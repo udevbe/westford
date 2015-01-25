@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.trinity</groupId>
+        <artifactId>shell</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>wayland</artifactId>
+    <name>Shell Wayland Implementation</name>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <pixman-java-bindings.version>1.0.0-SNAPSHOT</pixman-java-bindings.version>
+        <wayland-java-bindings.version>1.1.0-SNAPSHOT</wayland-java-bindings.version>
+        <jgml.version>0.1-SNAPSHOT</jgml.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.freedesktop</groupId>
+            <artifactId>pixman-java-bindings</artifactId>
+            <version>${pixman-java-bindings.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.freedesktop</groupId>
+            <artifactId>wayland</artifactId>
+            <version>${wayland-java-bindings.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hackoeur</groupId>
+            <artifactId>jglm</artifactId>
+            <version>${jgml.version}</version>
+        </dependency>
+        <!-- logging implementation for test log output -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
+
