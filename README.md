@@ -1,4 +1,4 @@
-Trinity Shell
+Westmalle
 =====================
 
 A Wayland OpenGL compositor written in pure Java.
