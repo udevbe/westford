@@ -2,21 +2,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.trinity</groupId>
+    <groupId>org.westmalle</groupId>
     <artifactId>shell</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Trinity Shell</name>
+    <name>Westmalle</name>
     <description>A Java Wayland shell.</description>
-    <url>https://github.com/Zubnix/trinityshell</url>
+    <url>https://github.com/Zubnix/westmalle</url>
     <inceptionYear>2009-11-06</inceptionYear>
     <developers>
         <developer>
             <id>Zubnix</id>
             <name>Erik De Rijcke</name>
             <email>DeRijcke.Erik@gmail.com</email>
-            <url>http://trinity.netcat.be</url>
             <timezone>gmt+1</timezone>
             <roles>
                 <role>Creator</role>
@@ -27,7 +26,7 @@
     </developers>
 
     <scm>
-        <developerConnection>scm:git:https://github.com/Zubnix/trinityshell.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/Zubnix/westmalle.git</developerConnection>
     </scm>
 
     <properties>
@@ -171,7 +170,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.trinity.*</Export-Package>
+                        <Export-Package>org.westmalle.*</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -228,11 +227,11 @@
                         <groups>
                             <group>
                                 <title>Bootstrap</title>
-                                <packages>org.trinity.wayland.bootstrap*</packages>
+                                <packages>org.westmalle.wayland.bootstrap*</packages>
                             </group>
                             <group>
                                 <title>Wayland</title>
-                                <packages>org.trinity.wayland*</packages>
+                                <packages>org.westmalle.wayland*</packages>
                             </group>
                         </groups>
                         <linksource>true</linksource>
