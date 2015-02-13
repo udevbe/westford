@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,9 +31,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 @Singleton
 public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobExecutor.class);
-
 
     private static final byte                 EVENT_NEW_JOB  = 1;
     private static final byte                 EVENT_FINISHED = 0;
@@ -66,7 +62,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         this.libc = libc;
     }
 
-    public void start() throws IOException {
+    public void start() {
         if (!this.eventSource.isPresent()) {
             this.eventSource = Optional.of(this.display.getEventLoop()
                                                        .addFileDescriptor(this.pipeR,
@@ -78,7 +74,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         }
     }
 
-    public void fireFinishedEvent() throws IOException {
+    public void fireFinishedEvent() {
         this.libc.write(this.pipeWR,
                         this.eventFinishedBuffer,
                         1);
@@ -86,20 +82,12 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
 
     public void submit(@Nonnull final Runnable job) {
         checkNotNull(job);
-
         try {
             this.jobsLock.lock();
             this.pendingJobs.add(job);
             //wake up event thread
             fireNewJobEvent();
-        }
-        catch (final IOException e) {
-            //"rollback"
-            this.pendingJobs.remove(job);
-            LOGGER.error("Can not submit job",
-                         e);
-        }
-        finally {
+        }finally {
             this.jobsLock.unlock();
         }
     }
@@ -162,7 +150,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         return jobs;
     }
 
-    private void fireNewJobEvent() throws IOException {
+    private void fireNewJobEvent() {
         this.libc.write(this.pipeWR,
                         this.eventNewJobBuffer,
                         1);

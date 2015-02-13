@@ -18,6 +18,7 @@ import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
@@ -64,14 +65,16 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                    id);
     }
 
+    @Nonnull
     @Override
     public Set<WlShellResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlShellResource create(final Client client,
-                                  final int version,
+    public WlShellResource create(@Nonnull final Client client,
+                                  @Nonnegative final int version,
                                   final int id) {
         return new WlShellResource(client,
                                    version,

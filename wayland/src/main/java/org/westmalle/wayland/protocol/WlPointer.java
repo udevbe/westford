@@ -24,6 +24,9 @@ import org.westmalle.wayland.output.PointerDevice;
 
 import java.util.Set;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 @AutoFactory(className = "WlPointerFactory")
 public class WlPointer extends EventBus implements WlPointerRequestsV3, ProtocolObject<WlPointerResource> {
 
@@ -49,14 +52,16 @@ public class WlPointer extends EventBus implements WlPointerRequestsV3, Protocol
 
     }
 
+    @Nonnull
     @Override
     public Set<WlPointerResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlPointerResource create(final Client client,
-                                    final int version,
+    public WlPointerResource create(@Nonnull final Client client,
+                                    @Nonnegative final int version,
                                     final int id) {
         return new WlPointerResource(client,
                                      version,

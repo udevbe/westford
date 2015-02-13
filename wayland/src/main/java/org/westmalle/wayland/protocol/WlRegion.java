@@ -22,6 +22,7 @@ import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.output.Region;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Rectangle;
 import java.util.Set;
 
@@ -38,14 +39,16 @@ public class WlRegion extends EventBus implements WlRegionRequests, ProtocolObje
         this.region = region;
     }
 
+    @Nonnull
     @Override
     public Set<WlRegionResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlRegionResource create(final Client client,
-                                   final int version,
+    public WlRegionResource create(@Nonnull final Client client,
+                                   @Nonnegative final int version,
                                    final int id) {
         return new WlRegionResource(client,
                                     version,

@@ -23,6 +23,7 @@ import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.SurfaceConfigurable;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.media.nativewindow.util.Rectangle;
 import java.util.Optional;
@@ -78,14 +79,16 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
         throw new IllegalArgumentException("Invalid transform");
     }
 
+    @Nonnull
     @Override
     public Set<WlSurfaceResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlSurfaceResource create(final Client client,
-                                    final int version,
+    public WlSurfaceResource create(@Nonnull final Client client,
+                                    @Nonnegative final int version,
                                     final int id) {
         return new WlSurfaceResource(client,
                                      version,

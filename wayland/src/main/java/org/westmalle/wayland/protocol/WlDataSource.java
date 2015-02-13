@@ -21,6 +21,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataSourceRequests;
 import org.freedesktop.wayland.server.WlDataSourceResource;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
@@ -40,14 +41,16 @@ public class WlDataSource extends EventBus implements WlDataSourceRequests, Prot
         this.mimeTypes.add(mimeType);
     }
 
+    @Nonnull
     @Override
     public Set<WlDataSourceResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlDataSourceResource create(final Client client,
-                                       final int version,
+    public WlDataSourceResource create(@Nonnull final Client client,
+                                       @Nonnegative final int version,
                                        final int id) {
         return new WlDataSourceResource(client,
                                         version,

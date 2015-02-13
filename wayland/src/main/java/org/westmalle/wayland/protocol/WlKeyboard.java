@@ -23,6 +23,9 @@ import org.westmalle.wayland.output.Keyboard;
 
 import java.util.Set;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 @AutoFactory(className = "WlKeyboardFactory")
 public class WlKeyboard extends EventBus implements WlKeyboardRequestsV3, ProtocolObject<WlKeyboardResource> {
 
@@ -38,14 +41,16 @@ public class WlKeyboard extends EventBus implements WlKeyboardRequestsV3, Protoc
 
     }
 
+    @Nonnull
     @Override
     public Set<WlKeyboardResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlKeyboardResource create(final Client client,
-                                     final int version,
+    public WlKeyboardResource create(@Nonnull final Client client,
+                                     @Nonnegative final int version,
                                      final int id) {
         return new WlKeyboardResource(client,
                                       version,

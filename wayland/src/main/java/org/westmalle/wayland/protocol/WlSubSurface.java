@@ -21,6 +21,7 @@ import org.freedesktop.wayland.server.WlSubsurfaceRequests;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
@@ -33,14 +34,16 @@ public class WlSubSurface extends EventBus implements WlSubsurfaceRequests, Prot
                  final WlSurfaceResource parent) {
     }
 
+    @Nonnull
     @Override
     public Set<WlSubsurfaceResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlSubsurfaceResource create(final Client client,
-                                       final int version,
+    public WlSubsurfaceResource create(@Nonnull final Client client,
+                                       @Nonnegative final int version,
                                        final int id) {
         return new WlSubsurfaceResource(client,
                                         version,

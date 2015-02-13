@@ -16,6 +16,8 @@ package org.westmalle.wayland.protocol;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Set;
@@ -41,14 +43,16 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                    id);
     }
 
+    @Nonnull
     @Override
     public Set<WlOutputResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlOutputResource create(final Client client,
-                                   final int version,
+    public WlOutputResource create(@Nonnull final Client client,
+                                   @Nonnegative final int version,
                                    final int id) {
         return new WlOutputResource(client,
                                     version,

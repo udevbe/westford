@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
@@ -44,14 +45,16 @@ public class WlDataDevice extends EventBus implements WlDataDeviceRequests, Prot
 
     }
 
+    @Nonnull
     @Override
     public Set<WlDataDeviceResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlDataDeviceResource create(final Client client,
-                                       final int version,
+    public WlDataDeviceResource create(@Nonnull final Client client,
+                                       @Nonnegative final int version,
                                        final int id) {
         return new WlDataDeviceResource(client,
                                         version,

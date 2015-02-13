@@ -20,6 +20,8 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlCallbackRequests;
 import org.freedesktop.wayland.server.WlCallbackResource;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Set;
 
@@ -32,14 +34,16 @@ public class WlCallback extends EventBus implements WlCallbackRequests, Protocol
     WlCallback() {
     }
 
+    @Nonnull
     @Override
     public Set<WlCallbackResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlCallbackResource create(final Client client,
-                                     final int version,
+    public WlCallbackResource create(@Nonnull final Client client,
+                                     @Nonnegative final int version,
                                      final int id) {
         return new WlCallbackResource(client,
                                       version,

@@ -21,6 +21,8 @@ import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.SurfaceConfigurable;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Set;
 
@@ -94,14 +96,16 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                                  id);
     }
 
+    @Nonnull
     @Override
     public Set<WlCompositorResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlCompositorResource create(final Client client,
-                                       final int version,
+    public WlCompositorResource create(@Nonnull final Client client,
+                                       @Nonnegative final int version,
                                        final int id) {
         return new WlCompositorResource(client,
                                         version,

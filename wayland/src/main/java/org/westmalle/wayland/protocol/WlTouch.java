@@ -20,6 +20,8 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlTouchRequestsV3;
 import org.freedesktop.wayland.server.WlTouchResource;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Set;
 
@@ -37,14 +39,16 @@ public class WlTouch extends EventBus implements WlTouchRequestsV3, ProtocolObje
 
     }
 
+    @Nonnull
     @Override
     public Set<WlTouchResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlTouchResource create(final Client client,
-                                  final int version,
+    public WlTouchResource create(@Nonnull final Client client,
+                                  @Nonnegative final int version,
                                   final int id) {
         return new WlTouchResource(client,
                                    version,

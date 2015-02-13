@@ -20,6 +20,7 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Set;
@@ -76,14 +77,16 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                                            id));
     }
 
+    @Nonnull
     @Override
     public Set<WlSeatResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlSeatResource create(final Client client,
-                                 final int version,
+    public WlSeatResource create(@Nonnull final Client client,
+                                 @Nonnegative final int version,
                                  final int id) {
         final WlSeatResource resource = new WlSeatResource(client,
                                                            version,

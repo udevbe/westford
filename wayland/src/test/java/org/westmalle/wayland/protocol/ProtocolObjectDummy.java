@@ -6,20 +6,25 @@ import org.freedesktop.wayland.server.Resource;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 import static org.mockito.Mockito.mock;
 
 public class ProtocolObjectDummy implements ProtocolObject<Resource<?>> {
 
     private final Set<Resource<?>> resources = new HashSet<>();
 
+    @Nonnull
     @Override
     public Set<Resource<?>> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public Resource<?> create(final Client client,
-                              final int version,
+    public Resource<?> create(@Nonnull final Client client,
+                              @Nonnegative final int version,
                               final int id) {
         return mock(Resource.class);
     }

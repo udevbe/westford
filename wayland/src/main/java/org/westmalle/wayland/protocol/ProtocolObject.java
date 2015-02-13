@@ -22,12 +22,16 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 public interface ProtocolObject<T extends Resource<?>> {
     /**
      * Get all resources currently associated with this protocol object.
      *
      * @return All associated resources.
      */
+    @Nonnull
     Set<T> getResources();
 
     /**
@@ -89,7 +93,8 @@ public interface ProtocolObject<T extends Resource<?>> {
      *
      * @return the newly created resource.
      */
-    T create(final Client client,
-             final int version,
+    @Nonnull
+    T create(@Nonnull final Client client,
+             @Nonnegative final int version,
              final int id);
 }

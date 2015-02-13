@@ -10,7 +10,6 @@ import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.util.InterfaceMeta;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;

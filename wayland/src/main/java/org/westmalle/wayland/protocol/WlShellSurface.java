@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
@@ -113,14 +114,16 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
     }
 
+    @Nonnull
     @Override
     public Set<WlShellSurfaceResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlShellSurfaceResource create(final Client client,
-                                         final int version,
+    public WlShellSurfaceResource create(@Nonnull final Client client,
+                                         @Nonnegative final int version,
                                          final int id) {
         return new WlShellSurfaceResource(client,
                                           version,

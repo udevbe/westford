@@ -20,6 +20,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataOfferRequests;
 import org.freedesktop.wayland.server.WlDataOfferResource;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
@@ -45,14 +46,16 @@ public class WlDataOffer extends EventBus implements WlDataOfferRequests, Protoc
 
     }
 
+    @Nonnull
     @Override
     public Set<WlDataOfferResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlDataOfferResource create(final Client client,
-                                      final int version,
+    public WlDataOfferResource create(@Nonnull final Client client,
+                                      @Nonnegative final int version,
                                       final int id) {
         return new WlDataOfferResource(client,
                                        version,

@@ -16,6 +16,7 @@ package org.westmalle.wayland.protocol;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -66,14 +67,16 @@ public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> imp
 //                   id);
     }
 
+    @Nonnull
     @Override
     public Set<WlDataDeviceManagerResource> getResources() {
         return this.resources;
     }
 
+    @Nonnull
     @Override
-    public WlDataDeviceManagerResource create(final Client client,
-                                              final int version,
+    public WlDataDeviceManagerResource create(@Nonnull final Client client,
+                                              @Nonnegative final int version,
                                               final int id) {
         return new WlDataDeviceManagerResource(client,
                                                version,
