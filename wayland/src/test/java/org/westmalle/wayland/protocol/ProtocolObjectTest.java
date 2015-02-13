@@ -46,7 +46,7 @@ public class ProtocolObjectTest {
 
     @Test
     public void testAddNone() throws Exception {
-        assertThat(this.protocolObjectDummy.getResources()).isEmpty();
+        assertThat((Iterable)this.protocolObjectDummy.getResources()).isEmpty();
     }
 
     @Test
@@ -55,8 +55,8 @@ public class ProtocolObjectTest {
         final Resource<?> resource = this.protocolObjectDummy.add(client,
                                                                   1,
                                                                   1);
-        assertThat(this.protocolObjectDummy.getResources()).contains(resource);
-        assertThat(this.protocolObjectDummy.getResources()).hasSize(1);
+        assertThat((Iterable)this.protocolObjectDummy.getResources()).contains(resource);
+        assertThat((Iterable)this.protocolObjectDummy.getResources()).hasSize(1);
     }
 
     @Test
@@ -71,35 +71,9 @@ public class ProtocolObjectTest {
         final Resource<?> resource2 = this.protocolObjectDummy.add(client,
                                                                    1,
                                                                    3);
-        assertThat(this.protocolObjectDummy.getResources()).contains(resource0);
-        assertThat(this.protocolObjectDummy.getResources()).contains(resource1);
-        assertThat(this.protocolObjectDummy.getResources()).contains(resource2);
-        assertThat(this.protocolObjectDummy.getResources()).hasSize(3);
+        assertThat((Iterable)this.protocolObjectDummy.getResources()).contains(resource0);
+        assertThat((Iterable)this.protocolObjectDummy.getResources()).contains(resource1);
+        assertThat((Iterable)this.protocolObjectDummy.getResources()).contains(resource2);
+        assertThat((Iterable)this.protocolObjectDummy.getResources()).hasSize(3);
     }
-
-//    @Test
-//    public void testDestroyResourcePresent() throws Exception {
-//        final Client client = mock(Client.class);
-//        final Resource<?> resource0 = this.protocolObjectDummy.add(client,
-//                                                                   1,
-//                                                                   1);
-//        final Resource<?> resource1 = this.protocolObjectDummy.add(client,
-//                                                                   1,
-//                                                                   2);
-//        this.protocolObjectDummy.destroy(resource0);
-//        assertThat(this.protocolObjectDummy.getResources()).contains(resource1);
-//        assertThat(this.protocolObjectDummy.getResources()).hasSize(1);
-//    }
-//
-//    @Test(expected = IllegalArgumentException.class)
-//    public void testDestroyResourceAbsent() throws Exception {
-//        final Client client = mock(Client.class);
-//        final Resource<?> resource0 = this.protocolObjectDummy.add(client,
-//                                                                   1,
-//                                                                   1);
-//        final Resource<?> resource1 = this.protocolObjectDummy.add(client,
-//                                                                   1,
-//                                                                   2);
-//        this.protocolObjectDummy.destroy(mock(Resource.class));
-//    }
 }
