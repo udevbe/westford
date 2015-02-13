@@ -31,21 +31,21 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     private final WlSurfaceFactory                         wlSurfaceFactory;
     private final WlRegionFactory                          wlRegionFactory;
-    private final org.westmalle.wayland.output.RegionFactory pixmanRegionFactory;
+    private final org.westmalle.wayland.output.RegionFactory regionFactory;
     private final Compositor                               compositor;
 
     @Inject
     WlCompositor(@Provided final Display display,
                  @Provided final WlSurfaceFactory wlSurfaceFactory,
                  @Provided final WlRegionFactory wlRegionFactory,
-                 @Provided final org.westmalle.wayland.output.RegionFactory pixmanRegionFactory,
+                 @Provided final org.westmalle.wayland.output.RegionFactory regionFactory,
                  final Compositor compositor) {
         super(display,
               WlCompositorResource.class,
               VERSION);
         this.wlSurfaceFactory = wlSurfaceFactory;
         this.wlRegionFactory = wlRegionFactory;
-        this.pixmanRegionFactory = pixmanRegionFactory;
+        this.regionFactory = regionFactory;
         this.compositor = compositor;
     }
 
@@ -88,7 +88,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     @Override
     public void createRegion(final WlCompositorResource resource,
                              final int id) {
-        this.wlRegionFactory.create(this.pixmanRegionFactory.create())
+        this.wlRegionFactory.create(this.regionFactory.create())
                             .add(resource.getClient(),
                                  resource.getVersion(),
                                  id);
