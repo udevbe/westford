@@ -67,7 +67,7 @@ public class WlCompositorTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class,
                                 InterfaceMeta.class);
-        when(InterfaceMeta.get(WlCompositorResource.class)).thenReturn(this.interfaceMeta);
+        when(InterfaceMeta.get((Class<?>) any())).thenReturn(this.interfaceMeta);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
         when(this.waylandServerLibraryMapping.wl_global_create(any(),
                                                                any(),
@@ -97,6 +97,7 @@ public class WlCompositorTest {
                                                                                     1);
         //then
         assertThat(wlCompositorResource).isNotNull();
+        assertThat(wlCompositorResource.getImplementation()).isSameAs(wlCompositor);
     }
 
     @Test
