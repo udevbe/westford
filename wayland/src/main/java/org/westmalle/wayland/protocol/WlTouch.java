@@ -36,7 +36,7 @@ public class WlTouch extends EventBus implements WlTouchRequestsV3, ProtocolObje
 
     @Override
     public void release(final WlTouchResource resource) {
-
+        resource.destroy();
     }
 
     @Nonnull

@@ -40,7 +40,7 @@ public class WlPointer extends EventBus implements WlPointerRequestsV3, Protocol
 
     @Override
     public void release(final WlPointerResource resource) {
-
+        resource.destroy();
     }
 
     @Override

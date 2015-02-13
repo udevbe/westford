@@ -38,7 +38,7 @@ public class WlKeyboard extends EventBus implements WlKeyboardRequestsV3, Protoc
 
     @Override
     public void release(final WlKeyboardResource resource) {
-
+        resource.destroy();
     }
 
     @Nonnull
