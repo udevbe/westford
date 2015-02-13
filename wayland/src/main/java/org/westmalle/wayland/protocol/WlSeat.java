@@ -114,12 +114,14 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
         return this.optionalWlKeyboard;
     }
 
-    public void setWlKeyboard(final WlKeyboard wlKeyboard) {
-
+    public void setWlKeyboard(final WlKeyboard newWlKeyboard) {
+        this.optionalWlKeyboard = Optional.of(newWlKeyboard);
+        getResources().forEach(this::emiteCapabilities);
     }
 
     public void removeWlKeyboard() {
-
+        this.optionalWlKeyboard = Optional.empty();
+        getResources().forEach(this::emiteCapabilities);
     }
 
     public Optional<WlPointer> getOptionalWlPointer() {
@@ -127,30 +129,26 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     }
 
     public void setWlPointer(@Nonnull final WlPointer newWlPointer) {
-        //destroy the previous pointer
-        this.optionalWlPointer.ifPresent(wlPointer -> wlPointer.getResources()
-                                                               .forEach(Resource::destroy));
         this.optionalWlPointer = Optional.of(newWlPointer);
         getResources().forEach(this::emiteCapabilities);
     }
 
     public void removeWlPointer() {
-        this.optionalWlPointer.ifPresent(wlPointer -> wlPointer.getResources()
-                                                               .forEach(org.freedesktop.wayland.server.WlPointerResource::destroy));
         this.optionalWlPointer = Optional.empty();
         getResources().forEach(this::emiteCapabilities);
     }
-
 
     public Optional<WlTouch> getOptionalWlTouch() {
         return this.optionalWlTouch;
     }
 
-    public void setWlTouch() {
-
+    public void setWlTouch(final WlTouch wlTouch) {
+        this.optionalWlTouch = Optional.of(wlTouch);
+        getResources().forEach(this::emiteCapabilities);
     }
 
     public void removeWlTouch() {
-
+        this.optionalWlTouch = Optional.empty();
+        getResources().forEach(this::emiteCapabilities);
     }
 }
