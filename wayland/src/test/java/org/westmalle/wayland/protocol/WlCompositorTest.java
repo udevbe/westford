@@ -3,7 +3,9 @@ package org.westmalle.wayland.protocol;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.util.InterfaceMeta;
@@ -11,17 +13,24 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.RegionFactory;
+import org.westmalle.wayland.output.Scene;
+import org.westmalle.wayland.output.Surface;
+
+import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -97,7 +106,57 @@ public class WlCompositorTest {
 
     @Test
     public void testCreateSurface() throws Exception {
+        //given
+        final Scene scene = mock(Scene.class);
+        when(this.compositor.getScene()).thenReturn(scene);
 
+        LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
+        when(scene.getSurfacesStack()).thenReturn(surfacesStack);
+
+        final Surface surface = mock(Surface.class);
+        when(this.compositor.create()).thenReturn(surface);
+
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(this.wlSurfaceFactory.create(any(),
+                                          any())).thenReturn(wlSurface);
+
+        WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        when(wlSurface.add(any(),anyInt(),anyInt())).thenReturn(wlSurfaceResource);
+
+        WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
+        final Client client = mock(Client.class);
+        when(wlCompositorResource.getClient()).thenReturn(client);
+        final int version = 3;
+        when(wlCompositorResource.getVersion()).thenReturn(version);
+
+        final WlCompositor wlCompositor = new WlCompositor(this.display,
+                                                           this.wlSurfaceFactory,
+                                                           this.wlRegionFactory,
+                                                           this.pixmanRegionFactory,
+                                                           this.compositor);
+        //when
+        final int id = 1;
+        wlCompositor.createSurface(wlCompositorResource,
+                                   1);
+        //then
+        verify(wlSurface,
+               times(1)).add(client,
+                             version,
+                             id);
+
+        assertThat((Iterable)surfacesStack).contains(wlSurfaceResource);
+
+        ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
+        verify(wlSurfaceResource,
+               times(1)).addDestroyListener(destroyListenerCaptor.capture());
+        final Listener destroyListener = destroyListenerCaptor.getValue();
+
+        //and later when
+        destroyListener.handle();
+
+        //then
+        assertThat((Iterable)surfacesStack).doesNotContain(wlSurfaceResource);
+        verify(this.compositor,times(1)).requestRender(wlSurfaceResource);
     }
 
     @Test
