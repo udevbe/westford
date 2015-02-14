@@ -65,11 +65,8 @@ public class WlShellTest {
         when(wlShellResource.getClient()).thenReturn(client);
         when(wlShellResource.getVersion()).thenReturn(version);
 
-        final WlSurface wlSurface = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-
         final WlShellSurface wlShellSurface = mock(WlShellSurface.class);
-        when(this.wlShellSurfaceFactory.create(wlSurface)).thenReturn(wlShellSurface);
+        when(this.wlShellSurfaceFactory.create(wlSurfaceResource)).thenReturn(wlShellSurface);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         when(wlShellSurface.add(any(),

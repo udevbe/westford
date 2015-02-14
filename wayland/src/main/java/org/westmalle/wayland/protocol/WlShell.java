@@ -43,8 +43,7 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                                 @Nonnull final WlSurfaceResource surface) {
         //TODO check if the given surface doesn't have a role assigned to it already.
 
-        final WlSurface wlSurface = (WlSurface) surface.getImplementation();
-        final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(wlSurface);
+        final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(surface);
         final WlShellSurfaceResource shellSurfaceResource = wlShellSurface.add(requester.getClient(),
                                                                                requester.getVersion(),
                                                                                id);

@@ -26,11 +26,12 @@ import java.util.Set;
 public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
 
     private final Set<WlShellSurfaceResource> resources = Sets.newHashSet();
+    @Nonnull
+    private final WlSurfaceResource wlSurfaceResource;
 
-    private final WlSurface wlSurface;
 
-    WlShellSurface(final WlSurface wlSurface) {
-        this.wlSurface = wlSurface;
+    WlShellSurface(@Nonnull final WlSurfaceResource wlSurfaceResource) {
+        this.wlSurfaceResource = wlSurfaceResource;
     }
 
     @Override
@@ -46,8 +47,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
               .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                               .move(WlShellSurface.this.wlSurface.getResource()
-                                                                                  .get(),
+                                               .move(this.wlSurfaceResource,
                                                      serial));
     }
 
