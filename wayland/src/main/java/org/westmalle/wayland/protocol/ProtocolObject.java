@@ -18,12 +18,11 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.Resource;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 public interface ProtocolObject<T extends Resource<?>> {
     /**

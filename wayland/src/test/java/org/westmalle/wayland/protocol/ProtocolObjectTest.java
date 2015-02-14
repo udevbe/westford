@@ -17,15 +17,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-                    //following classes have static methods, so we have to powermock them:
-                    WaylandServerLibrary.class
+                        //following classes have static methods, so we have to powermock them:
+                        WaylandServerLibrary.class
                 })
 public class ProtocolObjectTest {
 
@@ -82,7 +79,7 @@ public class ProtocolObjectTest {
         ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         //then
-        assertThat((Iterable)protocolObject.getResources()).isEmpty();
+        assertThat((Iterable) protocolObject.getResources()).isEmpty();
     }
 
     @Test
@@ -95,8 +92,8 @@ public class ProtocolObjectTest {
                                                         1,
                                                         1);
         //then
-        assertThat((Iterable)protocolObject.getResources()).contains(resource);
-        assertThat((Iterable)protocolObject.getResources()).hasSize(1);
+        assertThat((Iterable) protocolObject.getResources()).contains(resource);
+        assertThat((Iterable) protocolObject.getResources()).hasSize(1);
     }
 
     @Test
@@ -106,23 +103,23 @@ public class ProtocolObjectTest {
         ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         final Resource<?> resource0 = protocolObject.add(client,
-                                                                   1,
-                                                                   1);
+                                                         1,
+                                                         1);
         final Resource<?> resource1 = protocolObject.add(client,
-                                                                   1,
-                                                                   2);
+                                                         1,
+                                                         2);
         final Resource<?> resource2 = protocolObject.add(client,
-                                                                   1,
-                                                                   3);
+                                                         1,
+                                                         3);
         //then
-        assertThat((Iterable)protocolObject.getResources()).contains(resource0);
-        assertThat((Iterable)protocolObject.getResources()).contains(resource1);
-        assertThat((Iterable)protocolObject.getResources()).contains(resource2);
-        assertThat((Iterable)protocolObject.getResources()).hasSize(3);
+        assertThat((Iterable) protocolObject.getResources()).contains(resource0);
+        assertThat((Iterable) protocolObject.getResources()).contains(resource1);
+        assertThat((Iterable) protocolObject.getResources()).contains(resource2);
+        assertThat((Iterable) protocolObject.getResources()).hasSize(3);
     }
 
     @Test
-    public void testResourceDestroyed(){
+    public void testResourceDestroyed() {
         //given
         final Client client = mock(Client.class);
         ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
@@ -132,11 +129,12 @@ public class ProtocolObjectTest {
                                                         1);
         //then
         ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(resource,times(1)).addDestroyListener(destroyListenerCaptor.capture());
+        verify(resource,
+               times(1)).addDestroyListener(destroyListenerCaptor.capture());
         //and when
         final Listener destroyListener = destroyListenerCaptor.getValue();
         destroyListener.handle();
         //then
-        assertThat((Iterable)protocolObject.getResources()).isEmpty();
+        assertThat((Iterable) protocolObject.getResources()).isEmpty();
     }
 }

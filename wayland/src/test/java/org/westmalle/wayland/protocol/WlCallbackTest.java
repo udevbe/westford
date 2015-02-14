@@ -18,8 +18,8 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-                    //following classes have static methods, so we have to powermock them:
-                    WaylandServerLibrary.class,
+                        //following classes have static methods, so we have to powermock them:
+                        WaylandServerLibrary.class
                 })
 public class WlCallbackTest {
 

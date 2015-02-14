@@ -1,11 +1,7 @@
 package org.westmalle.wayland.protocol;
 
 import com.sun.jna.Pointer;
-import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.Listener;
-import org.freedesktop.wayland.server.WlCompositorResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.util.InterfaceMeta;
@@ -17,21 +13,14 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.output.Compositor;
-import org.westmalle.wayland.output.Region;
-import org.westmalle.wayland.output.RegionFactory;
-import org.westmalle.wayland.output.Scene;
-import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.*;
 
 import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -52,7 +41,7 @@ public class WlCompositorTest {
     @Mock
     private WlRegionFactory  wlRegionFactory;
     @Mock
-    private RegionFactory regionFactory;
+    private RegionFactory    regionFactory;
     @Mock
     private Compositor       compositor;
 
@@ -117,7 +106,9 @@ public class WlCompositorTest {
                                           any())).thenReturn(wlSurface);
 
         WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        when(wlSurface.add(any(),anyInt(),anyInt())).thenReturn(wlSurfaceResource);
+        when(wlSurface.add(any(),
+                           anyInt(),
+                           anyInt())).thenReturn(wlSurfaceResource);
 
         WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
         final Client client = mock(Client.class);
@@ -140,7 +131,7 @@ public class WlCompositorTest {
                              version,
                              id);
 
-        assertThat((Iterable)surfacesStack).contains(wlSurfaceResource);
+        assertThat((Iterable) surfacesStack).contains(wlSurfaceResource);
 
         ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlSurfaceResource,
@@ -151,8 +142,9 @@ public class WlCompositorTest {
         destroyListener.handle();
 
         //then
-        assertThat((Iterable)surfacesStack).doesNotContain(wlSurfaceResource);
-        verify(this.compositor,times(1)).requestRender(wlSurfaceResource);
+        assertThat((Iterable) surfacesStack).doesNotContain(wlSurfaceResource);
+        verify(this.compositor,
+               times(1)).requestRender(wlSurfaceResource);
     }
 
     @Test
@@ -180,9 +172,10 @@ public class WlCompositorTest {
         wlCompositor.createRegion(wlCompositorResource,
                                   id);
         //then
-        verify(wlRegion,times(1)).add(client,
-                                      version,
-                                      id);
+        verify(wlRegion,
+               times(1)).add(client,
+                             version,
+                             id);
     }
 
     @Test
@@ -197,7 +190,9 @@ public class WlCompositorTest {
         final int version = 1;
         final int id = 6;
         //when
-        final WlCompositorResource wlCompositorResource = wlCompositor.create(client, version, id);
+        final WlCompositorResource wlCompositorResource = wlCompositor.create(client,
+                                                                              version,
+                                                                              id);
         //then
         assertThat(wlCompositorResource).isNotNull();
     }

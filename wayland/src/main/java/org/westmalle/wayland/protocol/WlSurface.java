@@ -39,7 +39,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
 
     private final WlCallbackFactory    wlCallbackFactory;
     private final WlCompositorResource compositorResource;
-    private final Surface surface;
+    private final Surface              surface;
 
     private Optional<WlBufferResource> pendingBuffer = Optional.empty();
 

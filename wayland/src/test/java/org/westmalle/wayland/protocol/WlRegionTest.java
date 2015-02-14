@@ -17,16 +17,13 @@ import javax.media.nativewindow.util.Rectangle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        //following classes have static methods, so we have to powermock them:
-        WaylandServerLibrary.class,
-})
+                        //following classes have static methods, so we have to powermock them:
+                        WaylandServerLibrary.class
+                })
 public class WlRegionTest {
 
     @Mock
@@ -64,7 +61,8 @@ public class WlRegionTest {
         //when
         wlRegion.destroy(wlRegionResource);
         //then
-        verify(wlRegionResource,times(1)).destroy();
+        verify(wlRegionResource,
+               times(1)).destroy();
     }
 
     @Test

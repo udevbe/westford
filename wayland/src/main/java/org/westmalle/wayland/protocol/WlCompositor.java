@@ -31,10 +31,10 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     private final Set<WlCompositorResource> resources = Sets.newHashSet();
 
-    private final WlSurfaceFactory                         wlSurfaceFactory;
-    private final WlRegionFactory                          wlRegionFactory;
+    private final WlSurfaceFactory                           wlSurfaceFactory;
+    private final WlRegionFactory                            wlRegionFactory;
     private final org.westmalle.wayland.output.RegionFactory regionFactory;
-    private final Compositor                               compositor;
+    private final Compositor                                 compositor;
 
     @Inject
     WlCompositor(@Provided final Display display,

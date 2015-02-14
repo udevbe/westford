@@ -21,10 +21,9 @@ import org.freedesktop.wayland.server.WlKeyboardRequestsV3;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.westmalle.wayland.output.Keyboard;
 
-import java.util.Set;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Set;
 
 @AutoFactory(className = "WlKeyboardFactory")
 public class WlKeyboard extends EventBus implements WlKeyboardRequestsV3, ProtocolObject<WlKeyboardResource> {

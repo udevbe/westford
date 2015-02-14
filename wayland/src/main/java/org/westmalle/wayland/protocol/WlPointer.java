@@ -22,10 +22,9 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.output.PointerDevice;
 
-import java.util.Set;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Set;
 
 @AutoFactory(className = "WlPointerFactory")
 public class WlPointer extends EventBus implements WlPointerRequestsV3, ProtocolObject<WlPointerResource> {

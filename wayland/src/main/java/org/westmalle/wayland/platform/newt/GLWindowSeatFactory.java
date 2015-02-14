@@ -25,7 +25,7 @@ import org.westmalle.wayland.protocol.WlSeat;
 import javax.inject.Inject;
 
 public class GLWindowSeatFactory {
-    private final JobExecutor jobExecutor;
+    private final JobExecutor          jobExecutor;
     private final WlPointerFactory     wlPointerFactory;
     private final WlKeyboardFactory    wlKeyboardFactory;
     private final PointerDeviceFactory pointerDeviceFactory;

@@ -17,8 +17,6 @@ import com.google.common.collect.Lists;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -87,7 +85,8 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
             this.pendingJobs.add(job);
             //wake up event thread
             fireNewJobEvent();
-        }finally {
+        }
+        finally {
             this.jobsLock.unlock();
         }
     }

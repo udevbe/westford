@@ -14,16 +14,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.Keyboard;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        //following classes have static methods, so we have to powermock them:
-        WaylandServerLibrary.class,
-})
+                        //following classes have static methods, so we have to powermock them:
+                        WaylandServerLibrary.class
+                })
 public class WlKeyboardTest {
 
     @Mock
@@ -42,7 +39,7 @@ public class WlKeyboardTest {
     public void testRelease() throws Exception {
         //given
         WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
-        WlKeyboard wlKeyboard = new WlKeyboard(keyboard);
+        WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
         //when
         wlKeyboard.release(wlKeyboardResource);
         //then
@@ -56,7 +53,7 @@ public class WlKeyboardTest {
         final Client client = mock(Client.class);
         final int version = 4;
         final int id = 4;
-        WlKeyboard wlKeyboard = new WlKeyboard(keyboard);
+        WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
         //when
         final WlKeyboardResource wlKeyboardResource = wlKeyboard.create(client,
                                                                         version,

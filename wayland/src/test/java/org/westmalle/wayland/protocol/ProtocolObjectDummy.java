@@ -3,11 +3,10 @@ package org.westmalle.wayland.protocol;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 
