@@ -21,16 +21,16 @@ import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        //following classes have static methods, so we have to powermock them:
-        WaylandServerLibrary.class,
-        InterfaceMeta.class,
-        //following classes are final, so we have to powermock them:
-        WlSubSurfaceFactory.class
-})
+                        //following classes have static methods, so we have to powermock them:
+                        WaylandServerLibrary.class,
+                        InterfaceMeta.class,
+                        //following classes are final, so we have to powermock them:
+                        WlSubSurfaceFactory.class
+                })
 public class WlSubCompositorTest {
 
     @Mock
-    private Display display;
+    private Display             display;
     @Mock
     private WlSubSurfaceFactory wlSubSurfaceFactory;
 
@@ -39,19 +39,19 @@ public class WlSubCompositorTest {
     @Mock
     private InterfaceMeta               interfaceMeta;
     @Mock
-    private Pointer globalPointer;
+    private Pointer                     globalPointer;
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class,
-                InterfaceMeta.class);
+                                InterfaceMeta.class);
         when(InterfaceMeta.get((Class<?>) any())).thenReturn(this.interfaceMeta);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
         when(this.waylandServerLibraryMapping.wl_global_create(any(),
-                any(),
-                anyInt(),
-                any(),
-                any())).thenReturn(this.globalPointer);
+                                                               any(),
+                                                               anyInt(),
+                                                               any(),
+                                                               any())).thenReturn(this.globalPointer);
     }
 
     @Test
@@ -60,11 +60,12 @@ public class WlSubCompositorTest {
         final WlSubcompositorResource subcompositorResource = mock(WlSubcompositorResource.class);
 
         final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                this.wlSubSurfaceFactory);
+                                                                    this.wlSubSurfaceFactory);
         //when
         wlSubCompositor.destroy(subcompositorResource);
         //then
-        verify(subcompositorResource,times(1)).destroy();
+        verify(subcompositorResource,
+               times(1)).destroy();
     }
 
     @Test
@@ -81,24 +82,35 @@ public class WlSubCompositorTest {
         final WlSurfaceResource parent = mock(WlSurfaceResource.class);
 
         final WlSubSurface wlSubSurface = mock(WlSubSurface.class);
-        when(wlSubSurfaceFactory.create(surface,parent)).thenReturn(wlSubSurface);
+        when(wlSubSurfaceFactory.create(surface,
+                                        parent)).thenReturn(wlSubSurface);
 
         final WlSubsurfaceResource wlSubsurfaceResource = mock(WlSubsurfaceResource.class);
-        when(wlSubSurface.add(any(),anyInt(),anyInt())).thenReturn(wlSubsurfaceResource);
+        when(wlSubSurface.add(any(),
+                              anyInt(),
+                              anyInt())).thenReturn(wlSubsurfaceResource);
 
         final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                this.wlSubSurfaceFactory);
+                                                                    this.wlSubSurfaceFactory);
         //when
-        wlSubCompositor.getSubsurface(subcompositorResource,id,surface,parent);
+        wlSubCompositor.getSubsurface(subcompositorResource,
+                                      id,
+                                      surface,
+                                      parent);
         //then
-        verify(wlSubSurface,times(1)).add(client, version, id);
+        verify(wlSubSurface,
+               times(1)).add(client,
+                             version,
+                             id);
         ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(surface,times(1)).addDestroyListener(listenerArgumentCaptor.capture());
+        verify(surface,
+               times(1)).addDestroyListener(listenerArgumentCaptor.capture());
         Listener destroyListener = listenerArgumentCaptor.getValue();
         //and when
         destroyListener.handle();
         //then
-        verify(wlSubsurfaceResource,times(1)).destroy();
+        verify(wlSubsurfaceResource,
+               times(1)).destroy();
     }
 
     @Test
@@ -109,9 +121,11 @@ public class WlSubCompositorTest {
         final int id = 12;
 
         final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                this.wlSubSurfaceFactory);
+                                                                    this.wlSubSurfaceFactory);
         //when
-        WlSubcompositorResource wlSubcompositorResource = wlSubCompositor.create(client, version, id);
+        WlSubcompositorResource wlSubcompositorResource = wlSubCompositor.create(client,
+                                                                                 version,
+                                                                                 id);
         //then
         assertThat(wlSubcompositorResource).isNotNull();
         assertThat(wlSubcompositorResource.getImplementation()).isSameAs(wlSubCompositor);
@@ -122,14 +136,16 @@ public class WlSubCompositorTest {
         //given
         final Pointer resourcePointer = mock(Pointer.class);
         when(this.waylandServerLibraryMapping.wl_resource_create(any(),
-                any(),
-                anyInt(),
-                anyInt())).thenReturn(resourcePointer);
+                                                                 any(),
+                                                                 anyInt(),
+                                                                 anyInt())).thenReturn(resourcePointer);
 
         final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                this.wlSubSurfaceFactory);
+                                                                    this.wlSubSurfaceFactory);
         //when
-        WlSubcompositorResource wlSubcompositorResource = wlSubCompositor.onBindClient(mock(Client.class), 1, 1);
+        WlSubcompositorResource wlSubcompositorResource = wlSubCompositor.onBindClient(mock(Client.class),
+                                                                                       1,
+                                                                                       1);
         //then
         assertThat(wlSubcompositorResource).isNotNull();
         assertThat(wlSubcompositorResource.getImplementation()).isSameAs(wlSubCompositor);
