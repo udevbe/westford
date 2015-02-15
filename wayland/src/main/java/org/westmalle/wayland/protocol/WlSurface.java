@@ -64,6 +64,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     @Override
     public void setBufferTransform(final WlSurfaceResource resource,
                                    final int transform) {
+        //TODO support buffer transform
         this.surface.accept(SurfaceConfigurable ->
                                     SurfaceConfigurable.setTransform(getMatrix(transform)));
     }
