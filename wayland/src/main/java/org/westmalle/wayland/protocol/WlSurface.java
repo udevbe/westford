@@ -177,6 +177,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     }
 
     private void detachBuffer() {
+        this.pendingBuffer.ifPresent(wlShmBuffer -> this.destroyListener.remove());
         getSurface().detachBuffer();
     }
 
