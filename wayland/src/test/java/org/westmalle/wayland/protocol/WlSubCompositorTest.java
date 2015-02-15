@@ -82,8 +82,8 @@ public class WlSubCompositorTest {
         final WlSurfaceResource parent = mock(WlSurfaceResource.class);
 
         final WlSubSurface wlSubSurface = mock(WlSubSurface.class);
-        when(wlSubSurfaceFactory.create(surface,
-                                        parent)).thenReturn(wlSubSurface);
+        when(this.wlSubSurfaceFactory.create(surface,
+                                             parent)).thenReturn(wlSubSurface);
 
         final WlSubsurfaceResource wlSubsurfaceResource = mock(WlSubsurfaceResource.class);
         when(wlSubSurface.add(any(),
