@@ -48,11 +48,19 @@ public class WlSubCompositor extends Global<WlSubcompositorResource> implements 
                               final int id,
                               @Nonnull final WlSurfaceResource surface,
                               @Nonnull final WlSurfaceResource parent) {
-        this.wlSubSurfaceFactory.create(surface,
-                                        parent)
-                                .add(requester.getClient(),
-                                     requester.getVersion(),
-                                     id);
+        //TODO check if surface doesn't already have a role
+        final WlSubsurfaceResource wlSubsurfaceResource = this.wlSubSurfaceFactory.create(surface,
+                parent)
+                .add(requester.getClient(),
+                        requester.getVersion(),
+                        id);
+        surface.addDestroyListener(new Listener() {
+            @Override
+            public void handle() {
+                remove();
+                wlSubsurfaceResource.destroy();
+            }
+        });
     }
 
     @Nonnull
