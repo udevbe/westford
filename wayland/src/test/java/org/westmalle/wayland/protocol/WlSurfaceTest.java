@@ -1,19 +1,21 @@
 package org.westmalle.wayland.protocol;
 
-import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.WlCompositorResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.Surface;
+
+import javax.media.nativewindow.util.Rectangle;
+import java.util.function.IntConsumer;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
@@ -69,9 +71,9 @@ public class WlSurfaceTest {
                                                   this.compositorResource,
                                                   this.surface);
         //when
-        final WlSurfaceResource wlSurfaceResource = wlSurface.add(client,
-                                                                  version,
-                                                                  id);
+        final WlSurfaceResource wlSurfaceResource = wlSurface.create(client,
+                                                                     version,
+                                                                     id);
         //then
         assertThat(wlSurfaceResource).isNotNull();
         assertThat(wlSurfaceResource.getImplementation()).isSameAs(wlSurface);
@@ -94,17 +96,211 @@ public class WlSurfaceTest {
 
     @Test
     public void testAttach() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final int x = 11;
+        final int y = 22;
 
+        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
+                                                  this.compositorResource,
+                                                  this.surface);
+        //when
+        wlSurface.attach(wlSurfaceResource,
+                         wlBufferResource,
+                         x,
+                         y);
+        //then
+        verify(this.surface).attachBuffer(wlBufferResource,
+                                          x,
+                                          y);
+        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        verify(wlBufferResource,
+               times(1)).addDestroyListener(listenerArgumentCaptor.capture());
+        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        //and when
+        destroyListener.handle();
+        //then
+        this.surface.detachBuffer();
+    }
+
+    @Test
+    public void testDoubleAttach() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
+        final int x = 11;
+        final int y = 22;
+
+        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
+                                                  this.compositorResource,
+                                                  this.surface);
+        //when
+        wlSurface.attach(wlSurfaceResource,
+                         wlBufferResource0,
+                         x,
+                         y);
+        wlSurface.attach(wlSurfaceResource,
+                         wlBufferResource1,
+                         x,
+                         y);
+        //then
+        verify(this.surface).attachBuffer(wlBufferResource0,
+                                          x,
+                                          y);
+        verify(this.surface).attachBuffer(wlBufferResource1,
+                                          x,
+                                          y);
+
+        final ArgumentCaptor<Listener> listenerArgumentCaptor0 = ArgumentCaptor.forClass(Listener.class);
+        verify(wlBufferResource0,
+               times(1)).addDestroyListener(listenerArgumentCaptor0.capture());
+        final Listener destroyListener0 = listenerArgumentCaptor0.getValue();
+
+        verify(WaylandServerLibrary.INSTANCE())
+                .wl_list_remove(destroyListener0.getNative().link.getPointer());
+    }
+
+    @Test
+    public void testDetach() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final int x = 11;
+        final int y = 22;
+
+        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
+                                                  this.compositorResource,
+                                                  this.surface);
+        //when
+        wlSurface.attach(wlSurfaceResource,
+                         null,
+                         0,
+                         0);
+        //then
+        verify(this.surface).detachBuffer();
+    }
+
+    @Test
+    public void testAttachDetach() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final int x = 11;
+        final int y = 22;
+
+        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
+                                                  this.compositorResource,
+                                                  this.surface);
+        //when
+        wlSurface.attach(wlSurfaceResource,
+                         wlBufferResource,
+                         x,
+                         y);
+        wlSurface.attach(wlSurfaceResource,
+                         null,
+                         0,
+                         0);
+        //then
+        verify(this.surface,
+               times(1)).attachBuffer(wlBufferResource,
+                                      x,
+                                      y);
+        verify(this.surface,
+               times(1)).detachBuffer();
+
+        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        verify(wlBufferResource,
+               times(1)).addDestroyListener(listenerArgumentCaptor.capture());
+        final Listener destroyListener = listenerArgumentCaptor.getValue();
+
+        verify(WaylandServerLibrary.INSTANCE())
+                .wl_list_remove(destroyListener.getNative().link.getPointer());
     }
 
     @Test
     public void testDamage() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final int x = -20;
+        final int y = -100;
+        final int width = 500;
+        final int height = 1000;
 
+        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
+                                                  this.compositorResource,
+                                                  this.surface);
+        //when
+        wlSurface.damage(wlSurfaceResource,
+                         x,
+                         y,
+                         width,
+                         height);
+        //then
+        verify(this.surface,
+               times(1)).markDamaged(eq(new Rectangle(x,
+                                                      y,
+                                                      width,
+                                                      height)));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDamageNegativeWidthNegativeHeight() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final int x = 20;
+        final int y = 100;
+        final int width = -500;
+        final int height = -1000;
+
+        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
+                                                  this.compositorResource,
+                                                  this.surface);
+        //when
+        wlSurface.damage(wlSurfaceResource,
+                         x,
+                         y,
+                         width,
+                         height);
+        //then
     }
 
     @Test
     public void testFrame() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final int callbackId = 987;
 
+        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
+                                                  this.compositorResource,
+                                                  this.surface);
+
+        final Client client = mock(Client.class);
+        final int version = 5;
+
+        when(wlSurfaceResource.getClient()).thenReturn(client);
+        when(wlSurfaceResource.getVersion()).thenReturn(version);
+
+        final WlCallback wlCallback = mock(WlCallback.class);
+        when(this.wlCallbackFactory.create()).thenReturn(wlCallback);
+
+        final WlCallbackResource wlCallbackResource = mock(WlCallbackResource.class);
+        when(wlCallback.add(client,
+                            version,
+                            callbackId)).thenReturn(wlCallbackResource);
+        //when
+        wlSurface.frame(wlSurfaceResource,
+                        callbackId);
+        //then
+        ArgumentCaptor<IntConsumer> intConsumerArgumentCaptor = ArgumentCaptor.forClass(IntConsumer.class);
+        verify(this.surface).addCallback(intConsumerArgumentCaptor.capture());
+        final IntConsumer intConsumer = intConsumerArgumentCaptor.getValue();
+        //and when
+        final int callbackData = 999;
+        intConsumer.accept(callbackData);
+        //then
+        verify(wlCallbackResource,
+               times(1)).done(callbackData);
     }
 
     @Test
