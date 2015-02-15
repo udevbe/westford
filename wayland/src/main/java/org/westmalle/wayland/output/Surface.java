@@ -110,8 +110,8 @@ public class Surface extends EventBus {
 
     @Nonnull
     public Surface attachBuffer(@Nonnull final WlBufferResource buffer,
-                                            @Nonnull final Integer relX,
-                                            @Nonnull final Integer relY) {
+                                @Nonnull final Integer relX,
+                                @Nonnull final Integer relY) {
 
         this.pendingBuffer = Optional.of(buffer);
         this.pendingBufferOffset = new Point(relX,
