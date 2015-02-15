@@ -19,7 +19,6 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.Surface;
-import org.westmalle.wayland.output.SurfaceConfigurable;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -77,7 +76,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                 WlCompositor.this.compositor.getScene()
                                             .getSurfacesStack()
                                             .remove(surfaceResource);
-                surface.accept(SurfaceConfigurable::markDestroyed);
+                surface.markDestroyed();
                 WlCompositor.this.compositor.requestRender(surfaceResource);
             }
         });

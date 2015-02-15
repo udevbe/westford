@@ -20,7 +20,6 @@ import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.output.Surface;
-import org.westmalle.wayland.output.SurfaceConfigurable;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -65,8 +64,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     public void setBufferTransform(final WlSurfaceResource resource,
                                    final int transform) {
         //TODO support buffer transform
-        this.surface.accept(SurfaceConfigurable ->
-                                    SurfaceConfigurable.setTransform(getMatrix(transform)));
+        this.surface.setTransform(getMatrix(transform));
     }
 
     private float[] getMatrix(final int transform) {
@@ -101,7 +99,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     @Override
     public void destroy(final WlSurfaceResource resource) {
         resource.destroy();
-        getSurface().accept(SurfaceConfigurable::markDestroyed);
+        getSurface().markDestroyed();
     }
 
     @Override
@@ -128,11 +126,10 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        getSurface().accept(SurfaceConfigurable ->
-                                    SurfaceConfigurable.markDamaged(new Rectangle(x,
-                                                                                  y,
-                                                                                  width,
-                                                                                  height)));
+        getSurface().markDamaged(new Rectangle(x,
+                                               y,
+                                               width,
+                                               height));
     }
 
     @Override
@@ -142,19 +139,18 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
                                                                           .add(resource.getClient(),
                                                                                resource.getVersion(),
                                                                                callbackId);
-        getSurface().accept(SurfaceConfigurable -> SurfaceConfigurable.addCallback(callbackResource::done));
+        getSurface().addCallback(callbackResource::done);
     }
 
     @Override
     public void setOpaqueRegion(final WlSurfaceResource requester,
                                 final WlRegionResource region) {
         if (region == null) {
-            getSurface().accept(SurfaceConfigurable::removeOpaqueRegion);
+            getSurface().removeOpaqueRegion();
         }
         else {
             final WlRegion wlRegion = (WlRegion) region.getImplementation();
-            getSurface().accept(SurfaceConfigurable ->
-                                        SurfaceConfigurable.setOpaqueRegion(wlRegion.getRegion()));
+            getSurface().setOpaqueRegion(wlRegion.getRegion());
         }
     }
 
@@ -162,12 +158,11 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     public void setInputRegion(final WlSurfaceResource requester,
                                @Nullable final WlRegionResource regionResource) {
         if (regionResource == null) {
-            getSurface().accept(SurfaceConfigurable::removeInputRegion);
+            getSurface().removeInputRegion();
         }
         else {
             final WlRegion wlRegion = (WlRegion) regionResource.getImplementation();
-            getSurface().accept(SurfaceConfigurable ->
-                                        SurfaceConfigurable.setInputRegion(wlRegion.getRegion()));
+            getSurface().setInputRegion(wlRegion.getRegion());
         }
     }
 
@@ -175,14 +170,14 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     public void commit(final WlSurfaceResource requester) {
         this.pendingBuffer = Optional.empty();
         this.destroyListener.remove();
-        getSurface().accept(SurfaceConfigurable::commit);
+        getSurface().commit();
         final WlCompositor implementation = (WlCompositor) this.compositorResource.getImplementation();
         implementation.getCompositor()
                       .requestRender(requester);
     }
 
     private void detachBuffer() {
-        getSurface().accept(SurfaceConfigurable::detachBuffer);
+        getSurface().detachBuffer();
     }
 
     private void attachBuffer(final WlBufferResource buffer,
@@ -199,8 +194,8 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
         };
         buffer.addDestroyListener(this.destroyListener);
 
-        getSurface().accept(config -> config.attachBuffer(buffer,
-                                                          x,
-                                                          y));
+        getSurface().attachBuffer(buffer,
+                                  x,
+                                  y);
     }
 }

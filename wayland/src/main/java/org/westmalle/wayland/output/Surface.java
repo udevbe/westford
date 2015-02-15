@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.function.IntConsumer;
 
 @AutoFactory(className = "SurfaceFactory")
-public class Surface extends EventBus implements SurfaceConfigurable {
+public class Surface extends EventBus {
 
     private final RegionFactory pixmanRegionFactory;
 
@@ -80,10 +80,6 @@ public class Surface extends EventBus implements SurfaceConfigurable {
         this.buffer = optionalBuffer;
     }
 
-    public void accept(@Nonnull final SurfaceConfiguration config) {
-        config.visit(this);
-    }
-
     @Nonnull
     public List<IntConsumer> getPaintCallbacks() {
         return this.callbacks;
@@ -100,23 +96,20 @@ public class Surface extends EventBus implements SurfaceConfigurable {
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable markDestroyed() {
+    public Surface markDestroyed() {
         this.destroyed = true;
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable markDamaged(@Nonnull final RectangleImmutable damage) {
+    public Surface markDamaged(@Nonnull final RectangleImmutable damage) {
         this.pendingDamage = Optional.of(this.pendingDamage.orElse(this.pixmanRegionFactory.create())
                                                            .add(damage));
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable attachBuffer(@Nonnull final WlBufferResource buffer,
+    public Surface attachBuffer(@Nonnull final WlBufferResource buffer,
                                             @Nonnull final Integer relX,
                                             @Nonnull final Integer relY) {
 
@@ -127,15 +120,13 @@ public class Surface extends EventBus implements SurfaceConfigurable {
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable setTransform(final float[] transform) {
+    public Surface setTransform(final float[] transform) {
         this.pendingTransform = transform;
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable removeTransform() {
+    public Surface removeTransform() {
         this.pendingTransform = new float[]{1,
                                             0,
                                             0,
@@ -149,8 +140,7 @@ public class Surface extends EventBus implements SurfaceConfigurable {
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable detachBuffer() {
+    public Surface detachBuffer() {
         this.pendingBuffer = Optional.empty();
         this.pendingDamage = Optional.empty();
         this.pendingBufferOffset = new Point();
@@ -183,8 +173,7 @@ public class Surface extends EventBus implements SurfaceConfigurable {
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable commit() {
+    public Surface commit() {
         //flush
         this.transform = this.pendingTransform;
         if (this.buffer.isPresent()) {
@@ -204,43 +193,37 @@ public class Surface extends EventBus implements SurfaceConfigurable {
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable addCallback(final IntConsumer callback) {
+    public Surface addCallback(final IntConsumer callback) {
         this.callbacks.add(callback);
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable removeOpaqueRegion() {
+    public Surface removeOpaqueRegion() {
         this.pendingOpaqueRegion = Optional.empty();
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable setOpaqueRegion(@Nonnull final Region opaqueRegion) {
+    public Surface setOpaqueRegion(@Nonnull final Region opaqueRegion) {
         this.pendingOpaqueRegion = Optional.of(opaqueRegion);
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable removeInputRegion() {
+    public Surface removeInputRegion() {
         this.pendingInputRegion = Optional.empty();
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable setInputRegion(@Nonnull final Region inputRegion) {
+    public Surface setInputRegion(@Nonnull final Region inputRegion) {
         this.pendingInputRegion = Optional.of(inputRegion);
         return this;
     }
 
     @Nonnull
-    @Override
-    public SurfaceConfigurable setPosition(@Nonnull final PointImmutable position) {
+    public Surface setPosition(@Nonnull final PointImmutable position) {
         this.position = new Point(position.getX(),
                                   position.getY());
         return this;

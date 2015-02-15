@@ -148,10 +148,9 @@ public class PointerDevice {
                       final PointImmutable pointerSurfaceDelta,
                       final Motion motion) {
         final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
-        final Surface Surface = wlSurface.getSurface();
-        Surface.accept(config ->
-                               config.setPosition(new Point(motion.getX() - pointerSurfaceDelta.getX(),
-                                                            motion.getY() - pointerSurfaceDelta.getY())));
+        final Surface surface = wlSurface.getSurface();
+        surface.setPosition(new Point(motion.getX() - pointerSurfaceDelta.getX(),
+                                      motion.getY() - pointerSurfaceDelta.getY()));
         this.compositor.requestRender(surfaceResource);
     }
 
