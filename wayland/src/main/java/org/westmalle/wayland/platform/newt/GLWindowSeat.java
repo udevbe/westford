@@ -33,25 +33,25 @@ public class GLWindowSeat implements MouseListener, KeyListener {
     }
 
     @Override
-    public void mouseClicked(final MouseEvent e) {
+    public void mouseClicked(final MouseEvent mouseEvent) {
 
     }
 
     @Override
-    public void mouseEntered(final MouseEvent e) {
+    public void mouseEntered(final MouseEvent mouseEvent) {
 
     }
 
     @Override
-    public void mouseExited(final MouseEvent e) {
+    public void mouseExited(final MouseEvent mouseEvent) {
 
     }
 
     @Override
-    public void mousePressed(final MouseEvent e) {
+    public void mousePressed(final MouseEvent mouseEvent) {
 
-        final long time = e.getWhen();
-        final short button = e.getButton();
+        final long time = mouseEvent.getWhen();
+        final short button = mouseEvent.getButton();
 
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
@@ -62,9 +62,9 @@ public class GLWindowSeat implements MouseListener, KeyListener {
     }
 
     @Override
-    public void mouseReleased(final MouseEvent e) {
-        final long time = e.getWhen();
-        final short button = e.getButton();
+    public void mouseReleased(final MouseEvent mouseEvent) {
+        final long time = mouseEvent.getWhen();
+        final short button = mouseEvent.getButton();
 
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
@@ -75,11 +75,11 @@ public class GLWindowSeat implements MouseListener, KeyListener {
     }
 
     @Override
-    public void mouseMoved(final MouseEvent e) {
+    public void mouseMoved(final MouseEvent mouseEvent) {
 
-        final long time = e.getWhen();
-        final int x = e.getX();
-        final int y = e.getY();
+        final long time = mouseEvent.getWhen();
+        final int x = mouseEvent.getX();
+        final int y = mouseEvent.getY();
 
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
@@ -92,22 +92,22 @@ public class GLWindowSeat implements MouseListener, KeyListener {
 
 
     @Override
-    public void mouseDragged(final MouseEvent e) {
-        mouseMoved(e);
+    public void mouseDragged(final MouseEvent mouseEvent) {
+        mouseMoved(mouseEvent);
     }
 
     @Override
-    public void mouseWheelMoved(final MouseEvent e) {
-
-    }
-
-    @Override
-    public void keyPressed(final KeyEvent e) {
+    public void mouseWheelMoved(final MouseEvent mouseEvent) {
 
     }
 
     @Override
-    public void keyReleased(final KeyEvent e) {
+    public void keyPressed(final KeyEvent keyEvent) {
+
+    }
+
+    @Override
+    public void keyReleased(final KeyEvent keyEvent) {
 
     }
 }
