@@ -139,7 +139,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
                                                                           .add(resource.getClient(),
                                                                                resource.getVersion(),
                                                                                callbackId);
-        getSurface().addCallback(callbackResource::done);
+        getSurface().addCallback(callbackResource);
     }
 
     @Override
@@ -149,8 +149,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
             getSurface().removeOpaqueRegion();
         }
         else {
-            final WlRegion wlRegion = (WlRegion) region.getImplementation();
-            getSurface().setOpaqueRegion(wlRegion.getRegion());
+            getSurface().setOpaqueRegion(region);
         }
     }
 
@@ -161,8 +160,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
             getSurface().removeInputRegion();
         }
         else {
-            final WlRegion wlRegion = (WlRegion) regionResource.getImplementation();
-            getSurface().setInputRegion(wlRegion.getRegion());
+            getSurface().setInputRegion(regionResource);
         }
     }
 

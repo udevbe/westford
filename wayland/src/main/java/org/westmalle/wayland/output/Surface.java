@@ -18,6 +18,8 @@ import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlRegionResource;
 
 import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
@@ -26,20 +28,19 @@ import javax.media.nativewindow.util.RectangleImmutable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.IntConsumer;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface extends EventBus {
 
-    private final RegionFactory pixmanRegionFactory;
+    private final RegionFactory regionFactory;
 
     //pending states
     @Nonnull
-    private Optional<Region>           pendingOpaqueRegion = Optional.empty();
+    private Optional<WlRegionResource> pendingOpaqueRegion = Optional.empty();
     @Nonnull
-    private Optional<Region>           pendingInputRegion  = Optional.empty();
+    private Optional<WlRegionResource> pendingInputRegion  = Optional.empty();
     @Nonnull
-    private Optional<Region>           pendingDamage       = Optional.empty();
+    private Optional<Region> pendingDamage       = Optional.empty();
     @Nonnull
     private Optional<WlBufferResource> pendingBuffer       = Optional.empty();
     @Nonnull
@@ -53,13 +54,13 @@ public class Surface extends EventBus {
 
     //committed states
     @Nonnull
-    private final List<IntConsumer>          callbacks    = Lists.newLinkedList();
+    private final List<WlCallbackResource>   callbacks    = Lists.newLinkedList();
     @Nonnull
-    private       Optional<Region>           opaqueRegion = Optional.empty();
+    private       Optional<WlRegionResource> opaqueRegion = Optional.empty();
     @Nonnull
-    private       Optional<Region>           inputRegion  = Optional.empty();
+    private       Optional<WlRegionResource> inputRegion  = Optional.empty();
     @Nonnull
-    private       Optional<Region>           damage       = Optional.empty();
+    private       Optional<Region> damage       = Optional.empty();
     @Nonnull
     private       Optional<WlBufferResource> buffer       = Optional.empty();
     @Nonnull
@@ -74,14 +75,14 @@ public class Surface extends EventBus {
     @Nonnull
     private       Boolean                    destroyed    = Boolean.FALSE;
 
-    Surface(@Provided final RegionFactory pixmanRegionFactory,
+    Surface(@Provided final RegionFactory regionFactory,
             @Nonnull final Optional<WlBufferResource> optionalBuffer) {
-        this.pixmanRegionFactory = pixmanRegionFactory;
+        this.regionFactory = regionFactory;
         this.buffer = optionalBuffer;
     }
 
     @Nonnull
-    public List<IntConsumer> getPaintCallbacks() {
+    public List<WlCallbackResource> getFrameCallbacks() {
         return this.callbacks;
     }
 
@@ -103,8 +104,7 @@ public class Surface extends EventBus {
 
     @Nonnull
     public Surface markDamaged(@Nonnull final RectangleImmutable damage) {
-        this.pendingDamage = Optional.of(this.pendingDamage.orElse(this.pixmanRegionFactory.create())
-                                                           .add(damage));
+        this.pendingDamage = Optional.of(this.pendingDamage.orElse(this.regionFactory.create()).add(damage));
         return this;
     }
 
@@ -120,7 +120,7 @@ public class Surface extends EventBus {
     }
 
     @Nonnull
-    public Surface setTransform(final float[] transform) {
+    public Surface setTransform(@Nonnull final float[] transform) {
         this.pendingTransform = transform;
         return this;
     }
@@ -153,7 +153,7 @@ public class Surface extends EventBus {
     }
 
     @Nonnull
-    public Optional<Region> getInputRegion() {
+    public Optional<WlRegionResource> getInputRegion() {
         return this.inputRegion;
     }
 
@@ -163,7 +163,7 @@ public class Surface extends EventBus {
     }
 
     @Nonnull
-    public Optional<Region> getOpaqueRegion() {
+    public Optional<WlRegionResource> getOpaqueRegion() {
         return this.opaqueRegion;
     }
 
@@ -193,7 +193,7 @@ public class Surface extends EventBus {
     }
 
     @Nonnull
-    public Surface addCallback(final IntConsumer callback) {
+    public Surface addCallback(final WlCallbackResource callback) {
         this.callbacks.add(callback);
         return this;
     }
@@ -205,7 +205,7 @@ public class Surface extends EventBus {
     }
 
     @Nonnull
-    public Surface setOpaqueRegion(@Nonnull final Region opaqueRegion) {
+    public Surface setOpaqueRegion(@Nonnull final WlRegionResource opaqueRegion) {
         this.pendingOpaqueRegion = Optional.of(opaqueRegion);
         return this;
     }
@@ -217,7 +217,7 @@ public class Surface extends EventBus {
     }
 
     @Nonnull
-    public Surface setInputRegion(@Nonnull final Region inputRegion) {
+    public Surface setInputRegion(@Nonnull final WlRegionResource inputRegion) {
         this.pendingInputRegion = Optional.of(inputRegion);
         return this;
     }
@@ -230,9 +230,9 @@ public class Surface extends EventBus {
     }
 
     public Surface firePaintCallbacks(final int serial) {
-        final List<IntConsumer> callbacks = new ArrayList<>(getPaintCallbacks());
-        getPaintCallbacks().clear();
-        callbacks.forEach(paintCallback -> paintCallback.accept(serial));
+        final List<WlCallbackResource> callbacks = new ArrayList<>(getFrameCallbacks());
+        getFrameCallbacks().clear();
+        callbacks.forEach(frameCallback -> frameCallback.done(serial));
         return this;
     }
 }

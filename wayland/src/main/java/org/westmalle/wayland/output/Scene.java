@@ -14,8 +14,11 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.collect.Lists;
+
+import org.freedesktop.wayland.server.WlRegionResource;
 import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.inject.Inject;
@@ -59,15 +62,17 @@ public class Scene {
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
             final Surface Surface = ((WlSurface) implementation).getSurface();
 
-            final Optional<Region> inputRegion = Surface.getInputRegion();
+            final Optional<WlRegionResource> inputRegion = Surface.getInputRegion();
             if (inputRegion.isPresent()) {
 
                 final PointImmutable position = Surface.getPosition();
                 final int offsetX = position.getX();
                 final int offsetY = position.getY();
 
-                for (final RectangleImmutable rectangle : inputRegion.get()
-                                                                     .asList()) {
+                WlRegion wlRegion = (WlRegion) inputRegion.get().getImplementation();
+
+                for (final RectangleImmutable rectangle : wlRegion.getRegion()
+                                                                  .asList()) {
                     final int x1 = rectangle.getX() + offsetX;
                     final int y1 = rectangle.getY() + offsetY;
 
