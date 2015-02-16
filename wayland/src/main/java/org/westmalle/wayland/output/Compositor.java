@@ -61,6 +61,7 @@ public class Compositor {
                                 this.display.flushClients();
                             }
                             catch (ExecutionException | InterruptedException e) {
+                                //TODO proper error handling
                                 e.printStackTrace();
                             }
                         }
