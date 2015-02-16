@@ -38,8 +38,8 @@ public class EntryPoint {
     private final ServiceManager        serviceManager;
     private final GLWindowFactory       glWindowFactory;
     private final GLRenderEngineFactory glRenderEngineFactory;
-    private final ShmRendererFactory    wlShmRendererFactory;
-    private final CompositorFactory     wlShellCompositorFactory;
+    private final ShmRendererFactory    shmRendererFactory;
+    private final CompositorFactory     compositorFactory;
     private final WlCompositorFactory   wlCompositorFactory;
     private final GLWindowSeatFactory   glWindowSeatFactory;
     private final WlSeatFactory         wlSeatFactory;
@@ -48,8 +48,8 @@ public class EntryPoint {
     @Inject
     EntryPoint(final GLWindowFactory glWindowFactory,
                final GLRenderEngineFactory glRenderEngineFactory,
-               final ShmRendererFactory wlShmRendererFactory,
-               final CompositorFactory wlShellCompositorFactory,
+               final ShmRendererFactory shmRendererFactory,
+               final CompositorFactory compositorFactory,
                final WlCompositorFactory wlCompositorFactory,
                final GLWindowSeatFactory glWindowSeatFactory,
                final WlSeatFactory wlSeatFactory,
@@ -57,8 +57,8 @@ public class EntryPoint {
                final Set<Service> services) {
         this.glWindowFactory = glWindowFactory;
         this.glRenderEngineFactory = glRenderEngineFactory;
-        this.wlShmRendererFactory = wlShmRendererFactory;
-        this.wlShellCompositorFactory = wlShellCompositorFactory;
+        this.shmRendererFactory = shmRendererFactory;
+        this.compositorFactory = compositorFactory;
         this.wlCompositorFactory = wlCompositorFactory;
         this.glWindowSeatFactory = glWindowSeatFactory;
         this.wlSeatFactory = wlSeatFactory;
@@ -77,11 +77,11 @@ public class EntryPoint {
         //create an opengl render engine that uses shm buffers and outputs to an X opengl window
         final GLRenderEngine glRenderEngine = this.glRenderEngineFactory.create(glWindow);
         //create an shm renderer that passes on shm buffers to it's render implementation
-        final ShmRenderer shmRenderer = this.wlShmRendererFactory.create(glRenderEngine);
+        final ShmRenderer shmRenderer = this.shmRendererFactory.create(glRenderEngine);
 
         //setup compositing
         //create a compositor with shell and scene logic
-        final Compositor compositor = this.wlShellCompositorFactory.create(shmRenderer);
+        final Compositor compositor = this.compositorFactory.create(shmRenderer);
         //create a wayland compositor that delegates it's requests to a shell implementation.
         this.wlCompositorFactory.create(compositor);
 
