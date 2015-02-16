@@ -40,16 +40,16 @@ public class Scene {
     public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.SurfacesStack; }
 
     public PointImmutable relativeCoordinate(final WlSurfaceResource surfaceResource,
-                                             final int absX,
-                                             final int absY) {
+                                             final PointImmutable absPosition) {
         final WlSurfaceRequests implementation = surfaceResource.getImplementation();
         final Surface Surface = ((WlSurface) implementation).getSurface();
 
         final PointImmutable position = Surface.getPosition();
         final int offsetX = position.getX();
         final int offsetY = position.getY();
-        return new Point(absX - offsetX,
-                         absY - offsetY);
+
+        return new Point(absPosition.getX() - offsetX,
+                         absPosition.getY() - offsetY);
     }
 
     public Optional<WlSurfaceResource> findSurfaceAtCoordinate(final int absX,
