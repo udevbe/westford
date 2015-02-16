@@ -2,7 +2,6 @@ package org.westmalle.wayland.platform.newt;
 
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.NEWTEvent;
-
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.junit.Before;
@@ -22,35 +21,33 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        //following classes are final, so we have to powermock them:
-        NEWTEvent.class,
-        MouseEvent.class
-})
+                        //following classes are final, so we have to powermock them:
+                        NEWTEvent.class,
+                        MouseEvent.class
+                })
 public class GLWindowSeatTest {
 
     @Mock
-    private WlSeat wlSeat;
+    private WlSeat       wlSeat;
     @Mock
-    private JobExecutor jobExecutor;
+    private JobExecutor  jobExecutor;
     @InjectMocks
     private GLWindowSeat glWindowSeat;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         doAnswer(invocation -> {
             final Object arg0 = invocation.getArguments()[0];
             final Runnable runnable = (Runnable) arg0;
             runnable.run();
             return null;
-        }).when(jobExecutor).submit(any());
+        }).when(jobExecutor)
+          .submit(any());
     }
 
     @Test
@@ -79,7 +76,7 @@ public class GLWindowSeatTest {
         //then
         verify(pointerDevice,
                times(1)).button(wlPointerResources,
-                                (int)time,
+                                (int) time,
                                 button,
                                 WlPointerButtonState.PRESSED);
     }
@@ -110,7 +107,7 @@ public class GLWindowSeatTest {
         //then
         verify(pointerDevice,
                times(1)).button(wlPointerResources,
-                                (int)time,
+                                (int) time,
                                 button,
                                 WlPointerButtonState.RELEASED);
     }
@@ -143,7 +140,7 @@ public class GLWindowSeatTest {
         //then
         verify(pointerDevice,
                times(1)).motion(wlPointerResources,
-                                (int)time,
+                                (int) time,
                                 x,
                                 y);
     }

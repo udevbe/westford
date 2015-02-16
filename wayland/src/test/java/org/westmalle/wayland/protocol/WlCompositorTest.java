@@ -44,7 +44,7 @@ public class WlCompositorTest {
     @Mock
     private RegionFactory    regionFactory;
     @Mock
-    private SurfaceFactory surfaceFactory;
+    private SurfaceFactory   surfaceFactory;
     @Mock
     private Compositor       compositor;
 

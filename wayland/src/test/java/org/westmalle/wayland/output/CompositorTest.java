@@ -12,23 +12,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompositorTest {
 
     @Mock
-    private Display display;
+    private Display     display;
     @Mock
-    private Scene scene;
+    private Scene       scene;
     @Mock
     private ShmRenderer shmRenderer;
 
@@ -65,17 +60,23 @@ public class CompositorTest {
         InOrder inOrder = inOrder(this.shmRenderer,
                                   this.display);
         inOrder.verify(this.shmRenderer,
-                       times(1)).beginRender();
+                       times(1))
+               .beginRender();
         inOrder.verify(this.shmRenderer,
-                       times(1)).render(wlSurfaceResource0);
+                       times(1))
+               .render(wlSurfaceResource0);
         inOrder.verify(this.shmRenderer,
-                       times(1)).render(wlSurfaceResource1);
+                       times(1))
+               .render(wlSurfaceResource1);
         inOrder.verify(this.shmRenderer,
-                       times(1)).render(wlSurfaceResource2);
+                       times(1))
+               .render(wlSurfaceResource2);
         inOrder.verify(this.shmRenderer,
-                       times(1)).endRender();
+                       times(1))
+               .endRender();
         inOrder.verify(this.display,
-                       times(1)).flushClients();
+                       times(1))
+               .flushClients();
     }
 
     @Test
@@ -109,11 +110,12 @@ public class CompositorTest {
         this.compositor.requestRender(surfaceResource);
         this.compositor.requestRender(surfaceResource);
         //then
-        assertThat((Iterable< EventLoop.IdleHandler>)idleHandlers).hasSize(1);
+        assertThat((Iterable<EventLoop.IdleHandler>) idleHandlers).hasSize(1);
         //and when
-        idleHandlers.get(0).handle();
+        idleHandlers.get(0)
+                    .handle();
         this.compositor.requestRender(surfaceResource);
         //then
-        assertThat((Iterable< EventLoop.IdleHandler>)idleHandlers).hasSize(2);
+        assertThat((Iterable<EventLoop.IdleHandler>) idleHandlers).hasSize(2);
     }
 }

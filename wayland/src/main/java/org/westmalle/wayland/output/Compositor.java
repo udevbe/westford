@@ -18,16 +18,15 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
 
-    private final Display        display;
-    private final Scene          scene;
-    private final ShmRenderer    shmRenderer;
+    private final Display     display;
+    private final Scene       scene;
+    private final ShmRenderer shmRenderer;
 
     private final AtomicBoolean renderScheduled = new AtomicBoolean(false);
 

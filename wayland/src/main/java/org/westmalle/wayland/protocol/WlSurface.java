@@ -27,18 +27,17 @@ import javax.annotation.Nullable;
 import javax.media.nativewindow.util.Rectangle;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 @AutoFactory(className = "WlSurfaceFactory")
 public class WlSurface extends EventBus implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
-    private final Set<WlSurfaceResource> resources = Sets.newHashSet();
-    private Optional<Listener> destroyListener = Optional.empty();
+    private final Set<WlSurfaceResource> resources       = Sets.newHashSet();
+    private       Optional<Listener>     destroyListener = Optional.empty();
 
-    private final WlCallbackFactory    wlCallbackFactory;
-    private final Surface              surface;
+    private final WlCallbackFactory wlCallbackFactory;
+    private final Surface           surface;
 
     private Optional<WlBufferResource> pendingBuffer = Optional.empty();
 

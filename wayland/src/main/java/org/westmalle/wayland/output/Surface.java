@@ -16,12 +16,7 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlCallbackResource;
-import org.freedesktop.wayland.server.WlCompositorResource;
-import org.freedesktop.wayland.server.WlRegionResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.protocol.WlCompositor;
 
 import javax.annotation.Nonnull;
@@ -35,7 +30,7 @@ import java.util.Optional;
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
 
-    private final RegionFactory regionFactory;
+    private final RegionFactory        regionFactory;
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
 
@@ -45,7 +40,7 @@ public class Surface {
     @Nonnull
     private Optional<WlRegionResource> pendingInputRegion  = Optional.empty();
     @Nonnull
-    private Optional<Region> pendingDamage       = Optional.empty();
+    private Optional<Region>           pendingDamage       = Optional.empty();
     @Nonnull
     private Optional<WlBufferResource> pendingBuffer       = Optional.empty();
     @Nonnull
@@ -65,7 +60,7 @@ public class Surface {
     @Nonnull
     private       Optional<WlRegionResource> inputRegion  = Optional.empty();
     @Nonnull
-    private       Optional<Region> damage       = Optional.empty();
+    private       Optional<Region>           damage       = Optional.empty();
     @Nonnull
     private       Optional<WlBufferResource> buffer       = Optional.empty();
     @Nonnull
@@ -109,7 +104,8 @@ public class Surface {
 
     @Nonnull
     public Surface markDamaged(@Nonnull final RectangleImmutable damage) {
-        this.pendingDamage = Optional.of(this.pendingDamage.orElse(this.regionFactory.create()).add(damage));
+        this.pendingDamage = Optional.of(this.pendingDamage.orElse(this.regionFactory.create())
+                                                           .add(damage));
         return this;
     }
 
@@ -195,7 +191,8 @@ public class Surface {
         //reset
         detachBuffer();
         WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
-        wlCompositor.getCompositor().requestRender(wlSurfaceResource);
+        wlCompositor.getCompositor()
+                    .requestRender(wlSurfaceResource);
         return this;
     }
 

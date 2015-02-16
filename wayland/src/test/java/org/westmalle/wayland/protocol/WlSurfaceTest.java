@@ -15,7 +15,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.Surface;
 
 import javax.media.nativewindow.util.Rectangle;
-import java.util.function.IntConsumer;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;

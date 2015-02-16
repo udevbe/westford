@@ -14,7 +14,6 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.collect.Lists;
-
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -69,7 +68,8 @@ public class Scene {
                 final int offsetX = position.getX();
                 final int offsetY = position.getY();
 
-                WlRegion wlRegion = (WlRegion) inputRegion.get().getImplementation();
+                WlRegion wlRegion = (WlRegion) inputRegion.get()
+                                                          .getImplementation();
 
                 for (final RectangleImmutable rectangle : wlRegion.getRegion()
                                                                   .asList()) {
