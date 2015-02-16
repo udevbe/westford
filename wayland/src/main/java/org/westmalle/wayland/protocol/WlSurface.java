@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import javax.media.nativewindow.util.Rectangle;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -34,7 +35,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class WlSurface extends EventBus implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
     private final Set<WlSurfaceResource> resources = Sets.newHashSet();
-    private Listener destroyListener;
+    private Optional<Listener> destroyListener = Optional.empty();
 
     private final WlCallbackFactory    wlCallbackFactory;
     private final Surface              surface;
@@ -164,28 +165,29 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     @Override
     public void commit(final WlSurfaceResource requester) {
         this.pendingBuffer = Optional.empty();
-        this.destroyListener.remove();
+        this.destroyListener.ifPresent(Listener::remove);
         getSurface().commit(requester);
     }
 
     private void detachBuffer() {
-        this.pendingBuffer.ifPresent(wlShmBuffer -> this.destroyListener.remove());
+        this.pendingBuffer.ifPresent(wlShmBuffer -> this.destroyListener.ifPresent(Listener::remove));
         getSurface().detachBuffer();
     }
 
     private void attachBuffer(final WlBufferResource buffer,
                               final int x,
                               final int y) {
-        this.pendingBuffer.ifPresent(wlShmBuffer -> this.destroyListener.remove());
+        this.pendingBuffer.ifPresent(wlShmBuffer -> this.destroyListener.ifPresent(Listener::remove));
         this.pendingBuffer = Optional.of(buffer);
-        this.destroyListener = new Listener() {
+        final Listener listener = new Listener() {
             @Override
             public void handle() {
                 remove();
                 WlSurface.this.detachBuffer();
             }
         };
-        buffer.addDestroyListener(this.destroyListener);
+        this.destroyListener = Optional.of(listener);
+        buffer.addDestroyListener(listener);
 
         getSurface().attachBuffer(buffer,
                                   x,
