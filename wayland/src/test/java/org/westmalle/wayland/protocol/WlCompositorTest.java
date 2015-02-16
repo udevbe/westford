@@ -30,7 +30,8 @@ import static org.mockito.Mockito.*;
                         //following classes are final, so we have to powermock them:
                         WlSurfaceFactory.class,
                         WlRegionFactory.class,
-                        RegionFactory.class
+                        RegionFactory.class,
+                        SurfaceFactory.class
                 })
 public class WlCompositorTest {
 
@@ -42,6 +43,8 @@ public class WlCompositorTest {
     private WlRegionFactory  wlRegionFactory;
     @Mock
     private RegionFactory    regionFactory;
+    @Mock
+    private SurfaceFactory surfaceFactory;
     @Mock
     private Compositor       compositor;
 
@@ -78,6 +81,7 @@ public class WlCompositorTest {
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
                                                            this.regionFactory,
+                                                           this.surfaceFactory,
                                                            this.compositor);
 
         //when
@@ -98,12 +102,8 @@ public class WlCompositorTest {
         LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
         when(scene.getSurfacesStack()).thenReturn(surfacesStack);
 
-        final Surface surface = mock(Surface.class);
-        when(this.compositor.create()).thenReturn(surface);
-
         final WlSurface wlSurface = mock(WlSurface.class);
-        when(this.wlSurfaceFactory.create(any(),
-                                          any())).thenReturn(wlSurface);
+        when(this.wlSurfaceFactory.create(any())).thenReturn(wlSurface);
 
         WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         when(wlSurface.add(any(),
@@ -116,10 +116,14 @@ public class WlCompositorTest {
         final int version = 3;
         when(wlCompositorResource.getVersion()).thenReturn(version);
 
+        final Surface surface = mock(Surface.class);
+        when(this.surfaceFactory.create(wlCompositorResource)).thenReturn(surface);
+
         final WlCompositor wlCompositor = new WlCompositor(this.display,
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
                                                            this.regionFactory,
+                                                           this.surfaceFactory,
                                                            this.compositor);
         //when
         final int id = 1;
@@ -166,6 +170,7 @@ public class WlCompositorTest {
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
                                                            this.regionFactory,
+                                                           this.surfaceFactory,
                                                            this.compositor);
         //when
         final int id = 5;
@@ -185,6 +190,7 @@ public class WlCompositorTest {
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
                                                            this.regionFactory,
+                                                           this.surfaceFactory,
                                                            this.compositor);
         final Client client = mock(Client.class);
         final int version = 1;

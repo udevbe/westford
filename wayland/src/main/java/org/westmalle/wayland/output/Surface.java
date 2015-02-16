@@ -19,7 +19,10 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlRegionResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlCompositor;
 
 import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
@@ -30,9 +33,11 @@ import java.util.List;
 import java.util.Optional;
 
 @AutoFactory(className = "SurfaceFactory")
-public class Surface extends EventBus {
+public class Surface {
 
     private final RegionFactory regionFactory;
+    @Nonnull
+    private final WlCompositorResource wlCompositorResource;
 
     //pending states
     @Nonnull
@@ -76,9 +81,9 @@ public class Surface extends EventBus {
     private       Boolean                    destroyed    = Boolean.FALSE;
 
     Surface(@Provided final RegionFactory regionFactory,
-            @Nonnull final Optional<WlBufferResource> optionalBuffer) {
+            @Nonnull WlCompositorResource wlCompositorResource) {
         this.regionFactory = regionFactory;
-        this.buffer = optionalBuffer;
+        this.wlCompositorResource = wlCompositorResource;
     }
 
     @Nonnull
@@ -173,7 +178,7 @@ public class Surface extends EventBus {
     }
 
     @Nonnull
-    public Surface commit() {
+    public Surface commit(final WlSurfaceResource wlSurfaceResource) {
         //flush
         this.transform = this.pendingTransform;
         if (this.buffer.isPresent()) {
@@ -189,6 +194,8 @@ public class Surface extends EventBus {
         this.opaqueRegion = this.pendingOpaqueRegion;
         //reset
         detachBuffer();
+        WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
+        wlCompositor.getCompositor().requestRender(wlSurfaceResource);
         return this;
     }
 

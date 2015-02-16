@@ -28,7 +28,6 @@ public class Compositor {
     private final Display        display;
     private final Scene          scene;
     private final ShmRenderer    shmRenderer;
-    private final SurfaceFactory simpleShellSurfaceFactory;
 
     private final AtomicBoolean renderScheduled = new AtomicBoolean(false);
 
@@ -39,13 +38,6 @@ public class Compositor {
         this.display = display;
         this.scene = scene;
         this.shmRenderer = shmRenderer;
-        this.simpleShellSurfaceFactory = simpleShellSurfaceFactory;
-    }
-
-    public Surface create() {
-        final Surface shellSurface = this.simpleShellSurfaceFactory.create(Optional.empty());
-        shellSurface.register(this);
-        return shellSurface;
     }
 
     public void requestRender(final WlSurfaceResource surfaceResource) {

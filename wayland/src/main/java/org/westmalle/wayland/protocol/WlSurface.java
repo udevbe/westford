@@ -37,16 +37,13 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     private Listener destroyListener;
 
     private final WlCallbackFactory    wlCallbackFactory;
-    private final WlCompositorResource compositorResource;
     private final Surface              surface;
 
     private Optional<WlBufferResource> pendingBuffer = Optional.empty();
 
     WlSurface(@Provided final WlCallbackFactory wlCallbackFactory,
-              final WlCompositorResource compositorResource,
               final Surface surface) {
         this.wlCallbackFactory = wlCallbackFactory;
-        this.compositorResource = compositorResource;
         this.surface = surface;
     }
 
@@ -168,10 +165,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     public void commit(final WlSurfaceResource requester) {
         this.pendingBuffer = Optional.empty();
         this.destroyListener.remove();
-        getSurface().commit();
-        final WlCompositor implementation = (WlCompositor) this.compositorResource.getImplementation();
-        implementation.getCompositor()
-                      .requestRender(requester);
+        getSurface().commit(requester);
     }
 
     private void detachBuffer() {

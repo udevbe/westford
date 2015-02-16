@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.SurfaceFactory;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -33,6 +34,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     private final WlSurfaceFactory                           wlSurfaceFactory;
     private final WlRegionFactory                            wlRegionFactory;
     private final org.westmalle.wayland.output.RegionFactory regionFactory;
+    private final org.westmalle.wayland.output.SurfaceFactory surfaceFactory;
     private final Compositor                                 compositor;
 
     @Inject
@@ -40,6 +42,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                  @Provided final WlSurfaceFactory wlSurfaceFactory,
                  @Provided final WlRegionFactory wlRegionFactory,
                  @Provided final org.westmalle.wayland.output.RegionFactory regionFactory,
+                 @Provided final org.westmalle.wayland.output.SurfaceFactory surfaceFactory,
                  final Compositor compositor) {
         super(display,
               WlCompositorResource.class,
@@ -47,6 +50,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         this.wlSurfaceFactory = wlSurfaceFactory;
         this.wlRegionFactory = wlRegionFactory;
         this.regionFactory = regionFactory;
+        this.surfaceFactory = surfaceFactory;
         this.compositor = compositor;
     }
 
@@ -62,9 +66,8 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     @Override
     public void createSurface(final WlCompositorResource compositorResource,
                               final int id) {
-        final Surface surface = this.compositor.create();
-        final WlSurface wlSurface = this.wlSurfaceFactory.create(compositorResource,
-                                                                 surface);
+        final Surface surface = this.surfaceFactory.create(compositorResource);
+        final WlSurface wlSurface = this.wlSurfaceFactory.create(surface);
 
         final WlSurfaceResource surfaceResource = wlSurface.add(compositorResource.getClient(),
                                                                 compositorResource.getVersion(),
