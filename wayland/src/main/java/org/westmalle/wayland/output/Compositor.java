@@ -33,8 +33,7 @@ public class Compositor {
 
     Compositor(@Provided final Display display,
                @Provided final Scene scene,
-               final ShmRenderer shmRenderer,
-               @Provided final SurfaceFactory simpleShellSurfaceFactory) {
+               final ShmRenderer shmRenderer) {
         this.display = display;
         this.scene = scene;
         this.shmRenderer = shmRenderer;
