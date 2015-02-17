@@ -177,8 +177,6 @@ public class PointerDevice {
         }
 
         if (this.buttonsPressed == 0) {
-            //all buttons released for the grabbed surface
-            reportLeave(pointerResources);
             this.grab = Optional.empty();
             this.grabSerial = Optional.empty();
         }
@@ -187,7 +185,6 @@ public class PointerDevice {
             this.grab = this.focus;
             final int serial = this.display.nextSerial();
             this.grabSerial = Optional.of(serial);
-            reportEnter(pointerResources);
             reportButton(pointerResources,
                          serial,
                          time,
@@ -219,24 +216,53 @@ public class PointerDevice {
                          final int y) {
         this.position = new Point(x,
                                   y);
-        //update focus tracking
-        this.focus = this.compositor.getScene()
-                                    .findSurfaceAtCoordinate(x,
-                                                             y);
-        if (this.grab.isPresent()
-            && this.focus.equals(this.grab)) {
+        final Optional<WlSurfaceResource> newFocus = this.compositor.getScene()
+                                                                    .findSurfaceAtCoordinate(this.position);
+        final Optional<WlSurfaceResource> oldFocus = this.focus;
+        this.focus = newFocus;
+
+        if(this.grab.isPresent()) {
+            if (!oldFocus.equals(newFocus)) {
+                if (oldFocus.equals(this.grab)) {
+                    reportLeave(pointerResources,
+                                this.grab.get());
+                }
+                else if (newFocus.equals(this.grab)) {
+                    reportEnter(pointerResources,
+                                this.grab.get());
+                }
+            }
             reportMotion(pointerResources,
-                         time);
+                         time,
+                         this.grab.get());
+        }
+        else {
+            if (!oldFocus.equals(newFocus)) {
+                if(oldFocus.isPresent()) {
+                    reportLeave(pointerResources,
+                                oldFocus.get());
+                }
+                if(newFocus.isPresent()) {
+                    reportEnter(pointerResources,
+                                newFocus.get());
+                }
+            }
+            if(newFocus.isPresent()) {
+                reportMotion(pointerResources,
+                             time,
+                             newFocus.get());
+            }
         }
     }
 
     private void reportMotion(final Set<WlPointerResource> pointerResources,
-                              final int time) {
+                              final int time,
+                              final WlSurfaceResource wlSurfaceResource) {
         final Optional<WlPointerResource> pointerResource = findPointerResource(pointerResources,
-                                                                                this.grab.get());
+                                                                                wlSurfaceResource);
         if (pointerResource.isPresent()) {
             final PointImmutable relativePoint = this.compositor.getScene()
-                                                                .relativeCoordinate(this.grab.get(),
+                                                                .relativeCoordinate(wlSurfaceResource,
                                                                                     this.position);
             pointerResource.get()
                            .motion(time,
@@ -245,13 +271,13 @@ public class PointerDevice {
         }
     }
 
-    private void reportEnter(final Set<WlPointerResource> wlPointer) {
-        final WlSurfaceResource wlSurfaceResource = this.grab.get();
+    private void reportEnter(final Set<WlPointerResource> wlPointer,
+                             final WlSurfaceResource wlSurfaceResource) {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             final PointImmutable relativePoint = this.compositor.getScene()
-                                                                .relativeCoordinate(this.grab.get(),
+                                                                .relativeCoordinate(wlSurfaceResource,
                                                                                     this.position);
             pointerResource.get()
                            .enter(this.display.nextSerial(),
@@ -261,8 +287,8 @@ public class PointerDevice {
         }
     }
 
-    private void reportLeave(final Set<WlPointerResource> wlPointer) {
-        final WlSurfaceResource wlSurfaceResource = this.grab.get();
+    private void reportLeave(final Set<WlPointerResource> wlPointer,
+                             final WlSurfaceResource wlSurfaceResource) {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {

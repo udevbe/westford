@@ -52,8 +52,7 @@ public class Scene {
                          absPosition.getY() - offsetY);
     }
 
-    public Optional<WlSurfaceResource> findSurfaceAtCoordinate(final int absX,
-                                                               final int absY) {
+    public Optional<WlSurfaceResource> findSurfaceAtCoordinate(final PointImmutable absPosition) {
         final Iterator<WlSurfaceResource> SurfaceIterator = getSurfacesStack().descendingIterator();
 
         while (SurfaceIterator.hasNext()) {
@@ -79,7 +78,9 @@ public class Scene {
                     final int x2 = x1 + rectangle.getWidth();
                     final int y2 = y1 + rectangle.getHeight();
 
-                    if (x1 <= absX && x1 <= x2 && y1 <= absY && absY <= y2) {
+                    final int absX = absPosition.getX();
+                    final int absY = absPosition.getY();
+                    if (x1 <= absX && absX <= x2 && y1 <= absY && absY <= y2) {
                         return Optional.of(surfaceResource);
                     }
                 }
