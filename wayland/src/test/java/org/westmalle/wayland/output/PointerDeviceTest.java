@@ -161,8 +161,118 @@ public class PointerDeviceTest {
     }
 
     @Test
-    public void testNoGrabMotion() throws Exception {
+    public void testNoGrabNewFocusMotion() throws Exception {
+        //given
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
+        final WlPointerResource wlPointerResource1 = mock(WlPointerResource.class);
+        pointerResources.add(wlPointerResource0);
+        pointerResources.add(wlPointerResource1);
+        final int time = 112358;
+        final int x0 = 20;
+        final int y0 = 30;
+        final PointImmutable pos0 = new Point(x0,y0);
 
+        final int x1 = 100;
+        final int y1 = 200;
+        final PointImmutable pos1 = new Point(x1,y1);
+
+        final Scene scene = mock(Scene.class);
+        when(this.compositor.getScene()).thenReturn(scene);
+
+        final Client client0 = mock(Client.class);
+        final Client client1 = mock(Client.class);
+
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
+
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        when(wlSurfaceResource1.getClient()).thenReturn(client1);
+
+        when(wlPointerResource0.getClient()).thenReturn(client0);
+        when(wlPointerResource1.getClient()).thenReturn(client1);
+
+        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
+        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.of(wlSurfaceResource0));
+        when(scene.findSurfaceAtCoordinate(pos1)).thenReturn(Optional.of(wlSurfaceResource1));
+
+        final int relX0 = 50;
+        final int relY0 = 100;
+        final PointImmutable relPos0 = new Point(relX0,
+                                                 relY0);
+        when(scene.relativeCoordinate(wlSurfaceResource0,
+                                      pos0)).thenReturn(relPos0);
+
+        final int relX1 = 0;
+        final int relY1 = 100;
+        final PointImmutable relPos1 = new Point(relX1,
+                                                 relY1);
+        when(scene.relativeCoordinate(wlSurfaceResource1,
+                                      pos1)).thenReturn(relPos1);
+
+        final int serial0 = 90879;
+        final int serial1 = 90880;
+        final int serial2 = 90881;
+        when(this.display.nextSerial()).thenReturn(serial0,
+                                                   serial1,
+                                                   serial2);
+        //when
+        this.pointerDevice.motion(pointerResources,
+                                  time,
+                                  x0,
+                                  y0);
+        this.pointerDevice.motion(pointerResources,
+                                  time,
+                                  x1,
+                                  y1);
+        //then
+        //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
+        ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
+        final List<Fixed> values = fixedArgumentCaptor.getAllValues();
+
+        verify(wlPointerResource0,
+               times(1)).enter(eq(serial0),
+                               eq(wlSurfaceResource0),
+                               fixedArgumentCaptor.capture(),
+                               fixedArgumentCaptor.capture());
+
+        assertThat(values.get(0)
+                           .asInt()).isEqualTo(relX0);
+        assertThat(values.get(1)
+                           .asInt()).isEqualTo(relY0);
+
+        verify(wlPointerResource0,
+               times(1)).motion(eq(time),
+                                fixedArgumentCaptor.capture(),
+                                fixedArgumentCaptor.capture());
+        assertThat(values.get(2)
+                           .asInt()).isEqualTo(relX0);
+        assertThat(values.get(3)
+                           .asInt()).isEqualTo(relY0);
+
+
+        verify(wlPointerResource0,
+               times(1)).leave(serial1,
+                               wlSurfaceResource0);
+
+        verify(wlPointerResource1,
+               times(1)).enter(eq(serial2),
+                               eq(wlSurfaceResource1),
+                               fixedArgumentCaptor.capture(),
+                               fixedArgumentCaptor.capture());
+        assertThat(values.get(4)
+                           .asInt()).isEqualTo(relX1);
+        assertThat(values.get(5)
+                           .asInt()).isEqualTo(relY1);
+
+        verify(wlPointerResource1,
+               times(1)).motion(eq(time),
+                                fixedArgumentCaptor.capture(),
+                                fixedArgumentCaptor.capture());
+        assertThat(values.get(6)
+                           .asInt()).isEqualTo(relX1);
+        assertThat(values.get(7)
+                           .asInt()).isEqualTo(relY1);
     }
 
     @Test
