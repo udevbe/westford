@@ -40,9 +40,9 @@ public class PointerDevice {
     private PointImmutable position = new Point();
 
     private Optional<WlSurfaceResource> grab       = Optional.empty();
-    private Optional<Integer>           grabSerial = Optional.empty();
     private Optional<WlSurfaceResource> focus      = Optional.empty();
 
+    private int pointerSerial;
     private int buttonsPressed;
 
     private final Compositor compositor;
@@ -101,7 +101,7 @@ public class PointerDevice {
     }
 
     public void move(final WlSurfaceResource surfaceResource,
-                     final int grabSerial) {
+                     final int serial) {
         final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
         //keep reference to surface position position, relative to the pointer position
         final PointImmutable pointerStartPosition = getPosition();
@@ -113,9 +113,8 @@ public class PointerDevice {
         final Listener motionListener = new Listener() {
             @Subscribe
             public void handle(final Motion motion) {
-                if (getGrabSerial().isPresent()
-                    && getGrabSerial().get()
-                                      .equals(grabSerial)) {
+                if (PointerDevice.this.grab.get().equals(surfaceResource)
+                        && getPointerSerial() == serial) {
                     //there is pointer motion, move surface
                     move(surfaceResource,
                          pointerSurfaceDelta,
@@ -170,7 +169,6 @@ public class PointerDevice {
         if (this.grab.isPresent()) {
             //always report all buttons if we have a grabbed surface.
             reportButton(pointerResources,
-                         this.grabSerial.get(),
                          time,
                          button,
                          buttonState);
@@ -178,15 +176,11 @@ public class PointerDevice {
 
         if (this.buttonsPressed == 0) {
             this.grab = Optional.empty();
-            this.grabSerial = Optional.empty();
         }
         else if (!this.grab.isPresent() && this.focus.isPresent()) {
             //no grab, but we do have a focus and a pressed button. Focused surface becomes grab.
             this.grab = this.focus;
-            final int serial = this.display.nextSerial();
-            this.grabSerial = Optional.of(serial);
             reportButton(pointerResources,
-                         serial,
                          time,
                          button,
                          buttonState);
@@ -194,7 +188,6 @@ public class PointerDevice {
     }
 
     private void reportButton(final Set<WlPointerResource> pointerResources,
-                              final int serial,
                               final int time,
                               final int button,
                               final WlPointerButtonState buttonState) {
@@ -203,7 +196,7 @@ public class PointerDevice {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             pointerResource.get()
-                           .button(serial,
+                           .button(nextPointerSerial(),
                                    time,
                                    button,
                                    buttonState.getValue());
@@ -217,7 +210,7 @@ public class PointerDevice {
         this.position = new Point(x,
                                   y);
         final Optional<WlSurfaceResource> newFocus = this.compositor.getScene()
-                                                                    .findSurfaceAtCoordinate(this.position);
+                                                                    .findSurfaceAtCoordinate(getPosition());
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
 
@@ -263,7 +256,7 @@ public class PointerDevice {
         if (pointerResource.isPresent()) {
             final PointImmutable relativePoint = this.compositor.getScene()
                                                                 .relativeCoordinate(wlSurfaceResource,
-                                                                                    this.position);
+                                                                                    getPosition());
             pointerResource.get()
                            .motion(time,
                                    Fixed.create(relativePoint.getX()),
@@ -278,9 +271,9 @@ public class PointerDevice {
         if (pointerResource.isPresent()) {
             final PointImmutable relativePoint = this.compositor.getScene()
                                                                 .relativeCoordinate(wlSurfaceResource,
-                                                                                    this.position);
+                                                                                    getPosition());
             pointerResource.get()
-                           .enter(this.display.nextSerial(),
+                           .enter(nextPointerSerial(),
                                   wlSurfaceResource,
                                   Fixed.create(relativePoint.getX()),
                                   Fixed.create(relativePoint.getY()));
@@ -293,7 +286,7 @@ public class PointerDevice {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             pointerResource.get()
-                           .leave(this.display.nextSerial(),
+                           .leave(nextPointerSerial(),
                                   wlSurfaceResource);
         }
     }
@@ -309,8 +302,12 @@ public class PointerDevice {
         return Optional.empty();
     }
 
-    public Optional<Integer> getGrabSerial() {
-        return this.grabSerial;
+    private int nextPointerSerial(){
+        this.pointerSerial = this.display.nextSerial();
+        return this.pointerSerial;
     }
 
+    private int getPointerSerial(){
+        return this.pointerSerial;
+    }
 }
