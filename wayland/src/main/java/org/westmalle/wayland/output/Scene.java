@@ -14,20 +14,15 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.collect.Lists;
-import org.freedesktop.wayland.server.WlRegionResource;
 import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
-import javax.media.nativewindow.util.RectangleImmutable;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Optional;
 
 @Singleton
 public class Scene {
@@ -50,44 +45,6 @@ public class Scene {
 
         return new Point(absPosition.getX() - offsetX,
                          absPosition.getY() - offsetY);
-    }
-
-    public Optional<WlSurfaceResource> findSurfaceAtCoordinate(final PointImmutable absPosition) {
-        final Iterator<WlSurfaceResource> surfaceIterator = getSurfacesStack().descendingIterator();
-
-        while (surfaceIterator.hasNext()) {
-            final WlSurfaceResource surfaceResource = surfaceIterator.next();
-            final WlSurfaceRequests implementation = surfaceResource.getImplementation();
-            final Surface surface = ((WlSurface) implementation).getSurface();
-
-            final Optional<WlRegionResource> inputRegion = surface.getInputRegion();
-            if (inputRegion.isPresent()) {
-
-                final PointImmutable position = surface.getPosition();
-                final int offsetX = position.getX();
-                final int offsetY = position.getY();
-
-                WlRegion wlRegion = (WlRegion) inputRegion.get()
-                                                          .getImplementation();
-
-                for (final RectangleImmutable rectangle : wlRegion.getRegion()
-                                                                  .asList()) {
-                    final int x1 = rectangle.getX() + offsetX;
-                    final int y1 = rectangle.getY() + offsetY;
-
-                    final int x2 = x1 + rectangle.getWidth();
-                    final int y2 = y1 + rectangle.getHeight();
-
-                    final int absX = absPosition.getX();
-                    final int absY = absPosition.getY();
-                    if (x1 <= absX && absX <= x2 && y1 <= absY && absY <= y2) {
-                        return Optional.of(surfaceResource);
-                    }
-                }
-            }
-        }
-
-        return Optional.empty();
     }
 
     public boolean needsRender(final WlSurfaceResource surfaceResource) {
