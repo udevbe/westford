@@ -28,7 +28,7 @@ import java.util.List;
 @AutoFactory(className = "RegionFactory")
 public class Region {
 
-    private pixman_region32 pixman_region32 = new pixman_region32();
+    private final pixman_region32 pixman_region32 = new pixman_region32();
 
     Region() {
     }
@@ -36,7 +36,7 @@ public class Region {
     public List<RectangleImmutable> asList() {
         //int pointer
         final IntByReference n_rects = new IntByReference();
-        final pixman_box32 pixman_box32_array = Pixman1Library.INSTANCE.pixman_region32_rectangles(this.pixman_region32,
+        final pixman_box32 pixman_box32_array = Pixman1Library.INSTANCE.pixman_region32_rectangles(getPixmanRegion32(),
                                                                                                    n_rects);
         final int size = n_rects.getValue();
         final pixman_box32[] pixman_box32s = (pixman_box32[]) pixman_box32_array.toArray(size);
@@ -57,16 +57,13 @@ public class Region {
     }
 
     public Region add(@Nonnull final RectangleImmutable rectangle) {
-        final pixman_region32 new_pixman_region32 = new pixman_region32();
-        //FIXME check result.
-
-        final int result = Pixman1Library.INSTANCE.pixman_region32_union_rect(new_pixman_region32,
-                                                                              this.pixman_region32,
+        //FIXME check result
+        final int result = Pixman1Library.INSTANCE.pixman_region32_union_rect(getPixmanRegion32(),
+                                                                              getPixmanRegion32(),
                                                                               rectangle.getX(),
                                                                               rectangle.getY(),
                                                                               rectangle.getWidth(),
                                                                               rectangle.getHeight());
-        this.pixman_region32 = new_pixman_region32;
 
         return this;
     }
@@ -78,13 +75,10 @@ public class Region {
                                                           rectangle.getY(),
                                                           rectangle.getWidth(),
                                                           rectangle.getHeight());
-
-        final pixman_region32 new_pixman_region32 = new pixman_region32();
-        Pixman1Library.INSTANCE.pixman_region32_subtract(new_pixman_region32,
-                                                         delta_pixman_region32,
-                                                         this.pixman_region32);
-        this.pixman_region32 = new_pixman_region32;
-
+        //FIXME check result
+        final int result = Pixman1Library.INSTANCE.pixman_region32_subtract(getPixmanRegion32(),
+                                                                            getPixmanRegion32(),
+                                                                            delta_pixman_region32);
         return this;
     }
 

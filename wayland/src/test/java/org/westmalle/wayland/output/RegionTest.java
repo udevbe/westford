@@ -67,13 +67,13 @@ public class RegionTest {
         //then
         final List<RectangleImmutable> rectangleImmutables = region.asList();
         assertThat(rectangleImmutables).hasSize(2);
-        assertThat(rectangleImmutables.get(0)).isEqualTo(new Rectangle(100,
-                                                                       50,
-                                                                       50,
+        assertThat(rectangleImmutables.get(0)).isEqualTo(new Rectangle(0,
+                                                                       0,
+                                                                       100,
                                                                        50));
-        assertThat(rectangleImmutables.get(1)).isEqualTo(new Rectangle(50,
-                                                                       100,
-                                                                       100,
+        assertThat(rectangleImmutables.get(1)).isEqualTo(new Rectangle(0,
+                                                                       50,
+                                                                       50,
                                                                        50));
     }
 }
