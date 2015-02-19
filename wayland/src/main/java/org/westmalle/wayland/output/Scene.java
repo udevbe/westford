@@ -31,13 +31,13 @@ import java.util.Optional;
 
 @Singleton
 public class Scene {
-    private final LinkedList<WlSurfaceResource> SurfacesStack = Lists.newLinkedList();
+    private final LinkedList<WlSurfaceResource> surfacesStack = Lists.newLinkedList();
 
     @Inject
     Scene() {
     }
 
-    public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.SurfacesStack; }
+    public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.surfacesStack; }
 
     public PointImmutable relativeCoordinate(final WlSurfaceResource surfaceResource,
                                              final PointImmutable absPosition) {
@@ -53,17 +53,17 @@ public class Scene {
     }
 
     public Optional<WlSurfaceResource> findSurfaceAtCoordinate(final PointImmutable absPosition) {
-        final Iterator<WlSurfaceResource> SurfaceIterator = getSurfacesStack().descendingIterator();
+        final Iterator<WlSurfaceResource> surfaceIterator = getSurfacesStack().descendingIterator();
 
-        while (SurfaceIterator.hasNext()) {
-            final WlSurfaceResource surfaceResource = SurfaceIterator.next();
+        while (surfaceIterator.hasNext()) {
+            final WlSurfaceResource surfaceResource = surfaceIterator.next();
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
-            final Surface Surface = ((WlSurface) implementation).getSurface();
+            final Surface surface = ((WlSurface) implementation).getSurface();
 
-            final Optional<WlRegionResource> inputRegion = Surface.getInputRegion();
+            final Optional<WlRegionResource> inputRegion = surface.getInputRegion();
             if (inputRegion.isPresent()) {
 
-                final PointImmutable position = Surface.getPosition();
+                final PointImmutable position = surface.getPosition();
                 final int offsetX = position.getX();
                 final int offsetY = position.getY();
 
