@@ -18,15 +18,14 @@ Dependencies
 
  - JDK8.
  - Jogl. Available on maven central.
- - Google Auto-Value. Available on maven central.
  - Google Auto-Factory. Available on maven central.
  - Google Dagger. Available on maven central.
  - Google Guava. Available on maven central.
- - Findbugs. Available on maven central.
+ - jsr305. Available on maven central.
  - SLF4J. Available on maven central.
  - Wayland-Java-Bindings. Available on maven central.
  - Pixman-Java-Bindings. Available [here](https://github.com/Zubnix/pixman-java-bindings).
- - Jglm. Available [here](https://github.com/jroyalty/jglm).
+ - Jglm. Available on maven central.
 
 State
 =====
