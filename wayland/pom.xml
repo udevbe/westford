@@ -28,7 +28,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.freedesktop</groupId>
+            <groupId>com.github.Zubnix</groupId>
             <artifactId>pixman-java-bindings</artifactId>
             <version>${pixman-java-bindings.version}</version>
         </dependency>
