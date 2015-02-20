@@ -3,6 +3,7 @@ package org.westmalle.wayland.output;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlPointerResource;
+import org.freedesktop.wayland.server.WlRegionResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
@@ -13,10 +14,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.protocol.WlRegion;
+import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -54,8 +58,8 @@ public class PointerDeviceTest {
         final int y0 = 30;
         final PointImmutable pos0 = new Point(x0,y0);
 
-        final int x1 = 100;
-        final int y1 = 200;
+        final int x1 = 500;
+        final int y1 = 600;
         final PointImmutable pos1 = new Point(x1,y1);
 
         final int button0 = 1;
@@ -69,29 +73,67 @@ public class PointerDeviceTest {
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
 
+        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
+        surfaceResources.add(wlSurfaceResource0);
+        surfaceResources.add(wlSurfaceResource1);
+        when(scene.getSurfacesStack()).thenReturn(surfaceResources);
+
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final WlSurface wlSurface1 = mock(WlSurface.class);
+        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
+
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Surface surface1 = mock(Surface.class);
+        when(wlSurface1.getSurface()).thenReturn(surface1);
+
+        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
+        when(surface1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
+
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+        final WlRegion wlRegion1 = mock(WlRegion.class);
+        when(wlRegionResource1.getImplementation()).thenReturn(wlRegion1);
+
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+        final Region region1 = mock(Region.class);
+        when(wlRegion1.getRegion()).thenReturn(region1);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         when(wlSurfaceResource1.getClient()).thenReturn(client1);
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
         when(wlPointerResource1.getClient()).thenReturn(client1);
 
-        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.of(wlSurfaceResource0));
-        when(scene.findSurfaceAtCoordinate(pos1)).thenReturn(Optional.of(wlSurfaceResource1));
-
-        final int relX0 = 50;
-        final int relY0 = 100;
+        final PointImmutable surfacePos0 = new Point(10,
+                                                     10);
+        final int relX0 = x0 - 10;
+        final int relY0 = y0 - 10;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos0)).thenReturn(relPos0);
+        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(region0.contains(relPos0)).thenReturn(true);
+        when(surface0.getPosition()).thenReturn(surfacePos0);
 
-        final int relX1 = 0;
-        final int relY1 = 100;
+        final PointImmutable surfacePos1 = new Point(400,
+                                                     400);
+        final int relX1 = x1 - 400;
+        final int relY1 = y1 - 400;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos1)).thenReturn(relPos1);
+        when(surface1.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(region1.contains(relPos1)).thenReturn(true);
+        when(surface1.getPosition()).thenReturn(surfacePos1);
+
+        final int relX3 = x0 - 400;
+        final int relY3 = y0 - 400;
+        final PointImmutable relPos3 = new Point(relX3,
+                                                 relY3);
+        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos3);
 
         final int serial = 90879;
         when(this.display.nextSerial()).thenReturn(serial);
@@ -133,9 +175,9 @@ public class PointerDeviceTest {
         assertThat(values.get(3)
                            .asInt()).isEqualTo(relY0);
         assertThat(values.get(4)
-                           .asInt()).isEqualTo(relX1);
+                           .asInt()).isEqualTo(relX3);
         assertThat(values.get(5)
-                           .asInt()).isEqualTo(relY1);
+                           .asInt()).isEqualTo(relY3);
 
         verify(wlPointerResource0,
                times(1)).button(serial,
@@ -192,29 +234,63 @@ public class PointerDeviceTest {
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
 
+        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
+        surfaceResources.add(wlSurfaceResource0);
+        surfaceResources.add(wlSurfaceResource1);
+        when(scene.getSurfacesStack()).thenReturn(surfaceResources);
+
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final WlSurface wlSurface1 = mock(WlSurface.class);
+        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
+
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Surface surface1 = mock(Surface.class);
+        when(wlSurface1.getSurface()).thenReturn(surface1);
+
+        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
+        when(surface1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
+
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+        final WlRegion wlRegion1 = mock(WlRegion.class);
+        when(wlRegionResource1.getImplementation()).thenReturn(wlRegion1);
+
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+        final Region region1 = mock(Region.class);
+        when(wlRegion1.getRegion()).thenReturn(region1);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         when(wlSurfaceResource1.getClient()).thenReturn(client1);
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
         when(wlPointerResource1.getClient()).thenReturn(client1);
 
-        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.of(wlSurfaceResource0));
-        when(scene.findSurfaceAtCoordinate(pos1)).thenReturn(Optional.of(wlSurfaceResource1));
-
         final int relX0 = 50;
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos0)).thenReturn(relPos0);
+        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(region0.contains(relPos0)).thenReturn(true);
+
+        final PointImmutable surfacePos0 = new Point(x0 - relX0,
+                                                     y0 - relY0);
+        when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int relX1 = 0;
         final int relY1 = 100;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(scene.relativeCoordinate(wlSurfaceResource1,
-                                      pos1)).thenReturn(relPos1);
+        when(surface1.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(region1.contains(relPos1)).thenReturn(true);
+
+        final PointImmutable surfacePos1 = new Point(x1 - relX1,
+                                                     y1 - relY1);
+        when(surface1.getPosition()).thenReturn(surfacePos1);
 
         final int serial0 = 90879;
         final int serial1 = 90880;
@@ -306,20 +382,46 @@ public class PointerDeviceTest {
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
 
+        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
+        surfaceResources.add(wlSurfaceResource0);
+        when(scene.getSurfacesStack()).thenReturn(surfaceResources);
+
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+
+        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
-
-        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.of(wlSurfaceResource0));
-        when(scene.findSurfaceAtCoordinate(pos1)).thenReturn(Optional.<WlSurfaceResource>empty());
 
         final int relX0 = 50;
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos0)).thenReturn(relPos0);
+        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(region0.contains(relPos0)).thenReturn(true);
+
+        final PointImmutable surfacePos0 = new Point(x0 - relX0,
+                                                     y0 - relY0);
+        when(surface0.getPosition()).thenReturn(surfacePos0);
+
+        final int relX1 = 0;
+        final int relY1 = 100;
+        final PointImmutable relPos1 = new Point(relX1,
+                                                 relY1);
+        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(region0.contains(relPos1)).thenReturn(false);
 
         final int serial0 = 90879;
         final int serial1 = 90880;
@@ -391,20 +493,45 @@ public class PointerDeviceTest {
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
 
+        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
+        surfaceResources.add(wlSurfaceResource0);
+        when(scene.getSurfacesStack()).thenReturn(surfaceResources);
+
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+
+        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
 
-        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos1)).thenReturn(Optional.of(wlSurfaceResource0));
+        final PointImmutable surfacePos0 = new Point(100,
+                                                     100);
+        final int relX0 = x0 - 100;
+        final int relY0 = y0 - 100;
+        final PointImmutable relPos0 = new Point(relX0,
+                                                 relY0);
+        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(region0.contains(relPos0)).thenReturn(false);
+        when(surface0.getPosition()).thenReturn(surfacePos0);
 
-        final int relX1 = 50;
-        final int relY1 = 100;
+        final int relX1 = x1 - 100;
+        final int relY1 = y1 - 100;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos1)).thenReturn(relPos1);
+        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(region0.contains(relPos1)).thenReturn(true);
 
         final int serial0 = 90879;
         final int serial1 = 90880;
@@ -459,11 +586,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final PointImmutable pos0 = new Point(x0,y0);
+        final PointImmutable pos0 = new Point(x0,
+                                              y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final PointImmutable pos1 = new Point(x1,y1);
+        final PointImmutable pos1 = new Point(x1,
+                                              y1);
 
         final int button0 = 1;
 
@@ -474,20 +603,46 @@ public class PointerDeviceTest {
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
 
+        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
+        surfaceResources.add(wlSurfaceResource0);
+        when(scene.getSurfacesStack()).thenReturn(surfaceResources);
+
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+
+        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
 
-        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos1)).thenReturn(Optional.of(wlSurfaceResource0));
+        final PointImmutable surfacePos0 = new Point(100,
+                                                     100);
+        final int relX0 = x0 - 100;
+        final int relY0 = y0 - 100;
+        final PointImmutable relPos0 = new Point(relX0,
+                                                 relY0);
+        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(region0.contains(relPos0)).thenReturn(false);
 
-        final int relX1 = 50;
-        final int relY1 = 100;
+        when(surface0.getPosition()).thenReturn(surfacePos0);
+
+        final int relX1 = x1 - 100;
+        final int relY1 = y1 - 100;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos1)).thenReturn(relPos1);
+        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(region0.contains(relPos1)).thenReturn(true);
 
         final int serial0 = 90879;
         final int serial1 = 90880;
@@ -568,19 +723,39 @@ public class PointerDeviceTest {
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
 
+        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
+        surfaceResources.add(wlSurfaceResource0);
+        when(scene.getSurfacesStack()).thenReturn(surfaceResources);
+
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+
+        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
-
-        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.of(wlSurfaceResource0));
 
         final int relX0 = 50;
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos0)).thenReturn(relPos0);
+        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(region0.contains(relPos0)).thenReturn(true);
+
+        final PointImmutable surfacePos0 = new Point(x0 - relX0,
+                                                     y0 - relY0);
+        when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int serial0 = 90879;
         final int serial1 = 90880;
@@ -659,19 +834,39 @@ public class PointerDeviceTest {
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
 
+        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
+        surfaceResources.add(wlSurfaceResource0);
+        when(scene.getSurfacesStack()).thenReturn(surfaceResources);
+
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+
+        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
-
-        when(scene.findSurfaceAtCoordinate(any())).thenReturn(Optional.<WlSurfaceResource>empty());
-        when(scene.findSurfaceAtCoordinate(pos0)).thenReturn(Optional.of(wlSurfaceResource0));
 
         final int relX0 = 50;
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(scene.relativeCoordinate(wlSurfaceResource0,
-                                      pos0)).thenReturn(relPos0);
+        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(region0.contains(relPos0)).thenReturn(true);
+
+        final PointImmutable surfacePos0 = new Point(x0 - relX0,
+                                                     y0 - relY0);
+        when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int serial0 = 90879;
         final int serial1 = 90880;

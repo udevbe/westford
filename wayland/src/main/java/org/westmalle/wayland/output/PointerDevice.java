@@ -21,6 +21,7 @@ import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.output.events.Motion;
+import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.media.nativewindow.util.Point;
@@ -202,7 +203,7 @@ public class PointerDevice {
         }
     }
 
-    public Optional<WlSurfaceResource> findWlSurfaceResource() {
+    private Optional<WlSurfaceResource> findWlSurfaceResource() {
         final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getScene()
                                                                            .getSurfacesStack()
                                                                            .descendingIterator();
@@ -221,8 +222,9 @@ public class PointerDevice {
                 final int positionX = getPosition().getX();
                 final int positionY = getPosition().getY();
 
-                Region region = (Region) inputRegion.get()
-                                                    .getImplementation();
+                WlRegion wlRegion = (WlRegion) inputRegion.get()
+                                                          .getImplementation();
+                Region region = wlRegion.getRegion();
                 if (region.contains(new Point(positionX - surfaceX,
                                               positionY - surfaceY))) {
 
@@ -284,9 +286,9 @@ public class PointerDevice {
         final Optional<WlPointerResource> pointerResource = findPointerResource(pointerResources,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
-            final PointImmutable relativePoint = this.compositor.getScene()
-                                                                .relativeCoordinate(wlSurfaceResource,
-                                                                                    getPosition());
+            WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final PointImmutable relativePoint =  wlSurface.getSurface().relativeCoordinate(getPosition());
+
             pointerResource.get()
                            .motion(time,
                                    Fixed.create(relativePoint.getX()),
@@ -299,9 +301,9 @@ public class PointerDevice {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
-            final PointImmutable relativePoint = this.compositor.getScene()
-                                                                .relativeCoordinate(wlSurfaceResource,
-                                                                                    getPosition());
+            WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final PointImmutable relativePoint =  wlSurface.getSurface().relativeCoordinate(getPosition());
+
             pointerResource.get()
                            .enter(nextPointerSerial(),
                                   wlSurfaceResource,

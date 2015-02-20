@@ -239,4 +239,13 @@ public class Surface {
         callbacks.forEach(frameCallback -> frameCallback.done(serial));
         return this;
     }
+
+    public PointImmutable relativeCoordinate(final PointImmutable absoluteCoordinate){
+        final PointImmutable position = getPosition();
+        final int offsetX = position.getX();
+        final int offsetY = position.getY();
+
+        return new Point(absoluteCoordinate.getX() - offsetX,
+                         absoluteCoordinate.getY() - offsetY);
+    }
 }
