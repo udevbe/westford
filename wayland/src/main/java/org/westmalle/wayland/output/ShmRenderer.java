@@ -36,28 +36,20 @@ public class ShmRenderer {
         final WlBufferResource wlBufferResource = implementation.getSurface()
                                                                 .getBuffer()
                                                                 .get();
-        render(surfaceResource,
-               wlBufferResource);
-    }
-
-    public void render(final WlSurfaceResource surfaceResource,
-                       final WlBufferResource bufferResource) {
-
-        final ShmBuffer shmBuffer = ShmBuffer.get(bufferResource);
+        final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
         if (shmBuffer == null) {
             throw new IllegalArgumentException("Buffer resource is not an ShmBuffer.");
         }
         try {
             this.shmRenderEngine.draw(surfaceResource,
                                       shmBuffer)
-                                .get();
+                    .get();
         }
         catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
         implementation.getSurface()
-                      .firePaintCallbacks((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
+                .firePaintCallbacks((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
     }
 
     public void beginRender() throws ExecutionException, InterruptedException {
