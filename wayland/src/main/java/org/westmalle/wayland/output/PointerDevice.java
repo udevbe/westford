@@ -17,18 +17,17 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.Listener;
-import org.freedesktop.wayland.server.WlPointerResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.output.events.Motion;
+import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
@@ -39,8 +38,8 @@ public class PointerDevice {
 
     private PointImmutable position = new Point();
 
-    private Optional<WlSurfaceResource> grab       = Optional.empty();
-    private Optional<WlSurfaceResource> focus      = Optional.empty();
+    private Optional<WlSurfaceResource> grab  = Optional.empty();
+    private Optional<WlSurfaceResource> focus = Optional.empty();
 
     private int pointerSerial;
     private int buttonsPressed;
@@ -113,8 +112,9 @@ public class PointerDevice {
         final Listener motionListener = new Listener() {
             @Subscribe
             public void handle(final Motion motion) {
-                if (PointerDevice.this.grab.get().equals(surfaceResource)
-                        && getPointerSerial() == serial) {
+                if (PointerDevice.this.grab.get()
+                                           .equals(surfaceResource)
+                    && getPointerSerial() == serial) {
                     //there is pointer motion, move surface
                     move(surfaceResource,
                          pointerSurfaceDelta,
@@ -203,18 +203,50 @@ public class PointerDevice {
         }
     }
 
+    private Optional<WlSurfaceResource> findWlSurfaceResource() {
+        final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getScene()
+                                                                           .getSurfacesStack()
+                                                                           .descendingIterator();
+        while (surfaceIterator.hasNext()) {
+            final WlSurfaceResource surfaceResource = surfaceIterator.next();
+            final WlSurfaceRequests implementation = surfaceResource.getImplementation();
+            final Surface surface = ((WlSurface) implementation).getSurface();
+
+            final Optional<WlRegionResource> inputRegion = surface.getInputRegion();
+            if (inputRegion.isPresent()) {
+
+                final PointImmutable position = surface.getPosition();
+                final int surfaceX = position.getX();
+                final int surfaceY = position.getY();
+
+                final int positionX = getPosition().getX();
+                final int positionY = getPosition().getY();
+
+                WlRegion wlRegion = (WlRegion) inputRegion.get()
+                                                          .getImplementation();
+                Region region = wlRegion.getRegion();
+                if (region.contains(new Point(positionX - surfaceX,
+                                              positionY - surfaceY))) {
+
+                    return Optional.of(surfaceResource);
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
     public void doMotion(final Set<WlPointerResource> pointerResources,
                          final int time,
                          final int x,
                          final int y) {
         this.position = new Point(x,
                                   y);
-        final Optional<WlSurfaceResource> newFocus = this.compositor.getScene()
-                                                                    .findSurfaceAtCoordinate(getPosition());
+        final Optional<WlSurfaceResource> newFocus = findWlSurfaceResource();
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
 
-        if(this.grab.isPresent()) {
+        if (this.grab.isPresent()) {
             if (!oldFocus.equals(newFocus)) {
                 if (oldFocus.equals(this.grab)) {
                     reportLeave(pointerResources,
@@ -231,16 +263,16 @@ public class PointerDevice {
         }
         else {
             if (!oldFocus.equals(newFocus)) {
-                if(oldFocus.isPresent()) {
+                if (oldFocus.isPresent()) {
                     reportLeave(pointerResources,
                                 oldFocus.get());
                 }
-                if(newFocus.isPresent()) {
+                if (newFocus.isPresent()) {
                     reportEnter(pointerResources,
                                 newFocus.get());
                 }
             }
-            if(newFocus.isPresent()) {
+            if (newFocus.isPresent()) {
                 reportMotion(pointerResources,
                              time,
                              newFocus.get());
@@ -254,9 +286,9 @@ public class PointerDevice {
         final Optional<WlPointerResource> pointerResource = findPointerResource(pointerResources,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
-            final PointImmutable relativePoint = this.compositor.getScene()
-                                                                .relativeCoordinate(wlSurfaceResource,
-                                                                                    getPosition());
+            WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final PointImmutable relativePoint =  wlSurface.getSurface().relativeCoordinate(getPosition());
+
             pointerResource.get()
                            .motion(time,
                                    Fixed.create(relativePoint.getX()),
@@ -269,9 +301,9 @@ public class PointerDevice {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
-            final PointImmutable relativePoint = this.compositor.getScene()
-                                                                .relativeCoordinate(wlSurfaceResource,
-                                                                                    getPosition());
+            WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final PointImmutable relativePoint =  wlSurface.getSurface().relativeCoordinate(getPosition());
+
             pointerResource.get()
                            .enter(nextPointerSerial(),
                                   wlSurfaceResource,
@@ -302,12 +334,12 @@ public class PointerDevice {
         return Optional.empty();
     }
 
-    private int nextPointerSerial(){
+    private int nextPointerSerial() {
         this.pointerSerial = this.display.nextSerial();
         return this.pointerSerial;
     }
 
-    private int getPointerSerial(){
+    private int getPointerSerial() {
         return this.pointerSerial;
     }
 }

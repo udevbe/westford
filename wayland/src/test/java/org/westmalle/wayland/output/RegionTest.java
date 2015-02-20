@@ -7,6 +7,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
+import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.Rectangle;
 import javax.media.nativewindow.util.RectangleImmutable;
 
@@ -30,8 +31,8 @@ public class RegionTest {
                                                  50,
                                                  100,
                                                  100);
-        //when
         region.add(rect0);
+        //when
         region.add(rect1);
         //then
         final List<RectangleImmutable> rectangleImmutables = region.asList();
@@ -61,8 +62,8 @@ public class RegionTest {
                                                  50,
                                                  100,
                                                  100);
-        //when
         region.add(rect0);
+        //when
         region.subtract(rect1);
         //then
         final List<RectangleImmutable> rectangleImmutables = region.asList();
@@ -75,5 +76,23 @@ public class RegionTest {
                                                                        50,
                                                                        50,
                                                                        50));
+    }
+
+    @Test
+    public void testContains() throws Exception {
+        //given
+        RectangleImmutable rect0 = new Rectangle(50,
+                                                 50,
+                                                 100,
+                                                 100);
+        region.add(rect0);
+        //when
+        final boolean contains = region.contains(new Point(50,
+                                                           50));
+        final boolean notContains = region.contains(new Point(151,
+                                                              151));
+        //then
+        assertThat(contains).isTrue();
+        assertThat(notContains).isFalse();
     }
 }

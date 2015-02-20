@@ -20,6 +20,7 @@ import org.freedesktop.pixman1.pixman_box32;
 import org.freedesktop.pixman1.pixman_region32;
 
 import javax.annotation.Nonnull;
+import javax.media.nativewindow.util.PointImmutable;
 import javax.media.nativewindow.util.Rectangle;
 import javax.media.nativewindow.util.RectangleImmutable;
 import java.util.ArrayList;
@@ -80,6 +81,23 @@ public class Region {
                                                                             getPixmanRegion32(),
                                                                             delta_pixman_region32);
         return this;
+    }
+
+    public boolean contains(final PointImmutable point){
+        for (final RectangleImmutable rectangle : asList()) {
+            final int x1 = rectangle.getX();
+            final int y1 = rectangle.getY();
+
+            final int x2 = x1 + rectangle.getWidth();
+            final int y2 = y1 + rectangle.getHeight();
+
+            final int pointX = point.getX();
+            final int pointY = point.getY();
+            if (x1 <= pointX && pointX <= x2 && y1 <= pointY && pointY <= y2) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public pixman_region32 getPixmanRegion32() {
