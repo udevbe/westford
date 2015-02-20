@@ -91,13 +91,6 @@
 
         <!-- google auto -->
         <dependency>
-            <groupId>com.google.auto.value</groupId>
-            <artifactId>auto-value</artifactId>
-            <version>${auto.value.version}</version>
-            <optional>true</optional>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.google.auto.factory</groupId>
             <artifactId>auto-factory</artifactId>
             <version>${auto.factory.version}</version>
@@ -158,6 +151,7 @@
             <groupId>com.google.truth</groupId>
             <artifactId>truth</artifactId>
             <version>${truth.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
