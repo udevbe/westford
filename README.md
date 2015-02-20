@@ -29,6 +29,7 @@ Dependencies
 
 State
 =====
+[![Build Status](https://travis-ci.org/Zubnix/westmalle.svg)](https://travis-ci.org/Zubnix/westmalle)
  - X OpenGL rendering back-end works.
  - Moving clients works.
 
