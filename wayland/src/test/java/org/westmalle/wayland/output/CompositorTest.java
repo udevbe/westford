@@ -23,8 +23,6 @@ public class CompositorTest {
     @Mock
     private Display     display;
     @Mock
-    private Scene       scene;
-    @Mock
     private ShmRenderer shmRenderer;
 
     @InjectMocks
@@ -42,16 +40,12 @@ public class CompositorTest {
             return null;
         });
 
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
-        wlSurfaceResources.add(wlSurfaceResource1);
-        wlSurfaceResources.add(wlSurfaceResource2);
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
-        when(this.scene.needsRender(any())).thenReturn(true);
+        this.compositor.getSurfacesStack().add(wlSurfaceResource0);
+        this.compositor.getSurfacesStack().add(wlSurfaceResource1);
+        this.compositor.getSurfacesStack().add(wlSurfaceResource2);
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when
@@ -94,16 +88,12 @@ public class CompositorTest {
             return null;
         });
 
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
-        wlSurfaceResources.add(wlSurfaceResource1);
-        wlSurfaceResources.add(wlSurfaceResource2);
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
-        when(this.scene.needsRender(any())).thenReturn(true);
+        this.compositor.getSurfacesStack().add(wlSurfaceResource0);
+        this.compositor.getSurfacesStack().add(wlSurfaceResource1);
+        this.compositor.getSurfacesStack().add(wlSurfaceResource2);
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when

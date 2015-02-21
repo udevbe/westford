@@ -50,12 +50,6 @@ public class OutputModule {
         return Display.create();
     }
 
-    @Provides
-    @Singleton
-    Scene provideWlScene() {
-        return new Scene();
-    }
-
     @Singleton
     @Provides
     JobExecutor provideWlJobExecutor(final Display display,

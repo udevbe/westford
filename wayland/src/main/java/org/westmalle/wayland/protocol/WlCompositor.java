@@ -75,16 +75,14 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
             @Override
             public void handle() {
                 remove();
-                WlCompositor.this.compositor.getScene()
-                                            .getSurfacesStack()
+                WlCompositor.this.compositor.getSurfacesStack()
                                             .remove(surfaceResource);
                 surface.markDestroyed();
                 WlCompositor.this.compositor.requestRender(surfaceResource);
             }
         });
 
-        this.compositor.getScene()
-                       .getSurfacesStack()
+        this.compositor.getSurfacesStack()
                        .push(surfaceResource);
     }
 

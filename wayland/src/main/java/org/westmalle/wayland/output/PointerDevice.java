@@ -204,8 +204,7 @@ public class PointerDevice {
     }
 
     private Optional<WlSurfaceResource> findWlSurfaceResource() {
-        final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getScene()
-                                                                           .getSurfacesStack()
+        final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getSurfacesStack()
                                                                            .descendingIterator();
         while (surfaceIterator.hasNext()) {
             final WlSurfaceResource surfaceResource = surfaceIterator.next();

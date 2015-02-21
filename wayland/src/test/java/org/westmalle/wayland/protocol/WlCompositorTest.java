@@ -96,11 +96,8 @@ public class WlCompositorTest {
     @Test
     public void testCreateSurface() throws Exception {
         //given
-        final Scene scene = mock(Scene.class);
-        when(this.compositor.getScene()).thenReturn(scene);
-
         LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-        when(scene.getSurfacesStack()).thenReturn(surfacesStack);
+        when(this.compositor.getSurfacesStack()).thenReturn(surfacesStack);
 
         final WlSurface wlSurface = mock(WlSurface.class);
         when(this.wlSurfaceFactory.create(any())).thenReturn(wlSurface);

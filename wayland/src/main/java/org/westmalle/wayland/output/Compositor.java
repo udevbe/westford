@@ -15,9 +15,11 @@ package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import com.google.common.collect.Lists;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
+import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,23 +27,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Compositor {
 
     private final Display     display;
-    private final Scene       scene;
     private final ShmRenderer shmRenderer;
 
     private final AtomicBoolean renderScheduled = new AtomicBoolean(false);
 
+    private final LinkedList<WlSurfaceResource> surfacesStack = Lists.newLinkedList();
+
+
     Compositor(@Provided final Display display,
-               @Provided final Scene scene,
                final ShmRenderer shmRenderer) {
         this.display = display;
-        this.scene = scene;
         this.shmRenderer = shmRenderer;
     }
 
     public void requestRender(final WlSurfaceResource surfaceResource) {
         if (this.renderScheduled.compareAndSet(false,
                                                true)) {
-            if (this.scene.needsRender(surfaceResource)) {
+            if (needsRender(surfaceResource)) {
                 renderScene();
             }
         }
@@ -54,8 +56,7 @@ public class Compositor {
                                                                false)) {
                             try {
                                 this.shmRenderer.beginRender();
-                                this.scene.getSurfacesStack()
-                                          .forEach(this.shmRenderer::render);
+                                getSurfacesStack().forEach(this.shmRenderer::render);
                                 this.shmRenderer.endRender();
                                 this.display.flushClients();
                             }
@@ -67,7 +68,17 @@ public class Compositor {
                     });
     }
 
-    public Scene getScene() {
-        return this.scene;
+    public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.surfacesStack; }
+
+    private boolean needsRender(final WlSurfaceResource surfaceResource) {
+//        final WlSurfaceRequests implementation = surfaceResource.getImplementation();
+//        final Surface Surface = ((WlSurface) implementation).getSurface();
+//        if (Surface.isDestroyed()) {
+//            return true;
+//        }
+//        else {
+            //for now, always redraw
+            return true;
+//        }
     }
 }
