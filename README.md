@@ -24,7 +24,7 @@ Dependencies
  - jsr305. Available on maven central.
  - SLF4J. Available on maven central.
  - Wayland-Java-Bindings. Available on maven central.
- - Pixman-Java-Bindings. Available [here](https://github.com/Zubnix/pixman-java-bindings).
+ - Pixman-Java-Bindings. Available through [jitpack](https://jitpack.io/).
  - Jglm. Available on maven central.
 
 State
