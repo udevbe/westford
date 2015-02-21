@@ -77,8 +77,8 @@ public class Compositor {
 //            return true;
 //        }
 //        else {
-            //for now, always redraw
-            return true;
+        //for now, always redraw
+        return true;
 //        }
     }
 }

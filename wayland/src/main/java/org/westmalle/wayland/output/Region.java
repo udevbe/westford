@@ -83,7 +83,7 @@ public class Region {
         return this;
     }
 
-    public boolean contains(final PointImmutable point){
+    public boolean contains(final PointImmutable point) {
         for (final RectangleImmutable rectangle : asList()) {
             final int x1 = rectangle.getX();
             final int y1 = rectangle.getY();

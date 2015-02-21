@@ -15,9 +15,9 @@ import static org.mockito.Mockito.verify;
 public class ShellServiceTest {
 
     @Mock
-    private Display display;
+    private Display      display;
     @Mock
-    private JobExecutor jobExecutor;
+    private JobExecutor  jobExecutor;
     @InjectMocks
     private ShellService shellService;
 

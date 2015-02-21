@@ -46,11 +46,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final PointImmutable pos0 = new Point(x0,y0);
+        final PointImmutable pos0 = new Point(x0,
+                                              y0);
 
         final int x1 = 500;
         final int y1 = 600;
-        final PointImmutable pos1 = new Point(x1,y1);
+        final PointImmutable pos1 = new Point(x1,
+                                              y1);
 
         final int button0 = 1;
 
@@ -149,22 +151,22 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(1)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
 
         verify(wlPointerResource0,
                times(2)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(3)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
         assertThat(values.get(4)
-                           .asInt()).isEqualTo(relX3);
+                         .asInt()).isEqualTo(relX3);
         assertThat(values.get(5)
-                           .asInt()).isEqualTo(relY3);
+                         .asInt()).isEqualTo(relY3);
 
         verify(wlPointerResource0,
                times(1)).button(serial,
@@ -206,11 +208,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final PointImmutable pos0 = new Point(x0,y0);
+        final PointImmutable pos0 = new Point(x0,
+                                              y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final PointImmutable pos1 = new Point(x1,y1);
+        final PointImmutable pos1 = new Point(x1,
+                                              y1);
 
         final Client client0 = mock(Client.class);
         final Client client1 = mock(Client.class);
@@ -303,18 +307,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(1)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(3)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
 
 
         verify(wlPointerResource0,
@@ -327,18 +331,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
         assertThat(values.get(4)
-                           .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(relX1);
         assertThat(values.get(5)
-                           .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(relY1);
 
         verify(wlPointerResource1,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(6)
-                           .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(relX1);
         assertThat(values.get(7)
-                           .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(relY1);
     }
 
     /**
@@ -353,11 +357,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final PointImmutable pos0 = new Point(x0,y0);
+        final PointImmutable pos0 = new Point(x0,
+                                              y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final PointImmutable pos1 = new Point(x1,y1);
+        final PointImmutable pos1 = new Point(x1,
+                                              y1);
 
         final Client client0 = mock(Client.class);
 
@@ -431,18 +437,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(1)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(3)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
 
         verify(wlPointerResource0,
                times(1)).leave(serial1,
@@ -461,11 +467,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final PointImmutable pos0 = new Point(x0,y0);
+        final PointImmutable pos0 = new Point(x0,
+                                              y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final PointImmutable pos1 = new Point(x1,y1);
+        final PointImmutable pos1 = new Point(x1,
+                                              y1);
 
         final Client client0 = mock(Client.class);
 
@@ -538,18 +546,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                           .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(relX1);
         assertThat(values.get(1)
-                           .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(relY1);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                           .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(relX1);
         assertThat(values.get(3)
-                           .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(relY1);
     }
 
     /**
@@ -654,28 +662,29 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                           .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(relX1);
         assertThat(values.get(1)
-                           .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(relY1);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                           .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(relX1);
         assertThat(values.get(3)
-                           .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(relY1);
 
         verify(wlPointerResource0,
                never()).button(anyInt(),
-                                anyInt(),
-                                anyInt(),
-                                anyInt());
+                               anyInt(),
+                               anyInt(),
+                               anyInt());
     }
 
     /**
      * button is pressed, cursor is over surface, button is released
+     *
      * @throws Exception
      */
     @Test
@@ -687,7 +696,8 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final PointImmutable pos0 = new Point(x0,y0);
+        final PointImmutable pos0 = new Point(x0,
+                                              y0);
 
         final int button0 = 1;
 
@@ -760,24 +770,24 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(1)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                           .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(relX0);
         assertThat(values.get(3)
-                           .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(relY0);
 
         verify(wlPointerResource0,
                times(1)).button(serial1,
-                               time,
-                               button0,
-                               WlPointerButtonState.PRESSED.getValue());
+                                time,
+                                button0,
+                                WlPointerButtonState.PRESSED.getValue());
 
         verify(wlPointerResource0,
                times(1)).button(serial2,
@@ -795,7 +805,8 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final PointImmutable pos0 = new Point(x0,y0);
+        final PointImmutable pos0 = new Point(x0,
+                                              y0);
 
         final int button0 = 1;
 

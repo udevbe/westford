@@ -286,7 +286,8 @@ public class PointerDevice {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final PointImmutable relativePoint =  wlSurface.getSurface().relativeCoordinate(getPosition());
+            final PointImmutable relativePoint = wlSurface.getSurface()
+                                                          .relativeCoordinate(getPosition());
 
             pointerResource.get()
                            .motion(time,
@@ -301,7 +302,8 @@ public class PointerDevice {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final PointImmutable relativePoint =  wlSurface.getSurface().relativeCoordinate(getPosition());
+            final PointImmutable relativePoint = wlSurface.getSurface()
+                                                          .relativeCoordinate(getPosition());
 
             pointerResource.get()
                            .enter(nextPointerSerial(),

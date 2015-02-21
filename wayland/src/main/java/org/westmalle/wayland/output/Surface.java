@@ -240,7 +240,7 @@ public class Surface {
         return this;
     }
 
-    public PointImmutable relativeCoordinate(final PointImmutable absoluteCoordinate){
+    public PointImmutable relativeCoordinate(final PointImmutable absoluteCoordinate) {
         final PointImmutable position = getPosition();
         final int offsetX = position.getX();
         final int offsetY = position.getY();

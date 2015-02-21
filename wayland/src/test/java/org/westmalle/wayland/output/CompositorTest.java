@@ -43,9 +43,12 @@ public class CompositorTest {
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
-        this.compositor.getSurfacesStack().add(wlSurfaceResource0);
-        this.compositor.getSurfacesStack().add(wlSurfaceResource1);
-        this.compositor.getSurfacesStack().add(wlSurfaceResource2);
+        this.compositor.getSurfacesStack()
+                       .add(wlSurfaceResource0);
+        this.compositor.getSurfacesStack()
+                       .add(wlSurfaceResource1);
+        this.compositor.getSurfacesStack()
+                       .add(wlSurfaceResource2);
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when
@@ -91,9 +94,12 @@ public class CompositorTest {
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
-        this.compositor.getSurfacesStack().add(wlSurfaceResource0);
-        this.compositor.getSurfacesStack().add(wlSurfaceResource1);
-        this.compositor.getSurfacesStack().add(wlSurfaceResource2);
+        this.compositor.getSurfacesStack()
+                       .add(wlSurfaceResource0);
+        this.compositor.getSurfacesStack()
+                       .add(wlSurfaceResource1);
+        this.compositor.getSurfacesStack()
+                       .add(wlSurfaceResource2);
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when

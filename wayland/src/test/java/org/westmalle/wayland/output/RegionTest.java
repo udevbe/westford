@@ -5,11 +5,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.List;
-
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.Rectangle;
 import javax.media.nativewindow.util.RectangleImmutable;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 

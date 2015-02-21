@@ -43,13 +43,13 @@ public class ShmRenderer {
         try {
             this.shmRenderEngine.draw(surfaceResource,
                                       shmBuffer)
-                    .get();
+                                .get();
         }
         catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         implementation.getSurface()
-                .firePaintCallbacks((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
+                      .firePaintCallbacks((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
     }
 
     public void beginRender() throws ExecutionException, InterruptedException {
