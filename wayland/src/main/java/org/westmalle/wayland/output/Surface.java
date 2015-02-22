@@ -16,7 +16,10 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.protocol.WlCompositor;
 
 import javax.annotation.Nonnull;
