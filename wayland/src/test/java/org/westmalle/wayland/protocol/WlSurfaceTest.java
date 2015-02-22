@@ -362,7 +362,7 @@ public class WlSurfaceTest {
         wlSurface.commit(wlSurfaceResource);
         //then
         verify(this.surface,
-               times(1)).commit(wlSurfaceResource);
+               times(1)).commit();
         final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlBufferResource,
                times(1)).addDestroyListener(listenerArgumentCaptor.capture());
@@ -381,6 +381,6 @@ public class WlSurfaceTest {
         wlSurface.commit(wlSurfaceResource);
         //then
         verify(this.surface,
-               times(1)).commit(wlSurfaceResource);
+               times(1)).commit();
     }
 }
