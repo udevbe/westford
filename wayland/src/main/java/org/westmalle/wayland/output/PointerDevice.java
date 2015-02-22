@@ -150,7 +150,7 @@ public class PointerDevice {
         final Surface surface = wlSurface.getSurface();
         surface.setPosition(new Point(motion.getX() - pointerSurfaceDelta.getX(),
                                       motion.getY() - pointerSurfaceDelta.getY()));
-        this.compositor.requestRender(surfaceResource);
+        this.compositor.requestRender();
     }
 
     private void doButton(final Set<WlPointerResource> pointerResources,

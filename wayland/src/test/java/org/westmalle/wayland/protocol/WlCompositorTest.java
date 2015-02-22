@@ -145,7 +145,7 @@ public class WlCompositorTest {
         //then
         assertThat((Iterable) surfacesStack).doesNotContain(wlSurfaceResource);
         verify(this.compositor,
-               times(1)).requestRender(wlSurfaceResource);
+               times(1)).requestRender();
     }
 
     @Test

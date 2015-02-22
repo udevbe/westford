@@ -1,13 +1,19 @@
 package org.westmalle.wayland.output;
 
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlRegionResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.protocol.WlCompositor;
 
+import javax.media.nativewindow.util.Point;
+import javax.media.nativewindow.util.PointImmutable;
 import javax.media.nativewindow.util.Rectangle;
 import javax.media.nativewindow.util.RectangleImmutable;
 
@@ -56,36 +62,190 @@ public class SurfaceTest {
 
     @Test
     public void testRemoveTransform() throws Exception {
+        //given
+        final float[] transform = new float[1];
+        this.surface.setTransform(transform);
+        //when
+        this.surface.removeTransform();
+        //then
+        assertThat(this.surface.getTransform()).isEqualTo(new float[]{1,
+                                                                      0,
+                                                                      0,
+                                                                      0,
+                                                                      1,
+                                                                      0,
+                                                                      0,
+                                                                      0,
+                                                                      1},
+                                                          0.1f);
 
     }
 
     @Test
-    public void testDetachBuffer() throws Exception {
+    public void testAttachCommit() throws Exception {
+        //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
 
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
+        final WlBufferResource buffer = mock(WlBufferResource.class);
+        final Integer relX = -10;
+        final Integer relY = 200;
+        //when
+        this.surface.attachBuffer(buffer,
+                                  relX,
+                                  relY);
+        this.surface.commit();
+        //then
+        assertThat(this.surface.getBuffer()
+                               .isPresent()).isTrue();
+        verify(compositor,
+               times(1)).requestRender();
     }
 
     @Test
-    public void testCommit() throws Exception {
+    public void testAttachCommitAttachCommit() throws Exception {
+        //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
 
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
+        final WlBufferResource buffer = mock(WlBufferResource.class);
+        final Integer relX = -10;
+        final Integer relY = 200;
+        //when
+        this.surface.attachBuffer(buffer,
+                                  relX,
+                                  relY);
+        this.surface.commit();
+        this.surface.attachBuffer(buffer,
+                                  relX,
+                                  relY);
+        this.surface.commit();
+        //then
+        verify(buffer,
+               times(1)).release();
+    }
+
+    @Test
+    public void testAttachAttachCommit() throws Exception {
+        //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
+
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
+        final WlBufferResource buffer0 = mock(WlBufferResource.class);
+        final Integer relX0 = -10;
+        final Integer relY0 = 200;
+
+        final WlBufferResource buffer1 = mock(WlBufferResource.class);
+        final Integer relX1 = -10;
+        final Integer relY1 = 200;
+        //when
+        this.surface.attachBuffer(buffer0,
+                                  relX0,
+                                  relY0);
+        this.surface.attachBuffer(buffer1,
+                                  relX1,
+                                  relY1);
+        this.surface.commit();
+        //then
+        //then
+        assertThat(this.surface.getBuffer()
+                               .get()).isSameAs(buffer1);
+    }
+
+    @Test
+    public void testAttachDetachCommit() throws Exception {
+        //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
+
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
+        final WlBufferResource buffer = mock(WlBufferResource.class);
+        final Integer relX = -10;
+        final Integer relY = 200;
+        //when
+        this.surface.attachBuffer(buffer,
+                                  relX,
+                                  relY);
+        this.surface.detachBuffer();
+        this.surface.commit();
+        //then
+        assertThat(this.surface.getBuffer()
+                               .isPresent()).isFalse();
+        verify(compositor,
+               times(1)).requestRender();
     }
 
     @Test
     public void testRemoveOpaqueRegion() throws Exception {
-
+        //given
+        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        this.surface.setOpaqueRegion(wlRegionResource);
+        //when
+        this.surface.removeOpaqueRegion();
+        //then
+        assertThat(this.surface.getOpaqueRegion()
+                               .isPresent()).isFalse();
     }
 
     @Test
     public void testRemoveInputRegion() throws Exception {
-
+        //given
+        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        this.surface.setInputRegion(wlRegionResource);
+        //when
+        this.surface.removeInputRegion();
+        //then
+        assertThat(this.surface.getInputRegion()
+                               .isPresent()).isFalse();
     }
 
     @Test
     public void testFirePaintCallbacks() throws Exception {
+        //given
+        final int serial = 548674;
 
+        final WlCallbackResource wlCallbackResource0 = mock(WlCallbackResource.class);
+        final WlCallbackResource wlCallbackResource1 = mock(WlCallbackResource.class);
+        final WlCallbackResource wlCallbackResource2 = mock(WlCallbackResource.class);
+
+        this.surface.addCallback(wlCallbackResource0);
+        this.surface.addCallback(wlCallbackResource1);
+        this.surface.addCallback(wlCallbackResource2);
+        //when
+        this.surface.firePaintCallbacks(serial);
+        //then
+        verify(wlCallbackResource0,
+               times(1)).done(serial);
+        verify(wlCallbackResource1,
+               times(1)).done(serial);
+        verify(wlCallbackResource2,
+               times(1)).done(serial);
+        assertThat(this.surface.getFrameCallbacks()).isEmpty();
     }
 
     @Test
     public void testRelativeCoordinate() throws Exception {
-
+        //given
+        final PointImmutable absoluteCoordinate = new Point(150,
+                                                            150);
+        final PointImmutable surfaceCoordinate = new Point(100,
+                                                           100);
+        this.surface.setPosition(surfaceCoordinate);
+        //when
+        final PointImmutable relativeCoordinate = this.surface.relativeCoordinate(absoluteCoordinate);
+        //then
+        assertThat(relativeCoordinate).isEqualTo(new Point(50,
+                                                           50));
     }
 }

@@ -78,7 +78,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                 WlCompositor.this.compositor.getSurfacesStack()
                                             .remove(surfaceResource);
                 surface.markDestroyed();
-                WlCompositor.this.compositor.requestRender(surfaceResource);
+                WlCompositor.this.compositor.requestRender();
             }
         });
 

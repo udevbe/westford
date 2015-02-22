@@ -40,10 +40,10 @@ public class Compositor {
         this.shmRenderer = shmRenderer;
     }
 
-    public void requestRender(final WlSurfaceResource surfaceResource) {
+    public void requestRender() {
         if (this.renderScheduled.compareAndSet(false,
                                                true)) {
-            if (needsRender(surfaceResource)) {
+            if (needsRender()) {
                 renderScene();
             }
         }
@@ -70,7 +70,7 @@ public class Compositor {
 
     public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.surfacesStack; }
 
-    private boolean needsRender(final WlSurfaceResource surfaceResource) {
+    private boolean needsRender() {
 //        final WlSurfaceRequests implementation = surfaceResource.getImplementation();
 //        final Surface Surface = ((WlSurface) implementation).getSurface();
 //        if (Surface.isDestroyed()) {

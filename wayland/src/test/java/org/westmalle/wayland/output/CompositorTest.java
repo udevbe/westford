@@ -52,7 +52,7 @@ public class CompositorTest {
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when
-        this.compositor.requestRender(surfaceResource);
+        this.compositor.requestRender();
         //then
         InOrder inOrder = inOrder(this.shmRenderer,
                                   this.display);
@@ -103,14 +103,14 @@ public class CompositorTest {
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when
-        this.compositor.requestRender(surfaceResource);
-        this.compositor.requestRender(surfaceResource);
+        this.compositor.requestRender();
+        this.compositor.requestRender();
         //then
         assertThat((Iterable<EventLoop.IdleHandler>) idleHandlers).hasSize(1);
         //and when
         idleHandlers.get(0)
                     .handle();
-        this.compositor.requestRender(surfaceResource);
+        this.compositor.requestRender();
         //then
         assertThat((Iterable<EventLoop.IdleHandler>) idleHandlers).hasSize(2);
     }

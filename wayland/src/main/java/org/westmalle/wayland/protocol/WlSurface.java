@@ -165,7 +165,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     public void commit(final WlSurfaceResource requester) {
         this.pendingBuffer = Optional.empty();
         this.destroyListener.ifPresent(Listener::remove);
-        getSurface().commit(requester);
+        getSurface().commit();
     }
 
     private void detachBuffer() {

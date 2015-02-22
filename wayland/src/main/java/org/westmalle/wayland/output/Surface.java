@@ -174,7 +174,7 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface commit(final WlSurfaceResource wlSurfaceResource) {
+    public Surface commit() {
         //flush
         this.transform = this.pendingTransform;
         if (this.buffer.isPresent()) {
@@ -192,7 +192,7 @@ public class Surface {
         detachBuffer();
         WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
-                    .requestRender(wlSurfaceResource);
+                    .requestRender();
         return this;
     }
 
