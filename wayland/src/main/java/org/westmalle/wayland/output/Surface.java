@@ -76,7 +76,7 @@ public class Surface {
     private       Boolean                    destroyed    = Boolean.FALSE;
 
     Surface(@Provided final RegionFactory regionFactory,
-            @Nonnull WlCompositorResource wlCompositorResource) {
+            @Nonnull final WlCompositorResource wlCompositorResource) {
         this.regionFactory = regionFactory;
         this.wlCompositorResource = wlCompositorResource;
     }
