@@ -17,9 +17,12 @@ import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
+import org.westmalle.wayland.output.Surface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.media.nativewindow.util.Point;
+
 import java.util.Set;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
@@ -44,11 +47,18 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     public void move(final WlShellSurfaceResource requester,
                      @Nonnull final WlSeatResource seat,
                      final int serial) {
+        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+        final Surface surface = wlSurface.getSurface();
+
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
               .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                               .move(this.wlSurfaceResource,
-                                                     serial));
+                                               .grabMotion(this.wlSurfaceResource,
+                                                           serial,
+                                                           (pointerDevice,
+                                                            firstRelativePosition,
+                                                            motion) -> surface.setPosition(new Point(motion.getX() - firstRelativePosition.getX(),
+                                                                                                     motion.getY() - firstRelativePosition.getY()))));
     }
 
     @Override
@@ -56,11 +66,20 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                        @Nonnull final WlSeatResource seat,
                        final int serial,
                        final int edges) {
-        //TODO
-//        this.pointer.resize(this.wlSurface.getResource()
-//                                          .get(),
-//                            serial,
-//                            edges);
+        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+        final Surface surface = wlSurface.getSurface();
+
+        final WlSeat wlSeat = (WlSeat) seat.getImplementation();
+        wlSeat.getOptionalWlPointer()
+                .ifPresent(wlPointer -> wlPointer.getPointerDevice()
+                        .grabMotion(this.wlSurfaceResource,
+                                    serial,
+                                    (pointerDevice,
+                                     firstRelativePosition,
+                                     motion) -> {
+                                        //TODO calculate size & width.
+                                        requester.configure(0,123,456);
+                                    }));
     }
 
     @Override
@@ -129,5 +148,10 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                                           version,
                                           id,
                                           this);
+    }
+
+    @Nonnull
+    public WlSurfaceResource getWlSurfaceResource() {
+        return this.wlSurfaceResource;
     }
 }

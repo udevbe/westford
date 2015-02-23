@@ -59,9 +59,11 @@ public class WlShellSurfaceTest {
                             wlSeatResource,
                             serial);
         //then
+        //FIXME capture pointergrab motion and activate it & verify it.
         verify(pointerDevice,
-               times(1)).move(wlSurfaceResource,
-                              serial);
+               times(1)).grabMotion(eq(wlSurfaceResource),
+                                    eq(serial),
+                                    any());
     }
 
     @Test
