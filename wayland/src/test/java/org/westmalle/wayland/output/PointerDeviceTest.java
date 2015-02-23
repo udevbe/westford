@@ -866,4 +866,15 @@ public class PointerDeviceTest {
         //then
         assertThat(this.pointerDevice.isButtonPressed(button0)).isTrue();
     }
+
+    @Test
+    public void testMove() throws Exception {
+        //given
+
+    }
+
+    @Test
+    public void testResize() throws Exception {
+        //TODO
+    }
 }

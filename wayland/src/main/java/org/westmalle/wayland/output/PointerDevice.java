@@ -99,8 +99,9 @@ public class PointerDevice {
         this.inputBus.unregister(listener);
     }
 
-    public void move(final WlSurfaceResource surfaceResource,
-                     final int serial) {
+    public void grabMotion(final WlSurfaceResource surfaceResource,
+                           final int serial,
+                           final PointerGrabMotion pointerGrabMotion) {
         final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
         //keep reference to surface position position, relative to the pointer position
         final PointImmutable pointerStartPosition = getPosition();
@@ -112,13 +113,13 @@ public class PointerDevice {
         final Listener motionListener = new Listener() {
             @Subscribe
             public void handle(final Motion motion) {
-                if (PointerDevice.this.grab.get()
-                                           .equals(surfaceResource)
+                if (getGrab().get()
+                            .equals(surfaceResource)
                     && getPointerSerial() == serial) {
-                    //there is pointer motion, move surface
-                    move(surfaceResource,
-                         pointerSurfaceDelta,
-                         motion);
+                    //there is pointer motion
+                    pointerGrabMotion.motion(PointerDevice.this,
+                                             pointerSurfaceDelta,
+                                             motion);
                 }
                 else {
                     //another surface has the grab, stop listening for pointer motion.
@@ -136,21 +137,10 @@ public class PointerDevice {
                 PointerDevice.this.unregister(this);
             }
         };
-
         //listen for pointer motion
         register(motionListener);
         //listen for surface destruction
         surfaceResource.addDestroyListener(motionListener);
-    }
-
-    private void move(final WlSurfaceResource surfaceResource,
-                      final PointImmutable pointerSurfaceDelta,
-                      final Motion motion) {
-        final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
-        final Surface surface = wlSurface.getSurface();
-        surface.setPosition(new Point(motion.getX() - pointerSurfaceDelta.getX(),
-                                      motion.getY() - pointerSurfaceDelta.getY()));
-        this.compositor.requestRender();
     }
 
     private void doButton(final Set<WlPointerResource> pointerResources,
@@ -166,7 +156,7 @@ public class PointerDevice {
             this.buttonsPressed--;
         }
 
-        if (this.grab.isPresent()) {
+        if (getGrab().isPresent()) {
             //always report all buttons if we have a grabbed surface.
             reportButton(pointerResources,
                          time,
@@ -177,7 +167,7 @@ public class PointerDevice {
         if (this.buttonsPressed == 0) {
             this.grab = Optional.empty();
         }
-        else if (!this.grab.isPresent() && this.focus.isPresent()) {
+        else if (!getGrab().isPresent() && this.focus.isPresent()) {
             //no grab, but we do have a focus and a pressed button. Focused surface becomes grab.
             this.grab = this.focus;
             reportButton(pointerResources,
@@ -187,11 +177,15 @@ public class PointerDevice {
         }
     }
 
+    public Optional<WlSurfaceResource> getGrab() {
+        return this.grab;
+    }
+
     private void reportButton(final Set<WlPointerResource> pointerResources,
                               final int time,
                               final int button,
                               final WlPointerButtonState buttonState) {
-        final WlSurfaceResource wlSurfaceResource = this.grab.get();
+        final WlSurfaceResource wlSurfaceResource = getGrab().get();
         final Optional<WlPointerResource> pointerResource = findPointerResource(pointerResources,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
@@ -245,20 +239,20 @@ public class PointerDevice {
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
 
-        if (this.grab.isPresent()) {
+        if (getGrab().isPresent()) {
             if (!oldFocus.equals(newFocus)) {
-                if (oldFocus.equals(this.grab)) {
+                if (oldFocus.equals(getGrab())) {
                     reportLeave(pointerResources,
-                                this.grab.get());
+                                getGrab().get());
                 }
-                else if (newFocus.equals(this.grab)) {
+                else if (newFocus.equals(getGrab())) {
                     reportEnter(pointerResources,
-                                this.grab.get());
+                                getGrab().get());
                 }
             }
             reportMotion(pointerResources,
                          time,
-                         this.grab.get());
+                         getGrab().get());
         }
         else {
             if (!oldFocus.equals(newFocus)) {
@@ -304,7 +298,6 @@ public class PointerDevice {
             WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final PointImmutable relativePoint = wlSurface.getSurface()
                                                           .relativeCoordinate(getPosition());
-
             pointerResource.get()
                            .enter(nextPointerSerial(),
                                   wlSurfaceResource,
