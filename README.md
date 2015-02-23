@@ -30,8 +30,18 @@ Dependencies
 State
 =====
 [![Build Status](https://travis-ci.org/Zubnix/westmalle.svg?branch=master)](https://travis-ci.org/Zubnix/westmalle)
- - X OpenGL rendering back-end works.
- - Moving clients works.
+
+| Functionality               | Implemented        |
+| :-------------------------: | :----------------: |
+| OpenGL on X                 | :heavy_check_mark: |
+| OpenGL on KMS               | :x:                |
+| Software rendering on X     | :x:                |
+| Software rendering on KMS   | :x:                |
+| Window moving               | :heavy_check_mark: |
+| Window resizing             | :x:                |
+| Mouse input                 | :heavy_check_mark: |
+| Keyboard input              | :x:                |
+| Touch input                 | :x:                |
 
 Known Issues
 ============
