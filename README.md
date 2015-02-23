@@ -39,10 +39,15 @@ Known Issues
 
 TODO
 ====
- - Finish wl_shell implementation. - 30%
- - Start xdg_shell implementation. - 0%
- - Start XWayland support. - 0%
- - Unit tests. - 90%
+| Topic        | Progress   |
+| :----------: | :--------: |
+| unit tests   | 90%        |
+| wl_shell     | 30%        |
+| sw rendering | 0%         |
+| xdg_shell    | 0%         |
+| xwayland     | 0%         |
+| DRM/KMS      | 0%         |
+| multi seat   | 0%         |
 
 License
 =======
