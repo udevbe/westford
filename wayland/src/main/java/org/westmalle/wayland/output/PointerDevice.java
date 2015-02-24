@@ -99,16 +99,16 @@ public class PointerDevice {
         this.inputBus.unregister(listener);
     }
 
+    /**
+     * Listen for motion only when given surface is grabbed.
+     *
+     * @param surfaceResource Surface that is grabbed.
+     * @param serial Serial that triggered the grab.
+     * @param pointerGrabMotion Motion listener.
+     */
     public void grabMotion(final WlSurfaceResource surfaceResource,
                            final int serial,
                            final PointerGrabMotion pointerGrabMotion) {
-        final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
-        //keep reference to surface position position, relative to the pointer position
-        final PointImmutable pointerStartPosition = getPosition();
-        final PointImmutable surfaceStartPosition = wlSurface.getSurface()
-                                                             .getPosition();
-        final PointImmutable pointerSurfaceDelta = new Point(pointerStartPosition.getX() - surfaceStartPosition.getX(),
-                                                             pointerStartPosition.getY() - surfaceStartPosition.getY());
 
         final Listener motionListener = new Listener() {
             @Subscribe
@@ -118,7 +118,6 @@ public class PointerDevice {
                     && getPointerSerial() == serial) {
                     //there is pointer motion
                     pointerGrabMotion.motion(PointerDevice.this,
-                                             pointerSurfaceDelta,
                                              motion);
                 }
                 else {
@@ -207,25 +206,14 @@ public class PointerDevice {
 
             final Optional<WlRegionResource> inputRegion = surface.getInputRegion();
             if (inputRegion.isPresent()) {
-
-                final PointImmutable position = surface.getPosition();
-                final int surfaceX = position.getX();
-                final int surfaceY = position.getY();
-
-                final int positionX = getPosition().getX();
-                final int positionY = getPosition().getY();
-
                 WlRegion wlRegion = (WlRegion) inputRegion.get()
                                                           .getImplementation();
                 Region region = wlRegion.getRegion();
-                if (region.contains(new Point(positionX - surfaceX,
-                                              positionY - surfaceY))) {
-
+                if (region.contains(surface.local(getPosition()))) {
                     return Optional.of(surfaceResource);
                 }
             }
         }
-
         return Optional.empty();
     }
 
@@ -281,7 +269,7 @@ public class PointerDevice {
         if (pointerResource.isPresent()) {
             WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final PointImmutable relativePoint = wlSurface.getSurface()
-                                                          .relativeCoordinate(getPosition());
+                                                          .local(getPosition());
 
             pointerResource.get()
                            .motion(time,
@@ -297,7 +285,7 @@ public class PointerDevice {
         if (pointerResource.isPresent()) {
             WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final PointImmutable relativePoint = wlSurface.getSurface()
-                                                          .relativeCoordinate(getPosition());
+                                                          .local(getPosition());
             pointerResource.get()
                            .enter(nextPointerSerial(),
                                   wlSurfaceResource,

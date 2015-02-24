@@ -22,6 +22,7 @@ import org.westmalle.wayland.output.Surface;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
+import javax.media.nativewindow.util.PointImmutable;
 
 import java.util.Set;
 
@@ -31,7 +32,6 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     private final Set<WlShellSurfaceResource> resources = Sets.newHashSet();
     @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
-
 
     WlShellSurface(@Nonnull final WlSurfaceResource wlSurfaceResource) {
         this.wlSurfaceResource = wlSurfaceResource;
@@ -52,13 +52,25 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
-              .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                               .grabMotion(this.wlSurfaceResource,
-                                                           serial,
-                                                           (pointerDevice,
-                                                            firstRelativePosition,
-                                                            motion) -> surface.setPosition(new Point(motion.getX() - firstRelativePosition.getX(),
-                                                                                                     motion.getY() - firstRelativePosition.getY()))));
+              .ifPresent(wlPointer -> move(wlPointer,
+                                           serial,
+                                           surface));
+    }
+
+    private void move(final WlPointer wlPointer,
+                      final int grabSerial,
+                      final Surface surface){
+        final PointImmutable pointerPosition = wlPointer.getPointerDevice()
+                                                        .getPosition();
+        final PointImmutable surfacePosition = surface.getPosition();
+        final Point surfacePositionOffset = new Point(pointerPosition.getX() - surfacePosition.getX(),
+                                                      pointerPosition.getY() - surfacePosition.getY());
+        wlPointer.getPointerDevice()
+                 .grabMotion(this.wlSurfaceResource,
+                             grabSerial,
+                             (pointerDevice,
+                              motion) -> surface.setPosition(new Point(motion.getX() - surfacePositionOffset.getX(),
+                                                                       motion.getY() - surfacePositionOffset.getY())));
     }
 
     @Override
@@ -71,15 +83,20 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
-                .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                        .grabMotion(this.wlSurfaceResource,
-                                    serial,
-                                    (pointerDevice,
-                                     firstRelativePosition,
-                                     motion) -> {
-                                        //TODO calculate size & width.
-                                        requester.configure(0,123,456);
-                                    }));
+                .ifPresent(wlPointer -> {
+                    final PointImmutable globalGrabStart = wlPointer.getPointerDevice().getPosition();
+
+                    wlPointer.getPointerDevice()
+                            .grabMotion(this.wlSurfaceResource,
+                                        serial,
+                                        (pointerDevice,
+                                         motion) -> {
+                                            //TODO calculate size & width.
+                                            requester.configure(0,
+                                                                123,
+                                                                456);
+                                        });
+                });
     }
 
     @Override
