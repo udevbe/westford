@@ -104,7 +104,7 @@ public class PointerDeviceTest {
         final int relY0 = y0 - 10;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
@@ -114,7 +114,7 @@ public class PointerDeviceTest {
         final int relY1 = y1 - 400;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(surface1.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(surface1.local(pos1)).thenReturn(relPos1);
         when(region1.contains(relPos1)).thenReturn(true);
         when(surface1.getPosition()).thenReturn(surfacePos1);
 
@@ -122,7 +122,7 @@ public class PointerDeviceTest {
         final int relY3 = y0 - 400;
         final PointImmutable relPos3 = new Point(relX3,
                                                  relY3);
-        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos3);
+        when(surface0.local(pos1)).thenReturn(relPos3);
 
         final int serial = 90879;
         when(this.display.nextSerial()).thenReturn(serial);
@@ -262,7 +262,7 @@ public class PointerDeviceTest {
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
         final PointImmutable surfacePos0 = new Point(x0 - relX0,
@@ -273,7 +273,7 @@ public class PointerDeviceTest {
         final int relY1 = 100;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(surface1.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(surface1.local(pos1)).thenReturn(relPos1);
         when(region1.contains(relPos1)).thenReturn(true);
 
         final PointImmutable surfacePos1 = new Point(x1 - relX1,
@@ -396,7 +396,7 @@ public class PointerDeviceTest {
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
         final PointImmutable surfacePos0 = new Point(x0 - relX0,
@@ -407,7 +407,7 @@ public class PointerDeviceTest {
         final int relY1 = 100;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(surface0.local(pos1)).thenReturn(relPos1);
         when(region0.contains(relPos1)).thenReturn(false);
 
         final int serial0 = 90879;
@@ -508,7 +508,7 @@ public class PointerDeviceTest {
         final int relY0 = y0 - 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(false);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
@@ -516,7 +516,7 @@ public class PointerDeviceTest {
         final int relY1 = y1 - 100;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(surface0.local(pos1)).thenReturn(relPos1);
         when(region0.contains(relPos1)).thenReturn(true);
 
         final int serial0 = 90879;
@@ -615,7 +615,7 @@ public class PointerDeviceTest {
         final int relY0 = y0 - 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(false);
 
         when(surface0.getPosition()).thenReturn(surfacePos0);
@@ -624,7 +624,7 @@ public class PointerDeviceTest {
         final int relY1 = y1 - 100;
         final PointImmutable relPos1 = new Point(relX1,
                                                  relY1);
-        when(surface0.relativeCoordinate(pos1)).thenReturn(relPos1);
+        when(surface0.local(pos1)).thenReturn(relPos1);
         when(region0.contains(relPos1)).thenReturn(true);
 
         final int serial0 = 90879;
@@ -732,7 +732,7 @@ public class PointerDeviceTest {
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
         final PointImmutable surfacePos0 = new Point(x0 - relX0,
@@ -841,7 +841,7 @@ public class PointerDeviceTest {
         final int relY0 = 100;
         final PointImmutable relPos0 = new Point(relX0,
                                                  relY0);
-        when(surface0.relativeCoordinate(pos0)).thenReturn(relPos0);
+        when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
         final PointImmutable surfacePos0 = new Point(x0 - relX0,

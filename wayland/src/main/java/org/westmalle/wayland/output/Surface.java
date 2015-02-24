@@ -18,7 +18,9 @@ import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
 
 import com.hackoeur.jglm.Mat3;
+import com.hackoeur.jglm.Mat4;
 import com.hackoeur.jglm.Vec3;
+import com.hackoeur.jglm.Vec4;
 
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
@@ -52,7 +54,7 @@ public class Surface {
     @Nonnull
     private Optional<WlBufferResource> pendingBuffer       = Optional.empty();
     @Nonnull
-    private Mat3                       pendingTransform    = Mat3.MAT3_IDENTITY;
+    private Mat4 pendingTransform    = Mat4.MAT4_IDENTITY;
     @Nonnegative
     private int                        pendingScale        = 1;
     @Nonnull
@@ -70,7 +72,7 @@ public class Surface {
     @Nonnull
     private       Optional<WlBufferResource> buffer       = Optional.empty();
     @Nonnull
-    private       Mat3                       transform    = Mat3.MAT3_IDENTITY;
+    private       Mat4                       transform    = Mat4.MAT4_IDENTITY;
     @Nonnegative
     private       int                        scale        = 1;
     @Nonnull
@@ -96,7 +98,7 @@ public class Surface {
     }
 
     @Nonnull
-    public Mat3 getTransform() {
+    public Mat4 getTransform() {
         return this.transform;
     }
 
@@ -125,14 +127,14 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface setTransform(@Nonnull final Mat3 transform) {
+    public Surface setTransform(@Nonnull final Mat4 transform) {
         this.pendingTransform = transform;
         return this;
     }
 
     @Nonnull
     public Surface removeTransform() {
-        this.pendingTransform = Mat3.MAT3_IDENTITY;
+        this.pendingTransform = Mat4.MAT4_IDENTITY;
         return this;
     }
 
@@ -241,16 +243,8 @@ public class Surface {
     }
 
     public PointImmutable local(final PointImmutable global) {
-        final PointImmutable position = getPosition();
-
-        final Vec3 surfaceLocal = new Vec3(global.getX() - position.getX(),
-                                           global.getY() - position.getY(),
-                                           0);
-        final Vec3 surfaceTransformLocal = getTransform().multiply(surfaceLocal);
-        final Vec3 surfaceTransformScaledLocal = surfaceTransformLocal.scale(1f / getScale());
-
-        return new Point((int)surfaceTransformScaledLocal.getX(),
-                         (int)surfaceTransformScaledLocal.getY());
+        //FIXME implement this!
+        throw new UnsupportedOperationException();
     }
 
     public void setScale(final int scale) {
