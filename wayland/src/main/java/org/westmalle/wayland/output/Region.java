@@ -84,20 +84,10 @@ public class Region {
     }
 
     public boolean contains(final PointImmutable point) {
-        for (final RectangleImmutable rectangle : asList()) {
-            final int x1 = rectangle.getX();
-            final int y1 = rectangle.getY();
-
-            final int x2 = x1 + rectangle.getWidth();
-            final int y2 = y1 + rectangle.getHeight();
-
-            final int pointX = point.getX();
-            final int pointY = point.getY();
-            if (x1 <= pointX && pointX <= x2 && y1 <= pointY && pointY <= y2) {
-                return true;
-            }
-        }
-        return false;
+        return Pixman1Library.INSTANCE.pixman_region32_contains_point(getPixmanRegion32(),
+                                                                      point.getX(),
+                                                                      point.getY(),
+                                                                      null) != 0;
     }
 
     public pixman_region32 getPixmanRegion32() {
