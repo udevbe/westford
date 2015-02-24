@@ -17,6 +17,9 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
+
+import com.hackoeur.jglm.Mat3;
+
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.output.Surface;
@@ -53,15 +56,16 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
 
     @Override
     public void setBufferScale(final WlSurfaceResource resource,
-                               final int scale) {
-
+                               @Nonnegative final int scale) {
+        checkArgument(scale > 0);
+        this.surface.setScale(scale);
     }
 
     @Override
     public void setBufferTransform(final WlSurfaceResource resource,
                                    final int transform) {
         //TODO support buffer transform
-        this.surface.setTransform(getMatrix(transform));
+        this.surface.setTransform(new Mat3(getMatrix(transform)));
     }
 
     private float[] getMatrix(final int transform) {

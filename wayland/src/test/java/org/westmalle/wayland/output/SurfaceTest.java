@@ -1,5 +1,8 @@
 package org.westmalle.wayland.output;
 
+import com.hackoeur.jglm.Mat;
+import com.hackoeur.jglm.Mat3;
+
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
@@ -63,22 +66,11 @@ public class SurfaceTest {
     @Test
     public void testRemoveTransform() throws Exception {
         //given
-        final float[] transform = new float[1];
-        this.surface.setTransform(transform);
+        this.surface.setTransform(new Mat3());
         //when
         this.surface.removeTransform();
         //then
-        assertThat(this.surface.getTransform()).isEqualTo(new float[]{1,
-                                                                      0,
-                                                                      0,
-                                                                      0,
-                                                                      1,
-                                                                      0,
-                                                                      0,
-                                                                      0,
-                                                                      1},
-                                                          0.1f);
-
+        assertThat(this.surface.getTransform()).isEqualTo((new Mat3()));
     }
 
     @Test
@@ -243,7 +235,7 @@ public class SurfaceTest {
                                                            100);
         this.surface.setPosition(surfaceCoordinate);
         //when
-        final PointImmutable relativeCoordinate = this.surface.relativeCoordinate(absoluteCoordinate);
+        final PointImmutable relativeCoordinate = this.surface.local(absoluteCoordinate);
         //then
         assertThat(relativeCoordinate).isEqualTo(new Point(50,
                                                            50));

@@ -16,12 +16,17 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
+
+import com.hackoeur.jglm.Mat3;
+import com.hackoeur.jglm.Vec3;
+
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.protocol.WlCompositor;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
@@ -47,11 +52,9 @@ public class Surface {
     @Nonnull
     private Optional<WlBufferResource> pendingBuffer       = Optional.empty();
     @Nonnull
-    private float[]                    pendingTransform    = new float[]{
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1
-    };
+    private Mat3                       pendingTransform    = Mat3.MAT3_IDENTITY;
+    @Nonnegative
+    private int                        pendingScale        = 1;
     @Nonnull
     private Point                      pendingBufferOffset = new Point();
 
@@ -67,11 +70,9 @@ public class Surface {
     @Nonnull
     private       Optional<WlBufferResource> buffer       = Optional.empty();
     @Nonnull
-    private       float[]                    transform    = new float[]{
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1
-    };
+    private       Mat3                       transform    = Mat3.MAT3_IDENTITY;
+    @Nonnegative
+    private       int                        scale        = 1;
     @Nonnull
     private       Point                      position     = new Point();
     //additional server side states
@@ -95,7 +96,7 @@ public class Surface {
     }
 
     @Nonnull
-    public float[] getTransform() {
+    public Mat3 getTransform() {
         return this.transform;
     }
 
@@ -124,22 +125,14 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface setTransform(@Nonnull final float[] transform) {
+    public Surface setTransform(@Nonnull final Mat3 transform) {
         this.pendingTransform = transform;
         return this;
     }
 
     @Nonnull
     public Surface removeTransform() {
-        this.pendingTransform = new float[]{1,
-                                            0,
-                                            0,
-                                            0,
-                                            1,
-                                            0,
-                                            0,
-                                            0,
-                                            1};
+        this.pendingTransform = Mat3.MAT3_IDENTITY;
         return this;
     }
 
@@ -179,13 +172,14 @@ public class Surface {
     @Nonnull
     public Surface commit() {
         //flush
-        this.transform = this.pendingTransform;
         if (this.buffer.isPresent()) {
             //signal client that the previous buffer can be reused as we will now use the
             //newly attached buffer.
             final WlBufferResource wlBufferResource = this.buffer.get();
             wlBufferResource.release();
         }
+        this.transform = this.pendingTransform;
+        this.scale = this.pendingScale;
         this.buffer = this.pendingBuffer;
         this.position = this.position.translate(this.pendingBufferOffset);
         this.damage = this.pendingDamage;
@@ -246,12 +240,24 @@ public class Surface {
         return this;
     }
 
-    public PointImmutable relativeCoordinate(final PointImmutable absoluteCoordinate) {
+    public PointImmutable local(final PointImmutable global) {
         final PointImmutable position = getPosition();
-        final int offsetX = position.getX();
-        final int offsetY = position.getY();
 
-        return new Point(absoluteCoordinate.getX() - offsetX,
-                         absoluteCoordinate.getY() - offsetY);
+        final Vec3 surfaceLocal = new Vec3(global.getX() - position.getX(),
+                                           global.getY() - position.getY(),
+                                           0);
+        final Vec3 surfaceTransformLocal = getTransform().multiply(surfaceLocal);
+        final Vec3 surfaceTransformScaledLocal = surfaceTransformLocal.scale(1f / getScale());
+
+        return new Point((int)surfaceTransformScaledLocal.getX(),
+                         (int)surfaceTransformScaledLocal.getY());
+    }
+
+    public void setScale(final int scale) {
+        this.scale = scale;
+    }
+
+    public int getScale() {
+        return this.scale;
     }
 }
