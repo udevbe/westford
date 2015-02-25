@@ -19,8 +19,10 @@ import com.google.common.collect.Lists;
 
 import com.hackoeur.jglm.Mat3;
 import com.hackoeur.jglm.Mat4;
+import com.hackoeur.jglm.Matrices;
 import com.hackoeur.jglm.Vec3;
 import com.hackoeur.jglm.Vec4;
+import com.hackoeur.jglm.support.FastMath;
 
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
@@ -36,6 +38,8 @@ import javax.media.nativewindow.util.RectangleImmutable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
@@ -54,7 +58,7 @@ public class Surface {
     @Nonnull
     private Optional<WlBufferResource> pendingBuffer       = Optional.empty();
     @Nonnull
-    private Mat4 pendingTransform    = Mat4.MAT4_IDENTITY;
+    private Mat4 pendingTransform    = MAT4_IDENTITY;
     @Nonnegative
     private int                        pendingScale        = 1;
     @Nonnull
@@ -72,7 +76,7 @@ public class Surface {
     @Nonnull
     private       Optional<WlBufferResource> buffer       = Optional.empty();
     @Nonnull
-    private       Mat4                       transform    = Mat4.MAT4_IDENTITY;
+    private       Mat4                       transform    = MAT4_IDENTITY;
     @Nonnegative
     private       int                        scale        = 1;
     @Nonnull
@@ -134,7 +138,7 @@ public class Surface {
 
     @Nonnull
     public Surface removeTransform() {
-        this.pendingTransform = Mat4.MAT4_IDENTITY;
+        this.pendingTransform = MAT4_IDENTITY;
         return this;
     }
 
@@ -243,8 +247,22 @@ public class Surface {
     }
 
     public PointImmutable local(final PointImmutable global) {
-        //FIXME implement this!
-        throw new UnsupportedOperationException();
+        final PointImmutable position = getPosition();
+        final Vec4 untransformedLocalPoint = new Vec4(global.getX() - position.getX(),
+                                                      global.getY() - position.getY(),
+                                                      0.0f,
+                                                      1.0f);
+        final Vec4 localPoint;
+        final Mat4 transform = getTransform();
+        if(transform.equals(MAT4_IDENTITY)){
+            localPoint = untransformedLocalPoint;
+        }else {
+            //TODO for performance reasons, we should cache the inverse matrix
+            localPoint = Matrices.invert(transform).multiply(untransformedLocalPoint);
+        }
+
+        return new Point(FastMath.round(localPoint.getX()),
+                         FastMath.round(localPoint.getY()));
     }
 
     public void setScale(final int scale) {

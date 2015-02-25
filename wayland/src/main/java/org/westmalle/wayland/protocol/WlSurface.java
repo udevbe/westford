@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 
 import com.hackoeur.jglm.Mat3;
+import com.hackoeur.jglm.Mat4;
 
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
 
 @AutoFactory(className = "WlSurfaceFactory")
 public class WlSurface extends EventBus implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
@@ -64,19 +66,12 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     @Override
     public void setBufferTransform(final WlSurfaceResource resource,
                                    final int transform) {
-        //TODO support buffer transform
-        this.surface.setTransform(new Mat3(getMatrix(transform)));
+        this.surface.setTransform(getMatrix(transform));
     }
 
-    private float[] getMatrix(final int transform) {
-        if (transform == WlOutputTransform.FLIPPED_270.getValue()) {
-            return new float[]{
-                    1, 0, 0,
-                    0, 1, 0,
-                    0, 0, 1
-            };
-        }
-        throw new IllegalArgumentException("Invalid transform");
+    private Mat4 getMatrix(final int transform) {
+        //TODO get correct transformation matrix
+        return MAT4_IDENTITY;
     }
 
     @Nonnull
