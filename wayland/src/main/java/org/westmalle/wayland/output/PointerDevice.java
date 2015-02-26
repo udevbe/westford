@@ -207,9 +207,9 @@ public class PointerDevice {
             final Optional<WlRegionResource> inputRegion = surface.getState()
                                                                   .getInputRegion();
             if (inputRegion.isPresent()) {
-                WlRegion wlRegion = (WlRegion) inputRegion.get()
-                                                          .getImplementation();
-                Region region = wlRegion.getRegion();
+                final WlRegion wlRegion = (WlRegion) inputRegion.get()
+                                                                .getImplementation();
+                final Region region = wlRegion.getRegion();
                 if (region.contains(surface.local(getPosition()))) {
                     return Optional.of(surfaceResource);
                 }
@@ -268,7 +268,7 @@ public class PointerDevice {
         final Optional<WlPointerResource> pointerResource = findPointerResource(pointerResources,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
-            WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final PointImmutable relativePoint = wlSurface.getSurface()
                                                           .local(getPosition());
 
@@ -284,7 +284,7 @@ public class PointerDevice {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
-            WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final PointImmutable relativePoint = wlSurface.getSurface()
                                                           .local(getPosition());
             pointerResource.get()

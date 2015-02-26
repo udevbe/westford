@@ -44,10 +44,10 @@ public class GLRenderEngineTest {
     @Test
     public void testBegin() throws Exception {
         //given
-        List<Runnable> queue = new LinkedList<>();
+        final List<Runnable> queue = new LinkedList<>();
         when(this.renderThread.submit(isA(Runnable.class))).thenAnswer(invocation -> {
-            Object arg0 = invocation.getArguments()[0];
-            Runnable runnable = (Runnable) arg0;
+            final Object arg0 = invocation.getArguments()[0];
+            final Runnable runnable = (Runnable) arg0;
             queue.add(runnable);
             return null;
         });
@@ -55,10 +55,10 @@ public class GLRenderEngineTest {
         when(this.drawable.getSurfaceWidth()).thenReturn(345);
         when(this.drawable.getSurfaceHeight()).thenReturn(567);
 
-        GL gl = mock(GL.class);
+        final GL gl = mock(GL.class);
         when(this.drawable.getGL()).thenReturn(gl);
 
-        GL2ES2 gl2ES2 = mock(GL2ES2.class);
+        final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
         this.glRenderEngine.begin();
@@ -75,10 +75,10 @@ public class GLRenderEngineTest {
     @Test
     public void testDraw() throws Exception {
         //given
-        List<Runnable> queue = new LinkedList<>();
+        final List<Runnable> queue = new LinkedList<>();
         when(this.renderThread.submit(isA(Runnable.class))).thenAnswer(invocation -> {
-            Object arg0 = invocation.getArguments()[0];
-            Runnable runnable = (Runnable) arg0;
+            final Object arg0 = invocation.getArguments()[0];
+            final Runnable runnable = (Runnable) arg0;
             queue.add(runnable);
             return null;
         });
@@ -86,10 +86,10 @@ public class GLRenderEngineTest {
         when(this.drawable.getSurfaceWidth()).thenReturn(345);
         when(this.drawable.getSurfaceHeight()).thenReturn(567);
 
-        GL gl = mock(GL.class);
+        final GL gl = mock(GL.class);
         when(this.drawable.getGL()).thenReturn(gl);
 
-        GL2ES2 gl2ES2 = mock(GL2ES2.class);
+        final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
 
         doAnswer(invocation -> {
@@ -139,10 +139,10 @@ public class GLRenderEngineTest {
     @Test
     public void testEnd() throws Exception {
         //given
-        List<Runnable> queue = new LinkedList<>();
+        final List<Runnable> queue = new LinkedList<>();
         when(this.renderThread.submit(isA(Runnable.class))).thenAnswer(invocation -> {
-            Object arg0 = invocation.getArguments()[0];
-            Runnable runnable = (Runnable) arg0;
+            final Object arg0 = invocation.getArguments()[0];
+            final Runnable runnable = (Runnable) arg0;
             queue.add(runnable);
             return null;
         });
@@ -150,10 +150,10 @@ public class GLRenderEngineTest {
         when(this.drawable.getSurfaceWidth()).thenReturn(345);
         when(this.drawable.getSurfaceHeight()).thenReturn(567);
 
-        GL gl = mock(GL.class);
+        final GL gl = mock(GL.class);
         when(this.drawable.getGL()).thenReturn(gl);
 
-        GL2ES2 gl2ES2 = mock(GL2ES2.class);
+        final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
         this.glRenderEngine.end();
@@ -164,7 +164,7 @@ public class GLRenderEngineTest {
         queue.get(0)
              .run();
         //then
-        verify(drawable,
+        verify(this.drawable,
                times(1)).swapBuffers();
     }
 }

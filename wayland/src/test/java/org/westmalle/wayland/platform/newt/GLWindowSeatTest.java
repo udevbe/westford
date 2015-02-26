@@ -46,7 +46,7 @@ public class GLWindowSeatTest {
             final Runnable runnable = (Runnable) arg0;
             runnable.run();
             return null;
-        }).when(jobExecutor)
+        }).when(this.jobExecutor)
           .submit(any());
     }
 
@@ -72,7 +72,7 @@ public class GLWindowSeatTest {
 
         this.wlSeat.setWlPointer(wlPointer);
         //when
-        glWindowSeat.mousePressed(mouseEvent);
+        this.glWindowSeat.mousePressed(mouseEvent);
         //then
         verify(pointerDevice,
                times(1)).button(wlPointerResources,
@@ -103,7 +103,7 @@ public class GLWindowSeatTest {
 
         this.wlSeat.setWlPointer(wlPointer);
         //when
-        glWindowSeat.mouseReleased(mouseEvent);
+        this.glWindowSeat.mouseReleased(mouseEvent);
         //then
         verify(pointerDevice,
                times(1)).button(wlPointerResources,
@@ -136,7 +136,7 @@ public class GLWindowSeatTest {
 
         this.wlSeat.setWlPointer(wlPointer);
         //when
-        glWindowSeat.mouseMoved(mouseEvent);
+        this.glWindowSeat.mouseMoved(mouseEvent);
         //then
         verify(pointerDevice,
                times(1)).motion(wlPointerResources,

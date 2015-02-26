@@ -20,10 +20,7 @@ import org.westmalle.wayland.output.OutputModule;
 
 import javax.inject.Singleton;
 
-@Module(
-        includes = {
-                OutputModule.class
-        },
+@Module(includes = OutputModule.class,
         injects = {
                 WlSeatFactory.class,
                 WlKeyboardFactory.class,
@@ -34,12 +31,10 @@ import javax.inject.Singleton;
                 WlSurfaceFactory.class,
                 WlRegionFactory.class,
                 WlShellSurfaceFactory.class,
-                org.westmalle.wayland.protocol.WlSubSurfaceFactory.class
+                WlSubSurfaceFactory.class
         },
         library = true,
-        //depends on wlmodule that needs a render engine
-        complete = false
-)
+        complete = false)
 public class ProtocolModule {
 
     @Provides

@@ -17,10 +17,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes have static methods, so we have to powermock them:
-                        WaylandServerLibrary.class
-                })
+@PrepareForTest(WaylandServerLibrary.class)
 public class WlKeyboardTest {
 
     @Mock
@@ -38,8 +35,8 @@ public class WlKeyboardTest {
     @Test
     public void testRelease() throws Exception {
         //given
-        WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
-        WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
+        final WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
+        final WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
         //when
         wlKeyboard.release(wlKeyboardResource);
         //then
@@ -53,7 +50,7 @@ public class WlKeyboardTest {
         final Client client = mock(Client.class);
         final int version = 4;
         final int id = 4;
-        WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
+        final WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
         //when
         final WlKeyboardResource wlKeyboardResource = wlKeyboard.create(client,
                                                                         version,

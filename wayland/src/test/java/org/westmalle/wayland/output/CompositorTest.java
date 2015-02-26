@@ -50,12 +50,11 @@ public class CompositorTest {
         this.compositor.getSurfacesStack()
                        .add(wlSurfaceResource2);
 
-        final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when
         this.compositor.requestRender();
         //then
-        InOrder inOrder = inOrder(this.shmRenderer,
-                                  this.display);
+        final InOrder inOrder = inOrder(this.shmRenderer,
+                                        this.display);
         inOrder.verify(this.shmRenderer,
                        times(1))
                .beginRender();
@@ -101,7 +100,6 @@ public class CompositorTest {
         this.compositor.getSurfacesStack()
                        .add(wlSurfaceResource2);
 
-        final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         //when
         this.compositor.requestRender();
         this.compositor.requestRender();

@@ -17,10 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes have static methods, so we have to powermock them:
-                        WaylandServerLibrary.class
-                })
+@PrepareForTest(WaylandServerLibrary.class)
 public class WlCallbackTest {
 
     @Mock
@@ -38,7 +35,7 @@ public class WlCallbackTest {
         final Client client = mock(Client.class);
         final int version = 2;
         final int id = 3;
-        WlCallback wlCallback = new WlCallback();
+        final WlCallback wlCallback = new WlCallback();
         //when
         final WlCallbackResource wlCallbackResource = wlCallback.create(client,
                                                                         version,

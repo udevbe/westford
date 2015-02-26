@@ -26,10 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes have static methods, so we have to powermock them:
-                        WaylandServerLibrary.class
-                })
+@PrepareForTest(WaylandServerLibrary.class)
 public class WlShellSurfaceTest {
 
     @Mock
@@ -75,7 +72,7 @@ public class WlShellSurfaceTest {
                             wlSeatResource,
                             serial);
         //then
-        ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
+        final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice,
                times(1)).grabMotion(eq(wlSurfaceResource),
                                     eq(serial),

@@ -18,18 +18,14 @@ import org.westmalle.wayland.output.gl.OutputGLModule;
 import org.westmalle.wayland.platform.newt.PlatformNewtModule;
 import org.westmalle.wayland.protocol.ProtocolModule;
 
-@Module(
-        injects = {
-                EntryPoint.class
-        },
+@Module(injects = EntryPoint.class,
         includes = {
                 OutputGLModule.class,
                 ProtocolModule.class,
                 PlatformNewtModule.class,
         },
         complete = true,
-        library = false
-)
+        library = false)
 public class BootStrapModule {
 
 }

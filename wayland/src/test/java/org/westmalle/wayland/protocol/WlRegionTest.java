@@ -20,10 +20,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes have static methods, so we have to powermock them:
-                        WaylandServerLibrary.class
-                })
+@PrepareForTest(WaylandServerLibrary.class)
 public class WlRegionTest {
 
     @Mock

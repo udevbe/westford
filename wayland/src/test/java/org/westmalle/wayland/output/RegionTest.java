@@ -22,19 +22,19 @@ public class RegionTest {
     @Test
     public void testAdd() throws Exception {
         //given
-        RectangleImmutable rect0 = new Rectangle(0,
-                                                 0,
-                                                 100,
-                                                 100);
-        RectangleImmutable rect1 = new Rectangle(50,
-                                                 50,
-                                                 100,
-                                                 100);
-        region.add(rect0);
+        final RectangleImmutable rect0 = new Rectangle(0,
+                                                       0,
+                                                       100,
+                                                       100);
+        final RectangleImmutable rect1 = new Rectangle(50,
+                                                       50,
+                                                       100,
+                                                       100);
+        this.region.add(rect0);
         //when
-        region.add(rect1);
+        this.region.add(rect1);
         //then
-        final List<RectangleImmutable> rectangleImmutables = region.asList();
+        final List<RectangleImmutable> rectangleImmutables = this.region.asList();
         assertThat(rectangleImmutables).hasSize(3);
         assertThat(rectangleImmutables.get(0)).isEqualTo(new Rectangle(0,
                                                                        0,
@@ -53,19 +53,19 @@ public class RegionTest {
     @Test
     public void testSubtract() throws Exception {
         //given
-        RectangleImmutable rect0 = new Rectangle(0,
-                                                 0,
-                                                 100,
-                                                 100);
-        RectangleImmutable rect1 = new Rectangle(50,
-                                                 50,
-                                                 100,
-                                                 100);
-        region.add(rect0);
+        final RectangleImmutable rect0 = new Rectangle(0,
+                                                       0,
+                                                       100,
+                                                       100);
+        final RectangleImmutable rect1 = new Rectangle(50,
+                                                       50,
+                                                       100,
+                                                       100);
+        this.region.add(rect0);
         //when
-        region.subtract(rect1);
+        this.region.subtract(rect1);
         //then
-        final List<RectangleImmutable> rectangleImmutables = region.asList();
+        final List<RectangleImmutable> rectangleImmutables = this.region.asList();
         assertThat(rectangleImmutables).hasSize(2);
         assertThat(rectangleImmutables.get(0)).isEqualTo(new Rectangle(0,
                                                                        0,
@@ -80,16 +80,16 @@ public class RegionTest {
     @Test
     public void testContains() throws Exception {
         //given
-        RectangleImmutable rect0 = new Rectangle(50,
-                                                 50,
-                                                 100,
-                                                 100);
-        region.add(rect0);
+        final RectangleImmutable rect0 = new Rectangle(50,
+                                                       50,
+                                                       100,
+                                                       100);
+        this.region.add(rect0);
         //when
-        final boolean contains = region.contains(new Point(50,
-                                                           50));
-        final boolean notContains = region.contains(new Point(151,
-                                                              151));
+        final boolean contains = this.region.contains(new Point(50,
+                                                                50));
+        final boolean notContains = this.region.contains(new Point(151,
+                                                                   151));
         //then
         assertThat(contains).isTrue();
         assertThat(notContains).isFalse();

@@ -22,10 +22,7 @@ import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes are final, so we have to powermock them:
-                        RegionFactory.class
-                })
+@PrepareForTest(RegionFactory.class)
 public class SurfaceTest {
 
     @Mock

@@ -20,10 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes have static methods, so we have to powermock them:
-                        WaylandServerLibrary.class
-                })
+@PrepareForTest(WaylandServerLibrary.class)
 public class ProtocolObjectTest {
 
     @Mock
@@ -40,7 +37,7 @@ public class ProtocolObjectTest {
         //given
         final Client client = mock(Client.class);
         //when
-        ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         final Resource<?> resource = protocolObject.add(client,
                                                         1,
                                                         1);
@@ -53,7 +50,7 @@ public class ProtocolObjectTest {
         //given
         //when
         //then
-        ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         assertThat(protocolObject.getResource()).isEqualTo(Optional.empty());
     }
 
@@ -61,7 +58,7 @@ public class ProtocolObjectTest {
     public void testGetResourceMultipleResourceResource() throws Exception {
         //given
         final Client client = mock(Client.class);
-        ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         protocolObject.add(client,
                            1,
                            1);
@@ -76,7 +73,7 @@ public class ProtocolObjectTest {
     @Test
     public void testAddNone() throws Exception {
         //given
-        ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         //then
         assertThat((Iterable) protocolObject.getResources()).isEmpty();
@@ -86,7 +83,7 @@ public class ProtocolObjectTest {
     public void testAddSingle() throws Exception {
         //given
         final Client client = mock(Client.class);
-        ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         final Resource<?> resource = protocolObject.add(client,
                                                         1,
@@ -100,7 +97,7 @@ public class ProtocolObjectTest {
     public void testAddMultiple() throws Exception {
         //given
         final Client client = mock(Client.class);
-        ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         final Resource<?> resource0 = protocolObject.add(client,
                                                          1,
@@ -122,13 +119,13 @@ public class ProtocolObjectTest {
     public void testResourceDestroyed() {
         //given
         final Client client = mock(Client.class);
-        ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         final Resource<?> resource = protocolObject.add(client,
                                                         1,
                                                         1);
         //then
-        ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
+        final ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(resource,
                times(1)).addDestroyListener(destroyListenerCaptor.capture());
         //and when

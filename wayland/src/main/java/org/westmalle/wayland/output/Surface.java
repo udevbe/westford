@@ -179,7 +179,7 @@ public class Surface {
 
         //reset
         detachBuffer();
-        WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
+        final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
         return this;
@@ -280,7 +280,7 @@ public class Surface {
     public Surface setPosition(@Nonnull final PointImmutable position) {
         this.position = new Point(position.getX(),
                                   position.getY());
-        WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
+        final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
         return this;

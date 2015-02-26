@@ -23,9 +23,7 @@ import org.westmalle.wayland.protocol.ProtocolModule;
         },
         library = true,
         complete = true,
-        includes = {
-                ProtocolModule.class,
-        })
+        includes = ProtocolModule.class)
 public class PlatformNewtModule {
 
 }

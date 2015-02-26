@@ -21,10 +21,7 @@ import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes have static methods, so we have to powermock them:
-                        ShmBuffer.class
-                })
+@PrepareForTest(ShmBuffer.class)
 public class ShmRendererTest {
 
     @Mock
@@ -57,7 +54,7 @@ public class ShmRendererTest {
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
 
-        ListenableFuture listenableFuture = mock(ListenableFuture.class);
+        final ListenableFuture listenableFuture = mock(ListenableFuture.class);
         when(this.shmRenderEngine.draw(any(),
                                        any())).thenReturn(listenableFuture);
         //when
@@ -71,7 +68,7 @@ public class ShmRendererTest {
     @Test
     public void testBeginRender() throws Exception {
         //given
-        ListenableFuture listenableFuture = mock(ListenableFuture.class);
+        final ListenableFuture listenableFuture = mock(ListenableFuture.class);
         when(this.shmRenderEngine.begin()).thenReturn(listenableFuture);
         //when
         this.shmRenderer.beginRender();
@@ -83,7 +80,7 @@ public class ShmRendererTest {
     @Test
     public void testEndRender() throws Exception {
         //given
-        ListenableFuture listenableFuture = mock(ListenableFuture.class);
+        final ListenableFuture listenableFuture = mock(ListenableFuture.class);
         when(this.shmRenderEngine.end()).thenReturn(listenableFuture);
         //when
         this.shmRenderer.endRender();

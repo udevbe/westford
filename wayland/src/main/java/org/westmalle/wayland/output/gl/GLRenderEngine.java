@@ -229,10 +229,7 @@ public class GLRenderEngine implements ShmRenderEngine {
         this.gl.glGetShaderiv(shaderHandle,
                               GL2ES2.GL_COMPILE_STATUS,
                               vstatus);
-        if (vstatus.get(0) == GL.GL_TRUE) {
-            //success
-        }
-        else {
+        if (vstatus.get(0) != GL.GL_TRUE) {
             //failure!
             //get log length
             final int[] logLength = new int[1];

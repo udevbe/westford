@@ -16,10 +16,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-                        //following classes have static methods, so we have to powermock them:
-                        WaylandServerLibrary.class
-                })
+@PrepareForTest(WaylandServerLibrary.class)
 public class WlTouchTest {
 
     @Mock
@@ -34,9 +31,9 @@ public class WlTouchTest {
     @Test
     public void testRelease() throws Exception {
         //given
-        WlTouchResource wlTouchResource = mock(WlTouchResource.class);
+        final WlTouchResource wlTouchResource = mock(WlTouchResource.class);
 
-        WlTouch wlTouch = new WlTouch();
+        final WlTouch wlTouch = new WlTouch();
         //when
         wlTouch.release(wlTouchResource);
         //then
@@ -51,7 +48,7 @@ public class WlTouchTest {
         final int version = 1;
         final int id = 1;
 
-        WlTouch wlTouch = new WlTouch();
+        final WlTouch wlTouch = new WlTouch();
         //when
         final WlTouchResource wlTouchResource = wlTouch.create(client,
                                                                version,

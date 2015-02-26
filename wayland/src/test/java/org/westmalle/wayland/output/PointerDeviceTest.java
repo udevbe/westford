@@ -82,9 +82,9 @@ public class PointerDeviceTest {
         final SurfaceState surfaceState1 = mock(SurfaceState.class);
         when(surface1.getState()).thenReturn(surfaceState1);
 
-        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-        WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
         when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
@@ -146,7 +146,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
+        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0,
@@ -247,9 +247,9 @@ public class PointerDeviceTest {
         final SurfaceState surfaceState1 = mock(SurfaceState.class);
         when(surface1.getState()).thenReturn(surfaceState1);
 
-        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-        WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
         when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
@@ -307,7 +307,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
+        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0,
@@ -392,7 +392,7 @@ public class PointerDeviceTest {
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
 
-        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
@@ -440,7 +440,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
+        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0,
@@ -505,7 +505,7 @@ public class PointerDeviceTest {
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
 
-        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
@@ -552,7 +552,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
+        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0,
@@ -615,7 +615,7 @@ public class PointerDeviceTest {
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
 
-        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
@@ -671,7 +671,7 @@ public class PointerDeviceTest {
                                   WlPointerButtonState.RELEASED);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
+        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0,
@@ -737,7 +737,7 @@ public class PointerDeviceTest {
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
 
-        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
@@ -782,7 +782,7 @@ public class PointerDeviceTest {
                                   WlPointerButtonState.RELEASED);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
+        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0,
@@ -849,7 +849,7 @@ public class PointerDeviceTest {
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
 
-        WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);

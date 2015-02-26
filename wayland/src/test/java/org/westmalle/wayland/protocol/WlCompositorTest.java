@@ -96,18 +96,18 @@ public class WlCompositorTest {
     @Test
     public void testCreateSurface() throws Exception {
         //given
-        LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
+        final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(surfacesStack);
 
         final WlSurface wlSurface = mock(WlSurface.class);
         when(this.wlSurfaceFactory.create(any())).thenReturn(wlSurface);
 
-        WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         when(wlSurface.add(any(),
                            anyInt(),
                            anyInt())).thenReturn(wlSurfaceResource);
 
-        WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
+        final WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
         final Client client = mock(Client.class);
         when(wlCompositorResource.getClient()).thenReturn(client);
         final int version = 3;
@@ -134,7 +134,7 @@ public class WlCompositorTest {
 
         assertThat((Iterable) surfacesStack).contains(wlSurfaceResource);
 
-        ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
+        final ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlSurfaceResource,
                times(1)).addDestroyListener(destroyListenerCaptor.capture());
         final Listener destroyListener = destroyListenerCaptor.getValue();
@@ -157,7 +157,7 @@ public class WlCompositorTest {
         final WlRegion wlRegion = mock(WlRegion.class);
         when(this.wlRegionFactory.create(any())).thenReturn(wlRegion);
 
-        WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
+        final WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
         final Client client = mock(Client.class);
         when(wlCompositorResource.getClient()).thenReturn(client);
         final int version = 2;
