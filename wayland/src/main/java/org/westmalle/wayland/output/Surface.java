@@ -160,7 +160,6 @@ public class Surface {
 
     @Nonnull
     public Surface commit() {
-        //flush
         final Optional<WlBufferResource> buffer = getState().getBuffer();
         if (buffer.isPresent()) {
             //signal client that the previous buffer can be reused as we will now use the
@@ -168,16 +167,15 @@ public class Surface {
             buffer.get()
                   .release();
         }
+        //flush states
         this.state = this.pendingState;
         this.position = this.position.translate(this.pendingBufferOffset);
-
+        //update transformation
         if (needsTransformUpdate()) {
             updateCompositorTransforms();
-            this.transform = calculateTransform();
-            this.inverseTransform = Matrices.invert(this.transform);
+            calculateTransform();
         }
-
-        //reset
+        //reset pending buffer state
         detachBuffer();
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
@@ -204,7 +202,7 @@ public class Surface {
         this.pendingCompositorTransforms.clear();
     }
 
-    private Mat4 calculateTransform() {
+    public void calculateTransform() {
         //start with server transform
         Mat4 result = this.compositorTransform;
         //apply client transformation
@@ -218,7 +216,9 @@ public class Surface {
         if (scale != 1) {
             result = (Transforms.SCALE(scale)).multiply(result);
         }
-        return result;
+
+        this.transform = result;
+        this.inverseTransform = Matrices.invert(getTransform());
     }
 
     @Nonnull
