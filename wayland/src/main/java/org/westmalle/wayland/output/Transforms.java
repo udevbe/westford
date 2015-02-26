@@ -137,4 +137,25 @@ public class Transforms {
                                                     0f,
                                                     0f,
                                                     1f);
+
+    public static final Mat4 SCALE(int scale){
+        return new Mat4(
+                1f,
+                0f,
+                0f,
+                0f,
+                0f,
+                1f,
+                0f,
+                0f,
+                0f,
+                0f,
+                1f,
+                0f,
+                0f,
+                0f,
+                0f,
+                scale
+        );
+    }
 }

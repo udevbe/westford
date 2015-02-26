@@ -216,24 +216,7 @@ public class Surface {
         //apply scaling
         final int scale = getState().getScale();
         if (scale != 1) {
-            result = (new Mat4(
-                    1f,
-                    0f,
-                    0f,
-                    0f,
-                    0f,
-                    1f,
-                    0f,
-                    0f,
-                    0f,
-                    0f,
-                    1f,
-                    0f,
-                    0f,
-                    0f,
-                    0f,
-                    scale
-            )).multiply(result);
+            result = (Transforms.SCALE(scale)).multiply(result);
         }
         return result;
     }
