@@ -17,10 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
-
-import com.hackoeur.jglm.Mat3;
 import com.hackoeur.jglm.Mat4;
-
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.output.Surface;
@@ -70,28 +67,28 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     }
 
     private Mat4 getMatrix(final int transform) {
-        if(WlOutputTransform.NORMAL.getValue() == transform){
+        if (WlOutputTransform.NORMAL.getValue() == transform) {
             return MAT4_IDENTITY;
         }
-        if(WlOutputTransform._90.getValue() == transform){
+        if (WlOutputTransform._90.getValue() == transform) {
 
         }
-        if(WlOutputTransform._180.getValue() == transform){
+        if (WlOutputTransform._180.getValue() == transform) {
 
         }
-        if(WlOutputTransform._270.getValue() == transform){
+        if (WlOutputTransform._270.getValue() == transform) {
 
         }
-        if(WlOutputTransform.FLIPPED.getValue() == transform){
+        if (WlOutputTransform.FLIPPED.getValue() == transform) {
 
         }
-        if(WlOutputTransform.FLIPPED_90.getValue() == transform){
+        if (WlOutputTransform.FLIPPED_90.getValue() == transform) {
 
         }
-        if(WlOutputTransform.FLIPPED_180.getValue() == transform){
+        if (WlOutputTransform.FLIPPED_180.getValue() == transform) {
 
         }
-        if(WlOutputTransform.FLIPPED_270.getValue() == transform){
+        if (WlOutputTransform.FLIPPED_270.getValue() == transform) {
 
         }
         return MAT4_IDENTITY;

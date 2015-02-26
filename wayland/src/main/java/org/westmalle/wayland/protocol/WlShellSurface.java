@@ -23,7 +23,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
-
 import java.util.Set;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
@@ -59,7 +58,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
     private void move(final WlPointer wlPointer,
                       final int grabSerial,
-                      final Surface surface){
+                      final Surface surface) {
         final PointImmutable pointerPosition = wlPointer.getPointerDevice()
                                                         .getPosition();
         final PointImmutable surfacePosition = surface.getPosition();
@@ -83,20 +82,21 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
-                .ifPresent(wlPointer -> {
-                    final PointImmutable globalGrabStart = wlPointer.getPointerDevice().getPosition();
+              .ifPresent(wlPointer -> {
+                  final PointImmutable globalGrabStart = wlPointer.getPointerDevice()
+                                                                  .getPosition();
 
-                    wlPointer.getPointerDevice()
-                            .grabMotion(this.wlSurfaceResource,
-                                        serial,
-                                        (pointerDevice,
-                                         motion) -> {
-                                            //TODO calculate size & width.
-                                            requester.configure(0,
-                                                                123,
-                                                                456);
-                                        });
-                });
+                  wlPointer.getPointerDevice()
+                           .grabMotion(this.wlSurfaceResource,
+                                       serial,
+                                       (pointerDevice,
+                                        motion) -> {
+                                           //TODO calculate size & width.
+                                           requester.configure(0,
+                                                               123,
+                                                               456);
+                                       });
+              });
     }
 
     @Override

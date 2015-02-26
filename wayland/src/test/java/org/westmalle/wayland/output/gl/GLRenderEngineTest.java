@@ -1,7 +1,6 @@
 package org.westmalle.wayland.output.gl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
-
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.junit.Test;
@@ -12,26 +11,21 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import java.nio.IntBuffer;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GLAutoDrawable;
+import java.nio.IntBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GLRenderEngineTest {
@@ -39,13 +33,13 @@ public class GLRenderEngineTest {
     @Mock
     private ListeningExecutorService renderThread;
     @Mock
-    private GLAutoDrawable drawable;
+    private GLAutoDrawable           drawable;
     @Mock
-    private IntBuffer elementBuffer;
+    private IntBuffer                elementBuffer;
     @Mock
-    private IntBuffer vertexBuffer;
+    private IntBuffer                vertexBuffer;
     @InjectMocks
-    private GLRenderEngine glRenderEngine;
+    private GLRenderEngine           glRenderEngine;
 
     @Test
     public void testBegin() throws Exception {
@@ -72,7 +66,8 @@ public class GLRenderEngineTest {
         verify(this.renderThread,
                times(1)).submit((Runnable) any());
         //and when
-        queue.get(0).run();
+        queue.get(0)
+             .run();
         //then
         verify(gl2ES2).glClear(anyInt());
     }
@@ -103,16 +98,18 @@ public class GLRenderEngineTest {
             vstatus.put(0,
                         GL.GL_TRUE);
             return null;
-        }).when(gl2ES2).glGetShaderiv(anyInt(),
-                                      eq(GL2ES2.GL_COMPILE_STATUS),
-                                      any());
+        }).when(gl2ES2)
+          .glGetShaderiv(anyInt(),
+                         eq(GL2ES2.GL_COMPILE_STATUS),
+                         any());
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
         final WlSurface wlSurface = mock(WlSurface.class);
         when(surfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
-        final PointImmutable position = new Point(-10,45);
+        final PointImmutable position = new Point(-10,
+                                                  45);
         when(surface.getPosition()).thenReturn(position);
 
         final ShmBuffer buffer = mock(ShmBuffer.class);
@@ -120,7 +117,8 @@ public class GLRenderEngineTest {
         when(buffer.getHeight()).thenReturn(250);
 
         this.glRenderEngine.begin();
-        queue.get(0).run();
+        queue.get(0)
+             .run();
         //when
         this.glRenderEngine.draw(surfaceResource,
                                  buffer);
@@ -128,7 +126,8 @@ public class GLRenderEngineTest {
         verify(this.renderThread,
                times(2)).submit((Runnable) any());
         //and when
-        queue.get(1).run();
+        queue.get(1)
+             .run();
         //then
         verify(gl2ES2).glLinkProgram(anyInt());
         verify(gl2ES2).glDrawElements(anyInt(),
@@ -159,9 +158,11 @@ public class GLRenderEngineTest {
         //when
         this.glRenderEngine.end();
         //then
-        verify(this.renderThread,times(1)).submit((Runnable) any());
+        verify(this.renderThread,
+               times(1)).submit((Runnable) any());
         //and when
-        queue.get(0).run();
+        queue.get(0)
+             .run();
         //then
         verify(drawable,
                times(1)).swapBuffers();

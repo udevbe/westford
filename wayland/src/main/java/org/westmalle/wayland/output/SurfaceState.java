@@ -1,33 +1,30 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.value.AutoValue;
-
 import com.hackoeur.jglm.Mat4;
-
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 
-import java.util.Optional;
-
 import javax.annotation.Nonnegative;
+import java.util.Optional;
 
 @AutoValue
 public abstract class SurfaceState {
 
-    static Builder builder(){
+    static Builder builder() {
         return new AutoValue_SurfaceState.Builder().opaqueRegion(Optional.<WlRegionResource>empty())
-                .inputRegion(Optional.<WlRegionResource>empty())
-                .damage(Optional.<Region>empty())
-                .buffer(Optional.<WlBufferResource>empty())
-                .bufferTransform(Mat4.MAT4_IDENTITY)
-                .scale(1);
+                                                   .inputRegion(Optional.<WlRegionResource>empty())
+                                                   .damage(Optional.<Region>empty())
+                                                   .buffer(Optional.<WlBufferResource>empty())
+                                                   .bufferTransform(Mat4.MAT4_IDENTITY)
+                                                   .scale(1);
     }
 
     abstract Optional<WlRegionResource> getOpaqueRegion();
 
     abstract Optional<WlRegionResource> getInputRegion();
 
-    abstract Optional<Region>           getDamage();
+    abstract Optional<Region> getDamage();
 
     abstract Optional<WlBufferResource> getBuffer();
 
