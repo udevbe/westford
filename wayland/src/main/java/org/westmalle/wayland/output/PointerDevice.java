@@ -24,6 +24,7 @@ import org.westmalle.wayland.output.events.Motion;
 import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
 import java.util.HashSet;
@@ -91,11 +92,11 @@ public class PointerDevice {
         return this.pressedButtons.contains(button);
     }
 
-    public void register(final Object listener) {
+    public void register(@Nonnull final Object listener) {
         this.inputBus.register(listener);
     }
 
-    public void unregister(final Object listener) {
+    public void unregister(@Nonnull final Object listener) {
         this.inputBus.unregister(listener);
     }
 
@@ -106,9 +107,9 @@ public class PointerDevice {
      * @param serial            Serial that triggered the grab.
      * @param pointerGrabMotion Motion listener.
      */
-    public void grabMotion(final WlSurfaceResource surfaceResource,
+    public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
                            final int serial,
-                           final PointerGrabMotion pointerGrabMotion) {
+                           @Nonnull final PointerGrabMotion pointerGrabMotion) {
 
         final Listener motionListener = new Listener() {
             @Subscribe

@@ -31,13 +31,17 @@ import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
 import javax.media.nativewindow.util.RectangleImmutable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
 
+    @Nonnull
     private final RegionFactory        regionFactory;
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
@@ -49,9 +53,9 @@ public class Surface {
 
     //additional pending server side states
     @Nonnull
-    private final Set<Mat4> pendingCompositorTransforms = new HashSet<>();
+    private final List<Mat4> pendingCompositorTransforms = new LinkedList<>();
     @Nonnull
-    private       Point     pendingBufferOffset         = new Point();
+    private       Point      pendingBufferOffset         = new Point();
 
     //committed state
     @Nonnull
@@ -73,7 +77,7 @@ public class Surface {
     @Nonnull
     private final List<WlCallbackResource> callbacks = Lists.newLinkedList();
 
-    Surface(@Provided final RegionFactory regionFactory,
+    Surface(@Nonnull @Provided final RegionFactory regionFactory,
             @Nonnull final WlCompositorResource wlCompositorResource) {
         this.regionFactory = regionFactory;
         this.wlCompositorResource = wlCompositorResource;
@@ -125,13 +129,13 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface addServerTransform(@Nonnull final Mat4 transform) {
+    public Surface addCompositorTransform(@Nonnull final Mat4 transform) {
         this.pendingCompositorTransforms.add(transform);
         return this;
     }
 
     @Nonnull
-    public Surface removeServerTransform(@Nonnull final Mat4 transform) {
+    public Surface removeCompositorTransform(@Nonnull final Mat4 transform) {
         this.pendingCompositorTransforms.remove(transform);
         return this;
     }
