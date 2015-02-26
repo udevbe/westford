@@ -16,12 +16,10 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-
 import com.hackoeur.jglm.Mat4;
 import com.hackoeur.jglm.Matrices;
 import com.hackoeur.jglm.Vec4;
 import com.hackoeur.jglm.support.FastMath;
-
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
@@ -33,11 +31,7 @@ import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
 import javax.media.nativewindow.util.RectangleImmutable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
 
@@ -50,32 +44,34 @@ public class Surface {
 
     //pending state
     @Nonnull
-    private SurfaceState    pendingState = SurfaceState.builder().build();
+    private SurfaceState pendingState = SurfaceState.builder()
+                                                    .build();
 
     //additional pending server side states
     @Nonnull
     private final Set<Mat4> pendingCompositorTransforms = new HashSet<>();
     @Nonnull
-    private Point           pendingBufferOffset     = new Point();
+    private       Point     pendingBufferOffset         = new Point();
 
     //committed state
     @Nonnull
-    private SurfaceState state = SurfaceState.builder().build();
+    private SurfaceState state = SurfaceState.builder()
+                                             .build();
 
     //additional server side states
     @Nonnull
-    private       Boolean destroyed    = Boolean.FALSE;
+    private Boolean destroyed           = Boolean.FALSE;
     @Nonnull
-    private       Mat4   compositorTransform = MAT4_IDENTITY;
+    private Mat4    compositorTransform = MAT4_IDENTITY;
     @Nonnull
-    private       Mat4   transform    = MAT4_IDENTITY;
+    private Mat4    transform           = MAT4_IDENTITY;
     @Nonnull
-    private       Mat4   inverseTransform = MAT4_IDENTITY;
+    private Mat4    inverseTransform    = MAT4_IDENTITY;
     @Nonnull
-    private       Point  position     = new Point();
+    private Point   position            = new Point();
 
     @Nonnull
-    private final List<WlCallbackResource>   callbacks    = Lists.newLinkedList();
+    private final List<WlCallbackResource> callbacks = Lists.newLinkedList();
 
     Surface(@Provided final RegionFactory regionFactory,
             @Nonnull final WlCompositorResource wlCompositorResource) {
@@ -165,16 +161,17 @@ public class Surface {
     @Nonnull
     public Surface commit() {
         //flush
-        final Optional<WlBufferResource> buffer = this.state.getBuffer();
+        final Optional<WlBufferResource> buffer = getState().getBuffer();
         if (buffer.isPresent()) {
             //signal client that the previous buffer can be reused as we will now use the
             //newly attached buffer.
-            buffer.get().release();
+            buffer.get()
+                  .release();
         }
         this.state = this.pendingState;
         this.position = this.position.translate(this.pendingBufferOffset);
 
-        if(needsTransformUpdate()) {
+        if (needsTransformUpdate()) {
             updateCompositorTransforms();
             this.transform = calculateTransform();
             this.inverseTransform = Matrices.invert(this.transform);
@@ -188,13 +185,19 @@ public class Surface {
         return this;
     }
 
-    private boolean needsTransformUpdate() {
-        return this.pendingState.getScale() != this.state.getScale()
-               || !this.pendingState.getBufferTransform().equals(this.state.getBufferTransform())
+    @Nonnull
+    public SurfaceState getState() {
+        return this.state;
+    }
+
+    public boolean needsTransformUpdate() {
+        return this.pendingState.getScale() != getState().getScale()
+               || !this.pendingState.getBufferTransform()
+                                    .equals(getState().getBufferTransform())
                || !this.pendingCompositorTransforms.isEmpty();
     }
 
-    private void updateCompositorTransforms() {
+    public void updateCompositorTransforms() {
         for (final Mat4 pendingTransform : this.pendingCompositorTransforms) {
             this.compositorTransform = pendingTransform.multiply(this.compositorTransform);
         }
@@ -206,18 +209,30 @@ public class Surface {
         Mat4 result = this.compositorTransform;
         //apply client transformation
 
-        final Mat4 bufferTransform = this.state.getBufferTransform();
-        if(!bufferTransform.equals(MAT4_IDENTITY)) {
+        final Mat4 bufferTransform = getState().getBufferTransform();
+        if (!bufferTransform.equals(MAT4_IDENTITY)) {
             result = bufferTransform.multiply(result);
         }
         //apply scaling
-        final int scale = this.state.getScale();
-        if(scale != 1){
+        final int scale = getState().getScale();
+        if (scale != 1) {
             result = (new Mat4(
-                    1f, 0f, 0f, 0f,
-                    0f, 1f, 0f, 0f,
-                    0f, 0f, 1f, 0f,
-                    0f, 0f, 0f, scale
+                    1f,
+                    0f,
+                    0f,
+                    0f,
+                    0f,
+                    1f,
+                    0f,
+                    0f,
+                    0f,
+                    0f,
+                    1f,
+                    0f,
+                    0f,
+                    0f,
+                    0f,
+                    scale
             )).multiply(result);
         }
         return result;
@@ -231,25 +246,33 @@ public class Surface {
 
     @Nonnull
     public Surface removeOpaqueRegion() {
-        this.pendingState = this.pendingState.toBuilder().opaqueRegion(Optional.<WlRegionResource>empty()).build();
+        this.pendingState = this.pendingState.toBuilder()
+                                             .opaqueRegion(Optional.<WlRegionResource>empty())
+                                             .build();
         return this;
     }
 
     @Nonnull
     public Surface setOpaqueRegion(@Nonnull final WlRegionResource opaqueRegion) {
-        this.pendingState = this.pendingState.toBuilder().opaqueRegion(Optional.of(opaqueRegion)).build();
+        this.pendingState = this.pendingState.toBuilder()
+                                             .opaqueRegion(Optional.of(opaqueRegion))
+                                             .build();
         return this;
     }
 
     @Nonnull
     public Surface removeInputRegion() {
-        this.pendingState = this.pendingState.toBuilder().inputRegion(Optional.<WlRegionResource>empty()).build();
+        this.pendingState = this.pendingState.toBuilder()
+                                             .inputRegion(Optional.<WlRegionResource>empty())
+                                             .build();
         return this;
     }
 
     @Nonnull
     public Surface setInputRegion(@Nonnull final WlRegionResource inputRegion) {
-        this.pendingState = this.pendingState.toBuilder().inputRegion(Optional.of(inputRegion)).build();
+        this.pendingState = this.pendingState.toBuilder()
+                                             .inputRegion(Optional.of(inputRegion))
+                                             .build();
         return this;
     }
 
@@ -277,21 +300,26 @@ public class Surface {
                                                       0.0f,
                                                       1.0f);
         final Vec4 localPoint;
-        if(this.inverseTransform.equals(MAT4_IDENTITY)){
+        if (this.inverseTransform.equals(MAT4_IDENTITY)) {
             localPoint = untransformedLocalPoint;
-        }else {
+        }
+        else {
             localPoint = this.inverseTransform.multiply(untransformedLocalPoint);
         }
 
-        return new Point(FastMath.round(localPoint.getX()/localPoint.getW()),
-                         FastMath.round(localPoint.getY()/localPoint.getW()));
+        return new Point(FastMath.round(localPoint.getX() / localPoint.getW()),
+                         FastMath.round(localPoint.getY() / localPoint.getW()));
     }
 
     public void setScale(@Nonnegative final int scale) {
-        this.pendingState = this.pendingState.toBuilder().scale(scale).build();
+        this.pendingState = this.pendingState.toBuilder()
+                                             .scale(scale)
+                                             .build();
     }
 
     public void setBufferTransform(@Nonnull final Mat4 bufferTransform) {
-        this.pendingState = this.pendingState.toBuilder().bufferTransform(bufferTransform).build();
+        this.pendingState = this.pendingState.toBuilder()
+                                             .bufferTransform(bufferTransform)
+                                             .build();
     }
 }

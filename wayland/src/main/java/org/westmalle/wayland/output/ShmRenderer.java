@@ -34,6 +34,7 @@ public class ShmRenderer {
     public void render(final WlSurfaceResource surfaceResource) {
         final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
         final WlBufferResource wlBufferResource = implementation.getSurface()
+                                                                .getState()
                                                                 .getBuffer()
                                                                 .get();
         final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);

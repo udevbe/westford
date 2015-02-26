@@ -102,8 +102,8 @@ public class PointerDevice {
     /**
      * Listen for motion only when given surface is grabbed.
      *
-     * @param surfaceResource Surface that is grabbed.
-     * @param serial Serial that triggered the grab.
+     * @param surfaceResource   Surface that is grabbed.
+     * @param serial            Serial that triggered the grab.
      * @param pointerGrabMotion Motion listener.
      */
     public void grabMotion(final WlSurfaceResource surfaceResource,
@@ -114,7 +114,7 @@ public class PointerDevice {
             @Subscribe
             public void handle(final Motion motion) {
                 if (getGrab().get()
-                            .equals(surfaceResource)
+                             .equals(surfaceResource)
                     && getPointerSerial() == serial) {
                     //there is pointer motion
                     pointerGrabMotion.motion(PointerDevice.this,
@@ -204,7 +204,8 @@ public class PointerDevice {
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
             final Surface surface = ((WlSurface) implementation).getSurface();
 
-            final Optional<WlRegionResource> inputRegion = surface.getInputRegion();
+            final Optional<WlRegionResource> inputRegion = surface.getState()
+                                                                  .getInputRegion();
             if (inputRegion.isPresent()) {
                 WlRegion wlRegion = (WlRegion) inputRegion.get()
                                                           .getImplementation();
