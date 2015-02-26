@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -47,8 +48,11 @@ public class ShmRendererTest {
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
 
+        final SurfaceState surfaceState = mock(SurfaceState.class);
+        when(surface.getState()).thenReturn(surfaceState);
+
         final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
-        when(surface.getBuffer()).thenReturn(Optional.of(wlBufferResource));
+        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
 
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);

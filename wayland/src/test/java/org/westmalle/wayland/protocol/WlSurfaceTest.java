@@ -1,5 +1,6 @@
 package org.westmalle.wayland.protocol;
 
+import com.hackoeur.jglm.Mat4;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
@@ -44,7 +45,7 @@ public class WlSurfaceTest {
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSetBufferTransform() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -56,6 +57,9 @@ public class WlSurfaceTest {
         //when
         wlSurface.setBufferTransform(wlSurfaceResource,
                                      transform);
+        //then
+        verify(this.surface).setBufferTransform(Mat4.MAT4_IDENTITY);
+
     }
 
     @Test

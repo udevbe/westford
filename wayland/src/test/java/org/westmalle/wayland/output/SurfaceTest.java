@@ -1,9 +1,5 @@
 package org.westmalle.wayland.output;
 
-import com.hackoeur.jglm.Mat;
-import com.hackoeur.jglm.Mat3;
-import com.hackoeur.jglm.Mat4;
-
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
@@ -23,6 +19,7 @@ import javax.media.nativewindow.util.RectangleImmutable;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -82,7 +79,8 @@ public class SurfaceTest {
                                   relY);
         this.surface.commit();
         //then
-        assertThat(this.surface.getBuffer()
+        assertThat(this.surface.getState()
+                               .getBuffer()
                                .isPresent()).isTrue();
         verify(compositor,
                times(1)).requestRender();
@@ -140,7 +138,8 @@ public class SurfaceTest {
         this.surface.commit();
         //then
         //then
-        assertThat(this.surface.getBuffer()
+        assertThat(this.surface.getState()
+                               .getBuffer()
                                .get()).isSameAs(buffer1);
     }
 
@@ -163,7 +162,8 @@ public class SurfaceTest {
         this.surface.detachBuffer();
         this.surface.commit();
         //then
-        assertThat(this.surface.getBuffer()
+        assertThat(this.surface.getState()
+                               .getBuffer()
                                .isPresent()).isFalse();
         verify(compositor,
                times(1)).requestRender();
@@ -177,7 +177,8 @@ public class SurfaceTest {
         //when
         this.surface.removeOpaqueRegion();
         //then
-        assertThat(this.surface.getOpaqueRegion()
+        assertThat(this.surface.getState()
+                               .getOpaqueRegion()
                                .isPresent()).isFalse();
     }
 
@@ -189,7 +190,8 @@ public class SurfaceTest {
         //when
         this.surface.removeInputRegion();
         //then
-        assertThat(this.surface.getInputRegion()
+        assertThat(this.surface.getState()
+                               .getInputRegion()
                                .isPresent()).isFalse();
     }
 
@@ -220,6 +222,12 @@ public class SurfaceTest {
     @Test
     public void testLocal() throws Exception {
         //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
+
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
         final PointImmutable absoluteCoordinate = new Point(150,
                                                             150);
         final PointImmutable surfaceCoordinate = new Point(100,

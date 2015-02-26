@@ -77,10 +77,15 @@ public class PointerDeviceTest {
         final Surface surface1 = mock(Surface.class);
         when(wlSurface1.getSurface()).thenReturn(surface1);
 
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final SurfaceState surfaceState1 = mock(SurfaceState.class);
+        when(surface1.getState()).thenReturn(surfaceState1);
+
         WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
         WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
-        when(surface1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
+        when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
@@ -237,10 +242,15 @@ public class PointerDeviceTest {
         final Surface surface1 = mock(Surface.class);
         when(wlSurface1.getSurface()).thenReturn(surface1);
 
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final SurfaceState surfaceState1 = mock(SurfaceState.class);
+        when(surface1.getState()).thenReturn(surfaceState1);
+
         WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
         WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
-        when(surface1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
+        when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
@@ -379,8 +389,11 @@ public class PointerDeviceTest {
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
 
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+
         WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
@@ -489,8 +502,11 @@ public class PointerDeviceTest {
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
 
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+
         WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
@@ -596,8 +612,11 @@ public class PointerDeviceTest {
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
 
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+
         WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
@@ -715,8 +734,11 @@ public class PointerDeviceTest {
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
 
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+
         WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
@@ -824,8 +846,11 @@ public class PointerDeviceTest {
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
 
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+
         WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        when(surface0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
 
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);

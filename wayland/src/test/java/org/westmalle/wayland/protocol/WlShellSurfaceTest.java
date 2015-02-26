@@ -9,12 +9,17 @@ import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.PointerDevice;
+import org.westmalle.wayland.output.PointerGrabMotion;
+import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.events.Motion;
 
+import javax.media.nativewindow.util.Point;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -49,21 +54,41 @@ public class WlShellSurfaceTest {
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
+        final Point pointerPosition = new Point(100,
+                                                100);
+        when(pointerDevice.getPosition()).thenReturn(pointerPosition);
 
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface surface = mock(Surface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        final Point surfacePosition = new Point(75,
+                                                75);
+        when(surface.getPosition()).thenReturn(surfacePosition);
+
         final WlShellSurface wlShellSurface = new WlShellSurface(wlSurfaceResource);
         //when
         wlShellSurface.move(wlShellSurfaceResource,
                             wlSeatResource,
                             serial);
         //then
-        //FIXME capture pointergrab motion and activate it & verify it.
+        ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice,
                times(1)).grabMotion(eq(wlSurfaceResource),
                                     eq(serial),
-                                    any());
+                                    pointerGrabMotionCaptor.capture());
+        //and when
+        final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
+        pointerGrabMotion.motion(pointerDevice,
+                                 new Motion(98765,
+                                            110,
+                                            110));
+        //then
+        verify(surface).setPosition(new Point(85,
+                                              85));
     }
 
     @Test
