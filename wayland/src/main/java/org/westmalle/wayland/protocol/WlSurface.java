@@ -60,17 +60,40 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     public void setBufferScale(final WlSurfaceResource resource,
                                @Nonnegative final int scale) {
         checkArgument(scale > 0);
-        this.surface.setScale(scale);
+        getSurface().setScale(scale);
     }
 
     @Override
     public void setBufferTransform(final WlSurfaceResource resource,
                                    final int transform) {
-        this.surface.setTransform(getMatrix(transform));
+        this.surface.setBufferTransform(getMatrix(transform));
     }
 
     private Mat4 getMatrix(final int transform) {
-        //TODO get correct transformation matrix
+        if(WlOutputTransform.NORMAL.getValue() == transform){
+            return MAT4_IDENTITY;
+        }
+        if(WlOutputTransform._90.getValue() == transform){
+
+        }
+        if(WlOutputTransform._180.getValue() == transform){
+
+        }
+        if(WlOutputTransform._270.getValue() == transform){
+
+        }
+        if(WlOutputTransform.FLIPPED.getValue() == transform){
+
+        }
+        if(WlOutputTransform.FLIPPED_90.getValue() == transform){
+
+        }
+        if(WlOutputTransform.FLIPPED_180.getValue() == transform){
+
+        }
+        if(WlOutputTransform.FLIPPED_270.getValue() == transform){
+
+        }
         return MAT4_IDENTITY;
     }
 

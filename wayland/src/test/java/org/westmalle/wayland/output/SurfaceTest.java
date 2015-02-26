@@ -65,16 +65,6 @@ public class SurfaceTest {
     }
 
     @Test
-    public void testRemoveTransform() throws Exception {
-        //given
-        this.surface.setTransform(Mat4.MAT4_IDENTITY);
-        //when
-        this.surface.removeTransform();
-        //then
-        assertThat(this.surface.getTransform()).isEqualTo((Mat4.MAT4_IDENTITY));
-    }
-
-    @Test
     public void testAttachCommit() throws Exception {
         //given
         final WlCompositor wlCompositor = mock(WlCompositor.class);
