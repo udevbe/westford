@@ -20,12 +20,15 @@ import com.google.common.eventbus.EventBus;
 import com.hackoeur.jglm.Mat4;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.freedesktop.wayland.shared.WlSurfaceError;
+import org.westmalle.wayland.output.Transforms;
 import org.westmalle.wayland.output.Surface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.media.nativewindow.util.Rectangle;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,42 +59,56 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     @Override
     public void setBufferScale(final WlSurfaceResource resource,
                                @Nonnegative final int scale) {
-        checkArgument(scale > 0);
-        getSurface().setScale(scale);
+        if (scale > 0) {
+            getSurface().setScale(scale);
+        }
+        else {
+            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
+                               String.format("Invalid scale %d. Scale must be positive integer.",
+                                             scale));
+        }
     }
 
     @Override
     public void setBufferTransform(final WlSurfaceResource resource,
                                    final int transform) {
-        this.surface.setBufferTransform(getMatrix(transform));
+        this.surface.setBufferTransform(getMatrix(resource,
+                                                  transform));
     }
 
-    private Mat4 getMatrix(final int transform) {
+    private Mat4 getMatrix(final WlSurfaceResource resource,
+                           final int transform) {
         if (WlOutputTransform.NORMAL.getValue() == transform) {
+            return Transforms.NORMAL;
+        }
+        else if (WlOutputTransform._90.getValue() == transform) {
+            return Transforms._90;
+        }
+        else if (WlOutputTransform._180.getValue() == transform) {
+            return Transforms._180;
+        }
+        else if (WlOutputTransform._270.getValue() == transform) {
+            return Transforms._270;
+        }
+        else if (WlOutputTransform.FLIPPED.getValue() == transform) {
+            return Transforms.FLIPPED;
+        }
+        else if (WlOutputTransform.FLIPPED_90.getValue() == transform) {
+            return Transforms.FLIPPED_90;
+        }
+        else if (WlOutputTransform.FLIPPED_180.getValue() == transform) {
+            return Transforms.FLIPPED_180;
+        }
+        else if (WlOutputTransform.FLIPPED_270.getValue() == transform) {
+            return Transforms.FLIPPED_270;
+        }
+        else {
+            resource.postError(WlSurfaceError.INVALID_TRANSFORM.getValue(),
+                               String.format("Invalid transform %d. Supported values are %s.",
+                                             transform,
+                                             Arrays.asList(WlOutputTransform.values())));
             return MAT4_IDENTITY;
         }
-        if (WlOutputTransform._90.getValue() == transform) {
-
-        }
-        if (WlOutputTransform._180.getValue() == transform) {
-
-        }
-        if (WlOutputTransform._270.getValue() == transform) {
-
-        }
-        if (WlOutputTransform.FLIPPED.getValue() == transform) {
-
-        }
-        if (WlOutputTransform.FLIPPED_90.getValue() == transform) {
-
-        }
-        if (WlOutputTransform.FLIPPED_180.getValue() == transform) {
-
-        }
-        if (WlOutputTransform.FLIPPED_270.getValue() == transform) {
-
-        }
-        return MAT4_IDENTITY;
     }
 
     @Nonnull
