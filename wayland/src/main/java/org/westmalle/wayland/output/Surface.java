@@ -20,6 +20,8 @@ import com.hackoeur.jglm.Mat4;
 import com.hackoeur.jglm.Matrices;
 import com.hackoeur.jglm.Vec4;
 import com.hackoeur.jglm.support.FastMath;
+
+import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
@@ -30,6 +32,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
+import javax.media.nativewindow.util.Rectangle;
 import javax.media.nativewindow.util.RectangleImmutable;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -70,6 +73,9 @@ public class Surface {
     private Mat4    inverseTransform    = MAT4_IDENTITY;
     @Nonnull
     private Point   position            = new Point();
+    @Nonnull
+    private RectangleImmutable size = new Rectangle();
+
 
     @Nonnull
     private final List<WlCallbackResource> callbacks = Lists.newLinkedList();
@@ -145,6 +151,10 @@ public class Surface {
         return this;
     }
 
+    /**
+     * Compositor scoped position
+     * @return
+     */
     @Nonnull
     public PointImmutable getPosition() {
         return this.position;
@@ -167,12 +177,33 @@ public class Surface {
             updateCompositorTransform();
             updateTransform();
         }
+        updateSize();
+
         //reset pending buffer state
         detachBuffer();
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
         return this;
+    }
+
+    public void updateSize() {
+        //TODO test this method
+        final Optional<WlBufferResource> buffer = getState().getBuffer();
+        if(buffer.isPresent()){
+            final WlBufferResource wlBufferResource = buffer.get();
+            //FIXME we shouldn't assume the buffer to always be an shm buffer.
+            final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
+            final int bufferWidth = shmBuffer.getWidth();
+            final int bufferHeight = shmBuffer.getHeight();
+            final int scale = FastMath.round(getTransform().getColumn(3).getW());
+            this.size = new Rectangle(0,
+                                      0,
+                                      bufferWidth / scale,
+                                      bufferHeight /scale);
+        }else{
+            this.size = new Rectangle();
+        }
     }
 
     @Nonnull
@@ -270,6 +301,12 @@ public class Surface {
         return this;
     }
 
+    /**
+     * Translate a compositor scoped coordinate to a surface scoped coordinate.
+     *
+     * @param global
+     * @return
+     */
     public PointImmutable local(final PointImmutable global) {
         final PointImmutable position = getPosition();
         final Vec4 untransformedLocalPoint = new Vec4(global.getX() - position.getX(),
@@ -286,6 +323,15 @@ public class Surface {
 
         return new Point(FastMath.round(localPoint.getX() / localPoint.getW()),
                          FastMath.round(localPoint.getY() / localPoint.getW()));
+    }
+
+    /**
+     * Surface scoped size and position
+     * @return
+     */
+    @Nonnull
+    public RectangleImmutable getSize() {
+        return this.size;
     }
 
     public Surface setScale(@Nonnegative final int scale) {

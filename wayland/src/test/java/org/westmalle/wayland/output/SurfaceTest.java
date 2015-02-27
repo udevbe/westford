@@ -1,13 +1,16 @@
 package org.westmalle.wayland.output;
 
+import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlRegionResource;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.protocol.WlCompositor;
@@ -19,10 +22,12 @@ import javax.media.nativewindow.util.RectangleImmutable;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RegionFactory.class)
+@PrepareForTest({RegionFactory.class,
+                 ShmBuffer.class})
 public class SurfaceTest {
 
     @Mock
@@ -31,6 +36,11 @@ public class SurfaceTest {
     private WlCompositorResource wlCompositorResource;
     @InjectMocks
     private Surface              surface;
+
+    @Before
+    public void setUp(){
+        mockStatic(ShmBuffer.class);
+    }
 
     @Test
     public void testMarkDestroyed() throws Exception {
@@ -70,6 +80,15 @@ public class SurfaceTest {
         final WlBufferResource buffer = mock(WlBufferResource.class);
         final Integer relX = -10;
         final Integer relY = 200;
+
+        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
+        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+
+        final int bufferWidth = 200;
+        when(shmBuffer.getWidth()).thenReturn(bufferWidth);
+        final int bufferHeight = 300;
+        when(shmBuffer.getHeight()).thenReturn(bufferHeight);
+
         //when
         this.surface.attachBuffer(buffer,
                                   relX,
@@ -79,6 +98,7 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .isPresent()).isTrue();
+        assertThat(this.surface.getSize()).isEqualTo(new Rectangle(0,0,200,300));
         verify(compositor,
                times(1)).requestRender();
     }
@@ -95,6 +115,15 @@ public class SurfaceTest {
         final WlBufferResource buffer = mock(WlBufferResource.class);
         final Integer relX = -10;
         final Integer relY = 200;
+
+        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
+        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+
+        final int bufferWidth = 200;
+        when(shmBuffer.getWidth()).thenReturn(bufferWidth);
+        final int bufferHeight = 300;
+        when(shmBuffer.getHeight()).thenReturn(bufferHeight);
+
         //when
         this.surface.attachBuffer(buffer,
                                   relX,
@@ -105,6 +134,7 @@ public class SurfaceTest {
                                   relY);
         this.surface.commit();
         //then
+        assertThat(this.surface.getSize()).isEqualTo(new Rectangle(0,0,200,300));
         verify(buffer,
                times(1)).release();
     }
@@ -125,6 +155,23 @@ public class SurfaceTest {
         final WlBufferResource buffer1 = mock(WlBufferResource.class);
         final Integer relX1 = -10;
         final Integer relY1 = 200;
+
+        final ShmBuffer shmBuffer0 = mock(ShmBuffer.class);
+        when(ShmBuffer.get(buffer0)).thenReturn(shmBuffer0);
+
+        final int bufferWidth0 = 200;
+        when(shmBuffer0.getWidth()).thenReturn(bufferWidth0);
+        final int bufferHeight0 = 300;
+        when(shmBuffer0.getHeight()).thenReturn(bufferHeight0);
+
+        final ShmBuffer shmBuffer1 = mock(ShmBuffer.class);
+        when(ShmBuffer.get(buffer1)).thenReturn(shmBuffer1);
+
+        final int bufferWidth1 = 123;
+        when(shmBuffer1.getWidth()).thenReturn(bufferWidth1);
+        final int bufferHeight1 = 456;
+        when(shmBuffer1.getHeight()).thenReturn(bufferHeight1);
+
         //when
         this.surface.attachBuffer(buffer0,
                                   relX0,
@@ -134,10 +181,11 @@ public class SurfaceTest {
                                   relY1);
         this.surface.commit();
         //then
-        //then
         assertThat(this.surface.getState()
                                .getBuffer()
                                .get()).isSameAs(buffer1);
+        assertThat(this.surface.getSize()).isEqualTo(new Rectangle(0,0,123,456));
+
     }
 
     @Test
@@ -152,6 +200,10 @@ public class SurfaceTest {
         final WlBufferResource buffer = mock(WlBufferResource.class);
         final Integer relX = -10;
         final Integer relY = 200;
+
+        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
+        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+
         //when
         this.surface.attachBuffer(buffer,
                                   relX,
@@ -162,6 +214,7 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .isPresent()).isFalse();
+        assertThat(this.surface.getSize()).isEqualTo(new Rectangle(0,0,0,0));
         verify(compositor,
                times(1)).requestRender();
     }

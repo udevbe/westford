@@ -81,8 +81,8 @@ public class WlShellSurfaceTest {
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
         pointerGrabMotion.motion(pointerDevice,
                                  new Motion(98765,
-                                            110,
-                                            110));
+                                            new Point(110,
+                                            110)));
         //then
         verify(surface).setPosition(new Point(85,
                                               85));

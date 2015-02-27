@@ -17,13 +17,21 @@ import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.westmalle.wayland.output.Surface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.media.nativewindow.util.Point;
 import javax.media.nativewindow.util.PointImmutable;
+import javax.media.nativewindow.util.RectangleImmutable;
+
 import java.util.Set;
+
+import static org.freedesktop.wayland.shared.WlShellSurfaceResize.BOTTOM_LEFT;
+import static org.freedesktop.wayland.shared.WlShellSurfaceResize.BOTTOM_RIGHT;
+import static org.freedesktop.wayland.shared.WlShellSurfaceResize.TOP_LEFT;
+import static org.freedesktop.wayland.shared.WlShellSurfaceResize.TOP_RIGHT;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
 public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
@@ -68,8 +76,8 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                  .grabMotion(this.wlSurfaceResource,
                              grabSerial,
                              (pointerDevice,
-                              motion) -> surface.setPosition(new Point(motion.getX() - surfacePositionOffset.getX(),
-                                                                       motion.getY() - surfacePositionOffset.getY())));
+                              motion) -> surface.setPosition(new Point(motion.getPoint().getX() - surfacePositionOffset.getX(),
+                                                                       motion.getPoint().getY() - surfacePositionOffset.getY())));
     }
 
     @Override
@@ -77,26 +85,89 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                        @Nonnull final WlSeatResource seat,
                        final int serial,
                        final int edges) {
+        //TODO test this method
+
         final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface surface = wlSurface.getSurface();
 
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
               .ifPresent(wlPointer -> {
-                  final PointImmutable globalGrabStart = wlPointer.getPointerDevice()
+                  final PointImmutable pointerStartPos = wlPointer.getPointerDevice()
                                                                   .getPosition();
 
+                  final PointImmutable local = surface.local(pointerStartPos);
+                  final RectangleImmutable size = surface.getSize();
+
+                  final WlShellSurfaceResize quadrant = quadrant(size,
+                                                                 local);
+                  final PointImmutable delta = delta(quadrant,
+                                            size,
+                                            local);
                   wlPointer.getPointerDevice()
                            .grabMotion(this.wlSurfaceResource,
                                        serial,
                                        (pointerDevice,
                                         motion) -> {
-                                           //TODO calculate size & width.
-                                           requester.configure(0,
-                                                               123,
-                                                               456);
+                                           //TODO support one dimensional resize
+                                           final PointImmutable motionLocal = surface.local(motion.getPoint());
+                                           Point cornerPoint = new Point(motionLocal.getX()+delta.getX(),
+                                                                         motionLocal.getY()+delta.getY());
+                                           requester.configure(quadrant.getValue(),
+                                                               cornerPoint.getX(),
+                                                               cornerPoint.getY());
                                        });
               });
+    }
+
+    private PointImmutable delta(final WlShellSurfaceResize quadrant,
+                        final RectangleImmutable size,
+                        final PointImmutable local){
+        //TODO support one dimensional resize
+
+        switch (quadrant){
+            case TOP_LEFT:{
+                return local;
+            }
+            case TOP_RIGHT:{
+                return new Point(size.getWidth() - local.getX(),
+                                 local.getY());
+            }
+            case BOTTOM_RIGHT:{
+                return new Point(size.getWidth() - local.getX(),
+                                 size.getHeight() - local.getY());
+            }
+            case BOTTOM_LEFT: {
+                return new Point(local.getX(),
+                                 size.getHeight() - local.getY());
+            }
+            default: {
+                return new Point();
+            }
+        }
+    }
+
+    private WlShellSurfaceResize quadrant(final RectangleImmutable size,
+                                          final PointImmutable local) {
+        //TODO support one dimensional resize
+
+        boolean left = local.getX() < size.getWidth()/2;
+        boolean  top = local.getY() < size.getHeight()/2;
+
+        if(top && left){
+            return TOP_LEFT;
+        }
+        else
+        if(top){
+            return TOP_RIGHT;
+        }
+        else
+        if(left){
+            return BOTTOM_LEFT;
+        }
+        else{
+            return BOTTOM_RIGHT;
+        }
     }
 
     @Override

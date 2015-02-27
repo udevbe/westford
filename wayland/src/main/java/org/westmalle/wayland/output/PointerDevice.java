@@ -67,8 +67,7 @@ public class PointerDevice {
                  x,
                  y);
         this.inputBus.post(new Motion(time,
-                                      x,
-                                      y));
+                                      getPosition()));
     }
 
     public void button(final Set<WlPointerResource> pointerResources,
@@ -110,7 +109,6 @@ public class PointerDevice {
     public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
                            final int serial,
                            @Nonnull final PointerGrabMotion pointerGrabMotion) {
-
         final Listener motionListener = new Listener() {
             @Subscribe
             public void handle(final Motion motion) {
@@ -155,7 +153,6 @@ public class PointerDevice {
             //Is such a thing even possible? Yes it is. (Aliens pressing a button before starting compositor)
             this.buttonsPressed--;
         }
-
         if (getGrab().isPresent()) {
             //always report all buttons if we have a grabbed surface.
             reportButton(pointerResources,
@@ -163,7 +160,6 @@ public class PointerDevice {
                          button,
                          buttonState);
         }
-
         if (this.buttonsPressed == 0) {
             this.grab = Optional.empty();
         }
@@ -177,6 +173,7 @@ public class PointerDevice {
         }
     }
 
+    @Nonnull
     public Optional<WlSurfaceResource> getGrab() {
         return this.grab;
     }
@@ -197,7 +194,10 @@ public class PointerDevice {
         }
     }
 
-    private Optional<WlSurfaceResource> findWlSurfaceResource() {
+    @Nonnull
+    public Optional<WlSurfaceResource> over() {
+        //TODO test this method
+
         final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getSurfacesStack()
                                                                            .descendingIterator();
         Optional<WlSurfaceResource> wlSurfaceResource = Optional.empty();
@@ -212,7 +212,8 @@ public class PointerDevice {
                 final WlRegion wlRegion = (WlRegion) inputRegion.get()
                                                                 .getImplementation();
                 final Region region = wlRegion.getRegion();
-                if (region.contains(surface.local(getPosition()))) {
+                if (region.contains(surface.getSize(),
+                                    surface.local(getPosition()))) {
                     wlSurfaceResource = Optional.of(surfaceResource);
                     break;
                 }
@@ -224,13 +225,13 @@ public class PointerDevice {
         return wlSurfaceResource;
     }
 
-    public void doMotion(final Set<WlPointerResource> pointerResources,
+    public void doMotion(@Nonnull final Set<WlPointerResource> pointerResources,
                          final int time,
                          final int x,
                          final int y) {
         this.position = new Point(x,
                                   y);
-        final Optional<WlSurfaceResource> newFocus = findWlSurfaceResource();
+        final Optional<WlSurfaceResource> newFocus = over();
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
 
@@ -277,7 +278,6 @@ public class PointerDevice {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final PointImmutable relativePoint = wlSurface.getSurface()
                                                           .local(getPosition());
-
             pointerResource.get()
                            .motion(time,
                                    Fixed.create(relativePoint.getX()),

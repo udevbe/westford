@@ -13,28 +13,23 @@
 //limitations under the License.
 package org.westmalle.wayland.output.events;
 
+import javax.media.nativewindow.util.PointImmutable;
+
 public class Motion {
     private final int time;
-    private final int x;
-    private final int y;
+    private final PointImmutable point;
 
     public Motion(final int time,
-                  final int x,
-                  final int y) {
+                  final PointImmutable point) {
         this.time = time;
-        this.x = x;
-        this.y = y;
+        this.point = point;
     }
 
     public int getTime() {
         return this.time;
     }
 
-    public int getX() {
-        return this.x;
-    }
-
-    public int getY() {
-        return this.y;
+    public PointImmutable getPoint() {
+        return this.point;
     }
 }
