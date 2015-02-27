@@ -50,8 +50,7 @@ public class Surface {
     @Nonnull
     private SurfaceState pendingState = SurfaceState.builder()
                                                     .build();
-
-    //additional pending server side states
+    //pending derivable states
     @Nonnull
     private final List<Mat4> pendingCompositorTransforms = new LinkedList<>();
     @Nonnull
@@ -61,10 +60,8 @@ public class Surface {
     @Nonnull
     private SurfaceState state = SurfaceState.builder()
                                              .build();
-
-    //additional server side states
-    @Nonnull
-    private Boolean destroyed           = Boolean.FALSE;
+    //committed derived states
+    private boolean destroyed           = false;
     @Nonnull
     private Mat4    compositorTransform = MAT4_IDENTITY;
     @Nonnull
@@ -88,8 +85,7 @@ public class Surface {
         return this.callbacks;
     }
 
-    @Nonnull
-    public Boolean isDestroyed() {
+    public boolean isDestroyed() {
         return this.destroyed;
     }
 
@@ -129,20 +125,12 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface addCompositorTransform(@Nonnull final Mat4 transform) {
-        this.pendingCompositorTransforms.add(transform);
-        return this;
+    public List<Mat4> getPendingCompositorTransforms() {
+        return this.pendingCompositorTransforms;
     }
 
     @Nonnull
-    public Surface removeCompositorTransform(@Nonnull final Mat4 transform) {
-        this.pendingCompositorTransforms.remove(transform);
-        return this;
-    }
-
-    @Nonnull
-    public Surface resetServerTransforms() {
-        this.pendingCompositorTransforms.clear();
+    public Surface resetCompositorTransform() {
         this.compositorTransform = MAT4_IDENTITY;
         return this;
     }
@@ -176,8 +164,8 @@ public class Surface {
         this.position = this.position.translate(this.pendingBufferOffset);
         //update transformation
         if (needsTransformUpdate()) {
-            updateCompositorTransforms();
-            calculateTransform();
+            updateCompositorTransform();
+            updateTransform();
         }
         //reset pending buffer state
         detachBuffer();
@@ -199,14 +187,15 @@ public class Surface {
                || !this.pendingCompositorTransforms.isEmpty();
     }
 
-    public void updateCompositorTransforms() {
+    public Surface updateCompositorTransform() {
         for (final Mat4 pendingTransform : this.pendingCompositorTransforms) {
             this.compositorTransform = pendingTransform.multiply(this.compositorTransform);
         }
         this.pendingCompositorTransforms.clear();
+        return this;
     }
 
-    public void calculateTransform() {
+    public Surface updateTransform() {
         //start with server transform
         Mat4 result = this.compositorTransform;
         //apply client transformation
@@ -223,6 +212,7 @@ public class Surface {
 
         this.transform = result;
         this.inverseTransform = Matrices.invert(getTransform());
+        return this;
     }
 
     @Nonnull
@@ -298,15 +288,17 @@ public class Surface {
                          FastMath.round(localPoint.getY() / localPoint.getW()));
     }
 
-    public void setScale(@Nonnegative final int scale) {
+    public Surface setScale(@Nonnegative final int scale) {
         this.pendingState = this.pendingState.toBuilder()
                                              .scale(scale)
                                              .build();
+        return this;
     }
 
-    public void setBufferTransform(@Nonnull final Mat4 bufferTransform) {
+    public Surface setBufferTransform(@Nonnull final Mat4 bufferTransform) {
         this.pendingState = this.pendingState.toBuilder()
                                              .bufferTransform(bufferTransform)
                                              .build();
+        return this;
     }
 }
