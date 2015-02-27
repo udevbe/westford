@@ -200,6 +200,7 @@ public class PointerDevice {
     private Optional<WlSurfaceResource> findWlSurfaceResource() {
         final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getSurfacesStack()
                                                                            .descendingIterator();
+        Optional<WlSurfaceResource> wlSurfaceResource = Optional.empty();
         while (surfaceIterator.hasNext()) {
             final WlSurfaceResource surfaceResource = surfaceIterator.next();
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
@@ -212,11 +213,15 @@ public class PointerDevice {
                                                                 .getImplementation();
                 final Region region = wlRegion.getRegion();
                 if (region.contains(surface.local(getPosition()))) {
-                    return Optional.of(surfaceResource);
+                    wlSurfaceResource = Optional.of(surfaceResource);
+                    break;
                 }
+            }else{
+                wlSurfaceResource = Optional.of(surfaceResource);
+                break;
             }
         }
-        return Optional.empty();
+        return wlSurfaceResource;
     }
 
     public void doMotion(final Set<WlPointerResource> pointerResources,
