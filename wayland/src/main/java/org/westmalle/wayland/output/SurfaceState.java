@@ -20,15 +20,15 @@ public abstract class SurfaceState {
                                                    .scale(1);
     }
 
-    abstract Optional<WlRegionResource> getOpaqueRegion();
+    public abstract Optional<WlRegionResource> getOpaqueRegion();
 
-    abstract Optional<WlRegionResource> getInputRegion();
+    public abstract Optional<WlRegionResource> getInputRegion();
 
-    abstract Optional<Region> getDamage();
+    public abstract Optional<Region> getDamage();
 
-    abstract Optional<WlBufferResource> getBuffer();
+    public abstract Optional<WlBufferResource> getBuffer();
 
-    abstract Mat4 getBufferTransform();
+    public abstract Mat4 getBufferTransform();
 
     @Nonnegative
     abstract int getScale();
