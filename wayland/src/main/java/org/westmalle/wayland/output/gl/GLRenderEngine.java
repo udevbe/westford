@@ -21,6 +21,7 @@ import com.jogamp.common.nio.Buffers;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
+import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.ShmRenderEngine;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -146,7 +147,7 @@ public class GLRenderEngine implements ShmRenderEngine {
         buffer.beginAccess();
         final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
         final Surface surface = implementation.getSurface();
-        final PointImmutable position = surface.getPosition();
+        final Point position = surface.getPosition();
         final float[] vertices = {
                 position.getX(), position.getY(), 0f, 0f,
                 position.getX() + buffer.getWidth(), position.getY(), 1f, 0f,

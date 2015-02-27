@@ -8,11 +8,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.media.nativewindow.util.Point;
-import javax.media.nativewindow.util.PointImmutable;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GLAutoDrawable;
@@ -108,8 +107,8 @@ public class GLRenderEngineTest {
         when(surfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
-        final PointImmutable position = new Point(-10,
-                                                  45);
+        final Point position = Point.builder().x(-10).y(
+                                                  45).build();
         when(surface.getPosition()).thenReturn(position);
 
         final ShmBuffer buffer = mock(ShmBuffer.class);

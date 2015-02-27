@@ -11,9 +11,8 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Region;
-
-import javax.media.nativewindow.util.Rectangle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.eq;
@@ -80,10 +79,10 @@ public class WlRegionTest {
                      height);
         //then
         verify(region,
-               times(1)).add(eq(new Rectangle(x,
-                                              y,
-                                              width,
-                                              height)));
+               times(1)).add(eq(Rectangle.builder().x(x).
+                                                      y(y).
+                                                      width(width).
+                                                      height(height).build()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -123,10 +122,10 @@ public class WlRegionTest {
                           height);
         //then
         verify(region,
-               times(1)).subtract(eq(new Rectangle(x,
-                                                   y,
-                                                   width,
-                                                   height)));
+               times(1)).subtract(eq(Rectangle.builder().x(x).
+                y(y).
+                width(width).
+                                                           height(height).build()));
     }
 
     @Test(expected = IllegalArgumentException.class)

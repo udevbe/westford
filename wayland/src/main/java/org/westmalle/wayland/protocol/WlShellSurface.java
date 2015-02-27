@@ -18,13 +18,12 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
+import org.westmalle.wayland.output.Point;
+import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Surface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import javax.media.nativewindow.util.Point;
-import javax.media.nativewindow.util.PointImmutable;
-import javax.media.nativewindow.util.RectangleImmutable;
 
 import java.util.Set;
 
@@ -67,17 +66,15 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     private void move(final WlPointer wlPointer,
                       final int grabSerial,
                       final Surface surface) {
-        final PointImmutable pointerPosition = wlPointer.getPointerDevice()
+        final Point pointerPosition = wlPointer.getPointerDevice()
                                                         .getPosition();
-        final PointImmutable surfacePosition = surface.getPosition();
-        final Point surfacePositionOffset = new Point(pointerPosition.getX() - surfacePosition.getX(),
-                                                      pointerPosition.getY() - surfacePosition.getY());
+        final Point surfacePosition = surface.getPosition();
+        final Point pointerOffset = pointerPosition.subtract(surfacePosition);
         wlPointer.getPointerDevice()
                  .grabMotion(this.wlSurfaceResource,
                              grabSerial,
                              (pointerDevice,
-                              motion) -> surface.setPosition(new Point(motion.getPoint().getX() - surfacePositionOffset.getX(),
-                                                                       motion.getPoint().getY() - surfacePositionOffset.getY())));
+                              motion) -> surface.setPosition(motion.getPoint().subtract(pointerOffset)));
     }
 
     @Override
@@ -93,15 +90,15 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
               .ifPresent(wlPointer -> {
-                  final PointImmutable pointerStartPos = wlPointer.getPointerDevice()
+                  final Point pointerStartPos = wlPointer.getPointerDevice()
                                                                   .getPosition();
 
-                  final PointImmutable local = surface.local(pointerStartPos);
-                  final RectangleImmutable size = surface.getSize();
+                  final Point local = surface.local(pointerStartPos);
+                  final Rectangle size = surface.getSize();
 
                   final WlShellSurfaceResize quadrant = quadrant(size,
                                                                  local);
-                  final PointImmutable delta = delta(quadrant,
+                  final Point delta = delta(quadrant,
                                             size,
                                             local);
                   wlPointer.getPointerDevice()
@@ -110,9 +107,8 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                                        (pointerDevice,
                                         motion) -> {
                                            //TODO support one dimensional resize
-                                           final PointImmutable motionLocal = surface.local(motion.getPoint());
-                                           Point cornerPoint = new Point(motionLocal.getX()+delta.getX(),
-                                                                         motionLocal.getY()+delta.getY());
+                                           final Point motionLocal = surface.local(motion.getPoint());
+                                           Point cornerPoint = motionLocal.add(delta);
                                            requester.configure(quadrant.getValue(),
                                                                cornerPoint.getX(),
                                                                cornerPoint.getY());
@@ -120,9 +116,9 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
               });
     }
 
-    private PointImmutable delta(final WlShellSurfaceResize quadrant,
-                        final RectangleImmutable size,
-                        final PointImmutable local){
+    private Point delta(final WlShellSurfaceResize quadrant,
+                        final Rectangle size,
+                        final Point local){
         //TODO support one dimensional resize
 
         switch (quadrant){
@@ -130,25 +126,27 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                 return local;
             }
             case TOP_RIGHT:{
-                return new Point(size.getWidth() - local.getX(),
-                                 local.getY());
+                return local.toBuilder()
+                            .x(size.getWidth() - local.getX())
+                            .build();
             }
             case BOTTOM_RIGHT:{
-                return new Point(size.getWidth() - local.getX(),
-                                 size.getHeight() - local.getY());
+                return Point.builder()
+                            .x(size.getWidth() - local.getX())
+                            .y(size.getHeight() - local.getY())
+                            .build();
             }
             case BOTTOM_LEFT: {
-                return new Point(local.getX(),
-                                 size.getHeight() - local.getY());
+                return local.toBuilder().y(size.getHeight() - local.getY()).build();
             }
             default: {
-                return new Point();
+                return Point.builder().build();
             }
         }
     }
 
-    private WlShellSurfaceResize quadrant(final RectangleImmutable size,
-                                          final PointImmutable local) {
+    private WlShellSurfaceResize quadrant(final Rectangle size,
+                                          final Point local) {
         //TODO support one dimensional resize
 
         boolean left = local.getX() < size.getWidth()/2;

@@ -13,9 +13,8 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Surface;
-
-import javax.media.nativewindow.util.Rectangle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
@@ -231,10 +230,10 @@ public class WlSurfaceTest {
                          height);
         //then
         verify(this.surface,
-               times(1)).markDamaged(eq(new Rectangle(x,
-                                                      y,
-                                                      width,
-                                                      height)));
+               times(1)).markDamaged(eq(Rectangle.builder().x(x).y(
+                                                      y).width(
+                                                      width).height(
+                                                      height).build()));
     }
 
     @Test(expected = IllegalArgumentException.class)

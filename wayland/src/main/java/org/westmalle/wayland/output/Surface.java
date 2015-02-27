@@ -30,10 +30,6 @@ import org.westmalle.wayland.protocol.WlCompositor;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import javax.media.nativewindow.util.Point;
-import javax.media.nativewindow.util.PointImmutable;
-import javax.media.nativewindow.util.Rectangle;
-import javax.media.nativewindow.util.RectangleImmutable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +53,7 @@ public class Surface {
     @Nonnull
     private final List<Mat4> pendingCompositorTransforms = new LinkedList<>();
     @Nonnull
-    private       Point      pendingBufferOffset         = new Point();
+    private       Point      pendingBufferOffset         = Point.builder().build();
 
     //committed state
     @Nonnull
@@ -72,9 +68,9 @@ public class Surface {
     @Nonnull
     private Mat4    inverseTransform    = MAT4_IDENTITY;
     @Nonnull
-    private Point   position            = new Point();
+    private Point   position            = Point.builder().build();
     @Nonnull
-    private RectangleImmutable size = new Rectangle();
+    private Rectangle size = Rectangle.builder().build();
 
 
     @Nonnull
@@ -107,7 +103,7 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface markDamaged(@Nonnull final RectangleImmutable damage) {
+    public Surface markDamaged(@Nonnull final Rectangle damage) {
         final Region newDamage = this.pendingState.getDamage()
                                                   .orElse(this.regionFactory.create())
                                                   .add(damage);
@@ -125,8 +121,7 @@ public class Surface {
         this.pendingState = this.pendingState.toBuilder()
                                              .buffer(Optional.of(buffer))
                                              .build();
-        this.pendingBufferOffset = new Point(relX,
-                                             relY);
+        this.pendingBufferOffset = Point.builder().x(relX).y(relY).build();
         return this;
     }
 
@@ -147,7 +142,7 @@ public class Surface {
                                              .buffer(Optional.<WlBufferResource>empty())
                                              .damage(Optional.<Region>empty())
                                              .build();
-        this.pendingBufferOffset = new Point();
+        this.pendingBufferOffset = Point.builder().build();
         return this;
     }
 
@@ -156,7 +151,7 @@ public class Surface {
      * @return
      */
     @Nonnull
-    public PointImmutable getPosition() {
+    public Point getPosition() {
         return this.position;
     }
 
@@ -171,7 +166,7 @@ public class Surface {
         }
         //flush states
         this.state = this.pendingState;
-        this.position = this.position.translate(this.pendingBufferOffset);
+        this.position = this.position.add(this.pendingBufferOffset);
         //update transformation
         if (needsTransformUpdate()) {
             updateCompositorTransform();
@@ -197,12 +192,12 @@ public class Surface {
             final int bufferWidth = shmBuffer.getWidth();
             final int bufferHeight = shmBuffer.getHeight();
             final int scale = FastMath.round(getTransform().getColumn(3).getW());
-            this.size = new Rectangle(0,
-                                      0,
-                                      bufferWidth / scale,
-                                      bufferHeight /scale);
+            this.size = Rectangle.builder().x(0).y(
+                                      0).width(
+                                      bufferWidth / scale).height(
+                                      bufferHeight /scale).build();
         }else{
-            this.size = new Rectangle();
+            this.size = Rectangle.builder().build();
         }
     }
 
@@ -285,9 +280,8 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface setPosition(@Nonnull final PointImmutable position) {
-        this.position = new Point(position.getX(),
-                                  position.getY());
+    public Surface setPosition(@Nonnull final Point position) {
+        this.position = position;
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
@@ -307,8 +301,8 @@ public class Surface {
      * @param global
      * @return
      */
-    public PointImmutable local(final PointImmutable global) {
-        final PointImmutable position = getPosition();
+    public Point local(final Point global) {
+        final Point position = getPosition();
         final Vec4 untransformedLocalPoint = new Vec4(global.getX() - position.getX(),
                                                       global.getY() - position.getY(),
                                                       0.0f,
@@ -321,8 +315,8 @@ public class Surface {
             localPoint = this.inverseTransform.multiply(untransformedLocalPoint);
         }
 
-        return new Point(FastMath.round(localPoint.getX() / localPoint.getW()),
-                         FastMath.round(localPoint.getY() / localPoint.getW()));
+        return Point.builder().x(FastMath.round(localPoint.getX() / localPoint.getW())).y(
+                         FastMath.round(localPoint.getY() / localPoint.getW())).build();
     }
 
     /**
@@ -330,7 +324,7 @@ public class Surface {
      * @return
      */
     @Nonnull
-    public RectangleImmutable getSize() {
+    public Rectangle getSize() {
         return this.size;
     }
 

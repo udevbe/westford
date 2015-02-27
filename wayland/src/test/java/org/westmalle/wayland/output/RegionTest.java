@@ -5,9 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.media.nativewindow.util.Point;
-import javax.media.nativewindow.util.Rectangle;
-import javax.media.nativewindow.util.RectangleImmutable;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -22,74 +19,74 @@ public class RegionTest {
     @Test
     public void testAdd() throws Exception {
         //given
-        final RectangleImmutable rect0 = new Rectangle(0,
-                                                       0,
-                                                       100,
-                                                       100);
-        final RectangleImmutable rect1 = new Rectangle(50,
-                                                       50,
-                                                       100,
-                                                       100);
+        final Rectangle rect0 = Rectangle.builder().x(0).
+                                                       y(0).
+                                                       width(100).
+                                                       height(100).build();
+        final Rectangle rect1 = Rectangle.builder().x(50).
+                                                       y(50).
+        width(100).
+                height(100).build();
         this.region.add(rect0);
         //when
         this.region.add(rect1);
         //then
-        final List<RectangleImmutable> rectangleImmutables = this.region.asList();
-        assertThat(rectangleImmutables).hasSize(3);
-        assertThat(rectangleImmutables.get(0)).isEqualTo(new Rectangle(0,
-                                                                       0,
-                                                                       100,
-                                                                       50));
-        assertThat(rectangleImmutables.get(1)).isEqualTo(new Rectangle(0,
-                                                                       50,
-                                                                       150,
-                                                                       50));
-        assertThat(rectangleImmutables.get(2)).isEqualTo(new Rectangle(50,
-                                                                       100,
-                                                                       100,
-                                                                       50));
+        final List<Rectangle> Rectangles = this.region.asList();
+        assertThat(Rectangles).hasSize(3);
+        assertThat(Rectangles.get(0)).isEqualTo(Rectangle.builder().x(0).
+                                                        y(0).
+                                                        width(100).
+                height(50).build());
+        assertThat(Rectangles.get(1)).isEqualTo(Rectangle.builder().x(0).
+                                                        y(50).
+                                                        width(150).
+                height(50).build());
+        assertThat(Rectangles.get(2)).isEqualTo(Rectangle.builder().x(50).
+                                                        y(100).
+                                                        width(100).
+                height(50).build());
     }
 
     @Test
     public void testSubtract() throws Exception {
         //given
-        final RectangleImmutable rect0 = new Rectangle(0,
-                                                       0,
-                                                       100,
-                                                       100);
-        final RectangleImmutable rect1 = new Rectangle(50,
-                                                       50,
-                                                       100,
-                                                       100);
+        final Rectangle rect0 = Rectangle.builder().x(0).
+                y(0).
+                width(100).
+                height(100).build();
+        final Rectangle rect1 = Rectangle.builder().x(50).
+                y(50).
+                width(100).
+                height(100).build();
         this.region.add(rect0);
         //when
         this.region.subtract(rect1);
         //then
-        final List<RectangleImmutable> rectangleImmutables = this.region.asList();
-        assertThat(rectangleImmutables).hasSize(2);
-        assertThat(rectangleImmutables.get(0)).isEqualTo(new Rectangle(0,
-                                                                       0,
-                                                                       100,
-                                                                       50));
-        assertThat(rectangleImmutables.get(1)).isEqualTo(new Rectangle(0,
-                                                                       50,
-                                                                       50,
-                                                                       50));
+        final List<Rectangle> Rectangles = this.region.asList();
+        assertThat(Rectangles).hasSize(2);
+        assertThat(Rectangles.get(0)).isEqualTo(Rectangle.builder().x(0).
+                                                        y(0).
+                                                        width(100).
+                height(50).build());
+        assertThat(Rectangles.get(1)).isEqualTo(Rectangle.builder().x(0).
+                                                        y(50).
+                                                        width(50).
+                height(50).build());
     }
 
     @Test
     public void testContains() throws Exception {
         //given
-        final RectangleImmutable rect0 = new Rectangle(50,
-                                                       50,
-                                                       100,
-                                                       100);
+        final Rectangle rect0 = Rectangle.builder().x(50).
+                y(50).
+                width(100).
+                height(100).build();
         this.region.add(rect0);
         //when
-        final boolean contains = this.region.contains(new Point(50,
-                                                                50));
-        final boolean notContains = this.region.contains(new Point(151,
-                                                                   151));
+        final boolean contains = this.region.contains(Point.builder().x(50).
+                                                                y(50).build());
+        final boolean notContains = this.region.contains(Point.builder().x(151).
+                                                                   y(151).build());
         //then
         assertThat(contains).isTrue();
         assertThat(notContains).isFalse();

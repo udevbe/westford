@@ -14,12 +14,12 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.PointerDevice;
 import org.westmalle.wayland.output.PointerGrabMotion;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.events.Motion;
 
-import javax.media.nativewindow.util.Point;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -51,8 +51,8 @@ public class WlShellSurfaceTest {
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final Point pointerPosition = new Point(100,
-                                                100);
+        final Point pointerPosition = Point.builder().x(100).y(
+                                                100).build();
         when(pointerDevice.getPosition()).thenReturn(pointerPosition);
 
         final int serial = 12345;
@@ -62,8 +62,8 @@ public class WlShellSurfaceTest {
         final Surface surface = mock(Surface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
-        final Point surfacePosition = new Point(75,
-                                                75);
+        final Point surfacePosition = Point.builder().x(75).y(
+                                                75).build();
         when(surface.getPosition()).thenReturn(surfacePosition);
 
         final WlShellSurface wlShellSurface = new WlShellSurface(wlSurfaceResource);
@@ -81,11 +81,11 @@ public class WlShellSurfaceTest {
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
         pointerGrabMotion.motion(pointerDevice,
                                  new Motion(98765,
-                                            new Point(110,
-                                            110)));
+                                            Point.builder().x(110).y(
+                                            110).build()));
         //then
-        verify(surface).setPosition(new Point(85,
-                                              85));
+        verify(surface).setPosition(Point.builder().x(85).y(
+                                              85).build());
     }
 
     @Test

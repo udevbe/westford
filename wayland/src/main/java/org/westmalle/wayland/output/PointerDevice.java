@@ -25,8 +25,6 @@ import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
-import javax.media.nativewindow.util.Point;
-import javax.media.nativewindow.util.PointImmutable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
@@ -37,7 +35,7 @@ public class PointerDevice {
     private final EventBus     inputBus       = new EventBus();
     private final Set<Integer> pressedButtons = new HashSet<>();
 
-    private PointImmutable position = new Point();
+    private Point position = Point.builder().build();
 
     private Optional<WlSurfaceResource> grab  = Optional.empty();
     private Optional<WlSurfaceResource> focus = Optional.empty();
@@ -54,7 +52,7 @@ public class PointerDevice {
         this.compositor = compositor;
     }
 
-    public PointImmutable getPosition() {
+    public Point getPosition() {
         return this.position;
     }
 
@@ -229,8 +227,7 @@ public class PointerDevice {
                          final int time,
                          final int x,
                          final int y) {
-        this.position = new Point(x,
-                                  y);
+        this.position = Point.builder().x(x).y(y).build();
         final Optional<WlSurfaceResource> newFocus = over();
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
@@ -276,7 +273,7 @@ public class PointerDevice {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final PointImmutable relativePoint = wlSurface.getSurface()
+            final Point relativePoint = wlSurface.getSurface()
                                                           .local(getPosition());
             pointerResource.get()
                            .motion(time,
@@ -291,7 +288,7 @@ public class PointerDevice {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final PointImmutable relativePoint = wlSurface.getSurface()
+            final Point relativePoint = wlSurface.getSurface()
                                                           .local(getPosition());
             pointerResource.get()
                            .enter(nextPointerSerial(),

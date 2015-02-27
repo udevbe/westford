@@ -19,11 +19,11 @@ import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlRegionRequests;
 import org.freedesktop.wayland.server.WlRegionResource;
+import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Region;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import javax.media.nativewindow.util.Rectangle;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -70,10 +70,10 @@ public class WlRegion extends EventBus implements WlRegionRequests, ProtocolObje
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        this.region.add(new Rectangle(x,
-                                      y,
-                                      width,
-                                      height));
+        this.region.add(Rectangle.builder().x(x).y(
+                                      y).width(
+                                      width).height(
+                                      height).build());
     }
 
     @Override
@@ -85,10 +85,10 @@ public class WlRegion extends EventBus implements WlRegionRequests, ProtocolObje
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        this.region.subtract(new Rectangle(x,
-                                           y,
-                                           width,
-                                           height));
+        this.region.subtract(Rectangle.builder().x(x).y(
+                y).width(
+                width).height(
+                height).build());
     }
 
     public Region getRegion() {
