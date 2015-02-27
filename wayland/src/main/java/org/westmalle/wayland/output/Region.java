@@ -37,8 +37,9 @@ public class Region {
     public List<RectangleImmutable> asList() {
         //int pointer
         final IntByReference n_rects = new IntByReference();
-        final pixman_box32 pixman_box32_array = Pixman1Library.INSTANCE.pixman_region32_rectangles(getPixmanRegion32(),
-                                                                                                   n_rects);
+        final pixman_box32 pixman_box32_array = Pixman1Library.INSTANCE
+                                                              .pixman_region32_rectangles(getPixmanRegion32(),
+                                                                                          n_rects);
         final int size = n_rects.getValue();
         final pixman_box32[] pixman_box32s = (pixman_box32[]) pixman_box32_array.toArray(size);
 
@@ -59,31 +60,53 @@ public class Region {
 
     public Region add(@Nonnull final RectangleImmutable rectangle) {
         //FIXME check result
-        final int result = Pixman1Library.INSTANCE.pixman_region32_union_rect(getPixmanRegion32(),
-                                                                              getPixmanRegion32(),
-                                                                              rectangle.getX(),
-                                                                              rectangle.getY(),
-                                                                              rectangle.getWidth(),
-                                                                              rectangle.getHeight());
+        final int result = Pixman1Library.INSTANCE
+                                         .pixman_region32_union_rect(getPixmanRegion32(),
+                                                                     getPixmanRegion32(),
+                                                                     rectangle.getX(),
+                                                                     rectangle.getY(),
+                                                                     rectangle.getWidth(),
+                                                                     rectangle.getHeight());
 
         return this;
     }
 
     public Region subtract(@Nonnull final RectangleImmutable rectangle) {
         final pixman_region32 delta_pixman_region32 = new pixman_region32();
-        Pixman1Library.INSTANCE.pixman_region32_init_rect(delta_pixman_region32,
-                                                          rectangle.getX(),
-                                                          rectangle.getY(),
-                                                          rectangle.getWidth(),
-                                                          rectangle.getHeight());
+        Pixman1Library.INSTANCE
+                      .pixman_region32_init_rect(delta_pixman_region32,
+                                                 rectangle.getX(),
+                                                 rectangle.getY(),
+                                                 rectangle.getWidth(),
+                                                 rectangle.getHeight());
         //FIXME check result
-        final int result = Pixman1Library.INSTANCE.pixman_region32_subtract(getPixmanRegion32(),
-                                                                            getPixmanRegion32(),
-                                                                            delta_pixman_region32);
+        final int result = Pixman1Library.INSTANCE
+                                         .pixman_region32_subtract(getPixmanRegion32(),
+                                                                   getPixmanRegion32(),
+                                                                   delta_pixman_region32);
         return this;
     }
 
-    public boolean contains(final PointImmutable point) {
+    public boolean contains(@Nonnull final PointImmutable point) {
+        return Pixman1Library.INSTANCE
+                             .pixman_region32_contains_point(getPixmanRegion32(),
+                                                             point.getX(),
+                                                             point.getY(),
+                                                             null) != 0;
+    }
+
+    public boolean contains(@Nonnull final RectangleImmutable clipping,
+                            @Nonnull final PointImmutable point) {
+        //TODO test this method
+        //FIXME check result
+        final int result = Pixman1Library.INSTANCE
+                                         .pixman_region32_intersect_rect(getPixmanRegion32(),
+                                                                         getPixmanRegion32(),
+                                                                         clipping.getX(),
+                                                                         clipping.getY(),
+                                                                         clipping.getWidth(),
+                                                                         clipping.getHeight());
+
         return Pixman1Library.INSTANCE.pixman_region32_contains_point(getPixmanRegion32(),
                                                                       point.getX(),
                                                                       point.getY(),
