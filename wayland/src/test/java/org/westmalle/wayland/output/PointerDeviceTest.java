@@ -44,13 +44,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.builder().x(x0).y(
-                                              y0).build();
+        final Point pos0 = Point.create(x0,
+                                        y0);
 
         final int x1 = 500;
         final int y1 = 600;
-        final Point pos1 = Point.builder().x(x1).y(
-                                              y1).build();
+        final Point pos1 = Point.create(x1,
+                                        y1);
 
         final int button0 = 1;
 
@@ -101,30 +101,30 @@ public class PointerDeviceTest {
         when(wlPointerResource0.getClient()).thenReturn(client0);
         when(wlPointerResource1.getClient()).thenReturn(client1);
 
-        final Point surfacePos0 = Point.builder().x(10).y(
-                                                     10).build();
+        final Point surfacePos0 = Point.create(10,
+                                               10);
         final int relX0 = x0 - 10;
         final int relY0 = y0 - 10;
-        final Point relPos0 = Point.builder().x(relX0).y(
-                                                 relY0).build();
+        final Point relPos0 = Point.create(relX0,
+                                           relY0);
         when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
-        final Point surfacePos1 = Point.builder().x(400).y(
-                                                     400).build();
+        final Point surfacePos1 = Point.create(400,
+                                               400);
         final int relX1 = x1 - 400;
         final int relY1 = y1 - 400;
-        final Point relPos1 = Point.builder().x(relX1).y(
-                                                 relY1).build();
+        final Point relPos1 = Point.create(relX1,
+                                           relY1);
         when(surface1.local(pos1)).thenReturn(relPos1);
         when(region1.contains(relPos1)).thenReturn(true);
         when(surface1.getPosition()).thenReturn(surfacePos1);
 
         final int relX3 = x0 - 400;
         final int relY3 = y0 - 400;
-        final Point relPos3 = Point.builder().x(relX3).y(
-                                                 relY3).build();
+        final Point relPos3 = Point.create(relX3,
+                                           relY3);
         when(surface0.local(pos1)).thenReturn(relPos3);
 
         final int serial = 90879;
@@ -211,13 +211,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.builder().x(x0).y(
-                                              y0).build();
+        final Point pos0 = Point.create(x0,
+                                        y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final Point pos1 = Point.builder().x(x1).y(
-                                              y1).build();
+        final Point pos1 = Point.create(x1,
+                                        y1);
 
         final Client client0 = mock(Client.class);
         final Client client1 = mock(Client.class);
@@ -268,24 +268,22 @@ public class PointerDeviceTest {
 
         final int relX0 = 50;
         final int relY0 = 100;
-        final Point relPos0 = Point.builder().x(relX0).y(
-                relY0).build();
+        final Point relPos0 = Point.create(relX0,
+                                           relY0);
         when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
-        final Point surfacePos0 = Point.builder().x(x0 - relX0).y(
-                y0 - relY0).build();
+        final Point surfacePos0 = pos0.subtract(relPos0);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int relX1 = 0;
         final int relY1 = 100;
-        final Point relPos1 = Point.builder().x(relX1).y(
-                relY1).build();
+        final Point relPos1 = Point.create(relX1,
+                                           relY1);
         when(surface1.local(pos1)).thenReturn(relPos1);
         when(region1.contains(relPos1)).thenReturn(true);
 
-        final Point surfacePos1 = Point.builder().x(x1 - relX1).y(
-                y1 - relY1).build();
+        final Point surfacePos1 = pos1.subtract(relPos1);
         when(surface1.getPosition()).thenReturn(surfacePos1);
 
         final int serial0 = 90879;
@@ -365,13 +363,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.builder().x(x0).y(
-                y0).build();
+        final Point pos0 = Point.create(x0,
+                                        y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final Point pos1 = Point.builder().x(x1).y(
-                y1).build();
+        final Point pos1 = Point.create(x1,
+                                        y1);
 
         final Client client0 = mock(Client.class);
 
@@ -405,19 +403,18 @@ public class PointerDeviceTest {
 
         final int relX0 = 50;
         final int relY0 = 100;
-        final Point relPos0 = Point.builder().x(relX0).y(
-                relY0).build();
+        final Point relPos0 = Point.create(relX0,
+                                           relY0);
         when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
-        final Point surfacePos0 = Point.builder().x(x0 - relX0).y(
-                y0 - relY0).build();
+        final Point surfacePos0 = pos0.subtract(relPos0);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int relX1 = 0;
         final int relY1 = 100;
-        final Point relPos1 = Point.builder().x(relX1).y(
-                relY1).build();
+        final Point relPos1 = Point.create(relX1,
+                                           relY1);
         when(surface0.local(pos1)).thenReturn(relPos1);
         when(region0.contains(relPos1)).thenReturn(false);
 
@@ -478,13 +475,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.builder().x(x0).y(
-                y0).build();
+        final Point pos0 = Point.create(x0,
+                                        y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final Point pos1 = Point.builder().x(x1).y(
-                y1).build();
+        final Point pos1 = Point.create(x1,
+                                        y1);
 
         final Client client0 = mock(Client.class);
 
@@ -516,20 +513,20 @@ public class PointerDeviceTest {
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
 
-        final Point surfacePos0 = Point.builder().x(100).y(
-                100).build();
+        final Point surfacePos0 = Point.create(100,
+                                               100);
         final int relX0 = x0 - 100;
         final int relY0 = y0 - 100;
-        final Point relPos0 = Point.builder().x(relX0).y(
-                relY0).build();
+        final Point relPos0 = Point.create(relX0,
+                                           relY0);
         when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(false);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int relX1 = x1 - 100;
         final int relY1 = y1 - 100;
-        final Point relPos1 = Point.builder().x(relX1).y(
-                relY1).build();
+        final Point relPos1 = Point.create(relX1,
+                                           relY1);
         when(surface0.local(pos1)).thenReturn(relPos1);
         when(region0.contains(relPos1)).thenReturn(true);
 
@@ -586,13 +583,13 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.builder().x(x0).y(
-                y0).build();
+        final Point pos0 = Point.create(x0,
+                                        y0);
 
         final int x1 = 100;
         final int y1 = 200;
-        final Point pos1 = Point.builder().x(x1).y(
-                y1).build();
+        final Point pos1 = Point.create(x1,
+                                        y1);
 
         final int button0 = 1;
 
@@ -626,12 +623,12 @@ public class PointerDeviceTest {
 
         when(wlPointerResource0.getClient()).thenReturn(client0);
 
-        final Point surfacePos0 = Point.builder().x(100).y(
-                100).build();
+        final Point surfacePos0 = Point.create(100,
+                                               100);
         final int relX0 = x0 - 100;
         final int relY0 = y0 - 100;
-        final Point relPos0 = Point.builder().x(relX0).y(
-                relY0).build();
+        final Point relPos0 = Point.create(relX0,
+                                           relY0);
         when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(false);
 
@@ -639,8 +636,8 @@ public class PointerDeviceTest {
 
         final int relX1 = x1 - 100;
         final int relY1 = y1 - 100;
-        final Point relPos1 = Point.builder().x(relX1).y(
-                relY1).build();
+        final Point relPos1 = Point.create(relX1,
+                                           relY1);
         when(surface0.local(pos1)).thenReturn(relPos1);
         when(region0.contains(relPos1)).thenReturn(true);
 
@@ -713,8 +710,8 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.builder().x(x0).y(
-                y0).build();
+        final Point pos0 = Point.create(x0,
+                                        y0);
 
         final int button0 = 1;
 
@@ -750,13 +747,13 @@ public class PointerDeviceTest {
 
         final int relX0 = 50;
         final int relY0 = 100;
-        final Point relPos0 = Point.builder().x(relX0).y(
-                relY0).build();
+        final Point relPos0 = Point.create(relX0,
+                                           relY0);
         when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
-        final Point surfacePos0 = Point.builder().x(x0 - relX0).y(
-                y0 - relY0).build();
+
+        final Point surfacePos0 = pos0.subtract(relPos0);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int serial0 = 90879;
@@ -825,8 +822,8 @@ public class PointerDeviceTest {
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.builder().x(x0).y(
-                y0).build();
+        final Point pos0 = Point.create(x0,
+                                        y0);
 
         final int button0 = 1;
 
@@ -862,13 +859,12 @@ public class PointerDeviceTest {
 
         final int relX0 = 50;
         final int relY0 = 100;
-        final Point relPos0 = Point.builder().x(relX0).y(
-                relY0).build();
+        final Point relPos0 = Point.create(relX0,
+                                           relY0);
         when(surface0.local(pos0)).thenReturn(relPos0);
         when(region0.contains(relPos0)).thenReturn(true);
 
-        final Point surfacePos0 = Point.builder().x(x0 - relX0).y(
-                y0 - relY0).build();
+        final Point surfacePos0 = pos0.subtract(relPos0);
         when(surface0.getPosition()).thenReturn(surfacePos0);
 
         final int serial0 = 90879;

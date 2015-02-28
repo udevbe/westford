@@ -35,7 +35,7 @@ public class PointerDevice {
     private final EventBus     inputBus       = new EventBus();
     private final Set<Integer> pressedButtons = new HashSet<>();
 
-    private Point position = Point.builder().build();
+    private Point position = Point.ZERO;
 
     private Optional<WlSurfaceResource> grab  = Optional.empty();
     private Optional<WlSurfaceResource> focus = Optional.empty();
@@ -215,7 +215,8 @@ public class PointerDevice {
                     wlSurfaceResource = Optional.of(surfaceResource);
                     break;
                 }
-            }else{
+            }
+            else {
                 wlSurfaceResource = Optional.of(surfaceResource);
                 break;
             }
@@ -227,7 +228,8 @@ public class PointerDevice {
                          final int time,
                          final int x,
                          final int y) {
-        this.position = Point.builder().x(x).y(y).build();
+        this.position = Point.create(x,
+                                     y);
         final Optional<WlSurfaceResource> newFocus = over();
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
@@ -274,7 +276,7 @@ public class PointerDevice {
         if (pointerResource.isPresent()) {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Point relativePoint = wlSurface.getSurface()
-                                                          .local(getPosition());
+                                                 .local(getPosition());
             pointerResource.get()
                            .motion(time,
                                    Fixed.create(relativePoint.getX()),
@@ -289,7 +291,7 @@ public class PointerDevice {
         if (pointerResource.isPresent()) {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Point relativePoint = wlSurface.getSurface()
-                                                          .local(getPosition());
+                                                 .local(getPosition());
             pointerResource.get()
                            .enter(nextPointerSerial(),
                                   wlSurfaceResource,

@@ -70,10 +70,10 @@ public class WlRegion extends EventBus implements WlRegionRequests, ProtocolObje
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        this.region.add(Rectangle.builder().x(x).y(
-                                      y).width(
-                                      width).height(
-                                      height).build());
+        this.region.add(Rectangle.create(x,
+                                         y,
+                                         width,
+                                         height));
     }
 
     @Override
@@ -85,10 +85,10 @@ public class WlRegion extends EventBus implements WlRegionRequests, ProtocolObje
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        this.region.subtract(Rectangle.builder().x(x).y(
-                y).width(
-                width).height(
-                height).build());
+        this.region.subtract(Rectangle.create(x,
+                                              y,
+                                              width,
+                                              height));
     }
 
     public Region getRegion() {

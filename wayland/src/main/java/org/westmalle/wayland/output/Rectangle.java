@@ -6,8 +6,25 @@ import javax.annotation.Nonnegative;
 
 @AutoValue
 public abstract class Rectangle {
+
+    public static final Rectangle ZERO = builder().build();
+
+    public static Rectangle create(final int x,
+                                   final int y,
+                                   @Nonnegative final int width,
+                                   @Nonnegative final int height) {
+        return builder().x(x)
+                        .y(y)
+                        .width(width)
+                        .height(height)
+                        .build();
+    }
+
     public static Builder builder() {
-        return new AutoValue_Rectangle.Builder().x(0).y(0).width(0).height(0);
+        return new AutoValue_Rectangle.Builder().x(0)
+                                                .y(0)
+                                                .width(0)
+                                                .height(0);
     }
 
     public abstract int getX();
@@ -18,11 +35,9 @@ public abstract class Rectangle {
 
     public abstract int getHeight();
 
-    public Point getPosition(){
-        return Point.builder()
-                       .x(getX())
-                       .y(getY())
-                       .build();
+    public Point getPosition() {
+        return Point.create(getX(),
+                            getY());
     }
 
     @AutoValue.Builder

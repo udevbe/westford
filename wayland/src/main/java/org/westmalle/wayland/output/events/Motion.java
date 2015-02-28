@@ -15,10 +15,8 @@ package org.westmalle.wayland.output.events;
 
 import org.westmalle.wayland.output.Point;
 
-import javax.media.nativewindow.util.PointImmutable;
-
 public class Motion {
-    private final int time;
+    private final int   time;
     private final Point point;
 
     public Motion(final int time,

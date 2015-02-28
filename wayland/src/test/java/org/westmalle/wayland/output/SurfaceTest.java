@@ -1,10 +1,6 @@
 package org.westmalle.wayland.output;
 
-import org.freedesktop.wayland.server.ShmBuffer;
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlCallbackResource;
-import org.freedesktop.wayland.server.WlCompositorResource;
-import org.freedesktop.wayland.server.WlRegionResource;
+import org.freedesktop.wayland.server.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +9,6 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.protocol.WlCompositor;
-
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
@@ -33,7 +28,7 @@ public class SurfaceTest {
     private Surface              surface;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         mockStatic(ShmBuffer.class);
     }
 
@@ -52,10 +47,10 @@ public class SurfaceTest {
         final Region region = mock(Region.class);
         when(region.add(any())).thenReturn(region);
         when(this.regionFactory.create()).thenReturn(region);
-        final Rectangle damage = Rectangle.builder().x(100).
-                                                        y(100).
-                                                        width(20).
-                                                        height(50).build();
+        final Rectangle damage = Rectangle.create(100,
+                                                  100,
+                                                  20,
+                                                  50);
         //when
         this.surface.markDamaged(damage);
         //then
@@ -93,7 +88,10 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .isPresent()).isTrue();
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder().x(0).y(0).width(200).height(300).build());
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder()
+                                                              .width(200)
+                                                              .height(300)
+                                                              .build());
         verify(compositor,
                times(1)).requestRender();
     }
@@ -129,7 +127,10 @@ public class SurfaceTest {
                                   relY);
         this.surface.commit();
         //then
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder().x(0).y(0).width(200).height(300).build());
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder()
+                                                              .width(200)
+                                                              .height(300)
+                                                              .build());
         verify(buffer,
                times(1)).release();
     }
@@ -179,7 +180,10 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .get()).isSameAs(buffer1);
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder().x(0).y(0).width(123).height(456).build());
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder()
+                                                              .width(123)
+                                                              .height(456)
+                                                              .build());
 
     }
 
@@ -209,7 +213,7 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .isPresent()).isFalse();
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder().x(0).y(0).width(0).height(0).build());
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.ZERO);
         verify(compositor,
                times(1)).requestRender();
     }
@@ -273,15 +277,15 @@ public class SurfaceTest {
         final Compositor compositor = mock(Compositor.class);
         when(wlCompositor.getCompositor()).thenReturn(compositor);
 
-        final Point absoluteCoordinate = Point.builder().x(150).
-                y(150).build();
-        final Point surfaceCoordinate = Point.builder().x(100).
-                                                          y(100).build();
+        final Point absoluteCoordinate = Point.create(150,
+                                                      150);
+        final Point surfaceCoordinate = Point.create(100,
+                                                     100);
         this.surface.setPosition(surfaceCoordinate);
         //when
         final Point relativeCoordinate = this.surface.local(absoluteCoordinate);
         //then
-        assertThat(relativeCoordinate).isEqualTo(Point.builder().x(50).
-                y(50).build());
+        assertThat(relativeCoordinate).isEqualTo(Point.create(50,
+                                                              50));
     }
 }

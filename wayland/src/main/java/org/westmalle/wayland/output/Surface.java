@@ -20,12 +20,7 @@ import com.hackoeur.jglm.Mat4;
 import com.hackoeur.jglm.Matrices;
 import com.hackoeur.jglm.Vec4;
 import com.hackoeur.jglm.support.FastMath;
-
-import org.freedesktop.wayland.server.ShmBuffer;
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlCallbackResource;
-import org.freedesktop.wayland.server.WlCompositorResource;
-import org.freedesktop.wayland.server.WlRegionResource;
+import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.protocol.WlCompositor;
 
 import javax.annotation.Nonnegative;
@@ -49,28 +44,30 @@ public class Surface {
     @Nonnull
     private SurfaceState pendingState = SurfaceState.builder()
                                                     .build();
+
     //pending derivable states
     @Nonnull
     private final List<Mat4> pendingCompositorTransforms = new LinkedList<>();
     @Nonnull
-    private       Point      pendingBufferOffset         = Point.builder().build();
+    private       Point      pendingBufferOffset         = Point.ZERO;
 
     //committed state
     @Nonnull
     private SurfaceState state = SurfaceState.builder()
                                              .build();
+
     //committed derived states
-    private boolean destroyed           = false;
+    private boolean   destroyed           = false;
     @Nonnull
-    private Mat4    compositorTransform = MAT4_IDENTITY;
+    private Mat4      compositorTransform = MAT4_IDENTITY;
     @Nonnull
-    private Mat4    transform           = MAT4_IDENTITY;
+    private Mat4      transform           = MAT4_IDENTITY;
     @Nonnull
-    private Mat4    inverseTransform    = MAT4_IDENTITY;
+    private Mat4      inverseTransform    = MAT4_IDENTITY;
     @Nonnull
-    private Point   position            = Point.builder().build();
+    private Point     position            = Point.ZERO;
     @Nonnull
-    private Rectangle size = Rectangle.builder().build();
+    private Rectangle size                = Rectangle.ZERO;
 
 
     @Nonnull
@@ -121,7 +118,8 @@ public class Surface {
         this.pendingState = this.pendingState.toBuilder()
                                              .buffer(Optional.of(buffer))
                                              .build();
-        this.pendingBufferOffset = Point.builder().x(relX).y(relY).build();
+        this.pendingBufferOffset = Point.create(relX,
+                                                relY);
         return this;
     }
 
@@ -142,12 +140,13 @@ public class Surface {
                                              .buffer(Optional.<WlBufferResource>empty())
                                              .damage(Optional.<Region>empty())
                                              .build();
-        this.pendingBufferOffset = Point.builder().build();
+        this.pendingBufferOffset = Point.ZERO;
         return this;
     }
 
     /**
      * Compositor scoped position
+     *
      * @return
      */
     @Nonnull
@@ -185,19 +184,21 @@ public class Surface {
     public void updateSize() {
         //TODO test this method
         final Optional<WlBufferResource> buffer = getState().getBuffer();
-        if(buffer.isPresent()){
+        if (buffer.isPresent()) {
             final WlBufferResource wlBufferResource = buffer.get();
             //FIXME we shouldn't assume the buffer to always be an shm buffer.
             final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
             final int bufferWidth = shmBuffer.getWidth();
             final int bufferHeight = shmBuffer.getHeight();
-            final int scale = FastMath.round(getTransform().getColumn(3).getW());
-            this.size = Rectangle.builder().x(0).y(
-                                      0).width(
-                                      bufferWidth / scale).height(
-                                      bufferHeight /scale).build();
-        }else{
-            this.size = Rectangle.builder().build();
+            final int scale = FastMath.round(getTransform().getColumn(3)
+                                                           .getW());
+            this.size = Rectangle.builder()
+                                 .width(bufferWidth / scale)
+                                 .height(bufferHeight / scale)
+                                 .build();
+        }
+        else {
+            this.size = Rectangle.ZERO;
         }
     }
 
@@ -299,6 +300,7 @@ public class Surface {
      * Translate a compositor scoped coordinate to a surface scoped coordinate.
      *
      * @param global
+     *
      * @return
      */
     public Point local(final Point global) {
@@ -315,12 +317,13 @@ public class Surface {
             localPoint = this.inverseTransform.multiply(untransformedLocalPoint);
         }
 
-        return Point.builder().x(FastMath.round(localPoint.getX() / localPoint.getW())).y(
-                         FastMath.round(localPoint.getY() / localPoint.getW())).build();
+        return Point.create(FastMath.round(localPoint.getX() / localPoint.getW()),
+                            FastMath.round(localPoint.getY() / localPoint.getW()));
     }
 
     /**
      * Surface scoped size and position
+     *
      * @return
      */
     @Nonnull

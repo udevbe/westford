@@ -22,8 +22,8 @@ import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.freedesktop.wayland.shared.WlSurfaceError;
 import org.westmalle.wayland.output.Rectangle;
-import org.westmalle.wayland.output.Transforms;
 import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.Transforms;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -159,10 +159,10 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        getSurface().markDamaged(Rectangle.builder().x(x).y(
-                                                   y).width(
-                                                   width).height(
-                                                   height).build());
+        getSurface().markDamaged(Rectangle.create(x,
+                                                  y,
+                                                  width,
+                                                  height));
     }
 
     @Override

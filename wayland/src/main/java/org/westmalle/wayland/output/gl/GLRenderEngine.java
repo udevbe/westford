@@ -26,7 +26,6 @@ import org.westmalle.wayland.output.ShmRenderEngine;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.media.nativewindow.util.PointImmutable;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GLAutoDrawable;

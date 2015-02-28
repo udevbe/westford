@@ -51,8 +51,8 @@ public class WlShellSurfaceTest {
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final Point pointerPosition = Point.builder().x(100).y(
-                                                100).build();
+        final Point pointerPosition = Point.create(100,
+                                                   100);
         when(pointerDevice.getPosition()).thenReturn(pointerPosition);
 
         final int serial = 12345;
@@ -62,8 +62,8 @@ public class WlShellSurfaceTest {
         final Surface surface = mock(Surface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
-        final Point surfacePosition = Point.builder().x(75).y(
-                                                75).build();
+        final Point surfacePosition = Point.create(75,
+                                                   75);
         when(surface.getPosition()).thenReturn(surfacePosition);
 
         final WlShellSurface wlShellSurface = new WlShellSurface(wlSurfaceResource);
@@ -81,11 +81,11 @@ public class WlShellSurfaceTest {
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
         pointerGrabMotion.motion(pointerDevice,
                                  new Motion(98765,
-                                            Point.builder().x(110).y(
-                                            110).build()));
+                                            Point.create(110,
+                                                         110)));
         //then
-        verify(surface).setPosition(Point.builder().x(85).y(
-                                              85).build());
+        verify(surface).setPosition(Point.create(85,
+                                                 85));
     }
 
     @Test

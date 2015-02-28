@@ -35,8 +35,8 @@ public class Region {
         //int pointer
         final IntByReference n_rects = new IntByReference();
         final pixman_box32 pixman_box32_array = Pixman1Library.INSTANCE
-                                                              .pixman_region32_rectangles(getPixmanRegion32(),
-                                                                                          n_rects);
+                .pixman_region32_rectangles(getPixmanRegion32(),
+                                            n_rects);
         final int size = n_rects.getValue();
         final pixman_box32[] pixman_box32s = (pixman_box32[]) pixman_box32_array.toArray(size);
 
@@ -47,19 +47,22 @@ public class Region {
 
             final int width = pixman_box32.x2 - x;
             final int height = pixman_box32.y2 - y;
-            boxes.add(Rectangle.builder().x(x).y(y).width(width).height(height).build());
+            boxes.add(Rectangle.create(x,
+                                       y,
+                                       width,
+                                       height));
         }
         return boxes;
     }
 
     public Region add(@Nonnull final Rectangle rectangle) {
         Pixman1Library.INSTANCE
-                      .pixman_region32_union_rect(getPixmanRegion32(),
-                                                  getPixmanRegion32(),
-                                                  rectangle.getX(),
-                                                  rectangle.getY(),
-                                                  rectangle.getWidth(),
-                                                  rectangle.getHeight());
+                .pixman_region32_union_rect(getPixmanRegion32(),
+                                            getPixmanRegion32(),
+                                            rectangle.getX(),
+                                            rectangle.getY(),
+                                            rectangle.getWidth(),
+                                            rectangle.getHeight());
 
         return this;
     }
@@ -67,24 +70,24 @@ public class Region {
     public Region subtract(@Nonnull final Rectangle rectangle) {
         final pixman_region32 delta_pixman_region32 = new pixman_region32();
         Pixman1Library.INSTANCE
-                      .pixman_region32_init_rect(delta_pixman_region32,
-                                                 rectangle.getX(),
-                                                 rectangle.getY(),
-                                                 rectangle.getWidth(),
-                                                 rectangle.getHeight());
+                .pixman_region32_init_rect(delta_pixman_region32,
+                                           rectangle.getX(),
+                                           rectangle.getY(),
+                                           rectangle.getWidth(),
+                                           rectangle.getHeight());
         Pixman1Library.INSTANCE
-                      .pixman_region32_subtract(getPixmanRegion32(),
-                                                getPixmanRegion32(),
-                                                delta_pixman_region32);
+                .pixman_region32_subtract(getPixmanRegion32(),
+                                          getPixmanRegion32(),
+                                          delta_pixman_region32);
         return this;
     }
 
     public boolean contains(@Nonnull final Point point) {
         return Pixman1Library.INSTANCE
-                             .pixman_region32_contains_point(getPixmanRegion32(),
-                                                             point.getX(),
-                                                             point.getY(),
-                                                             null) != 0;
+                       .pixman_region32_contains_point(getPixmanRegion32(),
+                                                       point.getX(),
+                                                       point.getY(),
+                                                       null) != 0;
     }
 
     public boolean contains(@Nonnull final Rectangle clipping,
@@ -92,21 +95,21 @@ public class Region {
         //TODO test this method
 
         //fast path
-        if(clipping.getWidth() == 0 && clipping.getHeight() == 0){
+        if (clipping.getWidth() == 0 && clipping.getHeight() == 0) {
             return false;
         }
         Pixman1Library.INSTANCE
-                      .pixman_region32_intersect_rect(getPixmanRegion32(),
-                                                      getPixmanRegion32(),
-                                                      clipping.getX(),
-                                                      clipping.getY(),
-                                                      clipping.getWidth(),
-                                                      clipping.getHeight());
+                .pixman_region32_intersect_rect(getPixmanRegion32(),
+                                                getPixmanRegion32(),
+                                                clipping.getX(),
+                                                clipping.getY(),
+                                                clipping.getWidth(),
+                                                clipping.getHeight());
         return Pixman1Library.INSTANCE
-                             .pixman_region32_contains_point(getPixmanRegion32(),
-                                                             point.getX(),
-                                                             point.getY(),
-                                                             null) != 0;
+                       .pixman_region32_contains_point(getPixmanRegion32(),
+                                                       point.getX(),
+                                                       point.getY(),
+                                                       null) != 0;
     }
 
     public pixman_region32 getPixmanRegion32() {

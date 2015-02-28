@@ -107,8 +107,8 @@ public class GLRenderEngineTest {
         when(surfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
-        final Point position = Point.builder().x(-10).y(
-                                                  45).build();
+        final Point position = Point.create(-10,
+                                            45);
         when(surface.getPosition()).thenReturn(position);
 
         final ShmBuffer buffer = mock(ShmBuffer.class);

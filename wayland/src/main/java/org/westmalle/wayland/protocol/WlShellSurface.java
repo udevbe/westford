@@ -24,13 +24,9 @@ import org.westmalle.wayland.output.Surface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-
 import java.util.Set;
 
-import static org.freedesktop.wayland.shared.WlShellSurfaceResize.BOTTOM_LEFT;
-import static org.freedesktop.wayland.shared.WlShellSurfaceResize.BOTTOM_RIGHT;
-import static org.freedesktop.wayland.shared.WlShellSurfaceResize.TOP_LEFT;
-import static org.freedesktop.wayland.shared.WlShellSurfaceResize.TOP_RIGHT;
+import static org.freedesktop.wayland.shared.WlShellSurfaceResize.*;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
 public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
@@ -67,14 +63,15 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                       final int grabSerial,
                       final Surface surface) {
         final Point pointerPosition = wlPointer.getPointerDevice()
-                                                        .getPosition();
+                                               .getPosition();
         final Point surfacePosition = surface.getPosition();
         final Point pointerOffset = pointerPosition.subtract(surfacePosition);
         wlPointer.getPointerDevice()
                  .grabMotion(this.wlSurfaceResource,
                              grabSerial,
                              (pointerDevice,
-                              motion) -> surface.setPosition(motion.getPoint().subtract(pointerOffset)));
+                              motion) -> surface.setPosition(motion.getPoint()
+                                                                   .subtract(pointerOffset)));
     }
 
     @Override
@@ -91,7 +88,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
         wlSeat.getOptionalWlPointer()
               .ifPresent(wlPointer -> {
                   final Point pointerStartPos = wlPointer.getPointerDevice()
-                                                                  .getPosition();
+                                                         .getPosition();
 
                   final Point local = surface.local(pointerStartPos);
                   final Rectangle size = surface.getSize();
@@ -118,29 +115,29 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
     private Point delta(final WlShellSurfaceResize quadrant,
                         final Rectangle size,
-                        final Point local){
+                        final Point local) {
         //TODO support one dimensional resize
 
-        switch (quadrant){
-            case TOP_LEFT:{
+        switch (quadrant) {
+            case TOP_LEFT: {
                 return local;
             }
-            case TOP_RIGHT:{
+            case TOP_RIGHT: {
                 return local.toBuilder()
                             .x(size.getWidth() - local.getX())
                             .build();
             }
-            case BOTTOM_RIGHT:{
-                return Point.builder()
-                            .x(size.getWidth() - local.getX())
+            case BOTTOM_RIGHT: {
+                return Point.create(size.getWidth() - local.getX(),
+                                    size.getHeight() - local.getY());
+            }
+            case BOTTOM_LEFT: {
+                return local.toBuilder()
                             .y(size.getHeight() - local.getY())
                             .build();
             }
-            case BOTTOM_LEFT: {
-                return local.toBuilder().y(size.getHeight() - local.getY()).build();
-            }
             default: {
-                return Point.builder().build();
+                return Point.ZERO;
             }
         }
     }
@@ -149,21 +146,19 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                                           final Point local) {
         //TODO support one dimensional resize
 
-        boolean left = local.getX() < size.getWidth()/2;
-        boolean  top = local.getY() < size.getHeight()/2;
+        final boolean left = local.getX() < size.getWidth() / 2;
+        final boolean top = local.getY() < size.getHeight() / 2;
 
-        if(top && left){
+        if (top && left) {
             return TOP_LEFT;
         }
-        else
-        if(top){
+        else if (top) {
             return TOP_RIGHT;
         }
-        else
-        if(left){
+        else if (left) {
             return BOTTOM_LEFT;
         }
-        else{
+        else {
             return BOTTOM_RIGHT;
         }
     }

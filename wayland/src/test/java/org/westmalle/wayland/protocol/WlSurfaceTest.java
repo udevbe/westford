@@ -230,10 +230,10 @@ public class WlSurfaceTest {
                          height);
         //then
         verify(this.surface,
-               times(1)).markDamaged(eq(Rectangle.builder().x(x).y(
-                                                      y).width(
-                                                      width).height(
-                                                      height).build()));
+               times(1)).markDamaged(eq(Rectangle.create(x,
+                                                         y,
+                                                         width,
+                                                         height)));
     }
 
     @Test(expected = IllegalArgumentException.class)
