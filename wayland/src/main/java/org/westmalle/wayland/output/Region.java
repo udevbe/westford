@@ -21,10 +21,44 @@ import org.freedesktop.pixman1.pixman_region32;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @AutoFactory(className = "RegionFactory")
 public class Region {
+    private static final List<Rectangle> INFINITE_RECT = Collections.singletonList(Rectangle.create(Short.MIN_VALUE,
+                                                                                                    Short.MIN_VALUE,
+                                                                                                    Integer.MAX_VALUE,
+                                                                                                    Integer.MAX_VALUE));
+
+    public static final Region INFINITE = new Region() {
+        @Override
+        public List<Rectangle> asList() {
+            return INFINITE_RECT;
+        }
+
+        @Override
+        public Region add(@Nonnull final Rectangle rectangle) {
+            return this;
+        }
+
+        @Override
+        public Region subtract(@Nonnull final Rectangle rectangle) {
+            return this;
+        }
+
+        @Override
+        public boolean contains(@Nonnull final Rectangle clipping,
+                                @Nonnull final Point point) {
+            return new Region().add(clipping)
+                               .contains(point);
+        }
+
+        @Override
+        public boolean contains(@Nonnull final Point point) {
+            return true;
+        }
+    };
 
     private final pixman_region32 pixman_region32 = new pixman_region32();
 

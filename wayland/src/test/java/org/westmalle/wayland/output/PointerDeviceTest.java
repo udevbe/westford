@@ -887,13 +887,56 @@ public class PointerDeviceTest {
     }
 
     @Test
-    public void testMove() throws Exception {
+    public void testOver() throws Exception {
         //given
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
 
-    }
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+        final Point localPointerPosition0 = mock(Point.class);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(region0.contains(size0,
+                              localPointerPosition0)).thenReturn(true);
 
-    @Test
-    public void testResize() throws Exception {
-        //TODO
+        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource1);
+        final WlSurface wlSurface1 = mock(WlSurface.class);
+        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
+        final Surface surface1 = mock(Surface.class);
+        when(wlSurface1.getSurface()).thenReturn(surface1);
+        final Rectangle size1 = mock(Rectangle.class);
+        when(surface1.getSize()).thenReturn(size1);
+        final SurfaceState surfaceState1 = mock(SurfaceState.class);
+        when(surface1.getState()).thenReturn(surfaceState1);
+        final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
+        when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
+        final WlRegion wlRegion1 = mock(WlRegion.class);
+        when(wlRegionResource1.getImplementation()).thenReturn(wlRegion1);
+        final Region region1 = mock(Region.class);
+        when(wlRegion1.getRegion()).thenReturn(region1);
+        final Point localPointerPosition1 = mock(Point.class);
+        when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1);
+        when(region1.contains(size1,
+                              localPointerPosition1)).thenReturn(false);
+
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        //when
+        final Optional<WlSurfaceResource> over = this.pointerDevice.over();
+        //then
+        assertThat(over.get()).isEqualTo(wlSurfaceResource0);
     }
 }

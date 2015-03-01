@@ -194,11 +194,9 @@ public class PointerDevice {
 
     @Nonnull
     public Optional<WlSurfaceResource> over() {
-        //TODO test this method
-
         final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getSurfacesStack()
                                                                            .descendingIterator();
-        Optional<WlSurfaceResource> wlSurfaceResource = Optional.empty();
+
         while (surfaceIterator.hasNext()) {
             final WlSurfaceResource surfaceResource = surfaceIterator.next();
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
@@ -206,22 +204,23 @@ public class PointerDevice {
 
             final Optional<WlRegionResource> inputRegion = surface.getState()
                                                                   .getInputRegion();
+            final Region region;
             if (inputRegion.isPresent()) {
                 final WlRegion wlRegion = (WlRegion) inputRegion.get()
                                                                 .getImplementation();
-                final Region region = wlRegion.getRegion();
-                if (region.contains(surface.getSize(),
-                                    surface.local(getPosition()))) {
-                    wlSurfaceResource = Optional.of(surfaceResource);
-                    break;
-                }
+                region = wlRegion.getRegion();
             }
             else {
-                wlSurfaceResource = Optional.of(surfaceResource);
-                break;
+                region = Region.INFINITE;
+            }
+
+            if (region.contains(surface.getSize(),
+                                surface.local(getPosition()))) {
+                return Optional.of(surfaceResource);
             }
         }
-        return wlSurfaceResource;
+
+        return Optional.empty();
     }
 
     public void doMotion(@Nonnull final Set<WlPointerResource> pointerResources,
