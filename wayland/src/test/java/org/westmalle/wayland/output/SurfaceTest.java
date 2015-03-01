@@ -288,4 +288,75 @@ public class SurfaceTest {
         assertThat(relativeCoordinate).isEqualTo(Point.create(50,
                                                               50));
     }
+
+    @Test
+    public void testUpdateSizeNoScaling() throws Exception {
+        //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
+        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
+        when(shmBuffer.getWidth()).thenReturn(100);
+        when(shmBuffer.getHeight()).thenReturn(100);
+        final WlBufferResource buffer = mock(WlBufferResource.class);
+        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+
+        this.surface.attachBuffer(buffer,
+                                  0,
+                                  0);
+        //when
+        this.surface.commit();
+
+        //then
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
+    }
+
+    @Test
+    public void testUpdateSizeBufferAbsent() throws Exception {
+        //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
+        //when
+        this.surface.commit();
+
+        //then
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.ZERO);
+    }
+
+    @Test
+    public void testUpdateSizeScaling() throws Exception {
+        //given
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
+        final Compositor compositor = mock(Compositor.class);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+
+        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
+        when(shmBuffer.getWidth()).thenReturn(100);
+        when(shmBuffer.getHeight()).thenReturn(100);
+        final WlBufferResource buffer = mock(WlBufferResource.class);
+        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+
+        this.surface.setScale(5);
+
+        this.surface.attachBuffer(buffer,
+                                  0,
+                                  0);
+        //when
+        this.surface.commit();
+
+        //then
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.create(0,
+                                                                      0,
+                                                                      20,
+                                                                      20));
+    }
 }

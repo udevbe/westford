@@ -163,16 +163,16 @@ public class Surface {
             buffer.get()
                   .release();
         }
+        //check update transformation
+        final boolean needsTransformUpdate = needsTransformUpdate();
         //flush states
         this.state = this.pendingState;
         this.position = this.position.add(this.pendingBufferOffset);
-        //update transformation
-        if (needsTransformUpdate()) {
+        if (needsTransformUpdate) {
             updateCompositorTransform();
             updateTransform();
         }
         updateSize();
-
         //reset pending buffer state
         detachBuffer();
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
