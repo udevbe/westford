@@ -23,15 +23,17 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @AutoFactory(className = "RegionFactory")
 public class Region {
-    private static final List<Rectangle> INFINITE_RECT = Collections.singletonList(Rectangle.create(Short.MIN_VALUE,
-                                                                                                    Short.MIN_VALUE,
-                                                                                                    Integer.MAX_VALUE,
-                                                                                                    Integer.MAX_VALUE));
 
-    public static final Region INFINITE = new Region() {
+    private static final class InfiniteRegion extends Region {
+        private static final List<Rectangle> INFINITE_RECT = Collections.singletonList(Rectangle.create(Short.MIN_VALUE,
+                                                                                                        Short.MIN_VALUE,
+                                                                                                        Integer.MAX_VALUE,
+                                                                                                        Integer.MAX_VALUE));
+
         @Override
         public List<Rectangle> asList() {
             return INFINITE_RECT;
@@ -58,7 +60,15 @@ public class Region {
         public boolean contains(@Nonnull final Point point) {
             return true;
         }
-    };
+    }
+
+    /**
+     * x: -32768
+     * y: -32768
+     * width: 0x7fffffff
+     * height: 0x7fffffff
+     */
+    public static final Region INFINITY = new InfiniteRegion();
 
     private final pixman_region32 pixman_region32 = new pixman_region32();
 
@@ -146,5 +156,22 @@ public class Region {
 
     public pixman_region32 getPixmanRegion32() {
         return this.pixman_region32;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) { return true; }
+        if (!(o instanceof Region)) { return false; }
+
+        final Region region = (Region) o;
+
+        return (region.asList()
+                      .containsAll(asList())
+                && asList().containsAll(region.asList()));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(asList());
     }
 }

@@ -211,7 +211,7 @@ public class PointerDevice {
                 region = wlRegion.getRegion();
             }
             else {
-                region = Region.INFINITE;
+                region = Region.INFINITY;
             }
 
             if (region.contains(surface.getSize(),
