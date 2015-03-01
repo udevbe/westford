@@ -49,6 +49,8 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     public void move(final WlShellSurfaceResource requester,
                      @Nonnull final WlSeatResource seat,
                      final int serial) {
+        //TODO test this method
+
         final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface surface = wlSurface.getSurface();
 
