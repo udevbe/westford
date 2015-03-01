@@ -182,7 +182,6 @@ public class Surface {
     }
 
     public void updateSize() {
-        //TODO test this method
         final Optional<WlBufferResource> buffer = getState().getBuffer();
         if (buffer.isPresent()) {
             final WlBufferResource wlBufferResource = buffer.get();
