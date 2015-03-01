@@ -93,4 +93,28 @@ public class RegionTest {
         assertThat(contains).isTrue();
         assertThat(notContains).isFalse();
     }
+
+    @Test
+    public void testContainsWithClipping() throws Exception {
+        //given
+        final Rectangle clipping = Rectangle.create(60,
+                                                    60,
+                                                    10,
+                                                    10);
+        final Rectangle rect0 = Rectangle.create(50,
+                                                 50,
+                                                 100,
+                                                 100);
+        this.region.add(rect0);
+        //when
+        final boolean contains = this.region.contains(clipping,
+                                                      Point.create(60,
+                                                                   60));
+        final boolean notContains = this.region.contains(clipping,
+                                                         Point.create(71,
+                                                                      71));
+        //then
+        assertThat(contains).isTrue();
+        assertThat(notContains).isFalse();
+    }
 }

@@ -126,8 +126,6 @@ public class Region {
 
     public boolean contains(@Nonnull final Rectangle clipping,
                             @Nonnull final Point point) {
-        //TODO test this method
-
         //fast path
         if (clipping.getWidth() == 0 && clipping.getHeight() == 0) {
             return false;
