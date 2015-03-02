@@ -2,6 +2,7 @@ package org.westmalle.wayland.output;
 
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
+import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.junit.Before;
@@ -11,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -25,6 +27,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.verifyNoMoreInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -41,6 +44,7 @@ public class PointerDeviceTest {
     @Before
     public void setUp(){
         PowerMockito.mockStatic(WaylandServerLibrary.class);
+        Mockito.when(WaylandServerLibrary.INSTANCE()).thenReturn(mock(WaylandServerLibraryMapping.class));
     }
 
     /**
@@ -1126,5 +1130,16 @@ public class PointerDeviceTest {
                                          eq(Motion.create(time3,
                                                           x1,
                                                           y1)));
+        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        verify(wlSurfaceResource0).addDestroyListener(listenerArgumentCaptor.capture());
+        //and when
+        final Listener listener = listenerArgumentCaptor.getValue();
+        listener.handle();
+        this.pointerDevice.motion(pointerResources,
+                                  time3,
+                                  x1,
+                                  y1);
+        //then
+        verifyNoMoreInteractions(pointerGrabMotion);
     }
 }
