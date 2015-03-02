@@ -5,3 +5,10 @@ jdk:
 branches:
   only:
     - master
+before_install:
+    - git clone https://github.com/google/auto.git
+    - cd auto/value
+    - mvn install
+    - git clone https://github.com/Zubnix/jglm.git
+    - cd jglm
+    - mvn install
