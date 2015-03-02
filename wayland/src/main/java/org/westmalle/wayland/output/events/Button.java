@@ -13,30 +13,26 @@
 //limitations under the License.
 package org.westmalle.wayland.output.events;
 
+import com.google.auto.value.AutoValue;
+
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 
-public class Button {
-    private final int                  time;
-    private final int                  button;
-    private final WlPointerButtonState buttonState;
+import javax.annotation.Nonnull;
 
-    public Button(final int time,
-                  final int button,
-                  final WlPointerButtonState buttonState) {
-        this.time = time;
-        this.button = button;
-        this.buttonState = buttonState;
+@AutoValue
+public abstract class Button {
+
+    public static Button create(final int time,
+                                final int button,
+                                @Nonnull final WlPointerButtonState buttonState){
+        return new AutoValue_Button(time,
+                                    button,
+                                    buttonState);
     }
 
-    public int getButton() {
-        return this.button;
-    }
+    public abstract int getTime();
 
-    public WlPointerButtonState getButtonState() {
-        return this.buttonState;
-    }
+    public abstract int getButton();
 
-    public int getTime() {
-        return this.time;
-    }
+    public abstract WlPointerButtonState getButtonState();
 }

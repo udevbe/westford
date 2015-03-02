@@ -1,8 +1,10 @@
 package org.westmalle.wayland.output;
 
 import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +12,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.events.Motion;
 import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -22,7 +27,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(WaylandServerLibrary.class)
 public class PointerDeviceTest {
 
     @Mock
@@ -31,6 +37,11 @@ public class PointerDeviceTest {
     private Compositor    compositor;
     @InjectMocks
     private PointerDevice pointerDevice;
+
+    @Before
+    public void setUp(){
+        PowerMockito.mockStatic(WaylandServerLibrary.class);
+    }
 
     /**
      * cursor moves from one surface to another surface while button is pressed
@@ -1005,7 +1016,6 @@ public class PointerDeviceTest {
         assertThat(over.get()).isEqualTo(wlSurfaceResource0);
     }
 
-    @Ignore("fix segmentation fault caused by wayland listener")
     @Test
     public void testGrabMotion() throws Exception {
         //given
@@ -1104,7 +1114,7 @@ public class PointerDeviceTest {
                                   button1,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.grabMotion(wlSurfaceResource0,
-                                      serial1,
+                                      serial2,
                                       pointerGrabMotion);
         this.pointerDevice.motion(pointerResources,
                                   time3,
@@ -1113,8 +1123,8 @@ public class PointerDeviceTest {
 
         //then
         verify(pointerGrabMotion).motion(eq(this.pointerDevice),
-                                         eq(new Motion(time3,
-                                                       Point.create(5,
-                                                                    8))));
+                                         eq(Motion.create(time3,
+                                                          x1,
+                                                          y1)));
     }
 }

@@ -13,23 +13,27 @@
 //limitations under the License.
 package org.westmalle.wayland.output.events;
 
+import com.google.auto.value.AutoValue;
+
 import org.westmalle.wayland.output.Point;
 
-public class Motion {
-    private final int   time;
-    private final Point point;
+import javax.annotation.Nonnull;
 
-    public Motion(final int time,
-                  final Point point) {
-        this.time = time;
-        this.point = point;
+@AutoValue
+public abstract class Motion {
+
+    public static Motion create(final int time,
+                                @Nonnull final Point point){
+        return new AutoValue_Motion(time,point);
     }
 
-    public int getTime() {
-        return this.time;
+    public static Motion create(final int time,
+                                final int x,
+                                final int y){
+        return new AutoValue_Motion(time,Point.create(x,y));
     }
 
-    public Point getPoint() {
-        return this.point;
-    }
+    public abstract int getTime();
+
+    public abstract Point getPoint();
 }

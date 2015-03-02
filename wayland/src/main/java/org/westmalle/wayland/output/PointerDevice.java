@@ -20,6 +20,7 @@ import com.google.common.eventbus.Subscribe;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
+import org.westmalle.wayland.output.events.Button;
 import org.westmalle.wayland.output.events.Motion;
 import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -29,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice {
@@ -64,8 +66,8 @@ public class PointerDevice {
                  time,
                  x,
                  y);
-        this.inputBus.post(new Motion(time,
-                                      getPosition()));
+        this.inputBus.post(Motion.create(time,
+                                         getPosition()));
     }
 
     public void button(final Set<WlPointerResource> pointerResources,
@@ -82,7 +84,9 @@ public class PointerDevice {
                  time,
                  button,
                  buttonState);
-        this.inputBus.post(button);
+        this.inputBus.post(Button.create(time,
+                                         button,
+                                         buttonState));
     }
 
     public boolean isButtonPressed(final int button) {
@@ -110,19 +114,19 @@ public class PointerDevice {
         final Listener motionListener = new Listener() {
             @Subscribe
             public void handle(final Motion motion) {
-                if (getGrab().get()
-                             .equals(surfaceResource)
-                    && getPointerSerial() == serial) {
-                    //there is pointer motion
-                    pointerGrabMotion.motion(PointerDevice.this,
-                                             motion);
-                }
-                else {
-                    //another surface has the grab, stop listening for pointer motion.
-                    PointerDevice.this.unregister(this);
-                    //stop listening for destroy event
-                    remove();
-                }
+                getGrab().ifPresent(wlSurfaceResource -> {
+                    if (getPointerSerial() == serial) {
+                        //there is pointer motion
+                        pointerGrabMotion.motion(PointerDevice.this,
+                                                 motion);
+                    }
+                    else {
+                        //another surface has the grab, stop listening for pointer motion.
+                        PointerDevice.this.unregister(this);
+                        //stop listening for destroy event
+                        remove();
+                    }
+                });
             }
 
             @Override
