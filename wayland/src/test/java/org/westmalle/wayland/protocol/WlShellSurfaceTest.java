@@ -6,6 +6,7 @@ import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
+import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +18,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.PointerDevice;
 import org.westmalle.wayland.output.PointerGrabMotion;
+import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.events.Motion;
 
@@ -78,8 +80,7 @@ public class WlShellSurfaceTest {
                                     pointerGrabMotionCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
-        pointerGrabMotion.motion(pointerDevice,
-                                 Motion.create(98765,
+        pointerGrabMotion.motion(Motion.create(98765,
                                                110,
                                                110));
         //then
@@ -103,5 +104,61 @@ public class WlShellSurfaceTest {
                                                                                     id);
         //then
         assertThat(wlShellSurfaceResource).isNotNull();
+    }
+
+    @Test
+    public void testResize() throws Exception {
+        //given
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
+        final WlSeat wlSeat = mock(WlSeat.class);
+        when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
+
+        final WlPointer wlPointer = mock(WlPointer.class);
+        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+
+        final PointerDevice pointerDevice = mock(PointerDevice.class);
+        when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
+        final Point pointerPositionStart = mock(Point.class);
+        when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
+        final Point pointerPositionMotion = mock(Point.class);
+
+        final int serial = 12345;
+
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
+                                                                          80));
+        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(180,
+                                                                           180));
+
+        when(surface.getSize()).thenReturn(Rectangle.create(0,
+                                                            0,
+                                                            100,
+                                                            100));
+
+        final WlShellSurface wlShellSurface = new WlShellSurface(wlSurfaceResource);
+        //when
+        wlShellSurface.resize(wlShellSurfaceResource,
+                              wlSeatResource,
+                              serial,
+                              0);
+        //then
+        final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
+        verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
+                                         eq(serial),
+                                         pointerGrabMotionArgumentCaptor.capture());
+        //and when
+        final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
+        pointerGrabMotion.motion(Motion.create(456767,
+                                               pointerPositionMotion));
+        //then
+        verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_RIGHT.getValue(),
+                                                 200,
+                                                 200);
     }
 }

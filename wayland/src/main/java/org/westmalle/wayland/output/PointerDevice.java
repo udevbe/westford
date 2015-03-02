@@ -117,8 +117,7 @@ public class PointerDevice {
                 getGrab().ifPresent(wlSurfaceResource -> {
                     if (getPointerSerial() == serial) {
                         //there is pointer motion
-                        pointerGrabMotion.motion(PointerDevice.this,
-                                                 motion);
+                        pointerGrabMotion.motion(motion);
                     }
                     else {
                         //another surface has the grab, stop listening for pointer motion.

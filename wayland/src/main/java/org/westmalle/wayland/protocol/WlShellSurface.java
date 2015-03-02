@@ -19,6 +19,7 @@ import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.westmalle.wayland.output.Point;
+import org.westmalle.wayland.output.PointerDevice;
 import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Surface;
 
@@ -49,8 +50,6 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     public void move(final WlShellSurfaceResource requester,
                      @Nonnull final WlSeatResource seat,
                      final int serial) {
-        //TODO test this method
-
         final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface surface = wlSurface.getSurface();
 
@@ -71,8 +70,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
         wlPointer.getPointerDevice()
                  .grabMotion(this.wlSurfaceResource,
                              grabSerial,
-                             (pointerDevice,
-                              motion) -> surface.setPosition(motion.getPoint()
+                             (motion) -> surface.setPosition(motion.getPoint()
                                                                    .subtract(pointerOffset)));
     }
 
@@ -81,16 +79,14 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                        @Nonnull final WlSeatResource seat,
                        final int serial,
                        final int edges) {
-        //TODO test this method
-
         final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface surface = wlSurface.getSurface();
 
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
               .ifPresent(wlPointer -> {
-                  final Point pointerStartPos = wlPointer.getPointerDevice()
-                                                         .getPosition();
+                  final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+                  final Point pointerStartPos = pointerDevice.getPosition();
 
                   final Point local = surface.local(pointerStartPos);
                   final Rectangle size = surface.getSize();
@@ -100,18 +96,16 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                   final Point delta = delta(quadrant,
                                             size,
                                             local);
-                  wlPointer.getPointerDevice()
-                           .grabMotion(this.wlSurfaceResource,
-                                       serial,
-                                       (pointerDevice,
-                                        motion) -> {
-                                           //TODO support one dimensional resize
-                                           final Point motionLocal = surface.local(motion.getPoint());
-                                           Point cornerPoint = motionLocal.add(delta);
-                                           requester.configure(quadrant.getValue(),
-                                                               cornerPoint.getX(),
-                                                               cornerPoint.getY());
-                                       });
+                  pointerDevice.grabMotion(this.wlSurfaceResource,
+                                           serial,
+                                           motion -> {
+                                                //TODO support one dimensional resize
+                                                final Point motionLocal = surface.local(motion.getPoint());
+                                                Point cornerPoint = motionLocal.add(delta);
+                                                requester.configure(quadrant.getValue(),
+                                                                    cornerPoint.getX(),
+                                                                    cornerPoint.getY());
+                                           });
               });
     }
 

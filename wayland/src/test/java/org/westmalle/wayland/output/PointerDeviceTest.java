@@ -1126,8 +1126,7 @@ public class PointerDeviceTest {
                                   y1);
 
         //then
-        verify(pointerGrabMotion).motion(eq(this.pointerDevice),
-                                         eq(Motion.create(time3,
+        verify(pointerGrabMotion).motion(eq(Motion.create(time3,
                                                           x1,
                                                           y1)));
         final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
