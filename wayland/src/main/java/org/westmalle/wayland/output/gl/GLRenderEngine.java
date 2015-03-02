@@ -61,7 +61,7 @@ public class GLRenderEngine implements ShmRenderEngine {
             "\n" +
             "void main() {\n" +
             "    gl_FragColor.rgb = texture2D(tex, vv_texcoord).rgb;\n" +
-            "    gl_FragColor.a = 1f;\n" +
+            "    gl_FragColor.a = 1.;\n" +
             "}";
 
     private final Map<WlSurfaceResource, GLSurfaceData> cachedSurfaceData = Maps.newHashMap();
