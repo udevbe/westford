@@ -19,13 +19,14 @@ Dependencies
  - JDK8.
  - Jogl. Available on maven central.
  - Google Auto-Factory. Available on maven central.
+ - Google Auto-Value. Available [here](https://github.com/google/auto/tree/master/value).
  - Google Dagger. Available on maven central.
  - Google Guava. Available on maven central.
  - jsr305. Available on maven central.
  - SLF4J. Available on maven central.
  - Wayland-Java-Bindings. Available on maven central.
  - Pixman-Java-Bindings. Available through [jitpack](https://jitpack.io/).
- - Jglm. Available on maven central.
+ - Jglm Fork. Available [here](https://github.com/Zubnix/jglm)
 
 State
 =====
@@ -42,6 +43,7 @@ State
 | Mouse input                 | :heavy_check_mark: |
 | Keyboard input              | :x:                |
 | Touch input                 | :x:                |
+| Drag and Drop               | :x:                |
 
 Known Issues
 ============
@@ -51,8 +53,8 @@ Roadmap
 ====
 | Topic        | Progress   |
 | :----------: | :--------: |
-| unit tests   | 90%        |
-| wl_shell     | 30%        |
+| unit tests   | 95%        |
+| wl_shell     | 40%        |
 | sw rendering | 0%         |
 | xdg_shell    | 0%         |
 | xwayland     | 0%         |
