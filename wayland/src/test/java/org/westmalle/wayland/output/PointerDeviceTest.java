@@ -3,12 +3,14 @@ package org.westmalle.wayland.output;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.output.events.Motion;
 import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -37,8 +39,12 @@ public class PointerDeviceTest {
     public void testGrabNewFocusMotion() throws Exception {
         //given
 
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+        final int time2 = 112712;
+
         //pointer position 0
-        final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
         final Point pointerPos0 = Point.create(x0,
@@ -143,15 +149,15 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time2,
                                   x1,
                                   y1);
         //then
@@ -159,21 +165,22 @@ public class PointerDeviceTest {
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
-        verify(wlPointerResource0,
-               times(1)).enter(eq(this.display.nextSerial()),
-                               eq(wlSurfaceResource0),
-                               fixedArgumentCaptor.capture(),
-                               fixedArgumentCaptor.capture());
+        verify(wlPointerResource0).enter(eq(this.display.nextSerial()),
+                                         eq(wlSurfaceResource0),
+                                         fixedArgumentCaptor.capture(),
+                                         fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
                          .asInt()).isEqualTo(2);
         assertThat(values.get(1)
                          .asInt()).isEqualTo(3);
 
-        verify(wlPointerResource0,
-               times(2)).motion(eq(time),
-                                fixedArgumentCaptor.capture(),
-                                fixedArgumentCaptor.capture());
+        verify(wlPointerResource0).motion(eq(time0),
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
+        verify(wlPointerResource0).motion(eq(time2),
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
         assertThat(values.get(2)
                          .asInt()).isEqualTo(2);
         assertThat(values.get(3)
@@ -183,14 +190,12 @@ public class PointerDeviceTest {
         assertThat(values.get(5)
                          .asInt()).isEqualTo(8);
 
-        verify(wlPointerResource0,
-               times(1)).button(serial,
-                                time,
+        verify(wlPointerResource0).button(serial,
+                                time1,
                                 button0,
                                 WlPointerButtonState.PRESSED.getValue());
 
-        verify(wlPointerResource0,
-               times(1)).leave(this.display.nextSerial(),
+        verify(wlPointerResource0).leave(this.display.nextSerial(),
                                wlSurfaceResource0);
 
         verify(wlPointerResource1,
@@ -216,8 +221,11 @@ public class PointerDeviceTest {
     public void testNoGrabNewFocusMotion() throws Exception {
         //given
 
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+
         //pointer position 0
-        final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
         final Point pointerPos0 = Point.create(x0,
@@ -323,11 +331,11 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time1,
                                   x1,
                                   y1);
         //then
@@ -335,8 +343,7 @@ public class PointerDeviceTest {
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
-        verify(wlPointerResource0,
-               times(1)).enter(eq(serial0),
+        verify(wlPointerResource0).enter(eq(serial0),
                                eq(wlSurfaceResource0),
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
@@ -346,8 +353,7 @@ public class PointerDeviceTest {
         assertThat(values.get(1)
                          .asInt()).isEqualTo(3);
 
-        verify(wlPointerResource0,
-               times(1)).motion(eq(time),
+        verify(wlPointerResource0).motion(eq(time0),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
@@ -356,12 +362,10 @@ public class PointerDeviceTest {
                          .asInt()).isEqualTo(3);
 
 
-        verify(wlPointerResource0,
-               times(1)).leave(serial1,
+        verify(wlPointerResource0).leave(serial1,
                                wlSurfaceResource0);
 
-        verify(wlPointerResource1,
-               times(1)).enter(eq(serial2),
+        verify(wlPointerResource1).enter(eq(serial2),
                                eq(wlSurfaceResource1),
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
@@ -370,8 +374,7 @@ public class PointerDeviceTest {
         assertThat(values.get(5)
                          .asInt()).isEqualTo(144);
 
-        verify(wlPointerResource1,
-               times(1)).motion(eq(time),
+        verify(wlPointerResource1).motion(eq(time1),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(6)
@@ -387,8 +390,11 @@ public class PointerDeviceTest {
     public void testNoFocusMotion() throws Exception {
         //given
 
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+
         //pointer position 0
-        final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
         final Point pointerPos0 = Point.create(x0,
@@ -454,11 +460,11 @@ public class PointerDeviceTest {
                                                    serial2);
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time1,
                                   x1,
                                   y1);
         //then
@@ -466,8 +472,7 @@ public class PointerDeviceTest {
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
-        verify(wlPointerResource0,
-               times(1)).enter(eq(serial0),
+        verify(wlPointerResource0).enter(eq(serial0),
                                eq(wlSurfaceResource0),
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
@@ -477,8 +482,7 @@ public class PointerDeviceTest {
         assertThat(values.get(1)
                          .asInt()).isEqualTo(3);
 
-        verify(wlPointerResource0,
-               times(1)).motion(eq(time),
+        verify(wlPointerResource0).motion(eq(time0),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
@@ -486,8 +490,7 @@ public class PointerDeviceTest {
         assertThat(values.get(3)
                          .asInt()).isEqualTo(3);
 
-        verify(wlPointerResource0,
-               times(1)).leave(serial1,
+        verify(wlPointerResource0).leave(serial1,
                                wlSurfaceResource0);
     }
 
@@ -498,8 +501,11 @@ public class PointerDeviceTest {
     public void testNewFocusMotion() throws Exception {
         //given
 
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+
         //pointer position 0
-        final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
         final Point pointerPos0 = Point.create(x0,
@@ -566,11 +572,11 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time1,
                                   x1,
                                   y1);
         //then
@@ -578,8 +584,7 @@ public class PointerDeviceTest {
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
-        verify(wlPointerResource0,
-               times(1)).enter(eq(serial0),
+        verify(wlPointerResource0).enter(eq(serial0),
                                eq(wlSurfaceResource0),
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
@@ -589,8 +594,7 @@ public class PointerDeviceTest {
         assertThat(values.get(1)
                          .asInt()).isEqualTo(8);
 
-        verify(wlPointerResource0,
-               times(1)).motion(eq(time),
+        verify(wlPointerResource0).motion(eq(time1),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
@@ -606,8 +610,13 @@ public class PointerDeviceTest {
     public void testButtonNoGrabMotion() throws Exception {
         //given
 
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+        final int time2 = 112712;
+        final int time3 = 113209;
+
         //pointer position 0
-        final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
         final Point pointerPos0 = Point.create(x0,
@@ -677,19 +686,19 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time2,
                                   x1,
                                   y1);
         this.pointerDevice.button(pointerResources,
-                                  time,
+                                  time3,
                                   button0,
                                   WlPointerButtonState.RELEASED);
         //then
@@ -697,8 +706,7 @@ public class PointerDeviceTest {
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
-        verify(wlPointerResource0,
-               times(1)).enter(eq(serial0),
+        verify(wlPointerResource0).enter(eq(serial0),
                                eq(wlSurfaceResource0),
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
@@ -708,8 +716,7 @@ public class PointerDeviceTest {
         assertThat(values.get(1)
                          .asInt()).isEqualTo(8);
 
-        verify(wlPointerResource0,
-               times(1)).motion(eq(time),
+        verify(wlPointerResource0).motion(eq(time2),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
@@ -733,8 +740,12 @@ public class PointerDeviceTest {
     public void testButton() throws Exception {
         //given
 
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+        final int time2 = 112712;
+
         //pointer position 0
-        final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
         final Point pointerPos0 = Point.create(x0,
@@ -804,15 +815,15 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.button(pointerResources,
-                                  time,
+                                  time2,
                                   button0,
                                   WlPointerButtonState.RELEASED);
         //then
@@ -820,8 +831,7 @@ public class PointerDeviceTest {
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
-        verify(wlPointerResource0,
-               times(1)).enter(eq(serial0),
+        verify(wlPointerResource0).enter(eq(serial0),
                                eq(wlSurfaceResource0),
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
@@ -831,8 +841,7 @@ public class PointerDeviceTest {
         assertThat(values.get(1)
                          .asInt()).isEqualTo(3);
 
-        verify(wlPointerResource0,
-               times(1)).motion(eq(time),
+        verify(wlPointerResource0).motion(eq(time0),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
@@ -840,15 +849,13 @@ public class PointerDeviceTest {
         assertThat(values.get(3)
                          .asInt()).isEqualTo(3);
 
-        verify(wlPointerResource0,
-               times(1)).button(serial1,
-                                time,
+        verify(wlPointerResource0).button(serial1,
+                                time1,
                                 button0,
                                 WlPointerButtonState.PRESSED.getValue());
 
-        verify(wlPointerResource0,
-               times(1)).button(serial2,
-                                time,
+        verify(wlPointerResource0).button(serial2,
+                                time2,
                                 button0,
                                 WlPointerButtonState.RELEASED.getValue());
     }
@@ -857,8 +864,11 @@ public class PointerDeviceTest {
     public void testIsButtonPressed() throws Exception {
         //given
 
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+
         //pointer position 0
-        final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
         final Point pointerPos0 = Point.create(x0,
@@ -925,13 +935,14 @@ public class PointerDeviceTest {
 
         //button 0
         final int button0 = 1;
+
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         //then
@@ -986,9 +997,124 @@ public class PointerDeviceTest {
                               localPointerPosition1)).thenReturn(false);
 
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+
         //when
         final Optional<WlSurfaceResource> over = this.pointerDevice.over();
+
         //then
         assertThat(over.get()).isEqualTo(wlSurfaceResource0);
+    }
+
+    @Ignore("fix segmentation fault caused by wayland listener")
+    @Test
+    public void testGrabMotion() throws Exception {
+        //given
+
+        //time
+        final int time0 = 112358;
+        final int time1 = 112459;
+        final int time2 = 112712;
+        final int time3 = 113209;
+
+        //pointer position 0
+        final int x0 = 20;
+        final int y0 = 30;
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
+
+        //pointer position 1
+        final int x1 = 500;
+        final int y1 = 600;
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
+
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+
+        //mock surface 0
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
+        final WlRegion wlRegion0 = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(true);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(true);
+
+        //mock display
+        final int serial0 = 90879;
+        final int serial1 = 90881;
+        final int serial2 = 90882;
+        when(this.display.nextSerial()).thenReturn(serial0,
+                                                   serial1,
+                                                   serial2);
+
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
+        when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
+
+        //button 0
+        final int button0 = 1;
+
+        //button 1
+        final int button1 = 3;
+
+        //mock pointer grab motion
+        final PointerGrabMotion pointerGrabMotion = mock(PointerGrabMotion.class);
+
+        //when
+        this.pointerDevice.motion(pointerResources,
+                                  time0,
+                                  x0,
+                                  y0);
+        this.pointerDevice.button(pointerResources,
+                                  time1,
+                                  button0,
+                                  WlPointerButtonState.PRESSED);
+        this.pointerDevice.button(pointerResources,
+                                  time2,
+                                  button1,
+                                  WlPointerButtonState.PRESSED);
+        this.pointerDevice.grabMotion(wlSurfaceResource0,
+                                      serial1,
+                                      pointerGrabMotion);
+        this.pointerDevice.motion(pointerResources,
+                                  time3,
+                                  x1,
+                                  y1);
+
+        //then
+        verify(pointerGrabMotion).motion(eq(this.pointerDevice),
+                                         eq(new Motion(time3,
+                                                       Point.create(5,
+                                                                    8))));
     }
 }
