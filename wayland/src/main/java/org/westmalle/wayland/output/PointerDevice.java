@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice {
@@ -111,21 +110,29 @@ public class PointerDevice {
     public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
                            final int serial,
                            @Nonnull final PointerGrabMotion pointerGrabMotion) {
+        if (!getGrab().isPresent() ||
+            !getGrab().get()
+                      .equals(surfaceResource) ||
+            getPointerSerial() != serial) {
+            //preconditions not met
+            return;
+        }
+
         final Listener motionListener = new Listener() {
             @Subscribe
             public void handle(final Motion motion) {
-                getGrab().ifPresent(wlSurfaceResource -> {
-                    if (getPointerSerial() == serial) {
-                        //there is pointer motion
-                        pointerGrabMotion.motion(motion);
-                    }
-                    else {
-                        //another surface has the grab, stop listening for pointer motion.
-                        PointerDevice.this.unregister(this);
-                        //stop listening for destroy event
-                        remove();
-                    }
-                });
+                if (getGrab().isPresent() &&
+                    getGrab().get()
+                             .equals(surfaceResource)) {
+                    //there is pointer motion
+                    pointerGrabMotion.motion(motion);
+                }
+                else {
+                    //another surface has the grab, stop listening for pointer motion.
+                    PointerDevice.this.unregister(this);
+                    //stop listening for destroy event
+                    remove();
+                }
             }
 
             @Override
