@@ -64,8 +64,7 @@ public class WlSubCompositorTest {
         //when
         wlSubCompositor.destroy(subcompositorResource);
         //then
-        verify(subcompositorResource,
-               times(1)).destroy();
+        verify(subcompositorResource).destroy();
     }
 
     @Test
@@ -98,19 +97,16 @@ public class WlSubCompositorTest {
                                       surface,
                                       parent);
         //then
-        verify(wlSubSurface,
-               times(1)).add(client,
+        verify(wlSubSurface).add(client,
                              version,
                              id);
         final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(surface,
-               times(1)).addDestroyListener(listenerArgumentCaptor.capture());
+        verify(surface).addDestroyListener(listenerArgumentCaptor.capture());
         final Listener destroyListener = listenerArgumentCaptor.getValue();
         //and when
         destroyListener.handle();
         //then
-        verify(wlSubsurfaceResource,
-               times(1)).destroy();
+        verify(wlSubsurfaceResource).destroy();
     }
 
     @Test

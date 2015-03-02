@@ -74,8 +74,7 @@ public class GLWindowSeatTest {
         //when
         this.glWindowSeat.mousePressed(mouseEvent);
         //then
-        verify(pointerDevice,
-               times(1)).button(wlPointerResources,
+        verify(pointerDevice).button(wlPointerResources,
                                 (int) time,
                                 button,
                                 WlPointerButtonState.PRESSED);
@@ -105,8 +104,7 @@ public class GLWindowSeatTest {
         //when
         this.glWindowSeat.mouseReleased(mouseEvent);
         //then
-        verify(pointerDevice,
-               times(1)).button(wlPointerResources,
+        verify(pointerDevice).button(wlPointerResources,
                                 (int) time,
                                 button,
                                 WlPointerButtonState.RELEASED);
@@ -138,8 +136,7 @@ public class GLWindowSeatTest {
         //when
         this.glWindowSeat.mouseMoved(mouseEvent);
         //then
-        verify(pointerDevice,
-               times(1)).motion(wlPointerResources,
+        verify(pointerDevice).motion(wlPointerResources,
                                 (int) time,
                                 x,
                                 y);

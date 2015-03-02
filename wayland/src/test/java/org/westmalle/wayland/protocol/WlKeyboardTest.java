@@ -40,8 +40,7 @@ public class WlKeyboardTest {
         //when
         wlKeyboard.release(wlKeyboardResource);
         //then
-        verify(wlKeyboardResource,
-               times(1)).destroy();
+        verify(wlKeyboardResource).destroy();
     }
 
     @Test

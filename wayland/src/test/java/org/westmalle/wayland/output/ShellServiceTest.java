@@ -27,8 +27,7 @@ public class ShellServiceTest {
         //when
         this.shellService.startUp();
         //then
-        verify(this.jobExecutor,
-               times(1)).start();
+        verify(this.jobExecutor).start();
     }
 
     @Test
@@ -37,12 +36,9 @@ public class ShellServiceTest {
         //when
         this.shellService.run();
         //then
-        verify(this.display,
-               times(1)).initShm();
-        verify(this.display,
-               times(1)).addSocket(startsWith("wayland-"));
-        verify(this.display,
-               times(1)).run();
+        verify(this.display).initShm();
+        verify(this.display).addSocket(startsWith("wayland-"));
+        verify(this.display).run();
     }
 
     @Test
@@ -51,9 +47,7 @@ public class ShellServiceTest {
         //when
         this.shellService.shutDown();
         //then
-        verify(this.display,
-               times(1)).terminate();
-        verify(this.jobExecutor,
-               times(1)).fireFinishedEvent();
+        verify(this.display).terminate();
+        verify(this.jobExecutor).fireFinishedEvent();
     }
 }

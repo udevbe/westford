@@ -54,8 +54,7 @@ public class SurfaceTest {
         //when
         this.surface.markDamaged(damage);
         //then
-        verify(region,
-               times(1)).add(damage);
+        verify(region).add(damage);
     }
 
     @Test
@@ -92,8 +91,7 @@ public class SurfaceTest {
                                                               .width(200)
                                                               .height(300)
                                                               .build());
-        verify(compositor,
-               times(1)).requestRender();
+        verify(compositor).requestRender();
     }
 
     @Test
@@ -131,8 +129,7 @@ public class SurfaceTest {
                                                               .width(200)
                                                               .height(300)
                                                               .build());
-        verify(buffer,
-               times(1)).release();
+        verify(buffer).release();
     }
 
     @Test
@@ -214,8 +211,7 @@ public class SurfaceTest {
                                .getBuffer()
                                .isPresent()).isFalse();
         assertThat(this.surface.getSize()).isEqualTo(Rectangle.ZERO);
-        verify(compositor,
-               times(1)).requestRender();
+        verify(compositor).requestRender();
     }
 
     @Test
@@ -259,12 +255,9 @@ public class SurfaceTest {
         //when
         this.surface.firePaintCallbacks(serial);
         //then
-        verify(wlCallbackResource0,
-               times(1)).done(serial);
-        verify(wlCallbackResource1,
-               times(1)).done(serial);
-        verify(wlCallbackResource2,
-               times(1)).done(serial);
+        verify(wlCallbackResource0).done(serial);
+        verify(wlCallbackResource1).done(serial);
+        verify(wlCallbackResource2).done(serial);
         assertThat(this.surface.getFrameCallbacks()).isEmpty();
     }
 

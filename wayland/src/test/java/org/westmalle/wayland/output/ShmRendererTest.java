@@ -60,8 +60,7 @@ public class ShmRendererTest {
         //when
         this.shmRenderer.render(surfaceResource);
         //then
-        verify(this.shmRenderEngine,
-               times(1)).draw(surfaceResource,
+        verify(this.shmRenderEngine).draw(surfaceResource,
                               shmBuffer);
     }
 
@@ -73,8 +72,7 @@ public class ShmRendererTest {
         //when
         this.shmRenderer.beginRender();
         //then
-        verify(this.shmRenderEngine,
-               times(1)).begin();
+        verify(this.shmRenderEngine).begin();
     }
 
     @Test
@@ -85,7 +83,6 @@ public class ShmRendererTest {
         //when
         this.shmRenderer.endRender();
         //then
-        verify(this.shmRenderEngine,
-               times(1)).end();
+        verify(this.shmRenderEngine).end();
     }
 }

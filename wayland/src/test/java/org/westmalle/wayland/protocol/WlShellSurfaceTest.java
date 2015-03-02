@@ -73,8 +73,7 @@ public class WlShellSurfaceTest {
                             serial);
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
-        verify(pointerDevice,
-               times(1)).grabMotion(eq(wlSurfaceResource),
+        verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
                                     eq(serial),
                                     pointerGrabMotionCaptor.capture());
         //and when

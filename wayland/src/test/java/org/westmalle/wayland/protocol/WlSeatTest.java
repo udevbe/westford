@@ -89,10 +89,8 @@ public class WlSeatTest {
         wlSeat.getPointer(wlSeatResource,
                           id);
         //then
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.POINTER.getValue());
-        verify(wlPointer,
-               times(1)).add(client,
+        verify(wlSeatResource).capabilities(WlSeatCapability.POINTER.getValue());
+        verify(wlPointer).add(client,
                              version,
                              id);
     }
@@ -116,10 +114,8 @@ public class WlSeatTest {
         wlSeat.getKeyboard(wlSeatResource,
                            id);
         //then
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.KEYBOARD.getValue());
-        verify(wlKeyboard,
-               times(1)).add(client,
+        verify(wlSeatResource).capabilities(WlSeatCapability.KEYBOARD.getValue());
+        verify(wlKeyboard).add(client,
                              version,
                              id);
     }
@@ -143,10 +139,8 @@ public class WlSeatTest {
         wlSeat.getTouch(wlSeatResource,
                         id);
         //then
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.TOUCH.getValue());
-        verify(wlTouch,
-               times(1)).add(client,
+        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue());
+        verify(wlTouch).add(client,
                              version,
                              id);
     }
@@ -187,13 +181,10 @@ public class WlSeatTest {
         wlSeat.setWlKeyboard(wlKeyboard);
         wlSeat.setWlPointer(wlPointer);
         //then
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.TOUCH.getValue());
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.TOUCH.getValue() |
+        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue());
+        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue() |
                                       WlSeatCapability.KEYBOARD.getValue());
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.TOUCH.getValue() |
+        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue() |
                                       WlSeatCapability.KEYBOARD.getValue() |
                                       WlSeatCapability.POINTER.getValue());
     }
@@ -216,10 +207,8 @@ public class WlSeatTest {
         //when
         wlSeat.removeWlPointer();
         //then
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.POINTER.getValue());
-        verify(wlSeatResource,
-               times(1)).capabilities(0);
+        verify(wlSeatResource).capabilities(WlSeatCapability.POINTER.getValue());
+        verify(wlSeatResource).capabilities(0);
     }
 
     @Test
@@ -240,10 +229,8 @@ public class WlSeatTest {
         //when
         wlSeat.removeWlKeyboard();
         //then
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.KEYBOARD.getValue());
-        verify(wlSeatResource,
-               times(1)).capabilities(0);
+        verify(wlSeatResource).capabilities(WlSeatCapability.KEYBOARD.getValue());
+        verify(wlSeatResource).capabilities(0);
     }
 
     @Test
@@ -264,9 +251,7 @@ public class WlSeatTest {
         //when
         wlSeat.removeWlTouch();
         //then
-        verify(wlSeatResource,
-               times(1)).capabilities(WlSeatCapability.TOUCH.getValue());
-        verify(wlSeatResource,
-               times(1)).capabilities(0);
+        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue());
+        verify(wlSeatResource).capabilities(0);
     }
 }

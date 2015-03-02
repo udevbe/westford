@@ -40,8 +40,7 @@ public class WlPointerTest {
         //when
         wlPointer.release(wlPointerResource);
         //then
-        verify(wlPointerResource,
-               times(1)).destroy();
+        verify(wlPointerResource).destroy();
     }
 
     @Test

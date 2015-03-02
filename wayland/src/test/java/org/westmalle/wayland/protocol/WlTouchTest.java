@@ -37,8 +37,7 @@ public class WlTouchTest {
         //when
         wlTouch.release(wlTouchResource);
         //then
-        verify(wlTouchResource,
-               times(1)).destroy();
+        verify(wlTouchResource).destroy();
     }
 
     @Test

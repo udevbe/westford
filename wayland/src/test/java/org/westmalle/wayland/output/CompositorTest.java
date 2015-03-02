@@ -55,23 +55,17 @@ public class CompositorTest {
         //then
         final InOrder inOrder = inOrder(this.shmRenderer,
                                         this.display);
-        inOrder.verify(this.shmRenderer,
-                       times(1))
+        inOrder.verify(this.shmRenderer)
                .beginRender();
-        inOrder.verify(this.shmRenderer,
-                       times(1))
+        inOrder.verify(this.shmRenderer)
                .render(wlSurfaceResource0);
-        inOrder.verify(this.shmRenderer,
-                       times(1))
+        inOrder.verify(this.shmRenderer)
                .render(wlSurfaceResource1);
-        inOrder.verify(this.shmRenderer,
-                       times(1))
+        inOrder.verify(this.shmRenderer)
                .render(wlSurfaceResource2);
-        inOrder.verify(this.shmRenderer,
-                       times(1))
+        inOrder.verify(this.shmRenderer)
                .endRender();
-        inOrder.verify(this.display,
-                       times(1))
+        inOrder.verify(this.display)
                .flushClients();
     }
 

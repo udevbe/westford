@@ -297,8 +297,7 @@ public class WlSurfaceTest {
         wlSurface.setOpaqueRegion(wlSurfaceResource,
                                   wlRegionResource);
         //then
-        verify(this.surface,
-               times(1)).setOpaqueRegion(wlRegionResource);
+        verify(this.surface).setOpaqueRegion(wlRegionResource);
     }
 
     @Test
@@ -312,8 +311,7 @@ public class WlSurfaceTest {
         wlSurface.setOpaqueRegion(wlSurfaceResource,
                                   null);
         //then
-        verify(this.surface,
-               times(1)).removeOpaqueRegion();
+        verify(this.surface).removeOpaqueRegion();
     }
 
     @Test
@@ -328,8 +326,7 @@ public class WlSurfaceTest {
         wlSurface.setInputRegion(wlSurfaceResource,
                                  wlRegionResource);
         //then
-        verify(this.surface,
-               times(1)).setInputRegion(wlRegionResource);
+        verify(this.surface).setInputRegion(wlRegionResource);
     }
 
     @Test
@@ -343,8 +340,7 @@ public class WlSurfaceTest {
         wlSurface.setInputRegion(wlSurfaceResource,
                                  null);
         //then
-        verify(this.surface,
-               times(1)).removeInputRegion();
+        verify(this.surface).removeInputRegion();
     }
 
     @Test
@@ -364,11 +360,9 @@ public class WlSurfaceTest {
         //when
         wlSurface.commit(wlSurfaceResource);
         //then
-        verify(this.surface,
-               times(1)).commit();
+        verify(this.surface).commit();
         final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlBufferResource,
-               times(1)).addDestroyListener(listenerArgumentCaptor.capture());
+        verify(wlBufferResource).addDestroyListener(listenerArgumentCaptor.capture());
         final Listener destroyListener = listenerArgumentCaptor.getValue();
         verify(WaylandServerLibrary.INSTANCE())
                 .wl_list_remove(destroyListener.getNative().link.getPointer());
@@ -383,7 +377,6 @@ public class WlSurfaceTest {
         //when
         wlSurface.commit(wlSurfaceResource);
         //then
-        verify(this.surface,
-               times(1)).commit();
+        verify(this.surface).commit();
     }
 }

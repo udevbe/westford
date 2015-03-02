@@ -57,8 +57,7 @@ public class WlRegionTest {
         //when
         wlRegion.destroy(wlRegionResource);
         //then
-        verify(wlRegionResource,
-               times(1)).destroy();
+        verify(wlRegionResource).destroy();
     }
 
     @Test
@@ -78,8 +77,7 @@ public class WlRegionTest {
                      width,
                      height);
         //then
-        verify(region,
-               times(1)).add(eq(Rectangle.create(x,
+        verify(region).add(eq(Rectangle.create(x,
                                                  y,
                                                  width,
                                                  height)));
@@ -121,8 +119,7 @@ public class WlRegionTest {
                           width,
                           height);
         //then
-        verify(region,
-               times(1)).subtract(eq(Rectangle.create(x,
+        verify(region).subtract(eq(Rectangle.create(x,
                                                       y,
                                                       width,
                                                       height)));

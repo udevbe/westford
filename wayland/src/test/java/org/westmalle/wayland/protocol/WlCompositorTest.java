@@ -127,16 +127,14 @@ public class WlCompositorTest {
         wlCompositor.createSurface(wlCompositorResource,
                                    1);
         //then
-        verify(wlSurface,
-               times(1)).add(client,
+        verify(wlSurface).add(client,
                              version,
                              id);
 
         assertThat((Iterable) surfacesStack).contains(wlSurfaceResource);
 
         final ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlSurfaceResource,
-               times(1)).addDestroyListener(destroyListenerCaptor.capture());
+        verify(wlSurfaceResource).addDestroyListener(destroyListenerCaptor.capture());
         final Listener destroyListener = destroyListenerCaptor.getValue();
 
         //and later when
@@ -144,8 +142,7 @@ public class WlCompositorTest {
 
         //then
         assertThat((Iterable) surfacesStack).doesNotContain(wlSurfaceResource);
-        verify(this.compositor,
-               times(1)).requestRender();
+        verify(this.compositor).requestRender();
     }
 
     @Test
@@ -174,8 +171,7 @@ public class WlCompositorTest {
         wlCompositor.createRegion(wlCompositorResource,
                                   id);
         //then
-        verify(wlRegion,
-               times(1)).add(client,
+        verify(wlRegion).add(client,
                              version,
                              id);
     }

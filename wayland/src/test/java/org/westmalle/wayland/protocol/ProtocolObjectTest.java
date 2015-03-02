@@ -126,8 +126,7 @@ public class ProtocolObjectTest {
                                                         1);
         //then
         final ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(resource,
-               times(1)).addDestroyListener(destroyListenerCaptor.capture());
+        verify(resource).addDestroyListener(destroyListenerCaptor.capture());
         //and when
         final Listener destroyListener = destroyListenerCaptor.getValue();
         destroyListener.handle();

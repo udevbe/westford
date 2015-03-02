@@ -62,8 +62,7 @@ public class GLRenderEngineTest {
         //when
         this.glRenderEngine.begin();
         //then
-        verify(this.renderThread,
-               times(1)).submit((Runnable) any());
+        verify(this.renderThread).submit((Runnable) any());
         //and when
         queue.get(0)
              .run();
@@ -157,13 +156,11 @@ public class GLRenderEngineTest {
         //when
         this.glRenderEngine.end();
         //then
-        verify(this.renderThread,
-               times(1)).submit((Runnable) any());
+        verify(this.renderThread).submit((Runnable) any());
         //and when
         queue.get(0)
              .run();
         //then
-        verify(this.drawable,
-               times(1)).swapBuffers();
+        verify(this.drawable).swapBuffers();
     }
 }
