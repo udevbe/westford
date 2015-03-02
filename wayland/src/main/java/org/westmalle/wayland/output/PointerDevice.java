@@ -98,7 +98,7 @@ public class PointerDevice {
     }
 
     /**
-     * Listen for motion only when given surface is grabbed.
+     * Listen for motion as long as given surface is grabbed.
      *
      * @param surfaceResource   Surface that is grabbed.
      * @param serial            Serial that triggered the grab.
