@@ -6,14 +6,12 @@ import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -42,9 +40,10 @@ public class PointerDeviceTest {
     private PointerDevice pointerDevice;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
-        Mockito.when(WaylandServerLibrary.INSTANCE()).thenReturn(mock(WaylandServerLibraryMapping.class));
+        Mockito.when(WaylandServerLibrary.INSTANCE())
+               .thenReturn(mock(WaylandServerLibraryMapping.class));
     }
 
     /**
@@ -96,15 +95,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(true);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(true);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(false);
@@ -130,15 +132,18 @@ public class PointerDeviceTest {
         when(wlRegion1.getRegion()).thenReturn(region1);
 
         //mock surface 1 local coordinates
-        final Point localPointerPosition1Start = Point.create(13,21);
+        final Point localPointerPosition1Start = Point.create(13,
+                                                              21);
         when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
         when(region1.contains(size1,
                               localPointerPosition1Start)).thenReturn(false);
-        final Point localPointerPosition10 = Point.create(34, 55);
+        final Point localPointerPosition10 = Point.create(34,
+                                                          55);
         when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition10))).thenReturn(false);
-        final Point localPointerPosition11 = Point.create(89, 144);
+        final Point localPointerPosition11 = Point.create(89,
+                                                          144);
         when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition11))).thenReturn(true);
@@ -206,12 +211,12 @@ public class PointerDeviceTest {
                          .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0).button(serial,
-                                time1,
-                                button0,
-                                WlPointerButtonState.PRESSED.getValue());
+                                          time1,
+                                          button0,
+                                          WlPointerButtonState.PRESSED.getValue());
 
         verify(wlPointerResource0).leave(this.display.nextSerial(),
-                               wlSurfaceResource0);
+                                         wlSurfaceResource0);
 
         verify(wlPointerResource1,
                never()).enter(anyInt(),
@@ -277,15 +282,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(true);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(true);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(false);
@@ -311,15 +319,18 @@ public class PointerDeviceTest {
         when(wlRegion1.getRegion()).thenReturn(region1);
 
         //mock surface 1 local coordinates
-        final Point localPointerPosition1Start = Point.create(13,21);
+        final Point localPointerPosition1Start = Point.create(13,
+                                                              21);
         when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
         when(region1.contains(size1,
                               localPointerPosition1Start)).thenReturn(false);
-        final Point localPointerPosition10 = Point.create(34, 55);
+        final Point localPointerPosition10 = Point.create(34,
+                                                          55);
         when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition10))).thenReturn(false);
-        final Point localPointerPosition11 = Point.create(89, 144);
+        final Point localPointerPosition11 = Point.create(89,
+                                                          144);
         when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition11))).thenReturn(true);
@@ -359,9 +370,9 @@ public class PointerDeviceTest {
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
-                               eq(wlSurfaceResource0),
-                               fixedArgumentCaptor.capture(),
-                               fixedArgumentCaptor.capture());
+                                         eq(wlSurfaceResource0),
+                                         fixedArgumentCaptor.capture(),
+                                         fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
                          .asInt()).isEqualTo(2);
@@ -369,8 +380,8 @@ public class PointerDeviceTest {
                          .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0).motion(eq(time0),
-                                fixedArgumentCaptor.capture(),
-                                fixedArgumentCaptor.capture());
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
         assertThat(values.get(2)
                          .asInt()).isEqualTo(2);
         assertThat(values.get(3)
@@ -378,20 +389,20 @@ public class PointerDeviceTest {
 
 
         verify(wlPointerResource0).leave(serial1,
-                               wlSurfaceResource0);
+                                         wlSurfaceResource0);
 
         verify(wlPointerResource1).enter(eq(serial2),
-                               eq(wlSurfaceResource1),
-                               fixedArgumentCaptor.capture(),
-                               fixedArgumentCaptor.capture());
+                                         eq(wlSurfaceResource1),
+                                         fixedArgumentCaptor.capture(),
+                                         fixedArgumentCaptor.capture());
         assertThat(values.get(4)
                          .asInt()).isEqualTo(89);
         assertThat(values.get(5)
                          .asInt()).isEqualTo(144);
 
         verify(wlPointerResource1).motion(eq(time1),
-                                fixedArgumentCaptor.capture(),
-                                fixedArgumentCaptor.capture());
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
         assertThat(values.get(6)
                          .asInt()).isEqualTo(89);
         assertThat(values.get(7)
@@ -446,15 +457,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(true);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(true);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(false);
@@ -488,9 +502,9 @@ public class PointerDeviceTest {
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
-                               eq(wlSurfaceResource0),
-                               fixedArgumentCaptor.capture(),
-                               fixedArgumentCaptor.capture());
+                                         eq(wlSurfaceResource0),
+                                         fixedArgumentCaptor.capture(),
+                                         fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
                          .asInt()).isEqualTo(2);
@@ -498,15 +512,15 @@ public class PointerDeviceTest {
                          .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0).motion(eq(time0),
-                                fixedArgumentCaptor.capture(),
-                                fixedArgumentCaptor.capture());
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
         assertThat(values.get(2)
                          .asInt()).isEqualTo(2);
         assertThat(values.get(3)
                          .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0).leave(serial1,
-                               wlSurfaceResource0);
+                                         wlSurfaceResource0);
     }
 
     /**
@@ -557,15 +571,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(false);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(false);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(true);
@@ -600,9 +617,9 @@ public class PointerDeviceTest {
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
-                               eq(wlSurfaceResource0),
-                               fixedArgumentCaptor.capture(),
-                               fixedArgumentCaptor.capture());
+                                         eq(wlSurfaceResource0),
+                                         fixedArgumentCaptor.capture(),
+                                         fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
                          .asInt()).isEqualTo(5);
@@ -610,8 +627,8 @@ public class PointerDeviceTest {
                          .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0).motion(eq(time1),
-                                fixedArgumentCaptor.capture(),
-                                fixedArgumentCaptor.capture());
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
         assertThat(values.get(2)
                          .asInt()).isEqualTo(5);
         assertThat(values.get(3)
@@ -668,15 +685,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(false);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(false);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(true);
@@ -722,9 +742,9 @@ public class PointerDeviceTest {
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
-                               eq(wlSurfaceResource0),
-                               fixedArgumentCaptor.capture(),
-                               fixedArgumentCaptor.capture());
+                                         eq(wlSurfaceResource0),
+                                         fixedArgumentCaptor.capture(),
+                                         fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
                          .asInt()).isEqualTo(5);
@@ -732,8 +752,8 @@ public class PointerDeviceTest {
                          .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0).motion(eq(time2),
-                                fixedArgumentCaptor.capture(),
-                                fixedArgumentCaptor.capture());
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
         assertThat(values.get(2)
                          .asInt()).isEqualTo(5);
         assertThat(values.get(3)
@@ -797,15 +817,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(true);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(true);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(true);
@@ -847,9 +870,9 @@ public class PointerDeviceTest {
         final List<Fixed> values = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
-                               eq(wlSurfaceResource0),
-                               fixedArgumentCaptor.capture(),
-                               fixedArgumentCaptor.capture());
+                                         eq(wlSurfaceResource0),
+                                         fixedArgumentCaptor.capture(),
+                                         fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
                          .asInt()).isEqualTo(2);
@@ -857,22 +880,22 @@ public class PointerDeviceTest {
                          .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0).motion(eq(time0),
-                                fixedArgumentCaptor.capture(),
-                                fixedArgumentCaptor.capture());
+                                          fixedArgumentCaptor.capture(),
+                                          fixedArgumentCaptor.capture());
         assertThat(values.get(2)
                          .asInt()).isEqualTo(2);
         assertThat(values.get(3)
                          .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0).button(serial1,
-                                time1,
-                                button0,
-                                WlPointerButtonState.PRESSED.getValue());
+                                          time1,
+                                          button0,
+                                          WlPointerButtonState.PRESSED.getValue());
 
         verify(wlPointerResource0).button(serial2,
-                                time2,
-                                button0,
-                                WlPointerButtonState.RELEASED.getValue());
+                                          time2,
+                                          button0,
+                                          WlPointerButtonState.RELEASED.getValue());
     }
 
     @Test
@@ -920,15 +943,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(true);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(true);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(true);
@@ -1067,15 +1093,18 @@ public class PointerDeviceTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
 
         //mock surface 0 local coordinates
-        final Point localPointerPosition0Start = Point.create(1,1);
+        final Point localPointerPosition0Start = Point.create(1,
+                                                              1);
         when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         when(region0.contains(size0,
                               localPointerPosition0Start)).thenReturn(true);
-        final Point localPointerPosition00 = Point.create(2,3);
+        final Point localPointerPosition00 = Point.create(2,
+                                                          3);
         when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition00))).thenReturn(true);
-        final Point localPointerPosition01 = Point.create(5,8);
+        final Point localPointerPosition01 = Point.create(5,
+                                                          8);
         when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
         when(region0.contains(eq(size0),
                               eq(localPointerPosition01))).thenReturn(true);

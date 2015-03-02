@@ -99,12 +99,12 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                   pointerDevice.grabMotion(this.wlSurfaceResource,
                                            serial,
                                            motion -> {
-                                                //TODO support one dimensional resize
-                                                final Point motionLocal = surface.local(motion.getPoint());
-                                                Point cornerPoint = motionLocal.add(delta);
-                                                requester.configure(quadrant.getValue(),
-                                                                    cornerPoint.getX(),
-                                                                    cornerPoint.getY());
+                                               //TODO support one dimensional resize
+                                               final Point motionLocal = surface.local(motion.getPoint());
+                                               Point cornerPoint = motionLocal.add(delta);
+                                               requester.configure(quadrant.getValue(),
+                                                                   cornerPoint.getX(),
+                                                                   cornerPoint.getY());
                                            });
               });
     }

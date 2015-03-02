@@ -17,7 +17,8 @@ import org.westmalle.wayland.protocol.WlSurface;
 import java.util.Optional;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -61,7 +62,7 @@ public class ShmRendererTest {
         this.shmRenderer.render(surfaceResource);
         //then
         verify(this.shmRenderEngine).draw(surfaceResource,
-                              shmBuffer);
+                                          shmBuffer);
     }
 
     @Test

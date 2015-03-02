@@ -78,9 +78,9 @@ public class WlRegionTest {
                      height);
         //then
         verify(region).add(eq(Rectangle.create(x,
-                                                 y,
-                                                 width,
-                                                 height)));
+                                               y,
+                                               width,
+                                               height)));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -120,9 +120,9 @@ public class WlRegionTest {
                           height);
         //then
         verify(region).subtract(eq(Rectangle.create(x,
-                                                      y,
-                                                      width,
-                                                      height)));
+                                                    y,
+                                                    width,
+                                                    height)));
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -81,8 +81,8 @@ public class WlShellTest {
                                 wlSurfaceResource);
         //then
         verify(wlShellSurface).add(client,
-                             version,
-                             id);
+                                   version,
+                                   id);
         final ArgumentCaptor<Listener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlSurfaceResource).addDestroyListener(destroyListenerArgumentCaptor.capture());
 

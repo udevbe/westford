@@ -128,8 +128,8 @@ public class WlCompositorTest {
                                    1);
         //then
         verify(wlSurface).add(client,
-                             version,
-                             id);
+                              version,
+                              id);
 
         assertThat((Iterable) surfacesStack).contains(wlSurfaceResource);
 

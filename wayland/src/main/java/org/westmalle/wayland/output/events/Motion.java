@@ -14,7 +14,6 @@
 package org.westmalle.wayland.output.events;
 
 import com.google.auto.value.AutoValue;
-
 import org.westmalle.wayland.output.Point;
 
 import javax.annotation.Nonnull;
@@ -23,14 +22,17 @@ import javax.annotation.Nonnull;
 public abstract class Motion {
 
     public static Motion create(final int time,
-                                @Nonnull final Point point){
-        return new AutoValue_Motion(time,point);
+                                @Nonnull final Point point) {
+        return new AutoValue_Motion(time,
+                                    point);
     }
 
     public static Motion create(final int time,
                                 final int x,
-                                final int y){
-        return new AutoValue_Motion(time,Point.create(x,y));
+                                final int y) {
+        return new AutoValue_Motion(time,
+                                    Point.create(x,
+                                                 y));
     }
 
     public abstract int getTime();

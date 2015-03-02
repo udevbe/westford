@@ -15,11 +15,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.output.Point;
-import org.westmalle.wayland.output.PointerDevice;
-import org.westmalle.wayland.output.PointerGrabMotion;
-import org.westmalle.wayland.output.Rectangle;
-import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.output.events.Motion;
 
 import java.util.Optional;
@@ -76,8 +72,8 @@ public class WlShellSurfaceTest {
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
-                                    eq(serial),
-                                    pointerGrabMotionCaptor.capture());
+                                         eq(serial),
+                                         pointerGrabMotionCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
         pointerGrabMotion.motion(Motion.create(98765,

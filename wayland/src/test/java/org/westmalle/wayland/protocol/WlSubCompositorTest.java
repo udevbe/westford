@@ -98,8 +98,8 @@ public class WlSubCompositorTest {
                                       parent);
         //then
         verify(wlSubSurface).add(client,
-                             version,
-                             id);
+                                 version,
+                                 id);
         final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(surface).addDestroyListener(listenerArgumentCaptor.capture());
         final Listener destroyListener = listenerArgumentCaptor.getValue();

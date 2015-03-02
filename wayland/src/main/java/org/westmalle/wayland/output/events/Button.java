@@ -14,7 +14,6 @@
 package org.westmalle.wayland.output.events;
 
 import com.google.auto.value.AutoValue;
-
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 
 import javax.annotation.Nonnull;
@@ -24,7 +23,7 @@ public abstract class Button {
 
     public static Button create(final int time,
                                 final int button,
-                                @Nonnull final WlPointerButtonState buttonState){
+                                @Nonnull final WlPointerButtonState buttonState) {
         return new AutoValue_Button(time,
                                     button,
                                     buttonState);
