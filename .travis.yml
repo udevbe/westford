@@ -7,8 +7,12 @@ branches:
     - master
 before_install:
     - git clone https://github.com/google/auto.git
-    - cd auto/value
+    - pushd auto/value
     - mvn install
+    - popd
     - git clone https://github.com/Zubnix/jglm.git
-    - cd jglm
+    - pushd jglm
+    - mvn install
+    - popd
+install:
     - mvn install
