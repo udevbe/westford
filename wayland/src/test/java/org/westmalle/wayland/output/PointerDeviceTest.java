@@ -36,99 +36,111 @@ public class PointerDeviceTest {
     @Test
     public void testGrabNewFocusMotion() throws Exception {
         //given
-        final Set<WlPointerResource> pointerResources = new HashSet<>();
-        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
-        final WlPointerResource wlPointerResource1 = mock(WlPointerResource.class);
-        pointerResources.add(wlPointerResource0);
-        pointerResources.add(wlPointerResource1);
+
+        //pointer position 0
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.create(x0,
-                                        y0);
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
 
+        //pointer position 1
         final int x1 = 500;
         final int y1 = 600;
-        final Point pos1 = Point.create(x1,
-                                        y1);
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
 
-        final int button0 = 1;
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
-        final Client client0 = mock(Client.class);
-        final Client client1 = mock(Client.class);
-
+        //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-
-        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
-        surfaceResources.add(wlSurfaceResource0);
-        surfaceResources.add(wlSurfaceResource1);
-        when(this.compositor.getSurfacesStack()).thenReturn(surfaceResources);
-
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-        final WlSurface wlSurface1 = mock(WlSurface.class);
-        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
-
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
-        final Surface surface1 = mock(Surface.class);
-        when(wlSurface1.getSurface()).thenReturn(surface1);
-
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final SurfaceState surfaceState1 = mock(SurfaceState.class);
-        when(surface1.getState()).thenReturn(surfaceState1);
-
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-        final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
-        when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
-
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-        final WlRegion wlRegion1 = mock(WlRegion.class);
-        when(wlRegionResource1.getImplementation()).thenReturn(wlRegion1);
-
         final Region region0 = mock(Region.class);
         when(wlRegion0.getRegion()).thenReturn(region0);
+
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(true);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(false);
+
+        //mock surface 1
+        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource1);
+        final Client client1 = mock(Client.class);
+        when(wlSurfaceResource1.getClient()).thenReturn(client1);
+        final WlSurface wlSurface1 = mock(WlSurface.class);
+        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
+        final Surface surface1 = mock(Surface.class);
+        when(wlSurface1.getSurface()).thenReturn(surface1);
+        final Rectangle size1 = mock(Rectangle.class);
+        when(surface1.getSize()).thenReturn(size1);
+        final SurfaceState surfaceState1 = mock(SurfaceState.class);
+        when(surface1.getState()).thenReturn(surfaceState1);
+        final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
+        when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
+        final WlRegion wlRegion1 = mock(WlRegion.class);
+        when(wlRegionResource1.getImplementation()).thenReturn(wlRegion1);
         final Region region1 = mock(Region.class);
         when(wlRegion1.getRegion()).thenReturn(region1);
 
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
-        when(wlSurfaceResource1.getClient()).thenReturn(client1);
+        //mock surface 1 local coordinates
+        final Point localPointerPosition1Start = Point.create(13,21);
+        when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
+        when(region1.contains(size1,
+                              localPointerPosition1Start)).thenReturn(false);
+        final Point localPointerPosition10 = Point.create(34, 55);
+        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
+        when(region1.contains(eq(size1),
+                              eq(localPointerPosition10))).thenReturn(false);
+        final Point localPointerPosition11 = Point.create(89, 144);
+        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
+        when(region1.contains(eq(size1),
+                              eq(localPointerPosition11))).thenReturn(true);
 
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
         when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
+
+        //mock pointer 1 resource
+        final WlPointerResource wlPointerResource1 = mock(WlPointerResource.class);
         when(wlPointerResource1.getClient()).thenReturn(client1);
+        pointerResources.add(wlPointerResource1);
 
-        final Point surfacePos0 = Point.create(10,
-                                               10);
-        final int relX0 = x0 - 10;
-        final int relY0 = y0 - 10;
-        final Point relPos0 = Point.create(relX0,
-                                           relY0);
-        when(surface0.local(pos0)).thenReturn(relPos0);
-        when(region0.contains(relPos0)).thenReturn(true);
-        when(surface0.getPosition()).thenReturn(surfacePos0);
+        //mock button
+        final int button0 = 1;
 
-        final Point surfacePos1 = Point.create(400,
-                                               400);
-        final int relX1 = x1 - 400;
-        final int relY1 = y1 - 400;
-        final Point relPos1 = Point.create(relX1,
-                                           relY1);
-        when(surface1.local(pos1)).thenReturn(relPos1);
-        when(region1.contains(relPos1)).thenReturn(true);
-        when(surface1.getPosition()).thenReturn(surfacePos1);
-
-        final int relX3 = x0 - 400;
-        final int relY3 = y0 - 400;
-        final Point relPos3 = Point.create(relX3,
-                                           relY3);
-        when(surface0.local(pos1)).thenReturn(relPos3);
-
+        //mock display
         final int serial = 90879;
         when(this.display.nextSerial()).thenReturn(serial);
+
         //when
         this.pointerDevice.motion(pointerResources,
                                   time,
@@ -154,22 +166,22 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0,
                times(2)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
         assertThat(values.get(4)
-                         .asInt()).isEqualTo(relX3);
+                         .asInt()).isEqualTo(5);
         assertThat(values.get(5)
-                         .asInt()).isEqualTo(relY3);
+                         .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0,
                times(1)).button(serial,
@@ -203,95 +215,112 @@ public class PointerDeviceTest {
     @Test
     public void testNoGrabNewFocusMotion() throws Exception {
         //given
-        final Set<WlPointerResource> pointerResources = new HashSet<>();
-        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
-        final WlPointerResource wlPointerResource1 = mock(WlPointerResource.class);
-        pointerResources.add(wlPointerResource0);
-        pointerResources.add(wlPointerResource1);
+
+        //pointer position 0
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.create(x0,
-                                        y0);
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
 
-        final int x1 = 100;
-        final int y1 = 200;
-        final Point pos1 = Point.create(x1,
-                                        y1);
+        //pointer position 1
+        final int x1 = 500;
+        final int y1 = 600;
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
 
-        final Client client0 = mock(Client.class);
-        final Client client1 = mock(Client.class);
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
+        //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-
-        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
-        surfaceResources.add(wlSurfaceResource0);
-        surfaceResources.add(wlSurfaceResource1);
-        when(this.compositor.getSurfacesStack()).thenReturn(surfaceResources);
-
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-        final WlSurface wlSurface1 = mock(WlSurface.class);
-        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
-
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
-        final Surface surface1 = mock(Surface.class);
-        when(wlSurface1.getSurface()).thenReturn(surface1);
-
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final SurfaceState surfaceState1 = mock(SurfaceState.class);
-        when(surface1.getState()).thenReturn(surfaceState1);
-
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-        final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
-        when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
-
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-        final WlRegion wlRegion1 = mock(WlRegion.class);
-        when(wlRegionResource1.getImplementation()).thenReturn(wlRegion1);
-
         final Region region0 = mock(Region.class);
         when(wlRegion0.getRegion()).thenReturn(region0);
+
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(true);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(false);
+
+        //mock surface 1
+        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource1);
+        final Client client1 = mock(Client.class);
+        when(wlSurfaceResource1.getClient()).thenReturn(client1);
+        final WlSurface wlSurface1 = mock(WlSurface.class);
+        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
+        final Surface surface1 = mock(Surface.class);
+        when(wlSurface1.getSurface()).thenReturn(surface1);
+        final Rectangle size1 = mock(Rectangle.class);
+        when(surface1.getSize()).thenReturn(size1);
+        final SurfaceState surfaceState1 = mock(SurfaceState.class);
+        when(surface1.getState()).thenReturn(surfaceState1);
+        final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
+        when(surfaceState1.getInputRegion()).thenReturn(Optional.of(wlRegionResource1));
+        final WlRegion wlRegion1 = mock(WlRegion.class);
+        when(wlRegionResource1.getImplementation()).thenReturn(wlRegion1);
         final Region region1 = mock(Region.class);
         when(wlRegion1.getRegion()).thenReturn(region1);
 
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
-        when(wlSurfaceResource1.getClient()).thenReturn(client1);
+        //mock surface 1 local coordinates
+        final Point localPointerPosition1Start = Point.create(13,21);
+        when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
+        when(region1.contains(size1,
+                              localPointerPosition1Start)).thenReturn(false);
+        final Point localPointerPosition10 = Point.create(34, 55);
+        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
+        when(region1.contains(eq(size1),
+                              eq(localPointerPosition10))).thenReturn(false);
+        final Point localPointerPosition11 = Point.create(89, 144);
+        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
+        when(region1.contains(eq(size1),
+                              eq(localPointerPosition11))).thenReturn(true);
 
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
         when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
+
+        //mock pointer 1 resource
+        final WlPointerResource wlPointerResource1 = mock(WlPointerResource.class);
         when(wlPointerResource1.getClient()).thenReturn(client1);
+        pointerResources.add(wlPointerResource1);
 
-        final int relX0 = 50;
-        final int relY0 = 100;
-        final Point relPos0 = Point.create(relX0,
-                                           relY0);
-        when(surface0.local(pos0)).thenReturn(relPos0);
-        when(region0.contains(relPos0)).thenReturn(true);
-
-        final Point surfacePos0 = pos0.subtract(relPos0);
-        when(surface0.getPosition()).thenReturn(surfacePos0);
-
-        final int relX1 = 0;
-        final int relY1 = 100;
-        final Point relPos1 = Point.create(relX1,
-                                           relY1);
-        when(surface1.local(pos1)).thenReturn(relPos1);
-        when(region1.contains(relPos1)).thenReturn(true);
-
-        final Point surfacePos1 = pos1.subtract(relPos1);
-        when(surface1.getPosition()).thenReturn(surfacePos1);
-
+        //mock display
         final int serial0 = 90879;
-        final int serial1 = 90880;
-        final int serial2 = 90881;
+        final int serial1 = 90881;
+        final int serial2 = 90882;
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
                                                    serial2);
+
         //when
         this.pointerDevice.motion(pointerResources,
                                   time,
@@ -313,18 +342,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
 
 
         verify(wlPointerResource0,
@@ -337,18 +366,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture(),
                                fixedArgumentCaptor.capture());
         assertThat(values.get(4)
-                         .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(89);
         assertThat(values.get(5)
-                         .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(144);
 
         verify(wlPointerResource1,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(6)
-                         .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(89);
         assertThat(values.get(7)
-                         .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(144);
     }
 
     /**
@@ -357,70 +386,69 @@ public class PointerDeviceTest {
     @Test
     public void testNoFocusMotion() throws Exception {
         //given
-        final Set<WlPointerResource> pointerResources = new HashSet<>();
-        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
-        pointerResources.add(wlPointerResource0);
+
+        //pointer position 0
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.create(x0,
-                                        y0);
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
 
-        final int x1 = 100;
-        final int y1 = 200;
-        final Point pos1 = Point.create(x1,
-                                        y1);
+        //pointer position 1
+        final int x1 = 500;
+        final int y1 = 600;
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
 
-        final Client client0 = mock(Client.class);
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
+        //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-
-        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
-        surfaceResources.add(wlSurfaceResource0);
-        when(this.compositor.getSurfacesStack()).thenReturn(surfaceResources);
-
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
-
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-
         final Region region0 = mock(Region.class);
         when(wlRegion0.getRegion()).thenReturn(region0);
 
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(true);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(false);
 
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
         when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
 
-        final int relX0 = 50;
-        final int relY0 = 100;
-        final Point relPos0 = Point.create(relX0,
-                                           relY0);
-        when(surface0.local(pos0)).thenReturn(relPos0);
-        when(region0.contains(relPos0)).thenReturn(true);
-
-        final Point surfacePos0 = pos0.subtract(relPos0);
-        when(surface0.getPosition()).thenReturn(surfacePos0);
-
-        final int relX1 = 0;
-        final int relY1 = 100;
-        final Point relPos1 = Point.create(relX1,
-                                           relY1);
-        when(surface0.local(pos1)).thenReturn(relPos1);
-        when(region0.contains(relPos1)).thenReturn(false);
-
+        //mock display
         final int serial0 = 90879;
-        final int serial1 = 90880;
-        final int serial2 = 90881;
+        final int serial1 = 90881;
+        final int serial2 = 90882;
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
                                                    serial2);
@@ -445,18 +473,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0,
                times(1)).leave(serial1,
@@ -469,73 +497,73 @@ public class PointerDeviceTest {
     @Test
     public void testNewFocusMotion() throws Exception {
         //given
-        final Set<WlPointerResource> pointerResources = new HashSet<>();
-        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
-        pointerResources.add(wlPointerResource0);
+
+        //pointer position 0
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.create(x0,
-                                        y0);
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
 
-        final int x1 = 100;
-        final int y1 = 200;
-        final Point pos1 = Point.create(x1,
-                                        y1);
+        //pointer position 1
+        final int x1 = 500;
+        final int y1 = 600;
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
 
-        final Client client0 = mock(Client.class);
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
+        //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-
-        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
-        surfaceResources.add(wlSurfaceResource0);
-        when(this.compositor.getSurfacesStack()).thenReturn(surfaceResources);
-
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
-
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-
         final Region region0 = mock(Region.class);
         when(wlRegion0.getRegion()).thenReturn(region0);
 
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(false);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(false);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(true);
 
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
         when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
 
-        final Point surfacePos0 = Point.create(100,
-                                               100);
-        final int relX0 = x0 - 100;
-        final int relY0 = y0 - 100;
-        final Point relPos0 = Point.create(relX0,
-                                           relY0);
-        when(surface0.local(pos0)).thenReturn(relPos0);
-        when(region0.contains(relPos0)).thenReturn(false);
-        when(surface0.getPosition()).thenReturn(surfacePos0);
-
-        final int relX1 = x1 - 100;
-        final int relY1 = y1 - 100;
-        final Point relPos1 = Point.create(relX1,
-                                           relY1);
-        when(surface0.local(pos1)).thenReturn(relPos1);
-        when(region0.contains(relPos1)).thenReturn(true);
-
+        //mock display
         final int serial0 = 90879;
-        final int serial1 = 90880;
-        final int serial2 = 90881;
+        final int serial1 = 90881;
+        final int serial2 = 90882;
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
                                                    serial2);
+
         //when
         this.pointerDevice.motion(pointerResources,
                                   time,
@@ -557,18 +585,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(5);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(5);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(8);
     }
 
     /**
@@ -577,76 +605,76 @@ public class PointerDeviceTest {
     @Test
     public void testButtonNoGrabMotion() throws Exception {
         //given
-        final Set<WlPointerResource> pointerResources = new HashSet<>();
-        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
-        pointerResources.add(wlPointerResource0);
+
+        //pointer position 0
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.create(x0,
-                                        y0);
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
 
-        final int x1 = 100;
-        final int y1 = 200;
-        final Point pos1 = Point.create(x1,
-                                        y1);
+        //pointer position 1
+        final int x1 = 500;
+        final int y1 = 600;
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
 
-        final int button0 = 1;
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
-        final Client client0 = mock(Client.class);
-
+        //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-
-        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
-        surfaceResources.add(wlSurfaceResource0);
-        when(this.compositor.getSurfacesStack()).thenReturn(surfaceResources);
-
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
-
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-
         final Region region0 = mock(Region.class);
         when(wlRegion0.getRegion()).thenReturn(region0);
 
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(false);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(false);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(true);
 
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
         when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
 
-        final Point surfacePos0 = Point.create(100,
-                                               100);
-        final int relX0 = x0 - 100;
-        final int relY0 = y0 - 100;
-        final Point relPos0 = Point.create(relX0,
-                                           relY0);
-        when(surface0.local(pos0)).thenReturn(relPos0);
-        when(region0.contains(relPos0)).thenReturn(false);
-
-        when(surface0.getPosition()).thenReturn(surfacePos0);
-
-        final int relX1 = x1 - 100;
-        final int relY1 = y1 - 100;
-        final Point relPos1 = Point.create(relX1,
-                                           relY1);
-        when(surface0.local(pos1)).thenReturn(relPos1);
-        when(region0.contains(relPos1)).thenReturn(true);
-
+        //mock display
         final int serial0 = 90879;
-        final int serial1 = 90880;
-        final int serial2 = 90881;
+        final int serial1 = 90881;
+        final int serial2 = 90882;
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
                                                    serial2);
+
+        //button 0
+        final int button0 = 1;
+
         //when
         this.pointerDevice.motion(pointerResources,
                                   time,
@@ -676,18 +704,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(5);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(relX1);
+                         .asInt()).isEqualTo(5);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(relY1);
+                         .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0,
                never()).button(anyInt(),
@@ -704,64 +732,76 @@ public class PointerDeviceTest {
     @Test
     public void testButton() throws Exception {
         //given
-        final Set<WlPointerResource> pointerResources = new HashSet<>();
-        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
-        pointerResources.add(wlPointerResource0);
+
+        //pointer position 0
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.create(x0,
-                                        y0);
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
 
-        final int button0 = 1;
+        //pointer position 1
+        final int x1 = 500;
+        final int y1 = 600;
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
 
-        final Client client0 = mock(Client.class);
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
+        //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-
-        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
-        surfaceResources.add(wlSurfaceResource0);
-        when(this.compositor.getSurfacesStack()).thenReturn(surfaceResources);
-
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
-
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-
         final Region region0 = mock(Region.class);
         when(wlRegion0.getRegion()).thenReturn(region0);
 
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(true);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(true);
 
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
         when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
 
-        final int relX0 = 50;
-        final int relY0 = 100;
-        final Point relPos0 = Point.create(relX0,
-                                           relY0);
-        when(surface0.local(pos0)).thenReturn(relPos0);
-        when(region0.contains(relPos0)).thenReturn(true);
-
-
-        final Point surfacePos0 = pos0.subtract(relPos0);
-        when(surface0.getPosition()).thenReturn(surfacePos0);
-
+        //mock display
         final int serial0 = 90879;
-        final int serial1 = 90880;
-        final int serial2 = 90881;
+        final int serial1 = 90881;
+        final int serial2 = 90882;
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
                                                    serial2);
+
+        //button 0
+        final int button0 = 1;
+
         //when
         this.pointerDevice.motion(pointerResources,
                                   time,
@@ -787,18 +827,18 @@ public class PointerDeviceTest {
                                fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0,
                times(1)).motion(eq(time),
                                 fixedArgumentCaptor.capture(),
                                 fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(relX0);
+                         .asInt()).isEqualTo(2);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(relY0);
+                         .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0,
                times(1)).button(serial1,
@@ -816,63 +856,75 @@ public class PointerDeviceTest {
     @Test
     public void testIsButtonPressed() throws Exception {
         //given
-        final Set<WlPointerResource> pointerResources = new HashSet<>();
-        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
-        pointerResources.add(wlPointerResource0);
+
+        //pointer position 0
         final int time = 112358;
         final int x0 = 20;
         final int y0 = 30;
-        final Point pos0 = Point.create(x0,
-                                        y0);
+        final Point pointerPos0 = Point.create(x0,
+                                               y0);
 
-        final int button0 = 1;
+        //pointer position 1
+        final int x1 = 500;
+        final int y1 = 600;
+        final Point pointerPos1 = Point.create(x1,
+                                               y1);
 
-        final Client client0 = mock(Client.class);
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
+        //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-
-        final LinkedList<WlSurfaceResource> surfaceResources = new LinkedList<>();
-        surfaceResources.add(wlSurfaceResource0);
-        when(this.compositor.getSurfacesStack()).thenReturn(surfaceResources);
-
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
-
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(wlRegionResource0));
-
         final WlRegion wlRegion0 = mock(WlRegion.class);
         when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-
         final Region region0 = mock(Region.class);
         when(wlRegion0.getRegion()).thenReturn(region0);
 
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = Point.create(1,1);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+        final Point localPointerPosition00 = Point.create(2,3);
+        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition00))).thenReturn(true);
+        final Point localPointerPosition01 = Point.create(5,8);
+        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(region0.contains(eq(size0),
+                              eq(localPointerPosition01))).thenReturn(true);
 
+        final Set<WlPointerResource> pointerResources = new HashSet<>();
+
+        //mock pointer 0 resource
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
         when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
 
-        final int relX0 = 50;
-        final int relY0 = 100;
-        final Point relPos0 = Point.create(relX0,
-                                           relY0);
-        when(surface0.local(pos0)).thenReturn(relPos0);
-        when(region0.contains(relPos0)).thenReturn(true);
-
-        final Point surfacePos0 = pos0.subtract(relPos0);
-        when(surface0.getPosition()).thenReturn(surfacePos0);
-
+        //mock display
         final int serial0 = 90879;
-        final int serial1 = 90880;
-        final int serial2 = 90881;
+        final int serial1 = 90881;
+        final int serial2 = 90882;
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
                                                    serial2);
+
+        //button 0
+        final int button0 = 1;
         //when
         this.pointerDevice.motion(pointerResources,
                                   time,
