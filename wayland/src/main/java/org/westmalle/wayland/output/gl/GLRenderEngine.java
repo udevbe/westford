@@ -310,13 +310,14 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     private GLSurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
                                            final ShmBuffer buffer) {
+        //FIXME recalculate surface data if buffer size has changed + write proper unit test
         GLSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
             surfaceData = GLSurfaceData.create(this.gl);
             surfaceData.init(this.gl,
                              buffer);
-            this.cachedSurfaceData.put(surfaceResource,
-                                       surfaceData);
+//            this.cachedSurfaceData.put(surfaceResource,
+//                                       surfaceData);
         }
         return surfaceData;
     }
