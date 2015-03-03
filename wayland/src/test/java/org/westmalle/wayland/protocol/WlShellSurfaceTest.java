@@ -103,7 +103,9 @@ public class WlShellSurfaceTest {
     }
 
     @Test
-    public void testResize() throws Exception {
+    public void testResizeBottomRight() throws Exception {
+        //TODO test other corners
+
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
