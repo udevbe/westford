@@ -103,7 +103,7 @@ public class WlShellSurfaceTest {
     }
 
     @Test
-    public void testResize() throws Exception {
+    public void testResizeBottomRight() throws Exception {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
@@ -154,6 +154,175 @@ public class WlShellSurfaceTest {
                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_RIGHT.getValue(),
+                                                 200,
+                                                 200);
+    }
+
+    @Test
+    public void testResizeTopRight() throws Exception {
+        //given
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
+        final WlSeat wlSeat = mock(WlSeat.class);
+        when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
+
+        final WlPointer wlPointer = mock(WlPointer.class);
+        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+
+        final PointerDevice pointerDevice = mock(PointerDevice.class);
+        when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
+        final Point pointerPositionStart = mock(Point.class);
+        when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
+        final Point pointerPositionMotion = mock(Point.class);
+
+        final int serial = 12345;
+
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
+                                                                          20));
+        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(180,
+                                                                           -80));
+
+        when(surface.getSize()).thenReturn(Rectangle.create(0,
+                                                            0,
+                                                            100,
+                                                            100));
+
+        final WlShellSurface wlShellSurface = new WlShellSurface(wlSurfaceResource);
+        //when
+        wlShellSurface.resize(wlShellSurfaceResource,
+                              wlSeatResource,
+                              serial,
+                              0);
+        //then
+        final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
+        verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
+                                         eq(serial),
+                                         pointerGrabMotionArgumentCaptor.capture());
+        //and when
+        final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
+        pointerGrabMotion.motion(Motion.create(456767,
+                                               pointerPositionMotion));
+        //then
+        verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP_RIGHT.getValue(),
+                                                 200,
+                                                 200);
+    }
+
+    @Test
+    public void testResizeTopLeft() throws Exception {
+        //TODO test other corners
+        //given
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
+        final WlSeat wlSeat = mock(WlSeat.class);
+        when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
+
+        final WlPointer wlPointer = mock(WlPointer.class);
+        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+
+        final PointerDevice pointerDevice = mock(PointerDevice.class);
+        when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
+        final Point pointerPositionStart = mock(Point.class);
+        when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
+        final Point pointerPositionMotion = mock(Point.class);
+
+        final int serial = 12345;
+
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
+                                                                          20));
+        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(-80,
+                                                                           -80));
+
+        when(surface.getSize()).thenReturn(Rectangle.create(0,
+                                                            0,
+                                                            100,
+                                                            100));
+
+        final WlShellSurface wlShellSurface = new WlShellSurface(wlSurfaceResource);
+        //when
+        wlShellSurface.resize(wlShellSurfaceResource,
+                              wlSeatResource,
+                              serial,
+                              0);
+        //then
+        final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
+        verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
+                                         eq(serial),
+                                         pointerGrabMotionArgumentCaptor.capture());
+        //and when
+        final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
+        pointerGrabMotion.motion(Motion.create(456767,
+                                               pointerPositionMotion));
+        //then
+        verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP_LEFT.getValue(),
+                                                 200,
+                                                 200);
+    }
+
+    @Test
+    public void testResizeBottomLeft() throws Exception {
+        //given
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
+        final WlSeat wlSeat = mock(WlSeat.class);
+        when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
+
+        final WlPointer wlPointer = mock(WlPointer.class);
+        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+
+        final PointerDevice pointerDevice = mock(PointerDevice.class);
+        when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
+        final Point pointerPositionStart = mock(Point.class);
+        when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
+        final Point pointerPositionMotion = mock(Point.class);
+
+        final int serial = 12345;
+
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
+                                                                          80));
+        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(-80,
+                                                                           180));
+
+        when(surface.getSize()).thenReturn(Rectangle.create(0,
+                                                            0,
+                                                            100,
+                                                            100));
+
+        final WlShellSurface wlShellSurface = new WlShellSurface(wlSurfaceResource);
+        //when
+        wlShellSurface.resize(wlShellSurfaceResource,
+                              wlSeatResource,
+                              serial,
+                              0);
+        //then
+        final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
+        verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
+                                         eq(serial),
+                                         pointerGrabMotionArgumentCaptor.capture());
+        //and when
+        final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
+        pointerGrabMotion.motion(Motion.create(456767,
+                                               pointerPositionMotion));
+        //then
+        verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_LEFT.getValue(),
                                                  200,
                                                  200);
     }
