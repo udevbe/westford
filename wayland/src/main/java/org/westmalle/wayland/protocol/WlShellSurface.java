@@ -121,20 +121,20 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
         switch (quadrant) {
             case TOP_LEFT: {
                 final float[] anchorTranslation = new float[16];
-                anchorTranslation[3] = width;
-                anchorTranslation[7] = height;
+                anchorTranslation[12] = width;
+                anchorTranslation[13] = height;
                 quadrantTransform = Transforms._180.add(new Mat4(anchorTranslation));
                 break;
             }
             case TOP_RIGHT: {
                 final float[] anchorTranslation = new float[16];
-                anchorTranslation[7] = height;
+                anchorTranslation[13] = height;
                 quadrantTransform = Transforms.FLIPPED_180.add(new Mat4(anchorTranslation));
                 break;
             }
             case BOTTOM_LEFT: {
                 final float[] anchorTranslation = new float[16];
-                anchorTranslation[3] = width;
+                anchorTranslation[12] = width;
                 quadrantTransform = Transforms.FLIPPED.add(new Mat4(anchorTranslation));
                 break;
             }
@@ -145,8 +145,8 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
         final Vec4 localTransformed = quadrantTransform.multiply(local.toVec4());
         final float[] deltaTranslation = new float[16];
-        deltaTranslation[3] = width - localTransformed.getX();
-        deltaTranslation[7] = height - localTransformed.getY();
+        deltaTranslation[12] = width - localTransformed.getX();
+        deltaTranslation[13] = height - localTransformed.getY();
 
         return quadrantTransform.add(new Mat4(deltaTranslation));
     }
