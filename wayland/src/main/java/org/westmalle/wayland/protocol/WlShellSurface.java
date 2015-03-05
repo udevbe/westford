@@ -16,12 +16,12 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
+import com.hackoeur.jglm.Mat4;
+import com.hackoeur.jglm.Vec4;
+import com.hackoeur.jglm.support.FastMath;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
-import org.westmalle.wayland.output.Point;
-import org.westmalle.wayland.output.PointerDevice;
-import org.westmalle.wayland.output.Rectangle;
-import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.*;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -93,54 +93,68 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
                   final WlShellSurfaceResize quadrant = quadrant(size,
                                                                  local);
-                  final Point delta = delta(quadrant,
-                                            size,
-                                            local);
+                  final Mat4 transform = transform(quadrant,
+                                                   size,
+                                                   local);
                   pointerDevice.grabMotion(this.wlSurfaceResource,
                                            serial,
                                            motion -> {
-                                               //TODO support one dimensional resize
-                                               final Point motionLocal = surface.local(motion.getPoint());
-                                               Point cornerPoint = motionLocal.add(delta);
+                                               final Vec4 motionLocal = surface.local(motion.getPoint())
+                                                                               .toVec4();
+                                               final Vec4 resize = transform.multiply(motionLocal);
                                                requester.configure(quadrant.getValue(),
-                                                                   cornerPoint.getX(),
-                                                                   cornerPoint.getY());
+                                                                   FastMath.round(resize.getX()),
+                                                                   FastMath.round(resize.getY()));
                                            });
               });
     }
 
-    private Point delta(final WlShellSurfaceResize quadrant,
-                        final Rectangle size,
-                        final Point local) {
-        //TODO support one dimensional resize
+    private Mat4 transform(final WlShellSurfaceResize quadrant,
+                           final Rectangle size,
+                           final Point local) {
+        //TODO support one dimensional resize (TOP, BOTTOM, LEFT, RIGHT)
 
+        final int width = size.getWidth();
+        final int height = size.getHeight();
+
+        final Mat4 quadrantTransform;
         switch (quadrant) {
             case TOP_LEFT: {
-                return local;
+                final float[] anchorTranslation = new float[16];
+                anchorTranslation[3] = width;
+                anchorTranslation[7] = height;
+                quadrantTransform = Transforms._180.add(new Mat4(anchorTranslation));
+                break;
             }
             case TOP_RIGHT: {
-                return local.toBuilder()
-                            .x(size.getWidth() - local.getX())
-                            .build();
-            }
-            case BOTTOM_RIGHT: {
-                return Point.create(size.getWidth() - local.getX(),
-                                    size.getHeight() - local.getY());
+                final float[] anchorTranslation = new float[16];
+                anchorTranslation[7] = height;
+                quadrantTransform = Transforms.FLIPPED_180.add(new Mat4(anchorTranslation));
+                break;
             }
             case BOTTOM_LEFT: {
-                return local.toBuilder()
-                            .y(size.getHeight() - local.getY())
-                            .build();
+                final float[] anchorTranslation = new float[16];
+                anchorTranslation[3] = width;
+                quadrantTransform = Transforms.FLIPPED.add(new Mat4(anchorTranslation));
+                break;
             }
             default: {
-                return Point.ZERO;
+                quadrantTransform = Mat4.MAT4_IDENTITY;
             }
         }
+
+        final Vec4 localTransformed = quadrantTransform.multiply(local.toVec4());
+        final float[] deltaTranslation = new float[16];
+        deltaTranslation[3] = width - localTransformed.getX();
+        deltaTranslation[7] = height - localTransformed.getY();
+
+        return quadrantTransform.add(new Mat4(deltaTranslation));
     }
+
 
     private WlShellSurfaceResize quadrant(final Rectangle size,
                                           final Point local) {
-        //TODO support one dimensional resize
+        //TODO support one dimensional resize (TOP, BOTTOM, LEFT, RIGHT)
 
         final boolean left = local.getX() < size.getWidth() / 2;
         final boolean top = local.getY() < size.getHeight() / 2;

@@ -1,6 +1,7 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.value.AutoValue;
+import com.hackoeur.jglm.Vec4;
 
 @AutoValue
 public abstract class Point {
@@ -22,6 +23,13 @@ public abstract class Point {
     public abstract int getX();
 
     public abstract int getY();
+
+    public Vec4 toVec4() {
+        return new Vec4(getX(),
+                        getY(),
+                        0,
+                        1);
+    }
 
     public Point add(final Point right) {
         return Point.create(getX() + right.getX(),
