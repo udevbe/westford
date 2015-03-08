@@ -162,4 +162,6 @@ public class Transforms {
                 scale
         );
     }
+
+    public static Mat4 IDENTITY = Mat4.MAT4_IDENTITY;
 }

@@ -1,0 +1,146 @@
+package org.westmalle.wayland.output.wlshell;
+
+import com.hackoeur.jglm.Mat4;
+import com.hackoeur.jglm.Vec4;
+import com.hackoeur.jglm.support.FastMath;
+import org.freedesktop.wayland.server.WlShellSurfaceResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlShellSurfaceResize;
+import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.protocol.WlPointer;
+import org.westmalle.wayland.protocol.WlSurface;
+
+import javax.annotation.Nonnull;
+
+public class ShellSurface {
+    public void move(final WlSurfaceResource wlSurfaceResource,
+                     final WlPointer wlPointer,
+                     final int grabSerial) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface surface = wlSurface.getSurface();
+        final Point pointerPosition = wlPointer.getPointerDevice()
+                                               .getPosition();
+        final Point surfacePosition = surface.getPosition();
+        final Point pointerOffset = pointerPosition.subtract(surfacePosition);
+        wlPointer.getPointerDevice()
+                 .grabMotion(wlSurfaceResource,
+                             grabSerial,
+                             (motion) -> surface.setPosition(motion.getPoint()
+                                                                   .subtract(pointerOffset)));
+    }
+
+    public void resize(final WlShellSurfaceResource wlShellSurfaceResource,
+                       final WlSurfaceResource wlSurfaceResource,
+                       @Nonnull final WlPointer wlPointer,
+                       final int serial,
+                       final int edges) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface surface = wlSurface.getSurface();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+        final Point pointerStartPos = pointerDevice.getPosition();
+
+        final Point local = surface.local(pointerStartPos);
+        final Rectangle size = surface.getSize();
+
+        final WlShellSurfaceResize quadrant = quadrant(edges);
+        final Mat4 transform = transform(quadrant,
+                                         size,
+                                         local);
+        pointerDevice.grabMotion(wlSurfaceResource,
+                                 serial,
+                                 motion -> {
+                                     final Vec4 motionLocal = surface.local(motion.getPoint())
+                                                                     .toVec4();
+                                     final Vec4 resize = transform.multiply(motionLocal);
+                                     wlShellSurfaceResource.configure(quadrant.getValue(),
+                                                                      FastMath.round(resize.getX()),
+                                                                      FastMath.round(resize.getY()));
+                                 });
+    }
+
+    private Mat4 transform(final WlShellSurfaceResize quadrant,
+                           final Rectangle size,
+                           final Point local) {
+        final int width = size.getWidth();
+        final int height = size.getHeight();
+
+        final Mat4 quadrantTransform;
+        final float[] anchorTranslation = new float[16];
+        switch (quadrant) {
+            case TOP:
+                anchorTranslation[0] = 1;
+            case TOP_LEFT:
+                anchorTranslation[12] = width;
+                anchorTranslation[13] = height;
+                quadrantTransform = Transforms._180.add(new Mat4(anchorTranslation));
+                break;
+            case LEFT:
+                anchorTranslation[5] = -1;
+            case BOTTOM_LEFT:
+                anchorTranslation[12] = width;
+                quadrantTransform = Transforms.FLIPPED.add(new Mat4(anchorTranslation));
+                break;
+            case RIGHT:
+                anchorTranslation[5] = 1;
+            case TOP_RIGHT:
+                anchorTranslation[13] = height;
+                quadrantTransform = Transforms.FLIPPED_180.add(new Mat4(anchorTranslation));
+                break;
+            case BOTTOM:
+                anchorTranslation[0] = -1;
+            case BOTTOM_RIGHT:
+                quadrantTransform = Transforms.IDENTITY.add(new Mat4(anchorTranslation));
+                break;
+            default:
+                quadrantTransform = Transforms.IDENTITY;
+        }
+
+        final Vec4 localTransformed = quadrantTransform.multiply(local.toVec4());
+        final float[] deltaTranslation = new float[16];
+        deltaTranslation[12] = width - localTransformed.getX();
+        deltaTranslation[13] = height - localTransformed.getY();
+
+        switch (quadrant) {
+            case TOP:
+                deltaTranslation[12] = 0;
+                break;
+            case BOTTOM:
+                deltaTranslation[12] = width;
+                break;
+            case RIGHT:
+                deltaTranslation[13] = 0;
+                break;
+            case LEFT:
+                deltaTranslation[13] = height;
+                break;
+        }
+
+        return quadrantTransform.add(new Mat4(deltaTranslation));
+    }
+
+
+    private WlShellSurfaceResize quadrant(final int edges) {
+        switch (edges) {
+            case 0:
+                return WlShellSurfaceResize.NONE;
+            case 1:
+                return WlShellSurfaceResize.TOP;
+            case 2:
+                return WlShellSurfaceResize.BOTTOM;
+            case 4:
+                return WlShellSurfaceResize.LEFT;
+            case 5:
+                return WlShellSurfaceResize.TOP_LEFT;
+            case 6:
+                return WlShellSurfaceResize.BOTTOM_LEFT;
+            case 8:
+                return WlShellSurfaceResize.RIGHT;
+            case 9:
+                return WlShellSurfaceResize.TOP_RIGHT;
+            case 10:
+                return WlShellSurfaceResize.BOTTOM_RIGHT;
+            default:
+                return WlShellSurfaceResize.NONE;
+        }
+    }
+}

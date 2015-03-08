@@ -14,29 +14,27 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
-import com.hackoeur.jglm.Mat4;
-import com.hackoeur.jglm.Vec4;
-import com.hackoeur.jglm.support.FastMath;
 import org.freedesktop.wayland.server.*;
-import org.freedesktop.wayland.shared.WlShellSurfaceResize;
-import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
-import static org.freedesktop.wayland.shared.WlShellSurfaceResize.*;
-
 @AutoFactory(className = "WlShellSurfaceFactory")
 public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
 
     private final Set<WlShellSurfaceResource> resources = Sets.newHashSet();
+    private final ShellSurface      shellSurface;
     @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
 
-    WlShellSurface(@Nonnull final WlSurfaceResource wlSurfaceResource) {
+    WlShellSurface(@Provided final ShellSurface shellSurface,
+                   @Nonnull final WlSurfaceResource wlSurfaceResource) {
+        this.shellSurface = shellSurface;
         this.wlSurfaceResource = wlSurfaceResource;
     }
 
@@ -50,28 +48,11 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     public void move(final WlShellSurfaceResource requester,
                      @Nonnull final WlSeatResource seat,
                      final int serial) {
-        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-        final Surface surface = wlSurface.getSurface();
-
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
-              .ifPresent(wlPointer -> move(wlPointer,
-                                           serial,
-                                           surface));
-    }
-
-    private void move(final WlPointer wlPointer,
-                      final int grabSerial,
-                      final Surface surface) {
-        final Point pointerPosition = wlPointer.getPointerDevice()
-                                               .getPosition();
-        final Point surfacePosition = surface.getPosition();
-        final Point pointerOffset = pointerPosition.subtract(surfacePosition);
-        wlPointer.getPointerDevice()
-                 .grabMotion(this.wlSurfaceResource,
-                             grabSerial,
-                             (motion) -> surface.setPosition(motion.getPoint()
-                                                                   .subtract(pointerOffset)));
+              .ifPresent(wlPointer -> this.shellSurface.move(getWlSurfaceResource(),
+                                                             wlPointer,
+                                                             serial));
     }
 
     @Override
@@ -79,98 +60,13 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                        @Nonnull final WlSeatResource seat,
                        final int serial,
                        final int edges) {
-        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-        final Surface surface = wlSurface.getSurface();
-
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
-              .ifPresent(wlPointer -> {
-                  final PointerDevice pointerDevice = wlPointer.getPointerDevice();
-                  final Point pointerStartPos = pointerDevice.getPosition();
-
-                  final Point local = surface.local(pointerStartPos);
-                  final Rectangle size = surface.getSize();
-
-                  final WlShellSurfaceResize quadrant = quadrant(size,
-                                                                 local);
-                  final Mat4 transform = transform(quadrant,
-                                                   size,
-                                                   local);
-                  pointerDevice.grabMotion(this.wlSurfaceResource,
-                                           serial,
-                                           motion -> {
-                                               final Vec4 motionLocal = surface.local(motion.getPoint())
-                                                                               .toVec4();
-                                               final Vec4 resize = transform.multiply(motionLocal);
-                                               requester.configure(quadrant.getValue(),
-                                                                   FastMath.round(resize.getX()),
-                                                                   FastMath.round(resize.getY()));
-                                           });
-              });
-    }
-
-    private Mat4 transform(final WlShellSurfaceResize quadrant,
-                           final Rectangle size,
-                           final Point local) {
-        //TODO support one dimensional resize (TOP, BOTTOM, LEFT, RIGHT)
-
-        final int width = size.getWidth();
-        final int height = size.getHeight();
-
-        final Mat4 quadrantTransform;
-        switch (quadrant) {
-            case TOP_LEFT: {
-                final float[] anchorTranslation = new float[16];
-                anchorTranslation[12] = width;
-                anchorTranslation[13] = height;
-                quadrantTransform = Transforms._180.add(new Mat4(anchorTranslation));
-                break;
-            }
-            case TOP_RIGHT: {
-                final float[] anchorTranslation = new float[16];
-                anchorTranslation[13] = height;
-                quadrantTransform = Transforms.FLIPPED_180.add(new Mat4(anchorTranslation));
-                break;
-            }
-            case BOTTOM_LEFT: {
-                final float[] anchorTranslation = new float[16];
-                anchorTranslation[12] = width;
-                quadrantTransform = Transforms.FLIPPED.add(new Mat4(anchorTranslation));
-                break;
-            }
-            default: {
-                quadrantTransform = Mat4.MAT4_IDENTITY;
-            }
-        }
-
-        final Vec4 localTransformed = quadrantTransform.multiply(local.toVec4());
-        final float[] deltaTranslation = new float[16];
-        deltaTranslation[12] = width - localTransformed.getX();
-        deltaTranslation[13] = height - localTransformed.getY();
-
-        return quadrantTransform.add(new Mat4(deltaTranslation));
-    }
-
-
-    private WlShellSurfaceResize quadrant(final Rectangle size,
-                                          final Point local) {
-        //TODO support one dimensional resize (TOP, BOTTOM, LEFT, RIGHT)
-
-        final boolean left = local.getX() < size.getWidth() / 2;
-        final boolean top = local.getY() < size.getHeight() / 2;
-
-        if (top && left) {
-            return TOP_LEFT;
-        }
-        else if (top) {
-            return TOP_RIGHT;
-        }
-        else if (left) {
-            return BOTTOM_LEFT;
-        }
-        else {
-            return BOTTOM_RIGHT;
-        }
+              .ifPresent(wlPointer -> this.shellSurface.resize(requester,
+                                                               getWlSurfaceResource(),
+                                                               wlPointer,
+                                                               serial,
+                                                               edges));
     }
 
     @Override
