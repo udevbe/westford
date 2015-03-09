@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.output.wlshell.ShellSurface;
+import org.westmalle.wayland.output.wlshell.ShellSurfaceFactory;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -25,7 +27,8 @@ import static org.mockito.Mockito.*;
                         WaylandServerLibrary.class,
                         InterfaceMeta.class,
                         //following classes are final, so we have to powermock them:
-                        WlShellSurfaceFactory.class
+                        WlShellSurfaceFactory.class,
+                        ShellSurfaceFactory.class
                 })
 public class WlShellTest {
 
@@ -66,15 +69,24 @@ public class WlShellTest {
         when(wlShellResource.getVersion()).thenReturn(version);
 
         final WlShellSurface wlShellSurface = mock(WlShellSurface.class);
-        when(this.wlShellSurfaceFactory.create(wlSurfaceResource)).thenReturn(wlShellSurface);
+        final ShellSurface shellSurface = mock(ShellSurface.class);
+        when(wlShellSurface.getShellSurface()).thenReturn(shellSurface);
+        when(this.wlShellSurfaceFactory.create(shellSurface,
+                                               wlSurfaceResource)).thenReturn(wlShellSurface);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         when(wlShellSurface.add(any(),
                                 anyInt(),
                                 anyInt())).thenReturn(wlShellSurfaceResource);
 
+        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        when(shellSurfaceFactory.create(wlCompositor)).thenReturn(shellSurface);
+
         final WlShell wlShell = new WlShell(this.display,
-                                            this.wlShellSurfaceFactory);
+                                            this.wlShellSurfaceFactory,
+                                            shellSurfaceFactory,
+                                            wlCompositor);
         //when
         wlShell.getShellSurface(wlShellResource,
                                 id,
@@ -101,8 +113,12 @@ public class WlShellTest {
                                                                  any(),
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
+        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
         final WlShell wlShell = new WlShell(this.display,
-                                            this.wlShellSurfaceFactory);
+                                            this.wlShellSurfaceFactory,
+                                            shellSurfaceFactory,
+                                            wlCompositor);
         //when
         final WlShellResource wlShellResource = wlShell.onBindClient(mock(Client.class),
                                                                      1,
@@ -118,8 +134,12 @@ public class WlShellTest {
         final Client client = mock(Client.class);
         final int version = 2;
         final int id = 7;
+        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
+        final WlCompositor wlCompositor = mock(WlCompositor.class);
         final WlShell wlShell = new WlShell(this.display,
-                                            this.wlShellSurfaceFactory);
+                                            this.wlShellSurfaceFactory,
+                                            shellSurfaceFactory,
+                                            wlCompositor);
         //when
         final WlShellResource wlShellResource = wlShell.create(client,
                                                                version,

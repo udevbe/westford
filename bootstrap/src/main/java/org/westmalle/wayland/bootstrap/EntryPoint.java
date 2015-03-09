@@ -25,10 +25,7 @@ import org.westmalle.wayland.output.gl.GLRenderEngine;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
 import org.westmalle.wayland.platform.newt.GLWindowFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
-import org.westmalle.wayland.protocol.WlCompositorFactory;
-import org.westmalle.wayland.protocol.WlSeat;
-import org.westmalle.wayland.protocol.WlSeatFactory;
-import org.westmalle.wayland.protocol.WlShellFactory;
+import org.westmalle.wayland.protocol.*;
 
 import javax.inject.Inject;
 import java.util.Set;
@@ -83,7 +80,7 @@ public class EntryPoint {
         //create a compositor with shell and scene logic
         final Compositor compositor = this.compositorFactory.create(shmRenderer);
         //create a wayland compositor that delegates it's requests to a shell implementation.
-        this.wlCompositorFactory.create(compositor);
+        final WlCompositor wlCompositor = this.wlCompositorFactory.create(compositor);
 
         //setup seat
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
@@ -94,7 +91,7 @@ public class EntryPoint {
                                         compositor);
 
         //enable wl_shell protocol
-        this.wlShellFactory.create();
+        this.wlShellFactory.create(wlCompositor);
         //TODO enable xdg_shell protocol
 
         //start all services, 1 thread per service & exit main thread.

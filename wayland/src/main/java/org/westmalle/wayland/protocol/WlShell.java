@@ -27,27 +27,34 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
     private final Set<WlShellResource> resources = Sets.newHashSet();
 
-    private final WlShellSurfaceFactory wlShellSurfaceFactory;
+    private final WlShellSurfaceFactory                                    wlShellSurfaceFactory;
+    private final org.westmalle.wayland.output.wlshell.ShellSurfaceFactory shellSurfaceFactory;
+    private final WlCompositor                                             wlCompositor;
 
     WlShell(@Provided final Display display,
-            @Provided final WlShellSurfaceFactory wlShellSurfaceFactory) {
+            @Provided final WlShellSurfaceFactory wlShellSurfaceFactory,
+            @Provided final org.westmalle.wayland.output.wlshell.ShellSurfaceFactory shellSurfaceFactory,
+            @Nonnull final WlCompositor wlCompositor) {
         super(display,
               WlShellResource.class,
               VERSION);
         this.wlShellSurfaceFactory = wlShellSurfaceFactory;
+        this.shellSurfaceFactory = shellSurfaceFactory;
+        this.wlCompositor = wlCompositor;
     }
 
     @Override
     public void getShellSurface(final WlShellResource requester,
                                 final int id,
-                                @Nonnull final WlSurfaceResource surface) {
-        //TODO check if the given surface doesn't have a role assigned to it already.
+                                @Nonnull final WlSurfaceResource wlSurfaceResource) {
+        //TODO check if the given wlSurfaceResource doesn't have a role assigned to it already.
 
-        final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(surface);
+        final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(this.shellSurfaceFactory.create(this.wlCompositor),
+                                                                                wlSurfaceResource);
         final WlShellSurfaceResource shellSurfaceResource = wlShellSurface.add(requester.getClient(),
                                                                                requester.getVersion(),
                                                                                id);
-        surface.addDestroyListener(new Listener() {
+        wlSurfaceResource.addDestroyListener(new Listener() {
             @Override
             public void handle() {
                 remove();

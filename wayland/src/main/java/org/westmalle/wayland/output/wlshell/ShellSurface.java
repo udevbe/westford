@@ -1,5 +1,6 @@
 package org.westmalle.wayland.output.wlshell;
 
+import com.google.auto.factory.AutoFactory;
 import com.hackoeur.jglm.Mat4;
 import com.hackoeur.jglm.Vec4;
 import com.hackoeur.jglm.support.FastMath;
@@ -7,12 +8,23 @@ import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedList;
 
+@AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface {
+
+    @Nonnull
+    private final WlCompositor wlCompositor;
+
+    public ShellSurface(@Nonnull final WlCompositor wlCompositor) {
+        this.wlCompositor = wlCompositor;
+    }
+
     public void move(final WlSurfaceResource wlSurfaceResource,
                      final WlPointer wlPointer,
                      final int grabSerial) {
@@ -166,6 +178,15 @@ public class ShellSurface {
                 return WlShellSurfaceResize.BOTTOM_RIGHT;
             default:
                 return WlShellSurfaceResize.NONE;
+        }
+    }
+
+    public void toFront(final WlSurfaceResource wlSurfaceResource) {
+        final Compositor compositor = this.wlCompositor.getCompositor();
+        final LinkedList<WlSurfaceResource> surfacesStack = compositor.getSurfacesStack();
+        if (surfacesStack.remove(wlSurfaceResource)) {
+            surfacesStack.push(wlSurfaceResource);
+            compositor.requestRender();
         }
     }
 }

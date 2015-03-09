@@ -14,7 +14,6 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.*;
@@ -32,7 +31,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
 
-    WlShellSurface(@Provided final ShellSurface shellSurface,
+    WlShellSurface(@Nonnull final ShellSurface shellSurface,
                    @Nonnull final WlSurfaceResource wlSurfaceResource) {
         this.shellSurface = shellSurface;
         this.wlSurfaceResource = wlSurfaceResource;
@@ -50,7 +49,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                      final int serial) {
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
-              .ifPresent(wlPointer -> this.shellSurface.move(getWlSurfaceResource(),
+              .ifPresent(wlPointer -> getShellSurface().move(getWlSurfaceResource(),
                                                              wlPointer,
                                                              serial));
     }
@@ -62,7 +61,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                        final int edges) {
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
         wlSeat.getOptionalWlPointer()
-              .ifPresent(wlPointer -> this.shellSurface.resize(requester,
+              .ifPresent(wlPointer -> getShellSurface().resize(requester,
                                                                getWlSurfaceResource(),
                                                                wlPointer,
                                                                serial,
@@ -71,7 +70,7 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
 
     @Override
     public void setToplevel(final WlShellSurfaceResource requester) {
-
+        getShellSurface().toFront(getWlSurfaceResource());
     }
 
     @Override
@@ -140,5 +139,9 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     @Nonnull
     public WlSurfaceResource getWlSurfaceResource() {
         return this.wlSurfaceResource;
+    }
+
+    public ShellSurface getShellSurface() {
+        return this.shellSurface;
     }
 }
