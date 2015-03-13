@@ -1,9 +1,12 @@
 package org.westmalle.wayland.output.wlshell;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import com.hackoeur.jglm.Mat4;
 import com.hackoeur.jglm.Vec4;
 import com.hackoeur.jglm.support.FastMath;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
@@ -20,9 +23,34 @@ public class ShellSurface {
 
     @Nonnull
     private final WlCompositor wlCompositor;
+    private final int          pingSerial;
+    private final EventSource  timerEventSource;
 
-    public ShellSurface(@Nonnull final WlCompositor wlCompositor) {
+    private boolean active;
+
+    public ShellSurface(@Provided @Nonnull final Display display,
+                        @Nonnull final WlCompositor wlCompositor,
+                        final int pingSerial) {
         this.wlCompositor = wlCompositor;
+        this.pingSerial = pingSerial;
+        this.timerEventSource = display.getEventLoop()
+                                       .addTimer(() -> {
+                                           this.active = false;
+                                           return 0;
+                                       });
+    }
+
+    public void pong(final WlShellSurfaceResource wlShellSurfaceResource,
+                     final int pingSerial) {
+        if (this.pingSerial == pingSerial) {
+            this.active = true;
+            wlShellSurfaceResource.ping(pingSerial);
+            this.timerEventSource.updateTimer(5000);
+        }
+    }
+
+    public boolean isActive() {
+        return this.active;
     }
 
     public void move(final WlSurfaceResource wlSurfaceResource,

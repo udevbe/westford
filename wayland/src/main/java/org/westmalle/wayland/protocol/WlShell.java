@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
+import org.westmalle.wayland.output.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -27,6 +28,7 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
     private final Set<WlShellResource> resources = Sets.newHashSet();
 
+    private final Display                                                  display;
     private final WlShellSurfaceFactory                                    wlShellSurfaceFactory;
     private final org.westmalle.wayland.output.wlshell.ShellSurfaceFactory shellSurfaceFactory;
     private final WlCompositor                                             wlCompositor;
@@ -38,6 +40,7 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
         super(display,
               WlShellResource.class,
               VERSION);
+        this.display = display;
         this.wlShellSurfaceFactory = wlShellSurfaceFactory;
         this.shellSurfaceFactory = shellSurfaceFactory;
         this.wlCompositor = wlCompositor;
@@ -49,7 +52,10 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                                 @Nonnull final WlSurfaceResource wlSurfaceResource) {
         //TODO check if the given wlSurfaceResource doesn't have a role assigned to it already.
 
-        final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(this.shellSurfaceFactory.create(this.wlCompositor),
+        final int pingSerial = this.display.nextSerial();
+        final ShellSurface shellSurface = this.shellSurfaceFactory.create(this.wlCompositor,
+                                                                          pingSerial);
+        final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(shellSurface,
                                                                                 wlSurfaceResource);
         final WlShellSurfaceResource shellSurfaceResource = wlShellSurface.add(requester.getClient(),
                                                                                requester.getVersion(),
@@ -61,6 +67,9 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                 shellSurfaceResource.destroy();
             }
         });
+
+        shellSurface.pong(shellSurfaceResource,
+                          pingSerial);
     }
 
     @Override
