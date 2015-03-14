@@ -40,7 +40,6 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     @Override
     public void pong(final WlShellSurfaceResource requester,
                      final int serial) {
-        //TODO unit test
         this.shellSurface.pong(requester,
                                serial);
     }

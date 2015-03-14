@@ -1,26 +1,40 @@
 package org.westmalle.wayland.output.wlshell;
 
-import org.freedesktop.wayland.server.WlShellSurfaceResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.output.events.Motion;
+import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShellSurfaceTest {
 
-    @InjectMocks
-    private ShellSurface shellSurface;
+    @Mock
+    private EventSource eventSource;
+    @Mock
+    private EventLoop eventLoop;
+    @Mock
+    private Display display;
+    @Mock
+    private WlCompositor wlCompositor;
+
+    @Before
+    public void setUp(){
+        when(display.getEventLoop()).thenReturn(eventLoop);
+        when(eventLoop.addTimer(any())).thenReturn(eventSource);
+    }
 
     @Test
     public void testMove() throws Exception {
@@ -44,10 +58,11 @@ public class ShellSurfaceTest {
                                                    75);
         when(surface.getPosition()).thenReturn(surfacePosition);
 
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
         //when
-        this.shellSurface.move(wlSurfaceResource,
-                               wlPointer,
-                               serial);
+        shellSurface.move(wlSurfaceResource,
+                wlPointer,
+                serial);
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -93,8 +108,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -144,8 +162,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -195,8 +216,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -246,8 +270,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -297,8 +324,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -348,8 +378,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -399,8 +432,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -450,8 +486,11 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+
         //when
-        this.shellSurface.resize(wlShellSurfaceResource,
+        shellSurface.resize(wlShellSurfaceResource,
                                  wlSurfaceResource,
                                  wlPointer,
                                  serial,
@@ -469,5 +508,42 @@ public class ShellSurfaceTest {
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_LEFT.getValue(),
                                                  200,
                                                  200);
+    }
+
+    @Test
+    public void testPong(){
+        //given
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final int pingSerial = 12345;
+
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,12345);
+
+        //when
+        shellSurface.pong(wlShellSurfaceResource,
+                pingSerial);
+
+        //then
+        verify(wlShellSurfaceResource).ping(pingSerial);
+        verify(this.eventSource).updateTimer(anyInt());
+    }
+
+    @Test
+    public void testPongTimeout(){
+        //given
+        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,12345);
+        ArgumentCaptor<EventLoop.TimerEventHandler> timerEventHandlerArgumentCaptor = ArgumentCaptor.forClass(EventLoop.TimerEventHandler.class);
+        verify(eventLoop).addTimer(timerEventHandlerArgumentCaptor.capture());
+        final EventLoop.TimerEventHandler timerEventHandler = timerEventHandlerArgumentCaptor.getValue();
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final int pingSerial = 12345;
+        shellSurface.pong(wlShellSurfaceResource,
+                pingSerial);
+
+        //when
+        timerEventHandler.handle();
+
+        //then
+        assertThat(shellSurface.isActive()).isFalse();
     }
 }

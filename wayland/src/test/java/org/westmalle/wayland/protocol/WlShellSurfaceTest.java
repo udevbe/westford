@@ -16,6 +16,7 @@ import org.westmalle.wayland.output.wlshell.ShellSurface;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -35,7 +36,7 @@ public class WlShellSurfaceTest {
 
     @Test
     public void testMove() throws Exception {
-
+        //TODO
     }
 
     @Test
@@ -59,6 +60,23 @@ public class WlShellSurfaceTest {
 
     @Test
     public void testResize() throws Exception {
+        //TODO
+    }
 
+    @Test
+    public void testPong(){
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
+                wlSurfaceResource);
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final int serial = 7654;
+
+        //when
+        wlShellSurface.pong(wlShellSurfaceResource,serial);
+
+        //then
+        verify(this.shellSurface).pong(wlShellSurfaceResource,serial);
     }
 }
