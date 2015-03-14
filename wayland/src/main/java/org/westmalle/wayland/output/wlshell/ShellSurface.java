@@ -17,6 +17,7 @@ import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
+import java.util.Optional;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface {
@@ -26,7 +27,9 @@ public class ShellSurface {
     private final int          pingSerial;
     private final EventSource  timerEventSource;
 
-    private boolean active;
+    private boolean active = true;
+    private Optional<String> clazz = Optional.empty();
+    private Optional<String> title = Optional.empty();
 
     public ShellSurface(@Provided @Nonnull final Display display,
                         @Nonnull final WlCompositor wlCompositor,
@@ -38,6 +41,24 @@ public class ShellSurface {
                                            this.active = false;
                                            return 0;
                                        });
+    }
+
+    public Optional<String> getClazz() {
+        return this.clazz;
+    }
+
+    public void setClazz(Optional<String> clazz) {
+        this.clazz = clazz;
+        wlCompositor.getCompositor().requestRender();
+    }
+
+    public Optional<String>getTitle() {
+        return this.title;
+    }
+
+    public void setTitle(Optional<String> title) {
+        this.title = title;
+        wlCompositor.getCompositor().requestRender();
     }
 
     public void pong(final WlShellSurfaceResource wlShellSurfaceResource,

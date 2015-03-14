@@ -14,6 +14,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.wlshell.ShellSurface;
 
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -78,5 +80,41 @@ public class WlShellSurfaceTest {
 
         //then
         verify(this.shellSurface).pong(wlShellSurfaceResource,serial);
+    }
+
+    @Test
+    public void testSetTitle(){
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
+                wlSurfaceResource);
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final String title = "appTitle";
+
+        //when
+        wlShellSurface.setTitle(wlShellSurfaceResource,
+                title);
+
+        //then
+        verify(this.shellSurface).setTitle(Optional.of(title));
+    }
+
+    @Test
+    public void testSetClass(){
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
+                wlSurfaceResource);
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final String clazz = "appClass";
+
+        //when
+        wlShellSurface.setClass(wlShellSurfaceResource,
+                clazz);
+
+        //then
+        verify(this.shellSurface).setClazz(Optional.of(clazz));
     }
 }

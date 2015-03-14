@@ -21,6 +21,7 @@ import org.westmalle.wayland.output.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.Set;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
@@ -111,13 +112,13 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
     @Override
     public void setTitle(final WlShellSurfaceResource requester,
                          @Nonnull final String title) {
-
+        this.shellSurface.setTitle(Optional.of(title));
     }
 
     @Override
     public void setClass(final WlShellSurfaceResource requester,
                          @Nonnull final String class_) {
-
+        this.shellSurface.setClazz(Optional.of(class_));
     }
 
     @Nonnull
