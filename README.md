@@ -39,7 +39,7 @@ State
 | Software rendering on X     | :x:                |
 | Software rendering on KMS   | :x:                |
 | Window moving               | :heavy_check_mark: |
-| Window resizing             | :x:                |
+| Window resizing             | :heavy_check_mark: |
 | Mouse input                 | :heavy_check_mark: |
 | Keyboard input              | :x:                |
 | Touch input                 | :x:                |
