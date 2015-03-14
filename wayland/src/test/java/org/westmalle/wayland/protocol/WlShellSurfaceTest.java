@@ -17,16 +17,14 @@ import org.westmalle.wayland.output.wlshell.ShellSurface;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(WaylandServerLibrary.class)
 public class WlShellSurfaceTest {
 
     @Mock
-    private ShellSurface shellSurface;
+    private ShellSurface                shellSurface;
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
 
@@ -66,53 +64,55 @@ public class WlShellSurfaceTest {
     }
 
     @Test
-    public void testPong(){
+    public void testPong() {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
-                wlSurfaceResource);
+                                                                 wlSurfaceResource);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final int serial = 7654;
 
         //when
-        wlShellSurface.pong(wlShellSurfaceResource,serial);
+        wlShellSurface.pong(wlShellSurfaceResource,
+                            serial);
 
         //then
-        verify(this.shellSurface).pong(wlShellSurfaceResource,serial);
+        verify(this.shellSurface).pong(wlShellSurfaceResource,
+                                       serial);
     }
 
     @Test
-    public void testSetTitle(){
+    public void testSetTitle() {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
-                wlSurfaceResource);
+                                                                 wlSurfaceResource);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final String title = "appTitle";
 
         //when
         wlShellSurface.setTitle(wlShellSurfaceResource,
-                title);
+                                title);
 
         //then
         verify(this.shellSurface).setTitle(Optional.of(title));
     }
 
     @Test
-    public void testSetClass(){
+    public void testSetClass() {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
-                wlSurfaceResource);
+                                                                 wlSurfaceResource);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final String clazz = "appClass";
 
         //when
         wlShellSurface.setClass(wlShellSurfaceResource,
-                clazz);
+                                clazz);
 
         //then
         verify(this.shellSurface).setClazz(Optional.of(clazz));

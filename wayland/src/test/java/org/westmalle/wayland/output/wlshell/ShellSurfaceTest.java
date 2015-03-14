@@ -22,18 +22,18 @@ import static org.mockito.Mockito.*;
 public class ShellSurfaceTest {
 
     @Mock
-    private EventSource eventSource;
+    private EventSource  eventSource;
     @Mock
-    private EventLoop eventLoop;
+    private EventLoop    eventLoop;
     @Mock
-    private Display display;
+    private Display      display;
     @Mock
     private WlCompositor wlCompositor;
 
     @Before
-    public void setUp(){
-        when(display.getEventLoop()).thenReturn(eventLoop);
-        when(eventLoop.addTimer(any())).thenReturn(eventSource);
+    public void setUp() {
+        when(this.display.getEventLoop()).thenReturn(this.eventLoop);
+        when(this.eventLoop.addTimer(any())).thenReturn(this.eventSource);
     }
 
     @Test
@@ -58,11 +58,13 @@ public class ShellSurfaceTest {
                                                    75);
         when(surface.getPosition()).thenReturn(surfacePosition);
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
         //when
         shellSurface.move(wlSurfaceResource,
-                wlPointer,
-                serial);
+                          wlPointer,
+                          serial);
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -109,14 +111,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.RIGHT.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.RIGHT.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -163,14 +167,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.BOTTOM_RIGHT.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.BOTTOM_RIGHT.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -217,14 +223,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.TOP.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.TOP.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -271,14 +279,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.TOP_RIGHT.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.TOP_RIGHT.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -325,14 +335,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.LEFT.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.LEFT.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -379,14 +391,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.TOP_LEFT.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.TOP_LEFT.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -433,14 +447,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.BOTTOM.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.BOTTOM.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -487,14 +503,16 @@ public class ShellSurfaceTest {
                                                             100,
                                                             100));
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
-                                 wlSurfaceResource,
-                                 wlPointer,
-                                 serial,
-                                 WlShellSurfaceResize.BOTTOM_LEFT.getValue());
+                            wlSurfaceResource,
+                            wlPointer,
+                            serial,
+                            WlShellSurfaceResize.BOTTOM_LEFT.getValue());
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionArgumentCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
         verify(pointerDevice).grabMotion(eq(wlSurfaceResource),
@@ -511,16 +529,18 @@ public class ShellSurfaceTest {
     }
 
     @Test
-    public void testPong(){
+    public void testPong() {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final int pingSerial = 12345;
 
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,12345);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           12345);
 
         //when
         shellSurface.pong(wlShellSurfaceResource,
-                pingSerial);
+                          pingSerial);
 
         //then
         verify(wlShellSurfaceResource).ping(pingSerial);
@@ -528,17 +548,19 @@ public class ShellSurfaceTest {
     }
 
     @Test
-    public void testPongTimeout(){
+    public void testPongTimeout() {
         //given
-        final ShellSurface shellSurface = new ShellSurface(display,wlCompositor,12345);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           12345);
         ArgumentCaptor<EventLoop.TimerEventHandler> timerEventHandlerArgumentCaptor = ArgumentCaptor.forClass(EventLoop.TimerEventHandler.class);
-        verify(eventLoop).addTimer(timerEventHandlerArgumentCaptor.capture());
+        verify(this.eventLoop).addTimer(timerEventHandlerArgumentCaptor.capture());
         final EventLoop.TimerEventHandler timerEventHandler = timerEventHandlerArgumentCaptor.getValue();
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final int pingSerial = 12345;
         shellSurface.pong(wlShellSurfaceResource,
-                pingSerial);
+                          pingSerial);
 
         //when
         timerEventHandler.handle();

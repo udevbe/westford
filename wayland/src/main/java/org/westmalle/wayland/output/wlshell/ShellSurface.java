@@ -27,9 +27,9 @@ public class ShellSurface {
     private final int          pingSerial;
     private final EventSource  timerEventSource;
 
-    private boolean active = true;
-    private Optional<String> clazz = Optional.empty();
-    private Optional<String> title = Optional.empty();
+    private boolean          active = true;
+    private Optional<String> clazz  = Optional.empty();
+    private Optional<String> title  = Optional.empty();
 
     public ShellSurface(@Provided @Nonnull final Display display,
                         @Nonnull final WlCompositor wlCompositor,
@@ -47,18 +47,20 @@ public class ShellSurface {
         return this.clazz;
     }
 
-    public void setClazz(Optional<String> clazz) {
+    public void setClazz(final Optional<String> clazz) {
         this.clazz = clazz;
-        wlCompositor.getCompositor().requestRender();
+        this.wlCompositor.getCompositor()
+                    .requestRender();
     }
 
-    public Optional<String>getTitle() {
+    public Optional<String> getTitle() {
         return this.title;
     }
 
-    public void setTitle(Optional<String> title) {
+    public void setTitle(final Optional<String> title) {
         this.title = title;
-        wlCompositor.getCompositor().requestRender();
+        this.wlCompositor.getCompositor()
+                    .requestRender();
     }
 
     public void pong(final WlShellSurfaceResource wlShellSurfaceResource,
