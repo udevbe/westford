@@ -81,7 +81,7 @@ public class WlShellTest {
 
         final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
         final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(shellSurfaceFactory.create(wlCompositor,
+        when(shellSurfaceFactory.create(eq(wlCompositor),
                                         anyInt())).thenReturn(shellSurface);
 
         final WlShell wlShell = new WlShell(this.display,
