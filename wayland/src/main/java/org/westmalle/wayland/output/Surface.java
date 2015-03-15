@@ -224,12 +224,13 @@ public class Surface {
     public Surface updateTransform() {
         //start with server transform
         Mat4 result = this.compositorTransform;
-        //apply client transformation
 
+        //apply client transformation
         final Mat4 bufferTransform = getState().getBufferTransform();
         if (!bufferTransform.equals(MAT4_IDENTITY)) {
             result = bufferTransform.multiply(result);
         }
+
         //apply scaling
         final int scale = getState().getScale();
         if (scale != 1) {
@@ -303,6 +304,7 @@ public class Surface {
      * @return
      */
     public Point local(final Point global) {
+        //TODO unit test this method
         final Point position = getPosition();
         final Vec4 untransformedLocalPoint = new Vec4(global.getX() - position.getX(),
                                                       global.getY() - position.getY(),
@@ -318,6 +320,33 @@ public class Surface {
 
         return Point.create(FastMath.round(localPoint.getX() / localPoint.getW()),
                             FastMath.round(localPoint.getY() / localPoint.getW()));
+    }
+
+    /**
+     * Translate a surface scoped coordinate to a compositor scoped coordinate.
+     *
+     * @param local
+     *
+     * @return
+     */
+    public Point global(final Point local) {
+        //TODO unit test this method
+        final Vec4 untransformedLocalPoint = new Vec4(local.getX(),
+                                                      local.getY(),
+                                                      0.0f,
+                                                      1.0f);
+
+        final Vec4 localPoint;
+        if (this.transform.equals(MAT4_IDENTITY)) {
+            localPoint = untransformedLocalPoint;
+        }
+        else {
+            localPoint = this.transform.multiply(untransformedLocalPoint);
+        }
+
+        final Point position = getPosition();
+        return Point.create(FastMath.round(localPoint.getX() * localPoint.getW() + position.getX()),
+                            FastMath.round(localPoint.getY() * localPoint.getW() + position.getY()));
     }
 
     /**

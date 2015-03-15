@@ -14,6 +14,8 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import java.util.LinkedList;
+
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -567,5 +569,51 @@ public class ShellSurfaceTest {
 
         //then
         assertThat(shellSurface.isActive()).isFalse();
+    }
+
+    @Test
+    public void testToFront() throws Exception {
+        //given
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           12345);
+
+        final Compositor compositor = mock(Compositor.class);
+        when(this.wlCompositor.getCompositor()).thenReturn(compositor);
+        final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
+        when(compositor.getSurfacesStack()).thenReturn(surfacesStack);
+
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
+        final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
+
+        surfacesStack.add(wlSurfaceResource1);
+        surfacesStack.add(wlSurfaceResource0);
+        surfacesStack.add(wlSurfaceResource2);
+
+        //when
+        shellSurface.toFront(wlSurfaceResource0);
+
+        //then
+        assertThat(surfacesStack.getFirst()).isSameAs(wlSurfaceResource0);
+    }
+
+    @Test
+    public void testSetTransient() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
+
+
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           12345);
+
+        //when
+        shellSurface.setTransient(wlSurfaceResource,
+                                  parentWlSurfaceResource,
+                                  75,
+                                  120,
+                                  0);
     }
 }

@@ -50,7 +50,7 @@ public class ShellSurface {
     public void setClazz(final Optional<String> clazz) {
         this.clazz = clazz;
         this.wlCompositor.getCompositor()
-                    .requestRender();
+                         .requestRender();
     }
 
     public Optional<String> getTitle() {
@@ -60,7 +60,7 @@ public class ShellSurface {
     public void setTitle(final Optional<String> title) {
         this.title = title;
         this.wlCompositor.getCompositor()
-                    .requestRender();
+                         .requestRender();
     }
 
     public void pong(final WlShellSurfaceResource wlShellSurfaceResource,
@@ -239,5 +239,21 @@ public class ShellSurface {
             surfacesStack.push(wlSurfaceResource);
             compositor.requestRender();
         }
+    }
+
+    public void setTransient(final WlSurfaceResource wlSurfaceResource,
+                             final WlSurfaceResource parent,
+                             final int x,
+                             final int y,
+                             final int flags) {
+        //TODO interprete flags (for keyboard focus)
+        //TODO unit test this method
+        final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
+        final Point surfacePosition = parentWlSurface.getSurface()
+                                                     .global(Point.create(x,
+                                                                          y));
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        wlSurface.getSurface()
+                 .setPosition(surfacePosition);
     }
 }

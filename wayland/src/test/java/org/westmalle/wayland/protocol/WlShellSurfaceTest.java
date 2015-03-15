@@ -117,4 +117,48 @@ public class WlShellSurfaceTest {
         //then
         verify(this.shellSurface).setClazz(Optional.of(clazz));
     }
+
+    @Test
+    public void testSetToplevel() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
+                                                                 wlSurfaceResource);
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+
+        //when
+        wlShellSurface.setToplevel(wlShellSurfaceResource);
+
+        //then
+        verify(this.shellSurface).toFront(wlSurfaceResource);
+    }
+
+    @Test
+    public void testSetTransient() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
+                                                                 wlSurfaceResource);
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+        final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
+        final int x = 1235;
+        final int y = 9876;
+        final int flags = 0;
+
+        //when
+        wlShellSurface.setTransient(wlShellSurfaceResource,
+                                    parentWlSurfaceResource,
+                                    x,
+                                    y,
+                                    flags);
+
+        //then
+        verify(this.shellSurface).setTransient(wlSurfaceResource,
+                                               parentWlSurfaceResource,
+                                               x,
+                                               y,
+                                               flags);
+    }
 }

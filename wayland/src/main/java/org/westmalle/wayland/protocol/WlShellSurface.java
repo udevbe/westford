@@ -81,7 +81,11 @@ public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, 
                              final int x,
                              final int y,
                              final int flags) {
-
+        getShellSurface().setTransient(getWlSurfaceResource(),
+                                       parent,
+                                       x,
+                                       y,
+                                       flags);
     }
 
     @Override
