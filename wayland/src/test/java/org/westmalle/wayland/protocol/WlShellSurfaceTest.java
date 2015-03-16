@@ -1,6 +1,7 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
@@ -36,7 +37,30 @@ public class WlShellSurfaceTest {
 
     @Test
     public void testMove() throws Exception {
-        //TODO
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
+                                                                 wlSurfaceResource);
+
+        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
+        final WlSeat wlSeat = mock(WlSeat.class);
+        when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
+
+        final WlPointer wlPointer = mock(WlPointer.class);
+        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+
+        final int serial = 454;
+
+        //when
+        wlShellSurface.move(wlShellSurfaceResource,
+                            wlSeatResource,
+                            serial);
+        //then
+        verify(this.shellSurface).move(wlSurfaceResource,
+                                       wlPointer,
+                                       serial);
     }
 
     @Test
