@@ -84,7 +84,34 @@ public class WlShellSurfaceTest {
 
     @Test
     public void testResize() throws Exception {
-        //TODO
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
+                                                                 wlSurfaceResource);
+
+        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
+        final WlSeat wlSeat = mock(WlSeat.class);
+        when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
+
+        final WlPointer wlPointer = mock(WlPointer.class);
+        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+
+        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
+
+        final int serial = 454;
+        final int edges = 8;
+
+        //when
+        wlShellSurface.resize(wlShellSurfaceResource,
+                              wlSeatResource,
+                              serial,
+                              edges);
+        //then
+        verify(this.shellSurface).resize(wlShellSurfaceResource,
+                                         wlSurfaceResource,
+                                         wlPointer,
+                                         serial,
+                                         edges);
     }
 
     @Test
