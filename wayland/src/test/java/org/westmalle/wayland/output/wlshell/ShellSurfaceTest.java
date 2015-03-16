@@ -602,8 +602,26 @@ public class ShellSurfaceTest {
     public void testSetTransient() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
 
+        final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface parentWlSurface = mock(WlSurface.class);
+        when(parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        final Surface parentSurface = mock(Surface.class);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+
+        final int localX = 75;
+        final int localY = 120;
+
+        final int globalX = 100;
+        final int globalY = 150;
+
+        when(parentSurface.global(Point.create(localX,
+                                               localY))).thenReturn(Point.create(globalX,
+                                                                                 globalY));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.wlCompositor,
@@ -612,8 +630,12 @@ public class ShellSurfaceTest {
         //when
         shellSurface.setTransient(wlSurfaceResource,
                                   parentWlSurfaceResource,
-                                  75,
-                                  120,
+                                  localX,
+                                  localY,
                                   0);
+
+        //then
+        verify(surface).setPosition(Point.create(globalX,
+                                                 globalY));
     }
 }

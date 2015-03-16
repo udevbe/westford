@@ -247,7 +247,6 @@ public class ShellSurface {
                              final int y,
                              final int flags) {
         //TODO interprete flags (for keyboard focus)
-        //TODO unit test this method
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
         final Point surfacePosition = parentWlSurface.getSurface()
                                                      .global(Point.create(x,
