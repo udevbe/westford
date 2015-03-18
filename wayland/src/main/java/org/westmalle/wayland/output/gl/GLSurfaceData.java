@@ -90,7 +90,20 @@ public class GLSurfaceData {
                            pixels);
     }
 
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
     public IntBuffer getTexture() {
         return this.tex;
+    }
+
+    public void destroy(final GL2ES2 gl) {
+        gl.glDeleteTextures(1,
+                            getTexture());
     }
 }

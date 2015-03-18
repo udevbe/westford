@@ -31,6 +31,7 @@ import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GLAutoDrawable;
 import java.nio.IntBuffer;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import static javax.media.opengl.GL.GL_COLOR_BUFFER_BIT;
 
@@ -64,7 +65,7 @@ public class GLRenderEngine implements ShmRenderEngine {
             "    gl_FragColor.a = 1.;\n" +
             "}";
 
-    private final Map<WlSurfaceResource, GLSurfaceData> cachedSurfaceData = Maps.newHashMap();
+    private final Map<WlSurfaceResource, GLSurfaceData> cachedSurfaceData = new WeakHashMap<>();
     private final Map<GLBufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
 
     private final ListeningExecutorService renderThread;
@@ -310,14 +311,28 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     private GLSurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
                                            final ShmBuffer buffer) {
-        //FIXME recalculate surface data if buffer size has changed + write proper unit test
         GLSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
             surfaceData = GLSurfaceData.create(this.gl);
             surfaceData.init(this.gl,
                              buffer);
-//            this.cachedSurfaceData.put(surfaceResource,
-//                                       surfaceData);
+            this.cachedSurfaceData.put(surfaceResource,
+                                       surfaceData);
+        }
+        else {
+            final int surfaceDataWidth = surfaceData.getWidth();
+            final int surfaceDataHeight = surfaceData.getHeight();
+            final int bufferWidth = buffer.getWidth();
+            final int bufferHeight = buffer.getHeight();
+            if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
+                surfaceData.destroy(this.gl);
+
+                surfaceData = GLSurfaceData.create(this.gl);
+                surfaceData.init(this.gl,
+                                 buffer);
+                this.cachedSurfaceData.put(surfaceResource,
+                                           surfaceData);
+            }
         }
         return surfaceData;
     }

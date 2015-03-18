@@ -292,7 +292,10 @@ public class Surface {
     public Surface firePaintCallbacks(final int serial) {
         final List<WlCallbackResource> callbacks = new ArrayList<>(getFrameCallbacks());
         getFrameCallbacks().clear();
-        callbacks.forEach(frameCallback -> frameCallback.done(serial));
+        callbacks.forEach(frameCallback -> {
+            frameCallback.done(serial);
+            frameCallback.destroy();
+        });
         return this;
     }
 
