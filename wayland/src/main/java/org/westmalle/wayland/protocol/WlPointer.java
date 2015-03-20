@@ -25,11 +25,12 @@ import org.westmalle.wayland.output.PointerDevice;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlPointerFactory")
 public class WlPointer extends EventBus implements WlPointerRequestsV3, ProtocolObject<WlPointerResource> {
 
-    private final Set<WlPointerResource> resources = Sets.newHashSet();
+    private final Set<WlPointerResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private final PointerDevice pointerDevice;
 

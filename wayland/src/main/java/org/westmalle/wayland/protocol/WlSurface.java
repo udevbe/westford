@@ -44,8 +44,6 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
     private final WlCallbackFactory wlCallbackFactory;
     private final Surface           surface;
 
-    private Optional<WlBufferResource> pendingBuffer = Optional.empty();
-
     WlSurface(@Provided final WlCallbackFactory wlCallbackFactory,
               final Surface surface) {
         this.wlCallbackFactory = wlCallbackFactory;
@@ -199,21 +197,16 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
 
     @Override
     public void commit(final WlSurfaceResource requester) {
-        this.pendingBuffer = Optional.empty();
-        this.destroyListener.ifPresent(Listener::remove);
+        removeBufferDestroyListener();
         getSurface().commit();
     }
 
     private void detachBuffer() {
-        this.pendingBuffer.ifPresent(wlShmBuffer -> this.destroyListener.ifPresent(Listener::remove));
+        removeBufferDestroyListener();
         getSurface().detachBuffer();
     }
 
-    private void attachBuffer(final WlBufferResource buffer,
-                              final int x,
-                              final int y) {
-        this.pendingBuffer.ifPresent(wlShmBuffer -> this.destroyListener.ifPresent(Listener::remove));
-        this.pendingBuffer = Optional.of(buffer);
+    private void addBufferDestroyListener(final WlBufferResource buffer){
         final Listener listener = new Listener() {
             @Override
             public void handle() {
@@ -223,6 +216,19 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
         };
         this.destroyListener = Optional.of(listener);
         buffer.addDestroyListener(listener);
+    }
+
+    private void removeBufferDestroyListener(){
+        this.destroyListener.ifPresent(Listener::remove);
+        this.destroyListener = Optional.empty();
+    }
+
+    private void attachBuffer(final WlBufferResource buffer,
+                              final int x,
+                              final int y) {
+
+        removeBufferDestroyListener();
+        addBufferDestroyListener(buffer);
 
         getSurface().attachBuffer(buffer,
                                   x,

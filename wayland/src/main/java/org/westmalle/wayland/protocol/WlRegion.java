@@ -25,13 +25,14 @@ import org.westmalle.wayland.output.Region;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 @AutoFactory(className = "WlRegionFactory")
 public class WlRegion extends EventBus implements WlRegionRequests, ProtocolObject<WlRegionResource> {
 
-    private final Set<WlRegionResource> resources = Sets.newHashSet();
+    private final Set<WlRegionResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private final Region region;
 

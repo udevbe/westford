@@ -24,11 +24,12 @@ import org.westmalle.wayland.output.Keyboard;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlKeyboardFactory")
 public class WlKeyboard extends EventBus implements WlKeyboardRequestsV3, ProtocolObject<WlKeyboardResource> {
 
-    private final Set<WlKeyboardResource> resources = Sets.newHashSet();
+    private final Set<WlKeyboardResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final Keyboard keyboard;
 
     WlKeyboard(final Keyboard keyboard) {

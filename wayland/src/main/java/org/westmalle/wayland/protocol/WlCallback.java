@@ -24,11 +24,12 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlCallbackFactory")
-public class WlCallback extends EventBus implements WlCallbackRequests, ProtocolObject<WlCallbackResource> {
+public class WlCallback implements WlCallbackRequests, ProtocolObject<WlCallbackResource> {
 
-    private final Set<WlCallbackResource> resources = Sets.newHashSet();
+    private final Set<WlCallbackResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     @Inject
     WlCallback() {

@@ -24,11 +24,12 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlCompositorFactory")
 public class WlCompositor extends Global<WlCompositorResource> implements WlCompositorRequestsV3, ProtocolObject<WlCompositorResource> {
 
-    private final Set<WlCompositorResource> resources = Sets.newHashSet();
+    private final Set<WlCompositorResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private final WlSurfaceFactory                            wlSurfaceFactory;
     private final WlRegionFactory                             wlRegionFactory;

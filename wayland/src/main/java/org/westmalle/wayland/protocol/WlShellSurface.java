@@ -23,11 +23,12 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
 public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
 
-    private final Set<WlShellSurfaceResource> resources = Sets.newHashSet();
+    private final Set<WlShellSurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final ShellSurface      shellSurface;
     @Nonnull
     private final WlSurfaceResource wlSurfaceResource;

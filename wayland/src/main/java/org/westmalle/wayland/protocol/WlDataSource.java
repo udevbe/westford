@@ -25,11 +25,12 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataSourceFactory")
 public class WlDataSource extends EventBus implements WlDataSourceRequests, ProtocolObject<WlDataSourceResource> {
 
-    private final Set<WlDataSourceResource> resources = Sets.newHashSet();
+    private final Set<WlDataSourceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final List<String>              mimeTypes = Lists.newArrayList();
 
     WlDataSource() {

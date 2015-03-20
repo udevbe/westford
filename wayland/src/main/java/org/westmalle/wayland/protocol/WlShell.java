@@ -22,11 +22,12 @@ import org.westmalle.wayland.output.wlshell.ShellSurface;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlShellFactory")
 public class WlShell extends Global<WlShellResource> implements WlShellRequests, ProtocolObject<WlShellResource> {
 
-    private final Set<WlShellResource> resources = Sets.newHashSet();
+    private final Set<WlShellResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private final Display                                                  display;
     private final WlShellSurfaceFactory                                    wlShellSurfaceFactory;

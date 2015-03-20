@@ -23,11 +23,12 @@ import org.freedesktop.wayland.server.WlDataOfferResource;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataOfferFactory")
 public class WlDataOffer extends EventBus implements WlDataOfferRequests, ProtocolObject<WlDataOfferResource> {
 
-    private final Set<WlDataOfferResource> resources = Sets.newHashSet();
+    private final Set<WlDataOfferResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     WlDataOffer() {
     }

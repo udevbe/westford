@@ -24,11 +24,12 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlSeatFactory")
 public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, ProtocolObject<WlSeatResource> {
 
-    private final Set<WlSeatResource> resources = Sets.newHashSet();
+    private final Set<WlSeatResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private Optional<WlPointer>  optionalWlPointer  = Optional.empty();
     private Optional<WlKeyboard> optionalWlKeyboard = Optional.empty();

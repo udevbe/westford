@@ -21,11 +21,12 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @Singleton//EAGER
 public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequests, ProtocolObject<WlDataDeviceManagerResource> {
 
-    private final Set<WlDataDeviceManagerResource> resources = Sets.newHashSet();
+    private final Set<WlDataDeviceManagerResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private final WlDataSourceFactory wlDataSourceFactory;
 

@@ -24,11 +24,12 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlSubSurfaceFactory")
 public class WlSubSurface extends EventBus implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
 
-    private final Set<WlSubsurfaceResource> resources = Sets.newHashSet();
+    private final Set<WlSubsurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     WlSubSurface(final WlSurfaceResource surface,
                  final WlSurfaceResource parent) {

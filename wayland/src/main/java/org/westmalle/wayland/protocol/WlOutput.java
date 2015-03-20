@@ -21,11 +21,12 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @Singleton//Eager
 public class WlOutput extends Global<WlOutputResource> implements WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
 
-    private final Set<WlOutputResource> resources = Sets.newHashSet();
+    private final Set<WlOutputResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     @Inject
     WlOutput(final Display display) {

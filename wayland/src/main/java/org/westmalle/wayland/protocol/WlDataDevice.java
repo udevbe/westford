@@ -21,11 +21,12 @@ import org.freedesktop.wayland.server.*;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataDeviceFactory")
 public class WlDataDevice extends EventBus implements WlDataDeviceRequests, ProtocolObject<WlDataDeviceResource> {
 
-    private final Set<WlDataDeviceResource> resources = Sets.newHashSet();
+    private final Set<WlDataDeviceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     WlDataDevice() {}
 

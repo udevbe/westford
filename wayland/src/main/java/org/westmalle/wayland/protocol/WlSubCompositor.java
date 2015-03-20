@@ -21,11 +21,12 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @Singleton
 public class WlSubCompositor extends Global<WlSubcompositorResource> implements WlSubcompositorRequests, ProtocolObject<WlSubcompositorResource> {
 
-    private final Set<WlSubcompositorResource> resources = Sets.newHashSet();
+    private final Set<WlSubcompositorResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private final WlSubSurfaceFactory wlSubSurfaceFactory;
 

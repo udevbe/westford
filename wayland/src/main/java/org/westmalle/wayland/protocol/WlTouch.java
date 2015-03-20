@@ -24,11 +24,12 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlTouchFactory")
 public class WlTouch extends EventBus implements WlTouchRequestsV3, ProtocolObject<WlTouchResource> {
 
-    private final Set<WlTouchResource> resources = Sets.newHashSet();
+    private final Set<WlTouchResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     @Inject
     WlTouch() {
