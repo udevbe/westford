@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.hackoeur.jglm.Mat4;
 import com.jogamp.common.nio.Buffers;
 import org.freedesktop.wayland.server.ShmBuffer;
+import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.output.Point;
@@ -32,6 +33,7 @@ import javax.media.opengl.GLAutoDrawable;
 import java.nio.IntBuffer;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static javax.media.opengl.GL.GL_COLOR_BUFFER_BIT;
 
@@ -136,15 +138,18 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     @Override
     public ListenableFuture<?> draw(final WlSurfaceResource surfaceResource,
-                                    final ShmBuffer buffer) {
+                                    final WlBufferResource buffer) {
         return this.renderThread.submit(() -> doDraw(surfaceResource,
                                                      buffer));
     }
 
     private void doDraw(final WlSurfaceResource surfaceResource,
-                        final ShmBuffer buffer) {
+                        final WlBufferResource wlBufferResource) {
+        final ShmBuffer buffer = ShmBuffer.get(wlBufferResource);
+        if (buffer == null) {
+            throw new IllegalArgumentException("Buffer resource is not an ShmBuffer.");
+        }
 
-        buffer.beginAccess();
         final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
         final Surface surface = implementation.getSurface();
         final Point position = surface.getPosition();
@@ -155,9 +160,12 @@ public class GLRenderEngine implements ShmRenderEngine {
                 position.getX(), position.getY() + buffer.getHeight(), 0f, 1f
         };
 
+        buffer.beginAccess();
         querySurfaceData(surfaceResource,
                          buffer).makeActive(this.gl,
                                             buffer);
+        buffer.endAccess();
+        surface.firePaintCallbacks((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
 
         final int shaderProgram = queryShaderProgram(queryBufferFormat(buffer));
         configureShaders(shaderProgram,
@@ -168,7 +176,6 @@ public class GLRenderEngine implements ShmRenderEngine {
                                6,
                                GL.GL_UNSIGNED_INT,
                                0);
-        buffer.endAccess();
     }
 
     @Override

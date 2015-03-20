@@ -2,12 +2,17 @@ package org.westmalle.wayland.output.gl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import org.freedesktop.wayland.server.ShmBuffer;
+import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -18,6 +23,7 @@ import javax.media.opengl.GLAutoDrawable;
 import java.nio.IntBuffer;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -25,8 +31,10 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ShmBuffer.class)
 public class GLRenderEngineTest {
 
     @Mock
@@ -39,6 +47,11 @@ public class GLRenderEngineTest {
     private IntBuffer                vertexBuffer;
     @InjectMocks
     private GLRenderEngine           glRenderEngine;
+
+    @Before
+    public void setUp() {
+        PowerMockito.mockStatic(ShmBuffer.class);
+    }
 
     @Test
     public void testBegin() throws Exception {
@@ -110,16 +123,20 @@ public class GLRenderEngineTest {
                                             45);
         when(surface.getPosition()).thenReturn(position);
 
-        final ShmBuffer buffer = mock(ShmBuffer.class);
-        when(buffer.getWidth()).thenReturn(100);
-        when(buffer.getHeight()).thenReturn(250);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+
+        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
+        when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
+
+        when(shmBuffer.getWidth()).thenReturn(100);
+        when(shmBuffer.getHeight()).thenReturn(250);
 
         this.glRenderEngine.begin();
         queue.get(0)
              .run();
         //when
         this.glRenderEngine.draw(surfaceResource,
-                                 buffer);
+                                 wlBufferResource);
         //then
         verify(this.renderThread,
                times(2)).submit((Runnable) any());

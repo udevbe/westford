@@ -62,7 +62,7 @@ public class ShmRendererTest {
         this.shmRenderer.render(surfaceResource);
         //then
         verify(this.shmRenderEngine).draw(surfaceResource,
-                                          shmBuffer);
+                                          wlBufferResource);
     }
 
     @Test
