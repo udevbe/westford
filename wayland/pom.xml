@@ -15,7 +15,7 @@
 
     <properties>
         <pixman-java-bindings.version>1.0.0</pixman-java-bindings.version>
-        <wayland-java-bindings.version>1.1.1</wayland-java-bindings.version>
+        <wayland-java-bindings.version>1.2.0-SNAPSHOT</wayland-java-bindings.version>
         <jgml.version>1.0.1-SNAPSHOT</jgml.version>
     </properties>
 

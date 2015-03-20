@@ -71,14 +71,6 @@ public interface ProtocolObject<T extends Resource<?>> {
         final T resource = create(client,
                                   version,
                                   id);
-        resource.addDestroyListener(new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                ProtocolObject.this.getResources()
-                                   .remove(resource);
-            }
-        });
         getResources().add(resource);
         return resource;
     }

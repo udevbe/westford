@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
@@ -38,7 +39,7 @@ import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
 @AutoFactory(className = "WlSurfaceFactory")
 public class WlSurface extends EventBus implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
-    private final Set<WlSurfaceResource> resources       = Sets.newHashSet();
+    private final Set<WlSurfaceResource> resources       = Sets.newSetFromMap(new WeakHashMap<>());
     private       Optional<Listener>     destroyListener = Optional.empty();
 
     private final WlCallbackFactory wlCallbackFactory;
