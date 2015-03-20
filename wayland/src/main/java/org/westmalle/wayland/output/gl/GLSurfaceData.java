@@ -13,97 +13,82 @@
 //limitations under the License.
 package org.westmalle.wayland.output.gl;
 
-import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
+
 import org.freedesktop.wayland.server.ShmBuffer;
+
+import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 public class GLSurfaceData {
 
-    public static GLSurfaceData create(final GL2ES2 gl) {
-        final IntBuffer tex = Buffers.newDirectIntBuffer(1);
-        gl.glGenTextures(1,
-                         tex);
-        return new GLSurfaceData(tex);
+    public static GLSurfaceData create(final GL2ES2 gl,
+                                       final ShmBuffer buffer) {
+        createTextureData(gl,
+                          buffer);
+        final Texture texture = new Texture(gl,
+                                            createTextureData(gl,
+                                                              buffer));
+        texture.bind(gl);
+        texture.setTexParameteri(gl,
+                                 GL.GL_TEXTURE_WRAP_S,
+                                 GL.GL_CLAMP_TO_EDGE);
+        texture.setTexParameteri(gl,
+                                 GL.GL_TEXTURE_WRAP_T,
+                                 GL.GL_CLAMP_TO_EDGE);
+        texture.setTexParameteri(gl,
+                                 GL.GL_TEXTURE_MIN_FILTER,
+                                 GL.GL_NEAREST);
+        texture.setTexParameteri(gl,
+                                 GL.GL_TEXTURE_MAG_FILTER,
+                                 GL.GL_NEAREST);
+
+        return new GLSurfaceData(texture);
     }
 
-    private final IntBuffer tex;
-    private       int       width;
-    private       int       height;
-
-    private GLSurfaceData(final IntBuffer tex) {
-        this.tex = tex;
-    }
-
-    public void init(final GL2ES2 gl,
-                     final ShmBuffer buffer) {
-        this.width = buffer.getStride() / 4;
-        this.height = buffer.getHeight();
+    private static TextureData createTextureData(final GL2ES2 gl,
+                                                 final ShmBuffer buffer){
+        int width = buffer.getStride() / 4;
+        int height = buffer.getHeight();
         final ByteBuffer pixels = buffer.getData();
 
-        gl.glBindTexture(GL2ES2.GL_TEXTURE_2D,
-                         getTexture().get(0));
-        gl.glTexImage2D(GL.GL_TEXTURE_2D,
-                        0,
-                        GL.GL_RGBA,
-                        this.width,
-                        this.height,
-                        0,
-                        GL.GL_RGBA,
-                        GL.GL_UNSIGNED_BYTE,
-                        pixels);
-
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-                           GL.GL_TEXTURE_WRAP_S,
-                           GL.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-                           GL.GL_TEXTURE_WRAP_T,
-                           GL.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-                           GL.GL_TEXTURE_MIN_FILTER,
-                           GL.GL_NEAREST);
-        gl.glTexParameteri(GL.GL_TEXTURE_2D,
-                           GL.GL_TEXTURE_MAG_FILTER,
-                           GL.GL_NEAREST);
+        return new TextureData(gl.getGLProfile(),
+                               GL.GL_RGBA,
+                               width,
+                               height,
+                               0,
+                               GL.GL_RGBA,
+                               GL.GL_UNSIGNED_BYTE,
+                               false,
+                               false,
+                               false,
+                               pixels,
+                               null);
     }
 
-    public void makeActive(final GL2ES2 gl,
-                           final ShmBuffer buffer) {
+    private final Texture texture;
 
-        this.width = buffer.getStride() / 4;
-        this.height = buffer.getHeight();
-        final ByteBuffer pixels = buffer.getData();
-
-        gl.glBindTexture(GL2ES2.GL_TEXTURE_2D,
-                         getTexture().get(0));
-        gl.glTexSubImage2D(GL.GL_TEXTURE_2D,
-                           0,
-                           0,
-                           0,
-                           this.width,
-                           this.height,
-                           GL.GL_RGBA,
-                           GL.GL_UNSIGNED_BYTE,
-                           pixels);
+    private GLSurfaceData(Texture texture){
+        this.texture = texture;
     }
 
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
-
-    public IntBuffer getTexture() {
-        return this.tex;
+    public Texture getTexture() {
+        return texture;
     }
 
     public void destroy(final GL2ES2 gl) {
-        gl.glDeleteTextures(1,
-                            getTexture());
+        texture.destroy(gl);
+    }
+
+    public void update(final GL2ES2 gl,
+                       final ShmBuffer buffer){
+        getTexture().updateSubImage(gl,createTextureData(gl,
+                                                         buffer),
+                                    0,
+                                    0,
+                                    0);
     }
 }

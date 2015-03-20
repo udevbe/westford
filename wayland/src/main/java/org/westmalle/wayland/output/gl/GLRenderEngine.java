@@ -175,8 +175,8 @@ public class GLRenderEngine implements ShmRenderEngine {
 
         buffer.beginAccess();
         querySurfaceData(surfaceResource,
-                         buffer).makeActive(this.gl,
-                                            buffer);
+                         buffer).update(this.gl,
+                                        buffer);
         buffer.endAccess();
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
 
@@ -333,27 +333,29 @@ public class GLRenderEngine implements ShmRenderEngine {
                                            final ShmBuffer buffer) {
         GLSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
-            surfaceData = GLSurfaceData.create(this.gl);
-            surfaceData.init(this.gl,
-                             buffer);
+            surfaceData = GLSurfaceData.create(this.gl,
+                                               buffer);
             this.cachedSurfaceData.put(surfaceResource,
                                        surfaceData);
-        }
-        else {
-            final int surfaceDataWidth = surfaceData.getWidth();
-            final int surfaceDataHeight = surfaceData.getHeight();
-            final int bufferWidth = buffer.getWidth();
-            final int bufferHeight = buffer.getHeight();
-            if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
-                surfaceData.destroy(this.gl);
 
-                surfaceData = GLSurfaceData.create(this.gl);
-                surfaceData.init(this.gl,
-                                 buffer);
-                this.cachedSurfaceData.put(surfaceResource,
-                                           surfaceData);
-            }
+            return surfaceData;
         }
+
+        final int surfaceDataWidth = surfaceData.getTexture().getImageWidth();
+        final int surfaceDataHeight = surfaceData.getTexture().getImageWidth();
+        final int bufferWidth = buffer.getWidth();
+        final int bufferHeight = buffer.getHeight();
+
+        if (surfaceDataWidth != bufferWidth ||
+            surfaceDataHeight != bufferHeight) {
+
+            surfaceData.destroy(this.gl);
+            this.cachedSurfaceData.remove(surfaceResource);
+
+            return querySurfaceData(surfaceResource,
+                                    buffer);
+        }
+
         return surfaceData;
     }
 }
