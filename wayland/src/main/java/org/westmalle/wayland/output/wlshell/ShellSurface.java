@@ -116,8 +116,10 @@ public class ShellSurface {
                                                                      .toVec4();
                                      final Vec4 resize = transform.multiply(motionLocal);
                                      wlShellSurfaceResource.configure(quadrant.getValue(),
-                                                                      FastMath.round(resize.getX()),
-                                                                      FastMath.round(resize.getY()));
+                                                                      FastMath.max(1,
+                                                                                   FastMath.round(resize.getX())),
+                                                                      FastMath.max(1,
+                                                                                   FastMath.round(resize.getY())));
                                  });
     }
 
