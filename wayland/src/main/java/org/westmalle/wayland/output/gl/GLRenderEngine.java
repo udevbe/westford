@@ -21,21 +21,34 @@ import com.jogamp.common.nio.Buffers;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.ShmRenderEngine;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GLAutoDrawable;
 import java.nio.IntBuffer;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_COLOR_BUFFER_BIT;
+import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
+import static javax.media.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_TRIANGLES;
+import static javax.media.opengl.GL.GL_TRUE;
+import static javax.media.opengl.GL.GL_UNSIGNED_INT;
+import static javax.media.opengl.GL2ES2.GL_COMPILE_STATUS;
+import static javax.media.opengl.GL2ES2.GL_FRAGMENT_SHADER;
+import static javax.media.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
+import static javax.media.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
+import static org.freedesktop.wayland.shared.WlShmFormat.XRGB8888;
+import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_ARGB8888;
+import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_XRGB8888;
 
 public class GLRenderEngine implements ShmRenderEngine {
 
@@ -125,14 +138,14 @@ public class GLRenderEngine implements ShmRenderEngine {
         this.gl.glClear(GL_COLOR_BUFFER_BIT);
         //define triangles to be drawn.
         //make element buffer active
-        this.gl.glBindBuffer(GL2ES2.GL_ELEMENT_ARRAY_BUFFER,
+        this.gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
                              this.elementBuffer.get(0));
-        this.gl.glBufferData(GL2ES2.GL_ELEMENT_ARRAY_BUFFER,
+        this.gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                              4 * this.elements.length,
                              Buffers.newDirectIntBuffer(this.elements),
-                             GL2ES2.GL_DYNAMIC_DRAW);
+                             GL_DYNAMIC_DRAW);
         //make vertexBuffer active
-        this.gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER,
+        this.gl.glBindBuffer(GL_ARRAY_BUFFER,
                              this.vertexBuffer.get(0));
     }
 
@@ -165,16 +178,16 @@ public class GLRenderEngine implements ShmRenderEngine {
                          buffer).makeActive(this.gl,
                                             buffer);
         buffer.endAccess();
-        surface.firePaintCallbacks((int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
+        surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
 
         final int shaderProgram = queryShaderProgram(queryBufferFormat(buffer));
         configureShaders(shaderProgram,
                          this.projection,
                          vertices);
         this.gl.glUseProgram(shaderProgram);
-        this.gl.glDrawElements(GL.GL_TRIANGLES,
+        this.gl.glDrawElements(GL_TRIANGLES,
                                6,
-                               GL.GL_UNSIGNED_INT,
+                               GL_UNSIGNED_INT,
                                0);
     }
 
@@ -194,18 +207,18 @@ public class GLRenderEngine implements ShmRenderEngine {
     }
 
     private int createShaderProgram(final GLBufferFormat bufferFormat) {
-        final int vertexShader = this.gl.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
+        final int vertexShader = this.gl.glCreateShader(GL_VERTEX_SHADER);
         compileShader(vertexShader,
                       SURFACE_V);
 
         final int fragmentShader;
-        if (bufferFormat == GLBufferFormat.SHM_ARGB8888) {
-            fragmentShader = this.gl.glCreateShader(GL2ES2.GL_FRAGMENT_SHADER);
+        if (bufferFormat == SHM_ARGB8888) {
+            fragmentShader = this.gl.glCreateShader(GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_ARGB8888_F);
         }
-        else if (bufferFormat == GLBufferFormat.SHM_XRGB8888) {
-            fragmentShader = this.gl.glCreateShader(GL2ES2.GL_FRAGMENT_SHADER);
+        else if (bufferFormat == SHM_XRGB8888) {
+            fragmentShader = this.gl.glCreateShader(GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_XRGB8888_F);
         }
@@ -235,14 +248,14 @@ public class GLRenderEngine implements ShmRenderEngine {
 
         final IntBuffer vstatus = IntBuffer.allocate(1);
         this.gl.glGetShaderiv(shaderHandle,
-                              GL2ES2.GL_COMPILE_STATUS,
+                              GL_COMPILE_STATUS,
                               vstatus);
-        if (vstatus.get(0) != GL.GL_TRUE) {
+        if (vstatus.get(0) != GL_TRUE) {
             //failure!
             //get log length
             final int[] logLength = new int[1];
             this.gl.glGetShaderiv(shaderHandle,
-                                  GL2ES2.GL_INFO_LOG_LENGTH,
+                                  GL_INFO_LOG_LENGTH,
                                   logLength,
                                   0);
             //get log
@@ -272,10 +285,10 @@ public class GLRenderEngine implements ShmRenderEngine {
                                    false,
                                    projection.getBuffer());
 
-        this.gl.glBufferData(GL2ES2.GL_ARRAY_BUFFER,
+        this.gl.glBufferData(GL_ARRAY_BUFFER,
                              vertices.length * 4,
                              Buffers.newDirectFloatBuffer(vertices),
-                             GL2ES2.GL_DYNAMIC_DRAW);
+                             GL_DYNAMIC_DRAW);
         final int posAttrib = this.gl.glGetAttribLocation(program,
                                                           "va_position");
         final int texAttrib = this.gl.glGetAttribLocation(program,
@@ -283,14 +296,14 @@ public class GLRenderEngine implements ShmRenderEngine {
         this.gl.glEnableVertexAttribArray(posAttrib);
         this.gl.glVertexAttribPointer(posAttrib,
                                       2,
-                                      GL2ES2.GL_FLOAT,
+                                      GL_FLOAT,
                                       false,
                                       4 * 4,
                                       0);
         this.gl.glEnableVertexAttribArray(texAttrib);
         this.gl.glVertexAttribPointer(texAttrib,
                                       2,
-                                      GL.GL_FLOAT,
+                                      GL_FLOAT,
                                       false,
                                       4 * 4,
                                       2 * 4);
@@ -304,11 +317,11 @@ public class GLRenderEngine implements ShmRenderEngine {
     private GLBufferFormat queryBufferFormat(final ShmBuffer buffer) {
         final GLBufferFormat format;
         final int bufferFormat = buffer.getFormat();
-        if (bufferFormat == WlShmFormat.ARGB8888.getValue()) {
-            format = GLBufferFormat.SHM_ARGB8888;
+        if (bufferFormat == ARGB8888.getValue()) {
+            format = SHM_ARGB8888;
         }
-        else if (bufferFormat == WlShmFormat.XRGB8888.getValue()) {
-            format = GLBufferFormat.SHM_XRGB8888;
+        else if (bufferFormat == XRGB8888.getValue()) {
+            format = SHM_XRGB8888;
         }
         else {
             throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
