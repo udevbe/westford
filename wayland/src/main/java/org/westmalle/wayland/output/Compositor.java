@@ -17,11 +17,15 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
@@ -29,43 +33,41 @@ public class Compositor {
     private final Display     display;
     private final ShmRenderer shmRenderer;
 
-    private final AtomicBoolean renderScheduled = new AtomicBoolean(false);
-
     private final LinkedList<WlSurfaceResource> surfacesStack = Lists.newLinkedList();
+
+    private final EventLoop.IdleHandler idleHandler;
+    private Optional<EventSource> renderEvent = Optional.empty();
 
 
     Compositor(@Provided final Display display,
                final ShmRenderer shmRenderer) {
         this.display = display;
         this.shmRenderer = shmRenderer;
+        this.idleHandler = () -> {
+            this.renderEvent.get().remove();
+            this.renderEvent = Optional.empty();
+            try {
+                this.shmRenderer.beginRender();
+                getSurfacesStack().forEach(this.shmRenderer::render);
+                this.shmRenderer.endRender();
+                this.display.flushClients();
+            }
+            catch (ExecutionException | InterruptedException e) {
+                //TODO proper error handling
+               e.printStackTrace();
+            }
+        };
     }
 
     public void requestRender() {
-        if (this.renderScheduled.compareAndSet(false,
-                                               true)) {
-            if (needsRender()) {
+        if (!this.renderEvent.isPresent() && needsRender()) {
                 renderScene();
-            }
         }
     }
 
-    private void renderScene() {
-        this.display.getEventLoop()
-                    .addIdle(() -> {
-                        if (this.renderScheduled.compareAndSet(true,
-                                                               false)) {
-                            try {
-                                this.shmRenderer.beginRender();
-                                getSurfacesStack().forEach(this.shmRenderer::render);
-                                this.shmRenderer.endRender();
-                                this.display.flushClients();
-                            }
-                            catch (ExecutionException | InterruptedException e) {
-                                //TODO proper error handling
-                                e.printStackTrace();
-                            }
-                        }
-                    });
+    public void renderScene() {
+        this.renderEvent = Optional.of(this.display.getEventLoop()
+                                                   .addIdle(this.idleHandler));
     }
 
     public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.surfacesStack; }
