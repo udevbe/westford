@@ -14,13 +14,11 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
-import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @AutoFactory(className = "ShmRendererFactory")
 public class ShmRenderer {

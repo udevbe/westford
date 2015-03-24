@@ -15,7 +15,6 @@ package org.westmalle.wayland.protocol;
 
 import com.google.common.base.Preconditions;
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.Resource;
 
 import javax.annotation.Nonnegative;

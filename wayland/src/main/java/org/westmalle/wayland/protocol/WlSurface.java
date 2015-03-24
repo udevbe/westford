@@ -207,7 +207,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
         getSurface().detachBuffer();
     }
 
-    private void addBufferDestroyListener(final WlBufferResource buffer){
+    private void addBufferDestroyListener(final WlBufferResource buffer) {
         final Listener listener = new Listener() {
             @Override
             public void handle() {
@@ -219,7 +219,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
         buffer.addDestroyListener(listener);
     }
 
-    private void removeBufferDestroyListener(){
+    private void removeBufferDestroyListener() {
         this.destroyListener.ifPresent(Listener::remove);
         this.destroyListener = Optional.empty();
     }

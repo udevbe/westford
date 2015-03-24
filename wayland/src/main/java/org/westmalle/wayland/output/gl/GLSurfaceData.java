@@ -15,13 +15,11 @@ package org.westmalle.wayland.output.gl;
 
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
-
 import org.freedesktop.wayland.server.ShmBuffer;
-
-import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
+import java.nio.ByteBuffer;
 
 public class GLSurfaceData {
 
@@ -50,9 +48,9 @@ public class GLSurfaceData {
     }
 
     private static TextureData createTextureData(final GL2ES2 gl,
-                                                 final ShmBuffer buffer){
-        int width = buffer.getStride() / 4;
-        int height = buffer.getHeight();
+                                                 final ShmBuffer buffer) {
+        final int width = buffer.getStride() / 4;
+        final int height = buffer.getHeight();
         final ByteBuffer pixels = buffer.getData();
 
         return new TextureData(gl.getGLProfile(),
@@ -71,22 +69,23 @@ public class GLSurfaceData {
 
     private final Texture texture;
 
-    private GLSurfaceData(Texture texture){
+    private GLSurfaceData(final Texture texture) {
         this.texture = texture;
     }
 
     public Texture getTexture() {
-        return texture;
+        return this.texture;
     }
 
     public void destroy(final GL2ES2 gl) {
-        texture.destroy(gl);
+        this.texture.destroy(gl);
     }
 
     public void update(final GL2ES2 gl,
-                       final ShmBuffer buffer){
-        getTexture().updateSubImage(gl,createTextureData(gl,
-                                                         buffer),
+                       final ShmBuffer buffer) {
+        getTexture().updateSubImage(gl,
+                                    createTextureData(gl,
+                                                      buffer),
                                     0,
                                     0,
                                     0);

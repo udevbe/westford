@@ -24,8 +24,6 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
@@ -44,7 +42,8 @@ public class Compositor {
         this.display = display;
         this.shmRenderer = shmRenderer;
         this.idleHandler = () -> {
-            this.renderEvent.get().remove();
+            this.renderEvent.get()
+                            .remove();
             this.renderEvent = Optional.empty();
             try {
                 this.shmRenderer.beginRender();
@@ -54,14 +53,14 @@ public class Compositor {
             }
             catch (ExecutionException | InterruptedException e) {
                 //TODO proper error handling
-               e.printStackTrace();
+                e.printStackTrace();
             }
         };
     }
 
     public void requestRender() {
         if (!this.renderEvent.isPresent() && needsRender()) {
-                renderScene();
+            renderScene();
         }
     }
 

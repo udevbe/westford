@@ -41,10 +41,7 @@ import static javax.media.opengl.GL.GL_FLOAT;
 import static javax.media.opengl.GL.GL_TRIANGLES;
 import static javax.media.opengl.GL.GL_TRUE;
 import static javax.media.opengl.GL.GL_UNSIGNED_INT;
-import static javax.media.opengl.GL2ES2.GL_COMPILE_STATUS;
-import static javax.media.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static javax.media.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
-import static javax.media.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static javax.media.opengl.GL2ES2.*;
 import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
 import static org.freedesktop.wayland.shared.WlShmFormat.XRGB8888;
 import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_ARGB8888;
@@ -341,8 +338,10 @@ public class GLRenderEngine implements ShmRenderEngine {
             return surfaceData;
         }
 
-        final int surfaceDataWidth = surfaceData.getTexture().getImageWidth();
-        final int surfaceDataHeight = surfaceData.getTexture().getImageWidth();
+        final int surfaceDataWidth = surfaceData.getTexture()
+                                                .getImageWidth();
+        final int surfaceDataHeight = surfaceData.getTexture()
+                                                 .getImageWidth();
         final int bufferWidth = buffer.getWidth();
         final int bufferHeight = buffer.getHeight();
 
