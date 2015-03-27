@@ -13,14 +13,12 @@
     <name>Westmalle Bootstrap</name>
 
     <dependencies>
-        <!-- X11 -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>wayland</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <!-- logging implementation -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
