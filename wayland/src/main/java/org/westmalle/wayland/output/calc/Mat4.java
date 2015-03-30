@@ -2,19 +2,19 @@ package org.westmalle.wayland.output.calc;
 
 import com.google.auto.value.AutoValue;
 
-/**
- * @param <S> source space
- * @param <T> target space
- */
 @AutoValue
-public abstract class Mat4<S extends Space, T extends Space> {
+public abstract class Mat4 {
 
-    public static <S extends Space, T extends Space> Mat4<S, T> create(final float[] array,
-                                                                       final int offset) {
+    /**
+     * Construct a new matrix. Array elements should be in row major order.
+     * @return a new 4 by 4 matrix.
+     */
+    public static Mat4 create(final float[] array,
+                              final int offset) {
         if (array.length < 16) {
             throw new IllegalArgumentException("Array length must be >= 16");
         }
-        return Mat4.<S, T>builder()
+        return Mat4.builder()
                 .m00(array[offset]).m01(array[1 + offset]).m02(array[2 + offset]).m03(array[3 + offset])
                 .m10(array[4 + offset]).m11(array[5 + offset]).m12(array[6 + offset]).m13(array[7 + offset])
                 .m20(array[8 + offset]).m21(array[9 + offset]).m22(array[10 + offset]).m23(array[11 + offset])
@@ -26,31 +26,29 @@ public abstract class Mat4<S extends Space, T extends Space> {
     /**
      * Construct a new matrix. Arguments are in row major order.
      *
-     * @param m00
-     * @param m10
-     * @param m20
-     * @param m30
-     * @param m01
-     * @param m11
-     * @param m21
-     * @param m31
-     * @param m02
-     * @param m12
-     * @param m22
-     * @param m32
-     * @param m03
-     * @param m13
-     * @param m23
-     * @param m33
-     * @param <S>
-     * @param <T>
-     * @return
+     * @param m00 column 0, row 0
+     * @param m10 column 1, row 0
+     * @param m20 column 2, row 0
+     * @param m30 column 3, row 0
+     * @param m01 column 0, row 1
+     * @param m11 column 1, row 1
+     * @param m21 column 2, row 1
+     * @param m31 column 3, row 1
+     * @param m02 column 0, row 2
+     * @param m12 column 1, row 2
+     * @param m22 column 2, row 2
+     * @param m32 column 3, row 2
+     * @param m03 column 0, row 3
+     * @param m13 column 1, row 3
+     * @param m23 column 2, row 3
+     * @param m33 column 3, row 3
+     * @return a new 4 by 4 matrix.
      */
-    public static <S extends Space, T extends Space> Mat4<S, T> create(final float m00, final float m10, final float m20, final float m30,
-                                                                       final float m01, final float m11, final float m21, final float m31,
-                                                                       final float m02, final float m12, final float m22, final float m32,
-                                                                       final float m03, final float m13, final float m23, final float m33) {
-        return Mat4.<S, T>builder()
+    public static  Mat4 create(final float m00, final float m10, final float m20, final float m30,
+                               final float m01, final float m11, final float m21, final float m31,
+                               final float m02, final float m12, final float m22, final float m32,
+                               final float m03, final float m13, final float m23, final float m33) {
+        return Mat4.builder()
                 .m00(m00).m10(m10).m20(m20).m30(m30)
                 .m01(m01).m11(m11).m21(m21).m31(m31)
                 .m02(m02).m12(m12).m22(m22).m32(m32)
@@ -61,12 +59,12 @@ public abstract class Mat4<S extends Space, T extends Space> {
     /**
      * @param array expected format is column major.
      */
-    public static <S extends Space, T extends Space> Mat4<S, T> create(final float[] array) {
-        return Mat4.<S, T>create(array, 0);
+    public static  Mat4 create(final float[] array) {
+        return Mat4.create(array, 0);
     }
 
-    public static <S extends Space, T extends Space> Builder<S, T> builder() {
-        return new AutoValue_Mat4.Builder<S, T>()
+    public static  Builder builder() {
+        return new AutoValue_Mat4.Builder()
                 .m00(0.f).m10(0.f).m20(0.f).m30(0.f)
                 .m01(0.f).m11(0.f).m21(0.f).m31(0.f)
                 .m02(0.f).m12(0.f).m22(0.f).m32(0.f)
@@ -185,7 +183,7 @@ public abstract class Mat4<S extends Space, T extends Space> {
      */
     public abstract float getM33();
 
-    public abstract Builder<S, T> toBuilder();
+    public abstract Builder toBuilder();
 
     /**
      * Array representation of this matrix. Array is in column major order.
@@ -203,50 +201,50 @@ public abstract class Mat4<S extends Space, T extends Space> {
     }
 
     @AutoValue.Builder
-    public interface Builder<S extends Space, T extends Space> {
+    public interface Builder {
 
-        Builder<S, T> m00(float element);
+        Builder m00(float element);
 
-        Builder<S, T> m01(float element);
+        Builder m01(float element);
 
-        Builder<S, T> m02(float element);
+        Builder m02(float element);
 
-        Builder<S, T> m03(float element);
+        Builder m03(float element);
 
-        Builder<S, T> m10(float element);
+        Builder m10(float element);
 
-        Builder<S, T> m11(float element);
+        Builder m11(float element);
 
-        Builder<S, T> m12(float element);
+        Builder m12(float element);
 
-        Builder<S, T> m13(float element);
+        Builder m13(float element);
 
-        Builder<S, T> m20(float element);
+        Builder m20(float element);
 
-        Builder<S, T> m21(float element);
+        Builder m21(float element);
 
-        Builder<S, T> m22(float element);
+        Builder m22(float element);
 
-        Builder<S, T> m23(float element);
+        Builder m23(float element);
 
-        Builder<S, T> m30(float element);
+        Builder m30(float element);
 
-        Builder<S, T> m31(float element);
+        Builder m31(float element);
 
-        Builder<S, T> m32(float element);
+        Builder m32(float element);
 
-        Builder<S, T> m33(float element);
+        Builder m33(float element);
 
-        Mat4<S, T> build();
+        Mat4 build();
     }
 
     /**
-     * Transform vector in source plane to destination plane.
+     * Transform vector in point plane to destination plane.
      *
      * @param right right hand side of the multiplication
      * @return new vector who's space is this matrix' destination space.
      */
-    public Vec4<T> multiply(final Vec4<S> right) {
+    public Vec4 multiply(final Vec4 right) {
         //TODO unit test
 
         final float rightX = right.getX();
@@ -254,7 +252,7 @@ public abstract class Mat4<S extends Space, T extends Space> {
         final float rightZ = right.getZ();
         final float rightW = right.getW();
 
-        return Vec4.<T>create(
+        return Vec4.create(
                 getM00() * rightX + getM10() * rightY + getM20() * rightZ + getM30() * rightW,
                 getM01() * rightX + getM11() * rightY + getM21() * rightZ + getM31() * rightW,
                 getM02() * rightX + getM12() * rightY + getM22() * rightZ + getM32() * rightW,
@@ -263,15 +261,13 @@ public abstract class Mat4<S extends Space, T extends Space> {
     }
 
     /**
-     * Transform matrix in source plane to destination plane.
+     * Transform matrix in point plane to destination plane.
      *
      * @param right right hand side of the multiplication
-     * @param <U>   argument destination space
-     * @return new matrix who's source is this matrix' destination space.
+     * @return new matrix who's point is this matrix' destination space.
      */
-    public <U extends Space> Mat4<T, U> multiply(final Mat4<S, U> right) {
+    public Mat4 multiply(final Mat4 right) {
         //TODO unit tests
-
         return Mat4.create(
                 getM00() * right.getM00() + getM10() * right.getM01() + getM20() * right.getM02() + getM30() * right.getM03(),
                 getM00() * right.getM10() + getM10() * right.getM11() + getM20() * right.getM12() + getM30() * right.getM13(),
@@ -295,13 +291,12 @@ public abstract class Mat4<S extends Space, T extends Space> {
     }
 
     /**
-     * Copy this matrix to a matrix with a different source and destination space.
+     * Invert this matrix
      *
-     * @param <U>
-     * @param <V>
-     * @return
+     * @return a new matrix who's point and destination are swapped.
      */
-    public <U extends Space, V extends Space> Mat4<U, V> copy() {
-        return Mat4.<U, V>create(toArray());
+    public Mat4 invert() {
+        //TODO
+        throw new UnsupportedOperationException("TODO");
     }
 }

@@ -2,22 +2,20 @@ package org.westmalle.wayland.output.calc;
 
 import com.google.auto.value.AutoValue;
 
-/**
- * @param <S> source space
- */
-@AutoValue
-public abstract class Vec4<S extends Space> {
 
-    public static <S extends Space> Vec4<S> create(final float[] array) {
-        return Vec4.<S>create(array, 0);
+@AutoValue
+public abstract class Vec4 {
+
+    public static  Vec4 create(final float[] array) {
+        return Vec4.create(array, 0);
     }
 
-    public static <S extends Space> Vec4<S> create(final float[] array,
+    public static  Vec4 create(final float[] array,
                                                    final int offset) {
         if (array.length < 4) {
             throw new IllegalArgumentException("Array length must be >= 4");
         }
-        return Vec4.<S>builder()
+        return Vec4.builder()
                 .x(array[offset])
                 .y(array[1 + offset])
                 .z(array[2 + offset])
@@ -25,15 +23,15 @@ public abstract class Vec4<S extends Space> {
                 .build();
     }
 
-    public static <S extends Space> Vec4<S> create(final float x,
-                                                   final float y,
-                                                   final float z,
-                                                   final float w) {
-        return Vec4.<S>builder().x(x).y(y).z(z).w(w).build();
+    public static  Vec4 create(final float x,
+                               final float y,
+                               final float z,
+                               final float w) {
+        return Vec4.builder().x(x).y(y).z(z).w(w).build();
     }
 
-    public static <S extends Space> Builder<S> builder() {
-        return new AutoValue_Vec4.Builder<S>().x(0).y(0).z(0).w(0);
+    public static  Builder builder() {
+        return new AutoValue_Vec4.Builder().x(0).y(0).z(0).w(0);
     }
 
     public abstract float getX();
@@ -44,7 +42,7 @@ public abstract class Vec4<S extends Space> {
 
     public abstract float getW();
 
-    public abstract Builder<S> toBuilder();
+    public abstract Builder toBuilder();
 
     /**
      * @return a new array of length 4
@@ -59,17 +57,17 @@ public abstract class Vec4<S extends Space> {
     }
 
     @AutoValue.Builder
-    public interface Builder<S extends Space> {
+    public interface Builder {
 
-        Builder<S> x(float x);
+        Builder x(float x);
 
-        Builder<S> y(float y);
+        Builder y(float y);
 
-        Builder<S> z(float z);
+        Builder z(float z);
 
-        Builder<S> w(float z);
+        Builder w(float z);
 
-        Vec4<S> build();
+        Vec4 build();
     }
 
     /**
@@ -77,8 +75,8 @@ public abstract class Vec4<S extends Space> {
      * @param right
      * @return
      */
-    public Vec4<S> add(final Vec4<S> right) {
-        return Vec4.<S>create(getX() + right.getX(),
+    public Vec4 add(final Vec4 right) {
+        return Vec4.create(getX() + right.getX(),
                               getY() + right.getY(),
                               getZ() + right.getZ(),
                               getW() + right.getW());
@@ -89,8 +87,8 @@ public abstract class Vec4<S extends Space> {
      * @param right
      * @return
      */
-    public Vec4<S> subtract(final Vec4<S> right) {
-        return Vec4.<S>create(getX() - right.getX(),
+    public Vec4 subtract(final Vec4 right) {
+        return Vec4.create(getX() - right.getX(),
                               getY() - right.getY(),
                               getZ() - right.getZ(),
                               getW() - right.getW());
