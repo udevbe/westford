@@ -1,6 +1,5 @@
 package org.westmalle.wayland.protocol;
 
-import com.hackoeur.jglm.Mat4;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
@@ -15,6 +14,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.calc.Mat4;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
@@ -57,7 +57,7 @@ public class WlSurfaceTest {
         wlSurface.setBufferTransform(wlSurfaceResource,
                                      transform);
         //then
-        verify(this.surface).setBufferTransform(Mat4.MAT4_IDENTITY);
+        verify(this.surface).setBufferTransform(Mat4.IDENTITY);
 
     }
 

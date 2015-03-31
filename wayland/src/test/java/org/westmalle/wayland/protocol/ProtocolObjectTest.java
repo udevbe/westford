@@ -114,23 +114,4 @@ public class ProtocolObjectTest {
         assertThat((Iterable) protocolObject.getResources()).contains(resource2);
         assertThat((Iterable) protocolObject.getResources()).hasSize(3);
     }
-
-    @Test
-    public void testResourceDestroyed() {
-        //given
-        final Client client = mock(Client.class);
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
-        //when
-        final Resource<?> resource = protocolObject.add(client,
-                                                        1,
-                                                        1);
-        //then
-        final ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(resource).addDestroyListener(destroyListenerCaptor.capture());
-        //and when
-        final Listener destroyListener = destroyListenerCaptor.getValue();
-        destroyListener.handle();
-        //then
-        assertThat((Iterable) protocolObject.getResources()).isEmpty();
-    }
 }

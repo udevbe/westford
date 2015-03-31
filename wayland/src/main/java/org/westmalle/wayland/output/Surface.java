@@ -16,11 +16,9 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-import com.hackoeur.jglm.Mat4;
-import com.hackoeur.jglm.Matrices;
-import com.hackoeur.jglm.Vec4;
-import com.hackoeur.jglm.support.FastMath;
 import org.freedesktop.wayland.server.*;
+import org.westmalle.wayland.output.calc.Mat4;
+import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 
 import javax.annotation.Nonnegative;
@@ -29,8 +27,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
@@ -59,11 +55,11 @@ public class Surface {
     //committed derived states
     private boolean   destroyed           = false;
     @Nonnull
-    private Mat4      compositorTransform = MAT4_IDENTITY;
+    private Mat4      compositorTransform = Transforms.NORMAL;
     @Nonnull
-    private Mat4      transform           = MAT4_IDENTITY;
+    private Mat4      transform           = Transforms.NORMAL;
     @Nonnull
-    private Mat4      inverseTransform    = MAT4_IDENTITY;
+    private Mat4      inverseTransform    = Transforms.NORMAL;
     @Nonnull
     private Point     position            = Point.ZERO;
     @Nonnull
@@ -130,7 +126,7 @@ public class Surface {
 
     @Nonnull
     public Surface resetCompositorTransform() {
-        this.compositorTransform = MAT4_IDENTITY;
+        this.compositorTransform = Mat4.IDENTITY;
         return this;
     }
 
@@ -189,8 +185,7 @@ public class Surface {
             final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
             final int bufferWidth = shmBuffer.getWidth();
             final int bufferHeight = shmBuffer.getHeight();
-            final int scale = FastMath.round(getTransform().getColumn(3)
-                                                           .getW());
+            final int scale = Math.round(getTransform().getM33());
             this.size = Rectangle.builder()
                                  .width(bufferWidth / scale)
                                  .height(bufferHeight / scale)
@@ -227,7 +222,7 @@ public class Surface {
 
         //apply client transformation
         final Mat4 bufferTransform = getState().getBufferTransform();
-        if (!bufferTransform.equals(MAT4_IDENTITY)) {
+        if (!bufferTransform.equals(Mat4.IDENTITY)) {
             result = bufferTransform.multiply(result);
         }
 
@@ -238,7 +233,7 @@ public class Surface {
         }
 
         this.transform = result;
-        this.inverseTransform = Matrices.invert(getTransform());
+        this.inverseTransform = getTransform().invert();
         return this;
     }
 
@@ -309,20 +304,20 @@ public class Surface {
     public Point local(final Point global) {
         //TODO unit test this method
         final Point position = getPosition();
-        final Vec4 untransformedLocalPoint = new Vec4(global.getX() - position.getX(),
-                                                      global.getY() - position.getY(),
-                                                      0.0f,
-                                                      1.0f);
+        final Vec4 untransformedLocalPoint = Vec4.create(global.getX() - position.getX(),
+                                                         global.getY() - position.getY(),
+                                                         0.0f,
+                                                         1.0f);
         final Vec4 localPoint;
-        if (this.inverseTransform.equals(MAT4_IDENTITY)) {
+        if (this.inverseTransform.equals(Mat4.IDENTITY)) {
             localPoint = untransformedLocalPoint;
         }
         else {
             localPoint = this.inverseTransform.multiply(untransformedLocalPoint);
         }
 
-        return Point.create(FastMath.round(localPoint.getX() / localPoint.getW()),
-                            FastMath.round(localPoint.getY() / localPoint.getW()));
+        return Point.create(Math.round(localPoint.getX() / localPoint.getW()),
+                            Math.round(localPoint.getY() / localPoint.getW()));
     }
 
     /**
@@ -334,13 +329,13 @@ public class Surface {
      */
     public Point global(final Point local) {
         //TODO unit test this method
-        final Vec4 untransformedLocalPoint = new Vec4(local.getX(),
-                                                      local.getY(),
-                                                      0.0f,
-                                                      1.0f);
+        final Vec4 untransformedLocalPoint = Vec4.create(local.getX(),
+                                                         local.getY(),
+                                                         0.0f,
+                                                         1.0f);
 
         final Vec4 localPoint;
-        if (this.transform.equals(MAT4_IDENTITY)) {
+        if (this.transform.equals(Mat4.IDENTITY)) {
             localPoint = untransformedLocalPoint;
         }
         else {
@@ -348,8 +343,8 @@ public class Surface {
         }
 
         final Point position = getPosition();
-        return Point.create(FastMath.round(localPoint.getX() * localPoint.getW() + position.getX()),
-                            FastMath.round(localPoint.getY() * localPoint.getW() + position.getY()));
+        return Point.create(Math.round(localPoint.getX() * localPoint.getW() + position.getX()),
+                            Math.round(localPoint.getY() * localPoint.getW() + position.getY()));
     }
 
     /**

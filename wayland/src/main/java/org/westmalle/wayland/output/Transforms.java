@@ -1,19 +1,39 @@
 package org.westmalle.wayland.output;
 
-import com.hackoeur.jglm.Mat4;
+import org.westmalle.wayland.output.calc.Mat4;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 public class Transforms {
-    public static final Mat4 NORMAL      = Mat4.MAT4_IDENTITY;
-    public static final Mat4 _90         = new Mat4(0f,
-                                                    -1f,
+
+    public static final Mat4 NORMAL      = Mat4.IDENTITY;
+    public static final Mat4 _90         = Mat4.create(0f,
+                                                       -1f,
+                                                       0f,
+                                                       0f,
+
+                                                       1f,
+                                                       0f,
+                                                       0f,
+                                                       0f,
+
+                                                       0f,
+                                                       0f,
+                                                       1f,
+                                                       0f,
+
+                                                       0f,
+                                                       0f,
+                                                       0f,
+                                                       1f);
+    public static final Mat4 _180        = Mat4.create(-1f,
+                                                    0f,
                                                     0f,
                                                     0f,
 
-                                                    1f,
                                                     0f,
+                                                    -1f,
                                                     0f,
                                                     0f,
 
@@ -26,26 +46,7 @@ public class Transforms {
                                                     0f,
                                                     0f,
                                                     1f);
-    public static final Mat4 _180        = new Mat4(-1f,
-                                                    0f,
-                                                    0f,
-                                                    0f,
-
-                                                    0f,
-                                                    -1f,
-                                                    0f,
-                                                    0f,
-
-                                                    0f,
-                                                    0f,
-                                                    1f,
-                                                    0f,
-
-                                                    0f,
-                                                    0f,
-                                                    0f,
-                                                    1f);
-    public static final Mat4 _270        = new Mat4(0f,
+    public static final Mat4 _270        = Mat4.create(0f,
                                                     1f,
                                                     0f,
                                                     0f,
@@ -64,7 +65,7 @@ public class Transforms {
                                                     0f,
                                                     0f,
                                                     1f);
-    public static final Mat4 FLIPPED     = new Mat4(-1f,
+    public static final Mat4 FLIPPED     = Mat4.create(-1f,
                                                     0f,
                                                     0f,
                                                     0f,
@@ -83,7 +84,7 @@ public class Transforms {
                                                     0f,
                                                     0f,
                                                     1f);
-    public static final Mat4 FLIPPED_90  = new Mat4(0f,
+    public static final Mat4 FLIPPED_90  = Mat4.create(0f,
                                                     1f,
                                                     0f,
                                                     0f,
@@ -102,7 +103,7 @@ public class Transforms {
                                                     0f,
                                                     0f,
                                                     1f);
-    public static final Mat4 FLIPPED_180 = new Mat4(1f,
+    public static final Mat4 FLIPPED_180 = Mat4.create(1f,
                                                     0f,
                                                     0f,
                                                     0f,
@@ -121,7 +122,7 @@ public class Transforms {
                                                     0f,
                                                     0f,
                                                     1f);
-    public static final Mat4 FLIPPED_270 = new Mat4(0f,
+    public static final Mat4 FLIPPED_270 = Mat4.create(0f,
                                                     -1f,
                                                     0f,
                                                     0f,
@@ -143,7 +144,7 @@ public class Transforms {
 
     @Nonnull
     public static Mat4 SCALE(@Nonnegative final int scale) {
-        return new Mat4(
+        return Mat4.create(
                 1f,
                 0f,
                 0f,
@@ -162,6 +163,4 @@ public class Transforms {
                 scale
         );
     }
-
-    public static Mat4 IDENTITY = Mat4.MAT4_IDENTITY;
 }

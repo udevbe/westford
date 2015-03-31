@@ -2,11 +2,18 @@ package org.westmalle.wayland.output.calc;
 
 import com.google.auto.value.AutoValue;
 
+import java.nio.FloatBuffer;
+
 @AutoValue
 public abstract class Mat4 {
 
+    public static final Mat4 IDENTITY = Mat4.create(1.f, 0.f, 0.f, 0.f,
+                                                    0.f, 1.f, 0.f, 0.f,
+                                                    0.f, 0.f, 1.f, 0.f,
+                                                    0.f, 0.f, 0.f, 1.f);
+
     /**
-     * Construct a new matrix. Array elements should be in row major order.
+     * Construct a new matrix. Array elements should be in column major order.
      * @return a new 4 by 4 matrix.
      */
     public static Mat4 create(final float[] array,
@@ -21,7 +28,6 @@ public abstract class Mat4 {
                 .m30(array[12 + offset]).m31(array[13 + offset]).m32(array[14 + offset]).m33(array[15] + offset)
                 .build();
     }
-
 
     /**
      * Construct a new matrix. Arguments are in row major order.
@@ -57,7 +63,7 @@ public abstract class Mat4 {
     }
 
     /**
-     * @param array expected format is column major.
+     * @param array expected format is column major. Index 0 -> column 0, row 0; index 1 -> column 0, row 1 and so forth.
      */
     public static  Mat4 create(final float[] array) {
         return Mat4.create(array, 0);
@@ -200,6 +206,13 @@ public abstract class Mat4 {
         };
     }
 
+    public Mat4 add(final Mat4 right) {
+        return Mat4.create(getM00()+right.getM00(),getM10()+right.getM10(),getM20()+right.getM20(),getM30()+right.getM30(),
+                           getM01()+right.getM01(),getM11()+right.getM11(),getM21()+right.getM21(),getM31()+right.getM31(),
+                           getM02()+right.getM02(),getM12()+right.getM12(),getM22()+right.getM22(),getM32()+right.getM32(),
+                           getM03()+right.getM03(),getM13()+right.getM13(),getM23()+right.getM23(),getM33()+right.getM33());
+    }
+
     @AutoValue.Builder
     public interface Builder {
 
@@ -296,7 +309,107 @@ public abstract class Mat4 {
      * @return a new matrix who's point and destination are swapped.
      */
     public Mat4 invert() {
-        //TODO
-        throw new UnsupportedOperationException("TODO");
+        final float[][] matrix2d = new float[][] {{getM00(),getM10(),getM20(),getM30()},
+                                                  {getM01(),getM11(),getM21(),getM31()},
+                                                  {getM02(),getM12(),getM22(),getM32()},
+                                                  {getM03(),getM13(),getM23(),getM33()}};
+        //FIXME test uninvertable matrix, what will/should happen?
+        final float[][] matrix2dInverted = invert(matrix2d);
+        return Mat4.create(matrix2dInverted[0][0],matrix2dInverted[0][1],matrix2dInverted[0][2],matrix2dInverted[0][3],
+                matrix2dInverted[1][0],matrix2dInverted[1][1],matrix2dInverted[1][2],matrix2dInverted[1][3],
+                matrix2dInverted[2][0],matrix2dInverted[2][1],matrix2dInverted[2][2],matrix2dInverted[2][3],
+                matrix2dInverted[3][0],matrix2dInverted[3][1],matrix2dInverted[3][2],matrix2dInverted[3][3]);
+    }
+
+    private float[][] invert(float a[][])
+    {
+        int n = a.length;
+        float x[][] = new float[n][n];
+        float b[][] = new float[n][n];
+        int index[] = new int[n];
+        for (int i=0; i<n; ++i)
+            b[i][i] = 1;
+
+        gaussian(a, index);
+
+        for (int i=0; i<n-1; ++i)
+            for (int j=i+1; j<n; ++j)
+                for (int k=0; k<n; ++k)
+                    b[index[j]][k]
+                            -= a[index[j]][i]*b[index[i]][k];
+
+        for (int i=0; i<n; ++i)
+        {
+            x[n-1][i] = b[index[n-1]][i]/a[index[n-1]][n-1];
+            for (int j=n-2; j>=0; --j)
+            {
+                x[j][i] = b[index[j]][i];
+                for (int k=j+1; k<n; ++k)
+                {
+                    x[j][i] -= a[index[j]][k]*x[k][i];
+                }
+                x[j][i] /= a[index[j]][j];
+            }
+        }
+        return x;
+    }
+
+    private void gaussian(float a[][], int index[])
+    {
+        int n = index.length;
+        float c[] = new float[n];
+
+        for (int i=0; i<n; ++i)
+            index[i] = i;
+
+        for (int i=0; i<n; ++i)
+        {
+            float c1 = 0;
+            for (int j=0; j<n; ++j)
+            {
+                float c0 = Math.abs(a[i][j]);
+                if (c0 > c1) c1 = c0;
+            }
+            c[i] = c1;
+        }
+
+        int k = 0;
+        for (int j=0; j<n-1; ++j)
+        {
+            float pi1 = 0;
+            for (int i=j; i<n; ++i)
+            {
+                float pi0 = Math.abs(a[index[i]][j]);
+                pi0 /= c[index[i]];
+                if (pi0 > pi1)
+                {
+                    pi1 = pi0;
+                    k = i;
+                }
+            }
+
+            int itmp = index[j];
+            index[j] = index[k];
+            index[k] = itmp;
+            for (int i=j+1; i<n; ++i)
+            {
+                float pj = a[index[i]][j]/a[index[j]][j];
+
+                a[index[i]][j] = pj;
+
+                // Modify other elements accordingly
+                for (int l=j+1; l<n; ++l)
+                    a[index[i]][l] -= pj*a[index[j]][l];
+            }
+        }
+    }
+
+    public FloatBuffer toBuffer(){
+        final FloatBuffer buffer = FloatBuffer.allocate(16);
+        buffer.put(getM00()).put(getM01()).put(getM02()).put(getM03());
+        buffer.put(getM10()).put(getM11()).put(getM12()).put(getM13());
+        buffer.put(getM20()).put(getM21()).put(getM22()).put(getM23());
+        buffer.put(getM30()).put(getM31()).put(getM32()).put(getM33());
+        return buffer;
     }
 }

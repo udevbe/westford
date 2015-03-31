@@ -2,15 +2,14 @@ package org.westmalle.wayland.output.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.hackoeur.jglm.Mat4;
-import com.hackoeur.jglm.Vec4;
-import com.hackoeur.jglm.support.FastMath;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.calc.Mat4;
+import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -116,10 +115,10 @@ public class ShellSurface {
                                                                      .toVec4();
                                      final Vec4 resize = transform.multiply(motionLocal);
                                      wlShellSurfaceResource.configure(quadrant.getValue(),
-                                                                      FastMath.max(1,
-                                                                                   FastMath.round(resize.getX())),
-                                                                      FastMath.max(1,
-                                                                                   FastMath.round(resize.getY())));
+                                                                      Math.max(1,
+                                                                               Math.round(resize.getX())),
+                                                                      Math.max(1,
+                                                                               Math.round(resize.getY())));
                                  });
     }
 
@@ -137,7 +136,7 @@ public class ShellSurface {
             case TOP:
                 anchorTranslation[0] = 1;
                 anchorTranslation[13] = height;
-                quadrantTransform = Transforms._180.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms._180.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width;
@@ -146,7 +145,7 @@ public class ShellSurface {
             case TOP_LEFT:
                 anchorTranslation[12] = width;
                 anchorTranslation[13] = height;
-                quadrantTransform = Transforms._180.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms._180.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width - localTransformed.getX();
@@ -155,7 +154,7 @@ public class ShellSurface {
             case LEFT:
                 anchorTranslation[5] = -1;
                 anchorTranslation[12] = width;
-                quadrantTransform = Transforms.FLIPPED.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms.FLIPPED.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width - localTransformed.getX();
@@ -163,7 +162,7 @@ public class ShellSurface {
                 break;
             case BOTTOM_LEFT:
                 anchorTranslation[12] = width;
-                quadrantTransform = Transforms.FLIPPED.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms.FLIPPED.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width - localTransformed.getX();
@@ -172,7 +171,7 @@ public class ShellSurface {
             case RIGHT:
                 anchorTranslation[5] = 1;
                 anchorTranslation[13] = height;
-                quadrantTransform = Transforms.FLIPPED_180.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms.FLIPPED_180.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width - localTransformed.getX();
@@ -180,7 +179,7 @@ public class ShellSurface {
                 break;
             case TOP_RIGHT:
                 anchorTranslation[13] = height;
-                quadrantTransform = Transforms.FLIPPED_180.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms.FLIPPED_180.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width - localTransformed.getX();
@@ -188,24 +187,24 @@ public class ShellSurface {
                 break;
             case BOTTOM:
                 anchorTranslation[0] = -1;
-                quadrantTransform = Transforms.IDENTITY.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms.NORMAL.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width;
                 deltaTranslation[13] = height - localTransformed.getY();
                 break;
             case BOTTOM_RIGHT:
-                quadrantTransform = Transforms.IDENTITY.add(new Mat4(anchorTranslation));
+                quadrantTransform = Transforms.NORMAL.add(Mat4.create(anchorTranslation));
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
                 deltaTranslation[12] = width - localTransformed.getX();
                 deltaTranslation[13] = height - localTransformed.getY();
                 break;
             default:
-                quadrantTransform = Transforms.IDENTITY;
+                quadrantTransform = Transforms.NORMAL;
         }
 
-        return quadrantTransform.add(new Mat4(deltaTranslation));
+        return quadrantTransform.add(Mat4.create(deltaTranslation));
     }
 
 

@@ -1,9 +1,9 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.value.AutoValue;
-import com.hackoeur.jglm.Mat4;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlRegionResource;
+import org.westmalle.wayland.output.calc.Mat4;
 
 import javax.annotation.Nonnegative;
 import java.util.Optional;
@@ -16,7 +16,7 @@ public abstract class SurfaceState {
                                                    .inputRegion(Optional.<WlRegionResource>empty())
                                                    .damage(Optional.<Region>empty())
                                                    .buffer(Optional.<WlBufferResource>empty())
-                                                   .bufferTransform(Mat4.MAT4_IDENTITY)
+                                                   .bufferTransform(Mat4.IDENTITY)
                                                    .scale(1);
     }
 

@@ -17,13 +17,13 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
-import com.hackoeur.jglm.Mat4;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.freedesktop.wayland.shared.WlSurfaceError;
 import org.westmalle.wayland.output.Rectangle;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.Transforms;
+import org.westmalle.wayland.output.calc.Mat4;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.hackoeur.jglm.Mat4.MAT4_IDENTITY;
 
 @AutoFactory(className = "WlSurfaceFactory")
 public class WlSurface extends EventBus implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
@@ -106,7 +105,7 @@ public class WlSurface extends EventBus implements WlSurfaceRequestsV3, Protocol
                                String.format("Invalid transform %d. Supported values are %s.",
                                              transform,
                                              Arrays.asList(WlOutputTransform.values())));
-            return MAT4_IDENTITY;
+            return Transforms.NORMAL;
         }
     }
 

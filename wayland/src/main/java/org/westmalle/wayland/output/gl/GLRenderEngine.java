@@ -16,7 +16,6 @@ package org.westmalle.wayland.output.gl;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.hackoeur.jglm.Mat4;
 import com.jogamp.common.nio.Buffers;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -24,6 +23,7 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.ShmRenderEngine;
 import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.media.opengl.GL2ES2;
@@ -93,7 +93,7 @@ public class GLRenderEngine implements ShmRenderEngine {
             0
     };
 
-    private Mat4   projection;
+    private Mat4 projection;
     private GL2ES2 gl;
 
     GLRenderEngine(final ListeningExecutorService renderThread,
@@ -112,7 +112,7 @@ public class GLRenderEngine implements ShmRenderEngine {
     }
 
     private void doBegin() {
-        this.projection = new Mat4(2.0f / this.drawable.getSurfaceWidth(),
+        this.projection = Mat4.create(2.0f / this.drawable.getSurfaceWidth(),
                                    0,
                                    0,
                                    -1,
@@ -280,7 +280,7 @@ public class GLRenderEngine implements ShmRenderEngine {
         this.gl.glUniformMatrix4fv(uniTrans,
                                    1,
                                    false,
-                                   projection.getBuffer());
+                                   projection.toBuffer());
 
         this.gl.glBufferData(GL_ARRAY_BUFFER,
                              vertices.length * 4,
