@@ -36,6 +36,11 @@
             <artifactId>wayland</artifactId>
             <version>${wayland-java-bindings.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.hackoeur</groupId>
+            <artifactId>jglm</artifactId>
+            <version>${jgml.version}</version>
+        </dependency>
         <!-- logging implementation for test log output -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
