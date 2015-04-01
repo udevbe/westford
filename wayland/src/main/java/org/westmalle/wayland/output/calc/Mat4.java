@@ -35,7 +35,7 @@ public abstract class Mat4 {
      */
     public static Mat4 create(@Nonnull final float[] array,
                               @Nonnegative final int offset) {
-        checkArgument(array.length < 16,
+        checkArgument(array.length >= 16,
                       "Array length must be >= 16");
         checkArgument(offset >= 0,
                       "Offset must be >= 0");
