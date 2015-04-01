@@ -2,15 +2,14 @@ package org.westmalle.wayland.output.calc;
 
 import com.google.auto.value.AutoValue;
 
-import java.util.Optional;
-
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoValue
 public abstract class PointTranslation {
 
     public static PointTranslation create(@Nonnull final Vec4 point,
-                                          @Nonnull final Plane plane){
+                                          @Nonnull final Plane plane) {
         return new AutoValue_PointTranslation(point,
                                               plane);
     }
@@ -25,7 +24,8 @@ public abstract class PointTranslation {
         if (mat4Optional.isPresent()) {
             result = Optional.of(mat4Optional.get()
                                              .multiply(getPoint()));
-        } else {
+        }
+        else {
             result = Optional.empty();
         }
         return result;

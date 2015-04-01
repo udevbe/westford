@@ -93,7 +93,7 @@ public class GLRenderEngine implements ShmRenderEngine {
             0
     };
 
-    private Mat4 projection;
+    private Mat4   projection;
     private GL2ES2 gl;
 
     GLRenderEngine(final ListeningExecutorService renderThread,
@@ -113,24 +113,24 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     private void doBegin() {
         this.projection = Mat4.create(2.0f / this.drawable.getSurfaceWidth(),
-                                   0,
-                                   0,
-                                   -1,
+                                      0,
+                                      0,
+                                      -1,
 
-                                   0,
-                                   2.0f / -this.drawable.getSurfaceHeight(),
-                                   0,
-                                   1,
+                                      0,
+                                      2.0f / -this.drawable.getSurfaceHeight(),
+                                      0,
+                                      1,
 
-                                   0,
-                                   0,
-                                   1,
-                                   0,
+                                      0,
+                                      0,
+                                      1,
+                                      0,
 
-                                   0,
-                                   0,
-                                   0,
-                                   1);
+                                      0,
+                                      0,
+                                      0,
+                                      1);
         refreshGl();
         this.gl.glClear(GL_COLOR_BUFFER_BIT);
         //define triangles to be drawn.

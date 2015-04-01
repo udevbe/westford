@@ -1,7 +1,6 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.value.AutoValue;
-
 import org.westmalle.wayland.output.calc.Vec4;
 
 @AutoValue
@@ -27,9 +26,9 @@ public abstract class Point {
 
     public Vec4 toVec4() {
         return Vec4.create(getX(),
-                        getY(),
-                        0,
-                        1);
+                           getY(),
+                           0,
+                           1);
     }
 
     public Point add(final Point right) {
