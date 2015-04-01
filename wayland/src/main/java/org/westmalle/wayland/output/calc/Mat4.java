@@ -318,6 +318,7 @@ public abstract class Mat4 {
      * @return new matrix who's point is this matrix' destination space.
      */
     public Mat4 multiply(final Mat4 right) {
+        //TODO unit test
 
         final float nm00 = this.getM00() * right.getM00() + this.getM10() * right.getM01() + this.getM20() * right.getM02() + this.getM30() * right.getM03();
         final float nm01 = this.getM01() * right.getM00() + this.getM11() * right.getM01() + this.getM21() * right.getM02() + this.getM31() * right.getM03();
@@ -336,7 +337,6 @@ public abstract class Mat4 {
         final float nm32 = this.getM02() * right.getM30() + this.getM12() * right.getM31() + this.getM22() * right.getM32() + this.getM32() * right.getM33();
         final float nm33 = this.getM03() * right.getM30() + this.getM13() * right.getM31() + this.getM23() * right.getM32() + this.getM33() * right.getM33();
 
-        //TODO unit tests
         return Mat4.create(nm00,
                            nm01,
                            nm02,
@@ -361,6 +361,8 @@ public abstract class Mat4 {
      * @return a new matrix who's point and destination are swapped.
      */
     public Mat4 invert() {
+        //TODO unit test
+
         final float[][] matrix2d = new float[][]{{getM00(), getM10(), getM20(), getM30()},
                                                  {getM01(), getM11(), getM21(), getM31()},
                                                  {getM02(), getM12(), getM22(), getM32()},
@@ -460,6 +462,8 @@ public abstract class Mat4 {
     }
 
     public FloatBuffer toBuffer() {
+        //TODO unit test
+
         final FloatBuffer buffer = FloatBuffer.allocate(16);
         buffer.put(getM00())
               .put(getM01())

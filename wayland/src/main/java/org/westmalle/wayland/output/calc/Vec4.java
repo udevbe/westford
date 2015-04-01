@@ -76,6 +76,7 @@ public abstract class Vec4 {
      * @return
      */
     public Vec4 add(@Nonnull final Vec4 right) {
+        //TODO unit test
         return Vec4.create(getX() + right.getX(),
                            getY() + right.getY(),
                            getZ() + right.getZ(),
@@ -88,6 +89,7 @@ public abstract class Vec4 {
      * @return
      */
     public Vec4 subtract(@Nonnull final Vec4 right) {
+        //TODO unit test
         return Vec4.create(getX() - right.getX(),
                            getY() - right.getY(),
                            getZ() - right.getZ(),

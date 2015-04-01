@@ -19,6 +19,8 @@ public abstract class PointTranslation {
     public abstract Plane getPlane();
 
     public Optional<Vec4> to(@Nonnull final Plane targetPlane) {
+        //TODO unit test
+
         final Optional<Mat4> mat4Optional = getPlane().getTranslation(targetPlane);
         final Optional<Vec4> result;
         if (mat4Optional.isPresent()) {
