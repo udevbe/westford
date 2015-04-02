@@ -2,6 +2,7 @@ package org.westmalle.wayland.output;
 
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,11 +34,12 @@ public class CompositorTest {
         //given
         final EventLoop eventLoop = mock(EventLoop.class);
         when(this.display.getEventLoop()).thenReturn(eventLoop);
+        final List<EventLoop.IdleHandler> idleHandlers = new LinkedList<>();
         when(eventLoop.addIdle(any())).thenAnswer(invocation -> {
             final Object arg0 = invocation.getArguments()[0];
             final EventLoop.IdleHandler idleHandler = (EventLoop.IdleHandler) arg0;
-            idleHandler.handle();
-            return null;
+            idleHandlers.add(idleHandler);
+            return mock(EventSource.class);
         });
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -52,6 +54,7 @@ public class CompositorTest {
 
         //when
         this.compositor.requestRender();
+        idleHandlers.get(0).handle();
         //then
         final InOrder inOrder = inOrder(this.shmRenderer,
                                         this.display);
