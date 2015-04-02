@@ -1,6 +1,9 @@
 package org.westmalle.wayland.output.gl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
+
+import com.jogamp.opengl.util.texture.Texture;
+
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -32,9 +35,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(ShmBuffer.class)
+@PrepareForTest({ShmBuffer.class,
+                 GLSurfaceData.class})
 public class GLRenderEngineTest {
 
     @Mock
@@ -86,6 +91,9 @@ public class GLRenderEngineTest {
     @Test
     public void testDraw() throws Exception {
         //given
+        final Texture texture = mock(Texture.class);
+        whenNew(Texture.class).withAnyArguments().thenReturn(texture);
+
         final List<Runnable> queue = new LinkedList<>();
         when(this.renderThread.submit(isA(Runnable.class))).thenAnswer(invocation -> {
             final Object arg0 = invocation.getArguments()[0];

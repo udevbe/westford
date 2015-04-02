@@ -25,8 +25,6 @@ public class GLSurfaceData {
 
     public static GLSurfaceData create(final GL2ES2 gl,
                                        final ShmBuffer buffer) {
-        createTextureData(gl,
-                          buffer);
         final Texture texture = new Texture(gl,
                                             createTextureData(gl,
                                                               buffer));
