@@ -295,7 +295,6 @@ public abstract class Mat4 {
      * @return new vector who's space is this matrix' destination space.
      */
     public Vec4 multiply(final Vec4 right) {
-        //TODO unit test
 
         final float rightX = right.getX();
         final float rightY = right.getY();
@@ -318,7 +317,6 @@ public abstract class Mat4 {
      * @return new matrix who's point is this matrix' destination space.
      */
     public Mat4 multiply(final Mat4 right) {
-        //TODO unit test
 
         final float nm00 = this.getM00() * right.getM00() + this.getM10() * right.getM01() + this.getM20() * right.getM02() + this.getM30() * right.getM03();
         final float nm01 = this.getM01() * right.getM00() + this.getM11() * right.getM01() + this.getM21() * right.getM02() + this.getM31() * right.getM03();
@@ -361,12 +359,10 @@ public abstract class Mat4 {
      * @return a new matrix who's point and destination are swapped.
      */
     public Mat4 invert() {
-        //TODO unit test
-
-        final float[][] matrix2d = new float[][]{{getM00(), getM10(), getM20(), getM30()},
-                                                 {getM01(), getM11(), getM21(), getM31()},
-                                                 {getM02(), getM12(), getM22(), getM32()},
-                                                 {getM03(), getM13(), getM23(), getM33()}};
+        final float[][] matrix2d = new float[][]{{getM00(), getM01(), getM02(), getM03()},
+                                                 {getM10(), getM11(), getM12(), getM13()},
+                                                 {getM20(), getM21(), getM22(), getM23()},
+                                                 {getM30(), getM31(), getM32(), getM33()}};
         //FIXME test uninvertable matrix, what will/should happen?
         final float[][] matrix2dInverted = invert(matrix2d);
         return Mat4.create(matrix2dInverted[0][0],
@@ -462,7 +458,6 @@ public abstract class Mat4 {
     }
 
     public FloatBuffer toBuffer() {
-        //TODO unit test
 
         final FloatBuffer buffer = FloatBuffer.allocate(16);
         buffer.put(getM00())
