@@ -6,11 +6,11 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 @AutoValue
-public abstract class PointTranslation {
+public abstract class PlanePoint {
 
-    public static PointTranslation create(@Nonnull final Vec4 point,
+    public static PlanePoint create(@Nonnull final Vec4 point,
                                           @Nonnull final Plane plane) {
-        return new AutoValue_PointTranslation(point,
+        return new AutoValue_PlanePoint(point,
                                               plane);
     }
 
@@ -18,7 +18,7 @@ public abstract class PointTranslation {
 
     public abstract Plane getPlane();
 
-    public Optional<Vec4> to(@Nonnull final Plane targetPlane) {
+    public Optional<Vec4> translateTo(@Nonnull final Plane targetPlane) {
         //TODO unit test
 
         final Optional<Mat4> mat4Optional = getPlane().getTranslation(targetPlane);
