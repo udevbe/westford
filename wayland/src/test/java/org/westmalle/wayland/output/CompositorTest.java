@@ -80,11 +80,10 @@ public class CompositorTest {
 
         final List<EventLoop.IdleHandler> idleHandlers = new LinkedList<>();
         when(eventLoop.addIdle(any())).thenAnswer(invocation -> {
-
             final Object arg0 = invocation.getArguments()[0];
             final EventLoop.IdleHandler idleHandler = (EventLoop.IdleHandler) arg0;
             idleHandlers.add(idleHandler);
-            return null;
+            return mock(EventSource.class);
         });
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
