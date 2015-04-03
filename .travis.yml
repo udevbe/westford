@@ -5,13 +5,10 @@ jdk:
 branches:
   only:
     - master
+    - dagger2
 before_install:
     - git clone https://github.com/google/auto.git
     - pushd auto/value
-    - mvn install
-    - popd
-    - git clone https://github.com/Zubnix/jglm.git
-    - pushd jglm
     - mvn install
     - popd
 install:
