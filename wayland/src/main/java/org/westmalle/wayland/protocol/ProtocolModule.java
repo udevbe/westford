@@ -37,11 +37,4 @@ import javax.inject.Singleton;
         complete = false)
 public class ProtocolModule {
 
-    @Provides
-    @Singleton
-    WlSubCompositor provideWlSubCompositor(final Display display,
-                                           final org.westmalle.wayland.protocol.WlSubSurfaceFactory wlSubSurfaceFactory) {
-        return new WlSubCompositor(display,
-                                   wlSubSurfaceFactory);
-    }
 }

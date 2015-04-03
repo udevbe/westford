@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataOfferFactory")
-public class WlDataOffer extends EventBus implements WlDataOfferRequests, ProtocolObject<WlDataOfferResource> {
+public class WlDataOffer implements WlDataOfferRequests, ProtocolObject<WlDataOfferResource> {
 
     private final Set<WlDataOfferResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 

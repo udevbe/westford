@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataSourceFactory")
-public class WlDataSource extends EventBus implements WlDataSourceRequests, ProtocolObject<WlDataSourceResource> {
+public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlDataSourceResource> {
 
     private final Set<WlDataSourceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final List<String>              mimeTypes = Lists.newArrayList();

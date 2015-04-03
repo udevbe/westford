@@ -36,7 +36,7 @@ import java.util.WeakHashMap;
 import static com.google.common.base.Preconditions.checkArgument;
 
 @AutoFactory(className = "WlSurfaceFactory")
-public class WlSurface extends EventBus implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
+public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
     private final Set<WlSurfaceResource> resources       = Sets.newSetFromMap(new WeakHashMap<>());
     private       Optional<Listener>     destroyListener = Optional.empty();

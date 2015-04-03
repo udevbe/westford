@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlTouchFactory")
-public class WlTouch extends EventBus implements WlTouchRequestsV3, ProtocolObject<WlTouchResource> {
+public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResource> {
 
     private final Set<WlTouchResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 

@@ -13,17 +13,17 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
+import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@Singleton
+@AutoFactory(className = "WlSubCompositorFactory")
 public class WlSubCompositor extends Global<WlSubcompositorResource> implements WlSubcompositorRequests, ProtocolObject<WlSubcompositorResource> {
 
     private final Set<WlSubcompositorResource> resources = Sets.newSetFromMap(new WeakHashMap<>());

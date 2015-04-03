@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.jogamp.newt.opengl.GLWindow;
 
@@ -26,8 +25,6 @@ import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
 import org.westmalle.wayland.platform.newt.GLWindowFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.protocol.*;
-
-import java.util.Set;
 
 public class Boot {
 
@@ -71,11 +68,16 @@ public class Boot {
         //TODO enable xdg_shell protocol
     }
 
-    public static void main(final String[] args) {
-        final Westmalle westmalle = Dagger_Westmalle.create();
-        new Boot().strap(westmalle);
-
+    private void run(final Westmalle westmalle){
         //start all services, 1 thread per service & exit main thread.
         new ServiceManager(westmalle.services()).startAsync();
+    }
+
+    public static void main(final String[] args) {
+        final Westmalle westmalle = Dagger_Westmalle.create();
+
+        final Boot boot = new Boot();
+        boot.strap(westmalle);
+        boot.run(westmalle);
     }
 }

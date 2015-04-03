@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
-public class WlShellSurface extends EventBus implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
+public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
 
     private final Set<WlShellSurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final ShellSurface      shellSurface;

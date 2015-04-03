@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
+import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 
@@ -23,7 +24,7 @@ import javax.inject.Singleton;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@Singleton//EAGER
+@AutoFactory(className = "WlDataDeviceManagerFactory")
 public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequests, ProtocolObject<WlDataDeviceManagerResource> {
 
     private final Set<WlDataDeviceManagerResource> resources = Sets.newSetFromMap(new WeakHashMap<>());

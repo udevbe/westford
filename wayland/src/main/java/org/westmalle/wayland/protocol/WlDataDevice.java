@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataDeviceFactory")
-public class WlDataDevice extends EventBus implements WlDataDeviceRequests, ProtocolObject<WlDataDeviceResource> {
+public class WlDataDevice implements WlDataDeviceRequests, ProtocolObject<WlDataDeviceResource> {
 
     private final Set<WlDataDeviceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 

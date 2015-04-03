@@ -42,13 +42,20 @@ import javax.inject.Singleton;
         PlatformNewtModule.class
 })
 interface Westmalle {
+        //platform newt
         GLWindowFactory glWindowFactory();
+        GLWindowSeatFactory glWindowSeatFactory();
+
+        //output
         GLRenderEngineFactory glRenderEngineFactory();
         ShmRendererFactory shmRendererFactory();
         CompositorFactory compositorFactory();
+
+        //protocol
         WlCompositorFactory wlCompositorFactory();
-        GLWindowSeatFactory glWindowSeatFactory();
         WlSeatFactory wlSeatFactory();
         WlShellFactory wlShellFactory();
+
+        //running
         Set<Service> services();
 }

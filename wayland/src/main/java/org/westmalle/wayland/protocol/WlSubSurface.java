@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlSubSurfaceFactory")
-public class WlSubSurface extends EventBus implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
+public class WlSubSurface implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
 
     private final Set<WlSubsurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 

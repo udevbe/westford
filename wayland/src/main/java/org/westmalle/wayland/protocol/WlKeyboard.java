@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlKeyboardFactory")
-public class WlKeyboard extends EventBus implements WlKeyboardRequestsV3, ProtocolObject<WlKeyboardResource> {
+public class WlKeyboard implements WlKeyboardRequestsV3, ProtocolObject<WlKeyboardResource> {
 
     private final Set<WlKeyboardResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final Keyboard keyboard;
