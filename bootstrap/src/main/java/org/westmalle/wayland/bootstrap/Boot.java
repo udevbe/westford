@@ -41,7 +41,6 @@ public class Boot {
         final GLWindowSeatFactory glWindowSeatFactory= westmalle.glWindowSeatFactory();
         final WlSeatFactory wlSeatFactory= westmalle.wlSeatFactory();
         final WlShellFactory wlShellFactory= westmalle.wlShellFactory();
-        final Set<Service> services= westmalle.services();
 
         //create an output
         //create an X opengl enabled window
