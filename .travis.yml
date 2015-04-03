@@ -10,10 +10,10 @@ branches:
 before_install:
     - git clone https://github.com/google/auto.git
     - pushd auto/value
-    - mvn install
+    - mvn install -DskipTests
     - popd
     - pushd auto/factory
-    - mvn install
+    - mvn install -DskipTests
     - popd
 
 install:
