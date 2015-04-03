@@ -13,12 +13,12 @@
 //limitations under the License.
 package org.westmalle.wayland.output.gl;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
 import org.freedesktop.wayland.server.ShmBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
 import java.nio.ByteBuffer;
 
 public class GLSurfaceData {

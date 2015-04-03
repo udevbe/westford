@@ -2,6 +2,9 @@ package org.westmalle.wayland.output.gl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.texture.Texture;
 
 import org.freedesktop.wayland.server.ShmBuffer;
@@ -12,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -20,18 +22,13 @@ import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GLAutoDrawable;
 import java.nio.IntBuffer;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -45,7 +42,7 @@ public class GLRenderEngineTest {
     @Mock
     private ListeningExecutorService renderThread;
     @Mock
-    private GLAutoDrawable           drawable;
+    private GLAutoDrawable drawable;
     @Mock
     private IntBuffer                elementBuffer;
     @Mock

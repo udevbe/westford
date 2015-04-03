@@ -17,10 +17,10 @@ import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 
 import javax.inject.Inject;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
 
 public class GLWindowFactory {
 
