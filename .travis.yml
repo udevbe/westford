@@ -12,7 +12,7 @@ before_install:
     - pushd auto/value
     - mvn install
     - popd
-    - pushd factory
+    - pushd auto/factory
     - mvn install
     - popd
 
