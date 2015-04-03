@@ -33,7 +33,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.westmalle.wayland.bootstrap.EntryPoint</mainClass>
+                            <mainClass>org.westmalle.wayland.bootstrap.Boot</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
