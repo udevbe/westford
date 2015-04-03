@@ -8,16 +8,6 @@ branches:
     - dagger2
 
 before_install:
-    - git clone https://github.com/google/truth.git
-    - pushd truth
-    - mvn install
-    - popd
-
-    - git clone https://github.com/google/dagger.git
-    - pushd dagger
-    - mvn install
-    - popd
-
     - git clone https://github.com/google/auto.git
     - pushd auto/value
     - mvn install
