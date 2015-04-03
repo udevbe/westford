@@ -31,19 +31,19 @@
 
     <properties>
         <!-- dep versions -->
-        <jogl.version>2.2.4</jogl.version>
-        <auto.factory.version>0.1-beta1</auto.factory.version>
+        <jogl.version>2.3.1</jogl.version>
+        <auto.factory.version>1.0-SNAPSHOT</auto.factory.version>
         <auto.value.version>1.1-SNAPSHOT</auto.value.version>
-        <dagger.version>1.2.0</dagger.version>
+        <dagger.version>2.0-SNAPSHOT</dagger.version>
         <guava.version>18.0</guava.version>
         <findbugs.version>3.0.0</findbugs.version>
-        <slf4j.version>1.7.7</slf4j.version>
+        <slf4j.version>1.7.12</slf4j.version>
 
         <!-- test dep versions -->
         <junit.version><!--Don't use 4.12, powermock can't handle it. -->4.11</junit.version>
         <mockito.version>1.10.8</mockito.version>
         <powermock.version>1.6.0</powermock.version>
-        <truth.version>0.25</truth.version>
+        <truth.version>1.0-SNAPSHOT</truth.version>
 
         <!-- plugin dep versions-->
         <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
@@ -70,15 +70,15 @@
     <dependencies>
         <!-- Dagger DI -->
         <dependency>
-            <groupId>com.squareup.dagger</groupId>
+            <groupId>com.google.dagger</groupId>
             <artifactId>dagger</artifactId>
             <version>${dagger.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.squareup.dagger</groupId>
+            <groupId>com.google.dagger</groupId>
             <artifactId>dagger-compiler</artifactId>
             <version>${dagger.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- google guava -->
@@ -93,13 +93,13 @@
             <groupId>com.google.auto.factory</groupId>
             <artifactId>auto-factory</artifactId>
             <version>${auto.factory.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
             <version>${auto.value.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- rendering tools -->
