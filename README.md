@@ -53,7 +53,7 @@ Roadmap
 | Topic        | Progress   |
 | :----------: | :--------: |
 | unit tests   | 99%        |
-| wl_shell     | 40%        |
+| wl_shell     | 60%        |
 | sw rendering | 0%         |
 | xdg_shell    | 0%         |
 | xwayland     | 0%         |
