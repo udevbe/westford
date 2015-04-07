@@ -22,10 +22,7 @@ import org.westmalle.wayland.output.gl.OutputGLModule;
 import org.westmalle.wayland.platform.newt.GLWindowFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.platform.newt.PlatformNewtModule;
-import org.westmalle.wayland.protocol.ProtocolModule;
-import org.westmalle.wayland.protocol.WlCompositorFactory;
-import org.westmalle.wayland.protocol.WlSeatFactory;
-import org.westmalle.wayland.protocol.WlShellFactory;
+import org.westmalle.wayland.protocol.*;
 
 import javax.inject.Singleton;
 import java.util.Set;
@@ -56,6 +53,8 @@ interface Westmalle {
     WlSeatFactory wlSeatFactory();
 
     WlShellFactory wlShellFactory();
+
+    WlOutputFactory wlOutputFactory();
 
     //running
     Set<Service> services();
