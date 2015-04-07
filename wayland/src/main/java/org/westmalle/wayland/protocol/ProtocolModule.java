@@ -31,7 +31,8 @@ import javax.inject.Singleton;
                 WlSurfaceFactory.class,
                 WlRegionFactory.class,
                 WlShellSurfaceFactory.class,
-                WlSubSurfaceFactory.class
+                WlSubSurfaceFactory.class,
+                WlOutputFactory.class
         },
         library = true,
         complete = false)

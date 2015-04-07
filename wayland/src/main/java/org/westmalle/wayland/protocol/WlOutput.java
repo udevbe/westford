@@ -14,13 +14,15 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
+import org.westmalle.wayland.output.OutputGeometry;
+import org.westmalle.wayland.output.OutputMode;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -28,21 +30,49 @@ import java.util.WeakHashMap;
 public class WlOutput extends Global<WlOutputResource> implements WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
 
     private final Set<WlOutputResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    @Nonnull
+    private OutputGeometry outputGeometry;
+    @Nonnull
+    private OutputMode outputMode;
 
-    @Inject
-    WlOutput(final Display display) {
+    WlOutput(@Provided final Display display,
+             @Nonnull final OutputGeometry outputGeometry,
+             @Nonnull final OutputMode outputMode) {
         super(display,
               WlOutputResource.class,
               VERSION);
+        this.outputGeometry = outputGeometry;
+        this.outputMode = outputMode;
     }
 
     @Override
     public WlOutputResource onBindClient(final Client client,
                                          final int version,
                                          final int id) {
-        return add(client,
-                   version,
-                   id);
+        final WlOutputResource wlOutputResource = add(client,
+                                         version,
+                                         id);
+        notifyGeometry(wlOutputResource);
+        notifyMode(wlOutputResource);
+        return wlOutputResource;
+    }
+
+    private void notifyMode(final WlOutputResource wlOutputResource) {
+        wlOutputResource.mode(this.outputMode.getFlags(),
+                              this.outputMode.getWidth(),
+                              this.outputMode.getHeight(),
+                              this.outputMode.getRefresh());
+    }
+
+    private void notifyGeometry(final WlOutputResource wlOutputResource) {
+        wlOutputResource.geometry(this.outputGeometry.getX(),
+                                  this.outputGeometry.getY(),
+                                  this.outputGeometry.getPhysicalWidth(),
+                                  this.outputGeometry.getPhysicalHeight(),
+                                  this.outputGeometry.getSubpixel(),
+                                  this.outputGeometry.getMake(),
+                                  this.outputGeometry.getModel(),
+                                  this.outputGeometry.getTransform());
     }
 
     @Nonnull
@@ -60,5 +90,23 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                     version,
                                     id,
                                     this);
+    }
+
+    public void update(final OutputGeometry outputGeometry){
+        getResources().forEach(this::notifyGeometry);
+    }
+
+    public void update(final OutputMode outputMode){
+        getResources().forEach(this::notifyMode);
+    }
+
+    @Nonnull
+    public OutputGeometry getOutputGeometry() {
+        return this.outputGeometry;
+    }
+
+    @Nonnull
+    public OutputMode getOutputMode() {
+        return this.outputMode;
     }
 }
