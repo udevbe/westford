@@ -26,7 +26,6 @@ Dependencies
  - SLF4J. Available on maven central.
  - Wayland-Java-Bindings. Available on maven central.
  - Pixman-Java-Bindings. Available through [jitpack](https://jitpack.io/).
- - Jglm Fork. Available [here](https://github.com/Zubnix/jglm)
 
 State
 =====
@@ -53,7 +52,7 @@ Roadmap
 ====
 | Topic        | Progress   |
 | :----------: | :--------: |
-| unit tests   | 95%        |
+| unit tests   | 99%        |
 | wl_shell     | 40%        |
 | sw rendering | 0%         |
 | xdg_shell    | 0%         |
