@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
+import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 
@@ -23,7 +24,7 @@ import javax.inject.Singleton;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@Singleton//Eager
+@AutoFactory(className = "WlOutputFactory")
 public class WlOutput extends Global<WlOutputResource> implements WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
 
     private final Set<WlOutputResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
