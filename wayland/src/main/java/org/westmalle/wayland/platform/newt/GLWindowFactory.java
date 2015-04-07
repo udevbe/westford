@@ -28,14 +28,7 @@ public class GLWindowFactory {
     GLWindowFactory() {
     }
 
-    public GLWindow create() {
-        return createDrawable(System.getenv("DISPLAY"),
-                              getGLProfile(),
-                              800,
-                              600);
-    }
-
-    private GLWindow createDrawable(final String xDisplay,
+    public GLWindow create(final String xDisplay,
                                     final GLProfile profile,
                                     final int width,
                                     final int height) {
@@ -49,9 +42,5 @@ public class GLWindowFactory {
         drawable.setVisible(true,
                             true);
         return drawable;
-    }
-
-    private GLProfile getGLProfile() {
-        return GLProfile.getGL2ES2();
     }
 }

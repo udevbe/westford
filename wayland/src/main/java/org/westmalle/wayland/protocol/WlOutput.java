@@ -54,6 +54,7 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                          id);
         notifyGeometry(wlOutputResource);
         notifyMode(wlOutputResource);
+        wlOutputResource.done();
         return wlOutputResource;
     }
 
@@ -92,12 +93,18 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                     this);
     }
 
-    public void update(final OutputGeometry outputGeometry){
+    public WlOutput update(final OutputGeometry outputGeometry){
         getResources().forEach(this::notifyGeometry);
+        return this;
     }
 
-    public void update(final OutputMode outputMode){
+    public WlOutput update(final OutputMode outputMode){
         getResources().forEach(this::notifyMode);
+        return this;
+    }
+
+    public void done(){
+        getResources().forEach(WlOutputResource::done);
     }
 
     @Nonnull
