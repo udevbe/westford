@@ -20,7 +20,6 @@ import org.freedesktop.wayland.server.*;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Set;
 import java.util.WeakHashMap;
 

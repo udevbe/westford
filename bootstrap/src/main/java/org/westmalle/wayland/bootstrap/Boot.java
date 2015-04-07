@@ -15,7 +15,6 @@ package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
 import com.jogamp.newt.opengl.GLWindow;
-
 import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.CompositorFactory;
 import org.westmalle.wayland.output.ShmRenderer;
@@ -33,11 +32,11 @@ public class Boot {
         final GLWindowFactory glWindowFactory = westmalle.glWindowFactory();
         final GLRenderEngineFactory glRenderEngineFactory = westmalle.glRenderEngineFactory();
         final ShmRendererFactory shmRendererFactory = westmalle.shmRendererFactory();
-        final CompositorFactory compositorFactory= westmalle.compositorFactory();
-        final WlCompositorFactory wlCompositorFactory= westmalle.wlCompositorFactory();
-        final GLWindowSeatFactory glWindowSeatFactory= westmalle.glWindowSeatFactory();
-        final WlSeatFactory wlSeatFactory= westmalle.wlSeatFactory();
-        final WlShellFactory wlShellFactory= westmalle.wlShellFactory();
+        final CompositorFactory compositorFactory = westmalle.compositorFactory();
+        final WlCompositorFactory wlCompositorFactory = westmalle.wlCompositorFactory();
+        final GLWindowSeatFactory glWindowSeatFactory = westmalle.glWindowSeatFactory();
+        final WlSeatFactory wlSeatFactory = westmalle.wlSeatFactory();
+        final WlShellFactory wlShellFactory = westmalle.wlShellFactory();
 
         //create an output
         //create an X opengl enabled window
@@ -60,15 +59,15 @@ public class Boot {
         //these objects will listen for input events
         final WlSeat wlSeat = wlSeatFactory.create();
         glWindowSeatFactory.create(glWindow,
-                                        wlSeat,
-                                        compositor);
+                                   wlSeat,
+                                   compositor);
 
         //enable wl_shell protocol
         wlShellFactory.create(wlCompositor);
         //TODO enable xdg_shell protocol
     }
 
-    private void run(final Westmalle westmalle){
+    private void run(final Westmalle westmalle) {
         //start all services, 1 thread per service & exit main thread.
         new ServiceManager(westmalle.services()).startAsync();
     }

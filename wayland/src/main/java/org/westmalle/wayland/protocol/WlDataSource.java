@@ -16,7 +16,6 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.eventbus.EventBus;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataSourceRequests;
 import org.freedesktop.wayland.server.WlDataSourceResource;
