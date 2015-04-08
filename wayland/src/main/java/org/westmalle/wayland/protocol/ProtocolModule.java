@@ -14,11 +14,7 @@
 package org.westmalle.wayland.protocol;
 
 import dagger.Module;
-import dagger.Provides;
-import org.freedesktop.wayland.server.Display;
 import org.westmalle.wayland.output.OutputModule;
-
-import javax.inject.Singleton;
 
 @Module(includes = OutputModule.class,
         injects = {
@@ -31,7 +27,8 @@ import javax.inject.Singleton;
                 WlSurfaceFactory.class,
                 WlRegionFactory.class,
                 WlShellSurfaceFactory.class,
-                WlSubSurfaceFactory.class
+                WlSubSurfaceFactory.class,
+                WlOutputFactory.class
         },
         library = true,
         complete = false)

@@ -14,10 +14,7 @@
 package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.Service;
-
 import dagger.Component;
-import dagger.Module;
-
 import org.westmalle.wayland.output.CompositorFactory;
 import org.westmalle.wayland.output.ShmRendererFactory;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
@@ -25,14 +22,10 @@ import org.westmalle.wayland.output.gl.OutputGLModule;
 import org.westmalle.wayland.platform.newt.GLWindowFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.platform.newt.PlatformNewtModule;
-import org.westmalle.wayland.protocol.ProtocolModule;
-import org.westmalle.wayland.protocol.WlCompositorFactory;
-import org.westmalle.wayland.protocol.WlSeatFactory;
-import org.westmalle.wayland.protocol.WlShellFactory;
-
-import java.util.Set;
+import org.westmalle.wayland.protocol.*;
 
 import javax.inject.Singleton;
+import java.util.Set;
 
 //TODO split out project in logical components
 @Singleton
@@ -42,20 +35,27 @@ import javax.inject.Singleton;
         PlatformNewtModule.class
 })
 interface Westmalle {
-        //platform newt
-        GLWindowFactory glWindowFactory();
-        GLWindowSeatFactory glWindowSeatFactory();
+    //platform newt
+    GLWindowFactory glWindowFactory();
 
-        //output
-        GLRenderEngineFactory glRenderEngineFactory();
-        ShmRendererFactory shmRendererFactory();
-        CompositorFactory compositorFactory();
+    GLWindowSeatFactory glWindowSeatFactory();
 
-        //protocol
-        WlCompositorFactory wlCompositorFactory();
-        WlSeatFactory wlSeatFactory();
-        WlShellFactory wlShellFactory();
+    //output
+    GLRenderEngineFactory glRenderEngineFactory();
 
-        //running
-        Set<Service> services();
+    ShmRendererFactory shmRendererFactory();
+
+    CompositorFactory compositorFactory();
+
+    //protocol
+    WlCompositorFactory wlCompositorFactory();
+
+    WlSeatFactory wlSeatFactory();
+
+    WlShellFactory wlShellFactory();
+
+    WlOutputFactory wlOutputFactory();
+
+    //running
+    Set<Service> services();
 }

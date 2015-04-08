@@ -20,7 +20,6 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLAutoDrawable;
-
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -74,7 +73,7 @@ public class GLRenderEngine implements ShmRenderEngine {
     private final Map<GLBufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
 
     private final ListeningExecutorService renderThread;
-    private final GLAutoDrawable drawable;
+    private final GLAutoDrawable           drawable;
     private final IntBuffer                elementBuffer;
     private final IntBuffer                vertexBuffer;
     private final int[] elements = new int[]{

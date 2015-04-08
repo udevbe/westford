@@ -29,6 +29,15 @@
         <developerConnection>scm:git:https://github.com/Zubnix/westmalle.git</developerConnection>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>snapshots-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
     <properties>
         <!-- dep versions -->
         <jogl.version>2.3.1</jogl.version>
@@ -43,7 +52,7 @@
         <junit.version><!--Don't use 4.12, powermock can't handle it. -->4.11</junit.version>
         <mockito.version>1.10.8</mockito.version>
         <powermock.version>1.6.0</powermock.version>
-        <truth.version>1.0-SNAPSHOT</truth.version>
+        <truth.version>0.25</truth.version>
 
         <!-- plugin dep versions-->
         <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
