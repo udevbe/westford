@@ -20,6 +20,7 @@ import org.westmalle.wayland.output.ShmRendererFactory;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
 import org.westmalle.wayland.output.gl.OutputGLModule;
 import org.westmalle.wayland.platform.newt.GLWindowFactory;
+import org.westmalle.wayland.platform.newt.GLWindowOutputFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.platform.newt.PlatformNewtModule;
 import org.westmalle.wayland.protocol.*;
@@ -36,7 +37,7 @@ import java.util.Set;
 })
 interface Westmalle {
     //platform newt
-    GLWindowFactory glWindowFactory();
+    GLWindowOutputFactory glWindowOutputFactory();
 
     GLWindowSeatFactory glWindowSeatFactory();
 

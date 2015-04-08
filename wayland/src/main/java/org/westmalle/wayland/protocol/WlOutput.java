@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
+import org.westmalle.wayland.output.Output;
 import org.westmalle.wayland.output.OutputGeometry;
 import org.westmalle.wayland.output.OutputMode;
 
@@ -30,19 +31,14 @@ import java.util.WeakHashMap;
 public class WlOutput extends Global<WlOutputResource> implements WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
 
     private final Set<WlOutputResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
-    @Nonnull
-    private OutputGeometry outputGeometry;
-    @Nonnull
-    private OutputMode outputMode;
+    private final Output output;
 
     WlOutput(@Provided final Display display,
-             @Nonnull final OutputGeometry outputGeometry,
-             @Nonnull final OutputMode outputMode) {
+             final Output output) {
         super(display,
               WlOutputResource.class,
               VERSION);
-        this.outputGeometry = outputGeometry;
-        this.outputMode = outputMode;
+        this.output = output;
     }
 
     @Override
@@ -52,28 +48,10 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
         final WlOutputResource wlOutputResource = add(client,
                                          version,
                                          id);
-        notifyGeometry(wlOutputResource);
-        notifyMode(wlOutputResource);
+        this.output.notifyGeometry(wlOutputResource)
+                   .notifyMode(wlOutputResource);
         wlOutputResource.done();
         return wlOutputResource;
-    }
-
-    private void notifyMode(final WlOutputResource wlOutputResource) {
-        wlOutputResource.mode(this.outputMode.getFlags(),
-                              this.outputMode.getWidth(),
-                              this.outputMode.getHeight(),
-                              this.outputMode.getRefresh());
-    }
-
-    private void notifyGeometry(final WlOutputResource wlOutputResource) {
-        wlOutputResource.geometry(this.outputGeometry.getX(),
-                                  this.outputGeometry.getY(),
-                                  this.outputGeometry.getPhysicalWidth(),
-                                  this.outputGeometry.getPhysicalHeight(),
-                                  this.outputGeometry.getSubpixel(),
-                                  this.outputGeometry.getMake(),
-                                  this.outputGeometry.getModel(),
-                                  this.outputGeometry.getTransform());
     }
 
     @Nonnull
@@ -93,27 +71,7 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                     this);
     }
 
-    public WlOutput update(final OutputGeometry outputGeometry){
-        getResources().forEach(this::notifyGeometry);
-        return this;
-    }
-
-    public WlOutput update(final OutputMode outputMode){
-        getResources().forEach(this::notifyMode);
-        return this;
-    }
-
-    public void done(){
-        getResources().forEach(WlOutputResource::done);
-    }
-
-    @Nonnull
-    public OutputGeometry getOutputGeometry() {
-        return this.outputGeometry;
-    }
-
-    @Nonnull
-    public OutputMode getOutputMode() {
-        return this.outputMode;
+    public Output getOutput() {
+        return this.output;
     }
 }

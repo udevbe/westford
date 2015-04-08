@@ -14,14 +14,16 @@
 package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
-import com.jogamp.nativewindow.util.DimensionImmutable;
-import com.jogamp.newt.MonitorMode;
+
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLProfile;
+
 import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.output.gl.GLRenderEngine;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
 import org.westmalle.wayland.platform.newt.GLWindowFactory;
+import org.westmalle.wayland.platform.newt.GLWindowOutput;
+import org.westmalle.wayland.platform.newt.GLWindowOutputFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.protocol.*;
 
@@ -29,7 +31,7 @@ public class Boot {
 
     private void strap(final Westmalle westmalle) {
 
-        final GLWindowFactory glWindowFactory = westmalle.glWindowFactory();
+        final GLWindowOutputFactory glWindowOutputFactory = westmalle.glWindowOutputFactory();
         final GLRenderEngineFactory glRenderEngineFactory = westmalle.glRenderEngineFactory();
         final ShmRendererFactory shmRendererFactory = westmalle.shmRendererFactory();
         final CompositorFactory compositorFactory = westmalle.compositorFactory();
@@ -41,13 +43,13 @@ public class Boot {
 
         //create an output
         //create an X opengl enabled window
-
-        final GLWindow glWindow = setupXOutput(glWindowFactory,
-                                               wlOutputFactory);
-
+        final GLWindowOutput glWindowOutput = glWindowOutputFactory.create(System.getenv("DISPLAY"),
+                                                                           GLProfile.getGL2ES2(),
+                                                                           800,
+                                                                           600);
         //setup our render engine
         //create an opengl render engine that uses shm buffers and outputs to an X opengl window
-        final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindow);
+        final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindowOutput.getGlWindow());
         //create an shm renderer that passes on shm buffers to it's render implementation
         final ShmRenderer shmRenderer = shmRendererFactory.create(glRenderEngine);
 
@@ -61,7 +63,7 @@ public class Boot {
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
         //these objects will listen for input events
         final WlSeat wlSeat = wlSeatFactory.create();
-        glWindowSeatFactory.create(glWindow,
+        glWindowSeatFactory.create(glWindowOutput.getGlWindow(),
                                    wlSeat,
                                    compositor);
 
@@ -70,42 +72,7 @@ public class Boot {
         //TODO enable xdg_shell protocol
     }
 
-    private GLWindow setupXOutput(final GLWindowFactory glWindowFactory,
-                                  final WlOutputFactory wlOutputFactory) {
-        final GLWindow glWindow = glWindowFactory.create(System.getenv("DISPLAY"),
-                                                         GLProfile.getGL2ES2(),
-                                                         800,
-                                                         600);
-        final float[] pixelsPerMM = glWindow.getPixelsPerMM(new float[2]);
 
-        final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(glWindow.getX())
-                                                            .y(glWindow.getY())
-                                                            .physicalWidth((int) (glWindow.getSurfaceWidth() / pixelsPerMM[0]))
-                                                            .physicalHeight((int) (glWindow.getSurfaceHeight() / pixelsPerMM[1]))
-                                                            .make("NEWT")
-                                                            .model("GLX Window")
-                                                            .subpixel(0)
-                                                            .transform(0)
-                                                            .build();
-
-        final MonitorMode currentMode = glWindow.getMainMonitor()
-                                                .getCurrentMode();
-        final DimensionImmutable resolution = currentMode.getSurfaceSize()
-                                                         .getResolution();
-        final OutputMode outputMode = OutputMode.builder()
-                                                .flags(currentMode.getFlags())
-                                                .refresh((int) currentMode.getRefreshRate())
-                                                .width(resolution.getWidth())
-                                                .height(resolution.getHeight())
-                                                .build();
-        wlOutputFactory.create(outputGeometry,
-                               outputMode);
-
-        //TODO geometry & mode changes updates
-
-        return glWindow;
-    }
 
     private void run(final Westmalle westmalle) {
         //start all services, 1 thread per service & exit main thread.
