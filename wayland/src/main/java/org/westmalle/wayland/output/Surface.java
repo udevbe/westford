@@ -40,7 +40,6 @@ public class Surface {
     @Nonnull
     private SurfaceState pendingState = SurfaceState.builder()
                                                     .build();
-
     //pending derivable states
     @Nonnull
     private final List<Mat4> pendingCompositorTransforms = new LinkedList<>();
@@ -51,7 +50,6 @@ public class Surface {
     @Nonnull
     private SurfaceState state = SurfaceState.builder()
                                              .build();
-
     //committed derived states
     private boolean   destroyed           = false;
     @Nonnull
@@ -64,7 +62,6 @@ public class Surface {
     private Point     position            = Point.ZERO;
     @Nonnull
     private Rectangle size                = Rectangle.ZERO;
-
 
     @Nonnull
     private final List<WlCallbackResource> callbacks = Lists.newLinkedList();
@@ -108,8 +105,8 @@ public class Surface {
 
     @Nonnull
     public Surface attachBuffer(@Nonnull final WlBufferResource buffer,
-                                @Nonnull final Integer relX,
-                                @Nonnull final Integer relY) {
+                                final int relX,
+                                final int relY) {
 
         this.pendingState = this.pendingState.toBuilder()
                                              .buffer(Optional.of(buffer))
@@ -208,6 +205,7 @@ public class Surface {
                || !this.pendingCompositorTransforms.isEmpty();
     }
 
+    @Nonnull
     public Surface updateCompositorTransform() {
         for (final Mat4 pendingTransform : this.pendingCompositorTransforms) {
             this.compositorTransform = pendingTransform.multiply(this.compositorTransform);
@@ -216,6 +214,7 @@ public class Surface {
         return this;
     }
 
+    @Nonnull
     public Surface updateTransform() {
         //start with server transform
         Mat4 result = this.compositorTransform;
@@ -238,7 +237,7 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface addCallback(final WlCallbackResource callback) {
+    public Surface addCallback(@Nonnull final WlCallbackResource callback) {
         this.callbacks.add(callback);
         return this;
     }
@@ -284,6 +283,7 @@ public class Surface {
         return this;
     }
 
+    @Nonnull
     public Surface firePaintCallbacks(final int serial) {
         final List<WlCallbackResource> callbacks = new ArrayList<>(getFrameCallbacks());
         getFrameCallbacks().clear();
@@ -301,7 +301,8 @@ public class Surface {
      *
      * @return
      */
-    public Point local(final Point global) {
+    @Nonnull
+    public Point local(@Nonnull final Point global) {
         //TODO unit test this method
         final Point position = getPosition();
         final Vec4 untransformedLocalPoint = Vec4.create(global.getX() - position.getX(),
@@ -327,7 +328,8 @@ public class Surface {
      *
      * @return
      */
-    public Point global(final Point local) {
+    @Nonnull
+    public Point global(@Nonnull final Point local) {
         //TODO unit test this method
         final Vec4 untransformedLocalPoint = Vec4.create(local.getX(),
                                                          local.getY(),
@@ -364,6 +366,7 @@ public class Surface {
         return this;
     }
 
+    @Nonnull
     public Surface setBufferTransform(@Nonnull final Mat4 bufferTransform) {
         this.pendingState = this.pendingState.toBuilder()
                                              .bufferTransform(bufferTransform)

@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 @AutoValue
 public abstract class Mat4 {
 
+    @Nonnull
     public static final Mat4 IDENTITY = Mat4.create(1.f,
                                                     0.f,
                                                     0.f,
@@ -33,6 +34,7 @@ public abstract class Mat4 {
      *
      * @return a new 4 by 4 matrix.
      */
+    @Nonnull
     public static Mat4 create(@Nonnull final float[] array,
                               @Nonnegative final int offset) {
         checkArgument(array.length >= 16,
@@ -81,6 +83,7 @@ public abstract class Mat4 {
      *
      * @return a new 4 by 4 matrix.
      */
+    @Nonnull
     public static Mat4 create(final float m00,
                               final float m01,
                               final float m02,
@@ -123,6 +126,7 @@ public abstract class Mat4 {
     /**
      * @param array expected format is column major. Index 0 -> column 0, row 0; index 1 -> column 0, row 1 and so forth.
      */
+    @Nonnull
     public static Mat4 create(@Nonnull final float[] array) {
         return Mat4.create(array,
                            0);
@@ -294,7 +298,8 @@ public abstract class Mat4 {
      *
      * @return new vector who's space is this matrix' destination space.
      */
-    public Vec4 multiply(final Vec4 right) {
+    @Nonnull
+    public Vec4 multiply(@Nonnull final Vec4 right) {
 
         final float rightX = right.getX();
         final float rightY = right.getY();
@@ -316,7 +321,8 @@ public abstract class Mat4 {
      *
      * @return new matrix who's point is this matrix' destination space.
      */
-    public Mat4 multiply(final Mat4 right) {
+    @Nonnull
+    public Mat4 multiply(@Nonnull final Mat4 right) {
 
         final float nm00 = this.getM00() * right.getM00() + this.getM10() * right.getM01() + this.getM20() * right.getM02() + this.getM30() * right.getM03();
         final float nm01 = this.getM01() * right.getM00() + this.getM11() * right.getM01() + this.getM21() * right.getM02() + this.getM31() * right.getM03();
@@ -358,6 +364,7 @@ public abstract class Mat4 {
      *
      * @return a new matrix who's point and destination are swapped.
      */
+    @Nonnull
     public Mat4 invert() {
         final float[][] matrix2d = new float[][]{{getM00(), getM01(), getM02(), getM03()},
                                                  {getM10(), getM11(), getM12(), getM13()},
@@ -457,6 +464,7 @@ public abstract class Mat4 {
         }
     }
 
+    @Nonnull
     public FloatBuffer toBuffer() {
 
         final FloatBuffer buffer = FloatBuffer.allocate(16);

@@ -25,20 +25,24 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.Nonnull;
+
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
 
+    @Nonnull
     private final Display     display;
+    @Nonnull
     private final ShmRenderer shmRenderer;
-
+    @Nonnull
     private final LinkedList<WlSurfaceResource> surfacesStack = Lists.newLinkedList();
-
+    @Nonnull
     private final EventLoop.IdleHandler idleHandler;
+    @Nonnull
     private Optional<EventSource> renderEvent = Optional.empty();
 
-
-    Compositor(@Provided final Display display,
-               final ShmRenderer shmRenderer) {
+    Compositor(@Nonnull @Provided final Display display,
+               @Nonnull final ShmRenderer shmRenderer) {
         this.display = display;
         this.shmRenderer = shmRenderer;
         this.idleHandler = () -> {
@@ -69,6 +73,7 @@ public class Compositor {
                                                    .addIdle(this.idleHandler));
     }
 
+    @Nonnull
     public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.surfacesStack; }
 
     private boolean needsRender() {

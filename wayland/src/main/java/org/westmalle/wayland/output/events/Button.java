@@ -33,5 +33,6 @@ public abstract class Button {
 
     public abstract int getButton();
 
+    @Nonnull
     public abstract WlPointerButtonState getButtonState();
 }

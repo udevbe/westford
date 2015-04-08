@@ -3,6 +3,9 @@ package org.westmalle.wayland.output;
 
 import com.google.auto.value.AutoValue;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 @AutoValue
 public abstract class OutputGeometry {
 
@@ -26,12 +29,14 @@ public abstract class OutputGeometry {
      *
      * @return width in millimeters of the output
      */
+    @Nonnegative
     public abstract int getPhysicalWidth();
 
     /**
      *
      * @return height in millimeters of the output
      */
+    @Nonnegative
     public abstract int getPhysicalHeight();
 
     /**
@@ -44,12 +49,14 @@ public abstract class OutputGeometry {
      *
      * @return textual description of the manufacturer
      */
+    @Nonnull
     public abstract String getMake();
 
     /**
      *
      * @return textual description of the model
      */
+    @Nonnull
     public abstract String getModel();
 
     /**
@@ -64,8 +71,8 @@ public abstract class OutputGeometry {
     public interface Builder{
         Builder x(int x);
         Builder y(int y);
-        Builder physicalWidth(int width);
-        Builder physicalHeight(int height);
+        Builder physicalWidth(@Nonnegative int width);
+        Builder physicalHeight(@Nonnegative int height);
         Builder subpixel(int subpixel);
         Builder make(String make);
         Builder model(String model);

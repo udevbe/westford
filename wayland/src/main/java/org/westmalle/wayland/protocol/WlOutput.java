@@ -18,9 +18,6 @@ import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.output.Output;
-import org.westmalle.wayland.output.OutputGeometry;
-import org.westmalle.wayland.output.OutputMode;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
@@ -31,10 +28,11 @@ import java.util.WeakHashMap;
 public class WlOutput extends Global<WlOutputResource> implements WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
 
     private final Set<WlOutputResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    @Nonnull
     private final Output output;
 
     WlOutput(@Provided final Display display,
-             final Output output) {
+             @Nonnull final Output output) {
         super(display,
               WlOutputResource.class,
               VERSION);
@@ -45,6 +43,7 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
     public WlOutputResource onBindClient(final Client client,
                                          final int version,
                                          final int id) {
+        //TODO unit test
         final WlOutputResource wlOutputResource = add(client,
                                          version,
                                          id);
@@ -71,6 +70,7 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                     this);
     }
 
+    @Nonnull
     public Output getOutput() {
         return this.output;
     }

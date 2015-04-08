@@ -1,5 +1,7 @@
 package org.westmalle.wayland.platform.newt;
 
+import com.google.common.base.Preconditions;
+
 import com.jogamp.nativewindow.util.DimensionImmutable;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.MonitorMode;
@@ -15,24 +17,33 @@ import org.westmalle.wayland.output.OutputMode;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 public class GLWindowOutputFactory {
 
+    @Nonnull
     private final WlOutputFactory wlOutputFactory;
+    @Nonnull
     private final OutputFactory outputFactory;
 
     @Inject
-    GLWindowOutputFactory(final WlOutputFactory wlOutputFactory,
-                          final OutputFactory outputFactory) {
+    GLWindowOutputFactory(@Nonnull final WlOutputFactory wlOutputFactory,
+                          @Nonnull final OutputFactory outputFactory) {
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
     }
 
-    public GLWindowOutput create(final String xDisplay,
-                                 final GLProfile profile,
-                                 final int width,
-                                 final int height){
+    public GLWindowOutput create(@Nonnull final String xDisplay,
+                                 @Nonnull final GLProfile profile,
+                                 @Nonnegative final int width,
+                                 @Nonnegative final int height){
+        checkArgument(width > 0);
+        checkArgument(height > 0);
+
         final GLWindow glWindow = createGLWindow(xDisplay,
                                                  profile,
                                                  width,

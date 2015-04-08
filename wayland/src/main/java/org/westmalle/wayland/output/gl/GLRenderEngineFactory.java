@@ -20,6 +20,7 @@ import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLContext;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.nio.IntBuffer;
 import java.util.concurrent.ExecutionException;
@@ -31,7 +32,8 @@ public class GLRenderEngineFactory {
     GLRenderEngineFactory() {
     }
 
-    public GLRenderEngine create(final GLAutoDrawable drawable) {
+    @Nonnull
+    public GLRenderEngine create(@Nonnull final GLAutoDrawable drawable) {
 
         final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(r -> new Thread(r,
                                                                                                                                             "GL Render Engine")));

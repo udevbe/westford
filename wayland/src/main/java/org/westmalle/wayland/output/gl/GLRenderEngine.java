@@ -33,6 +33,8 @@ import java.nio.IntBuffer;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import javax.annotation.Nonnull;
+
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
 import static org.freedesktop.wayland.shared.WlShmFormat.XRGB8888;
@@ -41,6 +43,7 @@ import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_XRGB8888;
 
 public class GLRenderEngine implements ShmRenderEngine {
 
+    @Nonnull
     private static final String SURFACE_V          =
             "uniform mat4 mu_projection;\n" +
             "\n" +
@@ -53,6 +56,7 @@ public class GLRenderEngine implements ShmRenderEngine {
             "    vv_texcoord = va_texcoord;\n" +
             "    gl_Position = vec4(va_position, 0.0, 1.0) * mu_projection;\n" +
             "}";
+    @Nonnull
     private static final String SURFACE_ARGB8888_F =
             "varying vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
@@ -60,6 +64,7 @@ public class GLRenderEngine implements ShmRenderEngine {
             "void main(){\n" +
             "    gl_FragColor = texture2D(tex, vv_texcoord);\n" +
             "}";
+    @Nonnull
     private static final String SURFACE_XRGB8888_F =
             "varying vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
@@ -69,13 +74,20 @@ public class GLRenderEngine implements ShmRenderEngine {
             "    gl_FragColor.a = 1.;\n" +
             "}";
 
+    @Nonnull
     private final Map<WlSurfaceResource, GLSurfaceData> cachedSurfaceData = new WeakHashMap<>();
+    @Nonnull
     private final Map<GLBufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
 
+    @Nonnull
     private final ListeningExecutorService renderThread;
+    @Nonnull
     private final GLAutoDrawable           drawable;
+    @Nonnull
     private final IntBuffer                elementBuffer;
+    @Nonnull
     private final IntBuffer                vertexBuffer;
+    @Nonnull
     private final int[] elements = new int[]{
             0,
             1,
@@ -85,19 +97,22 @@ public class GLRenderEngine implements ShmRenderEngine {
             0
     };
 
+    @Nonnull
     private Mat4   projection;
+    @Nonnull
     private GL2ES2 gl;
 
-    GLRenderEngine(final ListeningExecutorService renderThread,
-                   final GLAutoDrawable drawable,
-                   final IntBuffer elementBuffer,
-                   final IntBuffer vertexBuffer) {
+    GLRenderEngine(@Nonnull final ListeningExecutorService renderThread,
+                   @Nonnull final GLAutoDrawable drawable,
+                   @Nonnull final IntBuffer elementBuffer,
+                   @Nonnull final IntBuffer vertexBuffer) {
         this.renderThread = renderThread;
         this.drawable = drawable;
         this.elementBuffer = elementBuffer;
         this.vertexBuffer = vertexBuffer;
     }
 
+    @Nonnull
     @Override
     public ListenableFuture<?> begin() {
         return this.renderThread.submit((Runnable) this::doBegin);
@@ -138,9 +153,10 @@ public class GLRenderEngine implements ShmRenderEngine {
                              this.vertexBuffer.get(0));
     }
 
+    @Nonnull
     @Override
-    public ListenableFuture<?> draw(final WlSurfaceResource surfaceResource,
-                                    final WlBufferResource buffer) {
+    public ListenableFuture<?> draw(@Nonnull final WlSurfaceResource surfaceResource,
+                                    @Nonnull final WlBufferResource buffer) {
         return this.renderThread.submit(() -> doDraw(surfaceResource,
                                                      buffer));
     }
@@ -180,6 +196,7 @@ public class GLRenderEngine implements ShmRenderEngine {
                                0);
     }
 
+    @Nonnull
     @Override
     public ListenableFuture<?> end() {
         return this.renderThread.submit((Runnable) this.drawable::swapBuffers);

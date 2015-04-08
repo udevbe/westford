@@ -24,10 +24,13 @@ public class ShellSurface {
     @Nonnull
     private final WlCompositor wlCompositor;
     private final int          pingSerial;
+    @Nonnull
     private final EventSource  timerEventSource;
 
     private boolean          active = true;
+    @Nonnull
     private Optional<String> clazz  = Optional.empty();
+    @Nonnull
     private Optional<String> title  = Optional.empty();
 
     public ShellSurface(@Provided @Nonnull final Display display,
@@ -42,27 +45,29 @@ public class ShellSurface {
                                        });
     }
 
+    @Nonnull
     public Optional<String> getClazz() {
         return this.clazz;
     }
 
-    public void setClazz(final Optional<String> clazz) {
+    public void setClazz(@Nonnull final Optional<String> clazz) {
         this.clazz = clazz;
         this.wlCompositor.getCompositor()
                          .requestRender();
     }
 
+    @Nonnull
     public Optional<String> getTitle() {
         return this.title;
     }
 
-    public void setTitle(final Optional<String> title) {
+    public void setTitle(@Nonnull final Optional<String> title) {
         this.title = title;
         this.wlCompositor.getCompositor()
                          .requestRender();
     }
 
-    public void pong(final WlShellSurfaceResource wlShellSurfaceResource,
+    public void pong(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
                      final int pingSerial) {
         if (this.pingSerial == pingSerial) {
             this.active = true;
@@ -75,8 +80,8 @@ public class ShellSurface {
         return this.active;
     }
 
-    public void move(final WlSurfaceResource wlSurfaceResource,
-                     final WlPointer wlPointer,
+    public void move(@Nonnull final WlSurfaceResource wlSurfaceResource,
+                     @Nonnull final WlPointer wlPointer,
                      final int grabSerial) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface surface = wlSurface.getSurface();
@@ -91,8 +96,8 @@ public class ShellSurface {
                                                                    .subtract(pointerOffset)));
     }
 
-    public void resize(final WlShellSurfaceResource wlShellSurfaceResource,
-                       final WlSurfaceResource wlSurfaceResource,
+    public void resize(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
+                       @Nonnull final WlSurfaceResource wlSurfaceResource,
                        @Nonnull final WlPointer wlPointer,
                        final int serial,
                        final int edges) {
@@ -122,9 +127,9 @@ public class ShellSurface {
                                  });
     }
 
-    private Mat4 transform(final WlShellSurfaceResize quadrant,
-                           final Rectangle size,
-                           final Point local) {
+    private Mat4 transform(@Nonnull final WlShellSurfaceResize quadrant,
+                           @Nonnull final Rectangle size,
+                           @Nonnull final Point local) {
         final int width = size.getWidth();
         final int height = size.getHeight();
 
@@ -233,7 +238,7 @@ public class ShellSurface {
         }
     }
 
-    public void toFront(final WlSurfaceResource wlSurfaceResource) {
+    public void toFront(@Nonnull final WlSurfaceResource wlSurfaceResource) {
         final Compositor compositor = this.wlCompositor.getCompositor();
         final LinkedList<WlSurfaceResource> surfacesStack = compositor.getSurfacesStack();
         if (surfacesStack.remove(wlSurfaceResource)) {
@@ -242,8 +247,8 @@ public class ShellSurface {
         }
     }
 
-    public void setTransient(final WlSurfaceResource wlSurfaceResource,
-                             final WlSurfaceResource parent,
+    public void setTransient(@Nonnull final WlSurfaceResource wlSurfaceResource,
+                             @Nonnull final WlSurfaceResource parent,
                              final int x,
                              final int y,
                              final int flags) {

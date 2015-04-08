@@ -21,10 +21,13 @@ import org.freedesktop.wayland.server.ShmBuffer;
 
 import java.nio.ByteBuffer;
 
+import javax.annotation.Nonnull;
+
 public class GLSurfaceData {
 
-    public static GLSurfaceData create(final GL2ES2 gl,
-                                       final ShmBuffer buffer) {
+    @Nonnull
+    public static GLSurfaceData create(@Nonnull final GL2ES2 gl,
+                                       @Nonnull final ShmBuffer buffer) {
         final Texture texture = new Texture(gl,
                                             createTextureData(gl,
                                                               buffer));
@@ -71,16 +74,17 @@ public class GLSurfaceData {
         this.texture = texture;
     }
 
+    @Nonnull
     public Texture getTexture() {
         return this.texture;
     }
 
-    public void destroy(final GL2ES2 gl) {
+    public void destroy(@Nonnull final GL2ES2 gl) {
         this.texture.destroy(gl);
     }
 
-    public void update(final GL2ES2 gl,
-                       final ShmBuffer buffer) {
+    public void update(@Nonnull final GL2ES2 gl,
+                       @Nonnull final ShmBuffer buffer) {
         getTexture().updateSubImage(gl,
                                     createTextureData(gl,
                                                       buffer),

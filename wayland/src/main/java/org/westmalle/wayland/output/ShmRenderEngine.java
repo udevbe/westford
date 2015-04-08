@@ -17,11 +17,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
+import javax.annotation.Nonnull;
+
 public interface ShmRenderEngine {
-    ListenableFuture<?> draw(final WlSurfaceResource surfaceResource,
-                             final WlBufferResource buffer);
-
+    @Nonnull
+    ListenableFuture<?> draw(@Nonnull final WlSurfaceResource surfaceResource,
+                             @Nonnull final WlBufferResource buffer);
+    @Nonnull
     ListenableFuture<?> begin();
-
+    @Nonnull
     ListenableFuture<?> end();
 }

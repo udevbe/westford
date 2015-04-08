@@ -19,16 +19,19 @@ public abstract class OutputMode {
     /**
      * @return width of the mode in hardware units
      */
+    @Nonnegative
     public abstract int getWidth();
 
     /**
      * @return height of the mode in hardware units
      */
+    @Nonnegative
     public abstract int getHeight();
 
     /**
      * @return vertical refresh rate in mHz
      */
+    @Nonnegative
     public abstract int getRefresh();
 
     public abstract Builder toBuilder();

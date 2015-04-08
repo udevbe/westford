@@ -21,13 +21,17 @@ import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.output.JobExecutor;
 import org.westmalle.wayland.protocol.WlSeat;
 
+import javax.annotation.Nonnull;
+
 public class GLWindowSeat implements MouseListener, KeyListener {
 
+    @Nonnull
     private final WlSeat      wlSeat;
+    @Nonnull
     private final JobExecutor jobExecutor;
 
-    GLWindowSeat(final WlSeat wlSeat,
-                 final JobExecutor jobExecutor) {
+    GLWindowSeat(@Nonnull final WlSeat wlSeat,
+                 @Nonnull final JobExecutor jobExecutor) {
         this.wlSeat = wlSeat;
         this.jobExecutor = jobExecutor;
     }

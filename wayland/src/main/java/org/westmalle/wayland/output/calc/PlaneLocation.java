@@ -14,10 +14,13 @@ public abstract class PlaneLocation {
                                            plane);
     }
 
+    @Nonnull
     public abstract Vec4 getLocation();
 
+    @Nonnull
     public abstract Plane getPlane();
 
+    @Nonnull
     public Optional<PlaneLocation> translateTo(@Nonnull final Plane targetPlane) {
         //TODO unit test
 

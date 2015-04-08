@@ -32,28 +32,36 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
 
     private static final byte                 EVENT_NEW_JOB  = 1;
     private static final byte                 EVENT_FINISHED = 0;
+    @Nonnull
     private static final LinkedList<Runnable> NO_JOBS        = new LinkedList<>();
 
+    @Nonnull
     private final byte[] eventNewJobBuffer   = new byte[]{EVENT_NEW_JOB};
+    @Nonnull
     private final byte[] eventFinishedBuffer = new byte[]{EVENT_FINISHED};
+    @Nonnull
     private final byte[] eventReadBuffer     = new byte[1];
 
+    @Nonnull
     private final ReentrantLock        jobsLock    = new ReentrantLock();
+    @Nonnull
     private final LinkedList<Runnable> pendingJobs = Lists.newLinkedList();
 
-
+    @Nonnull
     private Optional<EventSource> eventSource = Optional.empty();
 
+    @Nonnull
     private final Display  display;
     private final int      pipeR;
     private final int      pipeWR;
+    @Nonnull
     private final CLibrary libc;
 
     @Inject
-    JobExecutor(final Display display,
+    JobExecutor(@Nonnull final Display display,
                 final int pipeR,
                 final int pipeWR,
-                final CLibrary libc) {
+                @Nonnull final CLibrary libc) {
         this.display = display;
         this.pipeR = pipeR;
         this.pipeWR = pipeWR;

@@ -11,6 +11,7 @@ public class Plane {
 
     private final Map<Plane, Mat4> translations = new WeakHashMap<>();
 
+    @Nonnull
     public PlaneLocation locate(@Nonnull final Point point) {
         return locate(Vec4.create(point.getX(),
                                   point.getY(),
@@ -18,11 +19,13 @@ public class Plane {
                                   1));
     }
 
+    @Nonnull
     public PlaneLocation locate(@Nonnull final Vec4 vec4) {
         return PlaneLocation.create(vec4,
                                     this);
     }
 
+    @Nonnull
     public Optional<Mat4> getTranslation(@Nonnull final Plane target) {
         return Optional.ofNullable(this.translations.get(target));
     }

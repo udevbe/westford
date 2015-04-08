@@ -16,17 +16,20 @@ package org.westmalle.wayland.output;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import org.freedesktop.wayland.server.Display;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.IOException;
 
 public class ShellService extends AbstractExecutionThreadService {
 
+    @Nonnull
     private final Display     display;
+    @Nonnull
     private final JobExecutor jobExecutor;
 
     @Inject
-    ShellService(final Display display,
-                 final JobExecutor jobExecutor) {
+    ShellService(@Nonnull final Display display,
+                 @Nonnull final JobExecutor jobExecutor) {
         this.display = display;
         this.jobExecutor = jobExecutor;
     }

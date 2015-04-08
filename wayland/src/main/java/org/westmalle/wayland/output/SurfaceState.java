@@ -6,6 +6,8 @@ import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.output.calc.Mat4;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 import java.util.Optional;
 
 @AutoValue
@@ -20,14 +22,19 @@ public abstract class SurfaceState {
                                                    .scale(1);
     }
 
+    @Nonnull
     public abstract Optional<WlRegionResource> getOpaqueRegion();
 
+    @Nonnull
     public abstract Optional<WlRegionResource> getInputRegion();
 
+    @Nonnull
     public abstract Optional<Region> getDamage();
 
+    @Nonnull
     public abstract Optional<WlBufferResource> getBuffer();
 
+    @Nonnull
     public abstract Mat4 getBufferTransform();
 
     @Nonnegative
@@ -45,7 +52,7 @@ public abstract class SurfaceState {
 
         Builder bufferTransform(Mat4 bufferTransform);
 
-        Builder scale(@Nonnegative int scale);
+        Builder scale(int scale);
 
         SurfaceState build();
     }

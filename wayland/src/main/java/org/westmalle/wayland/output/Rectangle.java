@@ -3,6 +3,7 @@ package org.westmalle.wayland.output;
 import com.google.auto.value.AutoValue;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoValue
 public abstract class Rectangle {
@@ -31,10 +32,13 @@ public abstract class Rectangle {
 
     public abstract int getY();
 
+    @Nonnegative
     public abstract int getWidth();
 
+    @Nonnegative
     public abstract int getHeight();
 
+    @Nonnull
     public Point getPosition() {
         return Point.create(getX(),
                             getY());

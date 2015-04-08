@@ -25,6 +25,7 @@ import org.westmalle.wayland.output.events.Motion;
 import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,26 +34,35 @@ import java.util.Set;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice {
+    @Nonnull
     private final EventBus     inputBus       = new EventBus();
+    @Nonnull
     private final Set<Integer> pressedButtons = new HashSet<>();
 
+    @Nonnull
     private Point position = Point.ZERO;
 
+    @Nonnull
     private Optional<WlSurfaceResource> grab  = Optional.empty();
+    @Nonnull
     private Optional<WlSurfaceResource> focus = Optional.empty();
 
     private int pointerSerial;
+    @Nonnegative
     private int buttonsPressed;
 
+    @Nonnull
     private final Compositor compositor;
+    @Nonnull
     private final Display    display;
 
-    PointerDevice(@Provided final Display display,
-                  final Compositor compositor) {
+    PointerDevice(@Provided @Nonnull final Display display,
+                  @Nonnull final Compositor compositor) {
         this.display = display;
         this.compositor = compositor;
     }
 
+    @Nonnull
     public Point getPosition() {
         return this.position;
     }
@@ -69,10 +79,10 @@ public class PointerDevice {
                                          getPosition()));
     }
 
-    public void button(final Set<WlPointerResource> pointerResources,
+    public void button(@Nonnull final Set<WlPointerResource> pointerResources,
                        final int time,
-                       final int button,
-                       final WlPointerButtonState buttonState) {
+                       @Nonnegative final int button,
+                       @Nonnull final WlPointerButtonState buttonState) {
         if (buttonState == WlPointerButtonState.PRESSED) {
             this.pressedButtons.add(button);
         }
@@ -88,7 +98,7 @@ public class PointerDevice {
                                          buttonState));
     }
 
-    public boolean isButtonPressed(final int button) {
+    public boolean isButtonPressed(@Nonnegative final int button) {
         return this.pressedButtons.contains(button);
     }
 
@@ -149,10 +159,10 @@ public class PointerDevice {
         surfaceResource.addDestroyListener(motionListener);
     }
 
-    private void doButton(final Set<WlPointerResource> pointerResources,
+    private void doButton(@Nonnull final Set<WlPointerResource> pointerResources,
                           final int time,
-                          final int button,
-                          final WlPointerButtonState buttonState) {
+                          @Nonnegative final int button,
+                          @Nonnull final WlPointerButtonState buttonState) {
         if (buttonState == WlPointerButtonState.PRESSED) {
             this.buttonsPressed++;
         }
@@ -186,10 +196,10 @@ public class PointerDevice {
         return this.grab;
     }
 
-    private void reportButton(final Set<WlPointerResource> pointerResources,
+    private void reportButton(@Nonnull final Set<WlPointerResource> pointerResources,
                               final int time,
-                              final int button,
-                              final WlPointerButtonState buttonState) {
+                              @Nonnegative final int button,
+                              @Nonnull final WlPointerButtonState buttonState) {
         final WlSurfaceResource wlSurfaceResource = getGrab().get();
         final Optional<WlPointerResource> pointerResource = findPointerResource(pointerResources,
                                                                                 wlSurfaceResource);

@@ -16,6 +16,9 @@ package org.westmalle.wayland.output;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Library;
 
+import javax.inject.Singleton;
+
+@Singleton
 public interface CLibrary extends Library {
     String JNA_LIBRARY_NAME = "c";
 

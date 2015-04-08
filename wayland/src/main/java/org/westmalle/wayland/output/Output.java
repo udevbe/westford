@@ -23,21 +23,23 @@ public class Output {
         this.outputMode = outputMode;
     }
 
-    public Output update(final Set<WlOutputResource> resources,
-                         final OutputGeometry outputGeometry){
+    public Output update(@Nonnull final Set<WlOutputResource> resources,
+                         @Nonnull final OutputGeometry outputGeometry){
+        //TODO unit test
         this.outputGeometry = outputGeometry;
         resources.forEach(this::notifyGeometry);
         return this;
     }
 
-    public Output update(final Set<WlOutputResource> resources,
-                         final OutputMode outputMode){
+    public Output update(@Nonnull final Set<WlOutputResource> resources,
+                         @Nonnull final OutputMode outputMode){
+        //TODO unit test
         this.outputMode = outputMode;
         resources.forEach(this::notifyMode);
         return this;
     }
 
-    public Output notifyMode(final WlOutputResource wlOutputResource) {
+    public Output notifyMode(@Nonnull final WlOutputResource wlOutputResource) {
         wlOutputResource.mode(this.outputMode.getFlags(),
                               this.outputMode.getWidth(),
                               this.outputMode.getHeight(),
@@ -45,7 +47,7 @@ public class Output {
         return this;
     }
 
-    public Output notifyGeometry(final WlOutputResource wlOutputResource) {
+    public Output notifyGeometry(@Nonnull final WlOutputResource wlOutputResource) {
         wlOutputResource.geometry(this.outputGeometry.getX(),
                                   this.outputGeometry.getY(),
                                   this.outputGeometry.getPhysicalWidth(),

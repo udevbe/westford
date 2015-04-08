@@ -22,21 +22,27 @@ import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 public class GLWindowSeatFactory {
+    @Nonnull
     private final JobExecutor          jobExecutor;
+    @Nonnull
     private final WlPointerFactory     wlPointerFactory;
+    @Nonnull
     private final WlKeyboardFactory    wlKeyboardFactory;
+    @Nonnull
     private final PointerDeviceFactory pointerDeviceFactory;
+    @Nonnull
     private final KeyboardFactory      keyboardFactory;
 
     @Inject
-    GLWindowSeatFactory(final JobExecutor jobExecutor,
-                        final WlPointerFactory wlPointerFactory,
-                        final WlKeyboardFactory wlKeyboardFactory,
-                        final PointerDeviceFactory pointerDeviceFactory,
-                        final KeyboardFactory keyboardFactory) {
+    GLWindowSeatFactory(@Nonnull final JobExecutor jobExecutor,
+                        @Nonnull final WlPointerFactory wlPointerFactory,
+                        @Nonnull final WlKeyboardFactory wlKeyboardFactory,
+                        @Nonnull final PointerDeviceFactory pointerDeviceFactory,
+                        @Nonnull final KeyboardFactory keyboardFactory) {
         this.jobExecutor = jobExecutor;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
@@ -44,9 +50,10 @@ public class GLWindowSeatFactory {
         this.keyboardFactory = keyboardFactory;
     }
 
-    public GLWindowSeat create(final GLWindow glWindow,
-                               final WlSeat wlSeat,
-                               final Compositor compositor) {
+    @Nonnull
+    public GLWindowSeat create(@Nonnull final GLWindow glWindow,
+                               @Nonnull final WlSeat wlSeat,
+                               @Nonnull final Compositor compositor) {
         //this objects will post input events from the system to our wayland compositor system
         final GLWindowSeat glWindowSeat = new GLWindowSeat(wlSeat,
                                                            this.jobExecutor);

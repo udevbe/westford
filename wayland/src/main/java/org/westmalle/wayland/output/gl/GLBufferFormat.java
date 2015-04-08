@@ -13,25 +13,31 @@
 //limitations under the License.
 package org.westmalle.wayland.output.gl;
 
+import javax.annotation.Nonnull;
+
 public enum GLBufferFormat {
     SHM_ARGB8888("surface",
                  "surface_argb8888"),
     SHM_XRGB8888("surface",
                  "surface_xrgb8888");
 
+    @Nonnull
     private final String vertexShader;
+    @Nonnull
     private final String fragmentShader;
 
-    GLBufferFormat(final String vertexShader,
-                   final String fragmentShader) {
+    GLBufferFormat(@Nonnull final String vertexShader,
+                   @Nonnull final String fragmentShader) {
         this.vertexShader = vertexShader;
         this.fragmentShader = fragmentShader;
     }
 
+    @Nonnull
     public String getFragmentShader() {
         return this.fragmentShader;
     }
 
+    @Nonnull
     public String getVertexShader() {
         return this.vertexShader;
     }

@@ -29,21 +29,25 @@ import java.util.Objects;
 public class Region {
 
     private static final class InfiniteRegion extends Region {
+        @Nonnull
         private static final List<Rectangle> INFINITE_RECT = Collections.singletonList(Rectangle.create(Short.MIN_VALUE,
                                                                                                         Short.MIN_VALUE,
                                                                                                         Integer.MAX_VALUE,
                                                                                                         Integer.MAX_VALUE));
 
+        @Nonnull
         @Override
         public List<Rectangle> asList() {
             return INFINITE_RECT;
         }
 
+        @Nonnull
         @Override
         public Region add(@Nonnull final Rectangle rectangle) {
             return this;
         }
 
+        @Nonnull
         @Override
         public Region subtract(@Nonnull final Rectangle rectangle) {
             return this;
@@ -75,6 +79,7 @@ public class Region {
     Region() {
     }
 
+    @Nonnull
     public List<Rectangle> asList() {
         //int pointer
         final IntByReference n_rects = new IntByReference();
@@ -99,6 +104,7 @@ public class Region {
         return boxes;
     }
 
+    @Nonnull
     public Region add(@Nonnull final Rectangle rectangle) {
         Pixman1Library.INSTANCE
                 .pixman_region32_union_rect(getPixmanRegion32(),
@@ -111,6 +117,7 @@ public class Region {
         return this;
     }
 
+    @Nonnull
     public Region subtract(@Nonnull final Rectangle rectangle) {
         final pixman_region32 delta_pixman_region32 = new pixman_region32();
         Pixman1Library.INSTANCE
@@ -154,6 +161,7 @@ public class Region {
                                                        null) != 0;
     }
 
+    @Nonnull
     public pixman_region32 getPixmanRegion32() {
         return this.pixman_region32;
     }

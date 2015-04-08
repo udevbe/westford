@@ -37,5 +37,6 @@ public abstract class Motion {
 
     public abstract int getTime();
 
+    @Nonnull
     public abstract Point getPoint();
 }

@@ -20,16 +20,19 @@ import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.Nonnull;
+
 @AutoFactory(className = "ShmRendererFactory")
 public class ShmRenderer {
 
+    @Nonnull
     private final ShmRenderEngine shmRenderEngine;
 
-    ShmRenderer(final ShmRenderEngine shmRenderEngine) {
+    ShmRenderer(@Nonnull final ShmRenderEngine shmRenderEngine) {
         this.shmRenderEngine = shmRenderEngine;
     }
 
-    public void render(final WlSurfaceResource surfaceResource) {
+    public void render(@Nonnull final WlSurfaceResource surfaceResource) {
         final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
         final WlBufferResource wlBufferResource = implementation.getSurface()
                                                                 .getState()
