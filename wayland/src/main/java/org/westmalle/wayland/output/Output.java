@@ -1,6 +1,8 @@
 package org.westmalle.wayland.output;
 
 
+import com.google.auto.factory.AutoFactory;
+
 import org.freedesktop.wayland.server.WlOutputResource;
 
 import java.util.Set;

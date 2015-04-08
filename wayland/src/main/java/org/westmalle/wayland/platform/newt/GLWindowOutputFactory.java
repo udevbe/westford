@@ -9,10 +9,11 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 
-import org.westmalle.wayland.output.Output;
+import org.westmalle.wayland.output.OutputFactory;
 import org.westmalle.wayland.output.OutputGeometry;
 import org.westmalle.wayland.output.OutputMode;
 import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlOutputFactory;
 
 import javax.inject.Inject;
 

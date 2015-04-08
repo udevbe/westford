@@ -16,22 +16,6 @@ package org.westmalle.wayland.protocol;
 import dagger.Module;
 import org.westmalle.wayland.output.OutputModule;
 
-@Module(includes = OutputModule.class,
-        injects = {
-                WlSeatFactory.class,
-                WlKeyboardFactory.class,
-                WlPointerFactory.class,
-                WlTouchFactory.class,
-                WlDataDeviceFactory.class,
-                WlDataDeviceFactory.class,
-                WlSurfaceFactory.class,
-                WlRegionFactory.class,
-                WlShellSurfaceFactory.class,
-                WlSubSurfaceFactory.class,
-                WlOutputFactory.class
-        },
-        library = true,
-        complete = false)
+@Module(includes = OutputModule.class)
 public class ProtocolModule {
-
 }

@@ -16,14 +16,7 @@ package org.westmalle.wayland.platform.newt;
 import dagger.Module;
 import org.westmalle.wayland.protocol.ProtocolModule;
 
-@Module(
-        injects = {
-                GLWindowFactory.class,
-                GLWindowSeatFactory.class
-        },
-        library = true,
-        complete = true,
-        includes = ProtocolModule.class)
+@Module(includes = ProtocolModule.class)
 public class PlatformNewtModule {
 
 }

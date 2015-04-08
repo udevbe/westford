@@ -19,7 +19,6 @@ import org.westmalle.wayland.output.CompositorFactory;
 import org.westmalle.wayland.output.ShmRendererFactory;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
 import org.westmalle.wayland.output.gl.OutputGLModule;
-import org.westmalle.wayland.platform.newt.GLWindowFactory;
 import org.westmalle.wayland.platform.newt.GLWindowOutputFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.platform.newt.PlatformNewtModule;
@@ -28,7 +27,6 @@ import org.westmalle.wayland.protocol.*;
 import javax.inject.Singleton;
 import java.util.Set;
 
-//TODO split out project in logical components
 @Singleton
 @Component(modules = {
         OutputGLModule.class,
@@ -54,8 +52,6 @@ interface Westmalle {
     WlSeatFactory wlSeatFactory();
 
     WlShellFactory wlShellFactory();
-
-    WlOutputFactory wlOutputFactory();
 
     //running
     Set<Service> services();

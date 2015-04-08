@@ -15,13 +15,11 @@ package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
 
-import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLProfile;
 
 import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.output.gl.GLRenderEngine;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
-import org.westmalle.wayland.platform.newt.GLWindowFactory;
 import org.westmalle.wayland.platform.newt.GLWindowOutput;
 import org.westmalle.wayland.platform.newt.GLWindowOutputFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
@@ -39,7 +37,6 @@ public class Boot {
         final GLWindowSeatFactory glWindowSeatFactory = westmalle.glWindowSeatFactory();
         final WlSeatFactory wlSeatFactory = westmalle.wlSeatFactory();
         final WlShellFactory wlShellFactory = westmalle.wlShellFactory();
-        final WlOutputFactory wlOutputFactory = westmalle.wlOutputFactory();
 
         //create an output
         //create an X opengl enabled window
@@ -72,15 +69,13 @@ public class Boot {
         //TODO enable xdg_shell protocol
     }
 
-
-
     private void run(final Westmalle westmalle) {
         //start all services, 1 thread per service & exit main thread.
         new ServiceManager(westmalle.services()).startAsync();
     }
 
     public static void main(final String[] args) {
-        final Westmalle westmalle = Dagger_Westmalle.create();
+        final Westmalle westmalle = DaggerWestmalle.create();
 
         final Boot boot = new Boot();
         boot.strap(westmalle);

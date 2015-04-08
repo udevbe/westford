@@ -23,18 +23,7 @@ import javax.inject.Singleton;
 
 import static dagger.Provides.Type.SET;
 
-@Module(
-        injects = {
-                ShmRendererFactory.class,
-                CompositorFactory.class,
-                Display.class,
-                RegionFactory.class,
-                SurfaceFactory.class
-        },
-        library = true,
-        //needs render engine implementation, defined at startup.
-        complete = false
-)
+@Module
 public class OutputModule {
 
     @Provides
