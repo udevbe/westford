@@ -34,8 +34,7 @@ public class GLRenderEngineFactory {
     }
 
     @Nonnull
-    public GLRenderEngine create(@Nonnull final GLContext glContext,
-                                 @Nonnull final GLDrawable drawable) {
+    public GLRenderEngine create(@Nonnull final GLContext glContext) {
 
         final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(r -> new Thread(r,
                                                                                                                                             "GL Render Engine")));
@@ -54,7 +53,6 @@ public class GLRenderEngineFactory {
 
                 return new GLRenderEngine(executorService,
                                           glContext,
-                                          drawable,
                                           elementBuffer,
                                           vertexBuffer);
             })

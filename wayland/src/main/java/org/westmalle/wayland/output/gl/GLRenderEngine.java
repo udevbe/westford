@@ -87,8 +87,6 @@ public class GLRenderEngine implements ShmRenderEngine {
     @Nonnull
     private final GLContext glContext;
     @Nonnull
-    private final GLDrawable drawable;
-    @Nonnull
     private final IntBuffer                elementBuffer;
     @Nonnull
     private final IntBuffer                vertexBuffer;
@@ -109,25 +107,23 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     GLRenderEngine(@Nonnull final ListeningExecutorService renderThread,
                    @Nonnull final GLContext glContext,
-                   @Nonnull final GLDrawable drawable,
                    @Nonnull final IntBuffer elementBuffer,
                    @Nonnull final IntBuffer vertexBuffer) {
         this.renderThread = renderThread;
         this.glContext = glContext;
-        this.drawable = drawable;
         this.elementBuffer = elementBuffer;
         this.vertexBuffer = vertexBuffer;
     }
 
     @Nonnull
     @Override
-    public ListenableFuture<?> begin() {
-        return this.renderThread.submit(this::doBegin);
+    public ListenableFuture<?> begin(@Nonnull final GLDrawable drawable) {
+        return this.renderThread.submit(() -> doBegin(drawable));
     }
 
-    private void doBegin() {
-        final int surfaceWidth = this.drawable.getSurfaceWidth();
-        final int surfaceHeight = this.drawable.getSurfaceHeight();
+    private void doBegin(final GLDrawable drawable) {
+        final int surfaceWidth = drawable.getSurfaceWidth();
+        final int surfaceHeight = drawable.getSurfaceHeight();
         this.projection = Optional.of(Mat4.create(2.0f / surfaceWidth,
                                       0,
                                       0,
@@ -213,12 +209,12 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     @Nonnull
     @Override
-    public ListenableFuture<?> end() {
-        return this.renderThread.submit(this::doEnd);
+    public ListenableFuture<?> end(@Nonnull final GLDrawable drawable) {
+        return this.renderThread.submit(() -> doEnd(drawable));
     }
 
-    private void doEnd(){
-        this.drawable.swapBuffers();
+    private void doEnd(@Nonnull final GLDrawable drawable){
+        drawable.swapBuffers();
         this.gl = Optional.empty();
         this.projection = Optional.empty();
     }
@@ -340,7 +336,7 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     private void refreshGl() {
         this.gl = Optional.of(this.glContext.getGL()
-                                            .getGL2ES2());
+                                       .getGL2ES2());
     }
 
     private GLBufferFormat queryBufferFormat(final ShmBuffer buffer) {

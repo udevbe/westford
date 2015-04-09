@@ -14,6 +14,9 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
+
+import com.jogamp.opengl.GLDrawable;
+
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -48,13 +51,13 @@ public class ShmRenderer {
         }
     }
 
-    public void beginRender() throws ExecutionException, InterruptedException {
-        this.shmRenderEngine.begin()
+    public void beginRender(@Nonnull final GLDrawable glDrawable) throws ExecutionException, InterruptedException {
+        this.shmRenderEngine.begin(glDrawable)
                             .get();
     }
 
-    public void endRender() throws ExecutionException, InterruptedException {
-        this.shmRenderEngine.end()
+    public void endRender(@Nonnull final GLDrawable glDrawable) throws ExecutionException, InterruptedException {
+        this.shmRenderEngine.end(glDrawable)
                             .get();
     }
 }

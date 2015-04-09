@@ -45,21 +45,24 @@ public class Compositor {
                @Nonnull final ShmRenderer shmRenderer) {
         this.display = display;
         this.shmRenderer = shmRenderer;
-        this.idleHandler = () -> {
-            this.renderEvent.get()
-                            .remove();
-            this.renderEvent = Optional.empty();
-            try {
-                this.shmRenderer.beginRender();
-                getSurfacesStack().forEach(this.shmRenderer::render);
-                this.shmRenderer.endRender();
-                this.display.flushClients();
-            }
-            catch (ExecutionException | InterruptedException e) {
-                //TODO proper error handling
-                e.printStackTrace();
-            }
-        };
+        this.idleHandler = this::handleIdle;
+    }
+
+    private void handleIdle(){
+        this.renderEvent.get()
+                .remove();
+        this.renderEvent = Optional.empty();
+
+        try {
+            this.shmRenderer.beginRender();
+            getSurfacesStack().forEach(this.shmRenderer::render);
+            this.shmRenderer.endRender();
+            this.display.flushClients();
+        }
+        catch (ExecutionException | InterruptedException e) {
+            //TODO proper error handling
+            e.printStackTrace();
+        }
     }
 
     public void requestRender() {

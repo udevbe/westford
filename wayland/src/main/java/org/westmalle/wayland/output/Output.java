@@ -58,4 +58,14 @@ public class Output {
                                   this.outputGeometry.getTransform());
         return this;
     }
+
+    @Nonnull
+    public OutputMode getMode() {
+        return this.outputMode;
+    }
+
+    @Nonnull
+    public OutputGeometry getGeometry() {
+        return this.outputGeometry;
+    }
 }
