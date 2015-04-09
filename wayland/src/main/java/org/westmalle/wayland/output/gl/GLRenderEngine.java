@@ -126,13 +126,15 @@ public class GLRenderEngine implements ShmRenderEngine {
     }
 
     private void doBegin() {
-        this.projection = Optional.of(Mat4.create(2.0f / this.drawable.getSurfaceWidth(),
+        final int surfaceWidth = this.drawable.getSurfaceWidth();
+        final int surfaceHeight = this.drawable.getSurfaceHeight();
+        this.projection = Optional.of(Mat4.create(2.0f / surfaceWidth,
                                       0,
                                       0,
                                       -1,
 
                                       0,
-                                      2.0f / -this.drawable.getSurfaceHeight(),
+                                      2.0f / -surfaceHeight,
                                       0,
                                       1,
 
@@ -147,6 +149,10 @@ public class GLRenderEngine implements ShmRenderEngine {
                                       1));
         refreshGl();
         final GL2ES2 gl2ES2 = this.gl.get();
+        gl2ES2.glViewport(0,
+                          0,
+                          surfaceWidth,
+                          surfaceHeight);
         gl2ES2.glClear(GL.GL_COLOR_BUFFER_BIT);
         //define triangles to be drawn.
         //make element buffer active
