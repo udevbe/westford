@@ -15,6 +15,7 @@ package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
 
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLProfile;
 
 import org.westmalle.wayland.output.*;
@@ -46,7 +47,9 @@ public class Boot {
                                                                            600);
         //setup our render engine
         //create an opengl render engine that uses shm buffers and outputs to an X opengl window
-        final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindowOutput.getGlWindow());
+        final GLWindow glWindow = glWindowOutput.getGlWindow();
+        final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindow.getContext(),
+                                                                           glWindow);
         //create an shm renderer that passes on shm buffers to it's render implementation
         final ShmRenderer shmRenderer = shmRendererFactory.create(glRenderEngine);
 
@@ -60,7 +63,7 @@ public class Boot {
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
         //these objects will listen for input events
         final WlSeat wlSeat = wlSeatFactory.create();
-        glWindowSeatFactory.create(glWindowOutput.getGlWindow(),
+        glWindowSeatFactory.create(glWindow,
                                    wlSeat,
                                    compositor);
 

@@ -5,6 +5,8 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLDrawable;
 import com.jogamp.opengl.util.texture.Texture;
 
 import org.freedesktop.wayland.server.ShmBuffer;
@@ -42,7 +44,9 @@ public class GLRenderEngineTest {
     @Mock
     private ListeningExecutorService renderThread;
     @Mock
-    private GLAutoDrawable drawable;
+    private GLContext glContext;
+    @Mock
+    private GLDrawable drawable;
     @Mock
     private IntBuffer                elementBuffer;
     @Mock
@@ -70,7 +74,7 @@ public class GLRenderEngineTest {
         when(this.drawable.getSurfaceHeight()).thenReturn(567);
 
         final GL gl = mock(GL.class);
-        when(this.drawable.getGL()).thenReturn(gl);
+        when(this.glContext.getGL()).thenReturn(gl);
 
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
@@ -103,7 +107,7 @@ public class GLRenderEngineTest {
         when(this.drawable.getSurfaceHeight()).thenReturn(567);
 
         final GL gl = mock(GL.class);
-        when(this.drawable.getGL()).thenReturn(gl);
+        when(this.glContext.getGL()).thenReturn(gl);
 
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
@@ -171,7 +175,7 @@ public class GLRenderEngineTest {
         when(this.drawable.getSurfaceHeight()).thenReturn(567);
 
         final GL gl = mock(GL.class);
-        when(this.drawable.getGL()).thenReturn(gl);
+        when(this.glContext.getGL()).thenReturn(gl);
 
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);

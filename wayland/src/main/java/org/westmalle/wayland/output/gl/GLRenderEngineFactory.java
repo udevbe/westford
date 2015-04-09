@@ -19,6 +19,7 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLDrawable;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -33,15 +34,16 @@ public class GLRenderEngineFactory {
     }
 
     @Nonnull
-    public GLRenderEngine create(@Nonnull final GLAutoDrawable drawable) {
+    public GLRenderEngine create(@Nonnull final GLContext glContext,
+                                 @Nonnull final GLDrawable drawable) {
 
         final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(r -> new Thread(r,
                                                                                                                                             "GL Render Engine")));
         try {
             return executorService.submit(() -> {
-                makeCurrent(drawable);
-                final GL2ES2 gl = drawable.getGL()
-                                          .getGL2ES2();
+                makeCurrent(glContext);
+                final GL2ES2 gl = glContext.getGL()
+                                           .getGL2ES2();
                 gl.setSwapInterval(1);
                 final IntBuffer elementBuffer = Buffers.newDirectIntBuffer(1);
                 gl.glGenBuffers(1,
@@ -51,6 +53,7 @@ public class GLRenderEngineFactory {
                                 vertexBuffer);
 
                 return new GLRenderEngine(executorService,
+                                          glContext,
                                           drawable,
                                           elementBuffer,
                                           vertexBuffer);
@@ -62,8 +65,7 @@ public class GLRenderEngineFactory {
         }
     }
 
-    private GLContext makeCurrent(final GLAutoDrawable drawable) {
-        final GLContext context = drawable.getContext();
+    private GLContext makeCurrent(final GLContext context) {
         final int current = context.makeCurrent();
         switch (current) {
             case GLContext.CONTEXT_NOT_CURRENT:
