@@ -43,7 +43,7 @@
         <jogl.version>2.3.1</jogl.version>
         <auto.factory.version>1.0-SNAPSHOT</auto.factory.version>
         <auto.value.version>1.1-SNAPSHOT</auto.value.version>
-        <dagger.version>2.0-SNAPSHOT</dagger.version>
+        <dagger.version>2.0</dagger.version>
         <guava.version>18.0</guava.version>
         <findbugs.version>3.0.0</findbugs.version>
         <slf4j.version>1.7.12</slf4j.version>
