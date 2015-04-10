@@ -18,6 +18,7 @@ import com.sun.jna.Native;
 import dagger.Module;
 import dagger.Provides;
 import org.freedesktop.wayland.server.Display;
+import org.westmalle.wayland.platform.CLibrary;
 
 import javax.inject.Singleton;
 

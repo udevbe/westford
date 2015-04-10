@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.platform.CLibrary;
 
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.*;

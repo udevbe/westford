@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
+import org.westmalle.wayland.platform.CLibrary;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
