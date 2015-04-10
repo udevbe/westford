@@ -1,5 +1,7 @@
 package org.westmalle.wayland.output;
 
+import com.jogamp.opengl.GLDrawable;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
@@ -11,8 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -24,6 +30,8 @@ public class CompositorTest {
     @Mock
     private Display     display;
     @Mock
+    private GLDrawables glDrawables;
+    @Mock
     private ShmRenderer shmRenderer;
 
     @InjectMocks
@@ -32,6 +40,13 @@ public class CompositorTest {
     @Test
     public void testRequestRender() throws Exception {
         //given
+        final GLDrawable glDrawable0 = mock(GLDrawable.class);
+        final GLDrawable glDrawable1 = mock(GLDrawable.class);
+        final Set<GLDrawable> drawables = new HashSet<>();
+        drawables.add(glDrawable0);
+        drawables.add(glDrawable1);
+        when(glDrawables.get()).thenReturn(drawables);
+
         final EventLoop eventLoop = mock(EventLoop.class);
         when(this.display.getEventLoop()).thenReturn(eventLoop);
         final List<EventLoop.IdleHandler> idleHandlers = new LinkedList<>();
@@ -56,20 +71,33 @@ public class CompositorTest {
         this.compositor.requestRender();
         idleHandlers.get(0).handle();
         //then
-        final InOrder inOrder = inOrder(this.shmRenderer,
+        final InOrder inOrder0 = inOrder(this.shmRenderer,
                                         this.display);
-        inOrder.verify(this.shmRenderer)
-               .beginRender();
-        inOrder.verify(this.shmRenderer)
+        inOrder0.verify(this.shmRenderer)
+               .beginRender(glDrawable0);
+        inOrder0.verify(this.shmRenderer)
                .render(wlSurfaceResource0);
-        inOrder.verify(this.shmRenderer)
+        inOrder0.verify(this.shmRenderer)
                .render(wlSurfaceResource1);
-        inOrder.verify(this.shmRenderer)
+        inOrder0.verify(this.shmRenderer)
                .render(wlSurfaceResource2);
-        inOrder.verify(this.shmRenderer)
-               .endRender();
-        inOrder.verify(this.display)
-               .flushClients();
+        inOrder0.verify(this.shmRenderer)
+               .endRender(glDrawable0);
+
+        final InOrder inOrder1 = inOrder(this.shmRenderer,
+                                         this.display);
+        inOrder1.verify(this.shmRenderer)
+                .beginRender(glDrawable1);
+        inOrder1.verify(this.shmRenderer)
+                .render(wlSurfaceResource0);
+        inOrder1.verify(this.shmRenderer)
+                .render(wlSurfaceResource1);
+        inOrder1.verify(this.shmRenderer)
+                .render(wlSurfaceResource2);
+        inOrder1.verify(this.shmRenderer)
+                .endRender(glDrawable1);
+
+        verify(this.display).flushClients();
     }
 
     @Test

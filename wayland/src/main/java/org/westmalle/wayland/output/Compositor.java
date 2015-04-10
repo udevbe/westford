@@ -16,6 +16,7 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
@@ -23,15 +24,17 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 
 import java.util.LinkedList;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 
+//TODO lot's of low hanging optimizations here.
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
 
     @Nonnull
-    private final Display     display;
+    private final Display display;
+    @Nonnull
+    private final GLDrawables glDrawables;
     @Nonnull
     private final ShmRenderer shmRenderer;
     @Nonnull
@@ -42,27 +45,26 @@ public class Compositor {
     private Optional<EventSource> renderEvent = Optional.empty();
 
     Compositor(@Nonnull @Provided final Display display,
+               @Nonnull @Provided final GLDrawables glDrawables,
                @Nonnull final ShmRenderer shmRenderer) {
         this.display = display;
+        this.glDrawables = glDrawables;
         this.shmRenderer = shmRenderer;
         this.idleHandler = this::handleIdle;
     }
 
-    private void handleIdle(){
+    private void handleIdle() {
         this.renderEvent.get()
-                .remove();
+                        .remove();
         this.renderEvent = Optional.empty();
 
-        try {
-            this.shmRenderer.beginRender();
+        this.glDrawables.get().forEach(glDrawable -> {
+            this.shmRenderer.beginRender(glDrawable);
             getSurfacesStack().forEach(this.shmRenderer::render);
-            this.shmRenderer.endRender();
-            this.display.flushClients();
-        }
-        catch (ExecutionException | InterruptedException e) {
-            //TODO proper error handling
-            e.printStackTrace();
-        }
+            this.shmRenderer.endRender(glDrawable);
+        });
+
+        this.display.flushClients();
     }
 
     public void requestRender() {
@@ -73,11 +75,13 @@ public class Compositor {
 
     public void renderScene() {
         this.renderEvent = Optional.of(this.display.getEventLoop()
-                                                   .addIdle(this.idleHandler));
+                                               .addIdle(this.idleHandler));
     }
 
     @Nonnull
-    public LinkedList<WlSurfaceResource> getSurfacesStack() { return this.surfacesStack; }
+    public LinkedList<WlSurfaceResource> getSurfacesStack() {
+        return this.surfacesStack;
+    }
 
     private boolean needsRender() {
 //        final WlSurfaceRequests implementation = surfaceResource.getImplementation();

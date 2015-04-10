@@ -46,10 +46,9 @@ public class Boot {
                                                                            800,
                                                                            600);
         //setup our render engine
-        //create an opengl render engine that uses shm buffers and outputs to an X opengl window
+        //create an opengl render engine that uses shm buffers and can output to an opengl window
         final GLWindow glWindow = glWindowOutput.getGlWindow();
-        final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindow.getContext(),
-                                                                           glWindow);
+        final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindow.getContext());
         //create an shm renderer that passes on shm buffers to it's render implementation
         final ShmRenderer shmRenderer = shmRendererFactory.create(glRenderEngine);
 

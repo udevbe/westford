@@ -51,13 +51,23 @@ public class ShmRenderer {
         }
     }
 
-    public void beginRender(@Nonnull final GLDrawable glDrawable) throws ExecutionException, InterruptedException {
-        this.shmRenderEngine.begin(glDrawable)
-                            .get();
+    public void beginRender(@Nonnull final GLDrawable glDrawable) {
+        try {
+            this.shmRenderEngine.begin(glDrawable)
+                    .get();
+        }
+            catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
     }
 
-    public void endRender(@Nonnull final GLDrawable glDrawable) throws ExecutionException, InterruptedException {
+    public void endRender(@Nonnull final GLDrawable glDrawable) {
+        try {
         this.shmRenderEngine.end(glDrawable)
                             .get();
+        }
+        catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 }

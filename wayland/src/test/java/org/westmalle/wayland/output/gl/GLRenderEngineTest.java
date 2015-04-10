@@ -79,7 +79,7 @@ public class GLRenderEngineTest {
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
-        this.glRenderEngine.begin();
+        this.glRenderEngine.begin(this.drawable);
         //then
         verify(this.renderThread).submit((Runnable) any());
         //and when
@@ -140,7 +140,7 @@ public class GLRenderEngineTest {
         when(shmBuffer.getWidth()).thenReturn(100);
         when(shmBuffer.getHeight()).thenReturn(250);
 
-        this.glRenderEngine.begin();
+        this.glRenderEngine.begin(this.drawable);
         queue.get(0)
              .run();
         //when
@@ -163,6 +163,7 @@ public class GLRenderEngineTest {
     @Test
     public void testEnd() throws Exception {
         //given
+
         final List<Runnable> queue = new LinkedList<>();
         when(this.renderThread.submit(isA(Runnable.class))).thenAnswer(invocation -> {
             final Object arg0 = invocation.getArguments()[0];
@@ -180,7 +181,7 @@ public class GLRenderEngineTest {
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
-        this.glRenderEngine.end();
+        this.glRenderEngine.end(this.drawable);
         //then
         verify(this.renderThread).submit((Runnable) any());
         //and when

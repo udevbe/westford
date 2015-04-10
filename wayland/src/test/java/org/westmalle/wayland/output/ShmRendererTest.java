@@ -1,6 +1,9 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.util.concurrent.ListenableFuture;
+
+import com.jogamp.opengl.GLDrawable;
+
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -68,22 +71,24 @@ public class ShmRendererTest {
     @Test
     public void testBeginRender() throws Exception {
         //given
+        final GLDrawable glDrawable = mock(GLDrawable.class);
         final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.shmRenderEngine.begin()).thenReturn(listenableFuture);
+        when(this.shmRenderEngine.begin(glDrawable)).thenReturn(listenableFuture);
         //when
-        this.shmRenderer.beginRender();
+        this.shmRenderer.beginRender(glDrawable);
         //then
-        verify(this.shmRenderEngine).begin();
+        verify(this.shmRenderEngine).begin(glDrawable);
     }
 
     @Test
     public void testEndRender() throws Exception {
         //given
+        final GLDrawable glDrawable = mock(GLDrawable.class);
         final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.shmRenderEngine.end()).thenReturn(listenableFuture);
+        when(this.shmRenderEngine.end(glDrawable)).thenReturn(listenableFuture);
         //when
-        this.shmRenderer.endRender();
+        this.shmRenderer.endRender(glDrawable);
         //then
-        verify(this.shmRenderEngine).end();
+        verify(this.shmRenderEngine).end(glDrawable);
     }
 }

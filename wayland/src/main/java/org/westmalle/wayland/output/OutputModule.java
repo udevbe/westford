@@ -28,6 +28,12 @@ public class OutputModule {
 
     @Provides
     @Singleton
+    GLDrawables provideGLGlDrawables(){
+        return new GLDrawables();
+    }
+
+    @Provides
+    @Singleton
     CLibrary provideCLibrary() {
         return (CLibrary) Native.loadLibrary(CLibrary.JNA_LIBRARY_NAME,
                                              CLibrary.class);
