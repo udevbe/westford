@@ -4,14 +4,11 @@ jdk:
   - oraclejdk8
 branches:
   only:
-    - dagger2
+    - master
 
 before_install:
     - git clone https://github.com/google/auto.git
     - pushd auto/value
-    - mvn install -DskipTests
-    - popd
-    - pushd auto/factory
     - mvn install -DskipTests
     - popd
 install:
