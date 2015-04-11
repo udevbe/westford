@@ -41,7 +41,7 @@
     <properties>
         <!-- dep versions -->
         <jogl.version>2.3.1</jogl.version>
-        <auto.factory.version>1.0-SNAPSHOT</auto.factory.version>
+        <auto.factory.version>0.1-beta1</auto.factory.version>
         <auto.value.version>1.1-SNAPSHOT</auto.value.version>
         <dagger.version>2.0</dagger.version>
         <guava.version>18.0</guava.version>
