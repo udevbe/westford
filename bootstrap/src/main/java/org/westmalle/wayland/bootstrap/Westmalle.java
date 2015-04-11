@@ -22,7 +22,10 @@ import org.westmalle.wayland.output.gl.OutputGLModule;
 import org.westmalle.wayland.platform.newt.GLWindowOutputFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.platform.newt.PlatformNewtModule;
-import org.westmalle.wayland.protocol.*;
+import org.westmalle.wayland.protocol.ProtocolModule;
+import org.westmalle.wayland.protocol.WlCompositorFactory;
+import org.westmalle.wayland.protocol.WlSeatFactory;
+import org.westmalle.wayland.protocol.WlShellFactory;
 
 import javax.inject.Singleton;
 import java.util.Set;

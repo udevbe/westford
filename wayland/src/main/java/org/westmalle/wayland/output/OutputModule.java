@@ -29,7 +29,7 @@ public class OutputModule {
 
     @Provides
     @Singleton
-    GLDrawables provideGLGlDrawables(){
+    GLDrawables provideGLGlDrawables() {
         return new GLDrawables();
     }
 

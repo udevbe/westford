@@ -2,12 +2,10 @@ package org.westmalle.wayland.output;
 
 
 import com.google.auto.factory.AutoFactory;
-
 import org.freedesktop.wayland.server.WlOutputResource;
 
-import java.util.Set;
-
 import javax.annotation.Nonnull;
+import java.util.Set;
 
 @AutoFactory(className = "OutputFactory")
 public class Output {
@@ -15,7 +13,7 @@ public class Output {
     @Nonnull
     private OutputGeometry outputGeometry;
     @Nonnull
-    private OutputMode outputMode;
+    private OutputMode     outputMode;
 
     Output(@Nonnull final OutputGeometry outputGeometry,
            @Nonnull final OutputMode outputMode) {
@@ -24,7 +22,7 @@ public class Output {
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
-                         @Nonnull final OutputGeometry outputGeometry){
+                         @Nonnull final OutputGeometry outputGeometry) {
         //TODO unit test
         this.outputGeometry = outputGeometry;
         resources.forEach(this::notifyGeometry);
@@ -32,7 +30,7 @@ public class Output {
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
-                         @Nonnull final OutputMode outputMode){
+                         @Nonnull final OutputMode outputMode) {
         //TODO unit test
         this.outputMode = outputMode;
         resources.forEach(this::notifyMode);

@@ -1,14 +1,12 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -17,7 +15,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(WaylandServerLibrary.class)

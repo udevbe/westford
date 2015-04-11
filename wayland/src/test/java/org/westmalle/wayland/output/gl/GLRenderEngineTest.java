@@ -1,14 +1,11 @@
 package org.westmalle.wayland.output.gl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
-
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
-import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawable;
 import com.jogamp.opengl.util.texture.Texture;
-
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -33,6 +30,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
@@ -44,9 +42,9 @@ public class GLRenderEngineTest {
     @Mock
     private ListeningExecutorService renderThread;
     @Mock
-    private GLContext glContext;
+    private GLContext                glContext;
     @Mock
-    private GLDrawable drawable;
+    private GLDrawable               drawable;
     @Mock
     private IntBuffer                elementBuffer;
     @Mock
@@ -93,7 +91,8 @@ public class GLRenderEngineTest {
     public void testDraw() throws Exception {
         //given
         final Texture texture = mock(Texture.class);
-        whenNew(Texture.class).withAnyArguments().thenReturn(texture);
+        whenNew(Texture.class).withAnyArguments()
+                              .thenReturn(texture);
 
         final List<Runnable> queue = new LinkedList<>();
         when(this.renderThread.submit(isA(Runnable.class))).thenAnswer(invocation -> {

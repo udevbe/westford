@@ -21,7 +21,6 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawable;
-
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -31,12 +30,11 @@ import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.nio.IntBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
-
-import javax.annotation.Nonnull;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
@@ -85,7 +83,7 @@ public class GLRenderEngine implements ShmRenderEngine {
     @Nonnull
     private final ListeningExecutorService renderThread;
     @Nonnull
-    private final GLContext glContext;
+    private final GLContext                glContext;
     @Nonnull
     private final IntBuffer                elementBuffer;
     @Nonnull
@@ -101,9 +99,9 @@ public class GLRenderEngine implements ShmRenderEngine {
     };
 
     @Nonnull
-    private Optional<Mat4> projection = Optional.empty();
+    private Optional<Mat4>   projection = Optional.empty();
     @Nonnull
-    private Optional<GL2ES2> gl = Optional.empty();
+    private Optional<GL2ES2> gl         = Optional.empty();
 
     GLRenderEngine(@Nonnull final ListeningExecutorService renderThread,
                    @Nonnull final GLContext glContext,
@@ -125,24 +123,24 @@ public class GLRenderEngine implements ShmRenderEngine {
         final int surfaceWidth = drawable.getSurfaceWidth();
         final int surfaceHeight = drawable.getSurfaceHeight();
         this.projection = Optional.of(Mat4.create(2.0f / surfaceWidth,
-                                      0,
-                                      0,
-                                      -1,
+                                                  0,
+                                                  0,
+                                                  -1,
 
-                                      0,
-                                      2.0f / -surfaceHeight,
-                                      0,
-                                      1,
+                                                  0,
+                                                  2.0f / -surfaceHeight,
+                                                  0,
+                                                  1,
 
-                                      0,
-                                      0,
-                                      1,
-                                      0,
+                                                  0,
+                                                  0,
+                                                  1,
+                                                  0,
 
-                                      0,
-                                      0,
-                                      0,
-                                      1));
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  1));
         refreshGl();
         final GL2ES2 gl2ES2 = this.gl.get();
         gl2ES2.glViewport(0,
@@ -153,14 +151,14 @@ public class GLRenderEngine implements ShmRenderEngine {
         //define triangles to be drawn.
         //make element buffer active
         gl2ES2.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
-                             this.elementBuffer.get(0));
+                            this.elementBuffer.get(0));
         gl2ES2.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER,
-                             4 * this.elements.length,
-                             Buffers.newDirectIntBuffer(this.elements),
-                             GL.GL_DYNAMIC_DRAW);
+                            4 * this.elements.length,
+                            Buffers.newDirectIntBuffer(this.elements),
+                            GL.GL_DYNAMIC_DRAW);
         //make vertexBuffer active
         gl2ES2.glBindBuffer(GL.GL_ARRAY_BUFFER,
-                             this.vertexBuffer.get(0));
+                            this.vertexBuffer.get(0));
     }
 
     @Nonnull
@@ -202,9 +200,9 @@ public class GLRenderEngine implements ShmRenderEngine {
                          vertices);
         gl2ES2.glUseProgram(shaderProgram);
         gl2ES2.glDrawElements(GL.GL_TRIANGLES,
-                               6,
-                               GL.GL_UNSIGNED_INT,
-                               0);
+                              6,
+                              GL.GL_UNSIGNED_INT,
+                              0);
     }
 
     @Nonnull
@@ -213,7 +211,7 @@ public class GLRenderEngine implements ShmRenderEngine {
         return this.renderThread.submit(() -> doEnd(drawable));
     }
 
-    private void doEnd(@Nonnull final GLDrawable drawable){
+    private void doEnd(@Nonnull final GLDrawable drawable) {
         drawable.swapBuffers();
         this.gl = Optional.empty();
         this.projection = Optional.empty();
@@ -252,9 +250,9 @@ public class GLRenderEngine implements ShmRenderEngine {
 
         final int shaderProgram = gl2ES2.glCreateProgram();
         gl2ES2.glAttachShader(shaderProgram,
-                               vertexShader);
+                              vertexShader);
         gl2ES2.glAttachShader(shaderProgram,
-                               fragmentShader);
+                              fragmentShader);
         gl2ES2.glLinkProgram(shaderProgram);
         return shaderProgram;
     }
@@ -265,35 +263,35 @@ public class GLRenderEngine implements ShmRenderEngine {
         final int[] lengths = new int[]{lines[0].length()};
         final GL2ES2 gl2ES2 = this.gl.get();
         gl2ES2.glShaderSource(shaderHandle,
-                               lines.length,
-                               lines,
-                               lengths,
-                               0);
+                              lines.length,
+                              lines,
+                              lengths,
+                              0);
         gl2ES2.glCompileShader(shaderHandle);
 
         final IntBuffer vstatus = IntBuffer.allocate(1);
         gl2ES2.glGetShaderiv(shaderHandle,
-                              GL2ES2.GL_COMPILE_STATUS,
-                              vstatus);
+                             GL2ES2.GL_COMPILE_STATUS,
+                             vstatus);
         if (vstatus.get(0) != GL.GL_TRUE) {
             //failure!
             //get log length
             final int[] logLength = new int[1];
             gl2ES2.glGetShaderiv(shaderHandle,
-                                  GL2ES2.GL_INFO_LOG_LENGTH,
-                                  logLength,
-                                  0);
+                                 GL2ES2.GL_INFO_LOG_LENGTH,
+                                 logLength,
+                                 0);
             //get log
             if (logLength[0] == 0) {
                 logLength[0] = 1024;
             }
             final byte[] log = new byte[logLength[0]];
             gl2ES2.glGetShaderInfoLog(shaderHandle,
-                                       logLength[0],
-                                       null,
-                                       0,
-                                       log,
-                                       0);
+                                      logLength[0],
+                                      null,
+                                      0,
+                                      log,
+                                      0);
             System.err.println("Error compiling the vertex shader: " + new String(log));
             System.exit(1);
         }
@@ -304,39 +302,39 @@ public class GLRenderEngine implements ShmRenderEngine {
                                   final float[] vertices) {
         final GL2ES2 gl2ES2 = this.gl.get();
         final int uniTrans = gl2ES2.glGetUniformLocation(program,
-                                                          "mu_projection");
+                                                         "mu_projection");
         gl2ES2.glUniformMatrix4fv(uniTrans,
-                                   1,
-                                   false,
-                                   projection.toBuffer());
+                                  1,
+                                  false,
+                                  projection.toBuffer());
 
         gl2ES2.glBufferData(GL.GL_ARRAY_BUFFER,
-                             vertices.length * 4,
-                             Buffers.newDirectFloatBuffer(vertices),
-                             GL.GL_DYNAMIC_DRAW);
+                            vertices.length * 4,
+                            Buffers.newDirectFloatBuffer(vertices),
+                            GL.GL_DYNAMIC_DRAW);
         final int posAttrib = gl2ES2.glGetAttribLocation(program,
-                                                          "va_position");
+                                                         "va_position");
         final int texAttrib = gl2ES2.glGetAttribLocation(program,
-                                                          "va_texcoord");
+                                                         "va_texcoord");
         gl2ES2.glEnableVertexAttribArray(posAttrib);
         gl2ES2.glVertexAttribPointer(posAttrib,
-                                      2,
-                                      GL.GL_FLOAT,
-                                      false,
-                                      4 * 4,
-                                      0);
+                                     2,
+                                     GL.GL_FLOAT,
+                                     false,
+                                     4 * 4,
+                                     0);
         gl2ES2.glEnableVertexAttribArray(texAttrib);
         gl2ES2.glVertexAttribPointer(texAttrib,
-                                      2,
-                                      GL.GL_FLOAT,
-                                      false,
-                                      4 * 4,
-                                      2 * 4);
+                                     2,
+                                     GL.GL_FLOAT,
+                                     false,
+                                     4 * 4,
+                                     2 * 4);
     }
 
     private void refreshGl() {
         this.gl = Optional.of(this.glContext.getGL()
-                                       .getGL2ES2());
+                                            .getGL2ES2());
     }
 
     private GLBufferFormat queryBufferFormat(final ShmBuffer buffer) {

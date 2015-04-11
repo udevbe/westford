@@ -2,11 +2,7 @@ package org.westmalle.wayland.output.calc;
 
 import org.junit.Test;
 
-import java.util.Optional;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class PlaneLocationTest {
 
@@ -30,7 +26,7 @@ public class PlaneLocationTest {
                              translation);
 
         //when
-        final Optional<PlaneLocation> planeLocationTranslation = planeLocation.translateTo(other);
+        planeLocation.translateTo(other);
 
         //then
         verify(translation).multiply(vec4);

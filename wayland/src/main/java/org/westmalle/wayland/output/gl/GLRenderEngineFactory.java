@@ -17,9 +17,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL2ES2;
-import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLDrawable;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

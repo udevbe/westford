@@ -7,7 +7,6 @@ import org.westmalle.wayland.output.calc.Mat4;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-
 import java.util.Optional;
 
 @AutoValue

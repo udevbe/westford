@@ -14,10 +14,7 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
-import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawable;
-
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
@@ -27,8 +24,10 @@ public interface ShmRenderEngine {
     @Nonnull
     ListenableFuture<?> draw(@Nonnull final WlSurfaceResource surfaceResource,
                              @Nonnull final WlBufferResource buffer);
+
     @Nonnull
     ListenableFuture<?> begin(@Nonnull final GLDrawable drawable);
+
     @Nonnull
     ListenableFuture<?> end(@Nonnull final GLDrawable drawable);
 }

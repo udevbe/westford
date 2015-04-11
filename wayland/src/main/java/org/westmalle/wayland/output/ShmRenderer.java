@@ -14,16 +14,13 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
-
 import com.jogamp.opengl.GLDrawable;
-
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import java.util.concurrent.ExecutionException;
-
 import javax.annotation.Nonnull;
+import java.util.concurrent.ExecutionException;
 
 @AutoFactory(className = "ShmRendererFactory")
 public class ShmRenderer {
@@ -54,17 +51,17 @@ public class ShmRenderer {
     public void beginRender(@Nonnull final GLDrawable glDrawable) {
         try {
             this.shmRenderEngine.begin(glDrawable)
-                    .get();
+                                .get();
         }
-            catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+        catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     public void endRender(@Nonnull final GLDrawable glDrawable) {
         try {
-        this.shmRenderEngine.end(glDrawable)
-                            .get();
+            this.shmRenderEngine.end(glDrawable)
+                                .get();
         }
         catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();

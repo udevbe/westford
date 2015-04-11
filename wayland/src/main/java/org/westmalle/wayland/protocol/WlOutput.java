@@ -18,9 +18,9 @@ import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.output.Output;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -45,8 +45,8 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                          final int id) {
         //TODO unit test
         final WlOutputResource wlOutputResource = add(client,
-                                         version,
-                                         id);
+                                                      version,
+                                                      id);
         this.output.notifyGeometry(wlOutputResource)
                    .notifyMode(wlOutputResource);
         wlOutputResource.done();

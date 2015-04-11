@@ -16,23 +16,21 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 //TODO lot's of low hanging optimizations here.
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
 
     @Nonnull
-    private final Display display;
+    private final Display     display;
     @Nonnull
     private final GLDrawables glDrawables;
     @Nonnull
@@ -58,11 +56,12 @@ public class Compositor {
                         .remove();
         this.renderEvent = Optional.empty();
 
-        this.glDrawables.get().forEach(glDrawable -> {
-            this.shmRenderer.beginRender(glDrawable);
-            getSurfacesStack().forEach(this.shmRenderer::render);
-            this.shmRenderer.endRender(glDrawable);
-        });
+        this.glDrawables.get()
+                        .forEach(glDrawable -> {
+                            this.shmRenderer.beginRender(glDrawable);
+                            getSurfacesStack().forEach(this.shmRenderer::render);
+                            this.shmRenderer.endRender(glDrawable);
+                        });
 
         this.display.flushClients();
     }
@@ -75,7 +74,7 @@ public class Compositor {
 
     public void renderScene() {
         this.renderEvent = Optional.of(this.display.getEventLoop()
-                                               .addIdle(this.idleHandler));
+                                                   .addIdle(this.idleHandler));
     }
 
     @Nonnull

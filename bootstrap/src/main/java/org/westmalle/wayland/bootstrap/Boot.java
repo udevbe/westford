@@ -14,11 +14,12 @@
 package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
-
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLProfile;
-
-import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.Compositor;
+import org.westmalle.wayland.output.CompositorFactory;
+import org.westmalle.wayland.output.ShmRenderer;
+import org.westmalle.wayland.output.ShmRendererFactory;
 import org.westmalle.wayland.output.gl.GLRenderEngine;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
 import org.westmalle.wayland.platform.newt.GLWindowOutput;

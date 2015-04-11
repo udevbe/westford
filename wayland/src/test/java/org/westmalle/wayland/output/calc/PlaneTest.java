@@ -55,7 +55,8 @@ public class PlaneTest {
         final Mat4 mat4 = Mat4.IDENTITY;
 
         //when
-        plane.setTranslation(other, mat4);
+        plane.setTranslation(other,
+                             mat4);
 
         //then
         final Optional<Mat4> otherMat4 = plane.getTranslation(other);

@@ -1,7 +1,6 @@
 package org.westmalle.wayland.output;
 
 import com.jogamp.opengl.GLDrawable;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
@@ -17,8 +16,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -45,7 +42,7 @@ public class CompositorTest {
         final Set<GLDrawable> drawables = new HashSet<>();
         drawables.add(glDrawable0);
         drawables.add(glDrawable1);
-        when(glDrawables.get()).thenReturn(drawables);
+        when(this.glDrawables.get()).thenReturn(drawables);
 
         final EventLoop eventLoop = mock(EventLoop.class);
         when(this.display.getEventLoop()).thenReturn(eventLoop);
@@ -69,20 +66,21 @@ public class CompositorTest {
 
         //when
         this.compositor.requestRender();
-        idleHandlers.get(0).handle();
+        idleHandlers.get(0)
+                    .handle();
         //then
         final InOrder inOrder0 = inOrder(this.shmRenderer,
-                                        this.display);
+                                         this.display);
         inOrder0.verify(this.shmRenderer)
-               .beginRender(glDrawable0);
+                .beginRender(glDrawable0);
         inOrder0.verify(this.shmRenderer)
-               .render(wlSurfaceResource0);
+                .render(wlSurfaceResource0);
         inOrder0.verify(this.shmRenderer)
-               .render(wlSurfaceResource1);
+                .render(wlSurfaceResource1);
         inOrder0.verify(this.shmRenderer)
-               .render(wlSurfaceResource2);
+                .render(wlSurfaceResource2);
         inOrder0.verify(this.shmRenderer)
-               .endRender(glDrawable0);
+                .endRender(glDrawable0);
 
         final InOrder inOrder1 = inOrder(this.shmRenderer,
                                          this.display);

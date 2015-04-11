@@ -19,9 +19,8 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
 import org.freedesktop.wayland.server.ShmBuffer;
 
-import java.nio.ByteBuffer;
-
 import javax.annotation.Nonnull;
+import java.nio.ByteBuffer;
 
 public class GLSurfaceData {
 
