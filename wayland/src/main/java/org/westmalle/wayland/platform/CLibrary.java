@@ -48,6 +48,12 @@ public interface CLibrary extends Library {
     int F_FLOCK = 0x020; 	/* Use flock(2) semantics for lock */
     int F_POSIX = 0x040; 	/* Use POSIX semantics for lock */
 
+    int O_RDONLY = 0x0000;
+    int O_WRONLY = 0x0001;
+    int O_RDWR = 0x0002;
+    int O_ACCMODE = 0x0003;
+
+    int open(String pathname, int flags);
 
     int write(int fd,
               byte[] buffer,
