@@ -31,13 +31,11 @@ public class DisplayDriver extends DisplayImpl{
     protected void createNativeImpl() {
         this.fd = this.cLibrary.open("/dev/dri/card0", CLibrary.O_RDWR);
         final Pointer gbmDevice = this.gbmLibrary.gbm_create_device(fd);
-        final EGLGraphicsDevice
-                eglGraphicsDevice =
-                EGLDisplayUtil.eglCreateEGLGraphicsDevice(Pointer.nativeValue(gbmDevice),
-                                                          AbstractGraphicsDevice.DEFAULT_CONNECTION,
-                                                          AbstractGraphicsDevice.DEFAULT_UNIT);
+        final EGLGraphicsDevice eglGraphicsDevice = EGLDisplayUtil.eglCreateEGLGraphicsDevice(
+                Pointer.nativeValue(gbmDevice),
+                AbstractGraphicsDevice.DEFAULT_CONNECTION,
+                AbstractGraphicsDevice.DEFAULT_UNIT);
         eglGraphicsDevice.open();
-
 
         final  String extensions = EGL.eglQueryString(eglGraphicsDevice.getHandle(), EGL.EGL_EXTENSIONS);
 
@@ -45,10 +43,13 @@ public class DisplayDriver extends DisplayImpl{
             System.err.println("no surfaceless support, cannot initialize\n");
             System.exit(1);
         }
+
+        aDevice = eglGraphicsDevice;
     }
 
     @Override
     protected void closeNativeImpl(final AbstractGraphicsDevice aDevice) {
+        this.cLibrary.close(this.fd);
         this.fd = 0;
         aDevice.close();
     }
