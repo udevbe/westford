@@ -120,7 +120,7 @@ public class GLRenderEngine implements ShmRenderEngine {
     }
 
     private void doBegin(final GLDrawable drawable) {
-        final int surfaceWidth = drawable.getSurfaceWidth();
+        final int surfaceWidth  = drawable.getSurfaceWidth();
         final int surfaceHeight = drawable.getSurfaceHeight();
         this.projection = Optional.of(Mat4.create(2.0f / surfaceWidth,
                                                   0,
@@ -177,8 +177,8 @@ public class GLRenderEngine implements ShmRenderEngine {
         }
 
         final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
-        final Surface surface = implementation.getSurface();
-        final Point position = surface.getPosition();
+        final Surface   surface        = implementation.getSurface();
+        final Point     position       = surface.getPosition();
         final float[] vertices = {
                 position.getX(), position.getY(), 0f, 0f,
                 position.getX() + buffer.getWidth(), position.getY(), 1f, 0f,
@@ -228,8 +228,8 @@ public class GLRenderEngine implements ShmRenderEngine {
     }
 
     private int createShaderProgram(final GLBufferFormat bufferFormat) {
-        final GL2ES2 gl2ES2 = this.gl.get();
-        final int vertexShader = gl2ES2.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
+        final GL2ES2 gl2ES2       = this.gl.get();
+        final int    vertexShader = gl2ES2.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
         compileShader(vertexShader,
                       SURFACE_V);
 
@@ -259,9 +259,9 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     private void compileShader(final int shaderHandle,
                                final String shaderSource) {
-        final String[] lines = new String[]{shaderSource};
-        final int[] lengths = new int[]{lines[0].length()};
-        final GL2ES2 gl2ES2 = this.gl.get();
+        final String[] lines   = new String[]{shaderSource};
+        final int[]    lengths = new int[]{lines[0].length()};
+        final GL2ES2   gl2ES2  = this.gl.get();
         gl2ES2.glShaderSource(shaderHandle,
                               lines.length,
                               lines,
@@ -339,7 +339,7 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     private GLBufferFormat queryBufferFormat(final ShmBuffer buffer) {
         final GLBufferFormat format;
-        final int bufferFormat = buffer.getFormat();
+        final int            bufferFormat = buffer.getFormat();
         if (bufferFormat == ARGB8888.getValue()) {
             format = SHM_ARGB8888;
         }
@@ -354,7 +354,7 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     private GLSurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
                                            final ShmBuffer buffer) {
-        final GL2ES2 gl2ES2 = this.gl.get();
+        final GL2ES2  gl2ES2      = this.gl.get();
         GLSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
             surfaceData = GLSurfaceData.create(gl2ES2,
@@ -369,7 +369,7 @@ public class GLRenderEngine implements ShmRenderEngine {
                                                 .getImageWidth();
         final int surfaceDataHeight = surfaceData.getTexture()
                                                  .getImageWidth();
-        final int bufferWidth = buffer.getWidth();
+        final int bufferWidth  = buffer.getWidth();
         final int bufferHeight = buffer.getHeight();
 
         if (surfaceDataWidth != bufferWidth ||

@@ -43,7 +43,7 @@ public class WlShellSurfaceTest {
                                                                  wlSurfaceResource);
 
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
-        final WlSeat wlSeat = mock(WlSeat.class);
+        final WlSeat         wlSeat         = mock(WlSeat.class);
         when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
 
         final WlPointer wlPointer = mock(WlPointer.class);
@@ -66,9 +66,9 @@ public class WlShellSurfaceTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 1;
-        final int id = 1;
+        final Client client  = mock(Client.class);
+        final int    version = 1;
+        final int    id      = 1;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
@@ -90,7 +90,7 @@ public class WlShellSurfaceTest {
                                                                  wlSurfaceResource);
 
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
-        final WlSeat wlSeat = mock(WlSeat.class);
+        final WlSeat         wlSeat         = mock(WlSeat.class);
         when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
 
         final WlPointer wlPointer = mock(WlPointer.class);
@@ -99,7 +99,7 @@ public class WlShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final int serial = 454;
-        final int edges = 8;
+        final int edges  = 8;
 
         //when
         wlShellSurface.resize(wlShellSurfaceResource,
@@ -122,7 +122,7 @@ public class WlShellSurfaceTest {
                                                                  wlSurfaceResource);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
-        final int serial = 7654;
+        final int                    serial                 = 7654;
 
         //when
         wlShellSurface.pong(wlShellSurfaceResource,
@@ -141,7 +141,7 @@ public class WlShellSurfaceTest {
                                                                  wlSurfaceResource);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
-        final String title = "appTitle";
+        final String                 title                  = "appTitle";
 
         //when
         wlShellSurface.setTitle(wlShellSurfaceResource,
@@ -159,7 +159,7 @@ public class WlShellSurfaceTest {
                                                                  wlSurfaceResource);
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
-        final String clazz = "appClass";
+        final String                 clazz                  = "appClass";
 
         //when
         wlShellSurface.setClass(wlShellSurfaceResource,
@@ -192,11 +192,11 @@ public class WlShellSurfaceTest {
         final WlShellSurface wlShellSurface = new WlShellSurface(this.shellSurface,
                                                                  wlSurfaceResource);
 
-        final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
-        final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
-        final int x = 1235;
-        final int y = 9876;
-        final int flags = 0;
+        final WlShellSurfaceResource wlShellSurfaceResource  = mock(WlShellSurfaceResource.class);
+        final WlSurfaceResource      parentWlSurfaceResource = mock(WlSurfaceResource.class);
+        final int                    x                       = 1235;
+        final int                    y                       = 9876;
+        final int                    flags                   = 0;
 
         //when
         wlShellSurface.setTransient(wlShellSurfaceResource,

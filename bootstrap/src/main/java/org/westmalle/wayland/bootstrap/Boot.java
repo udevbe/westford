@@ -33,12 +33,12 @@ public class Boot {
 
         final GLWindowOutputFactory glWindowOutputFactory = westmalle.glWindowOutputFactory();
         final GLRenderEngineFactory glRenderEngineFactory = westmalle.glRenderEngineFactory();
-        final ShmRendererFactory shmRendererFactory = westmalle.shmRendererFactory();
-        final CompositorFactory compositorFactory = westmalle.compositorFactory();
-        final WlCompositorFactory wlCompositorFactory = westmalle.wlCompositorFactory();
-        final GLWindowSeatFactory glWindowSeatFactory = westmalle.glWindowSeatFactory();
-        final WlSeatFactory wlSeatFactory = westmalle.wlSeatFactory();
-        final WlShellFactory wlShellFactory = westmalle.wlShellFactory();
+        final ShmRendererFactory    shmRendererFactory    = westmalle.shmRendererFactory();
+        final CompositorFactory     compositorFactory     = westmalle.compositorFactory();
+        final WlCompositorFactory   wlCompositorFactory   = westmalle.wlCompositorFactory();
+        final GLWindowSeatFactory   glWindowSeatFactory   = westmalle.glWindowSeatFactory();
+        final WlSeatFactory         wlSeatFactory         = westmalle.wlSeatFactory();
+        final WlShellFactory        wlShellFactory        = westmalle.wlShellFactory();
 
         //create an output
         //create an X opengl enabled window
@@ -48,7 +48,7 @@ public class Boot {
                                                                            600);
         //setup our render engine
         //create an opengl render engine that uses shm buffers and can output to an opengl window
-        final GLWindow glWindow = glWindowOutput.getGlWindow();
+        final GLWindow       glWindow       = glWindowOutput.getGlWindow();
         final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindow.getContext());
         //create an shm renderer that passes on shm buffers to it's render implementation
         final ShmRenderer shmRenderer = shmRendererFactory.create(glRenderEngine);

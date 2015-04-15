@@ -56,7 +56,7 @@ public class ProtocolObjectTest {
     @Test(expected = IllegalStateException.class)
     public void testGetResourceMultipleResourceResource() throws Exception {
         //given
-        final Client client = mock(Client.class);
+        final Client                      client         = mock(Client.class);
         final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         protocolObject.add(client,
                            1,
@@ -81,7 +81,7 @@ public class ProtocolObjectTest {
     @Test
     public void testAddSingle() throws Exception {
         //given
-        final Client client = mock(Client.class);
+        final Client                      client         = mock(Client.class);
         final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         final Resource<?> resource = protocolObject.add(client,
@@ -95,7 +95,7 @@ public class ProtocolObjectTest {
     @Test
     public void testAddMultiple() throws Exception {
         //given
-        final Client client = mock(Client.class);
+        final Client                      client         = mock(Client.class);
         final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         final Resource<?> resource0 = protocolObject.add(client,

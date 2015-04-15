@@ -404,10 +404,10 @@ public abstract class Mat4 {
     }
 
     private float[][] invert(final float[][] a) {
-        final int n = a.length;
-        final float[][] x = new float[n][n];
-        final float[][] b = new float[n][n];
-        final int[] index = new int[n];
+        final int       n     = a.length;
+        final float[][] x     = new float[n][n];
+        final float[][] b     = new float[n][n];
+        final int[]     index = new int[n];
         for (int i = 0; i < n; ++i) { b[i][i] = 1; }
 
         gaussian(a,
@@ -437,7 +437,7 @@ public abstract class Mat4 {
 
     private void gaussian(final float[][] a,
                           final int[] index) {
-        final int n = index.length;
+        final int     n = index.length;
         final float[] c = new float[n];
 
         for (int i = 0; i < n; ++i) { index[i] = i; }

@@ -183,7 +183,7 @@ public class PointerDeviceTest {
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed> values = fixedArgumentCaptor.getAllValues();
+        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(this.display.nextSerial()),
                                          eq(wlSurfaceResource0),
@@ -367,7 +367,7 @@ public class PointerDeviceTest {
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed> values = fixedArgumentCaptor.getAllValues();
+        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
                                          eq(wlSurfaceResource0),
@@ -499,7 +499,7 @@ public class PointerDeviceTest {
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed> values = fixedArgumentCaptor.getAllValues();
+        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
                                          eq(wlSurfaceResource0),
@@ -614,7 +614,7 @@ public class PointerDeviceTest {
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed> values = fixedArgumentCaptor.getAllValues();
+        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
                                          eq(wlSurfaceResource0),
@@ -739,7 +739,7 @@ public class PointerDeviceTest {
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed> values = fixedArgumentCaptor.getAllValues();
+        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
                                          eq(wlSurfaceResource0),
@@ -867,7 +867,7 @@ public class PointerDeviceTest {
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed> values = fixedArgumentCaptor.getAllValues();
+        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
         verify(wlPointerResource0).enter(eq(serial0),
                                          eq(wlSurfaceResource0),

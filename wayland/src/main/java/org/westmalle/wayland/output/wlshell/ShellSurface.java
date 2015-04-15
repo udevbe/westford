@@ -84,11 +84,11 @@ public class ShellSurface {
                      @Nonnull final WlPointer wlPointer,
                      final int grabSerial) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface surface = wlSurface.getSurface();
+        final Surface   surface   = wlSurface.getSurface();
         final Point pointerPosition = wlPointer.getPointerDevice()
                                                .getPosition();
         final Point surfacePosition = surface.getPosition();
-        final Point pointerOffset = pointerPosition.subtract(surfacePosition);
+        final Point pointerOffset   = pointerPosition.subtract(surfacePosition);
         wlPointer.getPointerDevice()
                  .grabMotion(wlSurfaceResource,
                              grabSerial,
@@ -101,13 +101,13 @@ public class ShellSurface {
                        @Nonnull final WlPointer wlPointer,
                        final int serial,
                        final int edges) {
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface surface = wlSurface.getSurface();
-        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
-        final Point pointerStartPos = pointerDevice.getPosition();
+        final WlSurface     wlSurface       = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface       surface         = wlSurface.getSurface();
+        final PointerDevice pointerDevice   = wlPointer.getPointerDevice();
+        final Point         pointerStartPos = pointerDevice.getPosition();
 
-        final Point local = surface.local(pointerStartPos);
-        final Rectangle size = surface.getSize();
+        final Point     local = surface.local(pointerStartPos);
+        final Rectangle size  = surface.getSize();
 
         final WlShellSurfaceResize quadrant = quadrant(edges);
         final Mat4 transform = transform(quadrant,
@@ -130,13 +130,13 @@ public class ShellSurface {
     private Mat4 transform(@Nonnull final WlShellSurfaceResize quadrant,
                            @Nonnull final Rectangle size,
                            @Nonnull final Point local) {
-        final int width = size.getWidth();
+        final int width  = size.getWidth();
         final int height = size.getHeight();
 
-        final Mat4 quadrantTransform;
+        final Mat4    quadrantTransform;
         final float[] anchorTranslation = new float[16];
-        final float[] deltaTranslation = new float[16];
-        final Vec4 localTransformed;
+        final float[] deltaTranslation  = new float[16];
+        final Vec4    localTransformed;
         switch (quadrant) {
             case TOP:
                 anchorTranslation[0] = 1;
@@ -239,7 +239,7 @@ public class ShellSurface {
     }
 
     public void toFront(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        final Compositor compositor = this.wlCompositor.getCompositor();
+        final Compositor                    compositor    = this.wlCompositor.getCompositor();
         final LinkedList<WlSurfaceResource> surfacesStack = compositor.getSurfacesStack();
         if (surfacesStack.remove(wlSurfaceResource)) {
             surfacesStack.push(wlSurfaceResource);

@@ -52,7 +52,7 @@ public class OutputModule {
                                      final CLibrary libc) {
         final int[] pipe = configure(pipe(libc),
                                      libc);
-        final int pipeR = pipe[0];
+        final int pipeR  = pipe[0];
         final int pipeWR = pipe[1];
 
         return new JobExecutor(display,
@@ -69,7 +69,7 @@ public class OutputModule {
 
     private int[] configure(final int[] pipeFds,
                             final CLibrary libc) {
-        final int readFd = pipeFds[0];
+        final int readFd  = pipeFds[0];
         final int writeFd = pipeFds[1];
 
         final int readFlags = libc.fcntl(readFd,

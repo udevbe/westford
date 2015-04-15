@@ -36,7 +36,7 @@ public class WlKeyboardTest {
     public void testRelease() throws Exception {
         //given
         final WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
-        final WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
+        final WlKeyboard         wlKeyboard         = new WlKeyboard(this.keyboard);
         //when
         wlKeyboard.release(wlKeyboardResource);
         //then
@@ -46,9 +46,9 @@ public class WlKeyboardTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 4;
-        final int id = 4;
+        final Client     client     = mock(Client.class);
+        final int        version    = 4;
+        final int        id         = 4;
         final WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
         //when
         final WlKeyboardResource wlKeyboardResource = wlKeyboard.create(client,

@@ -66,7 +66,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     @Override
     public void createSurface(final WlCompositorResource compositorResource,
                               final int id) {
-        final Surface surface = this.surfaceFactory.create(compositorResource);
+        final Surface   surface   = this.surfaceFactory.create(compositorResource);
         final WlSurface wlSurface = this.wlSurfaceFactory.create(surface);
 
         final WlSurfaceResource surfaceResource = wlSurface.add(compositorResource.getClient(),

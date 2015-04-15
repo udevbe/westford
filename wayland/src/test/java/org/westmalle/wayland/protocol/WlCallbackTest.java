@@ -32,9 +32,9 @@ public class WlCallbackTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 2;
-        final int id = 3;
+        final Client     client     = mock(Client.class);
+        final int        version    = 2;
+        final int        id         = 3;
         final WlCallback wlCallback = new WlCallback();
         //when
         final WlCallbackResource wlCallbackResource = wlCallback.create(client,

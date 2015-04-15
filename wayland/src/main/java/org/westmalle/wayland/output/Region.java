@@ -86,7 +86,7 @@ public class Region {
         final pixman_box32 pixman_box32_array = Pixman1Library.INSTANCE
                 .pixman_region32_rectangles(getPixmanRegion32(),
                                             n_rects);
-        final int size = n_rects.getValue();
+        final int            size          = n_rects.getValue();
         final pixman_box32[] pixman_box32s = (pixman_box32[]) pixman_box32_array.toArray(size);
 
         final List<Rectangle> boxes = new ArrayList<>(size);

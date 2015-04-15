@@ -48,7 +48,7 @@ public class WlSurfaceTest {
     public void testSetBufferTransform() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final int transform = WlOutputTransform.NORMAL.getValue();
+        final int               transform         = WlOutputTransform.NORMAL.getValue();
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -64,9 +64,9 @@ public class WlSurfaceTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 5;
-        final int id = 100;
+        final Client client  = mock(Client.class);
+        final int    version = 5;
+        final int    id      = 100;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -97,9 +97,9 @@ public class WlSurfaceTest {
     public void testAttach() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
-        final int x = 11;
-        final int y = 22;
+        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
+        final int               x                 = 11;
+        final int               y                 = 22;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -126,10 +126,10 @@ public class WlSurfaceTest {
     public void testDoubleAttach() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
-        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
-        final int x = 11;
-        final int y = 22;
+        final WlBufferResource  wlBufferResource0 = mock(WlBufferResource.class);
+        final WlBufferResource  wlBufferResource1 = mock(WlBufferResource.class);
+        final int               x                 = 11;
+        final int               y                 = 22;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -179,9 +179,9 @@ public class WlSurfaceTest {
     public void testAttachDetach() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
-        final int x = 11;
-        final int y = 22;
+        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
+        final int               x                 = 11;
+        final int               y                 = 22;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -215,10 +215,10 @@ public class WlSurfaceTest {
     public void testDamage() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final int x = -20;
-        final int y = -100;
-        final int width = 500;
-        final int height = 1000;
+        final int               x                 = -20;
+        final int               y                 = -100;
+        final int               width             = 500;
+        final int               height            = 1000;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -240,10 +240,10 @@ public class WlSurfaceTest {
     public void testDamageNegativeWidthNegativeHeight() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final int x = 20;
-        final int y = 100;
-        final int width = -500;
-        final int height = -1000;
+        final int               x                 = 20;
+        final int               y                 = 100;
+        final int               width             = -500;
+        final int               height            = -1000;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -260,13 +260,13 @@ public class WlSurfaceTest {
     public void testFrame() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final int callbackId = 987;
+        final int               callbackId        = 987;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
 
-        final Client client = mock(Client.class);
-        final int version = 5;
+        final Client client  = mock(Client.class);
+        final int    version = 5;
 
         when(wlSurfaceResource.getClient()).thenReturn(client);
         when(wlSurfaceResource.getVersion()).thenReturn(version);
@@ -289,7 +289,7 @@ public class WlSurfaceTest {
     public void testSetOpaqueRegion() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final WlRegionResource  wlRegionResource  = mock(WlRegionResource.class);
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -318,7 +318,7 @@ public class WlSurfaceTest {
     public void testSetInputRegion() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final WlRegionResource  wlRegionResource  = mock(WlRegionResource.class);
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
@@ -347,9 +347,9 @@ public class WlSurfaceTest {
     public void testCommit() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
-        final int x = 11;
-        final int y = 22;
+        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
+        final int               x                 = 11;
+        final int               y                 = 22;
 
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);

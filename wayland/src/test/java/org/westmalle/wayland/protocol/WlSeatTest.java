@@ -73,9 +73,9 @@ public class WlSeatTest {
     @Test
     public void testGetPointer() throws Exception {
         //given
-        final int id = 20;
-        final int version = 1;
-        final Client client = mock(Client.class);
+        final int            id             = 20;
+        final int            version        = 1;
+        final Client         client         = mock(Client.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
@@ -98,9 +98,9 @@ public class WlSeatTest {
     @Test
     public void testGetKeyboard() throws Exception {
         //given
-        final int id = 30;
-        final int version = 2;
-        final Client client = mock(Client.class);
+        final int            id             = 30;
+        final int            version        = 2;
+        final Client         client         = mock(Client.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
@@ -123,9 +123,9 @@ public class WlSeatTest {
     @Test
     public void testGetTouch() throws Exception {
         //given
-        final int id = 40;
-        final int version = 5;
-        final Client client = mock(Client.class);
+        final int            id             = 40;
+        final int            version        = 5;
+        final Client         client         = mock(Client.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
@@ -148,10 +148,10 @@ public class WlSeatTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final WlSeat wlSeat = new WlSeat(this.display);
-        final Client client = mock(Client.class);
-        final int version = 2;
-        final int id = 7;
+        final WlSeat wlSeat  = new WlSeat(this.display);
+        final Client client  = mock(Client.class);
+        final int    version = 2;
+        final int    id      = 7;
         //when
         final WlSeatResource wlSeatResource = wlSeat.create(client,
                                                             version,
@@ -164,14 +164,14 @@ public class WlSeatTest {
     @Test
     public void testSetMultipleInputDevices() {
         //given
-        final int version = 3;
-        final Client client = mock(Client.class);
+        final int            version        = 3;
+        final Client         client         = mock(Client.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
-        final WlTouch wlTouch = mock(WlTouch.class);
+        final WlTouch    wlTouch    = mock(WlTouch.class);
         final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer  wlPointer  = mock(WlPointer.class);
 
         final WlSeat wlSeat = new WlSeat(this.display);
         wlSeat.getResources()
@@ -192,8 +192,8 @@ public class WlSeatTest {
     @Test
     public void testRemoveWlPointer() throws Exception {
         //given
-        final int version = 3;
-        final Client client = mock(Client.class);
+        final int            version        = 3;
+        final Client         client         = mock(Client.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
@@ -214,8 +214,8 @@ public class WlSeatTest {
     @Test
     public void testRemoveWlKeyboard() throws Exception {
         //given
-        final int version = 3;
-        final Client client = mock(Client.class);
+        final int            version        = 3;
+        final Client         client         = mock(Client.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
@@ -236,8 +236,8 @@ public class WlSeatTest {
     @Test
     public void testRemoveWlTouch() throws Exception {
         //given
-        final int version = 3;
-        final Client client = mock(Client.class);
+        final int            version        = 3;
+        final Client         client         = mock(Client.class);
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);

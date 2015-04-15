@@ -115,7 +115,7 @@ public class GLWindowOutputFactory {
             @Override
             public void windowResized(final WindowEvent e) {
                 final float[] pixelsPerMM = glWindow.getPixelsPerMM(new float[2]);
-                final Output output = wlOutput.getOutput();
+                final Output  output      = wlOutput.getOutput();
                 final OutputGeometry newGeometry = output.getGeometry()
                                                          .toBuilder()
                                                          .physicalWidth((int) (glWindow.getSurfaceWidth() / pixelsPerMM[0]))

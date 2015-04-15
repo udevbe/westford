@@ -17,9 +17,9 @@ public class PlaneLocationTest {
         final PlaneLocation planeLocation = PlaneLocation.create(vec4,
                                                                  plane);
 
-        final Plane other = new Plane();
-        final Mat4 translation = mock(Mat4.class);
-        final Vec4 otherVec4 = mock(Vec4.class);
+        final Plane other       = new Plane();
+        final Mat4  translation = mock(Mat4.class);
+        final Vec4  otherVec4   = mock(Vec4.class);
         when(translation.multiply(vec4)).thenReturn(otherVec4);
 
         plane.setTranslation(other,
