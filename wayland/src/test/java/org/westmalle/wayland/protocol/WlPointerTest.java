@@ -36,7 +36,7 @@ public class WlPointerTest {
     public void testRelease() throws Exception {
         //given
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
-        final WlPointer wlPointer = new WlPointer(this.pointerDevice);
+        final WlPointer         wlPointer         = new WlPointer(this.pointerDevice);
         //when
         wlPointer.release(wlPointerResource);
         //then
@@ -46,9 +46,9 @@ public class WlPointerTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 1;
-        final int id = 1;
+        final Client    client    = mock(Client.class);
+        final int       version   = 1;
+        final int       id        = 1;
         final WlPointer wlPointer = new WlPointer(this.pointerDevice);
         //when
         final WlPointerResource wlPointerResource = wlPointer.create(client,

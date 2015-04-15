@@ -67,8 +67,8 @@ public class SurfaceTest {
         when(wlCompositor.getCompositor()).thenReturn(compositor);
 
         final WlBufferResource buffer = mock(WlBufferResource.class);
-        final Integer relX = -10;
-        final Integer relY = 200;
+        final Integer          relX   = -10;
+        final Integer          relY   = 200;
 
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
@@ -104,8 +104,8 @@ public class SurfaceTest {
         when(wlCompositor.getCompositor()).thenReturn(compositor);
 
         final WlBufferResource buffer = mock(WlBufferResource.class);
-        final Integer relX = -10;
-        final Integer relY = 200;
+        final Integer          relX   = -10;
+        final Integer          relY   = 200;
 
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
@@ -142,12 +142,12 @@ public class SurfaceTest {
         when(wlCompositor.getCompositor()).thenReturn(compositor);
 
         final WlBufferResource buffer0 = mock(WlBufferResource.class);
-        final Integer relX0 = -10;
-        final Integer relY0 = 200;
+        final Integer          relX0   = -10;
+        final Integer          relY0   = 200;
 
         final WlBufferResource buffer1 = mock(WlBufferResource.class);
-        final Integer relX1 = -10;
-        final Integer relY1 = 200;
+        final Integer          relX1   = -10;
+        final Integer          relY1   = 200;
 
         final ShmBuffer shmBuffer0 = mock(ShmBuffer.class);
         when(ShmBuffer.get(buffer0)).thenReturn(shmBuffer0);
@@ -194,8 +194,8 @@ public class SurfaceTest {
         when(wlCompositor.getCompositor()).thenReturn(compositor);
 
         final WlBufferResource buffer = mock(WlBufferResource.class);
-        final Integer relX = -10;
-        final Integer relY = 200;
+        final Integer          relX   = -10;
+        final Integer          relY   = 200;
 
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);

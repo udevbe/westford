@@ -108,7 +108,7 @@ public class WlCompositorTest {
                            anyInt())).thenReturn(wlSurfaceResource);
 
         final WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
-        final Client client = mock(Client.class);
+        final Client               client               = mock(Client.class);
         when(wlCompositorResource.getClient()).thenReturn(client);
         final int version = 3;
         when(wlCompositorResource.getVersion()).thenReturn(version);
@@ -155,7 +155,7 @@ public class WlCompositorTest {
         when(this.wlRegionFactory.create(any())).thenReturn(wlRegion);
 
         final WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
-        final Client client = mock(Client.class);
+        final Client               client               = mock(Client.class);
         when(wlCompositorResource.getClient()).thenReturn(client);
         final int version = 2;
         when(wlCompositorResource.getVersion()).thenReturn(version);
@@ -185,9 +185,9 @@ public class WlCompositorTest {
                                                            this.regionFactory,
                                                            this.surfaceFactory,
                                                            this.compositor);
-        final Client client = mock(Client.class);
-        final int version = 1;
-        final int id = 6;
+        final Client client  = mock(Client.class);
+        final int    version = 1;
+        final int    id      = 6;
         //when
         final WlCompositorResource wlCompositorResource = wlCompositor.create(client,
                                                                               version,

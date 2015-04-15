@@ -54,7 +54,7 @@ public class GLWindowSeatTest {
     public void testMousePressed() throws Exception {
         //given
         final MouseEvent mouseEvent = mock(MouseEvent.class);
-        final long time = 87654;
+        final long       time       = 87654;
         when(mouseEvent.getWhen()).thenReturn(time);
         final short button = 3;
         when(mouseEvent.getButton()).thenReturn(button);
@@ -62,7 +62,7 @@ public class GLWindowSeatTest {
         final WlPointer wlPointer = mock(WlPointer.class);
         when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
 
-        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = new HashSet<>();
         wlPointerResources.add(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
@@ -84,7 +84,7 @@ public class GLWindowSeatTest {
     public void testMouseReleased() throws Exception {
         //given
         final MouseEvent mouseEvent = mock(MouseEvent.class);
-        final long time = 87654;
+        final long       time       = 87654;
         when(mouseEvent.getWhen()).thenReturn(time);
         final short button = 3;
         when(mouseEvent.getButton()).thenReturn(button);
@@ -92,7 +92,7 @@ public class GLWindowSeatTest {
         final WlPointer wlPointer = mock(WlPointer.class);
         when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
 
-        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = new HashSet<>();
         wlPointerResources.add(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
@@ -114,7 +114,7 @@ public class GLWindowSeatTest {
     public void testMouseMoved() throws Exception {
         //given
         final MouseEvent mouseEvent = mock(MouseEvent.class);
-        final long time = 87654;
+        final long       time       = 87654;
         when(mouseEvent.getWhen()).thenReturn(time);
         final int x = 321;
         final int y = 543;
@@ -124,7 +124,7 @@ public class GLWindowSeatTest {
         final WlPointer wlPointer = mock(WlPointer.class);
         when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
 
-        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = new HashSet<>();
         wlPointerResources.add(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);

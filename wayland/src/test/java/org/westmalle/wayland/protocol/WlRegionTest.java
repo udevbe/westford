@@ -34,10 +34,10 @@ public class WlRegionTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 1;
-        final int id = 1;
-        final Region region = mock(Region.class);
+        final Client   client   = mock(Client.class);
+        final int      version  = 1;
+        final int      id       = 1;
+        final Region   region   = mock(Region.class);
         final WlRegion wlRegion = new WlRegion(region);
         //when
         final WlRegionResource wlRegionResource = wlRegion.create(client,
@@ -52,8 +52,8 @@ public class WlRegionTest {
     public void testDestroy() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region region = mock(Region.class);
-        final WlRegion wlRegion = new WlRegion(region);
+        final Region           region           = mock(Region.class);
+        final WlRegion         wlRegion         = new WlRegion(region);
         //when
         wlRegion.destroy(wlRegionResource);
         //then
@@ -64,12 +64,12 @@ public class WlRegionTest {
     public void testAdd() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region region = mock(Region.class);
-        final WlRegion wlRegion = new WlRegion(region);
-        final int x = 10;
-        final int y = -12;
-        final int width = 123;
-        final int height = 111;
+        final Region           region           = mock(Region.class);
+        final WlRegion         wlRegion         = new WlRegion(region);
+        final int              x                = 10;
+        final int              y                = -12;
+        final int              width            = 123;
+        final int              height           = 111;
         //when
         wlRegion.add(wlRegionResource,
                      x,
@@ -87,12 +87,12 @@ public class WlRegionTest {
     public void testAddNegativeWidthHeight() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region region = mock(Region.class);
-        final WlRegion wlRegion = new WlRegion(region);
-        final int x = 10;
-        final int y = 12;
-        final int width = -100;
-        final int height = -200;
+        final Region           region           = mock(Region.class);
+        final WlRegion         wlRegion         = new WlRegion(region);
+        final int              x                = 10;
+        final int              y                = 12;
+        final int              width            = -100;
+        final int              height           = -200;
         //when
         wlRegion.add(wlRegionResource,
                      x,
@@ -106,12 +106,12 @@ public class WlRegionTest {
     public void testSubtract() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region region = mock(Region.class);
-        final WlRegion wlRegion = new WlRegion(region);
-        final int x = -12;
-        final int y = -10;
-        final int width = 321;
-        final int height = 111;
+        final Region           region           = mock(Region.class);
+        final WlRegion         wlRegion         = new WlRegion(region);
+        final int              x                = -12;
+        final int              y                = -10;
+        final int              width            = 321;
+        final int              height           = 111;
         //when
         wlRegion.subtract(wlRegionResource,
                           x,
@@ -129,12 +129,12 @@ public class WlRegionTest {
     public void testSubtractNativeWidthHeight() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region region = mock(Region.class);
-        final WlRegion wlRegion = new WlRegion(region);
-        final int x = 22;
-        final int y = 11;
-        final int width = -222;
-        final int height = -333;
+        final Region           region           = mock(Region.class);
+        final WlRegion         wlRegion         = new WlRegion(region);
+        final int              x                = 22;
+        final int              y                = 11;
+        final int              width            = -222;
+        final int              height           = -333;
         //when
         wlRegion.subtract(wlRegionResource,
                           x,

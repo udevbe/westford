@@ -60,16 +60,16 @@ public class WlShellTest {
     @Test
     public void testGetShellSurface() throws Exception {
         //given
-        final WlShellResource wlShellResource = mock(WlShellResource.class);
-        final int id = 123;
+        final WlShellResource   wlShellResource   = mock(WlShellResource.class);
+        final int               id                = 123;
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final Client client = mock(Client.class);
-        final int version = 3;
+        final Client            client            = mock(Client.class);
+        final int               version           = 3;
         when(wlShellResource.getClient()).thenReturn(client);
         when(wlShellResource.getVersion()).thenReturn(version);
 
         final WlShellSurface wlShellSurface = mock(WlShellSurface.class);
-        final ShellSurface shellSurface = mock(ShellSurface.class);
+        final ShellSurface   shellSurface   = mock(ShellSurface.class);
         when(wlShellSurface.getShellSurface()).thenReturn(shellSurface);
         when(this.wlShellSurfaceFactory.create(shellSurface,
                                                wlSurfaceResource)).thenReturn(wlShellSurface);
@@ -80,7 +80,7 @@ public class WlShellTest {
                                 anyInt())).thenReturn(wlShellSurfaceResource);
 
         final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
         when(shellSurfaceFactory.create(eq(wlCompositor),
                                         anyInt())).thenReturn(shellSurface);
 
@@ -115,7 +115,7 @@ public class WlShellTest {
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
         final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
         final WlShell wlShell = new WlShell(this.display,
                                             this.wlShellSurfaceFactory,
                                             shellSurfaceFactory,
@@ -132,11 +132,11 @@ public class WlShellTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 2;
-        final int id = 7;
+        final Client              client              = mock(Client.class);
+        final int                 version             = 2;
+        final int                 id                  = 7;
         final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
+        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
         final WlShell wlShell = new WlShell(this.display,
                                             this.wlShellSurfaceFactory,
                                             shellSurfaceFactory,

@@ -49,8 +49,8 @@ public class GLSurfaceData {
 
     private static TextureData createTextureData(final GL2ES2 gl,
                                                  final ShmBuffer buffer) {
-        final int width = buffer.getStride() / 4;
-        final int height = buffer.getHeight();
+        final int        width  = buffer.getStride() / 4;
+        final int        height = buffer.getHeight();
         final ByteBuffer pixels = buffer.getData();
 
         return new TextureData(gl.getGLProfile(),

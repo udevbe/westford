@@ -123,7 +123,7 @@ public class GLRenderEngineTest {
                          any());
 
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface       = mock(WlSurface.class);
         when(surfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);

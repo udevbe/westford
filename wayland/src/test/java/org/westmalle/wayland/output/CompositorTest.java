@@ -37,9 +37,9 @@ public class CompositorTest {
     @Test
     public void testRequestRender() throws Exception {
         //given
-        final GLDrawable glDrawable0 = mock(GLDrawable.class);
-        final GLDrawable glDrawable1 = mock(GLDrawable.class);
-        final Set<GLDrawable> drawables = new HashSet<>();
+        final GLDrawable      glDrawable0 = mock(GLDrawable.class);
+        final GLDrawable      glDrawable1 = mock(GLDrawable.class);
+        final Set<GLDrawable> drawables   = new HashSet<>();
         drawables.add(glDrawable0);
         drawables.add(glDrawable1);
         when(this.glDrawables.get()).thenReturn(drawables);

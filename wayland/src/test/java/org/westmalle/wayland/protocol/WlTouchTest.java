@@ -43,9 +43,9 @@ public class WlTouchTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 1;
-        final int id = 1;
+        final Client client  = mock(Client.class);
+        final int    version = 1;
+        final int    id      = 1;
 
         final WlTouch wlTouch = new WlTouch();
         //when

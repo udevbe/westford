@@ -52,8 +52,8 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
-        final Surface surface = mock(Surface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        final Surface           surface           = mock(Surface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
         final Point surfacePosition = Point.create(75,
@@ -98,7 +98,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -154,7 +154,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -210,7 +210,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -266,7 +266,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -322,7 +322,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -378,7 +378,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -434,7 +434,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -490,7 +490,7 @@ public class ShellSurfaceTest {
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -534,7 +534,7 @@ public class ShellSurfaceTest {
     public void testPong() {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
-        final int pingSerial = 12345;
+        final int                    pingSerial             = 12345;
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.wlCompositor,
@@ -560,7 +560,7 @@ public class ShellSurfaceTest {
         final EventLoop.TimerEventHandler timerEventHandler = timerEventHandlerArgumentCaptor.getValue();
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
-        final int pingSerial = 12345;
+        final int                    pingSerial             = 12345;
         shellSurface.pong(wlShellSurfaceResource,
                           pingSerial);
 
@@ -602,13 +602,13 @@ public class ShellSurfaceTest {
     public void testSetTransient() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
 
         final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface parentWlSurface = mock(WlSurface.class);
+        final WlSurface         parentWlSurface         = mock(WlSurface.class);
         when(parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
         final Surface parentSurface = mock(Surface.class);
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);

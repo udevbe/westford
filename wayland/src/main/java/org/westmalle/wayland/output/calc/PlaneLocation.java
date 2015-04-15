@@ -38,7 +38,7 @@ public abstract class PlaneLocation {
     public Optional<PlaneLocation> translateTo(@Nonnull final Plane targetPlane) {
         //TODO unit test
 
-        final Optional<Mat4> mat4Optional = getPlane().getTranslation(targetPlane);
+        final Optional<Mat4>          mat4Optional = getPlane().getTranslation(targetPlane);
         final Optional<PlaneLocation> result;
         if (mat4Optional.isPresent()) {
             result = Optional.of(targetPlane.locate(mat4Optional.get()

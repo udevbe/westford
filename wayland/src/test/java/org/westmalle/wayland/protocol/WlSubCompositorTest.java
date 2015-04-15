@@ -70,15 +70,15 @@ public class WlSubCompositorTest {
     @Test
     public void testGetSubsurface() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 4;
+        final Client                  client                = mock(Client.class);
+        final int                     version               = 4;
         final WlSubcompositorResource subcompositorResource = mock(WlSubcompositorResource.class);
         when(subcompositorResource.getClient()).thenReturn(client);
         when(subcompositorResource.getVersion()).thenReturn(4);
 
-        final int id = 123;
+        final int               id      = 123;
         final WlSurfaceResource surface = mock(WlSurfaceResource.class);
-        final WlSurfaceResource parent = mock(WlSurfaceResource.class);
+        final WlSurfaceResource parent  = mock(WlSurfaceResource.class);
 
         final WlSubSurface wlSubSurface = mock(WlSubSurface.class);
         when(this.wlSubSurfaceFactory.create(surface,
@@ -112,9 +112,9 @@ public class WlSubCompositorTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 2;
-        final int id = 12;
+        final Client client  = mock(Client.class);
+        final int    version = 2;
+        final int    id      = 12;
 
         final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
                                                                     this.wlSubSurfaceFactory);

@@ -38,9 +38,9 @@ public class WlSubSurfaceTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client = mock(Client.class);
-        final int version = 1;
-        final int id = 15;
+        final Client client  = mock(Client.class);
+        final int    version = 1;
+        final int    id      = 15;
 
         final WlSubSurface wlSubSurface = new WlSubSurface(this.surface,
                                                            this.parent);

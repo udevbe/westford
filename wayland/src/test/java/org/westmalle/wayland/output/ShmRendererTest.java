@@ -69,7 +69,7 @@ public class ShmRendererTest {
     @Test
     public void testBeginRender() throws Exception {
         //given
-        final GLDrawable glDrawable = mock(GLDrawable.class);
+        final GLDrawable       glDrawable       = mock(GLDrawable.class);
         final ListenableFuture listenableFuture = mock(ListenableFuture.class);
         when(this.shmRenderEngine.begin(glDrawable)).thenReturn(listenableFuture);
         //when
@@ -81,7 +81,7 @@ public class ShmRendererTest {
     @Test
     public void testEndRender() throws Exception {
         //given
-        final GLDrawable glDrawable = mock(GLDrawable.class);
+        final GLDrawable       glDrawable       = mock(GLDrawable.class);
         final ListenableFuture listenableFuture = mock(ListenableFuture.class);
         when(this.shmRenderEngine.end(glDrawable)).thenReturn(listenableFuture);
         //when
