@@ -4,6 +4,7 @@ package org.westmalle.wayland.platform.eglkms.drm;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class drmModeConnector extends Structure{
@@ -28,6 +29,8 @@ public class drmModeConnector extends Structure{
 
     @Override
     protected List getFieldOrder() {
-        return null;
+        return Arrays.asList("connector_id","encoder_id","connector_type","connector_type_id","connection",
+                             "mmWidth","mmHeight","subpixel","count_modes","modes","count_props","props","prop_values",
+                             "count_encoders","encoders");
     }
 }
