@@ -23,7 +23,7 @@ public class ScreenDriver extends ScreenImpl {
     protected void createNativeImpl() {
         init();
         this.aScreen = new DefaultGraphicsScreen(getDisplay().getGraphicsDevice(),
-                                            this.screen_idx);
+                                                 this.screen_idx);
 
 
     }
