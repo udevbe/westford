@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform.eglkms.gbm;
+package org.westmalle.wayland.platform.newt.eglkms.gbm;
 
 
 import com.sun.jna.Pointer;

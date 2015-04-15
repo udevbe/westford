@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform.eglkms.drm;
+package org.westmalle.wayland.platform.newt.eglkms.drm;
 
 public interface drmModeSubPixel {
     int DRM_MODE_SUBPIXEL_UNKNOWN        = 1;

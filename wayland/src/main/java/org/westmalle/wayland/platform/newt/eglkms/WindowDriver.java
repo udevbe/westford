@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform.eglkms;
+package org.westmalle.wayland.platform.newt.eglkms;
 
 
 import com.jogamp.nativewindow.util.Insets;

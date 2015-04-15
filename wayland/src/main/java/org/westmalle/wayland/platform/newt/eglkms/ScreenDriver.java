@@ -1,15 +1,15 @@
-package org.westmalle.wayland.platform.eglkms;
+package org.westmalle.wayland.platform.newt.eglkms;
 
 
 import com.jogamp.nativewindow.DefaultGraphicsScreen;
 import com.jogamp.newt.MonitorDevice;
 import com.jogamp.newt.MonitorMode;
 
-import org.westmalle.wayland.platform.eglkms.drm.DrmLibrary;
-import org.westmalle.wayland.platform.eglkms.drm.drmModeConnection;
-import org.westmalle.wayland.platform.eglkms.drm.drmModeConnector;
-import org.westmalle.wayland.platform.eglkms.drm.drmModeEncoder;
-import org.westmalle.wayland.platform.eglkms.drm.drmModeRes;
+import org.westmalle.wayland.platform.newt.eglkms.drm.DrmLibrary;
+import org.westmalle.wayland.platform.newt.eglkms.drm.drmModeConnection;
+import org.westmalle.wayland.platform.newt.eglkms.drm.drmModeConnector;
+import org.westmalle.wayland.platform.newt.eglkms.drm.drmModeEncoder;
+import org.westmalle.wayland.platform.newt.eglkms.drm.drmModeRes;
 
 import jogamp.newt.MonitorModeProps;
 import jogamp.newt.ScreenImpl;
@@ -67,7 +67,8 @@ public class ScreenDriver extends ScreenImpl{
         }
 
         for (i = 0; i < resources.count_encoders; i++) {
-            drmModeEncoder encoder = this.drmLibrary.drmModeGetEncoder(displayDriver.getFd(), resources.encoders.getInt(i*4));
+            drmModeEncoder
+                    encoder = this.drmLibrary.drmModeGetEncoder(displayDriver.getFd(), resources.encoders.getInt(i*4));
 
             if (encoder == null)
                 continue;

@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform.eglkms;
+package org.westmalle.wayland.platform.newt.eglkms;
 
 
 import com.jogamp.nativewindow.AbstractGraphicsDevice;
@@ -7,7 +7,7 @@ import com.jogamp.opengl.egl.EGL;
 import com.sun.jna.Pointer;
 
 import org.westmalle.wayland.platform.CLibrary;
-import org.westmalle.wayland.platform.eglkms.gbm.GbmLibrary;
+import org.westmalle.wayland.platform.newt.eglkms.gbm.GbmLibrary;
 
 import javax.inject.Inject;
 

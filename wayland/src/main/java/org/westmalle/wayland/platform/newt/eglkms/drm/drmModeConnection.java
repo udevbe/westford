@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform.eglkms.drm;
+package org.westmalle.wayland.platform.newt.eglkms.drm;
 
 
 public interface drmModeConnection {
