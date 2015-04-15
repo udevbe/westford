@@ -9,16 +9,16 @@ import java.util.List;
 
 public class drmModeRes extends Structure {
 
-    public int count_fbs;
+    public int     count_fbs;
     public Pointer fbs;
 
-    public int count_crtcs;
+    public int     count_crtcs;
     public Pointer crtcs;
 
-    public int count_connectors;
+    public int     count_connectors;
     public Pointer connectors;
 
-    public int count_encoders;
+    public int     count_encoders;
     public Pointer encoders;
 
     public int min_width, max_width;
@@ -26,7 +26,17 @@ public class drmModeRes extends Structure {
 
     @Override
     protected List getFieldOrder() {
-        return Arrays.asList("count_fbs","fbs","count_crtcs","crtcs","count_connectors","connectors","count_encoders",
-                             "encoders","min_width","max_width","min_height","max_height");
+        return Arrays.asList("count_fbs",
+                             "fbs",
+                             "count_crtcs",
+                             "crtcs",
+                             "count_connectors",
+                             "connectors",
+                             "count_encoders",
+                             "encoders",
+                             "min_width",
+                             "max_width",
+                             "min_height",
+                             "max_height");
     }
 }

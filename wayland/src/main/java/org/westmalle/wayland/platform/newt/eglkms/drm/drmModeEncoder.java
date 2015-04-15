@@ -5,7 +5,7 @@ import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public class drmModeEncoder extends Structure{
+public class drmModeEncoder extends Structure {
 
     public int encoder_id;
     public int encoder_type;
@@ -15,6 +15,10 @@ public class drmModeEncoder extends Structure{
 
     @Override
     protected List getFieldOrder() {
-        return Arrays.asList("encoder_id","encoder_type","crtc_id","possible_crtcs","possible_clones");
+        return Arrays.asList("encoder_id",
+                             "encoder_type",
+                             "crtc_id",
+                             "possible_crtcs",
+                             "possible_clones");
     }
 }

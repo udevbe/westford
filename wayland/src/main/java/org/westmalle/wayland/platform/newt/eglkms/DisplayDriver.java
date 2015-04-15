@@ -5,46 +5,49 @@ import com.jogamp.nativewindow.AbstractGraphicsDevice;
 import com.jogamp.nativewindow.egl.EGLGraphicsDevice;
 import com.jogamp.opengl.egl.EGL;
 import com.sun.jna.Pointer;
-
+import jogamp.newt.DisplayImpl;
+import jogamp.opengl.egl.EGLDisplayUtil;
 import org.westmalle.wayland.platform.CLibrary;
 import org.westmalle.wayland.platform.newt.eglkms.gbm.GbmLibrary;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import jogamp.newt.DisplayImpl;
-import jogamp.opengl.egl.EGLDisplayUtil;
+public class DisplayDriver extends DisplayImpl {
 
-public class DisplayDriver extends DisplayImpl{
-
-    private final CLibrary cLibrary;
+    @Nonnull
+    private final CLibrary   cLibrary;
+    @Nonnull
     private final GbmLibrary gbmLibrary;
-    private int fd;
+    private       int        fd;
 
     @Inject
-    DisplayDriver(final CLibrary cLibrary,
-                         final GbmLibrary gbmLibrary) {
+    DisplayDriver(@Nonnull final CLibrary cLibrary,
+                  @Nonnull final GbmLibrary gbmLibrary) {
         this.cLibrary = cLibrary;
         this.gbmLibrary = gbmLibrary;
     }
 
     @Override
     protected void createNativeImpl() {
-        this.fd = this.cLibrary.open("/dev/dri/card0", CLibrary.O_RDWR);
-        final Pointer gbmDevice = this.gbmLibrary.gbm_create_device(fd);
+        this.fd = this.cLibrary.open("/dev/dri/card0",
+                                     CLibrary.O_RDWR);
+        final Pointer gbmDevice = this.gbmLibrary.gbm_create_device(this.fd);
         final EGLGraphicsDevice eglGraphicsDevice = EGLDisplayUtil.eglCreateEGLGraphicsDevice(
                 Pointer.nativeValue(gbmDevice),
                 AbstractGraphicsDevice.DEFAULT_CONNECTION,
                 AbstractGraphicsDevice.DEFAULT_UNIT);
         eglGraphicsDevice.open();
 
-        final  String extensions = EGL.eglQueryString(eglGraphicsDevice.getHandle(), EGL.EGL_EXTENSIONS);
+        final String extensions = EGL.eglQueryString(eglGraphicsDevice.getHandle(),
+                                                     EGL.EGL_EXTENSIONS);
 
         if (!extensions.contains("EGL_KHR_surfaceless_opengl")) {
             System.err.println("no surfaceless support, cannot initialize\n");
             System.exit(1);
         }
 
-        aDevice = eglGraphicsDevice;
+        this.aDevice = eglGraphicsDevice;
     }
 
     @Override
@@ -60,6 +63,6 @@ public class DisplayDriver extends DisplayImpl{
     }
 
     public int getFd() {
-        return fd;
+        return this.fd;
     }
 }
