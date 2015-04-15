@@ -58,7 +58,7 @@ Roadmap
 | sw rendering  | 0%        |
 | xdg_shell     | 0%        |
 | xwayland      | 0%        |
-| DRM/KMS       | 0%        |
+| DRM/KMS       | 10%        |
 | multi seat    | 0%        |
 
 License
