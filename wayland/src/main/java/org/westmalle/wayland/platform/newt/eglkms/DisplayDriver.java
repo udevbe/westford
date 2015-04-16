@@ -20,6 +20,7 @@ public class DisplayDriver extends DisplayImpl {
     @Nonnull
     private final GbmLibrary gbmLibrary;
     private       int        fd;
+    private Pointer gbmDevice;
 
     @Inject
     DisplayDriver(@Nonnull final CLibrary cLibrary,
@@ -32,7 +33,8 @@ public class DisplayDriver extends DisplayImpl {
     protected void createNativeImpl() {
         this.fd = this.cLibrary.open("/dev/dri/card0",
                                      CLibrary.O_RDWR);
-        final Pointer gbmDevice = this.gbmLibrary.gbm_create_device(this.fd);
+        this.gbmDevice = this.gbmLibrary.gbm_create_device(this.fd);
+
         final EGLGraphicsDevice eglGraphicsDevice = EGLDisplayUtil.eglCreateEGLGraphicsDevice(
                 Pointer.nativeValue(gbmDevice),
                 AbstractGraphicsDevice.DEFAULT_CONNECTION,
@@ -52,9 +54,11 @@ public class DisplayDriver extends DisplayImpl {
 
     @Override
     protected void closeNativeImpl(final AbstractGraphicsDevice aDevice) {
+        aDevice.close();
+        GbmLibrary.INSTANCE.gbm_device_destroy(this.gbmDevice);
+        this.gbmDevice = null;
         this.cLibrary.close(this.fd);
         this.fd = 0;
-        aDevice.close();
     }
 
     @Override
@@ -64,5 +68,9 @@ public class DisplayDriver extends DisplayImpl {
 
     public int getFd() {
         return this.fd;
+    }
+
+    public Pointer getGbmDevice() {
+        return this.gbmDevice;
     }
 }

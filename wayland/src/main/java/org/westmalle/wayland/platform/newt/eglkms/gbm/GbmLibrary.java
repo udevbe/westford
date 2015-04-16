@@ -12,4 +12,6 @@ public interface GbmLibrary {
     Pointer gbm_create_device(int fd);
 
     Pointer gbm_bo_create (Pointer gbm, int width, int height, int format, int usage);
+
+    void gbm_device_destroy(Pointer gbmDevice);
 }

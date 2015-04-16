@@ -12,13 +12,6 @@ import javax.annotation.Nonnull;
 
 public class ScreenDriver extends ScreenImpl {
 
-    @Nonnull
-    private final DrmLibrary drmLibrary;
-
-    public ScreenDriver(@Nonnull final DrmLibrary drmLibrary) {
-        this.drmLibrary = drmLibrary;
-    }
-
     @Override
     protected void createNativeImpl() {
         init();
@@ -39,21 +32,21 @@ public class ScreenDriver extends ScreenImpl {
 
         int i;
 
-        final drmModeRes resources = this.drmLibrary.drmModeGetResources(displayDriver.getFd());
+        final drmModeRes resources = DrmLibrary.INSTANCE.drmModeGetResources(displayDriver.getFd());
         if (resources == null) {
             System.err.println("drmModeGetResources failed\n");
             System.exit(1);
         }
 
         for (i = 0; i < resources.count_connectors; i++) {
-            connector = this.drmLibrary.drmModeGetConnector(displayDriver.getFd(),
+            connector = DrmLibrary.INSTANCE.drmModeGetConnector(displayDriver.getFd(),
                                                             resources.connectors.getInt(i * 4));
             if (connector == null) { continue; }
 
             if (connector.connection == drmModeConnection.DRM_MODE_CONNECTED &&
                 connector.count_modes > 0) { break; }
 
-            this.drmLibrary.drmModeFreeConnector(connector);
+            DrmLibrary.INSTANCE.drmModeFreeConnector(connector);
         }
 
         if (i == resources.count_connectors) {
@@ -63,14 +56,14 @@ public class ScreenDriver extends ScreenImpl {
 
         for (i = 0; i < resources.count_encoders; i++) {
             final drmModeEncoder
-                    encoder = this.drmLibrary.drmModeGetEncoder(displayDriver.getFd(),
+                    encoder = DrmLibrary.INSTANCE.drmModeGetEncoder(displayDriver.getFd(),
                                                                 resources.encoders.getInt(i * 4));
 
             if (encoder == null) { continue; }
 
             if (encoder.encoder_id == connector.encoder_id) { break; }
 
-            this.drmLibrary.drmModeFreeEncoder(encoder);
+            DrmLibrary.INSTANCE.drmModeFreeEncoder(encoder);
         }
 
     }
