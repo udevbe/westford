@@ -15,12 +15,16 @@ package org.westmalle.wayland.platform;
 
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Library;
+import com.sun.jna.Native;
 
 import javax.inject.Singleton;
 
 @Singleton
 public interface CLibrary extends Library {
     String JNA_LIBRARY_NAME = "c";
+
+    CLibrary INSTANCE = (CLibrary) Native.loadLibrary(JNA_LIBRARY_NAME, CLibrary.class);
+
 
     /* command values */
     int F_DUPFD = 0;	/* duplicate file descriptor */

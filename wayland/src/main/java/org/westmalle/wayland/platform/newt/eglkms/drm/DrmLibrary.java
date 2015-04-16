@@ -2,9 +2,13 @@ package org.westmalle.wayland.platform.newt.eglkms.drm;
 
 
 import com.sun.jna.Library;
+import com.sun.jna.Native;
 
 public interface DrmLibrary extends Library {
     String JNA_LIBRARY_NAME = "drm";
+
+    DrmLibrary INSTANCE = (DrmLibrary) Native.loadLibrary(JNA_LIBRARY_NAME,DrmLibrary.class);
+
 
     drmModeRes drmModeGetResources(int fd);
 
