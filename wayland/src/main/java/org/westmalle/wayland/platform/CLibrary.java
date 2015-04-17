@@ -23,7 +23,8 @@ import javax.inject.Singleton;
 public interface CLibrary extends Library {
     String JNA_LIBRARY_NAME = "c";
 
-    CLibrary INSTANCE = (CLibrary) Native.loadLibrary(JNA_LIBRARY_NAME, CLibrary.class);
+    CLibrary INSTANCE = (CLibrary) Native.loadLibrary(JNA_LIBRARY_NAME,
+                                                      CLibrary.class);
 
 
     /* command values */
