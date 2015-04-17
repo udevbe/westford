@@ -33,10 +33,7 @@
                 <version>2.5.3</version>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/main/assembly/linux-amd64.xml</descriptor>
-                        <descriptor>src/main/assembly/linux-i586.xml</descriptor>
-                        <descriptor>src/main/assembly/linux-armv6.xml</descriptor>
-                        <descriptor>src/main/assembly/linux-armv6hf.xml</descriptor>
+                        <descriptor>src/main/assembly/static.xml</descriptor>
                     </descriptors>
                     <archive>
                         <manifest>
