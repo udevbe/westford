@@ -189,8 +189,8 @@ public class GLRenderEngine implements ShmRenderEngine {
         buffer.beginAccess();
         final GL2ES2 gl2ES2 = this.gl.get();
         querySurfaceData(surfaceResource,
-                         buffer).update(gl2ES2,
-                                        buffer);
+                         buffer).makeActive(gl2ES2,
+                                            buffer);
         buffer.endAccess();
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
 
@@ -357,31 +357,26 @@ public class GLRenderEngine implements ShmRenderEngine {
         final GL2ES2  gl2ES2      = this.gl.get();
         GLSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
-            surfaceData = GLSurfaceData.create(gl2ES2,
-                                               buffer);
+            surfaceData = GLSurfaceData.create(gl2ES2);
+            surfaceData.init(gl2ES2,
+                             buffer);
             this.cachedSurfaceData.put(surfaceResource,
                                        surfaceData);
+        } else {
+            final int surfaceDataWidth = surfaceData.getWidth();
+            final int surfaceDataHeight = surfaceData.getHeight();
+            final int bufferWidth = buffer.getWidth();
+            final int bufferHeight = buffer.getHeight();
+            if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
+                surfaceData.destroy(gl2ES2);
 
-            return surfaceData;
+                surfaceData = GLSurfaceData.create(gl2ES2);
+                surfaceData.init(gl2ES2,
+                                 buffer);
+                this.cachedSurfaceData.put(surfaceResource,
+                                           surfaceData);
+            }
         }
-
-        final int surfaceDataWidth = surfaceData.getTexture()
-                                                .getImageWidth();
-        final int surfaceDataHeight = surfaceData.getTexture()
-                                                 .getImageWidth();
-        final int bufferWidth  = buffer.getWidth();
-        final int bufferHeight = buffer.getHeight();
-
-        if (surfaceDataWidth != bufferWidth ||
-            surfaceDataHeight != bufferHeight) {
-
-            surfaceData.destroy(gl2ES2);
-            this.cachedSurfaceData.remove(surfaceResource);
-
-            return querySurfaceData(surfaceResource,
-                                    buffer);
-        }
-
         return surfaceData;
     }
 }
