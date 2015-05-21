@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform;
+package org.westmalle.wayland.platform.pixman1;
 
 
 import com.sun.jna.NativeLong;

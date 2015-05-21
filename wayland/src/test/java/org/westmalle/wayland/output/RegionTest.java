@@ -1,9 +1,10 @@
 package org.westmalle.wayland.output;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.platform.pixman1.Libpixman1;
 
 import java.util.List;
 
@@ -13,8 +14,12 @@ import static com.google.common.truth.Truth.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class RegionTest {
 
-    @InjectMocks
     private Region region;
+
+    @Before
+    public void setUp() throws Exception {
+        this.region = new Region(Libpixman1.GET());
+    }
 
     @Test
     public void testAdd() throws Exception {

@@ -21,7 +21,7 @@ import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.platform.Libc;
+import org.westmalle.wayland.platform.c.Libc;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -70,14 +70,17 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     private final Display  display;
     private final int      pipeR;
     private final int      pipeWR;
+    private final Libc     libc;
 
     @Inject
     JobExecutor(@Nonnull final Display display,
                 final int pipeR,
-                final int pipeWR) {
+                final int pipeWR,
+                final Libc libc) {
         this.display = display;
         this.pipeR = pipeR;
         this.pipeWR = pipeWR;
+        this.libc = libc;
     }
 
     public void start() {
@@ -93,7 +96,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     public void fireFinishedEvent() {
-        Libc.write(this.pipeWR,
+        this.libc.write(this.pipeWR,
                         this.eventFinishedBuffer,
                         1);
     }
@@ -112,8 +115,8 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     private void clean() {
-        Libc.close(this.pipeR);
-        Libc.close(this.pipeWR);
+        this.libc.close(this.pipeR);
+        this.libc.close(this.pipeWR);
         this.eventSource.get()
                         .remove();
         this.eventSource = Optional.empty();
@@ -148,7 +151,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     private byte read() {
-        Libc.read(this.pipeR,
+        this.libc.read(this.pipeR,
                        this.eventReadBuffer,
                        1);
         return this.eventReadBuffer.getByte(0);
@@ -170,7 +173,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     private void fireNewJobEvent() {
-        Libc.write(this.pipeWR,
+        this.libc.write(this.pipeWR,
                         this.eventNewJobBuffer,
                         1);
     }

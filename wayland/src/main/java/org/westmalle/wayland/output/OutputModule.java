@@ -16,7 +16,8 @@ package org.westmalle.wayland.output;
 import com.google.common.util.concurrent.Service;
 
 import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.platform.Libc;
+import org.westmalle.wayland.platform.c.Libc;
+import org.westmalle.wayland.platform.pixman1.Libpixman1;
 
 import javax.inject.Singleton;
 
@@ -36,45 +37,61 @@ public class OutputModule {
 
     @Provides
     @Singleton
+    Libc provideLibc() {
+        return Libc.GET();
+    }
+
+    @Provides
+    @Singleton
+    Libpixman1 provideLibPixman1() {
+        return Libpixman1.GET();
+    }
+
+    @Provides
+    @Singleton
     Display provideDisplay() {
         return Display.create();
     }
 
     @Singleton
     @Provides
-    JobExecutor provideWlJobExecutor(final Display display) {
-        final int[] pipe = configure(pipe());
+    JobExecutor provideWlJobExecutor(final Display display,
+                                     final Libc libc) {
+        final int[] pipe = configure(pipe(libc),
+                                     libc);
         final int pipeR  = pipe[0];
         final int pipeWR = pipe[1];
 
         return new JobExecutor(display,
                                pipeR,
-                               pipeWR);
+                               pipeWR,
+                               libc);
     }
 
-    private int[] pipe() {
+    private int[] pipe(final Libc libc) {
         final int[] pipeFds = new int[2];
-        Libc.pipe(pipeFds);
+        libc.pipe(pipeFds);
         return pipeFds;
     }
 
-    private int[] configure(final int[] pipeFds) {
+    private int[] configure(final int[] pipeFds,
+                            final Libc libc) {
         final int readFd  = pipeFds[0];
         final int writeFd = pipeFds[1];
 
-        final int readFlags = Libc.fcntl(readFd,
-                                         Libc.F_GETFD,
+        final int readFlags = libc.fcntl(readFd,
+                                         libc.F_GETFD,
                                          0);
-        Libc.fcntl(readFd,
-                   Libc.F_SETFD,
-                   readFlags | Libc.FD_CLOEXEC);
+        libc.fcntl(readFd,
+                   libc.F_SETFD,
+                   readFlags | libc.FD_CLOEXEC);
 
-        final int writeFlags = Libc.fcntl(writeFd,
-                                          Libc.F_GETFD,
+        final int writeFlags = libc.fcntl(writeFd,
+                                          libc.F_GETFD,
                                           0);
-        Libc.fcntl(writeFd,
-                   Libc.F_SETFD,
-                   writeFlags | Libc.FD_CLOEXEC);
+        libc.fcntl(writeFd,
+                   libc.F_SETFD,
+                   writeFlags | libc.FD_CLOEXEC);
 
         return pipeFds;
     }
