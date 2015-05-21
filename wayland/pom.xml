@@ -14,23 +14,10 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <pixman-java-bindings.version>1.0.0</pixman-java-bindings.version>
         <wayland-java-bindings.version>1.2.0</wayland-java-bindings.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
     <dependencies>
-        <dependency>
-            <groupId>com.github.Zubnix</groupId>
-            <artifactId>pixman-java-bindings</artifactId>
-            <version>${pixman-java-bindings.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.freedesktop</groupId>
             <artifactId>wayland</artifactId>

@@ -29,19 +29,6 @@
         <developerConnection>scm:git:https://github.com/Zubnix/westmalle.git</developerConnection>
     </scm>
 
-    <repositories>
-        <repository>
-            <id>snapshots-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <properties>
         <!-- dep versions -->
         <jogl.version>2.3.1</jogl.version>

@@ -14,16 +14,19 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
-import com.sun.jna.ptr.IntByReference;
-import org.freedesktop.pixman1.Pixman1Library;
-import org.freedesktop.pixman1.pixman_box32;
-import org.freedesktop.pixman1.pixman_region32;
 
-import javax.annotation.Nonnull;
+import com.sun.jna.ptr.IntByReference;
+
+import org.westmalle.wayland.platform.Pixman1Library;
+import org.westmalle.wayland.platform.pixman_box32;
+import org.westmalle.wayland.platform.pixman_region32;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "RegionFactory")
 public class Region {
