@@ -27,9 +27,7 @@ public class CompositorTest {
     @Mock
     private Display     display;
     @Mock
-    private GLDrawables glDrawables;
-    @Mock
-    private ShmRenderer shmRenderer;
+    private Renderer renderer;
 
     @InjectMocks
     private Compositor compositor;
@@ -42,7 +40,7 @@ public class CompositorTest {
         final Set<GLDrawable> drawables   = new HashSet<>();
         drawables.add(glDrawable0);
         drawables.add(glDrawable1);
-        when(this.glDrawables.get()).thenReturn(drawables);
+        //when(this.glDrawables.get()).thenReturn(drawables);
 
         final EventLoop eventLoop = mock(EventLoop.class);
         when(this.display.getEventLoop()).thenReturn(eventLoop);
@@ -69,30 +67,30 @@ public class CompositorTest {
         idleHandlers.get(0)
                     .handle();
         //then
-        final InOrder inOrder0 = inOrder(this.shmRenderer,
+        final InOrder inOrder0 = inOrder(this.renderer,
                                          this.display);
-        inOrder0.verify(this.shmRenderer)
+        inOrder0.verify(this.renderer)
                 .beginRender(glDrawable0);
-        inOrder0.verify(this.shmRenderer)
+        inOrder0.verify(this.renderer)
                 .render(wlSurfaceResource0);
-        inOrder0.verify(this.shmRenderer)
+        inOrder0.verify(this.renderer)
                 .render(wlSurfaceResource1);
-        inOrder0.verify(this.shmRenderer)
+        inOrder0.verify(this.renderer)
                 .render(wlSurfaceResource2);
-        inOrder0.verify(this.shmRenderer)
+        inOrder0.verify(this.renderer)
                 .endRender(glDrawable0);
 
-        final InOrder inOrder1 = inOrder(this.shmRenderer,
+        final InOrder inOrder1 = inOrder(this.renderer,
                                          this.display);
-        inOrder1.verify(this.shmRenderer)
+        inOrder1.verify(this.renderer)
                 .beginRender(glDrawable1);
-        inOrder1.verify(this.shmRenderer)
+        inOrder1.verify(this.renderer)
                 .render(wlSurfaceResource0);
-        inOrder1.verify(this.shmRenderer)
+        inOrder1.verify(this.renderer)
                 .render(wlSurfaceResource1);
-        inOrder1.verify(this.shmRenderer)
+        inOrder1.verify(this.renderer)
                 .render(wlSurfaceResource2);
-        inOrder1.verify(this.shmRenderer)
+        inOrder1.verify(this.renderer)
                 .endRender(glDrawable1);
 
         verify(this.display).flushClients();

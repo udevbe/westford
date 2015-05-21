@@ -20,14 +20,14 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 
 import javax.annotation.Nonnull;
 
-public interface ShmRenderEngine {
+public interface RenderEngine {
     @Nonnull
     ListenableFuture<?> draw(@Nonnull final WlSurfaceResource surfaceResource,
                              @Nonnull final WlBufferResource buffer);
 
     @Nonnull
-    ListenableFuture<?> begin(@Nonnull final GLDrawable drawable);
+    ListenableFuture<?> begin(@Nonnull final Object outputImplementation);
 
     @Nonnull
-    ListenableFuture<?> end(@Nonnull final GLDrawable drawable);
+    ListenableFuture<?> end(@Nonnull final Object outputImplementation);
 }

@@ -14,11 +14,15 @@ public class Output {
     private OutputGeometry outputGeometry;
     @Nonnull
     private OutputMode     outputMode;
+    @Nonnull
+    private Object outputImplementation;
 
     Output(@Nonnull final OutputGeometry outputGeometry,
-           @Nonnull final OutputMode outputMode) {
+           @Nonnull final OutputMode outputMode,
+           @Nonnull final Object outputImplementation) {
         this.outputGeometry = outputGeometry;
         this.outputMode = outputMode;
+        this.outputImplementation = outputImplementation;
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
@@ -65,5 +69,10 @@ public class Output {
     @Nonnull
     public OutputGeometry getGeometry() {
         return this.outputGeometry;
+    }
+
+    @Nonnull
+    public Object getImplementation() {
+        return outputImplementation;
     }
 }

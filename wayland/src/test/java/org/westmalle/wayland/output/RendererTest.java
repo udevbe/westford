@@ -24,12 +24,12 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ShmBuffer.class)
-public class ShmRendererTest {
+public class RendererTest {
 
     @Mock
-    private ShmRenderEngine shmRenderEngine;
+    private RenderEngine renderEngine;
     @InjectMocks
-    private ShmRenderer     shmRenderer;
+    private Renderer renderer;
 
     @Before
     public void setUp() {
@@ -57,12 +57,12 @@ public class ShmRendererTest {
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
 
         final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.shmRenderEngine.draw(any(),
+        when(this.renderEngine.draw(any(),
                                        any())).thenReturn(listenableFuture);
         //when
-        this.shmRenderer.render(surfaceResource);
+        this.renderer.render(surfaceResource);
         //then
-        verify(this.shmRenderEngine).draw(surfaceResource,
+        verify(this.renderEngine).draw(surfaceResource,
                                           wlBufferResource);
     }
 
@@ -71,11 +71,11 @@ public class ShmRendererTest {
         //given
         final GLDrawable       glDrawable       = mock(GLDrawable.class);
         final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.shmRenderEngine.begin(glDrawable)).thenReturn(listenableFuture);
+        when(this.renderEngine.begin(glDrawable)).thenReturn(listenableFuture);
         //when
-        this.shmRenderer.beginRender(glDrawable);
+        this.renderer.beginRender(glDrawable);
         //then
-        verify(this.shmRenderEngine).begin(glDrawable);
+        verify(this.renderEngine).begin(glDrawable);
     }
 
     @Test
@@ -83,10 +83,10 @@ public class ShmRendererTest {
         //given
         final GLDrawable       glDrawable       = mock(GLDrawable.class);
         final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.shmRenderEngine.end(glDrawable)).thenReturn(listenableFuture);
+        when(this.renderEngine.end(glDrawable)).thenReturn(listenableFuture);
         //when
-        this.shmRenderer.endRender(glDrawable);
+        this.renderer.endRender(glDrawable);
         //then
-        verify(this.shmRenderEngine).end(glDrawable);
+        verify(this.renderEngine).end(glDrawable);
     }
 }

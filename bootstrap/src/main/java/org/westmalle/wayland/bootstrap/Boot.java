@@ -18,11 +18,10 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLProfile;
 import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.CompositorFactory;
-import org.westmalle.wayland.output.ShmRenderer;
+import org.westmalle.wayland.output.Renderer;
 import org.westmalle.wayland.output.ShmRendererFactory;
 import org.westmalle.wayland.output.gl.GLRenderEngine;
 import org.westmalle.wayland.output.gl.GLRenderEngineFactory;
-import org.westmalle.wayland.platform.newt.GLWindowOutput;
 import org.westmalle.wayland.platform.newt.GLWindowOutputFactory;
 import org.westmalle.wayland.platform.newt.GLWindowSeatFactory;
 import org.westmalle.wayland.protocol.*;
@@ -42,20 +41,23 @@ public class Boot {
 
         //create an output
         //create an X opengl enabled window
-        final GLWindowOutput glWindowOutput = glWindowOutputFactory.create(System.getenv("DISPLAY"),
+        final WlOutput glWindowOutput = glWindowOutputFactory.create(System.getenv("DISPLAY"),
                                                                            GLProfile.getGL2ES2(),
                                                                            800,
                                                                            600);
         //setup our render engine
         //create an opengl render engine that uses shm buffers and can output to an opengl window
-        final GLWindow       glWindow       = glWindowOutput.getGlWindow();
+        final GLWindow       glWindow       = (GLWindow) glWindowOutput.getOutput().getImplementation();
         final GLRenderEngine glRenderEngine = glRenderEngineFactory.create(glWindow.getContext());
         //create an shm renderer that passes on shm buffers to it's render implementation
-        final ShmRenderer shmRenderer = shmRendererFactory.create(glRenderEngine);
+        final Renderer renderer = shmRendererFactory.create(glRenderEngine);
 
         //setup compositing
         //create a compositor with shell and scene logic
-        final Compositor compositor = compositorFactory.create(shmRenderer);
+        final Compositor compositor = compositorFactory.create(renderer);
+        //add our output to the compositor
+        //TODO add hotplug functionality
+        compositor.getWlOutputs().add(glWindowOutput);
         //create a wayland compositor that delegates it's requests to a shell implementation.
         final WlCompositor wlCompositor = wlCompositorFactory.create(compositor);
 

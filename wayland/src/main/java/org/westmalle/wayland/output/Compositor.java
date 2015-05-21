@@ -15,11 +15,11 @@ package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.collect.Lists;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
@@ -32,22 +32,20 @@ public class Compositor {
     @Nonnull
     private final Display     display;
     @Nonnull
-    private final GLDrawables glDrawables;
+    private final Renderer renderer;
     @Nonnull
-    private final ShmRenderer shmRenderer;
+    private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
     @Nonnull
-    private final LinkedList<WlSurfaceResource> surfacesStack = Lists.newLinkedList();
+    private final LinkedList<WlOutput> wlOutputs = new LinkedList<>();
     @Nonnull
     private final EventLoop.IdleHandler idleHandler;
     @Nonnull
     private Optional<EventSource> renderEvent = Optional.empty();
 
     Compositor(@Nonnull @Provided final Display display,
-               @Nonnull @Provided final GLDrawables glDrawables,
-               @Nonnull final ShmRenderer shmRenderer) {
+               @Nonnull final Renderer renderer) {
         this.display = display;
-        this.glDrawables = glDrawables;
-        this.shmRenderer = shmRenderer;
+        this.renderer = renderer;
         this.idleHandler = this::handleIdle;
     }
 
@@ -56,18 +54,18 @@ public class Compositor {
                         .remove();
         this.renderEvent = Optional.empty();
 
-        this.glDrawables.get()
-                        .forEach(glDrawable -> {
-                            this.shmRenderer.beginRender(glDrawable);
-                            getSurfacesStack().forEach(this.shmRenderer::render);
-                            this.shmRenderer.endRender(glDrawable);
-                        });
+        this.wlOutputs.forEach(wlOutput -> {
+            final Object outputImplementation = wlOutput.getOutput().getImplementation();
+            this.renderer.beginRender(outputImplementation);
+            getSurfacesStack().forEach(this.renderer::render);
+            this.renderer.endRender(outputImplementation);
+        });
 
         this.display.flushClients();
     }
 
     public void requestRender() {
-        if (!this.renderEvent.isPresent() && needsRender()) {
+        if (!this.renderEvent.isPresent()) {
             renderScene();
         }
     }
@@ -82,15 +80,8 @@ public class Compositor {
         return this.surfacesStack;
     }
 
-    private boolean needsRender() {
-//        final WlSurfaceRequests implementation = surfaceResource.getImplementation();
-//        final Surface Surface = ((WlSurface) implementation).getSurface();
-//        if (Surface.isDestroyed()) {
-//            return true;
-//        }
-//        else {
-        //for now, always redraw
-        return true;
-//        }
+    @Nonnull
+    public LinkedList<WlOutput> getWlOutputs() {
+        return this.wlOutputs;
     }
 }

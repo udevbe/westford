@@ -25,7 +25,9 @@ public class Libegl {
     public native boolean eglInitialize (Pointer dpy, Pointer major, Pointer minor);
     public native boolean eglTerminate (Pointer dpy);
     public native boolean eglBindAPI (int api);
+    public native boolean eglSwapBuffers (Pointer dpy, Pointer surface);
+    public native Pointer eglCreateContext (Pointer dpy, Pointer config, Pointer share_context, Pointer attrib_list);
 
-    public native Pointer glGetPlatformDisplayEXT (int platform, Pointer native_display, Pointer attrib_list);
+    public native Pointer eglGetPlatformDisplayEXT (int platform, Pointer native_display, Pointer attrib_list);
     public native Pointer eglCreatePlatformWindowSurfaceEXT (Pointer dpy, Pointer config, Pointer native_window, Pointer attrib_list);
 }

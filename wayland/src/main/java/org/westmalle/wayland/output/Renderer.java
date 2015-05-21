@@ -23,13 +23,13 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutionException;
 
 @AutoFactory(className = "ShmRendererFactory")
-public class ShmRenderer {
+public class Renderer {
 
     @Nonnull
-    private final ShmRenderEngine shmRenderEngine;
+    private final RenderEngine renderEngine;
 
-    ShmRenderer(@Nonnull final ShmRenderEngine shmRenderEngine) {
-        this.shmRenderEngine = shmRenderEngine;
+    Renderer(@Nonnull final RenderEngine renderEngine) {
+        this.renderEngine = renderEngine;
     }
 
     public void render(@Nonnull final WlSurfaceResource surfaceResource) {
@@ -39,7 +39,7 @@ public class ShmRenderer {
                                                                 .getBuffer()
                                                                 .get();
         try {
-            this.shmRenderEngine.draw(surfaceResource,
+            this.renderEngine.draw(surfaceResource,
                                       wlBufferResource)
                                 .get();
         }
@@ -48,9 +48,9 @@ public class ShmRenderer {
         }
     }
 
-    public void beginRender(@Nonnull final GLDrawable glDrawable) {
+    public void beginRender(@Nonnull final Object outputImplementation) {
         try {
-            this.shmRenderEngine.begin(glDrawable)
+            this.renderEngine.begin(outputImplementation)
                                 .get();
         }
         catch (InterruptedException | ExecutionException e) {
@@ -58,9 +58,9 @@ public class ShmRenderer {
         }
     }
 
-    public void endRender(@Nonnull final GLDrawable glDrawable) {
+    public void endRender(@Nonnull final Object outputImplementation) {
         try {
-            this.shmRenderEngine.end(glDrawable)
+            this.renderEngine.end(outputImplementation)
                                 .get();
         }
         catch (InterruptedException | ExecutionException e) {

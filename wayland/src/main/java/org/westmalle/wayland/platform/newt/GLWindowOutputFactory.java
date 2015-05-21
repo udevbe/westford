@@ -36,41 +36,29 @@ import javax.inject.Inject;
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class GLWindowOutputFactory {
-
-    @Nonnull
-    private final GLDrawables     glDrawables;
     @Nonnull
     private final WlOutputFactory wlOutputFactory;
     @Nonnull
     private final OutputFactory   outputFactory;
 
     @Inject
-    GLWindowOutputFactory(@Nonnull final GLDrawables glDrawables,
-                          @Nonnull final WlOutputFactory wlOutputFactory,
+    GLWindowOutputFactory(@Nonnull final WlOutputFactory wlOutputFactory,
                           @Nonnull final OutputFactory outputFactory) {
-        this.glDrawables = glDrawables;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
     }
 
-    public GLWindowOutput create(@Nonnull final String xDisplay,
+    public WlOutput create(@Nonnull final String xDisplay,
                                  @Nonnull final GLProfile profile,
                                  @Nonnegative final int width,
                                  @Nonnegative final int height) {
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        final GLWindow glWindow = createGLWindow(xDisplay,
-                                                 profile,
-                                                 width,
-                                                 height);
-        final WlOutput wlOutput = createWlOutput(glWindow);
-
-        this.glDrawables.get()
-                        .add(glWindow);
-
-        return GLWindowOutput.create(glWindow,
-                                     wlOutput);
+        return createWlOutput(createGLWindow(xDisplay,
+                profile,
+                width,
+                height));
     }
 
     private GLWindow createGLWindow(final String xDisplay,
@@ -116,7 +104,8 @@ public class GLWindowOutputFactory {
                                                 .build();
 
         final WlOutput wlOutput = this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
-                                                                                        outputMode));
+                                                                                        outputMode,
+                                                                                        glWindow));
         addGLWindowListener(wlOutput,
                             glWindow);
         return wlOutput;
@@ -161,8 +150,6 @@ public class GLWindowOutputFactory {
 
             @Override
             public void windowDestroyed(final WindowEvent e) {
-                GLWindowOutputFactory.this.glDrawables.get()
-                                                      .remove(glWindow);
                 wlOutput.destroy();
             }
 

@@ -31,12 +31,6 @@ public class OutputModule {
 
     @Provides
     @Singleton
-    GLDrawables provideGLGlDrawables() {
-        return new GLDrawables();
-    }
-
-    @Provides
-    @Singleton
     Libc provideLibc() {
         return Libc.GET();
     }

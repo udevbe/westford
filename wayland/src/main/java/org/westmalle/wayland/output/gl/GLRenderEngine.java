@@ -25,7 +25,7 @@ import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.output.Point;
-import org.westmalle.wayland.output.ShmRenderEngine;
+import org.westmalle.wayland.output.RenderEngine;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -36,13 +36,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
 import static org.freedesktop.wayland.shared.WlShmFormat.XRGB8888;
 import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_ARGB8888;
 import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_XRGB8888;
 
-public class GLRenderEngine implements ShmRenderEngine {
+public class GLRenderEngine implements RenderEngine {
 
     @Nonnull
     private static final String SURFACE_V          =
@@ -115,8 +116,8 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     @Nonnull
     @Override
-    public ListenableFuture<?> begin(@Nonnull final GLDrawable drawable) {
-        return this.renderThread.submit(() -> doBegin(drawable));
+    public ListenableFuture<?> begin(@Nonnull final Object outputImplementation) {
+        return this.renderThread.submit(() -> doBegin((GLDrawable) outputImplementation));
     }
 
     private void doBegin(final GLDrawable drawable) {
@@ -207,8 +208,8 @@ public class GLRenderEngine implements ShmRenderEngine {
 
     @Nonnull
     @Override
-    public ListenableFuture<?> end(@Nonnull final GLDrawable drawable) {
-        return this.renderThread.submit(() -> doEnd(drawable));
+    public ListenableFuture<?> end(@Nonnull final Object outputImplementation) {
+        return this.renderThread.submit(() -> doEnd((GLDrawable) outputImplementation));
     }
 
     private void doEnd(@Nonnull final GLDrawable drawable) {
