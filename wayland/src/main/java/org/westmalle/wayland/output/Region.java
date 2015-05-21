@@ -17,7 +17,7 @@ import com.google.auto.factory.AutoFactory;
 
 import com.sun.jna.ptr.IntByReference;
 
-import org.westmalle.wayland.platform.Pixman1Library;
+import org.westmalle.wayland.platform.Libpixman1;
 import org.westmalle.wayland.platform.pixman_box32;
 import org.westmalle.wayland.platform.pixman_region32;
 
@@ -86,7 +86,7 @@ public class Region {
     public List<Rectangle> asList() {
         //int pointer
         final IntByReference n_rects = new IntByReference();
-        final pixman_box32 pixman_box32_array = Pixman1Library.INSTANCE
+        final pixman_box32 pixman_box32_array = Libpixman1
                 .pixman_region32_rectangles(getPixmanRegion32(),
                                             n_rects);
         final int            size          = n_rects.getValue();
@@ -109,7 +109,7 @@ public class Region {
 
     @Nonnull
     public Region add(@Nonnull final Rectangle rectangle) {
-        Pixman1Library.INSTANCE
+        Libpixman1
                 .pixman_region32_union_rect(getPixmanRegion32(),
                                             getPixmanRegion32(),
                                             rectangle.getX(),
@@ -123,13 +123,13 @@ public class Region {
     @Nonnull
     public Region subtract(@Nonnull final Rectangle rectangle) {
         final pixman_region32 delta_pixman_region32 = new pixman_region32();
-        Pixman1Library.INSTANCE
+        Libpixman1
                 .pixman_region32_init_rect(delta_pixman_region32,
                                            rectangle.getX(),
                                            rectangle.getY(),
                                            rectangle.getWidth(),
                                            rectangle.getHeight());
-        Pixman1Library.INSTANCE
+        Libpixman1
                 .pixman_region32_subtract(getPixmanRegion32(),
                                           getPixmanRegion32(),
                                           delta_pixman_region32);
@@ -137,7 +137,7 @@ public class Region {
     }
 
     public boolean contains(@Nonnull final Point point) {
-        return Pixman1Library.INSTANCE
+        return Libpixman1
                        .pixman_region32_contains_point(getPixmanRegion32(),
                                                        point.getX(),
                                                        point.getY(),
@@ -150,14 +150,14 @@ public class Region {
         if (clipping.getWidth() == 0 && clipping.getHeight() == 0) {
             return false;
         }
-        Pixman1Library.INSTANCE
+        Libpixman1
                 .pixman_region32_intersect_rect(getPixmanRegion32(),
                                                 getPixmanRegion32(),
                                                 clipping.getX(),
                                                 clipping.getY(),
                                                 clipping.getWidth(),
                                                 clipping.getHeight());
-        return Pixman1Library.INSTANCE
+        return Libpixman1
                        .pixman_region32_contains_point(getPixmanRegion32(),
                                                        point.getX(),
                                                        point.getY(),

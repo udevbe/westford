@@ -14,17 +14,22 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.collect.Lists;
+
+import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.platform.CLibrary;
+import org.westmalle.wayland.platform.Libc;
+
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,11 +42,21 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     private static final LinkedList<Runnable> NO_JOBS        = new LinkedList<>();
 
     @Nonnull
-    private final byte[] eventNewJobBuffer   = new byte[]{EVENT_NEW_JOB};
+    private final Pointer eventNewJobBuffer   = new Memory(1){
+        {
+            setByte(0,
+                    EVENT_NEW_JOB);
+        }
+    };
     @Nonnull
-    private final byte[] eventFinishedBuffer = new byte[]{EVENT_FINISHED};
+    private final Pointer eventFinishedBuffer = new Memory(1){
+        {
+            setByte(0,
+                    EVENT_FINISHED);
+        }
+    };
     @Nonnull
-    private final byte[] eventReadBuffer     = new byte[1];
+    private final Pointer eventReadBuffer     = new Memory(1);
 
     @Nonnull
     private final ReentrantLock        jobsLock    = new ReentrantLock();
@@ -55,18 +70,14 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     private final Display  display;
     private final int      pipeR;
     private final int      pipeWR;
-    @Nonnull
-    private final CLibrary libc;
 
     @Inject
     JobExecutor(@Nonnull final Display display,
                 final int pipeR,
-                final int pipeWR,
-                @Nonnull final CLibrary libc) {
+                final int pipeWR) {
         this.display = display;
         this.pipeR = pipeR;
         this.pipeWR = pipeWR;
-        this.libc = libc;
     }
 
     public void start() {
@@ -82,7 +93,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     public void fireFinishedEvent() {
-        this.libc.write(this.pipeWR,
+        Libc.write(this.pipeWR,
                         this.eventFinishedBuffer,
                         1);
     }
@@ -101,8 +112,8 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     private void clean() {
-        this.libc.close(this.pipeR);
-        this.libc.close(this.pipeWR);
+        Libc.close(this.pipeR);
+        Libc.close(this.pipeWR);
         this.eventSource.get()
                         .remove();
         this.eventSource = Optional.empty();
@@ -137,10 +148,10 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     private byte read() {
-        this.libc.read(this.pipeR,
+        Libc.read(this.pipeR,
                        this.eventReadBuffer,
                        1);
-        return this.eventReadBuffer[0];
+        return this.eventReadBuffer.getByte(0);
     }
 
     private LinkedList<Runnable> commit() {
@@ -159,7 +170,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     private void fireNewJobEvent() {
-        this.libc.write(this.pipeWR,
+        Libc.write(this.pipeWR,
                         this.eventNewJobBuffer,
                         1);
     }
