@@ -11,11 +11,11 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.output.gl;
+package org.westmalle.wayland.jogl;
 
 import javax.annotation.Nonnull;
 
-public enum GLBufferFormat {
+public enum JoglBufferFormat {
     SHM_ARGB8888("surface",
                  "surface_argb8888"),
     SHM_XRGB8888("surface",
@@ -26,8 +26,8 @@ public enum GLBufferFormat {
     @Nonnull
     private final String fragmentShader;
 
-    GLBufferFormat(@Nonnull final String vertexShader,
-                   @Nonnull final String fragmentShader) {
+    JoglBufferFormat(@Nonnull final String vertexShader,
+                     @Nonnull final String fragmentShader) {
         this.vertexShader = vertexShader;
         this.fragmentShader = fragmentShader;
     }

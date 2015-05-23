@@ -16,12 +16,12 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RegionFactory.class,
+@PrepareForTest({FiniteRegionFactory.class,
                  ShmBuffer.class})
 public class SurfaceTest {
 
     @Mock
-    private RegionFactory        regionFactory;
+    private FiniteRegionFactory finiteRegionFactory;
     @Mock
     private WlCompositorResource wlCompositorResource;
     @InjectMocks
@@ -44,9 +44,9 @@ public class SurfaceTest {
     @Test
     public void testMarkDamaged() throws Exception {
         //given
-        final Region region = mock(Region.class);
+        final FiniteRegion region = mock(FiniteRegion.class);
         when(region.add(any())).thenReturn(region);
-        when(this.regionFactory.create()).thenReturn(region);
+        when(this.finiteRegionFactory.create()).thenReturn(region);
         final Rectangle damage = Rectangle.create(100,
                                                   100,
                                                   20,

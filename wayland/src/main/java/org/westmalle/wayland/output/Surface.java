@@ -32,7 +32,7 @@ import java.util.Optional;
 public class Surface {
 
     @Nonnull
-    private final RegionFactory        regionFactory;
+    private final FiniteRegionFactory finiteRegionFactory;
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
 
@@ -66,9 +66,9 @@ public class Surface {
     @Nonnull
     private final List<WlCallbackResource> callbacks = Lists.newLinkedList();
 
-    Surface(@Nonnull @Provided final RegionFactory regionFactory,
+    Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
             @Nonnull final WlCompositorResource wlCompositorResource) {
-        this.regionFactory = regionFactory;
+        this.finiteRegionFactory = finiteRegionFactory;
         this.wlCompositorResource = wlCompositorResource;
     }
 
@@ -95,7 +95,7 @@ public class Surface {
     @Nonnull
     public Surface markDamaged(@Nonnull final Rectangle damage) {
         final Region newDamage = this.pendingState.getDamage()
-                                                  .orElse(this.regionFactory.create())
+                                                  .orElse(this.finiteRegionFactory.create())
                                                   .add(damage);
         this.pendingState = this.pendingState.toBuilder()
                                              .damage(Optional.of(newDamage))

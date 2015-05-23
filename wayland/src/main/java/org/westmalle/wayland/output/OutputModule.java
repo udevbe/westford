@@ -16,9 +16,11 @@ package org.westmalle.wayland.output;
 import com.google.common.util.concurrent.Service;
 
 import org.freedesktop.wayland.server.Display;
+import org.westmalle.wayland.jogl.JoglComponent;
+import org.westmalle.wayland.platform.NativeModule;
 import org.westmalle.wayland.platform.c.Libc;
-import org.westmalle.wayland.platform.pixman1.Libpixman1;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -26,19 +28,13 @@ import dagger.Provides;
 
 import static dagger.Provides.Type.SET;
 
-@Module
+@Module(includes = NativeModule.class)
 public class OutputModule {
 
     @Provides
     @Singleton
-    Libc provideLibc() {
-        return Libc.GET();
-    }
-
-    @Provides
-    @Singleton
-    Libpixman1 provideLibPixman1() {
-        return Libpixman1.GET();
+    InfiniteRegion provideInfiniteRegion(final FiniteRegionFactory finiteRegionFactory){
+        return new InfiniteRegion(finiteRegionFactory);
     }
 
     @Provides
@@ -49,9 +45,11 @@ public class OutputModule {
 
     @Singleton
     @Provides
-    JobExecutor provideWlJobExecutor(final Display display,
-                                     final Libc libc) {
-        final int[] pipe = configure(pipe(libc),
+    JobExecutor provideJobExecutor(final Display display,
+                                   final Libc libc) {
+        final int[] pipeFds = new int[2];
+        libc.pipe(pipeFds);
+        final int[] pipe = configure(pipeFds,
                                      libc);
         final int pipeR  = pipe[0];
         final int pipeWR = pipe[1];
@@ -60,12 +58,6 @@ public class OutputModule {
                                pipeR,
                                pipeWR,
                                libc);
-    }
-
-    private int[] pipe(final Libc libc) {
-        final int[] pipeFds = new int[2];
-        libc.pipe(pipeFds);
-        return pipeFds;
     }
 
     private int[] configure(final int[] pipeFds,

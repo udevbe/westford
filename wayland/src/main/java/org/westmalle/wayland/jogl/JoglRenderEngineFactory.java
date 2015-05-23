@@ -11,7 +11,7 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.output.gl;
+package org.westmalle.wayland.jogl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -25,14 +25,14 @@ import java.nio.IntBuffer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-public class GLRenderEngineFactory {
+public class JoglRenderEngineFactory {
 
     @Inject
-    GLRenderEngineFactory() {
+    JoglRenderEngineFactory() {
     }
 
     @Nonnull
-    public GLRenderEngine create(@Nonnull final GLContext glContext) {
+    public JoglRenderEngine create(@Nonnull final GLContext glContext) {
 
         final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(r -> new Thread(r,
                                                                                                                                             "GL Render Engine")));
@@ -49,7 +49,7 @@ public class GLRenderEngineFactory {
                 gl.glGenBuffers(1,
                                 vertexBuffer);
 
-                return new GLRenderEngine(executorService,
+                return new JoglRenderEngine(executorService,
                                           glContext,
                                           elementBuffer,
                                           vertexBuffer);

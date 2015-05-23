@@ -1,17 +1,23 @@
 package org.westmalle.wayland.output;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 
+@RunWith(MockitoJUnitRunner.class)
 public class InfiniteRegionTest {
+
+    @InjectMocks
+    private InfiniteRegion region;
 
     @Test
     public void testAsList() throws Exception {
         //given
-        final Region region = Region.INFINITY;
         //when
         final List<Rectangle> rectangles = region.asList();
         //then
@@ -21,7 +27,6 @@ public class InfiniteRegionTest {
     @Test
     public void testAdd() throws Exception {
         //given
-        final Region region = Region.INFINITY;
         final Rectangle rectangle = Rectangle.create(123,
                                                      456,
                                                      789,
@@ -35,7 +40,6 @@ public class InfiniteRegionTest {
     @Test
     public void testSubtract() throws Exception {
         //given
-        final Region region = Region.INFINITY;
         final Rectangle rectangle = Rectangle.create(123,
                                                      456,
                                                      789,
@@ -49,7 +53,6 @@ public class InfiniteRegionTest {
     @Test
     public void testContains() throws Exception {
         //given
-        final Region region = Region.INFINITY;
         //when
         final boolean contains = region.contains(Point.create(Short.MAX_VALUE,
                                                               Short.MAX_VALUE));
@@ -60,7 +63,6 @@ public class InfiniteRegionTest {
     @Test
     public void testContainsClipping() throws Exception {
         //given
-        final Region region = Region.INFINITY;
         final Rectangle rectangle = Rectangle.create(123,
                                                      456,
                                                      789,

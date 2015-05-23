@@ -11,7 +11,7 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.output.gl;
+package org.westmalle.wayland.jogl;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -36,14 +36,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
 import static org.freedesktop.wayland.shared.WlShmFormat.XRGB8888;
-import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_ARGB8888;
-import static org.westmalle.wayland.output.gl.GLBufferFormat.SHM_XRGB8888;
 
-public class GLRenderEngine implements RenderEngine {
+public class JoglRenderEngine implements RenderEngine {
 
     @Nonnull
     private static final String SURFACE_V          =
@@ -77,9 +74,9 @@ public class GLRenderEngine implements RenderEngine {
             "}";
 
     @Nonnull
-    private final Map<WlSurfaceResource, GLSurfaceData> cachedSurfaceData = new WeakHashMap<>();
+    private final Map<WlSurfaceResource, JoglSurfaceData> cachedSurfaceData = new WeakHashMap<>();
     @Nonnull
-    private final Map<GLBufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
+    private final Map<JoglBufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
 
     @Nonnull
     private final ListeningExecutorService renderThread;
@@ -104,10 +101,10 @@ public class GLRenderEngine implements RenderEngine {
     @Nonnull
     private Optional<GL2ES2> gl         = Optional.empty();
 
-    GLRenderEngine(@Nonnull final ListeningExecutorService renderThread,
-                   @Nonnull final GLContext glContext,
-                   @Nonnull final IntBuffer elementBuffer,
-                   @Nonnull final IntBuffer vertexBuffer) {
+    JoglRenderEngine(@Nonnull final ListeningExecutorService renderThread,
+                     @Nonnull final GLContext glContext,
+                     @Nonnull final IntBuffer elementBuffer,
+                     @Nonnull final IntBuffer vertexBuffer) {
         this.renderThread = renderThread;
         this.glContext = glContext;
         this.elementBuffer = elementBuffer;
@@ -218,7 +215,7 @@ public class GLRenderEngine implements RenderEngine {
         this.projection = Optional.empty();
     }
 
-    private int queryShaderProgram(final GLBufferFormat bufferFormat) {
+    private int queryShaderProgram(final JoglBufferFormat bufferFormat) {
         Integer shaderProgram = this.shaderPrograms.get(bufferFormat);
         if (shaderProgram == null) {
             shaderProgram = createShaderProgram(bufferFormat);
@@ -228,19 +225,19 @@ public class GLRenderEngine implements RenderEngine {
         return shaderProgram;
     }
 
-    private int createShaderProgram(final GLBufferFormat bufferFormat) {
+    private int createShaderProgram(final JoglBufferFormat bufferFormat) {
         final GL2ES2 gl2ES2       = this.gl.get();
         final int    vertexShader = gl2ES2.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
         compileShader(vertexShader,
                       SURFACE_V);
 
         final int fragmentShader;
-        if (bufferFormat == SHM_ARGB8888) {
+        if (bufferFormat == JoglBufferFormat.SHM_ARGB8888) {
             fragmentShader = gl2ES2.glCreateShader(GL2ES2.GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_ARGB8888_F);
         }
-        else if (bufferFormat == SHM_XRGB8888) {
+        else if (bufferFormat == JoglBufferFormat.SHM_XRGB8888) {
             fragmentShader = gl2ES2.glCreateShader(GL2ES2.GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_XRGB8888_F);
@@ -338,14 +335,14 @@ public class GLRenderEngine implements RenderEngine {
                                             .getGL2ES2());
     }
 
-    private GLBufferFormat queryBufferFormat(final ShmBuffer buffer) {
-        final GLBufferFormat format;
+    private JoglBufferFormat queryBufferFormat(final ShmBuffer buffer) {
+        final JoglBufferFormat format;
         final int            bufferFormat = buffer.getFormat();
         if (bufferFormat == ARGB8888.getValue()) {
-            format = SHM_ARGB8888;
+            format = JoglBufferFormat.SHM_ARGB8888;
         }
         else if (bufferFormat == XRGB8888.getValue()) {
-            format = SHM_XRGB8888;
+            format = JoglBufferFormat.SHM_XRGB8888;
         }
         else {
             throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
@@ -353,12 +350,12 @@ public class GLRenderEngine implements RenderEngine {
         return format;
     }
 
-    private GLSurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
+    private JoglSurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
                                            final ShmBuffer buffer) {
         final GL2ES2  gl2ES2      = this.gl.get();
-        GLSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
+        JoglSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
-            surfaceData = GLSurfaceData.create(gl2ES2);
+            surfaceData = JoglSurfaceData.create(gl2ES2);
             surfaceData.init(gl2ES2,
                              buffer);
             this.cachedSurfaceData.put(surfaceResource,
@@ -371,7 +368,7 @@ public class GLRenderEngine implements RenderEngine {
             if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
                 surfaceData.destroy(gl2ES2);
 
-                surfaceData = GLSurfaceData.create(gl2ES2);
+                surfaceData = JoglSurfaceData.create(gl2ES2);
                 surfaceData.init(gl2ES2,
                                  buffer);
                 this.cachedSurfaceData.put(surfaceResource,

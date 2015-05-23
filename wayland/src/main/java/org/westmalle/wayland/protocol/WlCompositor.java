@@ -33,7 +33,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     private final WlSurfaceFactory                            wlSurfaceFactory;
     private final WlRegionFactory                             wlRegionFactory;
-    private final org.westmalle.wayland.output.RegionFactory  regionFactory;
+    private final org.westmalle.wayland.output.FiniteRegionFactory finiteRegionFactory;
     private final org.westmalle.wayland.output.SurfaceFactory surfaceFactory;
     private final Compositor                                  compositor;
 
@@ -41,7 +41,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     WlCompositor(@Provided final Display display,
                  @Provided final WlSurfaceFactory wlSurfaceFactory,
                  @Provided final WlRegionFactory wlRegionFactory,
-                 @Provided final org.westmalle.wayland.output.RegionFactory regionFactory,
+                 @Provided final org.westmalle.wayland.output.FiniteRegionFactory finiteRegionFactory,
                  @Provided final org.westmalle.wayland.output.SurfaceFactory surfaceFactory,
                  final Compositor compositor) {
         super(display,
@@ -49,7 +49,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
               VERSION);
         this.wlSurfaceFactory = wlSurfaceFactory;
         this.wlRegionFactory = wlRegionFactory;
-        this.regionFactory = regionFactory;
+        this.finiteRegionFactory = finiteRegionFactory;
         this.surfaceFactory = surfaceFactory;
         this.compositor = compositor;
     }
@@ -90,10 +90,10 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     @Override
     public void createRegion(final WlCompositorResource resource,
                              final int id) {
-        this.wlRegionFactory.create(this.regionFactory.create())
+        this.wlRegionFactory.create(this.finiteRegionFactory.create())
                             .add(resource.getClient(),
-                                 resource.getVersion(),
-                                 id);
+                                    resource.getVersion(),
+                                    id);
     }
 
     @Nonnull

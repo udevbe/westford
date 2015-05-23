@@ -11,7 +11,7 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.platform.newt;
+package org.westmalle.wayland.jogl;
 
 import com.jogamp.nativewindow.util.DimensionImmutable;
 import com.jogamp.newt.Display;
@@ -35,15 +35,15 @@ import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public class GLWindowOutputFactory {
+public class JoglOutputFactory {
     @Nonnull
     private final WlOutputFactory wlOutputFactory;
     @Nonnull
     private final OutputFactory   outputFactory;
 
     @Inject
-    GLWindowOutputFactory(@Nonnull final WlOutputFactory wlOutputFactory,
-                          @Nonnull final OutputFactory outputFactory) {
+    JoglOutputFactory(@Nonnull final WlOutputFactory wlOutputFactory,
+                      @Nonnull final OutputFactory outputFactory) {
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
     }

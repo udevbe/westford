@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
                         //following classes are final, so we have to powermock them:
                         WlSurfaceFactory.class,
                         WlRegionFactory.class,
-                        RegionFactory.class,
+                        FiniteRegionFactory.class,
                         SurfaceFactory.class
                 })
 public class WlCompositorTest {
@@ -42,7 +42,7 @@ public class WlCompositorTest {
     @Mock
     private WlRegionFactory  wlRegionFactory;
     @Mock
-    private RegionFactory    regionFactory;
+    private FiniteRegionFactory finiteRegionFactory;
     @Mock
     private SurfaceFactory   surfaceFactory;
     @Mock
@@ -80,7 +80,7 @@ public class WlCompositorTest {
         final WlCompositor wlCompositor = new WlCompositor(this.display,
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
-                                                           this.regionFactory,
+                                                           this.finiteRegionFactory,
                                                            this.surfaceFactory,
                                                            this.compositor);
 
@@ -119,7 +119,7 @@ public class WlCompositorTest {
         final WlCompositor wlCompositor = new WlCompositor(this.display,
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
-                                                           this.regionFactory,
+                                                           this.finiteRegionFactory,
                                                            this.surfaceFactory,
                                                            this.compositor);
         //when
@@ -148,8 +148,8 @@ public class WlCompositorTest {
     @Test
     public void testCreateRegion() throws Exception {
         //given
-        final Region region = mock(Region.class);
-        when(this.regionFactory.create()).thenReturn(region);
+        final FiniteRegion region = mock(FiniteRegion.class);
+        when(this.finiteRegionFactory.create()).thenReturn(region);
 
         final WlRegion wlRegion = mock(WlRegion.class);
         when(this.wlRegionFactory.create(any())).thenReturn(wlRegion);
@@ -163,7 +163,7 @@ public class WlCompositorTest {
         final WlCompositor wlCompositor = new WlCompositor(this.display,
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
-                                                           this.regionFactory,
+                                                           this.finiteRegionFactory,
                                                            this.surfaceFactory,
                                                            this.compositor);
         //when
@@ -182,7 +182,7 @@ public class WlCompositorTest {
         final WlCompositor wlCompositor = new WlCompositor(this.display,
                                                            this.wlSurfaceFactory,
                                                            this.wlRegionFactory,
-                                                           this.regionFactory,
+                                                           this.finiteRegionFactory,
                                                            this.surfaceFactory,
                                                            this.compositor);
         final Client client  = mock(Client.class);

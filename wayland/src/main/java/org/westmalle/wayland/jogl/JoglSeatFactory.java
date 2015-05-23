@@ -11,7 +11,7 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.platform.newt;
+package org.westmalle.wayland.jogl;
 
 import com.jogamp.newt.opengl.GLWindow;
 import org.westmalle.wayland.output.Compositor;
@@ -25,7 +25,7 @@ import org.westmalle.wayland.protocol.WlSeat;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-public class GLWindowSeatFactory {
+public class JoglSeatFactory {
     @Nonnull
     private final JobExecutor          jobExecutor;
     @Nonnull
@@ -38,11 +38,11 @@ public class GLWindowSeatFactory {
     private final KeyboardFactory      keyboardFactory;
 
     @Inject
-    GLWindowSeatFactory(@Nonnull final JobExecutor jobExecutor,
-                        @Nonnull final WlPointerFactory wlPointerFactory,
-                        @Nonnull final WlKeyboardFactory wlKeyboardFactory,
-                        @Nonnull final PointerDeviceFactory pointerDeviceFactory,
-                        @Nonnull final KeyboardFactory keyboardFactory) {
+    JoglSeatFactory(@Nonnull final JobExecutor jobExecutor,
+                    @Nonnull final WlPointerFactory wlPointerFactory,
+                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
+                    @Nonnull final PointerDeviceFactory pointerDeviceFactory,
+                    @Nonnull final KeyboardFactory keyboardFactory) {
         this.jobExecutor = jobExecutor;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
@@ -51,11 +51,11 @@ public class GLWindowSeatFactory {
     }
 
     @Nonnull
-    public GLWindowSeat create(@Nonnull final GLWindow glWindow,
+    public JoglSeat create(@Nonnull final GLWindow glWindow,
                                @Nonnull final WlSeat wlSeat,
                                @Nonnull final Compositor compositor) {
         //this objects will post input events from the system to our wayland compositor system
-        final GLWindowSeat glWindowSeat = new GLWindowSeat(wlSeat,
+        final JoglSeat joglSeat = new JoglSeat(wlSeat,
                                                            this.jobExecutor);
         //FIXME for now we put these here, these should be handled dynamically when a mouse or keyboard is
         //added or removed
@@ -63,8 +63,8 @@ public class GLWindowSeatFactory {
         wlSeat.setWlPointer(this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)));
         wlSeat.setWlKeyboard(this.wlKeyboardFactory.create(this.keyboardFactory.create()));
 
-        glWindow.addMouseListener(glWindowSeat);
-        glWindow.addKeyListener(glWindowSeat);
-        return glWindowSeat;
+        glWindow.addMouseListener(joglSeat);
+        glWindow.addKeyListener(joglSeat);
+        return joglSeat;
     }
 }

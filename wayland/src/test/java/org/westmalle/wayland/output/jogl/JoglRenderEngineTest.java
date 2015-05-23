@@ -1,4 +1,4 @@
-package org.westmalle.wayland.output.gl;
+package org.westmalle.wayland.output.jogl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.jogamp.opengl.GL;
@@ -17,6 +17,8 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.jogl.JoglRenderEngine;
+import org.westmalle.wayland.jogl.JoglSurfaceData;
 import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -36,8 +38,8 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ShmBuffer.class,
-                 GLSurfaceData.class})
-public class GLRenderEngineTest {
+                 JoglSurfaceData.class})
+public class JoglRenderEngineTest {
 
     @Mock
     private ListeningExecutorService renderThread;
@@ -50,7 +52,7 @@ public class GLRenderEngineTest {
     @Mock
     private IntBuffer                vertexBuffer;
     @InjectMocks
-    private GLRenderEngine           glRenderEngine;
+    private JoglRenderEngine joglRenderEngine;
 
     @Before
     public void setUp() {
@@ -77,7 +79,7 @@ public class GLRenderEngineTest {
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
-        this.glRenderEngine.begin(this.drawable);
+        this.joglRenderEngine.begin(this.drawable);
         //then
         verify(this.renderThread).submit((Runnable) any());
         //and when
@@ -139,11 +141,11 @@ public class GLRenderEngineTest {
         when(shmBuffer.getWidth()).thenReturn(100);
         when(shmBuffer.getHeight()).thenReturn(250);
 
-        this.glRenderEngine.begin(this.drawable);
+        this.joglRenderEngine.begin(this.drawable);
         queue.get(0)
              .run();
         //when
-        this.glRenderEngine.draw(surfaceResource,
+        this.joglRenderEngine.draw(surfaceResource,
                                  wlBufferResource);
         //then
         verify(this.renderThread,
@@ -180,7 +182,7 @@ public class GLRenderEngineTest {
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
-        this.glRenderEngine.end(this.drawable);
+        this.joglRenderEngine.end(this.drawable);
         //then
         verify(this.renderThread).submit((Runnable) any());
         //and when

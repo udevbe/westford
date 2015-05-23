@@ -22,7 +22,7 @@ import org.westmalle.wayland.protocol.WlSurface;
 import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutionException;
 
-@AutoFactory(className = "ShmRendererFactory")
+@AutoFactory(className = "RendererFactory")
 public class Renderer {
 
     @Nonnull
@@ -40,8 +40,8 @@ public class Renderer {
                                                                 .get();
         try {
             this.renderEngine.draw(surfaceResource,
-                                      wlBufferResource)
-                                .get();
+                                   wlBufferResource)
+                             .get();
         }
         catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();

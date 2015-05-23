@@ -18,19 +18,18 @@ import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
 public class Libc {
 
-    private static Libc INSTANCE;
+    static {
+        Native.register(Platform.C_LIBRARY_NAME);
+    }
 
-    public static Libc GET() {
-        if (INSTANCE == null) {
-            Native.register(Platform.C_LIBRARY_NAME);
-            INSTANCE = new Libc();
-        }
-        return INSTANCE;
+    @Inject
+    public Libc() {
     }
 
     /* command values */

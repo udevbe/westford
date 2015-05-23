@@ -11,12 +11,15 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.platform.newt;
+package org.westmalle.wayland.jogl;
 
-import dagger.Module;
-import org.westmalle.wayland.protocol.ProtocolModule;
+import dagger.Subcomponent;
 
-@Module(includes = ProtocolModule.class)
-public class PlatformNewtModule {
+@Subcomponent
+public interface JoglComponent {
+    JoglOutputFactory outputFactory();
 
+    JoglSeatFactory seatFactory();
+
+    JoglRenderEngineFactory renderEngineFactory();
 }

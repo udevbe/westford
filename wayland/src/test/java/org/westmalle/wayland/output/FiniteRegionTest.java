@@ -1,5 +1,6 @@
 package org.westmalle.wayland.output;
 
+import com.sun.jna.Native;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,13 +13,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class RegionTest {
+public class FiniteRegionTest {
 
-    private Region region;
+    private FiniteRegion finiteRegion;
 
     @Before
     public void setUp() throws Exception {
-        this.region = new Region(Libpixman1.GET());
+
+        this.finiteRegion = new FiniteRegion(new Libpixman1());
     }
 
     @Test
@@ -32,11 +34,11 @@ public class RegionTest {
                                                  50,
                                                  100,
                                                  100);
-        this.region.add(rect0);
+        this.finiteRegion.add(rect0);
         //when
-        this.region.add(rect1);
+        this.finiteRegion.add(rect1);
         //then
-        final List<Rectangle> Rectangles = this.region.asList();
+        final List<Rectangle> Rectangles = this.finiteRegion.asList();
         assertThat(Rectangles).hasSize(3);
         assertThat(Rectangles.get(0)).isEqualTo(Rectangle.builder()
                                                          .width(100)
@@ -64,11 +66,11 @@ public class RegionTest {
                                                  50,
                                                  100,
                                                  100);
-        this.region.add(rect0);
+        this.finiteRegion.add(rect0);
         //when
-        this.region.subtract(rect1);
+        this.finiteRegion.subtract(rect1);
         //then
-        final List<Rectangle> Rectangles = this.region.asList();
+        final List<Rectangle> Rectangles = this.finiteRegion.asList();
         assertThat(Rectangles).hasSize(2);
         assertThat(Rectangles.get(0)).isEqualTo(Rectangle.builder()
                                                          .width(100)
@@ -88,11 +90,11 @@ public class RegionTest {
                                                  50,
                                                  100,
                                                  100);
-        this.region.add(rect0);
+        this.finiteRegion.add(rect0);
         //when
-        final boolean contains = this.region.contains(Point.create(50,
+        final boolean contains = this.finiteRegion.contains(Point.create(50,
                                                                    50));
-        final boolean notContains = this.region.contains(Point.create(151,
+        final boolean notContains = this.finiteRegion.contains(Point.create(151,
                                                                       151));
         //then
         assertThat(contains).isTrue();
@@ -110,12 +112,12 @@ public class RegionTest {
                                                  50,
                                                  100,
                                                  100);
-        this.region.add(rect0);
+        this.finiteRegion.add(rect0);
         //when
-        final boolean contains = this.region.contains(clipping,
+        final boolean contains = this.finiteRegion.contains(clipping,
                                                       Point.create(60,
                                                                    60));
-        final boolean notContains = this.region.contains(clipping,
+        final boolean notContains = this.finiteRegion.contains(clipping,
                                                          Point.create(71,
                                                                       71));
         //then

@@ -11,7 +11,7 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.output.gl;
+package org.westmalle.wayland.jogl;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
@@ -20,20 +20,20 @@ import org.freedesktop.wayland.server.ShmBuffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-public class GLSurfaceData {
+public class JoglSurfaceData {
 
-    public static GLSurfaceData create(final GL2ES2 gl) {
+    public static JoglSurfaceData create(final GL2ES2 gl) {
         final IntBuffer tex = Buffers.newDirectIntBuffer(1);
         gl.glGenTextures(1,
                          tex);
-        return new GLSurfaceData(tex);
+        return new JoglSurfaceData(tex);
     }
 
     private final IntBuffer tex;
     private       int       width;
     private       int       height;
 
-    private GLSurfaceData(final IntBuffer tex) {
+    private JoglSurfaceData(final IntBuffer tex) {
         this.tex = tex;
     }
 

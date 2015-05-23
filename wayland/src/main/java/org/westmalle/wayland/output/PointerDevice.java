@@ -52,13 +52,17 @@ public class PointerDevice {
     private int buttonsPressed;
 
     @Nonnull
+    private final InfiniteRegion infiniteRegion;
+    @Nonnull
     private final Compositor compositor;
     @Nonnull
     private final Display    display;
 
     PointerDevice(@Provided @Nonnull final Display display,
+                  @Provided @Nonnull final InfiniteRegion infiniteRegion,
                   @Nonnull final Compositor compositor) {
         this.display = display;
+        this.infiniteRegion = infiniteRegion;
         this.compositor = compositor;
     }
 
@@ -231,7 +235,7 @@ public class PointerDevice {
                 region = wlRegion.getRegion();
             }
             else {
-                region = Region.INFINITY;
+                region = this.infiniteRegion;
             }
 
             if (region.contains(surface.getSize(),

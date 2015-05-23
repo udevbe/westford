@@ -11,7 +11,7 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.platform.newt;
+package org.westmalle.wayland.jogl;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
@@ -23,15 +23,15 @@ import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 
-public class GLWindowSeat implements MouseListener, KeyListener {
+public class JoglSeat implements MouseListener, KeyListener {
 
     @Nonnull
     private final WlSeat      wlSeat;
     @Nonnull
     private final JobExecutor jobExecutor;
 
-    GLWindowSeat(@Nonnull final WlSeat wlSeat,
-                 @Nonnull final JobExecutor jobExecutor) {
+    JoglSeat(@Nonnull final WlSeat wlSeat,
+             @Nonnull final JobExecutor jobExecutor) {
         this.wlSeat = wlSeat;
         this.jobExecutor = jobExecutor;
     }

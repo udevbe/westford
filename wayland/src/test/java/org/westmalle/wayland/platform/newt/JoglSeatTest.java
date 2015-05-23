@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.jogl.JoglSeat;
 import org.westmalle.wayland.output.JobExecutor;
 import org.westmalle.wayland.output.PointerDevice;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -30,14 +31,14 @@ import static org.powermock.api.mockito.PowerMockito.mock;
                         NEWTEvent.class,
                         MouseEvent.class
                 })
-public class GLWindowSeatTest {
+public class JoglSeatTest {
 
     @Mock
     private WlSeat       wlSeat;
     @Mock
     private JobExecutor  jobExecutor;
     @InjectMocks
-    private GLWindowSeat glWindowSeat;
+    private JoglSeat joglSeat;
 
     @Before
     public void setUp() {
@@ -72,7 +73,7 @@ public class GLWindowSeatTest {
 
         this.wlSeat.setWlPointer(wlPointer);
         //when
-        this.glWindowSeat.mousePressed(mouseEvent);
+        this.joglSeat.mousePressed(mouseEvent);
         //then
         verify(pointerDevice).button(wlPointerResources,
                                      (int) time,
@@ -102,7 +103,7 @@ public class GLWindowSeatTest {
 
         this.wlSeat.setWlPointer(wlPointer);
         //when
-        this.glWindowSeat.mouseReleased(mouseEvent);
+        this.joglSeat.mouseReleased(mouseEvent);
         //then
         verify(pointerDevice).button(wlPointerResources,
                                      (int) time,
@@ -134,7 +135,7 @@ public class GLWindowSeatTest {
 
         this.wlSeat.setWlPointer(wlPointer);
         //when
-        this.glWindowSeat.mouseMoved(mouseEvent);
+        this.joglSeat.mouseMoved(mouseEvent);
         //then
         verify(pointerDevice).motion(wlPointerResources,
                                      (int) time,
