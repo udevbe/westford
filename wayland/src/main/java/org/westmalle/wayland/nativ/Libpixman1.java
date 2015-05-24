@@ -1,9 +1,8 @@
-package org.westmalle.wayland.platform.pixman1;
+package org.westmalle.wayland.nativ;
 
 import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
@@ -11,8 +10,8 @@ public class Libpixman1 {
     static{
         Native.register("pixman-1");
     }
-    @Inject
-    public Libpixman1() {
+
+    Libpixman1() {
     }
 
     public native pixman_box32 pixman_region32_rectangles(pixman_region32 region, IntByReference n_rects);

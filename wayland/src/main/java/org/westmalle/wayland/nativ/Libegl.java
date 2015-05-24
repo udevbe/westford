@@ -1,18 +1,16 @@
-package org.westmalle.wayland.platform.egl;
+package org.westmalle.wayland.nativ;
 
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 public class Libegl {
-    private static Libegl INSTANCE;
 
-    public static Libegl GET() {
-        if (INSTANCE == null) {
-            Native.register("egl");
-            INSTANCE = new Libegl();
-        }
-        return INSTANCE;
+    static {
+        Native.register("egl");
+    }
+
+    Libegl() {
     }
 
     public final int EGL_PLATFORM_ANDROID_KHR  =        0x3141;

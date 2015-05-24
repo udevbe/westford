@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform.pixman1;
+package org.westmalle.wayland.nativ;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;

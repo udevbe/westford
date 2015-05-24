@@ -1,7 +1,5 @@
 package org.westmalle.wayland.output;
 
-import org.westmalle.wayland.platform.pixman1.Libpixman1;
-
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;

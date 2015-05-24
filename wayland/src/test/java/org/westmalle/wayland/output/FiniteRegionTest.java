@@ -1,104 +1,80 @@
 package org.westmalle.wayland.output;
 
-import com.sun.jna.Native;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.platform.pixman1.Libpixman1;
+import org.westmalle.wayland.nativ.Libpixman1;
+import org.westmalle.wayland.nativ.pixman_region32;
 
-import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class FiniteRegionTest {
 
+    @Mock
+    private Libpixman1 libpixman1;
+    @InjectMocks
     private FiniteRegion finiteRegion;
-
-    @Before
-    public void setUp() throws Exception {
-
-        this.finiteRegion = new FiniteRegion(new Libpixman1());
-    }
 
     @Test
     public void testAdd() throws Exception {
         //given
-        final Rectangle rect0 = Rectangle.builder()
+        final Rectangle rectangle = Rectangle.builder()
                                          .width(100)
                                          .height(100)
                                          .build();
-        final Rectangle rect1 = Rectangle.create(50,
-                                                 50,
-                                                 100,
-                                                 100);
-        this.finiteRegion.add(rect0);
         //when
-        this.finiteRegion.add(rect1);
+        this.finiteRegion.add(rectangle);
         //then
-        final List<Rectangle> Rectangles = this.finiteRegion.asList();
-        assertThat(Rectangles).hasSize(3);
-        assertThat(Rectangles.get(0)).isEqualTo(Rectangle.builder()
-                                                         .width(100)
-                                                         .height(50)
-                                                         .build());
-        assertThat(Rectangles.get(1)).isEqualTo(Rectangle.builder()
-                                                         .y(50)
-                                                         .width(150)
-                                                         .height(50)
-                                                         .build());
-        assertThat(Rectangles.get(2)).isEqualTo(Rectangle.create(50,
-                                                                 100,
-                                                                 100,
-                                                                 50));
+        verify(this.libpixman1).pixman_region32_union_rect(this.finiteRegion.getPixmanRegion32(),
+                this.finiteRegion.getPixmanRegion32(),
+                rectangle.getX(),
+                rectangle.getY(),
+                rectangle.getWidth(),
+                rectangle.getHeight());
     }
 
     @Test
     public void testSubtract() throws Exception {
         //given
-        final Rectangle rect0 = Rectangle.builder()
+        final Rectangle rectangle = Rectangle.builder()
                                          .width(100)
                                          .height(100)
                                          .build();
-        final Rectangle rect1 = Rectangle.create(50,
-                                                 50,
-                                                 100,
-                                                 100);
-        this.finiteRegion.add(rect0);
         //when
-        this.finiteRegion.subtract(rect1);
+        this.finiteRegion.subtract(rectangle);
         //then
-        final List<Rectangle> Rectangles = this.finiteRegion.asList();
-        assertThat(Rectangles).hasSize(2);
-        assertThat(Rectangles.get(0)).isEqualTo(Rectangle.builder()
-                                                         .width(100)
-                                                         .height(50)
-                                                         .build());
-        assertThat(Rectangles.get(1)).isEqualTo(Rectangle.builder()
-                                                         .y(50)
-                                                         .width(50)
-                                                         .height(50)
-                                                         .build());
+        ArgumentCaptor<pixman_region32> delta_pixman_region32Captor = ArgumentCaptor.forClass(pixman_region32.class);
+        verify(this.libpixman1)
+                .pixman_region32_init_rect(delta_pixman_region32Captor.capture(),
+                        eq(rectangle.getX()),
+                        eq(rectangle.getY()),
+                                eq(rectangle.getWidth()),
+                                        eq(rectangle.getHeight()));
+        verify(this.libpixman1)
+                .pixman_region32_subtract(this.finiteRegion.getPixmanRegion32(),
+                        delta_pixman_region32Captor.getValue(),
+                        delta_pixman_region32Captor.getValue());
     }
 
     @Test
     public void testContains() throws Exception {
         //given
-        final Rectangle rect0 = Rectangle.create(50,
-                                                 50,
-                                                 100,
-                                                 100);
-        this.finiteRegion.add(rect0);
+        final Point point = Point.create(50,
+                50);
         //when
-        final boolean contains = this.finiteRegion.contains(Point.create(50,
-                                                                   50));
-        final boolean notContains = this.finiteRegion.contains(Point.create(151,
-                                                                      151));
+        this.finiteRegion.contains(point);
         //then
-        assertThat(contains).isTrue();
-        assertThat(notContains).isFalse();
+        verify(this.libpixman1)
+                .pixman_region32_contains_point(this.finiteRegion.getPixmanRegion32(),
+                        point.getX(),
+                        point.getY(),
+                        null);
     }
 
     @Test
@@ -108,20 +84,23 @@ public class FiniteRegionTest {
                                                     60,
                                                     10,
                                                     10);
-        final Rectangle rect0 = Rectangle.create(50,
-                                                 50,
-                                                 100,
-                                                 100);
-        this.finiteRegion.add(rect0);
+        final Point point = Point.create(60,
+                60);
         //when
-        final boolean contains = this.finiteRegion.contains(clipping,
-                                                      Point.create(60,
-                                                                   60));
-        final boolean notContains = this.finiteRegion.contains(clipping,
-                                                         Point.create(71,
-                                                                      71));
+        this.finiteRegion.contains(clipping,
+                point);
         //then
-        assertThat(contains).isTrue();
-        assertThat(notContains).isFalse();
+        verify(this.libpixman1)
+                .pixman_region32_intersect_rect(this.finiteRegion.getPixmanRegion32(),
+                        this.finiteRegion.getPixmanRegion32(),
+                        clipping.getX(),
+                        clipping.getY(),
+                        clipping.getWidth(),
+                        clipping.getHeight());
+        verify(this.libpixman1)
+                .pixman_region32_contains_point(this.finiteRegion.getPixmanRegion32(),
+                        point.getX(),
+                        point.getY(),
+                        null);
     }
 }

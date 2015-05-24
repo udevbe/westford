@@ -16,11 +16,9 @@ package org.westmalle.wayland.output;
 import com.google.common.util.concurrent.Service;
 
 import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.jogl.JoglComponent;
-import org.westmalle.wayland.platform.NativeModule;
-import org.westmalle.wayland.platform.c.Libc;
+import org.westmalle.wayland.nativ.NativeModule;
+import org.westmalle.wayland.nativ.Libc;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;

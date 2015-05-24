@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.platform.c.Libc;
+import org.westmalle.wayland.nativ.Libc;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;

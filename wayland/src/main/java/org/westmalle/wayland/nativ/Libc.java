@@ -11,14 +11,13 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.platform.c;
+package org.westmalle.wayland.nativ;
 
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
@@ -28,8 +27,7 @@ public class Libc {
         Native.register(Platform.C_LIBRARY_NAME);
     }
 
-    @Inject
-    public Libc() {
+    Libc() {
     }
 
     /* command values */

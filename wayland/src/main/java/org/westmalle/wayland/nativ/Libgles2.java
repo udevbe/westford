@@ -1,18 +1,14 @@
-package org.westmalle.wayland.platform.gles2;
-
+package org.westmalle.wayland.nativ;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 public class Libgles2 {
-    private static Libgles2 INSTANCE;
+    static{
+        Native.register("gles2");
+    }
 
-    public static Libgles2 GET() {
-        if (INSTANCE == null) {
-            Native.register("gles2");
-            INSTANCE = new Libgles2();
-        }
-        return INSTANCE;
+    Libgles2() {
     }
 
     public final int GL_VERTEX_SHADER = 0x8B31;

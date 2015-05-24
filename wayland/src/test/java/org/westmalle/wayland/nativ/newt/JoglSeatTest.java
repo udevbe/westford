@@ -1,4 +1,4 @@
-package org.westmalle.wayland.platform.newt;
+package org.westmalle.wayland.nativ.newt;
 
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.NEWTEvent;

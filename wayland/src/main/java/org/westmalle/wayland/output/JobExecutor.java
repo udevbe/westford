@@ -21,7 +21,7 @@ import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.platform.c.Libc;
+import org.westmalle.wayland.nativ.Libc;
 
 import java.util.LinkedList;
 import java.util.Optional;
