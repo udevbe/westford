@@ -11,6 +11,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.protocol.WlOutput;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -37,10 +38,18 @@ public class CompositorTest {
         //given
         final GLDrawable      glDrawable0 = mock(GLDrawable.class);
         final GLDrawable      glDrawable1 = mock(GLDrawable.class);
-        final Set<GLDrawable> drawables   = new HashSet<>();
-        drawables.add(glDrawable0);
-        drawables.add(glDrawable1);
-        //when(this.glDrawables.get()).thenReturn(drawables);
+
+        WlOutput wlOutput0 = mock(WlOutput.class);
+        Output output0 = mock(Output.class);
+        when(wlOutput0.getOutput()).thenReturn(output0);
+        when(output0.getImplementation()).thenReturn(glDrawable0);
+        this.compositor.getWlOutputs().add(wlOutput0);
+
+        WlOutput wlOutput1 = mock(WlOutput.class);
+        Output output1 = mock(Output.class);
+        when(wlOutput1.getOutput()).thenReturn(output1);
+        when(output1.getImplementation()).thenReturn(glDrawable1);
+        this.compositor.getWlOutputs().add(wlOutput1);
 
         final EventLoop eventLoop = mock(EventLoop.class);
         when(this.display.getEventLoop()).thenReturn(eventLoop);
