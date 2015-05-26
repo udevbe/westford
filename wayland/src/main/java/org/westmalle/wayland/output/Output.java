@@ -11,11 +11,11 @@ import java.util.Set;
 public class Output {
 
     @Nonnull
-    private OutputGeometry outputGeometry;
+    private       OutputGeometry outputGeometry;
     @Nonnull
-    private OutputMode     outputMode;
+    private       OutputMode     outputMode;
     @Nonnull
-    private Object outputImplementation;
+    private final Object         outputImplementation;
 
     Output(@Nonnull final OutputGeometry outputGeometry,
            @Nonnull final OutputMode outputMode,
@@ -73,6 +73,6 @@ public class Output {
 
     @Nonnull
     public Object getImplementation() {
-        return outputImplementation;
+        return this.outputImplementation;
     }
 }

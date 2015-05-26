@@ -14,7 +14,6 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
-import com.jogamp.opengl.GLDrawable;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -51,7 +50,7 @@ public class Renderer {
     public void beginRender(@Nonnull final Object outputImplementation) {
         try {
             this.renderEngine.begin(outputImplementation)
-                                .get();
+                             .get();
         }
         catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -61,7 +60,7 @@ public class Renderer {
     public void endRender(@Nonnull final Object outputImplementation) {
         try {
             this.renderEngine.end(outputImplementation)
-                                .get();
+                             .get();
         }
         catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();

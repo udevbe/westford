@@ -1,3 +1,16 @@
+//Copyright 2015 Erik De Rijcke
+//
+//Licensed under the Apache License,Version2.0(the"License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//
+//http://www.apache.org/licenses/LICENSE-2.0
+//
+//Unless required by applicable law or agreed to in writing,software
+//distributed under the License is distributed on an"AS IS"BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
 package org.westmalle.wayland.output;
 
 import com.jogamp.opengl.GLDrawable;
@@ -13,10 +26,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.protocol.WlOutput;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -26,7 +37,7 @@ import static org.mockito.Mockito.*;
 public class CompositorTest {
 
     @Mock
-    private Display     display;
+    private Display  display;
     @Mock
     private Renderer renderer;
 
@@ -36,20 +47,22 @@ public class CompositorTest {
     @Test
     public void testRequestRender() throws Exception {
         //given
-        final GLDrawable      glDrawable0 = mock(GLDrawable.class);
-        final GLDrawable      glDrawable1 = mock(GLDrawable.class);
+        final GLDrawable glDrawable0 = mock(GLDrawable.class);
+        final GLDrawable glDrawable1 = mock(GLDrawable.class);
 
-        WlOutput wlOutput0 = mock(WlOutput.class);
-        Output output0 = mock(Output.class);
+        final WlOutput wlOutput0 = mock(WlOutput.class);
+        final Output   output0   = mock(Output.class);
         when(wlOutput0.getOutput()).thenReturn(output0);
         when(output0.getImplementation()).thenReturn(glDrawable0);
-        this.compositor.getWlOutputs().add(wlOutput0);
+        this.compositor.getWlOutputs()
+                       .add(wlOutput0);
 
-        WlOutput wlOutput1 = mock(WlOutput.class);
-        Output output1 = mock(Output.class);
+        final WlOutput wlOutput1 = mock(WlOutput.class);
+        final Output   output1   = mock(Output.class);
         when(wlOutput1.getOutput()).thenReturn(output1);
         when(output1.getImplementation()).thenReturn(glDrawable1);
-        this.compositor.getWlOutputs().add(wlOutput1);
+        this.compositor.getWlOutputs()
+                       .add(wlOutput1);
 
         final EventLoop eventLoop = mock(EventLoop.class);
         when(this.display.getEventLoop()).thenReturn(eventLoop);

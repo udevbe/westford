@@ -54,9 +54,9 @@ public class PointerDevice {
     @Nonnull
     private final InfiniteRegion infiniteRegion;
     @Nonnull
-    private final Compositor compositor;
+    private final Compositor     compositor;
     @Nonnull
-    private final Display    display;
+    private final Display        display;
 
     PointerDevice(@Provided @Nonnull final Display display,
                   @Provided @Nonnull final InfiniteRegion infiniteRegion,

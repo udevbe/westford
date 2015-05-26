@@ -32,7 +32,7 @@ import java.util.Optional;
 public class Surface {
 
     @Nonnull
-    private final FiniteRegionFactory finiteRegionFactory;
+    private final FiniteRegionFactory  finiteRegionFactory;
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
 
@@ -48,20 +48,20 @@ public class Surface {
 
     //committed state
     @Nonnull
-    private SurfaceState state               = SurfaceState.builder()
-                                                           .build();
+    private SurfaceState state = SurfaceState.builder()
+                                             .build();
     //committed derived states
-    private boolean      destroyed           = false;
+    private boolean destroyed;
     @Nonnull
-    private Mat4         compositorTransform = Transforms.NORMAL;
+    private Mat4      compositorTransform = Transforms.NORMAL;
     @Nonnull
-    private Mat4         transform           = Transforms.NORMAL;
+    private Mat4      transform           = Transforms.NORMAL;
     @Nonnull
-    private Mat4         inverseTransform    = Transforms.NORMAL;
+    private Mat4      inverseTransform    = Transforms.NORMAL;
     @Nonnull
-    private Point        position            = Point.ZERO;
+    private Point     position            = Point.ZERO;
     @Nonnull
-    private Rectangle    size                = Rectangle.ZERO;
+    private Rectangle size                = Rectangle.ZERO;
 
     @Nonnull
     private final List<WlCallbackResource> callbacks = Lists.newLinkedList();

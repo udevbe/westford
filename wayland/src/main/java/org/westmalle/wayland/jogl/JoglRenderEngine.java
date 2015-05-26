@@ -337,7 +337,7 @@ public class JoglRenderEngine implements RenderEngine {
 
     private JoglBufferFormat queryBufferFormat(final ShmBuffer buffer) {
         final JoglBufferFormat format;
-        final int            bufferFormat = buffer.getFormat();
+        final int              bufferFormat = buffer.getFormat();
         if (bufferFormat == ARGB8888.getValue()) {
             format = JoglBufferFormat.SHM_ARGB8888;
         }
@@ -351,8 +351,8 @@ public class JoglRenderEngine implements RenderEngine {
     }
 
     private JoglSurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
-                                           final ShmBuffer buffer) {
-        final GL2ES2  gl2ES2      = this.gl.get();
+                                             final ShmBuffer buffer) {
+        final GL2ES2    gl2ES2      = this.gl.get();
         JoglSurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
             surfaceData = JoglSurfaceData.create(gl2ES2);
@@ -360,7 +360,8 @@ public class JoglRenderEngine implements RenderEngine {
                              buffer);
             this.cachedSurfaceData.put(surfaceResource,
                                        surfaceData);
-        } else {
+        }
+        else {
             final int surfaceDataWidth = surfaceData.getWidth();
             final int surfaceDataHeight = surfaceData.getHeight();
             final int bufferWidth = buffer.getWidth();

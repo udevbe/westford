@@ -14,15 +14,13 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.util.concurrent.Service;
-
-import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.nativ.NativeModule;
-import org.westmalle.wayland.nativ.Libc;
-
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
+import org.freedesktop.wayland.server.Display;
+import org.westmalle.wayland.nativ.Libc;
+import org.westmalle.wayland.nativ.NativeModule;
+
+import javax.inject.Singleton;
 
 import static dagger.Provides.Type.SET;
 
@@ -31,7 +29,7 @@ public class OutputModule {
 
     @Provides
     @Singleton
-    InfiniteRegion provideInfiniteRegion(final FiniteRegionFactory finiteRegionFactory){
+    InfiniteRegion provideInfiniteRegion(final FiniteRegionFactory finiteRegionFactory) {
         return new InfiniteRegion(finiteRegionFactory);
     }
 

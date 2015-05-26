@@ -9,6 +9,7 @@ import org.westmalle.wayland.protocol.WlShellFactory;
 
 import javax.inject.Singleton;
 import java.util.Set;
+
 @Singleton
 @Component(modules = OutputModule.class)
 public interface OutputComponent {

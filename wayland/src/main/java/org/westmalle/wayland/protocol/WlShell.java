@@ -18,7 +18,6 @@ import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.output.wlshell.ShellSurface;
-import org.westmalle.wayland.output.wlshell.ShellSurfaceFactory;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

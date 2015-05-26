@@ -1,8 +1,20 @@
+//Copyright 2015 Erik De Rijcke
+//
+//Licensed under the Apache License,Version2.0(the"License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//
+//http://www.apache.org/licenses/LICENSE-2.0
+//
+//Unless required by applicable law or agreed to in writing,software
+//distributed under the License is distributed on an"AS IS"BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
 package org.westmalle.wayland.output;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
@@ -17,13 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.nativ.Libc;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.verifyNoMoreInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -85,13 +91,15 @@ public class JobExecutorTest {
                                          any())).thenReturn(eventSource);
 
         when(this.libc.write(eq(this.pipeWR),
-                             eq((Pointer) Whitebox.getInternalState(this.jobExecutor, "eventFinishedBuffer")),
+                             eq((Pointer) Whitebox.getInternalState(this.jobExecutor,
+                                                                    "eventFinishedBuffer")),
                              eq(1))).thenAnswer(invocation -> this.jobExecutor.handle(this.pipeR,
                                                                                       1234));
         doAnswer(invocation -> {
                      Pointer buffer = (Pointer) invocation.getArguments()[1];
                      //event finished
-                    buffer.setByte(0, (byte) 0);
+                     buffer.setByte(0,
+                                    (byte) 0);
                      return null;
                  }
                 ).when(this.libc)
@@ -102,11 +110,12 @@ public class JobExecutorTest {
         this.jobExecutor.start();
         this.jobExecutor.fireFinishedEvent();
 
-        ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
+        final ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
         verify(this.libc).write(eq(this.pipeWR),
                                 bufferArgumentCaptor.capture(),
                                 eq(1));
-        assertThat(bufferArgumentCaptor.getValue().getByte(0)).isEqualTo((byte)0);
+        assertThat(bufferArgumentCaptor.getValue()
+                                       .getByte(0)).isEqualTo((byte) 0);
         verify(eventSource).remove();
         verify(this.libc).close(this.pipeR);
         verify(this.libc).close(this.pipeWR);
@@ -134,7 +143,8 @@ public class JobExecutorTest {
         doAnswer(invocation -> {
                      Pointer buffer = (Pointer) invocation.getArguments()[1];
                      //new job
-                    buffer.setByte(0, (byte) 1);
+                     buffer.setByte(0,
+                                    (byte) 1);
                      return null;
                  }
                 ).when(this.libc)
@@ -143,11 +153,13 @@ public class JobExecutorTest {
                        anyInt());
 
         when(this.libc.write(this.pipeWR,
-                (Pointer) Whitebox.getInternalState(this.jobExecutor, "eventNewJobBuffer"),
-                1)).thenAnswer(invocation -> {
-                    JobExecutorTest.this.jobExecutor.handle(pipeR,0);
-                    return null;
-                });
+                             (Pointer) Whitebox.getInternalState(this.jobExecutor,
+                                                                 "eventNewJobBuffer"),
+                             1)).thenAnswer(invocation -> {
+            JobExecutorTest.this.jobExecutor.handle(this.pipeR,
+                                                    0);
+            return null;
+        });
 
         //when
         final Runnable job = mock(Runnable.class);
@@ -155,11 +167,12 @@ public class JobExecutorTest {
         this.jobExecutor.submit(job);
 
         //then
-        ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
+        final ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
         verify(this.libc).write(eq(this.pipeWR),
                                 bufferArgumentCaptor.capture(),
                                 eq(1));
-        assertThat(bufferArgumentCaptor.getValue().getByte(0)).isEqualTo((byte)1);
+        assertThat(bufferArgumentCaptor.getValue()
+                                       .getByte(0)).isEqualTo((byte) 1);
         verify(job).run();
     }
 
@@ -175,7 +188,8 @@ public class JobExecutorTest {
 
         when(this.libc.write(eq(this.pipeWR),
                              eq(new Memory(1) {{
-                                 setByte(0, (byte) 1);
+                                 setByte(0,
+                                         (byte) 1);
                              }}),
                              eq(1))).then(invocation -> {
             this.jobExecutor.handle(this.pipeR,
@@ -185,7 +199,8 @@ public class JobExecutorTest {
         doAnswer(invocation -> {
                      Pointer buffer = (Pointer) invocation.getArguments()[1];
                      //new job
-                    buffer.setByte(0, (byte) 1);
+                     buffer.setByte(0,
+                                    (byte) 1);
                      return null;
                  }
                 ).when(this.libc)
@@ -194,9 +209,11 @@ public class JobExecutorTest {
                        anyInt());
 
         when(this.libc.write(this.pipeWR,
-                (Pointer) Whitebox.getInternalState(this.jobExecutor, "eventNewJobBuffer"),
-                1)).thenAnswer(invocation -> {
-            JobExecutorTest.this.jobExecutor.handle(pipeR,0);
+                             (Pointer) Whitebox.getInternalState(this.jobExecutor,
+                                                                 "eventNewJobBuffer"),
+                             1)).thenAnswer(invocation -> {
+            JobExecutorTest.this.jobExecutor.handle(this.pipeR,
+                                                    0);
             return null;
         });
 
@@ -205,12 +222,13 @@ public class JobExecutorTest {
         this.jobExecutor.submit(job);
         this.jobExecutor.submit(job);
 
-        ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
+        final ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
         verify(this.libc,
                times(2)).write(eq(this.pipeWR),
                                bufferArgumentCaptor.capture(),
                                eq(1));
-        assertThat(bufferArgumentCaptor.getValue().getByte(0)).isEqualTo((byte) 1);
+        assertThat(bufferArgumentCaptor.getValue()
+                                       .getByte(0)).isEqualTo((byte) 1);
         verify(job,
                times(2)).run();
     }
@@ -227,19 +245,21 @@ public class JobExecutorTest {
 
         //new job event mock behavior
         when(this.libc.write(eq(this.pipeWR),
-                             eq((Pointer) Whitebox.getInternalState(this.jobExecutor, "eventNewJobBuffer")),
+                             eq((Pointer) Whitebox.getInternalState(this.jobExecutor,
+                                                                    "eventNewJobBuffer")),
                              eq(1))).thenAnswer(writeAnswer -> {
 
             doAnswer(readAnswer -> {
                          Pointer buffer = (Pointer) readAnswer.getArguments()[1];
                          //new job
-                         buffer.setByte(0, (byte) 1);
+                         buffer.setByte(0,
+                                        (byte) 1);
                          return null;
                      }
-            ).when(this.libc)
-                    .read(eq(this.pipeR),
-                          any(),
-                          anyInt());
+                    ).when(this.libc)
+                     .read(eq(this.pipeR),
+                           any(),
+                           anyInt());
             this.jobExecutor.handle(this.pipeR,
                                     1234);
             return null;
@@ -247,12 +267,14 @@ public class JobExecutorTest {
 
         //finished event mock behavior
         when(this.libc.write(eq(this.pipeWR),
-                             eq((Pointer) Whitebox.getInternalState(this.jobExecutor, "eventFinishedBuffer")),
+                             eq((Pointer) Whitebox.getInternalState(this.jobExecutor,
+                                                                    "eventFinishedBuffer")),
                              eq(1))).thenAnswer(writeAnswer -> {
             doAnswer(readAnswer -> {
                          Pointer buffer = (Pointer) readAnswer.getArguments()[1];
                          //event finished
-                        buffer.setByte(0, (byte) 0);
+                         buffer.setByte(0,
+                                        (byte) 0);
                          return null;
                      }
                     ).when(this.libc)
@@ -270,14 +292,20 @@ public class JobExecutorTest {
         this.jobExecutor.fireFinishedEvent();
         this.jobExecutor.submit(job);
 
-        ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
+        final ArgumentCaptor<Pointer> bufferArgumentCaptor = ArgumentCaptor.forClass(Pointer.class);
         verify(this.libc,
                times(3)).write(eq(this.pipeWR),
-                bufferArgumentCaptor.capture(),
-                eq(1));
-        assertThat(bufferArgumentCaptor.getAllValues().get(0).getByte(0)).isEqualTo((byte) 1);
-        assertThat(bufferArgumentCaptor.getAllValues().get(1).getByte(0)).isEqualTo((byte) 0);
-        assertThat(bufferArgumentCaptor.getAllValues().get(2).getByte(0)).isEqualTo((byte) 1);
+                               bufferArgumentCaptor.capture(),
+                               eq(1));
+        assertThat(bufferArgumentCaptor.getAllValues()
+                                       .get(0)
+                                       .getByte(0)).isEqualTo((byte) 1);
+        assertThat(bufferArgumentCaptor.getAllValues()
+                                       .get(1)
+                                       .getByte(0)).isEqualTo((byte) 0);
+        assertThat(bufferArgumentCaptor.getAllValues()
+                                       .get(2)
+                                       .getByte(0)).isEqualTo((byte) 1);
 
         verify(job).run();
         verify(eventSource).remove();

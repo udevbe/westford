@@ -52,11 +52,11 @@ public class JoglSeatFactory {
 
     @Nonnull
     public JoglSeat create(@Nonnull final GLWindow glWindow,
-                               @Nonnull final WlSeat wlSeat,
-                               @Nonnull final Compositor compositor) {
+                           @Nonnull final WlSeat wlSeat,
+                           @Nonnull final Compositor compositor) {
         //this objects will post input events from the system to our wayland compositor system
         final JoglSeat joglSeat = new JoglSeat(wlSeat,
-                                                           this.jobExecutor);
+                                               this.jobExecutor);
         //FIXME for now we put these here, these should be handled dynamically when a mouse or keyboard is
         //added or removed
         //enable pointer and keyboard for wlseat

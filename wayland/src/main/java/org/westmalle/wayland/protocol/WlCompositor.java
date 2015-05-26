@@ -31,11 +31,11 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     private final Set<WlCompositorResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
-    private final WlSurfaceFactory                            wlSurfaceFactory;
-    private final WlRegionFactory                             wlRegionFactory;
+    private final WlSurfaceFactory                                 wlSurfaceFactory;
+    private final WlRegionFactory                                  wlRegionFactory;
     private final org.westmalle.wayland.output.FiniteRegionFactory finiteRegionFactory;
-    private final org.westmalle.wayland.output.SurfaceFactory surfaceFactory;
-    private final Compositor                                  compositor;
+    private final org.westmalle.wayland.output.SurfaceFactory      surfaceFactory;
+    private final Compositor                                       compositor;
 
     @Inject
     WlCompositor(@Provided final Display display,
@@ -92,8 +92,8 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                              final int id) {
         this.wlRegionFactory.create(this.finiteRegionFactory.create())
                             .add(resource.getClient(),
-                                    resource.getVersion(),
-                                    id);
+                                 resource.getVersion(),
+                                 id);
     }
 
     @Nonnull

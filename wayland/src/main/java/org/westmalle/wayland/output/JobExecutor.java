@@ -14,22 +14,19 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.collect.Lists;
-
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.nativ.Libc;
 
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
-
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,14 +39,14 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     private static final LinkedList<Runnable> NO_JOBS        = new LinkedList<>();
 
     @Nonnull
-    private final Pointer eventNewJobBuffer   = new Memory(1){
+    private final Pointer eventNewJobBuffer   = new Memory(1) {
         {
             setByte(0,
                     EVENT_NEW_JOB);
         }
     };
     @Nonnull
-    private final Pointer eventFinishedBuffer = new Memory(1){
+    private final Pointer eventFinishedBuffer = new Memory(1) {
         {
             setByte(0,
                     EVENT_FINISHED);
@@ -67,10 +64,10 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     private Optional<EventSource> eventSource = Optional.empty();
 
     @Nonnull
-    private final Display  display;
-    private final int      pipeR;
-    private final int      pipeWR;
-    private final Libc     libc;
+    private final Display display;
+    private final int     pipeR;
+    private final int     pipeWR;
+    private final Libc    libc;
 
     @Inject
     JobExecutor(@Nonnull final Display display,

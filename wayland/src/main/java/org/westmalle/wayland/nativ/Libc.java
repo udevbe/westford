@@ -62,21 +62,21 @@ public class Libc {
     public final int O_ACCMODE = 0x0003;
 
     public native int open(String pathname,
-             int flags);
+                           int flags);
 
     public native int write(int fd,
-              Pointer buffer,
-              int n_byte) throws LastErrorException;
+                            Pointer buffer,
+                            int n_byte) throws LastErrorException;
 
     public native int close(int fd) throws LastErrorException;
 
     public native void read(int fd,
-              Pointer buffer,
-              int n_byte) throws LastErrorException;
+                            Pointer buffer,
+                            int n_byte) throws LastErrorException;
 
     public native int fcntl(int fd,
-              int operation,
-              int args) throws LastErrorException;
+                            int operation,
+                            int args) throws LastErrorException;
 
     public native int pipe(int[] pipeFds) throws LastErrorException;
 }

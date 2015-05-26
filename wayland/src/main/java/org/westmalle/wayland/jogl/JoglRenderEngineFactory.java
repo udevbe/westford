@@ -50,9 +50,9 @@ public class JoglRenderEngineFactory {
                                 vertexBuffer);
 
                 return new JoglRenderEngine(executorService,
-                                          glContext,
-                                          elementBuffer,
-                                          vertexBuffer);
+                                            glContext,
+                                            elementBuffer,
+                                            vertexBuffer);
             })
                                   .get();
         }
@@ -61,7 +61,7 @@ public class JoglRenderEngineFactory {
         }
     }
 
-    private GLContext makeCurrent(final GLContext context) {
+    private void makeCurrent(final GLContext context) {
         final int current = context.makeCurrent();
         switch (current) {
             case GLContext.CONTEXT_NOT_CURRENT:
@@ -69,6 +69,5 @@ public class JoglRenderEngineFactory {
             case GLContext.CONTEXT_CURRENT:
             case GLContext.CONTEXT_CURRENT_NEW:
         }
-        return context;
     }
 }

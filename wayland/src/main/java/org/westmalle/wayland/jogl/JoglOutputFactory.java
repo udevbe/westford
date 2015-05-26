@@ -25,7 +25,10 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import org.freedesktop.wayland.server.WlOutputResource;
-import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.Output;
+import org.westmalle.wayland.output.OutputFactory;
+import org.westmalle.wayland.output.OutputGeometry;
+import org.westmalle.wayland.output.OutputMode;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
@@ -49,16 +52,16 @@ public class JoglOutputFactory {
     }
 
     public WlOutput create(@Nonnull final String xDisplay,
-                                 @Nonnull final GLProfile profile,
-                                 @Nonnegative final int width,
-                                 @Nonnegative final int height) {
+                           @Nonnull final GLProfile profile,
+                           @Nonnegative final int width,
+                           @Nonnegative final int height) {
         checkArgument(width > 0);
         checkArgument(height > 0);
 
         return createWlOutput(createGLWindow(xDisplay,
-                profile,
-                width,
-                height));
+                                             profile,
+                                             width,
+                                             height));
     }
 
     private GLWindow createGLWindow(final String xDisplay,

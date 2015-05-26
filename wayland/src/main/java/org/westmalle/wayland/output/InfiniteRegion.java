@@ -16,9 +16,9 @@ import java.util.List;
 public class InfiniteRegion implements Region {
     @Nonnull
     private static final List<Rectangle> INFINITE_RECT = Collections.singletonList(Rectangle.create(Short.MIN_VALUE,
-            Short.MIN_VALUE,
-            Integer.MAX_VALUE,
-            Integer.MAX_VALUE));
+                                                                                                    Short.MIN_VALUE,
+                                                                                                    Integer.MAX_VALUE,
+                                                                                                    Integer.MAX_VALUE));
     @Nonnull
     private final FiniteRegionFactory finiteRegionFactory;
 
@@ -48,8 +48,9 @@ public class InfiniteRegion implements Region {
     @Override
     public boolean contains(@Nonnull final Rectangle clipping,
                             @Nonnull final Point point) {
-        return this.finiteRegionFactory.create().add(clipping)
-                                                .contains(point);
+        return this.finiteRegionFactory.create()
+                                       .add(clipping)
+                                       .contains(point);
     }
 
     @Override

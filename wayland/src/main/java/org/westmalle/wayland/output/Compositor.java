@@ -30,13 +30,13 @@ import java.util.Optional;
 public class Compositor {
 
     @Nonnull
-    private final Display     display;
+    private final Display  display;
     @Nonnull
     private final Renderer renderer;
     @Nonnull
     private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
     @Nonnull
-    private final LinkedList<WlOutput> wlOutputs = new LinkedList<>();
+    private final LinkedList<WlOutput>          wlOutputs     = new LinkedList<>();
     @Nonnull
     private final EventLoop.IdleHandler idleHandler;
     @Nonnull
@@ -55,7 +55,8 @@ public class Compositor {
         this.renderEvent = Optional.empty();
 
         this.wlOutputs.forEach(wlOutput -> {
-            final Object outputImplementation = wlOutput.getOutput().getImplementation();
+            final Object outputImplementation = wlOutput.getOutput()
+                                                        .getImplementation();
             this.renderer.beginRender(outputImplementation);
             getSurfacesStack().forEach(this.renderer::render);
             this.renderer.endRender(outputImplementation);

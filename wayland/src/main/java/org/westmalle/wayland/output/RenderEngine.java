@@ -14,7 +14,6 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.jogamp.opengl.GLDrawable;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 

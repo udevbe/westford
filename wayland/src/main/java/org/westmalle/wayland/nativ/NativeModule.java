@@ -22,13 +22,13 @@ public class NativeModule {
 
     @Singleton
     @Provides
-    Libegl provideLibegl(){
+    Libegl provideLibegl() {
         return new Libegl();
     }
 
     @Singleton
     @Provides
-    Libgles2 provideLibgles2(){
+    Libgles2 provideLibgles2() {
         return new Libgles2();
     }
 }
