@@ -1,11 +1,13 @@
-package org.westmalle.wayland.output.jogl;
+package org.westmalle.wayland.jogl;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
+
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawable;
 import com.jogamp.opengl.util.texture.Texture;
+
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -17,8 +19,6 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.jogl.JoglRenderEngine;
-import org.westmalle.wayland.jogl.JoglSurfaceData;
 import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -31,8 +31,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 

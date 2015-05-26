@@ -1,7 +1,8 @@
-package org.westmalle.wayland.nativ.newt;
+package org.westmalle.wayland.jogl;
 
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.NEWTEvent;
+
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.junit.Before;
@@ -11,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.jogl.JoglSeat;
 import org.westmalle.wayland.output.JobExecutor;
 import org.westmalle.wayland.output.PointerDevice;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -22,7 +22,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 @RunWith(PowerMockRunner.class)
