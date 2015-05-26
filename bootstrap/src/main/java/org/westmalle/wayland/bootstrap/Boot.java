@@ -27,7 +27,7 @@ public class Boot {
 
     private void strap(final OutputComponent outputComponent) {
 
-        final RendererFactory     shmRendererFactory  = outputComponent.shmRendererFactory();
+        final RendererFactory     rendererFactory  = outputComponent.shmRendererFactory();
         final CompositorFactory   compositorFactory   = outputComponent.compositorFactory();
         final WlCompositorFactory wlCompositorFactory = outputComponent.wlCompositorFactory();
         final WlSeatFactory       wlSeatFactory       = outputComponent.wlSeatFactory();
@@ -50,7 +50,7 @@ public class Boot {
                                                        .getImplementation();
         final RenderEngine joglRenderEngine = joglRenderEngineFactory.create(glWindow.getContext());
         //create an shm renderer that passes on shm buffers to it's render implementation
-        final Renderer renderer = shmRendererFactory.create(joglRenderEngine);
+        final Renderer renderer = rendererFactory.create(joglRenderEngine);
 
         //setup compositing
         //create a compositor with shell and scene logic
