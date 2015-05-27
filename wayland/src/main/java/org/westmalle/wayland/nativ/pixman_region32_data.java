@@ -8,6 +8,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class pixman_region32_data extends Structure {
+
+    private static final List<?> FIELD_ORDER = Arrays.asList("size",
+                                                             "numRects");
+
     public NativeLong size;
     public NativeLong numRects;
 
@@ -16,7 +20,9 @@ public class pixman_region32_data extends Structure {
     }
 
     protected List<?> getFieldOrder() {
-        return Arrays.asList("size",
-                             "numRects");
+        return FIELD_ORDER;
+    }
+
+    public static class ByReference extends pixman_region32_data implements Structure.ByReference {
     }
 }

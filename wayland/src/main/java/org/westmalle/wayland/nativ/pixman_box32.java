@@ -7,6 +7,12 @@ import java.util.List;
 
 
 public class pixman_box32 extends Structure {
+
+    private static final List<?> FIELD_ORDER = Arrays.asList("x1",
+                                                             "y1",
+                                                             "x2",
+                                                             "y2");
+
     public int x1;
     public int y1;
     public int x2;
@@ -17,9 +23,6 @@ public class pixman_box32 extends Structure {
     }
 
     protected List<?> getFieldOrder() {
-        return Arrays.asList("x1",
-                             "y1",
-                             "x2",
-                             "y2");
+        return FIELD_ORDER;
     }
 }

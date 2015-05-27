@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class pixman_region32 extends Structure {
+
+    private static final List<?> FIELD_ORDER = Arrays.asList("extents",
+                                                             "data");
+
     /**
      * C type : pixman_box32_t
      */
@@ -20,7 +24,6 @@ public class pixman_region32 extends Structure {
     }
 
     protected List<?> getFieldOrder() {
-        return Arrays.asList("extents",
-                             "data");
+        return FIELD_ORDER;
     }
 }
