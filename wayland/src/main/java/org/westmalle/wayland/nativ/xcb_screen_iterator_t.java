@@ -13,35 +13,23 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ;
 
-import javax.inject.Singleton;
+import com.sun.jna.Structure;
 
-import dagger.Module;
-import dagger.Provides;
+import java.util.Arrays;
+import java.util.List;
 
-@Module
-public class NativeModule {
+public class xcb_screen_iterator_t extends Structure {
 
-    @Singleton
-    @Provides
-    Libpixman1 provideLibpixman1() {
-        return new Libpixman1();
-    }
+    private static final List<?> FIELD_ORDER = Arrays.asList("data",
+                                                             "rem",
+                                                             "index");
 
-    @Singleton
-    @Provides
-    Libc provideLibc() {
-        return new Libc();
-    }
+    public xcb_screen_t.ByReference data;
+    public int rem;
+    public int index;
 
-    @Singleton
-    @Provides
-    Libegl provideLibegl() {
-        return new Libegl();
-    }
-
-    @Singleton
-    @Provides
-    Libgles2 provideLibgles2() {
-        return new Libgles2();
+    @Override
+    protected List getFieldOrder() {
+        return FIELD_ORDER;
     }
 }

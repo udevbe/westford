@@ -13,35 +13,25 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ;
 
+
+import com.sun.jna.Native;
+import com.sun.jna.Pointer;
+
 import javax.inject.Singleton;
 
-import dagger.Module;
-import dagger.Provides;
+@Singleton
+public class LibX11 {
 
-@Module
-public class NativeModule {
-
-    @Singleton
-    @Provides
-    Libpixman1 provideLibpixman1() {
-        return new Libpixman1();
+    static {
+        Native.register("X11");
     }
 
-    @Singleton
-    @Provides
-    Libc provideLibc() {
-        return new Libc();
+    LibX11() {
     }
 
-    @Singleton
-    @Provides
-    Libegl provideLibegl() {
-        return new Libegl();
-    }
+    public native Pointer XOpenDisplay(String display_name);
 
-    @Singleton
-    @Provides
-    Libgles2 provideLibgles2() {
-        return new Libgles2();
-    }
+    public native int XCloseDisplay(Pointer dpy);
+
+    public native Pointer XGetXCBConnection(Pointer dpy);
 }

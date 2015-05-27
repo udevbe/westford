@@ -13,35 +13,19 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ;
 
-import javax.inject.Singleton;
+import com.sun.jna.Structure;
 
-import dagger.Module;
-import dagger.Provides;
+import java.util.Collections;
+import java.util.List;
 
-@Module
-public class NativeModule {
+public class xcb_void_cookie_t extends Structure{
 
-    @Singleton
-    @Provides
-    Libpixman1 provideLibpixman1() {
-        return new Libpixman1();
-    }
+    private static final List<?> FIELD_ORDER = Collections.singletonList("sequence");
 
-    @Singleton
-    @Provides
-    Libc provideLibc() {
-        return new Libc();
-    }
+    public int sequence;
 
-    @Singleton
-    @Provides
-    Libegl provideLibegl() {
-        return new Libegl();
-    }
-
-    @Singleton
-    @Provides
-    Libgles2 provideLibgles2() {
-        return new Libgles2();
+    @Override
+    protected List<?> getFieldOrder() {
+        return FIELD_ORDER;
     }
 }
