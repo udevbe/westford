@@ -29,7 +29,7 @@ public class xcb_screen_iterator_t extends Structure {
     public int index;
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 }

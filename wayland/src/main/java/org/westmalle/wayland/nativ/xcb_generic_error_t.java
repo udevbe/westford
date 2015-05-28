@@ -29,7 +29,7 @@ public class xcb_generic_error_t extends Structure {
     public int full_sequence;
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 }

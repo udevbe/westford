@@ -54,7 +54,7 @@ public class xcb_screen_t extends Structure{
     public byte allowed_depths_len;
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 
