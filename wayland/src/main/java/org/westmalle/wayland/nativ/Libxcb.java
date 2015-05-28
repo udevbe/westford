@@ -28,12 +28,12 @@ public class Libxcb {
     Libxcb() {
     }
 
-    public final long XCB_COPY_FROM_PARENT  = 0L;
-    public final int XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
-    public final int XCB_CW_EVENT_MASK = 2048;
-    public final int XCB_EVENT_MASK_KEY_PRESS = 1;
-    public final int XCB_EVENT_MASK_BUTTON_PRESS = 4;
-    public final int XCB_EVENT_MASK_EXPOSURE = 32768;
+    public static final long XCB_COPY_FROM_PARENT  = 0L;
+    public static final int XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
+    public static final int XCB_CW_EVENT_MASK = 2048;
+    public static final int XCB_EVENT_MASK_KEY_PRESS = 1;
+    public static final int XCB_EVENT_MASK_BUTTON_PRESS = 4;
+    public static final int XCB_EVENT_MASK_EXPOSURE = 32768;
 
     public native Pointer xcb_get_setup(Pointer c);
 

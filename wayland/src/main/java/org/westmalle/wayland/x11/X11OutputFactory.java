@@ -21,7 +21,9 @@ import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.nativ.xcb_generic_error_t;
 import org.westmalle.wayland.nativ.xcb_screen_t;
 import org.westmalle.wayland.nativ.xcb_void_cookie_t;
+import org.westmalle.wayland.output.OutputFactory;
 import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlOutputFactory;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -32,14 +34,24 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 public class X11OutputFactory {
 
+    @Nonnull
     private final LibX11 libX11;
+    @Nonnull
     private final Libxcb libxcb;
+    @Nonnull
+    private final WlOutputFactory wlOutputFactory;
+    @Nonnull
+    private final OutputFactory outputFactory;
 
     @Inject
-    X11OutputFactory(final LibX11 libX11,
-                     final Libxcb libxcb) {
+    X11OutputFactory(@Nonnull final LibX11 libX11,
+                     @Nonnull final Libxcb libxcb,
+                     @Nonnull final WlOutputFactory wlOutputFactory,
+                     @Nonnull final OutputFactory outputFactory) {
         this.libX11 = libX11;
         this.libxcb = libxcb;
+        this.wlOutputFactory = wlOutputFactory;
+        this.outputFactory = outputFactory;
     }
 
     public WlOutput create(@Nonnull final String xDisplay,
@@ -48,14 +60,18 @@ public class X11OutputFactory {
         checkArgument(width > 0);
         checkArgument(height > 0);
 
-        return createWlOutput(xDisplay,
-                              width,
-                              height);
+        return createWlOutput(createXPlatformOutput(xDisplay,
+                                                    width,
+                                                    height));
     }
 
-    private WlOutput createWlOutput(final String xDisplay,
-                                    final int width,
-                                    final int height) {
+    private WlOutput createWlOutput(XPlatformOutput xPlatformOutput){
+        return null;
+    }
+
+    private XPlatformOutput createXPlatformOutput(final String xDisplay,
+                                                  final int width,
+                                                  final int height) {
 
         Pointer display = this.libX11.XOpenDisplay(xDisplay);
         if (display == null) {
@@ -78,15 +94,15 @@ public class X11OutputFactory {
             throw new RuntimeException("failed to generate X window id");
         }
 
-        int xcb_window_attrib_mask = this.libxcb.XCB_CW_EVENT_MASK;
+        int xcb_window_attrib_mask = Libxcb.XCB_CW_EVENT_MASK;
         Pointer xcb_window_attrib_list = new Memory(4 * 3);
-        xcb_window_attrib_list.setInt(0, this.libxcb.XCB_EVENT_MASK_BUTTON_PRESS);
-        xcb_window_attrib_list.setInt(4, this.libxcb.XCB_EVENT_MASK_EXPOSURE);
-        xcb_window_attrib_list.setInt(8, this.libxcb.XCB_EVENT_MASK_KEY_PRESS);
+        xcb_window_attrib_list.setInt(0, Libxcb.XCB_EVENT_MASK_BUTTON_PRESS);
+        xcb_window_attrib_list.setInt(4, Libxcb.XCB_EVENT_MASK_EXPOSURE);
+        xcb_window_attrib_list.setInt(8, Libxcb.XCB_EVENT_MASK_KEY_PRESS);
 
         xcb_void_cookie_t create_cookie = this.libxcb.xcb_create_window_checked(
                 connection,
-                (byte) this.libxcb.XCB_COPY_FROM_PARENT, // depth
+                (byte) Libxcb.XCB_COPY_FROM_PARENT, // depth
                 window,
                 screen.root, // parent window
                 (short) 0,
@@ -94,7 +110,7 @@ public class X11OutputFactory {
                 (short) width,
                 (short) height,
                 (short) 0, // border width
-                (short) this.libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT, // class
+                (short) Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT, // class
                 screen.root_visual, // visual
                 xcb_window_attrib_mask,
                 xcb_window_attrib_list);
@@ -112,6 +128,6 @@ public class X11OutputFactory {
             throw new RuntimeException("failed to map X window: " + error.error_code);
         }
 
-        return null;
+        return XPlatformOutput.create(window, display);
     }
 }

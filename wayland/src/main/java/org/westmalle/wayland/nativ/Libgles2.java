@@ -11,27 +11,27 @@ public class Libgles2 {
     Libgles2() {
     }
 
-    public final int GL_VERTEX_SHADER        = 0x8B31;
-    public final int GL_FRAGMENT_SHADER      = 0x8B30;
-    public final int GL_COMPILE_STATUS       = 0x8B81;
-    public final int GL_TRUE                 = 1;
-    public final int GL_INFO_LOG_LENGTH      = 0x8B84;
-    public final int GL_ARRAY_BUFFER         = 0x8892;
-    public final int GL_DYNAMIC_DRAW         = 0x88E8;
-    public final int GL_FLOAT                = 0x1406;
-    public final int GL_UNSIGNED_INT         = 0x1405;
-    public final int GL_TRIANGLES            = 0x0004;
-    public final int GL_ELEMENT_ARRAY_BUFFER = 0x8893;
-    public final int GL_COLOR_BUFFER_BIT     = 0x00004000;
-    public final int GL_TEXTURE_2D           = 0x0DE1;
-    public final int GL_UNSIGNED_BYTE        = 0x1401;
-    public final int GL_TEXTURE_WRAP_S       = 0x2802;
-    public final int GL_CLAMP_TO_EDGE        = 0x812F;
-    public final int GL_TEXTURE_WRAP_T       = 0x2803;
-    public final int GL_TEXTURE_MIN_FILTER   = 0x2801;
-    public final int GL_NEAREST              = 0x2600;
-    public final int GL_TEXTURE_MAG_FILTER   = 0x2800;
-    public final int GL_RGBA                 = 0x1908;
+    public static final int GL_VERTEX_SHADER        = 0x8B31;
+    public static final int GL_FRAGMENT_SHADER      = 0x8B30;
+    public static final int GL_COMPILE_STATUS       = 0x8B81;
+    public static final int GL_TRUE                 = 1;
+    public static final int GL_INFO_LOG_LENGTH      = 0x8B84;
+    public static final int GL_ARRAY_BUFFER         = 0x8892;
+    public static final int GL_DYNAMIC_DRAW         = 0x88E8;
+    public static final int GL_FLOAT                = 0x1406;
+    public static final int GL_UNSIGNED_INT         = 0x1405;
+    public static final int GL_TRIANGLES            = 0x0004;
+    public static final int GL_ELEMENT_ARRAY_BUFFER = 0x8893;
+    public static final int GL_COLOR_BUFFER_BIT     = 0x00004000;
+    public static final int GL_TEXTURE_2D           = 0x0DE1;
+    public static final int GL_UNSIGNED_BYTE        = 0x1401;
+    public static final int GL_TEXTURE_WRAP_S       = 0x2802;
+    public static final int GL_CLAMP_TO_EDGE        = 0x812F;
+    public static final int GL_TEXTURE_WRAP_T       = 0x2803;
+    public static final int GL_TEXTURE_MIN_FILTER   = 0x2801;
+    public static final int GL_NEAREST              = 0x2600;
+    public static final int GL_TEXTURE_MAG_FILTER   = 0x2800;
+    public static final int GL_RGBA                 = 0x1908;
 
 
     public native void glViewport(int x,
