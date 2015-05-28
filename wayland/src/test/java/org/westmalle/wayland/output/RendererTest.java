@@ -31,8 +31,7 @@ import org.westmalle.wayland.protocol.WlSurface;
 import java.util.Optional;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -69,9 +68,6 @@ public class RendererTest {
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
 
-        final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.renderEngine.draw(any(),
-                                    any())).thenReturn(listenableFuture);
         //when
         this.renderer.render(surfaceResource);
         //then
@@ -83,8 +79,6 @@ public class RendererTest {
     public void testBeginRender() throws Exception {
         //given
         final GLDrawable       glDrawable       = mock(GLDrawable.class);
-        final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.renderEngine.begin(glDrawable)).thenReturn(listenableFuture);
         //when
         this.renderer.beginRender(glDrawable);
         //then
