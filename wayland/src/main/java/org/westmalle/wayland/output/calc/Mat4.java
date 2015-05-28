@@ -24,23 +24,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 @AutoValue
 public abstract class Mat4 {
 
+    //@formatter:off
     @Nonnull
-    public static final Mat4 IDENTITY = Mat4.create(1.f,
-                                                    0.f,
-                                                    0.f,
-                                                    0.f,
-                                                    0.f,
-                                                    1.f,
-                                                    0.f,
-                                                    0.f,
-                                                    0.f,
-                                                    0.f,
-                                                    1.f,
-                                                    0.f,
-                                                    0.f,
-                                                    0.f,
-                                                    0.f,
-                                                    1.f);
+    public static final Mat4 IDENTITY = Mat4.create(1.f, 0.f, 0.f, 0.f,
+                                                    0.f, 1.f, 0.f, 0.f,
+                                                    0.f, 0.f, 1.f, 0.f,
+                                                    0.f, 0.f, 0.f, 1.f);
+    //@formatter:on
 
     /**
      * Construct a new matrix. Array elements should be in column major order.
@@ -54,24 +44,14 @@ public abstract class Mat4 {
                       "Array length must be >= 16");
         checkArgument(offset >= 0,
                       "Offset must be >= 0");
+        //@formatter:off
         return Mat4.builder()
-                   .m00(array[offset])
-                   .m01(array[1 + offset])
-                   .m02(array[2 + offset])
-                   .m03(array[3 + offset])
-                   .m10(array[4 + offset])
-                   .m11(array[5 + offset])
-                   .m12(array[6 + offset])
-                   .m13(array[7 + offset])
-                   .m20(array[8 + offset])
-                   .m21(array[9 + offset])
-                   .m22(array[10 + offset])
-                   .m23(array[11 + offset])
-                   .m30(array[12 + offset])
-                   .m31(array[13 + offset])
-                   .m32(array[14 + offset])
-                   .m33(array[15] + offset)
+                   .m00(array[offset]).m01(array[1 + offset]).m02(array[2 + offset]).m03(array[3 + offset])
+                   .m10(array[4 + offset]).m11(array[5 + offset]).m12(array[6 + offset]).m13(array[7 + offset])
+                   .m20(array[8 + offset]).m21(array[9 + offset]).m22(array[10 + offset]).m23(array[11 + offset])
+                   .m30(array[12 + offset]).m31(array[13 + offset]).m32(array[14 + offset]).m33(array[15] + offset)
                    .build();
+        //@formatter:on
     }
 
     /**
@@ -97,43 +77,18 @@ public abstract class Mat4 {
      * @return a new 4 by 4 matrix.
      */
     @Nonnull
-    public static Mat4 create(final float m00,
-                              final float m01,
-                              final float m02,
-                              final float m03,
-
-                              final float m10,
-                              final float m11,
-                              final float m12,
-                              final float m13,
-
-                              final float m20,
-                              final float m21,
-                              final float m22,
-                              final float m23,
-
-                              final float m30,
-                              final float m31,
-                              final float m32,
-                              final float m33) {
+    //@formatter:off
+    public static Mat4 create(final float m00, final float m01, final float m02, final float m03,
+                              final float m10, final float m11, final float m12, final float m13,
+                              final float m20, final float m21, final float m22, final float m23,
+                              final float m30, final float m31, final float m32, final float m33) {
         return Mat4.builder()
-                   .m00(m00)
-                   .m10(m10)
-                   .m20(m20)
-                   .m30(m30)
-                   .m01(m01)
-                   .m11(m11)
-                   .m21(m21)
-                   .m31(m31)
-                   .m02(m02)
-                   .m12(m12)
-                   .m22(m22)
-                   .m32(m32)
-                   .m03(m03)
-                   .m13(m13)
-                   .m23(m23)
-                   .m33(m33)
+                   .m00(m00).m10(m10).m20(m20).m30(m30)
+                   .m01(m01).m11(m11).m21(m21).m31(m31)
+                   .m02(m02).m12(m12).m22(m22).m32(m32)
+                   .m03(m03).m13(m13).m23(m23).m33(m33)
                    .build();
+        //@formatter:on
     }
 
     /**
@@ -146,23 +101,13 @@ public abstract class Mat4 {
     }
 
     public static Builder builder() {
+        //@formatter:off
         return new AutoValue_Mat4.Builder()
-                .m00(0.f)
-                .m10(0.f)
-                .m20(0.f)
-                .m30(0.f)
-                .m01(0.f)
-                .m11(0.f)
-                .m21(0.f)
-                .m31(0.f)
-                .m02(0.f)
-                .m12(0.f)
-                .m22(0.f)
-                .m32(0.f)
-                .m03(0.f)
-                .m13(0.f)
-                .m23(0.f)
-                .m33(0.f);
+                                 .m00(0.f).m10(0.f).m20(0.f).m30(0.f)
+                                 .m01(0.f).m11(0.f).m21(0.f).m31(0.f)
+                                 .m02(0.f).m12(0.f).m22(0.f).m32(0.f)
+                                 .m03(0.f).m13(0.f).m23(0.f).m33(0.f);
+        //@formatter:on
     }
 
     /**
@@ -248,22 +193,12 @@ public abstract class Mat4 {
     public abstract Builder toBuilder();
 
     public Mat4 add(final Mat4 other) {
-        return Mat4.create(getM00() + other.getM00(),
-                           getM01() + other.getM01(),
-                           getM02() + other.getM02(),
-                           getM03() + other.getM03(),
-                           getM10() + other.getM10(),
-                           getM11() + other.getM11(),
-                           getM12() + other.getM12(),
-                           getM13() + other.getM13(),
-                           getM20() + other.getM20(),
-                           getM21() + other.getM21(),
-                           getM22() + other.getM22(),
-                           getM23() + other.getM23(),
-                           getM30() + other.getM30(),
-                           getM31() + other.getM31(),
-                           getM32() + other.getM32(),
-                           getM33() + other.getM33());
+        //@formatter:off
+        return Mat4.create(getM00() + other.getM00(), getM01() + other.getM01(), getM02() + other.getM02(), getM03() + other.getM03(),
+                           getM10() + other.getM10(), getM11() + other.getM11(), getM12() + other.getM12(), getM13() + other.getM13(),
+                           getM20() + other.getM20(), getM21() + other.getM21(), getM22() + other.getM22(), getM23() + other.getM23(),
+                           getM30() + other.getM30(), getM31() + other.getM31(), getM32() + other.getM32(), getM33() + other.getM33());
+        //@formatter:on
     }
 
     @AutoValue.Builder
@@ -319,12 +254,10 @@ public abstract class Mat4 {
         final float rightZ = right.getZ();
         final float rightW = right.getW();
 
-        return Vec4.create(
-                getM00() * rightX + getM10() * rightY + getM20() * rightZ + getM30() * rightW,
-                getM01() * rightX + getM11() * rightY + getM21() * rightZ + getM31() * rightW,
-                getM02() * rightX + getM12() * rightY + getM22() * rightZ + getM32() * rightW,
-                getM03() * rightX + getM13() * rightY + getM23() * rightZ + getM33() * rightW
-                          );
+        return Vec4.create(getM00() * rightX + getM10() * rightY + getM20() * rightZ + getM30() * rightW,
+                           getM01() * rightX + getM11() * rightY + getM21() * rightZ + getM31() * rightW,
+                           getM02() * rightX + getM12() * rightY + getM22() * rightZ + getM32() * rightW,
+                           getM03() * rightX + getM13() * rightY + getM23() * rightZ + getM33() * rightW);
     }
 
     /**
@@ -354,22 +287,12 @@ public abstract class Mat4 {
         final float nm32 = this.getM02() * right.getM30() + this.getM12() * right.getM31() + this.getM22() * right.getM32() + this.getM32() * right.getM33();
         final float nm33 = this.getM03() * right.getM30() + this.getM13() * right.getM31() + this.getM23() * right.getM32() + this.getM33() * right.getM33();
 
-        return Mat4.create(nm00,
-                           nm01,
-                           nm02,
-                           nm03,
-                           nm10,
-                           nm11,
-                           nm12,
-                           nm13,
-                           nm20,
-                           nm21,
-                           nm22,
-                           nm23,
-                           nm30,
-                           nm31,
-                           nm32,
-                           nm33);
+        //@formatter:off
+        return Mat4.create(nm00, nm01, nm02, nm03,
+                           nm10, nm11, nm12, nm13,
+                           nm20, nm21, nm22, nm23,
+                           nm30, nm31, nm32, nm33);
+        //@formatter:on
     }
 
     /**
@@ -385,22 +308,12 @@ public abstract class Mat4 {
                                                  {getM30(), getM31(), getM32(), getM33()}};
         //FIXME test uninvertable matrix, what will/should happen?
         final float[][] matrix2dInverted = invert(matrix2d);
-        return Mat4.create(matrix2dInverted[0][0],
-                           matrix2dInverted[0][1],
-                           matrix2dInverted[0][2],
-                           matrix2dInverted[0][3],
-                           matrix2dInverted[1][0],
-                           matrix2dInverted[1][1],
-                           matrix2dInverted[1][2],
-                           matrix2dInverted[1][3],
-                           matrix2dInverted[2][0],
-                           matrix2dInverted[2][1],
-                           matrix2dInverted[2][2],
-                           matrix2dInverted[2][3],
-                           matrix2dInverted[3][0],
-                           matrix2dInverted[3][1],
-                           matrix2dInverted[3][2],
-                           matrix2dInverted[3][3]);
+        //@formatter:off
+        return Mat4.create(matrix2dInverted[0][0], matrix2dInverted[0][1], matrix2dInverted[0][2], matrix2dInverted[0][3],
+                           matrix2dInverted[1][0], matrix2dInverted[1][1], matrix2dInverted[1][2], matrix2dInverted[1][3],
+                           matrix2dInverted[2][0], matrix2dInverted[2][1], matrix2dInverted[2][2], matrix2dInverted[2][3],
+                           matrix2dInverted[3][0], matrix2dInverted[3][1], matrix2dInverted[3][2], matrix2dInverted[3][3]);
+        //@formatter:on
     }
 
     private float[][] invert(final float[][] a) {
@@ -468,9 +381,7 @@ public abstract class Mat4 {
             index[k] = itmp;
             for (int i = j + 1; i < n; ++i) {
                 final float pj = a[index[i]][j] / a[index[j]][j];
-
                 a[index[i]][j] = pj;
-
                 // Modify other elements accordingly
                 for (int l = j + 1; l < n; ++l) { a[index[i]][l] -= pj * a[index[j]][l]; }
             }
@@ -481,22 +392,12 @@ public abstract class Mat4 {
     public FloatBuffer toBuffer() {
 
         final FloatBuffer buffer = FloatBuffer.allocate(16);
-        buffer.put(getM00())
-              .put(getM01())
-              .put(getM02())
-              .put(getM03());
-        buffer.put(getM10())
-              .put(getM11())
-              .put(getM12())
-              .put(getM13());
-        buffer.put(getM20())
-              .put(getM21())
-              .put(getM22())
-              .put(getM23());
-        buffer.put(getM30())
-              .put(getM31())
-              .put(getM32())
-              .put(getM33());
+        //@formatter:off
+        buffer.put(getM00()).put(getM01()).put(getM02()).put(getM03());
+        buffer.put(getM10()).put(getM11()).put(getM12()).put(getM13());
+        buffer.put(getM20()).put(getM21()).put(getM22()).put(getM23());
+        buffer.put(getM30()).put(getM31()).put(getM32()).put(getM33());
+        //@formatter:on
         buffer.rewind();
         return buffer;
     }

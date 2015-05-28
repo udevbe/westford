@@ -120,25 +120,12 @@ public class JoglRenderEngine implements RenderEngine {
     private void doBegin(final GLDrawable drawable) {
         final int surfaceWidth  = drawable.getSurfaceWidth();
         final int surfaceHeight = drawable.getSurfaceHeight();
-        this.projection = Optional.of(Mat4.create(2.0f / surfaceWidth,
-                                                  0,
-                                                  0,
-                                                  -1,
-
-                                                  0,
-                                                  2.0f / -surfaceHeight,
-                                                  0,
-                                                  1,
-
-                                                  0,
-                                                  0,
-                                                  1,
-                                                  0,
-
-                                                  0,
-                                                  0,
-                                                  0,
-                                                  1));
+        //@formatter:off
+        this.projection = Optional.of(Mat4.create(2.0f / surfaceWidth, 0,                     0, -1,
+                                                  0,                   2.0f / -surfaceHeight, 0,  1,
+                                                  0,                   0,                     1,  0,
+                                                  0,                   0,                     0,  1));
+        //@formatter:on
         refreshGl();
         final GL2ES2 gl2ES2 = this.gl.get();
         gl2ES2.glViewport(0,
