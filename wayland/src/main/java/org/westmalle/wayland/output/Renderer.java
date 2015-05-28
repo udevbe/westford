@@ -32,33 +32,22 @@ public class Renderer {
     }
 
     public void render(@Nonnull final WlSurfaceResource surfaceResource) {
-        final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
-        final WlBufferResource wlBufferResource = implementation.getSurface()
-                                                                .getState()
-                                                                .getBuffer()
-                                                                .get();
-        try {
-            this.renderEngine.draw(surfaceResource,
-                                   wlBufferResource)
-                             .get();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
+        final WlBufferResource wlBufferResource = wlSurface.getSurface()
+                                                           .getState()
+                                                           .getBuffer()
+                                                           .get();
+        this.renderEngine.draw(surfaceResource,
+                               wlBufferResource);
     }
 
     public void beginRender(@Nonnull final Object outputImplementation) {
-        try {
-            this.renderEngine.begin(outputImplementation)
-                             .get();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        this.renderEngine.begin(outputImplementation);
     }
 
     public void endRender(@Nonnull final Object outputImplementation) {
         try {
+            //wait for rendering to finish
             this.renderEngine.end(outputImplementation)
                              .get();
         }

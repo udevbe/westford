@@ -62,18 +62,18 @@ public class OutputModule {
         final int writeFd = pipeFds[1];
 
         final int readFlags = libc.fcntl(readFd,
-                                         libc.F_GETFD,
+                                         Libc.F_GETFD,
                                          0);
         libc.fcntl(readFd,
-                   libc.F_SETFD,
-                   readFlags | libc.FD_CLOEXEC);
+                   Libc.F_SETFD,
+                   readFlags | Libc.FD_CLOEXEC);
 
         final int writeFlags = libc.fcntl(writeFd,
-                                          libc.F_GETFD,
+                                          Libc.F_GETFD,
                                           0);
         libc.fcntl(writeFd,
-                   libc.F_SETFD,
-                   writeFlags | libc.FD_CLOEXEC);
+                   Libc.F_SETFD,
+                   writeFlags | Libc.FD_CLOEXEC);
 
         return pipeFds;
     }

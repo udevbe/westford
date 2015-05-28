@@ -35,6 +35,8 @@ import java.nio.IntBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
@@ -79,13 +81,13 @@ public class JoglRenderEngine implements RenderEngine {
     private final Map<JoglBufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
 
     @Nonnull
-    private final ListeningExecutorService renderThread;
+    private final ExecutorService renderThread;
     @Nonnull
-    private final GLContext                glContext;
+    private final GLContext       glContext;
     @Nonnull
-    private final IntBuffer                elementBuffer;
+    private final IntBuffer       elementBuffer;
     @Nonnull
-    private final IntBuffer                vertexBuffer;
+    private final IntBuffer       vertexBuffer;
     @Nonnull
     private final int[] elements = new int[]{
             0,
@@ -101,7 +103,7 @@ public class JoglRenderEngine implements RenderEngine {
     @Nonnull
     private Optional<GL2ES2> gl         = Optional.empty();
 
-    JoglRenderEngine(@Nonnull final ListeningExecutorService renderThread,
+    JoglRenderEngine(@Nonnull final ExecutorService renderThread,
                      @Nonnull final GLContext glContext,
                      @Nonnull final IntBuffer elementBuffer,
                      @Nonnull final IntBuffer vertexBuffer) {
@@ -111,10 +113,9 @@ public class JoglRenderEngine implements RenderEngine {
         this.vertexBuffer = vertexBuffer;
     }
 
-    @Nonnull
     @Override
-    public ListenableFuture<?> begin(@Nonnull final Object outputImplementation) {
-        return this.renderThread.submit(() -> doBegin((GLDrawable) outputImplementation));
+    public void begin(@Nonnull final Object outputImplementation) {
+        this.renderThread.submit(() -> doBegin((GLDrawable) outputImplementation));
     }
 
     private void doBegin(final GLDrawable drawable) {
@@ -146,12 +147,11 @@ public class JoglRenderEngine implements RenderEngine {
                             this.vertexBuffer.get(0));
     }
 
-    @Nonnull
     @Override
-    public ListenableFuture<?> draw(@Nonnull final WlSurfaceResource surfaceResource,
-                                    @Nonnull final WlBufferResource buffer) {
-        return this.renderThread.submit(() -> doDraw(surfaceResource,
-                                                     buffer));
+    public void draw(@Nonnull final WlSurfaceResource surfaceResource,
+                     @Nonnull final WlBufferResource buffer) {
+        this.renderThread.submit(() -> doDraw(surfaceResource,
+                                              buffer));
     }
 
     private void doDraw(final WlSurfaceResource surfaceResource,
@@ -192,7 +192,7 @@ public class JoglRenderEngine implements RenderEngine {
 
     @Nonnull
     @Override
-    public ListenableFuture<?> end(@Nonnull final Object outputImplementation) {
+    public Future<?> end(@Nonnull final Object outputImplementation) {
         return this.renderThread.submit(() -> doEnd((GLDrawable) outputImplementation));
     }
 

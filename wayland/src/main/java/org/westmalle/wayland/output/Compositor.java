@@ -19,6 +19,7 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;

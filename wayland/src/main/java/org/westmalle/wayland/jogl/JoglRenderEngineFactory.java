@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.nio.IntBuffer;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class JoglRenderEngineFactory {
@@ -34,8 +35,8 @@ public class JoglRenderEngineFactory {
     @Nonnull
     public JoglRenderEngine create(@Nonnull final GLContext glContext) {
 
-        final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(r -> new Thread(r,
-                                                                                                                                            "GL Render Engine")));
+        final ExecutorService executorService = Executors.newSingleThreadExecutor(r -> new Thread(r,
+                                                                                                  "GL Render Engine"));
         try {
             return executorService.submit(() -> {
                 makeCurrent(glContext);

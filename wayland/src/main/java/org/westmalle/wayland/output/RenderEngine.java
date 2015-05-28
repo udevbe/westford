@@ -13,20 +13,18 @@
 //limitations under the License.
 package org.westmalle.wayland.output;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.Future;
 
 public interface RenderEngine {
-    @Nonnull
-    ListenableFuture<?> draw(@Nonnull final WlSurfaceResource surfaceResource,
-                             @Nonnull final WlBufferResource buffer);
+    void draw(@Nonnull final WlSurfaceResource surfaceResource,
+              @Nonnull final WlBufferResource buffer);
+
+    void begin(@Nonnull final Object outputImplementation);
 
     @Nonnull
-    ListenableFuture<?> begin(@Nonnull final Object outputImplementation);
-
-    @Nonnull
-    ListenableFuture<?> end(@Nonnull final Object outputImplementation);
+    Future<?> end(@Nonnull final Object outputImplementation);
 }
