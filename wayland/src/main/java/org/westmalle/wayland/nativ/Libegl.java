@@ -25,19 +25,19 @@ public class Libegl {
     Libegl() {
     }
 
-    public static final int EGL_PLATFORM_ANDROID_KHR    = 0x3141;
-    public static final int EGL_PLATFORM_GBM_KHR        = 0x31D7;
-    public static final int EGL_PLATFORM_WAYLAND_KHR    = 0x31D8;
-    public static final int EGL_PLATFORM_X11_KHR        = 0x31D5;
+    public static final int EGL_PLATFORM_ANDROID_KHR = 0x3141;
+    public static final int EGL_PLATFORM_GBM_KHR = 0x31D7;
+    public static final int EGL_PLATFORM_WAYLAND_KHR = 0x31D8;
+    public static final int EGL_PLATFORM_X11_KHR = 0x31D5;
     public static final int EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
-    public static final int EGL_PLATFORM_GBM_MESA       = 0x31D7;
+    public static final int EGL_PLATFORM_GBM_MESA = 0x31D7;
 
-    public static final int EGL_WAYLAND_BUFFER_WL     = 0x31D5;
-    public static final int EGL_WAYLAND_PLANE_WL      = 0x31D6;
-    public static final int EGL_TEXTURE_Y_U_V_WL      = 0x31D7;
-    public static final int EGL_TEXTURE_Y_UV_WL       = 0x31D8;
-    public static final int EGL_TEXTURE_Y_XUXV_WL     = 0x31D9;
-    public static final int EGL_TEXTURE_FORMAT        = 0x3080;
+    public static final int EGL_WAYLAND_BUFFER_WL = 0x31D5;
+    public static final int EGL_WAYLAND_PLANE_WL = 0x31D6;
+    public static final int EGL_TEXTURE_Y_U_V_WL = 0x31D7;
+    public static final int EGL_TEXTURE_Y_UV_WL = 0x31D8;
+    public static final int EGL_TEXTURE_Y_XUXV_WL = 0x31D9;
+    public static final int EGL_TEXTURE_FORMAT = 0x3080;
     public static final int EGL_WAYLAND_Y_INVERTED_WL = 0x31DB;
 
     public native boolean eglBindWaylandDisplayWL(Pointer dpy,
@@ -61,6 +61,11 @@ public class Libegl {
 
     public native boolean eglSwapBuffers(Pointer dpy,
                                          Pointer surface);
+
+    public native boolean eglMakeCurrent(Pointer dpy,
+                                         Pointer draw,
+                                         Pointer read,
+                                         Pointer context);
 
     public native Pointer eglCreateContext(Pointer dpy,
                                            Pointer config,

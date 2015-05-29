@@ -22,7 +22,6 @@ import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.nativ.xcb_generic_error_t;
 import org.westmalle.wayland.nativ.xcb_screen_t;
 import org.westmalle.wayland.nativ.xcb_void_cookie_t;
-import org.westmalle.wayland.output.Output;
 import org.westmalle.wayland.output.OutputFactory;
 import org.westmalle.wayland.output.OutputGeometry;
 import org.westmalle.wayland.output.OutputMode;
@@ -46,16 +45,20 @@ public class X11OutputFactory {
     private final WlOutputFactory wlOutputFactory;
     @Nonnull
     private final OutputFactory   outputFactory;
+    @Nonnull
+    private final XOutputFactory xOutputFactory;
 
     @Inject
     X11OutputFactory(@Nonnull final LibX11 libX11,
                      @Nonnull final Libxcb libxcb,
                      @Nonnull final WlOutputFactory wlOutputFactory,
-                     @Nonnull final OutputFactory outputFactory) {
+                     @Nonnull final OutputFactory outputFactory,
+                     @Nonnull final XOutputFactory xOutputFactory) {
         this.libX11 = libX11;
         this.libxcb = libxcb;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
+        this.xOutputFactory = xOutputFactory;
     }
 
     public WlOutput create(@Nonnull final String xDisplay,
@@ -156,10 +159,9 @@ public class X11OutputFactory {
                                                 .width(width)
                                                 .refresh(60)
                                                 .build();
-        final Output output = this.outputFactory.create(outputGeometry,
-                                                        outputMode,
-                                                        XOutput.create(window,
-                                                                       display));
-        return this.wlOutputFactory.create(output);
+        return this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
+                                                                     outputMode,
+                                                                     this.xOutputFactory.create(display,
+                                                                                                window)));
     }
 }
