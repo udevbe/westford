@@ -98,7 +98,7 @@ public class JoglSurfaceData {
         return this.height;
     }
 
-    public IntBuffer getTexture() {
+    private IntBuffer getTexture() {
         return this.tex;
     }
 

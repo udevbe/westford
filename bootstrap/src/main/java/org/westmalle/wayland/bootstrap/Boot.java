@@ -23,7 +23,7 @@ import org.westmalle.wayland.jogl.JoglSeatFactory;
 import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.protocol.*;
 
-public class Boot {
+class Boot {
 
     private void strap(final OutputComponent outputComponent) {
 

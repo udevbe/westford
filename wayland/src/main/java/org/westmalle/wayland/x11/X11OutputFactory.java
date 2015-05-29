@@ -15,13 +15,8 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.shared.WlOutputTransform;
-import org.westmalle.wayland.nativ.LibX11;
-import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.nativ.xcb_generic_error_t;
-import org.westmalle.wayland.nativ.xcb_screen_t;
-import org.westmalle.wayland.nativ.xcb_void_cookie_t;
+import org.westmalle.wayland.nativ.*;
 import org.westmalle.wayland.output.OutputFactory;
 import org.westmalle.wayland.output.OutputGeometry;
 import org.westmalle.wayland.output.OutputMode;
@@ -46,7 +41,7 @@ public class X11OutputFactory {
     @Nonnull
     private final OutputFactory   outputFactory;
     @Nonnull
-    private final XOutputFactory xOutputFactory;
+    private final XOutputFactory  xOutputFactory;
 
     @Inject
     X11OutputFactory(@Nonnull final LibX11 libX11,
@@ -77,12 +72,12 @@ public class X11OutputFactory {
                                            final int width,
                                            final int height) {
 
-        Pointer display = this.libX11.XOpenDisplay(xDisplay);
+        final Pointer display = this.libX11.XOpenDisplay(xDisplay);
         if (display == null) {
             throw new RuntimeException("XOpenDisplay() failed: " + xDisplay);
         }
 
-        Pointer connection = this.libX11.XGetXCBConnection(display);
+        final Pointer connection = this.libX11.XGetXCBConnection(display);
         if (connection == null) {
             throw new RuntimeException("XGetXCBConnection() failed");
         }
@@ -90,55 +85,46 @@ public class X11OutputFactory {
             throw new RuntimeException("errors occured in connecting to X server");
         }
 
-        Pointer      setup  = this.libxcb.xcb_get_setup(connection);
-        xcb_screen_t screen = this.libxcb.xcb_setup_roots_iterator(setup).data;
+        final Pointer      setup  = this.libxcb.xcb_get_setup(connection);
+        final xcb_screen_t screen = this.libxcb.xcb_setup_roots_iterator(setup).data;
 
-        int window = this.libxcb.xcb_generate_id(connection);
+        final int window = this.libxcb.xcb_generate_id(connection);
         if (window <= 0) {
             throw new RuntimeException("failed to generate X window id");
         }
 
-        int     xcb_window_attrib_mask = Libxcb.XCB_CW_EVENT_MASK;
-        Pointer xcb_window_attrib_list = new Memory(4 * 3);
-        xcb_window_attrib_list.setInt(0,
-                                      Libxcb.XCB_EVENT_MASK_BUTTON_PRESS);
-        xcb_window_attrib_list.setInt(4,
-                                      Libxcb.XCB_EVENT_MASK_EXPOSURE);
-        xcb_window_attrib_list.setInt(8,
-                                      Libxcb.XCB_EVENT_MASK_KEY_PRESS);
-
-        xcb_void_cookie_t create_cookie = this.libxcb.xcb_create_window_checked(
-                connection,
-                (byte) Libxcb.XCB_COPY_FROM_PARENT,
-                // depth
-                window,
-                screen.root,
-                // parent window
-                (short) 0,
-                (short) 0,
-                (short) width,
-                (short) height,
-                (short) 0,
-                // border width
-                (short) Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                // class
-                screen.root_visual,
-                // visual
-                xcb_window_attrib_mask,
-                xcb_window_attrib_list);
-
-        xcb_void_cookie_t map_cookie = this.libxcb.xcb_map_window_checked(connection,
-                                                                          window);
-
-        // Check errors.
+        final int     xcbWindowAttribMask = Libxcb.XCB_CW_EVENT_MASK;
+        final Pointer xcbWindowAttribList = new Memory(Integer.BYTES * 3);
+        //TODO just write an int array...
+        xcbWindowAttribList.setInt(0,
+                                   Libxcb.XCB_EVENT_MASK_BUTTON_PRESS);
+        xcbWindowAttribList.setInt(4,
+                                   Libxcb.XCB_EVENT_MASK_EXPOSURE);
+        xcbWindowAttribList.setInt(8,
+                                   Libxcb.XCB_EVENT_MASK_KEY_PRESS);
+        final xcb_void_cookie_t createCookie = this.libxcb.xcb_create_window_checked(connection,
+                                                                                     (byte) Libxcb.XCB_COPY_FROM_PARENT,
+                                                                                     window,
+                                                                                     screen.root,
+                                                                                     (short) 0,
+                                                                                     (short) 0,
+                                                                                     (short) width,
+                                                                                     (short) height,
+                                                                                     (short) 0,
+                                                                                     (short) Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                                                                                     screen.root_visual,
+                                                                                     xcbWindowAttribMask,
+                                                                                     xcbWindowAttribList);
+        final xcb_void_cookie_t mapCookie = this.libxcb.xcb_map_window_checked(connection,
+                                                                               window);
         xcb_generic_error_t error;
         error = this.libxcb.xcb_request_check(connection,
-                                              create_cookie);
+                                              createCookie);
         if (error != null) {
             throw new RuntimeException("failed to create X window: " + error.error_code);
         }
         error = this.libxcb.xcb_request_check(connection,
-                                              map_cookie);
+                                              mapCookie);
         if (error != null) {
             throw new RuntimeException("failed to map X window: " + error.error_code);
         }

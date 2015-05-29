@@ -53,16 +53,14 @@ public class Compositor {
         this.renderEvent.get()
                         .remove();
         this.renderEvent = Optional.empty();
-
-        this.wlOutputs.forEach(wlOutput -> {
-            final Object outputImplementation = wlOutput.getOutput()
-                                                        .getImplementation();
-            this.renderer.beginRender(outputImplementation);
-            getSurfacesStack().forEach(this.renderer::render);
-            this.renderer.endRender(outputImplementation);
-        });
-
+        this.wlOutputs.forEach(this::render);
         this.display.flushClients();
+    }
+
+    private void render(@Nonnull final WlOutput wlOutput){
+        this.renderer.beginRender(wlOutput);
+        getSurfacesStack().forEach(this.renderer::render);
+        this.renderer.endRender(wlOutput);
     }
 
     public void requestRender() {
@@ -71,7 +69,7 @@ public class Compositor {
         }
     }
 
-    public void renderScene() {
+    private void renderScene() {
         this.renderEvent = Optional.of(this.display.getEventLoop()
                                                    .addIdle(this.idleHandler));
     }

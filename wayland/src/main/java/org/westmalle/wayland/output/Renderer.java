@@ -16,6 +16,7 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
@@ -41,14 +42,14 @@ public class Renderer {
                                wlBufferResource);
     }
 
-    public void beginRender(@Nonnull final Object outputImplementation) {
-        this.renderEngine.begin(outputImplementation);
+    public void beginRender(@Nonnull final WlOutput wlOutput) {
+        this.renderEngine.begin(wlOutput);
     }
 
-    public void endRender(@Nonnull final Object outputImplementation) {
+    public void endRender(@Nonnull final WlOutput wlOutput) {
         try {
             //wait for rendering to finish
-            this.renderEngine.end(outputImplementation)
+            this.renderEngine.end(wlOutput)
                              .get();
         }
         catch (InterruptedException | ExecutionException e) {

@@ -2,7 +2,7 @@ package org.westmalle.wayland.egl;
 
 public interface EglOutput {
 
-    default void begin(){};
+    default void begin() {}
 
-    default void end() {};
+    default void end() {}
 }

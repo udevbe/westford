@@ -100,4 +100,42 @@ public class Libgles2 {
                                              boolean normalized,
                                              int stride,
                                              Pointer pointer);
+
+    public native void glGenBuffers(int n,
+                                    Pointer buffers);
+
+    public native void glGenTextures(int n,
+                                     Pointer textures);
+
+    public native void glBindTexture(int target,
+                                     int texture);
+
+    public native void glTexImage2D(int target,
+                                    int level,
+                                    int internalformat,
+                                    int width,
+                                    int height,
+                                    int border,
+                                    int format,
+                                    int type,
+                                    Pointer pixels);
+
+    public native void glTexParameteri(int target,
+                                       int pname,
+                                       int param);
+
+    public native void glTexSubImage2D(int target,
+                                       int level,
+                                       int xoffset,
+                                       int yoffset,
+                                       int width,
+                                       int height,
+                                       int format,
+                                       int type,
+                                       Pointer pixels);
+
+    public native void glDeleteTextures(int n,
+                                        Pointer textures);
+
+
 }

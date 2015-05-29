@@ -15,16 +15,18 @@ package org.westmalle.wayland.output;
 
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.Future;
 
 public interface RenderEngine {
+
+    void begin(@Nonnull final WlOutput wlOutput);
+
     void draw(@Nonnull final WlSurfaceResource surfaceResource,
-              @Nonnull final WlBufferResource buffer);
-
-    void begin(@Nonnull final Object outputImplementation);
-
+              @Nonnull final WlBufferResource wlBufferResource);
+    
     @Nonnull
-    Future<?> end(@Nonnull final Object outputImplementation);
+    Future<?> end(@Nonnull final WlOutput wlOutput);
 }

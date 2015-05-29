@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLContext;
@@ -28,6 +29,7 @@ import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.RenderEngine;
 import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.calc.Mat4;
+import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
@@ -114,11 +116,12 @@ public class JoglRenderEngine implements RenderEngine {
     }
 
     @Override
-    public void begin(@Nonnull final Object outputImplementation) {
-        this.renderThread.submit(() -> doBegin((GLDrawable) outputImplementation));
+    public void begin(@Nonnull final WlOutput wlOutput) {
+        this.renderThread.submit(() -> doBegin(wlOutput));
     }
 
-    private void doBegin(final GLDrawable drawable) {
+    private void doBegin(@Nonnull final WlOutput wlOutput) {
+        final GLWindow drawable = (GLWindow) wlOutput.getOutput().getImplementation();
         final int surfaceWidth  = drawable.getSurfaceWidth();
         final int surfaceHeight = drawable.getSurfaceHeight();
         //@formatter:off
@@ -149,9 +152,9 @@ public class JoglRenderEngine implements RenderEngine {
 
     @Override
     public void draw(@Nonnull final WlSurfaceResource surfaceResource,
-                     @Nonnull final WlBufferResource buffer) {
+                     @Nonnull final WlBufferResource wlBufferResource) {
         this.renderThread.submit(() -> doDraw(surfaceResource,
-                                              buffer));
+                                              wlBufferResource));
     }
 
     private void doDraw(final WlSurfaceResource surfaceResource,
@@ -192,11 +195,12 @@ public class JoglRenderEngine implements RenderEngine {
 
     @Nonnull
     @Override
-    public Future<?> end(@Nonnull final Object outputImplementation) {
-        return this.renderThread.submit(() -> doEnd((GLDrawable) outputImplementation));
+    public Future<?> end(@Nonnull final WlOutput wlOutput) {
+        return this.renderThread.submit(() -> doEnd(wlOutput));
     }
 
-    private void doEnd(@Nonnull final GLDrawable drawable) {
+    private void doEnd(@Nonnull final WlOutput wlOutput) {
+        final GLWindow drawable = (GLWindow) wlOutput.getOutput().getImplementation();
         drawable.swapBuffers();
         this.gl = Optional.empty();
         this.projection = Optional.empty();

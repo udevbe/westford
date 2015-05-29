@@ -401,4 +401,6 @@ public abstract class Mat4 {
         buffer.rewind();
         return buffer;
     }
+
+    //TODO toArray
 }

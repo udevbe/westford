@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.jogl;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLContext;

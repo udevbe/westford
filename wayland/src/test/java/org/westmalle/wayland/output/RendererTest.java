@@ -78,7 +78,7 @@ public class RendererTest {
     @Test
     public void testBeginRender() throws Exception {
         //given
-        final GLDrawable       glDrawable       = mock(GLDrawable.class);
+        final GLDrawable glDrawable = mock(GLDrawable.class);
         //when
         this.renderer.beginRender(glDrawable);
         //then
