@@ -32,7 +32,7 @@ public class Libegl {
     public static final int EGL_PLATFORM_X11_KHR = 0x31D5;
     public static final int EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
     public static final int EGL_PLATFORM_GBM_MESA = 0x31D7;
-
+    public static final int EGL_OPENGL_ES_API = 0x30A0;
     public static final int EGL_WAYLAND_BUFFER_WL = 0x31D5;
     public static final int EGL_WAYLAND_PLANE_WL = 0x31D6;
     public static final int EGL_TEXTURE_Y_U_V_WL = 0x31D7;
@@ -60,8 +60,7 @@ public class Libegl {
     public static final Pointer EGL_NO_CONTEXT = Pointer.createConstant(0);
     public static final int EGL_BACK_BUFFER = 0x3084;
     public static final int EGL_RENDER_BUFFER = 0x3086;
-    public static final int EGL_SINGLE_BUFFER =0x3085;
-
+    public static final int EGL_SINGLE_BUFFER = 0x3085;
 
 
     public native boolean eglBindWaylandDisplayWL(Pointer dpy,
@@ -111,7 +110,7 @@ public class Libegl {
                                           int config_size,
                                           Pointer num_config);
 
-    public native boolean eglQueryContext (Pointer dpy, Pointer ctx, int attribute, Pointer value);
+    public native boolean eglQueryContext(Pointer dpy, Pointer ctx, int attribute, Pointer value);
 
 
 }
