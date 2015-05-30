@@ -25,8 +25,8 @@ public class xcb_screen_iterator_t extends Structure {
                                                              "index");
 
     public xcb_screen_t.ByReference data;
-    public int rem;
-    public int index;
+    public int                      rem;
+    public int                      index;
 
     @Override
     protected List<?> getFieldOrder() {

@@ -26,7 +26,7 @@ public interface RenderEngine {
 
     void draw(@Nonnull final WlSurfaceResource surfaceResource,
               @Nonnull final WlBufferResource wlBufferResource);
-    
+
     @Nonnull
     Future<?> end(@Nonnull final WlOutput wlOutput);
 }

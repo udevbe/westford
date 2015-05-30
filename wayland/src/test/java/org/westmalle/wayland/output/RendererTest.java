@@ -26,12 +26,14 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.Optional;
+import java.util.concurrent.Future;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -78,22 +80,30 @@ public class RendererTest {
     @Test
     public void testBeginRender() throws Exception {
         //given
+        final WlOutput wlOutput = mock(WlOutput.class);
+        final Output   output   = mock(Output.class);
+        when(wlOutput.getOutput()).thenReturn(output);
         final GLDrawable glDrawable = mock(GLDrawable.class);
+        when(output.getImplementation()).thenReturn(glDrawable);
         //when
-        this.renderer.beginRender(glDrawable);
+        this.renderer.beginRender(wlOutput);
         //then
-        verify(this.renderEngine).begin(glDrawable);
+        verify(this.renderEngine).begin(wlOutput);
     }
 
     @Test
     public void testEndRender() throws Exception {
         //given
-        final GLDrawable       glDrawable       = mock(GLDrawable.class);
-        final ListenableFuture listenableFuture = mock(ListenableFuture.class);
-        when(this.renderEngine.end(glDrawable)).thenReturn(listenableFuture);
+        final WlOutput wlOutput = mock(WlOutput.class);
+        final Output   output   = mock(Output.class);
+        when(wlOutput.getOutput()).thenReturn(output);
+        final GLDrawable glDrawable = mock(GLDrawable.class);
+        when(output.getImplementation()).thenReturn(glDrawable);
+        final Future future = mock(ListenableFuture.class);
+        when(this.renderEngine.end(wlOutput)).thenReturn(future);
         //when
-        this.renderer.endRender(glDrawable);
+        this.renderer.endRender(wlOutput);
         //then
-        verify(this.renderEngine).end(glDrawable);
+        verify(this.renderEngine).end(wlOutput);
     }
 }

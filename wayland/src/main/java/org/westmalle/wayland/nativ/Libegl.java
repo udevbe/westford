@@ -25,42 +25,42 @@ public class Libegl {
     Libegl() {
     }
 
-    public static final Pointer EGL_NO_DISPLAY = Pointer.createConstant(0);
-    public static final int EGL_PLATFORM_ANDROID_KHR = 0x3141;
-    public static final int EGL_PLATFORM_GBM_KHR = 0x31D7;
-    public static final int EGL_PLATFORM_WAYLAND_KHR = 0x31D8;
-    public static final int EGL_PLATFORM_X11_KHR = 0x31D5;
-    public static final int EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
-    public static final int EGL_PLATFORM_GBM_MESA = 0x31D7;
-    public static final int EGL_OPENGL_ES_API = 0x30A0;
-    public static final int EGL_WAYLAND_BUFFER_WL = 0x31D5;
-    public static final int EGL_WAYLAND_PLANE_WL = 0x31D6;
-    public static final int EGL_TEXTURE_Y_U_V_WL = 0x31D7;
-    public static final int EGL_TEXTURE_Y_UV_WL = 0x31D8;
-    public static final int EGL_TEXTURE_Y_XUXV_WL = 0x31D9;
-    public static final int EGL_TEXTURE_FORMAT = 0x3080;
-    public static final int EGL_WAYLAND_Y_INVERTED_WL = 0x31DB;
-    public static final int EGL_COLOR_BUFFER_TYPE = 0x303F;
-    public static final int EGL_RGB_BUFFER = 0x308E;
-    public static final int EGL_BUFFER_SIZE = 0x3020;
-    public static final int EGL_RED_SIZE = 0x3024;
-    public static final int EGL_GREEN_SIZE = 0x3023;
-    public static final int EGL_BLUE_SIZE = 0x3022;
-    public static final int EGL_ALPHA_SIZE = 0x3021;
-    public static final int EGL_DEPTH_SIZE = 0x3025;
-    public static final int EGL_STENCIL_SIZE = 0x3026;
-    public static final int EGL_SAMPLE_BUFFERS = 0x3032;
-    public static final int EGL_SAMPLES = 0x3031;
-    public static final int EGL_SURFACE_TYPE = 0x3033;
-    public static final int EGL_WINDOW_BIT = 0x0004;
-    public static final int EGL_RENDERABLE_TYPE = 0x3040;
-    public static final int EGL_OPENGL_ES2_BIT = 0x0004;
-    public static final int EGL_NONE = 0x3038;
-    public static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-    public static final Pointer EGL_NO_CONTEXT = Pointer.createConstant(0);
-    public static final int EGL_BACK_BUFFER = 0x3084;
-    public static final int EGL_RENDER_BUFFER = 0x3086;
-    public static final int EGL_SINGLE_BUFFER = 0x3085;
+    public static final Pointer EGL_NO_DISPLAY              = Pointer.createConstant(0);
+    public static final int     EGL_PLATFORM_ANDROID_KHR    = 0x3141;
+    public static final int     EGL_PLATFORM_GBM_KHR        = 0x31D7;
+    public static final int     EGL_PLATFORM_WAYLAND_KHR    = 0x31D8;
+    public static final int     EGL_PLATFORM_X11_KHR        = 0x31D5;
+    public static final int     EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
+    public static final int     EGL_PLATFORM_GBM_MESA       = 0x31D7;
+    public static final int     EGL_OPENGL_ES_API           = 0x30A0;
+    public static final int     EGL_WAYLAND_BUFFER_WL       = 0x31D5;
+    public static final int     EGL_WAYLAND_PLANE_WL        = 0x31D6;
+    public static final int     EGL_TEXTURE_Y_U_V_WL        = 0x31D7;
+    public static final int     EGL_TEXTURE_Y_UV_WL         = 0x31D8;
+    public static final int     EGL_TEXTURE_Y_XUXV_WL       = 0x31D9;
+    public static final int     EGL_TEXTURE_FORMAT          = 0x3080;
+    public static final int     EGL_WAYLAND_Y_INVERTED_WL   = 0x31DB;
+    public static final int     EGL_COLOR_BUFFER_TYPE       = 0x303F;
+    public static final int     EGL_RGB_BUFFER              = 0x308E;
+    public static final int     EGL_BUFFER_SIZE             = 0x3020;
+    public static final int     EGL_RED_SIZE                = 0x3024;
+    public static final int     EGL_GREEN_SIZE              = 0x3023;
+    public static final int     EGL_BLUE_SIZE               = 0x3022;
+    public static final int     EGL_ALPHA_SIZE              = 0x3021;
+    public static final int     EGL_DEPTH_SIZE              = 0x3025;
+    public static final int     EGL_STENCIL_SIZE            = 0x3026;
+    public static final int     EGL_SAMPLE_BUFFERS          = 0x3032;
+    public static final int     EGL_SAMPLES                 = 0x3031;
+    public static final int     EGL_SURFACE_TYPE            = 0x3033;
+    public static final int     EGL_WINDOW_BIT              = 0x0004;
+    public static final int     EGL_RENDERABLE_TYPE         = 0x3040;
+    public static final int     EGL_OPENGL_ES2_BIT          = 0x0004;
+    public static final int     EGL_NONE                    = 0x3038;
+    public static final int     EGL_CONTEXT_CLIENT_VERSION  = 0x3098;
+    public static final Pointer EGL_NO_CONTEXT              = Pointer.createConstant(0);
+    public static final int     EGL_BACK_BUFFER             = 0x3084;
+    public static final int     EGL_RENDER_BUFFER           = 0x3086;
+    public static final int     EGL_SINGLE_BUFFER           = 0x3085;
 
 
     public native boolean eglBindWaylandDisplayWL(Pointer dpy,
@@ -110,7 +110,10 @@ public class Libegl {
                                           int config_size,
                                           Pointer num_config);
 
-    public native boolean eglQueryContext(Pointer dpy, Pointer ctx, int attribute, Pointer value);
+    public native boolean eglQueryContext(Pointer dpy,
+                                          Pointer ctx,
+                                          int attribute,
+                                          Pointer value);
 
 
 }

@@ -13,10 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Singleton;
 
 @Module
 public class NativeModule {

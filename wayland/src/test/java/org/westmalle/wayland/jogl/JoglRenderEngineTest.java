@@ -30,8 +30,10 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.output.Output;
 import org.westmalle.wayland.output.Point;
 import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import java.nio.IntBuffer;
@@ -57,6 +59,10 @@ public class JoglRenderEngineTest {
     @Mock
     private GLContext                glContext;
     @Mock
+    private WlOutput                 wlOutput;
+    @Mock
+    private Output                   output;
+    @Mock
     private GLDrawable               drawable;
     @Mock
     private IntBuffer                elementBuffer;
@@ -68,6 +74,8 @@ public class JoglRenderEngineTest {
     @Before
     public void setUp() {
         PowerMockito.mockStatic(ShmBuffer.class);
+        when(this.wlOutput.getOutput()).thenReturn(this.output);
+        when(this.output.getImplementation()).thenReturn(this.drawable);
     }
 
     @Test
@@ -90,7 +98,7 @@ public class JoglRenderEngineTest {
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
-        this.joglRenderEngine.begin(this.drawable);
+        this.joglRenderEngine.begin(this.wlOutput);
         //then
         verify(this.renderThread).submit((Runnable) any());
         //and when
@@ -152,7 +160,7 @@ public class JoglRenderEngineTest {
         when(shmBuffer.getWidth()).thenReturn(100);
         when(shmBuffer.getHeight()).thenReturn(250);
 
-        this.joglRenderEngine.begin(this.drawable);
+        this.joglRenderEngine.begin(this.wlOutput);
         queue.get(0)
              .run();
         //when
@@ -193,7 +201,7 @@ public class JoglRenderEngineTest {
         final GL2ES2 gl2ES2 = mock(GL2ES2.class);
         when(gl.getGL2ES2()).thenReturn(gl2ES2);
         //when
-        this.joglRenderEngine.end(this.drawable);
+        this.joglRenderEngine.end(this.wlOutput);
         //then
         verify(this.renderThread).submit((Runnable) any());
         //and when

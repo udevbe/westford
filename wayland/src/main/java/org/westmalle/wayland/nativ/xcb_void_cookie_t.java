@@ -18,7 +18,7 @@ import com.sun.jna.Structure;
 import java.util.Collections;
 import java.util.List;
 
-public class xcb_void_cookie_t extends Structure{
+public class xcb_void_cookie_t extends Structure {
 
     private static final List<?> FIELD_ORDER = Collections.singletonList("sequence");
 

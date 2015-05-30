@@ -92,7 +92,7 @@ public class CompositorTest {
         final InOrder inOrder0 = inOrder(this.renderer,
                                          this.display);
         inOrder0.verify(this.renderer)
-                .beginRender(glDrawable0);
+                .beginRender(wlOutput0);
         inOrder0.verify(this.renderer)
                 .render(wlSurfaceResource0);
         inOrder0.verify(this.renderer)
@@ -100,12 +100,12 @@ public class CompositorTest {
         inOrder0.verify(this.renderer)
                 .render(wlSurfaceResource2);
         inOrder0.verify(this.renderer)
-                .endRender(glDrawable0);
+                .endRender(wlOutput0);
 
         final InOrder inOrder1 = inOrder(this.renderer,
                                          this.display);
         inOrder1.verify(this.renderer)
-                .beginRender(glDrawable1);
+                .beginRender(wlOutput1);
         inOrder1.verify(this.renderer)
                 .render(wlSurfaceResource0);
         inOrder1.verify(this.renderer)
@@ -113,7 +113,7 @@ public class CompositorTest {
         inOrder1.verify(this.renderer)
                 .render(wlSurfaceResource2);
         inOrder1.verify(this.renderer)
-                .endRender(glDrawable1);
+                .endRender(wlOutput1);
 
         verify(this.display).flushClients();
     }

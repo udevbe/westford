@@ -402,5 +402,15 @@ public abstract class Mat4 {
         return buffer;
     }
 
+    @Nonnull
+    public float[] toArray() {
+        return new float[]{
+                getM00(), getM01(), getM02(), getM03(),
+                getM10(), getM11(), getM12(), getM13(),
+                getM20(), getM21(), getM22(), getM23(),
+                getM30(), getM31(), getM32(), getM33()
+        };
+    }
+
     //TODO toArray
 }

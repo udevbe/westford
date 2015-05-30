@@ -4,11 +4,13 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Maps;
 import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.nativ.Libgles2;
+import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -280,13 +282,17 @@ public class EglRenderEngine implements RenderEngine {
 
     private void compileShader(final int shaderHandle,
                                final String shaderSource) {
-        final String[] lines   = new String[]{shaderSource};
-        final int[]    lengths = new int[]{lines[0].length()};
+        final Pointer      lines              = new Memory(Pointer.SIZE);
+        final NativeString nativeShaderSource = new NativeString(shaderSource);
+        lines.setPointer(0,
+                         nativeShaderSource.getPointer());
+        final Pointer lengths = new Memory(Integer.BYTES);
+        lengths.setInt(0,
+                       nativeShaderSource.length());
         this.libgles2.glShaderSource(shaderHandle,
-                                     lines.length,
+                                     1,
                                      lines,
-                                     lengths,
-                                     0);
+                                     lengths);
         this.libgles2.glCompileShader(shaderHandle);
 
         final Memory vstatus = new Memory(Integer.BYTES);
@@ -296,23 +302,21 @@ public class EglRenderEngine implements RenderEngine {
         if (vstatus.getInt(0) != Libgles2.GL_TRUE) {
             //failure!
             //get log length
-            final int[] logLength = new int[1];
+            final Memory logLength = new Memory(Integer.BYTES);
             this.libgles2.glGetShaderiv(shaderHandle,
-                                        Libgles2.GL_INFO_LOG_LENGTH,
-                                        logLength,
-                                        0);
+                                        GL_INFO_LOG_LENGTH,
+                                        logLength);
             //get log
-            if (logLength[0] == 0) {
-                logLength[0] = 1024;
+            int logSize = logLength.getInt(0);
+            if (logSize == 0) {
+                logSize = 1024;
             }
-            final byte[] log = new byte[logLength[0]];
+            final Memory log = new Memory(logSize);
             this.libgles2.glGetShaderInfoLog(shaderHandle,
-                                             logLength[0],
+                                             logSize,
                                              null,
-                                             0,
-                                             log,
-                                             0);
-            System.err.println("Error compiling the vertex shader: " + new String(log));
+                                             log);
+            System.err.println("Error compiling the vertex shader: " + log.getString(0));
             System.exit(1);
         }
     }
@@ -321,35 +325,47 @@ public class EglRenderEngine implements RenderEngine {
                                   final Mat4 projection,
                                   final float[] vertices) {
         final int uniTrans = this.libgles2.glGetUniformLocation(program,
-                                                                "mu_projection");
+                                                                new NativeString("mu_projection").getPointer());
+        final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
+        projectionBuffer.write(0,
+                               projection.toArray(),
+                               0,
+                               16);
         this.libgles2.glUniformMatrix4fv(uniTrans,
                                          1,
                                          false,
-                                         projection.toBuffer());
+                                         projectionBuffer);
 
+        final Memory verticesBuffer = new Memory(Float.BYTES * vertices.length);
+        verticesBuffer.write(0,
+                             vertices,
+                             0,
+                             vertices.length);
         this.libgles2.glBufferData(GL_ARRAY_BUFFER,
-                                   vertices.length * 4,
-                                   Buffers.newDirectFloatBuffer(vertices),
+                                   vertices.length * Float.BYTES,
+                                   verticesBuffer,
                                    GL_DYNAMIC_DRAW);
 
         final int posAttrib = this.libgles2.glGetAttribLocation(program,
-                                                                "va_position");
+                                                                new NativeString("va_position").getPointer());
         final int texAttrib = this.libgles2.glGetAttribLocation(program,
-                                                                "va_texcoord");
+                                                                new NativeString("va_texcoord").getPointer());
+
         this.libgles2.glEnableVertexAttribArray(posAttrib);
         this.libgles2.glVertexAttribPointer(posAttrib,
                                             2,
                                             GL_FLOAT,
                                             false,
-                                            4 * 4,
-                                            0);
+                                            4 * Float.BYTES,
+                                            null);
+
         this.libgles2.glEnableVertexAttribArray(texAttrib);
         this.libgles2.glVertexAttribPointer(texAttrib,
                                             2,
                                             GL_FLOAT,
                                             false,
-                                            4 * 4,
-                                            2 * 4);
+                                            4 * Float.BYTES,
+                                            Pointer.createConstant(2 * Float.BYTES));
     }
 
     @Nonnull

@@ -18,7 +18,7 @@ import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public class xcb_screen_t extends Structure{
+public class xcb_screen_t extends Structure {
 
     private static final List<?> FIELD_ORDER = Arrays.asList("root",
                                                              "default_colormap",
@@ -36,29 +36,29 @@ public class xcb_screen_t extends Structure{
                                                              "save_unders",
                                                              "root_depth",
                                                              "allowed_depths_len");
-    public int root;
-    public int default_colormap;
-    public int white_pixel;
-    public int black_pixel;
-    public int current_input_masks;
+    public int   root;
+    public int   default_colormap;
+    public int   white_pixel;
+    public int   black_pixel;
+    public int   current_input_masks;
     public short width_in_pixels;
     public short height_in_pixels;
     public short width_in_millimeters;
     public short height_in_millimeters;
     public short min_installed_maps;
     public short max_installed_maps;
-    public int root_visual;
-    public byte backing_stores;
-    public byte save_unders;
-    public byte root_depth;
-    public byte allowed_depths_len;
+    public int   root_visual;
+    public byte  backing_stores;
+    public byte  save_unders;
+    public byte  root_depth;
+    public byte  allowed_depths_len;
 
     @Override
     protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 
-    public static class ByReference extends xcb_screen_t implements Structure.ByReference{
+    public static class ByReference extends xcb_screen_t implements Structure.ByReference {
 
     }
 }

@@ -29,7 +29,6 @@ import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-
 public class X11OutputFactory {
 
     @Nonnull

@@ -57,7 +57,7 @@ public class Compositor {
         this.display.flushClients();
     }
 
-    private void render(@Nonnull final WlOutput wlOutput){
+    private void render(@Nonnull final WlOutput wlOutput) {
         this.renderer.beginRender(wlOutput);
         getSurfacesStack().forEach(this.renderer::render);
         this.renderer.endRender(wlOutput);

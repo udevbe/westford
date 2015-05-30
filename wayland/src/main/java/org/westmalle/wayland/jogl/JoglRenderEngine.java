@@ -14,10 +14,7 @@
 package org.westmalle.wayland.jogl;
 
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GLContext;
@@ -121,7 +118,8 @@ public class JoglRenderEngine implements RenderEngine {
     }
 
     private void doBegin(@Nonnull final WlOutput wlOutput) {
-        final GLWindow drawable = (GLWindow) wlOutput.getOutput().getImplementation();
+        final GLDrawable drawable = (GLDrawable) wlOutput.getOutput()
+                                                         .getImplementation();
         final int surfaceWidth  = drawable.getSurfaceWidth();
         final int surfaceHeight = drawable.getSurfaceHeight();
         //@formatter:off
@@ -200,7 +198,8 @@ public class JoglRenderEngine implements RenderEngine {
     }
 
     private void doEnd(@Nonnull final WlOutput wlOutput) {
-        final GLWindow drawable = (GLWindow) wlOutput.getOutput().getImplementation();
+        final GLDrawable drawable = (GLDrawable) wlOutput.getOutput()
+                                                         .getImplementation();
         drawable.swapBuffers();
         this.gl = Optional.empty();
         this.projection = Optional.empty();

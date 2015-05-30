@@ -18,13 +18,13 @@ public class xcb_generic_error_t extends Structure {
                                                              "pad",
                                                              "full_sequence");
 
-    public byte response_type;
-    public byte error_code;
+    public byte  response_type;
+    public byte  error_code;
     public short sequence;
-    public int resource_id;
+    public int   resource_id;
     public short minor_code;
-    public byte major_code;
-    public byte pad0;
+    public byte  major_code;
+    public byte  pad0;
     public int[] pad = new int[5];
     public int full_sequence;
 
