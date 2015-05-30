@@ -44,4 +44,22 @@ public class NativeModule {
     Libgles2 provideLibgles2() {
         return new Libgles2();
     }
+
+    @Singleton
+    @Provides
+    LibX11 provideLibX11() {
+        return new LibX11();
+    }
+
+    @Singleton
+    @Provides
+    Libxcb provideLibxcb() {
+        return new Libxcb();
+    }
+
+    @Singleton
+    @Provides
+    LibX11xcb provideLibX11xcb() {
+        return new LibX11xcb();
+    }
 }

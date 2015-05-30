@@ -15,42 +15,38 @@ package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.opengl.GLProfile;
-import org.westmalle.wayland.jogl.JoglComponent;
-import org.westmalle.wayland.jogl.JoglOutputFactory;
-import org.westmalle.wayland.jogl.JoglRenderEngineFactory;
-import org.westmalle.wayland.jogl.JoglSeatFactory;
+import org.westmalle.wayland.egl.EglRenderEngine;
+import org.westmalle.wayland.egl.EglRenderEngineFactory;
+import org.westmalle.wayland.egl.HasEglOutput;
 import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.protocol.*;
+import org.westmalle.wayland.x11.X11OutputFactory;
 
 class Boot {
 
     private void strap(final OutputComponent outputComponent) {
 
-        final RendererFactory     rendererFactory  = outputComponent.shmRendererFactory();
+        final RendererFactory     rendererFactory     = outputComponent.shmRendererFactory();
         final CompositorFactory   compositorFactory   = outputComponent.compositorFactory();
         final WlCompositorFactory wlCompositorFactory = outputComponent.wlCompositorFactory();
         final WlSeatFactory       wlSeatFactory       = outputComponent.wlSeatFactory();
         final WlShellFactory      wlShellFactory      = outputComponent.wlShellFactory();
 
-        final JoglComponent           joglComponent           = outputComponent.newJoglComponent();
-        final JoglOutputFactory       joglOutputFactory       = joglComponent.outputFactory();
-        final JoglRenderEngineFactory joglRenderEngineFactory = joglComponent.renderEngineFactory();
-        final JoglSeatFactory         joglSeatFactory         = joglComponent.seatFactory();
+        final X11OutputFactory outputFactory = outputComponent.x11Component()
+                                                              .outputFactory();
+
+        final EglRenderEngineFactory renderEngineFactory = outputComponent.eglComponent()
+                                                                          .renderEngineFactory();
 
         //create an output
-        //create an X opengl enabled window
-        final WlOutput joglOutput = joglOutputFactory.create(System.getenv("DISPLAY"),
-                                                             GLProfile.getGL2ES2(),
-                                                             800,
-                                                             600);
+        //create an X opengl enabled x11 window
+        final WlOutput wlOutput = outputFactory.create(System.getenv("DISPLAY"),
+                                                       800,
+                                                       600);
         //setup our render engine
-        //create an opengl render engine that uses shm buffers and can output to an opengl window
-        final GLWindow glWindow = (GLWindow) joglOutput.getOutput()
-                                                       .getImplementation();
-        final RenderEngine joglRenderEngine = joglRenderEngineFactory.create(glWindow.getContext());
+        final EglRenderEngine renderEngine = renderEngineFactory.create();
         //create an shm renderer that passes on shm buffers to it's render implementation
-        final Renderer renderer = rendererFactory.create(joglRenderEngine);
+        final Renderer renderer = rendererFactory.create(renderEngine);
 
         //setup compositing
         //create a compositor with shell and scene logic
@@ -58,7 +54,7 @@ class Boot {
         //add our output to the compositor
         //TODO add hotplug functionality
         compositor.getWlOutputs()
-                  .add(joglOutput);
+                  .add(wlOutput);
         //create a wayland compositor that delegates it's requests to a shell implementation.
         final WlCompositor wlCompositor = wlCompositorFactory.create(compositor);
 
@@ -66,9 +62,9 @@ class Boot {
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
         //these objects will listen for input events
         final WlSeat wlSeat = wlSeatFactory.create();
-        joglSeatFactory.create(glWindow,
-                               wlSeat,
-                               compositor);
+//        joglSeatFactory.create(glWindow,
+//                               wlSeat,
+//                               compositor);
 
         //enable wl_shell protocol
         wlShellFactory.create(wlCompositor);

@@ -36,6 +36,8 @@ public class X11OutputFactory {
     @Nonnull
     private final Libxcb          libxcb;
     @Nonnull
+    private final LibX11xcb       libX11xcb;
+    @Nonnull
     private final WlOutputFactory wlOutputFactory;
     @Nonnull
     private final OutputFactory   outputFactory;
@@ -45,11 +47,13 @@ public class X11OutputFactory {
     @Inject
     X11OutputFactory(@Nonnull final LibX11 libX11,
                      @Nonnull final Libxcb libxcb,
+                     @Nonnull final LibX11xcb libX11xcb,
                      @Nonnull final WlOutputFactory wlOutputFactory,
                      @Nonnull final OutputFactory outputFactory,
                      @Nonnull final XOutputFactory xOutputFactory) {
         this.libX11 = libX11;
         this.libxcb = libxcb;
+        this.libX11xcb = libX11xcb;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.xOutputFactory = xOutputFactory;
@@ -76,7 +80,7 @@ public class X11OutputFactory {
             throw new RuntimeException("XOpenDisplay() failed: " + xDisplay);
         }
 
-        final Pointer connection = this.libX11.XGetXCBConnection(display);
+        final Pointer connection = this.libX11xcb.XGetXCBConnection(display);
         if (connection == null) {
             throw new RuntimeException("XGetXCBConnection() failed");
         }
@@ -85,7 +89,8 @@ public class X11OutputFactory {
         }
 
         final Pointer      setup  = this.libxcb.xcb_get_setup(connection);
-        final xcb_screen_t screen = this.libxcb.xcb_setup_roots_iterator(setup).data;
+        final xcb_screen_iterator_t screenIterator = this.libxcb.xcb_setup_roots_iterator(setup);
+        final xcb_screen_t screen = screenIterator.data;
 
         final int window = this.libxcb.xcb_generate_id(connection);
         if (window <= 0) {
