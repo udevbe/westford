@@ -35,14 +35,14 @@ public class NativeModule {
 
     @Singleton
     @Provides
-    Libegl provideLibegl() {
-        return new Libegl();
+    LibEGL provideLibegl() {
+        return new LibEGL();
     }
 
     @Singleton
     @Provides
-    Libgles2 provideLibgles2() {
-        return new Libgles2();
+    LibGLESv2 provideLibgles2() {
+        return new LibGLESv2();
     }
 
     @Singleton

@@ -35,30 +35,32 @@ public class Libxcb {
     public static final int  XCB_EVENT_MASK_BUTTON_PRESS   = 4;
     public static final int  XCB_EVENT_MASK_EXPOSURE       = 32768;
 
+    public native int xcb_flush(Pointer c);
+
     public native Pointer xcb_get_setup(Pointer c);
 
-    public native xcb_screen_iterator_t xcb_setup_roots_iterator(Pointer setup);
+    public native xcb_screen_iterator_t.ByValue xcb_setup_roots_iterator(Pointer setup);
 
     public native int xcb_connection_has_error(Pointer c);
 
     public native int xcb_generate_id(Pointer c);
 
-    public native xcb_void_cookie_t xcb_create_window_checked(Pointer c,
-                                                              byte depth,
-                                                              int wid,
-                                                              int parent,
-                                                              short x,
-                                                              short y,
-                                                              short width,
-                                                              short height,
-                                                              short border_width,
-                                                              short _class,
-                                                              int visual,
-                                                              int value_mask,
-                                                              Pointer value_list);
+    public native xcb_void_cookie_t.ByValue xcb_create_window_checked(Pointer c,
+                                                                      byte depth,
+                                                                      int wid,
+                                                                      int parent,
+                                                                      short x,
+                                                                      short y,
+                                                                      short width,
+                                                                      short height,
+                                                                      short border_width,
+                                                                      short _class,
+                                                                      int visual,
+                                                                      int value_mask,
+                                                                      Pointer value_list);
 
-    public native xcb_void_cookie_t xcb_map_window_checked(Pointer c,
-                                                           int wid);
+    public native xcb_void_cookie_t.ByValue xcb_map_window_checked(Pointer c,
+                                                                   int wid);
 
     public native xcb_generic_error_t xcb_request_check(Pointer c,
                                                         xcb_void_cookie_t cookie);

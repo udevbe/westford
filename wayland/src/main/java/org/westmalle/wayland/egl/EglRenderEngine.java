@@ -9,7 +9,7 @@ import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
-import org.westmalle.wayland.nativ.Libgles2;
+import org.westmalle.wayland.nativ.LibGLESv2;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.output.calc.Mat4;
@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.westmalle.wayland.nativ.Libgles2.*;
+import static org.westmalle.wayland.nativ.LibGLESv2.*;
 
 @AutoFactory(className = "EglRenderEngineFactory")
 public class EglRenderEngine implements RenderEngine {
@@ -33,10 +33,10 @@ public class EglRenderEngine implements RenderEngine {
     private static final String SURFACE_V          =
             "uniform mat4 mu_projection;\n" +
             "\n" +
-            "attribute vec2 va_position;\n" +
-            "attribute vec2 va_texcoord;\n" +
+            "attribute mediump vec2 va_position;\n" +
+            "attribute mediump vec2 va_texcoord;\n" +
             "\n" +
-            "varying vec2 vv_texcoord;\n" +
+            "varying mediump vec2 vv_texcoord;\n" +
             "\n" +
             "void main(){\n" +
             "    vv_texcoord = va_texcoord;\n" +
@@ -44,7 +44,7 @@ public class EglRenderEngine implements RenderEngine {
             "}";
     @Nonnull
     private static final String SURFACE_ARGB8888_F =
-            "varying vec2 vv_texcoord;\n" +
+            "varying mediump vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
             "\n" +
             "void main(){\n" +
@@ -52,7 +52,7 @@ public class EglRenderEngine implements RenderEngine {
             "}";
     @Nonnull
     private static final String SURFACE_XRGB8888_F =
-            "varying vec2 vv_texcoord;\n" +
+            "varying mediump vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
             "\n" +
             "void main() {\n" +
@@ -68,17 +68,17 @@ public class EglRenderEngine implements RenderEngine {
     @Nonnull
     private final ExecutorService renderThread;
     @Nonnull
-    private final Libgles2        libgles2;
+    private final LibGLESv2       libGLESv2;
 
     private Memory bufferData;
     private Memory elementBuffer;
     private Memory vertexBuffer;
     private Mat4   projection;
 
-    EglRenderEngine(@Provided @Nonnull final Libgles2 libgles2) {
+    EglRenderEngine(@Provided @Nonnull final LibGLESv2 libGLESv2) {
         this.renderThread = Executors.newSingleThreadExecutor(r -> new Thread(r,
                                                                               "GL Render Engine"));
-        this.libgles2 = libgles2;
+        this.libGLESv2 = libGLESv2;
     }
 
     @Override
@@ -101,23 +101,23 @@ public class EglRenderEngine implements RenderEngine {
                                       0,                   0,                     1,  0,
                                       0,                   0,                     0,  1);
         //@formatter:on
-        this.libgles2.glViewport(0,
-                                 0,
-                                 surfaceWidth,
-                                 surfaceHeight);
-        this.libgles2.glClear(GL_COLOR_BUFFER_BIT);
+        this.libGLESv2.glViewport(0,
+                                  0,
+                                  surfaceWidth,
+                                  surfaceHeight);
+        this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
         //define triangles to be drawn.
         //make element buffer active
-        this.libgles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
-                                   getElementBuffer().getInt(0));
+        this.libGLESv2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+                                    getElementBuffer().getInt(0));
 
-        this.libgles2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                                   getBufferData().size(),
-                                   getBufferData(),
-                                   GL_DYNAMIC_DRAW);
+        this.libGLESv2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                                    getBufferData().size(),
+                                    getBufferData(),
+                                    GL_DYNAMIC_DRAW);
         //make vertexBuffer active
-        this.libgles2.glBindBuffer(GL_ARRAY_BUFFER,
-                                   getVertexBuffer().getInt(0));
+        this.libGLESv2.glBindBuffer(GL_ARRAY_BUFFER,
+                                    getVertexBuffer().getInt(0));
     }
 
     @Nonnull
@@ -139,8 +139,8 @@ public class EglRenderEngine implements RenderEngine {
     private Memory getElementBuffer() {
         if (this.elementBuffer == null) {
             final Memory elementBuffer = new Memory(Integer.BYTES);
-            this.libgles2.glGenBuffers(1,
-                                       elementBuffer);
+            this.libGLESv2.glGenBuffers(1,
+                                        elementBuffer);
             this.elementBuffer = elementBuffer;
         }
         return this.elementBuffer;
@@ -150,8 +150,8 @@ public class EglRenderEngine implements RenderEngine {
     private Memory getVertexBuffer() {
         if (this.vertexBuffer == null) {
             final Memory vertexBuffer = new Memory(Integer.BYTES);
-            this.libgles2.glGenBuffers(1,
-                                       vertexBuffer);
+            this.libGLESv2.glGenBuffers(1,
+                                        vertexBuffer);
             this.vertexBuffer = vertexBuffer;
         }
         return this.vertexBuffer;
@@ -183,7 +183,7 @@ public class EglRenderEngine implements RenderEngine {
 
         buffer.beginAccess();
         querySurfaceData(surfaceResource,
-                         buffer).makeActive(this.libgles2,
+                         buffer).makeActive(this.libGLESv2,
                                             buffer);
         buffer.endAccess();
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
@@ -192,19 +192,19 @@ public class EglRenderEngine implements RenderEngine {
         configureShaders(shaderProgram,
                          this.projection,
                          vertices);
-        this.libgles2.glUseProgram(shaderProgram);
-        this.libgles2.glDrawElements(GL_TRIANGLES,
-                                     6,
-                                     GL_UNSIGNED_INT,
-                                     null);
+        this.libGLESv2.glUseProgram(shaderProgram);
+        this.libGLESv2.glDrawElements(GL_TRIANGLES,
+                                      6,
+                                      GL_UNSIGNED_INT,
+                                      null);
     }
 
     private Gles2SurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
                                               final ShmBuffer buffer) {
         Gles2SurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
-            surfaceData = Gles2SurfaceData.create(this.libgles2);
-            surfaceData.init(this.libgles2,
+            surfaceData = Gles2SurfaceData.create(this.libGLESv2);
+            surfaceData.init(this.libGLESv2,
                              buffer);
             this.cachedSurfaceData.put(surfaceResource,
                                        surfaceData);
@@ -215,9 +215,9 @@ public class EglRenderEngine implements RenderEngine {
             final int bufferWidth = buffer.getWidth();
             final int bufferHeight = buffer.getHeight();
             if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
-                surfaceData.destroy(this.libgles2);
-                surfaceData = Gles2SurfaceData.create(this.libgles2);
-                surfaceData.init(this.libgles2,
+                surfaceData.destroy(this.libGLESv2);
+                surfaceData = Gles2SurfaceData.create(this.libGLESv2);
+                surfaceData.init(this.libGLESv2,
                                  buffer);
                 this.cachedSurfaceData.put(surfaceResource,
                                            surfaceData);
@@ -252,18 +252,18 @@ public class EglRenderEngine implements RenderEngine {
     }
 
     private int createShaderProgram(final Gles2BufferFormat bufferFormat) {
-        final int vertexShader = this.libgles2.glCreateShader(GL_VERTEX_SHADER);
+        final int vertexShader = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
         compileShader(vertexShader,
                       SURFACE_V);
 
         final int fragmentShader;
         if (bufferFormat == Gles2BufferFormat.SHM_ARGB8888) {
-            fragmentShader = this.libgles2.glCreateShader(GL_FRAGMENT_SHADER);
+            fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_ARGB8888_F);
         }
         else if (bufferFormat == Gles2BufferFormat.SHM_XRGB8888) {
-            fragmentShader = this.libgles2.glCreateShader(GL_FRAGMENT_SHADER);
+            fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_XRGB8888_F);
         }
@@ -271,12 +271,12 @@ public class EglRenderEngine implements RenderEngine {
             throw new UnsupportedOperationException("Buffer format " + bufferFormat + " is not supported");
         }
 
-        final int shaderProgram = this.libgles2.glCreateProgram();
-        this.libgles2.glAttachShader(shaderProgram,
-                                     vertexShader);
-        this.libgles2.glAttachShader(shaderProgram,
-                                     fragmentShader);
-        this.libgles2.glLinkProgram(shaderProgram);
+        final int shaderProgram = this.libGLESv2.glCreateProgram();
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      vertexShader);
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      fragmentShader);
+        this.libGLESv2.glLinkProgram(shaderProgram);
         return shaderProgram;
     }
 
@@ -289,33 +289,33 @@ public class EglRenderEngine implements RenderEngine {
         final Pointer lengths = new Memory(Integer.BYTES);
         lengths.setInt(0,
                        nativeShaderSource.length());
-        this.libgles2.glShaderSource(shaderHandle,
-                                     1,
-                                     lines,
-                                     lengths);
-        this.libgles2.glCompileShader(shaderHandle);
+        this.libGLESv2.glShaderSource(shaderHandle,
+                                      1,
+                                      lines,
+                                      lengths);
+        this.libGLESv2.glCompileShader(shaderHandle);
 
         final Memory vstatus = new Memory(Integer.BYTES);
-        this.libgles2.glGetShaderiv(shaderHandle,
-                                    GL_COMPILE_STATUS,
-                                    vstatus);
-        if (vstatus.getInt(0) != Libgles2.GL_TRUE) {
+        this.libGLESv2.glGetShaderiv(shaderHandle,
+                                     GL_COMPILE_STATUS,
+                                     vstatus);
+        if (vstatus.getInt(0) != LibGLESv2.GL_TRUE) {
             //failure!
             //get log length
             final Memory logLength = new Memory(Integer.BYTES);
-            this.libgles2.glGetShaderiv(shaderHandle,
-                                        GL_INFO_LOG_LENGTH,
-                                        logLength);
+            this.libGLESv2.glGetShaderiv(shaderHandle,
+                                         GL_INFO_LOG_LENGTH,
+                                         logLength);
             //get log
             int logSize = logLength.getInt(0);
             if (logSize == 0) {
                 logSize = 1024;
             }
             final Memory log = new Memory(logSize);
-            this.libgles2.glGetShaderInfoLog(shaderHandle,
-                                             logSize,
-                                             null,
-                                             log);
+            this.libGLESv2.glGetShaderInfoLog(shaderHandle,
+                                              logSize,
+                                              null,
+                                              log);
             System.err.println("Error compiling the vertex shader: " + log.getString(0));
             System.exit(1);
         }
@@ -324,48 +324,48 @@ public class EglRenderEngine implements RenderEngine {
     private void configureShaders(final Integer program,
                                   final Mat4 projection,
                                   final float[] vertices) {
-        final int uniTrans = this.libgles2.glGetUniformLocation(program,
-                                                                new NativeString("mu_projection").getPointer());
+        final int uniTrans = this.libGLESv2.glGetUniformLocation(program,
+                                                                 new NativeString("mu_projection").getPointer());
         final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
         projectionBuffer.write(0,
                                projection.toArray(),
                                0,
                                16);
-        this.libgles2.glUniformMatrix4fv(uniTrans,
-                                         1,
-                                         false,
-                                         projectionBuffer);
+        this.libGLESv2.glUniformMatrix4fv(uniTrans,
+                                          1,
+                                          false,
+                                          projectionBuffer);
 
         final Memory verticesBuffer = new Memory(Float.BYTES * vertices.length);
         verticesBuffer.write(0,
                              vertices,
                              0,
                              vertices.length);
-        this.libgles2.glBufferData(GL_ARRAY_BUFFER,
-                                   vertices.length * Float.BYTES,
-                                   verticesBuffer,
-                                   GL_DYNAMIC_DRAW);
+        this.libGLESv2.glBufferData(GL_ARRAY_BUFFER,
+                                    vertices.length * Float.BYTES,
+                                    verticesBuffer,
+                                    GL_DYNAMIC_DRAW);
 
-        final int posAttrib = this.libgles2.glGetAttribLocation(program,
-                                                                new NativeString("va_position").getPointer());
-        final int texAttrib = this.libgles2.glGetAttribLocation(program,
-                                                                new NativeString("va_texcoord").getPointer());
+        final int posAttrib = this.libGLESv2.glGetAttribLocation(program,
+                                                                 new NativeString("va_position").getPointer());
+        final int texAttrib = this.libGLESv2.glGetAttribLocation(program,
+                                                                 new NativeString("va_texcoord").getPointer());
 
-        this.libgles2.glEnableVertexAttribArray(posAttrib);
-        this.libgles2.glVertexAttribPointer(posAttrib,
-                                            2,
-                                            GL_FLOAT,
-                                            false,
-                                            4 * Float.BYTES,
-                                            null);
+        this.libGLESv2.glEnableVertexAttribArray(posAttrib);
+        this.libGLESv2.glVertexAttribPointer(posAttrib,
+                                             2,
+                                             GL_FLOAT,
+                                             false,
+                                             4 * Float.BYTES,
+                                             null);
 
-        this.libgles2.glEnableVertexAttribArray(texAttrib);
-        this.libgles2.glVertexAttribPointer(texAttrib,
-                                            2,
-                                            GL_FLOAT,
-                                            false,
-                                            4 * Float.BYTES,
-                                            Pointer.createConstant(2 * Float.BYTES));
+        this.libGLESv2.glEnableVertexAttribArray(texAttrib);
+        this.libGLESv2.glVertexAttribPointer(texAttrib,
+                                             2,
+                                             GL_FLOAT,
+                                             false,
+                                             4 * Float.BYTES,
+                                             Pointer.createConstant(2 * Float.BYTES));
     }
 
     @Nonnull

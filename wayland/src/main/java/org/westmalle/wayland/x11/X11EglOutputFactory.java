@@ -15,27 +15,27 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-import org.westmalle.wayland.nativ.Libegl;
+import org.westmalle.wayland.nativ.LibEGL;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import static org.westmalle.wayland.nativ.Libegl.*;
+import static org.westmalle.wayland.nativ.LibEGL.*;
 
-public class XEglOutputFactory {
+public class X11EglOutputFactory {
 
     @Nonnull
-    private final Libegl libegl;
+    private final LibEGL libEGL;
 
     @Inject
-    XEglOutputFactory(@Nonnull final Libegl libegl) {
-        this.libegl = libegl;
+    X11EglOutputFactory(@Nonnull final LibEGL libEGL) {
+        this.libEGL = libEGL;
     }
 
     @Nonnull
-    public XEglOutput create(@Nonnull final Pointer display,
-                             final int window) {
-        if (!this.libegl.eglBindAPI(EGL_OPENGL_ES_API)) {
+    public X11EglOutput create(@Nonnull final Pointer display,
+                               final int window) {
+        if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
             throw new RuntimeException("eglBindAPI failed");
         }
         final Pointer eglDisplay   = createEglDisplay(display);
@@ -47,23 +47,24 @@ public class XEglOutputFactory {
         final Pointer config = configs.getPointer(0);
         final Pointer context = createEglContext(eglDisplay,
                                                  config);
-        return new XEglOutput(this.libegl,
-                              eglDisplay,
-                              createEglSurface(eglDisplay,
-                                               config,
-                                               context,
-                                               window),
-                              context);
+        return new X11EglOutput(this.libEGL,
+                                eglDisplay,
+                                createEglSurface(eglDisplay,
+                                                 config,
+                                                 context,
+                                                 window),
+                                context);
     }
 
     private Pointer createEglDisplay(final Pointer nativeDisplay) {
-        final Pointer eglDisplay = this.libegl.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
+
+        final Pointer eglDisplay = this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                                         nativeDisplay,
                                                                         null);
         if (eglDisplay == EGL_NO_DISPLAY) {
             throw new RuntimeException("eglGetDisplay() failed");
         }
-        if (!this.libegl.eglInitialize(eglDisplay,
+        if (!this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)) {
             throw new RuntimeException("eglInitialize() failed");
@@ -76,7 +77,7 @@ public class XEglOutputFactory {
                               final int configs_size) {
         final Pointer num_configs        = new Memory(Integer.BYTES);
         final Pointer egl_config_attribs = createEglConfigAttribs();
-        if (!this.libegl.eglChooseConfig(eglDisplay,
+        if (!this.libEGL.eglChooseConfig(eglDisplay,
                                          egl_config_attribs,
                                          configs,
                                          configs_size,
@@ -89,78 +90,35 @@ public class XEglOutputFactory {
     }
 
     private Pointer createEglConfigAttribs() {
-        final Pointer egl_config_attribs = new Memory(Integer.BYTES * ((12 * 2) + 1));
-        //TODO just write an int array...
-        egl_config_attribs.setInt(0,
-                                  EGL_COLOR_BUFFER_TYPE);
-        egl_config_attribs.setInt(4,
-                                  EGL_RGB_BUFFER);
-
-        egl_config_attribs.setInt(8,
-                                  EGL_BUFFER_SIZE);
-        egl_config_attribs.setInt(12,
-                                  32);
-
-        egl_config_attribs.setInt(16,
-                                  EGL_RED_SIZE);
-        egl_config_attribs.setInt(20,
-                                  8);
-
-        egl_config_attribs.setInt(24,
-                                  EGL_GREEN_SIZE);
-        egl_config_attribs.setInt(28,
-                                  8);
-
-        egl_config_attribs.setInt(32,
-                                  EGL_BLUE_SIZE);
-        egl_config_attribs.setInt(36,
-                                  8);
-
-        egl_config_attribs.setInt(40,
-                                  EGL_ALPHA_SIZE);
-        egl_config_attribs.setInt(44,
-                                  8);
-
-        egl_config_attribs.setInt(48,
-                                  EGL_DEPTH_SIZE);
-        egl_config_attribs.setInt(52,
-                                  24);
-
-        egl_config_attribs.setInt(56,
-                                  EGL_STENCIL_SIZE);
-        egl_config_attribs.setInt(60,
-                                  8);
-
-        egl_config_attribs.setInt(64,
-                                  EGL_SAMPLE_BUFFERS);
-        egl_config_attribs.setInt(68,
-                                  0);
-
-        egl_config_attribs.setInt(72,
-                                  EGL_SAMPLES);
-        egl_config_attribs.setInt(76,
-                                  0);
-
-        egl_config_attribs.setInt(80,
-                                  EGL_SURFACE_TYPE);
-        egl_config_attribs.setInt(84,
-                                  EGL_WINDOW_BIT);
-
-        egl_config_attribs.setInt(88,
-                                  EGL_RENDERABLE_TYPE);
-        egl_config_attribs.setInt(92,
-                                  EGL_OPENGL_ES2_BIT);
-
-        egl_config_attribs.setInt(96,
-                                  EGL_NONE);
-
-        return egl_config_attribs;
+        final int     size          = (12 * 2) + 1;
+        final Pointer configAttribs = new Memory(Integer.BYTES * size);
+        configAttribs.write(0,
+                            new int[]{
+                                    //@formatter:off
+                                         EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
+                                         EGL_BUFFER_SIZE,       32,
+                                         EGL_RED_SIZE,          8,
+                                         EGL_GREEN_SIZE,        8,
+                                         EGL_BLUE_SIZE,         8,
+                                         EGL_ALPHA_SIZE,        8,
+                                         EGL_DEPTH_SIZE,        24,
+                                         EGL_STENCIL_SIZE,      8,
+                                         EGL_SAMPLE_BUFFERS,    0,
+                                         EGL_SAMPLES,           0,
+                                         EGL_SURFACE_TYPE,      EGL_WINDOW_BIT,
+                                         EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
+                                         EGL_NONE
+                                        //@formatter:on
+                            },
+                            0,
+                            size);
+        return configAttribs;
     }
 
     private Pointer createEglContext(final Pointer eglDisplay,
                                      final Pointer config) {
         final Pointer eglContextAttribs = createEglContextAttribs();
-        final Pointer context = this.libegl.eglCreateContext(eglDisplay,
+        final Pointer context = this.libEGL.eglCreateContext(eglDisplay,
                                                              config,
                                                              EGL_NO_CONTEXT,
                                                              eglContextAttribs);
@@ -172,13 +130,14 @@ public class XEglOutputFactory {
 
     private Pointer createEglContextAttribs() {
         final Pointer eglContextAttribs = new Memory(Integer.BYTES * 3);
-        //TODO just write an int array...
-        eglContextAttribs.setInt(0,
-                                 EGL_CONTEXT_CLIENT_VERSION);
-        eglContextAttribs.setInt(4,
-                                 2);
-        eglContextAttribs.setInt(8,
-                                 EGL_NONE);
+        eglContextAttribs.write(0,
+                                new int[]{
+                                        EGL_CONTEXT_CLIENT_VERSION,
+                                        2,
+                                        EGL_NONE
+                                },
+                                0,
+                                3);
         return eglContextAttribs;
     }
 
@@ -187,14 +146,17 @@ public class XEglOutputFactory {
                                      final Pointer context,
                                      final int nativeWindow) {
         final Pointer eglSurfaceAttribs = createSurfaceAttribs();
-        final Pointer eglSurface = this.libegl.eglCreatePlatformWindowSurfaceEXT(eglDisplay,
+        final Memory  surfaceId         = new Memory(Integer.BYTES);
+        surfaceId.setInt(0,
+                         nativeWindow);
+        final Pointer eglSurface = this.libEGL.eglCreatePlatformWindowSurfaceEXT(eglDisplay,
                                                                                  config,
-                                                                                 Pointer.createConstant(nativeWindow),
+                                                                                 surfaceId,
                                                                                  eglSurfaceAttribs);
         if (eglSurface == null) {
             throw new RuntimeException("eglCreateWindowSurface() failed");
         }
-        if (!this.libegl.eglMakeCurrent(eglDisplay,
+        if (!this.libEGL.eglMakeCurrent(eglDisplay,
                                         eglSurface,
                                         eglSurface,
                                         context)) {
@@ -205,13 +167,14 @@ public class XEglOutputFactory {
 
     private Pointer createSurfaceAttribs() {
         final Pointer eglSurfaceAttribs = new Memory(3 * Integer.BYTES);
-        //TODO just write an int array...
-        eglSurfaceAttribs.setInt(0,
-                                 EGL_RENDER_BUFFER);
-        eglSurfaceAttribs.setInt(4,
-                                 EGL_BACK_BUFFER);
-        eglSurfaceAttribs.setInt(12,
-                                 EGL_NONE);
+        eglSurfaceAttribs.write(0,
+                                new int[]{
+                                        EGL_RENDER_BUFFER,
+                                        EGL_BACK_BUFFER,
+                                        EGL_NONE
+                                },
+                                0,
+                                3);
         return eglSurfaceAttribs;
     }
 }

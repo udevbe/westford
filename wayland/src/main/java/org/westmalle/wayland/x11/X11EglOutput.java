@@ -15,14 +15,14 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Pointer;
 import org.westmalle.wayland.egl.EglOutput;
-import org.westmalle.wayland.nativ.Libegl;
+import org.westmalle.wayland.nativ.LibEGL;
 
 import javax.annotation.Nonnull;
 
-public class XEglOutput implements EglOutput {
+public class X11EglOutput implements EglOutput {
 
     @Nonnull
-    private final Libegl  libegl;
+    private final LibEGL  libEGL;
     @Nonnull
     private final Pointer eglDisplay;
     @Nonnull
@@ -30,11 +30,11 @@ public class XEglOutput implements EglOutput {
     @Nonnull
     private final Pointer eglContext;
 
-    XEglOutput(@Nonnull final Libegl libegl,
-               @Nonnull final Pointer eglDisplay,
-               @Nonnull final Pointer eglSurface,
-               @Nonnull final Pointer eglContext) {
-        this.libegl = libegl;
+    X11EglOutput(@Nonnull final LibEGL libEGL,
+                 @Nonnull final Pointer eglDisplay,
+                 @Nonnull final Pointer eglSurface,
+                 @Nonnull final Pointer eglContext) {
+        this.libEGL = libEGL;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
@@ -42,7 +42,8 @@ public class XEglOutput implements EglOutput {
 
     @Override
     public void begin() {
-        this.libegl.eglMakeCurrent(this.eglDisplay,
+        //TODO check if makecurrent is required?
+        this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    this.eglSurface,
                                    this.eglSurface,
                                    this.eglContext);
@@ -50,7 +51,7 @@ public class XEglOutput implements EglOutput {
 
     @Override
     public void end() {
-        this.libegl.eglSwapBuffers(this.eglDisplay,
+        this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    this.eglSurface);
     }
 }

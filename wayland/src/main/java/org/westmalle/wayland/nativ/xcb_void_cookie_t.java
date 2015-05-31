@@ -24,8 +24,11 @@ public class xcb_void_cookie_t extends Structure {
 
     public int sequence;
 
-    @Override
     protected List<?> getFieldOrder() {
         return FIELD_ORDER;
+    }
+
+    public static class ByValue extends xcb_void_cookie_t implements Structure.ByValue {
+
     }
 }

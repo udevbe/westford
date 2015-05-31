@@ -21,21 +21,21 @@ import org.westmalle.wayland.egl.HasEglOutput;
 
 import javax.annotation.Nonnull;
 
-@AutoFactory(className = "XOutputFactory")
-public class XOutput implements HasEglOutput {
+@AutoFactory(className = "X11OutputImplementationFactory")
+public class X11OutputImplementation implements HasEglOutput {
 
     @Nonnull
-    private final XEglOutputFactory xEglOutputFactory;
-    private final int               xWindow;
+    private final X11EglOutputFactory x11EglOutputFactory;
+    private final int                 xWindow;
     @Nonnull
-    private final Pointer           xDisplay;
+    private final Pointer             xDisplay;
 
-    private XEglOutput eglOutput;
+    private X11EglOutput eglOutput;
 
-    XOutput(@Provided @Nonnull final XEglOutputFactory xEglOutputFactory,
-            @Nonnull final Pointer xDisplay,
-            final int xWindow) {
-        this.xEglOutputFactory = xEglOutputFactory;
+    X11OutputImplementation(@Provided @Nonnull final X11EglOutputFactory x11EglOutputFactory,
+                            @Nonnull final Pointer xDisplay,
+                            final int xWindow) {
+        this.x11EglOutputFactory = x11EglOutputFactory;
         this.xWindow = xWindow;
         this.xDisplay = xDisplay;
     }
@@ -43,8 +43,8 @@ public class XOutput implements HasEglOutput {
     @Override
     public EglOutput getEglOutput() {
         if (this.eglOutput == null) {
-            this.eglOutput = this.xEglOutputFactory.create(this.xDisplay,
-                                                           this.xWindow);
+            this.eglOutput = this.x11EglOutputFactory.create(this.xDisplay,
+                                                             this.xWindow);
         }
         return this.eglOutput;
     }

@@ -16,13 +16,13 @@ package org.westmalle.wayland.nativ;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
-public class Libegl {
+public class LibEGL {
 
     static {
-        Native.register("egl");
+        Native.register("EGL");
     }
 
-    Libegl() {
+    LibEGL() {
     }
 
     public static final Pointer EGL_NO_DISPLAY              = Pointer.createConstant(0);

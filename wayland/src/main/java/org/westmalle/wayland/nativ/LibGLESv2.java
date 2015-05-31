@@ -3,12 +3,12 @@ package org.westmalle.wayland.nativ;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
-public class Libgles2 {
+public class LibGLESv2 {
     static {
-        Native.register("gles2");
+        Native.register("GLESv2");
     }
 
-    Libgles2() {
+    LibGLESv2() {
     }
 
     public static final int GL_VERTEX_SHADER        = 0x8B31;

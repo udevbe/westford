@@ -32,17 +32,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class X11OutputFactory {
 
     @Nonnull
-    private final LibX11          libX11;
+    private final LibX11                         libX11;
     @Nonnull
-    private final Libxcb          libxcb;
+    private final Libxcb                         libxcb;
     @Nonnull
-    private final LibX11xcb       libX11xcb;
+    private final LibX11xcb                      libX11xcb;
     @Nonnull
-    private final WlOutputFactory wlOutputFactory;
+    private final WlOutputFactory                wlOutputFactory;
     @Nonnull
-    private final OutputFactory   outputFactory;
+    private final OutputFactory                  outputFactory;
     @Nonnull
-    private final XOutputFactory  xOutputFactory;
+    private final X11OutputImplementationFactory x11OutputImplementationFactory;
 
     @Inject
     X11OutputFactory(@Nonnull final LibX11 libX11,
@@ -50,13 +50,13 @@ public class X11OutputFactory {
                      @Nonnull final LibX11xcb libX11xcb,
                      @Nonnull final WlOutputFactory wlOutputFactory,
                      @Nonnull final OutputFactory outputFactory,
-                     @Nonnull final XOutputFactory xOutputFactory) {
+                     @Nonnull final X11OutputImplementationFactory x11OutputImplementationFactory) {
         this.libX11 = libX11;
         this.libxcb = libxcb;
         this.libX11xcb = libX11xcb;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
-        this.xOutputFactory = xOutputFactory;
+        this.x11OutputImplementationFactory = x11OutputImplementationFactory;
     }
 
     public WlOutput create(@Nonnull final String xDisplay,
@@ -89,8 +89,7 @@ public class X11OutputFactory {
         }
 
         final Pointer      setup  = this.libxcb.xcb_get_setup(connection);
-        final xcb_screen_iterator_t screenIterator = this.libxcb.xcb_setup_roots_iterator(setup);
-        final xcb_screen_t screen = screenIterator.data;
+        final xcb_screen_t screen = this.libxcb.xcb_setup_roots_iterator(setup).data;
 
         final int window = this.libxcb.xcb_generate_id(connection);
         if (window <= 0) {
@@ -133,6 +132,9 @@ public class X11OutputFactory {
             throw new RuntimeException("failed to map X window: " + error.error_code);
         }
 
+        //FIXME instead we want to setup an event loop that is hooked into our own compositor event loop
+        this.libxcb.xcb_flush(connection);
+
         final OutputGeometry outputGeometry = OutputGeometry.builder()
                                                             .x(0)
                                                             .y(0)
@@ -151,7 +153,7 @@ public class X11OutputFactory {
                                                 .build();
         return this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
                                                                      outputMode,
-                                                                     this.xOutputFactory.create(display,
-                                                                                                window)));
+                                                                     this.x11OutputImplementationFactory.create(display,
+                                                                                                                window)));
     }
 }

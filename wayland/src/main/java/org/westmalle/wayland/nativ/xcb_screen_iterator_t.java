@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class xcb_screen_iterator_t extends Structure {
-
     private static final List<?> FIELD_ORDER = Arrays.asList("data",
                                                              "rem",
                                                              "index");
@@ -28,8 +27,13 @@ public class xcb_screen_iterator_t extends Structure {
     public int                      rem;
     public int                      index;
 
-    @Override
     protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
+
+    public static class ByValue extends xcb_screen_iterator_t implements Structure.ByValue {
+
+    }
 }
+
+

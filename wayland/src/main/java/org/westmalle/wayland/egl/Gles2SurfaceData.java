@@ -16,19 +16,19 @@ package org.westmalle.wayland.egl;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import org.freedesktop.wayland.server.ShmBuffer;
-import org.westmalle.wayland.nativ.Libgles2;
+import org.westmalle.wayland.nativ.LibGLESv2;
 
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
-import static org.westmalle.wayland.nativ.Libgles2.*;
+import static org.westmalle.wayland.nativ.LibGLESv2.*;
 
 public class Gles2SurfaceData {
 
-    public static Gles2SurfaceData create(@Nonnull final Libgles2 libgles2) {
+    public static Gles2SurfaceData create(@Nonnull final LibGLESv2 libGLESv2) {
         final Memory tex = new Memory(Integer.BYTES);
-        libgles2.glGenTextures(1,
-                               tex);
+        libGLESv2.glGenTextures(1,
+                                tex);
         return new Gles2SurfaceData(tex);
     }
 
@@ -40,56 +40,56 @@ public class Gles2SurfaceData {
         this.tex = tex;
     }
 
-    public void init(@Nonnull final Libgles2 libgles2,
+    public void init(@Nonnull final LibGLESv2 libGLESv2,
                      final ShmBuffer buffer) {
         this.width = buffer.getStride() / Integer.BYTES;
         this.height = buffer.getHeight();
         final ByteBuffer pixels = buffer.getData();
 
-        libgles2.glBindTexture(GL_TEXTURE_2D,
-                               getTexture().getInt(0));
-        libgles2.glTexImage2D(GL_TEXTURE_2D,
-                              0,
-                              GL_RGBA,
-                              this.width,
-                              this.height,
-                              0,
-                              GL_RGBA,
-                              GL_UNSIGNED_BYTE,
-                              Native.getDirectBufferPointer(pixels));
+        libGLESv2.glBindTexture(GL_TEXTURE_2D,
+                                getTexture().getInt(0));
+        libGLESv2.glTexImage2D(GL_TEXTURE_2D,
+                               0,
+                               GL_RGBA,
+                               this.width,
+                               this.height,
+                               0,
+                               GL_RGBA,
+                               GL_UNSIGNED_BYTE,
+                               Native.getDirectBufferPointer(pixels));
 
-        libgles2.glTexParameteri(GL_TEXTURE_2D,
-                                 GL_TEXTURE_WRAP_S,
-                                 GL_CLAMP_TO_EDGE);
-        libgles2.glTexParameteri(GL_TEXTURE_2D,
-                                 GL_TEXTURE_WRAP_T,
-                                 GL_CLAMP_TO_EDGE);
-        libgles2.glTexParameteri(GL_TEXTURE_2D,
-                                 GL_TEXTURE_MIN_FILTER,
-                                 GL_NEAREST);
-        libgles2.glTexParameteri(GL_TEXTURE_2D,
-                                 GL_TEXTURE_MAG_FILTER,
-                                 GL_NEAREST);
+        libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                  GL_TEXTURE_WRAP_S,
+                                  GL_CLAMP_TO_EDGE);
+        libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                  GL_TEXTURE_WRAP_T,
+                                  GL_CLAMP_TO_EDGE);
+        libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                  GL_TEXTURE_MIN_FILTER,
+                                  GL_NEAREST);
+        libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                  GL_TEXTURE_MAG_FILTER,
+                                  GL_NEAREST);
     }
 
-    public void makeActive(@Nonnull final Libgles2 libgles2,
+    public void makeActive(@Nonnull final LibGLESv2 libGLESv2,
                            @Nonnull final ShmBuffer buffer) {
 
         this.width = buffer.getStride() / 4;
         this.height = buffer.getHeight();
         final ByteBuffer pixels = buffer.getData();
 
-        libgles2.glBindTexture(GL_TEXTURE_2D,
-                               getTexture().getInt(0));
-        libgles2.glTexSubImage2D(GL_TEXTURE_2D,
-                                 0,
-                                 0,
-                                 0,
-                                 this.width,
-                                 this.height,
-                                 GL_RGBA,
-                                 GL_UNSIGNED_BYTE,
-                                 Native.getDirectBufferPointer(pixels));
+        libGLESv2.glBindTexture(GL_TEXTURE_2D,
+                                getTexture().getInt(0));
+        libGLESv2.glTexSubImage2D(GL_TEXTURE_2D,
+                                  0,
+                                  0,
+                                  0,
+                                  this.width,
+                                  this.height,
+                                  GL_RGBA,
+                                  GL_UNSIGNED_BYTE,
+                                  Native.getDirectBufferPointer(pixels));
     }
 
     public int getWidth() {
@@ -104,8 +104,8 @@ public class Gles2SurfaceData {
         return this.tex;
     }
 
-    public void destroy(@Nonnull final Libgles2 libgles2) {
-        libgles2.glDeleteTextures(1,
-                                  getTexture());
+    public void destroy(@Nonnull final LibGLESv2 libGLESv2) {
+        libGLESv2.glDeleteTextures(1,
+                                   getTexture());
     }
 }

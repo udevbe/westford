@@ -36,6 +36,7 @@ public class xcb_screen_t extends Structure {
                                                              "save_unders",
                                                              "root_depth",
                                                              "allowed_depths_len");
+
     public int   root;
     public int   default_colormap;
     public int   white_pixel;
@@ -53,7 +54,6 @@ public class xcb_screen_t extends Structure {
     public byte  root_depth;
     public byte  allowed_depths_len;
 
-    @Override
     protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
@@ -62,3 +62,4 @@ public class xcb_screen_t extends Structure {
 
     }
 }
+
