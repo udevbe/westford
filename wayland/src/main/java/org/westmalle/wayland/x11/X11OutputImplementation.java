@@ -15,9 +15,7 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-
 import com.sun.jna.Pointer;
-
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
@@ -29,7 +27,7 @@ public class X11OutputImplementation implements HasEglOutput {
     @Nonnull
     private final X11EglOutputFactory x11EglOutputFactory;
     @Nonnull
-    private final Pointer xcbConnection;
+    private final Pointer             xcbConnection;
     private final int                 xWindow;
     @Nonnull
     private final Pointer             xDisplay;

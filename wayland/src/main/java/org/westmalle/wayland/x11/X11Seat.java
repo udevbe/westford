@@ -7,7 +7,7 @@ import org.westmalle.wayland.nativ.xcb_generic_event_t;
 
 public class X11Seat implements EventLoop.FileDescriptorEventHandler {
 
-    private final Libxcb libxcb;
+    private final Libxcb                  libxcb;
     private final X11OutputImplementation x11OutputImplementation;
 
     X11Seat(final Libxcb libxcb,

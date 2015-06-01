@@ -13,8 +13,8 @@ public class xcb_generic_event_t extends Structure {
                                                              "pad",
                                                              "full_sequence");
 
-    public byte response_type;
-    public byte pad0;
+    public byte  response_type;
+    public byte  pad0;
     public short sequence;
     public int[] pad = new int[7];
     public int full_sequence;

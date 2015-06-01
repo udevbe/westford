@@ -23,20 +23,20 @@ public class xcb_key_press_event_t extends Structure {
                                                              "same_screen",
                                                              "pad0");
 
-    public byte response_type;
-    public byte detail;
+    public byte  response_type;
+    public byte  detail;
     public short sequence;
-    public int time;
-    public int root;
-    public int event;
-    public int child;
+    public int   time;
+    public int   root;
+    public int   event;
+    public int   child;
     public short root_x;
     public short root_y;
     public short event_x;
     public short event_y;
     public short state;
-    public byte same_screen;
-    public byte pad0;
+    public byte  same_screen;
+    public byte  pad0;
 
     @Override
     protected List<?> getFieldOrder() {

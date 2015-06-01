@@ -15,19 +15,19 @@ import javax.inject.Inject;
 public class X11SeatFactory {
 
     @Nonnull
-    private final Display display;
+    private final Display              display;
     @Nonnull
-    private final LibX11 libX11;
+    private final LibX11               libX11;
     @Nonnull
-    private final Libxcb libxcb;
+    private final Libxcb               libxcb;
     @Nonnull
-    private final WlPointerFactory wlPointerFactory;
+    private final WlPointerFactory     wlPointerFactory;
     @Nonnull
-    private final WlKeyboardFactory wlKeyboardFactory;
+    private final WlKeyboardFactory    wlKeyboardFactory;
     @Nonnull
     private final PointerDeviceFactory pointerDeviceFactory;
     @Nonnull
-    private final KeyboardFactory keyboardFactory;
+    private final KeyboardFactory      keyboardFactory;
 
     @Inject
     X11SeatFactory(@Nonnull final Display display,
@@ -51,9 +51,10 @@ public class X11SeatFactory {
         final int xDisplayFD = this.libX11.XConnectionNumber(x11OutputImplementation.getxDisplay());
         final X11Seat x11Seat = new X11Seat(this.libxcb,
                                             x11OutputImplementation);
-        this.display.getEventLoop().addFileDescriptor(xDisplayFD,
-                                                      EventLoop.EVENT_READABLE,
-                                                      x11Seat);
+        this.display.getEventLoop()
+                    .addFileDescriptor(xDisplayFD,
+                                       EventLoop.EVENT_READABLE,
+                                       x11Seat);
         return x11Seat;
     }
 }
