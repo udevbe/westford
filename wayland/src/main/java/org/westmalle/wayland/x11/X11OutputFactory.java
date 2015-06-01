@@ -15,8 +15,14 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+
 import org.freedesktop.wayland.shared.WlOutputTransform;
-import org.westmalle.wayland.nativ.*;
+import org.westmalle.wayland.nativ.LibX11;
+import org.westmalle.wayland.nativ.LibX11xcb;
+import org.westmalle.wayland.nativ.Libxcb;
+import org.westmalle.wayland.nativ.xcb_generic_error_t;
+import org.westmalle.wayland.nativ.xcb_screen_t;
+import org.westmalle.wayland.nativ.xcb_void_cookie_t;
 import org.westmalle.wayland.output.OutputFactory;
 import org.westmalle.wayland.output.OutputGeometry;
 import org.westmalle.wayland.output.OutputMode;
@@ -28,19 +34,30 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.westmalle.wayland.nativ.Libxcb.*;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_COPY_FROM_PARENT;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_CW_EVENT_MASK;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_KEY_PRESS;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_KEY_RELEASE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
 
 public class X11OutputFactory {
 
     @Nonnull
-    private final LibX11                         libX11;
+    private final LibX11 libX11;
     @Nonnull
-    private final Libxcb                         libxcb;
+    private final Libxcb libxcb;
     @Nonnull
-    private final LibX11xcb                      libX11xcb;
+    private final LibX11xcb libX11xcb;
     @Nonnull
-    private final WlOutputFactory                wlOutputFactory;
+    private final WlOutputFactory wlOutputFactory;
     @Nonnull
-    private final OutputFactory                  outputFactory;
+    private final OutputFactory outputFactory;
     @Nonnull
     private final X11OutputImplementationFactory x11OutputImplementationFactory;
 
@@ -88,7 +105,7 @@ public class X11OutputFactory {
             throw new RuntimeException("errors occured in connecting to X server");
         }
 
-        final Pointer      setup  = this.libxcb.xcb_get_setup(connection);
+        final Pointer setup = this.libxcb.xcb_get_setup(connection);
         final xcb_screen_t screen = this.libxcb.xcb_setup_roots_iterator(setup).data;
 
         final int window = this.libxcb.xcb_generate_id(connection);
@@ -96,17 +113,21 @@ public class X11OutputFactory {
             throw new RuntimeException("failed to generate X window id");
         }
 
-        final int     xcbWindowAttribMask = Libxcb.XCB_CW_EVENT_MASK;
-        final Pointer xcbWindowAttribList = new Memory(Integer.BYTES * 3);
-        //TODO just write an int array...
-        xcbWindowAttribList.setInt(0,
-                                   Libxcb.XCB_EVENT_MASK_BUTTON_PRESS);
-        xcbWindowAttribList.setInt(4,
-                                   Libxcb.XCB_EVENT_MASK_EXPOSURE);
-        xcbWindowAttribList.setInt(8,
-                                   Libxcb.XCB_EVENT_MASK_KEY_PRESS);
+        final int xcbWindowAttribMask = XCB_CW_EVENT_MASK;
+        final Pointer xcbWindowAttribList = new Memory(Integer.BYTES * 9);
+        xcbWindowAttribList.write(0, new int[]{
+                XCB_EVENT_MASK_KEY_PRESS,
+                XCB_EVENT_MASK_KEY_RELEASE,
+                XCB_EVENT_MASK_BUTTON_PRESS,
+                XCB_EVENT_MASK_BUTTON_RELEASE,
+                XCB_EVENT_MASK_ENTER_WINDOW,
+                XCB_EVENT_MASK_LEAVE_WINDOW,
+                XCB_EVENT_MASK_POINTER_MOTION,
+                XCB_EVENT_MASK_POINTER_MOTION_HINT,
+                XCB_EVENT_MASK_BUTTON_MOTION,
+        }, 0, 9);
         final xcb_void_cookie_t createCookie = this.libxcb.xcb_create_window_checked(connection,
-                                                                                     (byte) Libxcb.XCB_COPY_FROM_PARENT,
+                                                                                     (byte) XCB_COPY_FROM_PARENT,
                                                                                      window,
                                                                                      screen.root,
                                                                                      (short) 0,
@@ -114,7 +135,7 @@ public class X11OutputFactory {
                                                                                      (short) width,
                                                                                      (short) height,
                                                                                      (short) 0,
-                                                                                     (short) Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                                                                                     (short) XCB_WINDOW_CLASS_INPUT_OUTPUT,
                                                                                      screen.root_visual,
                                                                                      xcbWindowAttribMask,
                                                                                      xcbWindowAttribList);
@@ -136,24 +157,26 @@ public class X11OutputFactory {
         this.libxcb.xcb_flush(connection);
 
         final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(0)
-                                                            .y(0)
-                                                            .subpixel(0)
-                                                            .make("Westmalle xcb")
-                                                            .model("X11")
-                                                            .physicalWidth((width / screen.width_in_pixels) * screen.width_in_millimeters)
-                                                            .physicalHeight((height / screen.height_in_pixels) * screen.height_in_millimeters)
-                                                            .transform(WlOutputTransform.NORMAL.getValue())
-                                                            .build();
+                .x(0)
+                .y(0)
+                .subpixel(0)
+                .make("Westmalle xcb")
+                .model("X11")
+                .physicalWidth((width / screen.width_in_pixels) * screen.width_in_millimeters)
+                .physicalHeight((height / screen.height_in_pixels) * screen.height_in_millimeters)
+                .transform(WlOutputTransform.NORMAL.getValue())
+                .build();
         final OutputMode outputMode = OutputMode.builder()
-                                                .flags(0)
-                                                .height(height)
-                                                .width(width)
-                                                .refresh(60)
-                                                .build();
+                .flags(0)
+                .height(height)
+                .width(width)
+                .refresh(60)
+                .build();
         return this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
                                                                      outputMode,
-                                                                     this.x11OutputImplementationFactory.create(display,
-                                                                                                                window)));
+                                                                     this.x11OutputImplementationFactory
+                                                                             .create(connection,
+                                                                                     display,
+                                                                                     window)));
     }
 }

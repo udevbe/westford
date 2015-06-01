@@ -28,12 +28,28 @@ public class Libxcb {
     Libxcb() {
     }
 
-    public static final long XCB_COPY_FROM_PARENT          = 0L;
-    public static final int  XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
-    public static final int  XCB_CW_EVENT_MASK             = 2048;
-    public static final int  XCB_EVENT_MASK_KEY_PRESS      = 1;
-    public static final int  XCB_EVENT_MASK_BUTTON_PRESS   = 4;
-    public static final int  XCB_EVENT_MASK_EXPOSURE       = 32768;
+    public static final long XCB_COPY_FROM_PARENT = 0L;
+    public static final int XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
+    public static final int XCB_CW_EVENT_MASK = 2048;
+
+    public static final int XCB_EVENT_MASK_KEY_PRESS = 1;
+    public static final int XCB_EVENT_MASK_KEY_RELEASE = 2;
+    public static final int XCB_EVENT_MASK_BUTTON_PRESS = 4;
+    public static final int XCB_EVENT_MASK_BUTTON_RELEASE = 8;
+    public static final int XCB_EVENT_MASK_ENTER_WINDOW = 16;
+    public static final int XCB_EVENT_MASK_LEAVE_WINDOW = 32;
+    public static final int XCB_EVENT_MASK_POINTER_MOTION = 64;
+    public static final int XCB_EVENT_MASK_POINTER_MOTION_HINT = 128;
+    public static final int XCB_EVENT_MASK_BUTTON_MOTION = 8192;
+    public static final int XCB_EVENT_MASK_EXPOSURE = 32768;
+
+    public static final int XCB_KEY_PRESS = 2;
+    public static final int XCB_KEY_RELEASE = 3;
+    public static final int XCB_BUTTON_PRESS = 4;
+    public static final int XCB_BUTTON_RELEASE = 5;
+    public static final int XCB_MOTION_NOTIFY = 6;
+    public static final int XCB_ENTER_NOTIFY = 7;
+    public static final int XCB_LEAVE_NOTIFY = 8;
 
     public native int xcb_flush(Pointer c);
 
@@ -61,6 +77,8 @@ public class Libxcb {
 
     public native xcb_void_cookie_t.ByValue xcb_map_window_checked(Pointer c,
                                                                    int wid);
+
+    public native xcb_generic_event_t xcb_poll_for_event(Pointer c);
 
     public native xcb_generic_error_t xcb_request_check(Pointer c,
                                                         xcb_void_cookie_t cookie);
