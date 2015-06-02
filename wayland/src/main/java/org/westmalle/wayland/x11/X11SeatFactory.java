@@ -28,7 +28,7 @@ import javax.inject.Inject;
 public class X11SeatFactory {
 
     @Nonnull
-    private final JobExecutor jobExecutor;
+    private final JobExecutor          jobExecutor;
     @Nonnull
     private final WlPointerFactory     wlPointerFactory;
     @Nonnull
@@ -56,7 +56,8 @@ public class X11SeatFactory {
                           @Nonnull final Compositor compositor) {
         final X11Seat x11Seat = new X11Seat(wlSeat,
                                             this.jobExecutor);
-        final X11Output x11Output = (X11Output) wlOutput.getOutput().getImplementation();
+        final X11Output x11Output = (X11Output) wlOutput.getOutput()
+                                                        .getImplementation();
         x11Output.getX11EventBus()
                  .register(x11Seat);
         //FIXME for now we put these here, these should be handled dynamically when a mouse or keyboard is

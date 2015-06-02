@@ -10,9 +10,10 @@ public class LibX11xcb {
     }
 
     public static final int XlibOwnsEventQueue = 0;
-    public static final int XCBOwnsEventQueue = 1;
+    public static final int XCBOwnsEventQueue  = 1;
 
     public native Pointer XGetXCBConnection(Pointer dpy);
 
-    public native void XSetEventQueueOwner(Pointer dpy, int owner);
+    public native void XSetEventQueueOwner(Pointer dpy,
+                                           int owner);
 }

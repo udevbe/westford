@@ -79,4 +79,6 @@ public class Libc {
                             int args) throws LastErrorException;
 
     public native int pipe(int[] pipeFds) throws LastErrorException;
+
+    public native void free(Pointer p);
 }

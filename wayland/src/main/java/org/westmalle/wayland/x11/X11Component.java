@@ -18,5 +18,6 @@ import dagger.Subcomponent;
 @Subcomponent
 public interface X11Component {
     X11OutputFactory outputFactory();
+
     X11SeatFactory seatFactory();
 }

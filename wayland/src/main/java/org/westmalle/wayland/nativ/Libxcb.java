@@ -32,16 +32,15 @@ public class Libxcb {
     public static final int  XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
     public static final int  XCB_CW_EVENT_MASK             = 2048;
 
-    public static final int XCB_EVENT_MASK_KEY_PRESS           = 1;
-    public static final int XCB_EVENT_MASK_KEY_RELEASE         = 2;
-    public static final int XCB_EVENT_MASK_BUTTON_PRESS        = 4;
-    public static final int XCB_EVENT_MASK_BUTTON_RELEASE      = 8;
-    public static final int XCB_EVENT_MASK_ENTER_WINDOW        = 16;
-    public static final int XCB_EVENT_MASK_LEAVE_WINDOW        = 32;
-    public static final int XCB_EVENT_MASK_POINTER_MOTION      = 64;
-    public static final int XCB_EVENT_MASK_POINTER_MOTION_HINT = 128;
-    public static final int XCB_EVENT_MASK_BUTTON_MOTION       = 8192;
-    public static final int XCB_EVENT_MASK_EXPOSURE            = 32768;
+    public static final int XCB_EVENT_MASK_KEY_PRESS      = 1;
+    public static final int XCB_EVENT_MASK_KEY_RELEASE    = 2;
+    public static final int XCB_EVENT_MASK_BUTTON_PRESS   = 4;
+    public static final int XCB_EVENT_MASK_BUTTON_RELEASE = 8;
+    public static final int XCB_EVENT_MASK_ENTER_WINDOW   = 16;
+    public static final int XCB_EVENT_MASK_LEAVE_WINDOW   = 32;
+    public static final int XCB_EVENT_MASK_POINTER_MOTION = 64;
+    public static final int XCB_EVENT_MASK_KEYMAP_STATE   = 16384;
+    public static final int XCB_EVENT_MASK_FOCUS_CHANGE   = 2097152;
 
     public static final int XCB_KEY_PRESS      = 2;
     public static final int XCB_KEY_RELEASE    = 3;
@@ -61,27 +60,24 @@ public class Libxcb {
 
     public native int xcb_generate_id(Pointer c);
 
-    public native xcb_void_cookie_t.ByValue xcb_create_window_checked(Pointer c,
-                                                                      byte depth,
-                                                                      int wid,
-                                                                      int parent,
-                                                                      short x,
-                                                                      short y,
-                                                                      short width,
-                                                                      short height,
-                                                                      short border_width,
-                                                                      short _class,
-                                                                      int visual,
-                                                                      int value_mask,
-                                                                      Pointer value_list);
+    public native xcb_void_cookie_t.ByValue xcb_create_window(Pointer c,
+                                                              byte depth,
+                                                              int wid,
+                                                              int parent,
+                                                              short x,
+                                                              short y,
+                                                              short width,
+                                                              short height,
+                                                              short border_width,
+                                                              short _class,
+                                                              int visual,
+                                                              int value_mask,
+                                                              Pointer value_list);
 
-    public native xcb_void_cookie_t.ByValue xcb_map_window_checked(Pointer c,
-                                                                   int wid);
+    public native xcb_void_cookie_t.ByValue xcb_map_window(Pointer c,
+                                                           int wid);
 
     public native xcb_generic_event_t xcb_poll_for_event(Pointer c);
-
-    public native xcb_generic_error_t xcb_request_check(Pointer c,
-                                                        xcb_void_cookie_t cookie);
 
     public native int xcb_get_file_descriptor(Pointer c);
 }

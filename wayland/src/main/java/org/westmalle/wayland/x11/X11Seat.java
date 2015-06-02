@@ -14,13 +14,8 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
-
 import org.freedesktop.wayland.shared.WlPointerButtonState;
-import org.westmalle.wayland.nativ.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.xcb_key_press_event_t;
-import org.westmalle.wayland.nativ.xcb_key_release_event_t;
-import org.westmalle.wayland.nativ.xcb_motion_notify_event_t;
+import org.westmalle.wayland.nativ.*;
 import org.westmalle.wayland.output.JobExecutor;
 import org.westmalle.wayland.protocol.WlSeat;
 
@@ -29,7 +24,7 @@ import javax.annotation.Nonnull;
 public class X11Seat {
 
     @Nonnull
-    private final WlSeat wlSeat;
+    private final WlSeat      wlSeat;
     @Nonnull
     private final JobExecutor jobExecutor;
 
@@ -46,46 +41,46 @@ public class X11Seat {
 
     @Subscribe
     public void handle(final xcb_button_press_event_t event) {
-        final long time = event.time;
+        final long  time   = event.time;
         final short button = event.detail;
 
         this.wlSeat.getOptionalWlPointer()
-                .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
-                        .button(wlPointer.getResources(),
-                                (int) time,
-                                button,
-                                WlPointerButtonState.PRESSED)));
+                   .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
+                                                                                  .button(wlPointer.getResources(),
+                                                                                          (int) time,
+                                                                                          button,
+                                                                                          WlPointerButtonState.PRESSED)));
     }
 
     @Subscribe
-    public void handle(xcb_key_release_event_t event) {
+    public void handle(final xcb_key_release_event_t event) {
 
     }
 
     @Subscribe
     public void handle(final xcb_button_release_event_t event) {
-        final long time = event.time;
+        final long  time   = event.time;
         final short button = event.detail;
 
         this.wlSeat.getOptionalWlPointer()
-                .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
-                        .button(wlPointer.getResources(),
-                                (int) time,
-                                button,
-                                WlPointerButtonState.RELEASED)));
+                   .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
+                                                                                  .button(wlPointer.getResources(),
+                                                                                          (int) time,
+                                                                                          button,
+                                                                                          WlPointerButtonState.RELEASED)));
     }
 
     @Subscribe
     public void handle(final xcb_motion_notify_event_t event) {
         final long time = event.time;
-        final int x = event.event_x;
-        final int y = event.event_y;
+        final int  x    = event.event_x;
+        final int  y    = event.event_y;
 
         this.wlSeat.getOptionalWlPointer()
-                .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
-                        .motion(wlPointer.getResources(),
-                                (int) time,
-                                x,
-                                y)));
+                   .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
+                                                                                  .motion(wlPointer.getResources(),
+                                                                                          (int) time,
+                                                                                          x,
+                                                                                          y)));
     }
 }

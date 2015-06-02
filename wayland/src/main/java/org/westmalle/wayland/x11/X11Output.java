@@ -14,7 +14,6 @@
 package org.westmalle.wayland.x11;
 
 import com.sun.jna.Pointer;
-
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
@@ -25,7 +24,7 @@ public class X11Output implements HasEglOutput {
     @Nonnull
     private final X11EglOutputFactory x11EglOutputFactory;
     @Nonnull
-    private final X11EventBus x11EventBus;
+    private final X11EventBus         x11EventBus;
     @Nonnull
     private final Pointer             xcbConnection;
     private final int                 xWindow;
@@ -56,17 +55,17 @@ public class X11Output implements HasEglOutput {
     }
 
     public int getxWindow() {
-        return xWindow;
+        return this.xWindow;
     }
 
     @Nonnull
     public Pointer getxDisplay() {
-        return xDisplay;
+        return this.xDisplay;
     }
 
     @Nonnull
     public Pointer getXcbConnection() {
-        return xcbConnection;
+        return this.xcbConnection;
     }
 
     @Nonnull
