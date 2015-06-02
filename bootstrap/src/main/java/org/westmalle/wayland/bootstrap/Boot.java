@@ -15,7 +15,7 @@ package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
 
-import org.westmalle.wayland.egl.EglRenderEngine;
+import org.westmalle.wayland.egl.EglGles2RenderEngine;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
 import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.CompositorFactory;
@@ -56,7 +56,7 @@ class Boot {
                                                        800,
                                                        600);
         //setup our render engine
-        final EglRenderEngine renderEngine = renderEngineFactory.create();
+        final EglGles2RenderEngine renderEngine = renderEngineFactory.create();
         //create an shm renderer that passes on shm buffers to it's render implementation
         final Renderer renderer = rendererFactory.create(renderEngine);
 

@@ -27,7 +27,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.westmalle.wayland.nativ.LibGLESv2.*;
 
 @AutoFactory(className = "EglRenderEngineFactory")
-public class EglRenderEngine implements RenderEngine {
+public class EglGles2RenderEngine implements RenderEngine {
 
     @Nonnull
     private static final String SURFACE_V          =
@@ -75,7 +75,7 @@ public class EglRenderEngine implements RenderEngine {
     private Memory vertexBuffer;
     private Mat4   projection;
 
-    EglRenderEngine(@Provided @Nonnull final LibGLESv2 libGLESv2) {
+    EglGles2RenderEngine(@Provided @Nonnull final LibGLESv2 libGLESv2) {
         this.renderThread = Executors.newSingleThreadExecutor(r -> new Thread(r,
                                                                               "GL Render Engine"));
         this.libGLESv2 = libGLESv2;
