@@ -13,19 +13,19 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import com.sun.jna.Pointer;
+
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
 import javax.annotation.Nonnull;
 
-@AutoFactory(className = "X11OutputImplementationFactory")
-public class X11OutputImplementation implements HasEglOutput {
+public class X11Output implements HasEglOutput {
 
     @Nonnull
     private final X11EglOutputFactory x11EglOutputFactory;
+    @Nonnull
+    private final X11EventBus x11EventBus;
     @Nonnull
     private final Pointer             xcbConnection;
     private final int                 xWindow;
@@ -34,11 +34,13 @@ public class X11OutputImplementation implements HasEglOutput {
 
     private X11EglOutput eglOutput;
 
-    X11OutputImplementation(@Provided @Nonnull final X11EglOutputFactory x11EglOutputFactory,
-                            @Nonnull final Pointer xcbConnection,
-                            @Nonnull final Pointer xDisplay,
-                            final int xWindow) {
+    X11Output(@Nonnull final X11EglOutputFactory x11EglOutputFactory,
+              @Nonnull final X11EventBus x11EventBus,
+              @Nonnull final Pointer xcbConnection,
+              @Nonnull final Pointer xDisplay,
+              final int xWindow) {
         this.x11EglOutputFactory = x11EglOutputFactory;
+        this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xWindow = xWindow;
         this.xDisplay = xDisplay;
@@ -65,5 +67,10 @@ public class X11OutputImplementation implements HasEglOutput {
     @Nonnull
     public Pointer getXcbConnection() {
         return xcbConnection;
+    }
+
+    @Nonnull
+    public X11EventBus getX11EventBus() {
+        return this.x11EventBus;
     }
 }

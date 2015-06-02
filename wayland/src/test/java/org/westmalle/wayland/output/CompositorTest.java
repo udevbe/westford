@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.output;
 
-import com.jogamp.opengl.GLDrawable;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
@@ -31,7 +30,10 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompositorTest {
@@ -47,20 +49,20 @@ public class CompositorTest {
     @Test
     public void testRequestRender() throws Exception {
         //given
-        final GLDrawable glDrawable0 = mock(GLDrawable.class);
-        final GLDrawable glDrawable1 = mock(GLDrawable.class);
+        final Object outputImpl0 = mock(Object.class);
+        final Object outputImpl1 = mock(Object.class);
 
         final WlOutput wlOutput0 = mock(WlOutput.class);
         final Output   output0   = mock(Output.class);
         when(wlOutput0.getOutput()).thenReturn(output0);
-        when(output0.getImplementation()).thenReturn(glDrawable0);
+        when(output0.getImplementation()).thenReturn(outputImpl0);
         this.compositor.getWlOutputs()
                        .add(wlOutput0);
 
         final WlOutput wlOutput1 = mock(WlOutput.class);
         final Output   output1   = mock(Output.class);
         when(wlOutput1.getOutput()).thenReturn(output1);
-        when(output1.getImplementation()).thenReturn(glDrawable1);
+        when(output1.getImplementation()).thenReturn(outputImpl1);
         this.compositor.getWlOutputs()
                        .add(wlOutput1);
 

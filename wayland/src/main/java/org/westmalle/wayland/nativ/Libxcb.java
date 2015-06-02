@@ -82,4 +82,6 @@ public class Libxcb {
 
     public native xcb_generic_error_t xcb_request_check(Pointer c,
                                                         xcb_void_cookie_t cookie);
+
+    public native int xcb_get_file_descriptor(Pointer c);
 }

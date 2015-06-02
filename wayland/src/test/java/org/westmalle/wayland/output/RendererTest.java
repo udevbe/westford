@@ -14,7 +14,6 @@
 package org.westmalle.wayland.output;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.jogamp.opengl.GLDrawable;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -83,8 +82,8 @@ public class RendererTest {
         final WlOutput wlOutput = mock(WlOutput.class);
         final Output   output   = mock(Output.class);
         when(wlOutput.getOutput()).thenReturn(output);
-        final GLDrawable glDrawable = mock(GLDrawable.class);
-        when(output.getImplementation()).thenReturn(glDrawable);
+        final Object outputImpl = mock(Object.class);
+        when(output.getImplementation()).thenReturn(outputImpl);
         //when
         this.renderer.beginRender(wlOutput);
         //then
@@ -96,9 +95,8 @@ public class RendererTest {
         //given
         final WlOutput wlOutput = mock(WlOutput.class);
         final Output   output   = mock(Output.class);
-        when(wlOutput.getOutput()).thenReturn(output);
-        final GLDrawable glDrawable = mock(GLDrawable.class);
-        when(output.getImplementation()).thenReturn(glDrawable);
+        final Object outputImpl = mock(Object.class);
+        when(output.getImplementation()).thenReturn(outputImpl);
         final Future future = mock(ListenableFuture.class);
         when(this.renderEngine.end(wlOutput)).thenReturn(future);
         //when

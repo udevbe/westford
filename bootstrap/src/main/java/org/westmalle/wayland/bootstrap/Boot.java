@@ -14,13 +14,23 @@
 package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
-import com.jogamp.newt.opengl.GLWindow;
+
 import org.westmalle.wayland.egl.EglRenderEngine;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
-import org.westmalle.wayland.egl.HasEglOutput;
-import org.westmalle.wayland.output.*;
-import org.westmalle.wayland.protocol.*;
+import org.westmalle.wayland.output.Compositor;
+import org.westmalle.wayland.output.CompositorFactory;
+import org.westmalle.wayland.output.DaggerOutputComponent;
+import org.westmalle.wayland.output.OutputComponent;
+import org.westmalle.wayland.output.Renderer;
+import org.westmalle.wayland.output.RendererFactory;
+import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlCompositorFactory;
+import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlSeat;
+import org.westmalle.wayland.protocol.WlSeatFactory;
+import org.westmalle.wayland.protocol.WlShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
+import org.westmalle.wayland.x11.X11SeatFactory;
 
 class Boot {
 
@@ -34,6 +44,8 @@ class Boot {
 
         final X11OutputFactory outputFactory = outputComponent.x11Component()
                                                               .outputFactory();
+        final X11SeatFactory seatFactory = outputComponent.x11Component()
+                                                             .seatFactory();
 
         final EglRenderEngineFactory renderEngineFactory = outputComponent.eglComponent()
                                                                           .renderEngineFactory();
@@ -62,9 +74,9 @@ class Boot {
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
         //these objects will listen for input events
         final WlSeat wlSeat = wlSeatFactory.create();
-//        joglSeatFactory.create(glWindow,
-//                               wlSeat,
-//                               compositor);
+        seatFactory.create(wlOutput,
+                           wlSeat,
+                           compositor);
 
         //enable wl_shell protocol
         wlShellFactory.create(wlCompositor);

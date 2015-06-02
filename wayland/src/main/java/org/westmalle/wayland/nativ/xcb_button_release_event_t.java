@@ -7,7 +7,7 @@ import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public class xcb_button_press_event_t extends Structure {
+public class xcb_button_release_event_t extends Structure {
 
     private static List<?> FIELD_ORDER = Arrays.asList("response_type",
                                                        "detail",
@@ -39,7 +39,7 @@ public class xcb_button_press_event_t extends Structure {
     public byte  same_screen;
     public byte  pad0;
 
-    public xcb_button_press_event_t(final Pointer p) {
+    public xcb_button_release_event_t(final Pointer p) {
         super(p);
     }
 

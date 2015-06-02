@@ -30,8 +30,4 @@ public class LibX11 {
     }
 
     public native Pointer XOpenDisplay(String display_name);
-
-    public native int XCloseDisplay(Pointer dpy);
-
-    public native int XConnectionNumber(Pointer dpy);
 }

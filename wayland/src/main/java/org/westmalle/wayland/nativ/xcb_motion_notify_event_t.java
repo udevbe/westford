@@ -7,7 +7,7 @@ import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public class xcb_key_press_event_t extends Structure {
+public class xcb_motion_notify_event_t extends Structure {
 
     private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
                                                              "detail",
@@ -24,27 +24,27 @@ public class xcb_key_press_event_t extends Structure {
                                                              "same_screen",
                                                              "pad0");
 
-    public byte  response_type;
-    public byte  detail;
+    public byte response_type;
+    public byte detail;
     public short sequence;
-    public int   time;
-    public int   root;
-    public int   event;
-    public int   child;
+    public int time;
+    public int root;
+    public int event;
+    public int child;
     public short root_x;
     public short root_y;
     public short event_x;
     public short event_y;
     public short state;
-    public byte  same_screen;
-    public byte  pad0;
+    public byte same_screen;
+    public byte pad0;
 
-    public xcb_key_press_event_t(final Pointer p) {
+    public xcb_motion_notify_event_t(final Pointer p) {
         super(p);
     }
 
     @Override
-    protected List<?> getFieldOrder() {
+    protected List getFieldOrder() {
         return FIELD_ORDER;
     }
 }
