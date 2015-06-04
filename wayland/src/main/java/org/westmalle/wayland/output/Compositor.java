@@ -21,9 +21,11 @@ import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlOutput;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 //TODO lot's of low hanging optimizations here.
 @AutoFactory(className = "CompositorFactory")
@@ -72,6 +74,11 @@ public class Compositor {
     private void renderScene() {
         this.renderEvent = Optional.of(this.display.getEventLoop()
                                                    .addIdle(this.idleHandler));
+    }
+
+    @Nonnegative
+    public int getTime(){
+        return (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
     }
 
     @Nonnull
