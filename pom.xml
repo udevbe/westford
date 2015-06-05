@@ -201,38 +201,5 @@
                 </configuration>
             </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${maven.source.plugin.version}</version>
-                    <configuration>
-                        <verbose>false</verbose>
-                        <groups>
-                            <group>
-                                <title>Bootstrap</title>
-                                <packages>org.westmalle.wayland.bootstrap*</packages>
-                            </group>
-                            <group>
-                                <title>Wayland</title>
-                                <packages>org.westmalle.wayland*</packages>
-                            </group>
-                        </groups>
-                        <linksource>true</linksource>
-                        <minmemory>16m</minmemory>
-                        <maxmemory>128m</maxmemory>
-                        <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
-                        <docletArtifact>
-                            <groupId>org.umlgraph</groupId>
-                            <artifactId>umlgraph</artifactId>
-                            <version>${umlgraph.version}</version>
-                        </docletArtifact>
-                        <additionalparam>-views</additionalparam>
-                        <useStandardDocletOptions>true</useStandardDocletOptions>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 </project>
