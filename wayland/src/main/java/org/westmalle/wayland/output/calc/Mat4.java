@@ -32,11 +32,6 @@ public abstract class Mat4 {
                                                     0.f, 0.f, 0.f, 1.f);
     //@formatter:on
 
-    /**
-     * Construct a new matrix. Array elements should be in column major order.
-     *
-     * @return a new 4 by 4 matrix.
-     */
     @Nonnull
     public static Mat4 create(@Nonnull final float[] array,
                               @Nonnegative final int offset) {
@@ -92,7 +87,9 @@ public abstract class Mat4 {
     }
 
     /**
-     * @param array expected format is column major. Index 0 -> column 0, row 0; index 1 -> column 0, row 1 and so forth.
+     * @param array expected format is column major. Index 0 -&gt; column 0, row 0; index 1 -&gt; column 0, row 1 and so forth.
+     *
+     * @return a new 4 by 4 matrix.
      */
     @Nonnull
     public static Mat4 create(@Nonnull final float[] array) {
@@ -239,13 +236,6 @@ public abstract class Mat4 {
         Mat4 build();
     }
 
-    /**
-     * Transform vector in point plane to destination plane.
-     *
-     * @param right right hand side of the multiplication
-     *
-     * @return new vector who's space is this matrix' destination space.
-     */
     @Nonnull
     public Vec4 multiply(@Nonnull final Vec4 right) {
 
@@ -260,13 +250,6 @@ public abstract class Mat4 {
                            getM03() * rightX + getM13() * rightY + getM23() * rightZ + getM33() * rightW);
     }
 
-    /**
-     * Transform matrix in point plane to destination plane.
-     *
-     * @param right right hand side of the multiplication
-     *
-     * @return new matrix who's point is this matrix' destination space.
-     */
     @Nonnull
     public Mat4 multiply(@Nonnull final Mat4 right) {
 
@@ -295,11 +278,6 @@ public abstract class Mat4 {
         //@formatter:on
     }
 
-    /**
-     * Invert this matrix
-     *
-     * @return a new matrix who's point and destination are swapped.
-     */
     @Nonnull
     public Mat4 invert() {
         final float[][] matrix2d = new float[][]{{getM00(), getM01(), getM02(), getM03()},

@@ -37,43 +37,22 @@ public class NativeString implements CharSequence, Comparable {
     private final Pointer pointer;
     private final String  encoding;
 
-    /**
-     * Create a native string (NUL-terminated array of <code>char</code>).<p>
-     * Uses the encoding returned by {@link Native#getDefaultStringEncoding()}.
-     */
     public NativeString(final String string) {
         this(string,
              Native.getDefaultStringEncoding());
     }
 
-    /**
-     * Create a native string as a NUL-terminated array of <code>wchar_t</code>
-     * (if <code>wide</code> is true) or <code>char</code>.<p>
-     * If not <code>wide</code>, the encoding is obtained from {@link
-     * Native#getDefaultStringEncoding()}.
-     *
-     * @param string value to write to native memory
-     * @param wide   whether to store the String as <code>wchar_t</code>
-     */
     public NativeString(final String string,
                         final boolean wide) {
         this(string,
              wide ? WIDE_STRING : Native.getDefaultStringEncoding());
     }
 
-    /**
-     * Create a native string as a NUL-terminated array of
-     * <code>wchar_t</code>.
-     */
     public NativeString(final WString string) {
         this(string.toString(),
              WIDE_STRING);
     }
 
-    /**
-     * Create a native string (NUL-terminated array of <code>char</code>),
-     * using the requested encoding.
-     */
     public NativeString(final String string,
                         final String encoding) {
         if (string == null) {
@@ -103,11 +82,6 @@ public class NativeString implements CharSequence, Comparable {
         }
     }
 
-    /**
-     * Return a byte array corresponding to the given String, using the given
-     * encoding.  If the encoding is not found default to the platform native
-     * encoding.
-     */
     private byte[] getBytes(final String s,
                             final String encoding) {
         if (encoding != null) {

@@ -137,11 +137,6 @@ public class Surface {
         return this;
     }
 
-    /**
-     * Compositor scoped position
-     *
-     * @return
-     */
     @Nonnull
     public Point getPosition() {
         return this.position;
@@ -294,13 +289,6 @@ public class Surface {
         return this;
     }
 
-    /**
-     * Translate a compositor scoped coordinate to a surface scoped coordinate.
-     *
-     * @param global
-     *
-     * @return
-     */
     @Nonnull
     public Point local(@Nonnull final Point global) {
         //TODO unit test this method
@@ -321,13 +309,6 @@ public class Surface {
                             Math.round(localPoint.getY() / localPoint.getW()));
     }
 
-    /**
-     * Translate a surface scoped coordinate to a compositor scoped coordinate.
-     *
-     * @param local
-     *
-     * @return
-     */
     @Nonnull
     public Point global(@Nonnull final Point local) {
         //TODO unit test this method
@@ -349,11 +330,6 @@ public class Surface {
                             Math.round(localPoint.getY() * localPoint.getW() + position.getY()));
     }
 
-    /**
-     * Surface scoped size and position
-     *
-     * @return
-     */
     @Nonnull
     public Rectangle getSize() {
         return this.size;
