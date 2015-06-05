@@ -78,6 +78,7 @@
             <artifactId>dagger-compiler</artifactId>
             <version>${dagger.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!-- google guava -->
@@ -93,12 +94,14 @@
             <artifactId>auto-factory</artifactId>
             <version>${auto.factory.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
             <version>${auto.value.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!-- misc. program aids (not the disease) -->
