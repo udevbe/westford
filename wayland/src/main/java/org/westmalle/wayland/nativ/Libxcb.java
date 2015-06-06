@@ -28,7 +28,10 @@ public class Libxcb {
     Libxcb() {
     }
 
-    public static final int XCB_GRAB_MODE_SYNC  = 0;
+    public static final int XCB_ATOM_ATOM = 4;
+
+    public static final int XCB_PROP_MODE_REPLACE = 0;
+
     public static final int XCB_GRAB_MODE_ASYNC = 1;
 
     public static final int XCB_CURSOR_NONE = 0;
@@ -98,4 +101,22 @@ public class Libxcb {
 
     public native xcb_void_cookie_t.ByValue xcb_ungrab_pointer(Pointer c,
                                                                int time);
+
+    public native xcb_intern_atom_cookie_t.ByValue xcb_intern_atom(Pointer c,
+                                                                   byte only_if_exists,
+                                                                   short name_len,
+                                                                   Pointer name);
+
+    public native xcb_intern_atom_reply_t xcb_intern_atom_reply(Pointer c,
+                                                                xcb_intern_atom_cookie_t.ByValue cookie,
+                                                                Pointer e);
+
+    public native xcb_void_cookie_t.ByValue xcb_change_property(Pointer c,
+                                                                byte mode,
+                                                                int window,
+                                                                int property,
+                                                                int type,
+                                                                byte format,
+                                                                int data_len,
+                                                                Pointer data);
 }

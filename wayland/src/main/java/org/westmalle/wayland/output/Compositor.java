@@ -77,7 +77,7 @@ public class Compositor {
     }
 
     @Nonnegative
-    public int getTime(){
+    public int getTime() {
         return (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
     }
 

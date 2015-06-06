@@ -14,21 +14,10 @@
 package org.westmalle.wayland.bootstrap;
 
 import com.google.common.util.concurrent.ServiceManager;
-
 import org.westmalle.wayland.egl.EglGles2RenderEngine;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
-import org.westmalle.wayland.output.Compositor;
-import org.westmalle.wayland.output.CompositorFactory;
-import org.westmalle.wayland.output.DaggerOutputComponent;
-import org.westmalle.wayland.output.OutputComponent;
-import org.westmalle.wayland.output.Renderer;
-import org.westmalle.wayland.output.RendererFactory;
-import org.westmalle.wayland.protocol.WlCompositor;
-import org.westmalle.wayland.protocol.WlCompositorFactory;
-import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.protocol.WlSeat;
-import org.westmalle.wayland.protocol.WlSeatFactory;
-import org.westmalle.wayland.protocol.WlShellFactory;
+import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.protocol.*;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
@@ -45,7 +34,7 @@ class Boot {
         final X11OutputFactory outputFactory = outputComponent.x11Component()
                                                               .outputFactory();
         final X11SeatFactory seatFactory = outputComponent.x11Component()
-                                                             .seatFactory();
+                                                          .seatFactory();
 
         final EglRenderEngineFactory renderEngineFactory = outputComponent.eglComponent()
                                                                           .renderEngineFactory();

@@ -18,18 +18,21 @@ import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 public class X11Output implements HasEglOutput {
 
     @Nonnull
-    private final X11EglOutputFactory x11EglOutputFactory;
+    private final X11EglOutputFactory  x11EglOutputFactory;
     @Nonnull
-    private final X11EventBus         x11EventBus;
+    private final X11EventBus          x11EventBus;
     @Nonnull
-    private final Pointer             xcbConnection;
-    private final int                 xWindow;
+    private final Pointer              xcbConnection;
+    private final int                  xWindow;
     @Nonnull
-    private final Pointer             xDisplay;
+    private final Pointer              xDisplay;
+    @Nonnull
+    private final Map<String, Integer> atoms;
 
     private X11EglOutput eglOutput;
 
@@ -37,12 +40,14 @@ public class X11Output implements HasEglOutput {
               @Nonnull final X11EventBus x11EventBus,
               @Nonnull final Pointer xcbConnection,
               @Nonnull final Pointer xDisplay,
-              final int xWindow) {
+              final int xWindow,
+              @Nonnull final Map<String, Integer> x11Atoms) {
         this.x11EglOutputFactory = x11EglOutputFactory;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xWindow = xWindow;
         this.xDisplay = xDisplay;
+        this.atoms = x11Atoms;
     }
 
     @Override
@@ -71,5 +76,10 @@ public class X11Output implements HasEglOutput {
     @Nonnull
     public X11EventBus getX11EventBus() {
         return this.x11EventBus;
+    }
+
+    @Nonnull
+    public Map<String, Integer> getX11Atoms() {
+        return this.atoms;
     }
 }
