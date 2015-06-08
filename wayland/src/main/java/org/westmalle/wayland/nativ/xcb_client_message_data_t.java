@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.Union;
 
 public class xcb_client_message_data_t extends Union {
@@ -20,7 +21,20 @@ public class xcb_client_message_data_t extends Union {
     public short[] data16 = new short[10];
     public int[]   data32 = new int[5];
 
+    public xcb_client_message_data_t(final Pointer p) {
+        super(p);
+    }
+
+    public xcb_client_message_data_t() {
+    }
+
     public static class ByValue extends xcb_client_message_data_t implements Union.ByValue {
 
+        public ByValue(final Pointer p) {
+            super(p);
+        }
+
+        public ByValue() {
+        }
     }
 }

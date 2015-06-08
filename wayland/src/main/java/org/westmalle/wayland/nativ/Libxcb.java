@@ -57,6 +57,10 @@ public class Libxcb {
     public static final int XCB_MOTION_NOTIFY  = 6;
     public static final int XCB_ENTER_NOTIFY   = 7;
     public static final int XCB_LEAVE_NOTIFY   = 8;
+    public static final int XCB_FOCUS_IN       = 9;
+    public static final int XCB_FOCUS_OUT      = 10;
+    public static final int XCB_EXPOSE         = 12;
+    public static final int XCB_CLIENT_MESSAGE = 33;
 
     public native int xcb_flush(Pointer c);
 
