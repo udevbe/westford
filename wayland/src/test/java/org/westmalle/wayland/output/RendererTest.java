@@ -93,9 +93,9 @@ public class RendererTest {
     @Test
     public void testEndRender() throws Exception {
         //given
-        final WlOutput wlOutput = mock(WlOutput.class);
-        final Output   output   = mock(Output.class);
-        final Object outputImpl = mock(Object.class);
+        final WlOutput wlOutput   = mock(WlOutput.class);
+        final Output   output     = mock(Output.class);
+        final Object   outputImpl = mock(Object.class);
         when(output.getImplementation()).thenReturn(outputImpl);
         final Future future = mock(ListenableFuture.class);
         when(this.renderEngine.end(wlOutput)).thenReturn(future);

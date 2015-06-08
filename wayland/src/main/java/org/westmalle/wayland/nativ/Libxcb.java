@@ -28,6 +28,14 @@ public class Libxcb {
     Libxcb() {
     }
 
+    public static final int XCB_ATOM_ATOM = 4;
+
+    public static final int XCB_PROP_MODE_REPLACE = 0;
+
+    public static final int XCB_GRAB_MODE_ASYNC = 1;
+
+    public static final int XCB_CURSOR_NONE = 0;
+
     public static final long XCB_COPY_FROM_PARENT          = 0L;
     public static final int  XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
     public static final int  XCB_CW_EVENT_MASK             = 2048;
@@ -80,4 +88,35 @@ public class Libxcb {
     public native xcb_generic_event_t xcb_poll_for_event(Pointer c);
 
     public native int xcb_get_file_descriptor(Pointer c);
+
+    public native xcb_grab_pointer_cookie_t.ByValue xcb_grab_pointer(Pointer c,
+                                                                     byte owner_events,
+                                                                     int grab_window,
+                                                                     short event_mask,
+                                                                     byte pointer_mode,
+                                                                     byte keyboard_mode,
+                                                                     int confine_to,
+                                                                     int cursor,
+                                                                     int time);
+
+    public native xcb_void_cookie_t.ByValue xcb_ungrab_pointer(Pointer c,
+                                                               int time);
+
+    public native xcb_intern_atom_cookie_t.ByValue xcb_intern_atom(Pointer c,
+                                                                   byte only_if_exists,
+                                                                   short name_len,
+                                                                   Pointer name);
+
+    public native xcb_intern_atom_reply_t xcb_intern_atom_reply(Pointer c,
+                                                                xcb_intern_atom_cookie_t.ByValue cookie,
+                                                                Pointer e);
+
+    public native xcb_void_cookie_t.ByValue xcb_change_property(Pointer c,
+                                                                byte mode,
+                                                                int window,
+                                                                int property,
+                                                                int type,
+                                                                byte format,
+                                                                int data_len,
+                                                                Pointer data);
 }

@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.output.Compositor;
 import org.westmalle.wayland.output.JobExecutor;
 import org.westmalle.wayland.output.KeyboardFactory;
@@ -28,6 +29,8 @@ import javax.inject.Inject;
 public class X11SeatFactory {
 
     @Nonnull
+    private final Libxcb               libxcb;
+    @Nonnull
     private final JobExecutor          jobExecutor;
     @Nonnull
     private final WlPointerFactory     wlPointerFactory;
@@ -39,11 +42,13 @@ public class X11SeatFactory {
     private final KeyboardFactory      keyboardFactory;
 
     @Inject
-    X11SeatFactory(@Nonnull final JobExecutor jobExecutor,
+    X11SeatFactory(@Nonnull final Libxcb libxcb,
+                   @Nonnull final JobExecutor jobExecutor,
                    @Nonnull final WlPointerFactory wlPointerFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final PointerDeviceFactory pointerDeviceFactory,
                    @Nonnull final KeyboardFactory keyboardFactory) {
+        this.libxcb = libxcb;
         this.jobExecutor = jobExecutor;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
@@ -54,10 +59,14 @@ public class X11SeatFactory {
     public X11Seat create(@Nonnull final WlOutput wlOutput,
                           @Nonnull final WlSeat wlSeat,
                           @Nonnull final Compositor compositor) {
-        final X11Seat x11Seat = new X11Seat(wlSeat,
-                                            this.jobExecutor);
+
         final X11Output x11Output = (X11Output) wlOutput.getOutput()
                                                         .getImplementation();
+        final X11Seat x11Seat = new X11Seat(this.libxcb,
+                                            x11Output,
+                                            compositor,
+                                            wlSeat,
+                                            this.jobExecutor);
         x11Output.getX11EventBus()
                  .register(x11Seat);
         //FIXME for now we put these here, these should be handled dynamically when a mouse or keyboard is

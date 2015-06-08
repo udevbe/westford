@@ -245,3 +245,5 @@ nbactions.xml
 nb-configuration.xml
 
 
+
+bootstrap/dependency-reduced-pom.xml

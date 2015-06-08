@@ -13,15 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.shared.WlOutputTransform;
-import org.westmalle.wayland.nativ.LibX11;
-import org.westmalle.wayland.nativ.LibX11xcb;
-import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.nativ.xcb_screen_t;
+import org.westmalle.wayland.nativ.*;
 import org.westmalle.wayland.output.Output;
 import org.westmalle.wayland.output.OutputFactory;
 import org.westmalle.wayland.output.OutputGeometry;
@@ -32,6 +30,8 @@ import org.westmalle.wayland.protocol.WlOutputFactory;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.westmalle.wayland.nativ.LibX11xcb.XCBOwnsEventQueue;
@@ -41,6 +41,8 @@ public class X11OutputFactory {
 
     @Nonnull
     private final Display             display;
+    @Nonnull
+    private final Libc                libc;
     @Nonnull
     private final LibX11              libX11;
     @Nonnull
@@ -58,6 +60,7 @@ public class X11OutputFactory {
 
     @Inject
     X11OutputFactory(@Nonnull final Display display,
+                     @Nonnull final Libc libc,
                      @Nonnull final LibX11 libX11,
                      @Nonnull final Libxcb libxcb,
                      @Nonnull final LibX11xcb libX11xcb,
@@ -66,6 +69,7 @@ public class X11OutputFactory {
                      @Nonnull final OutputFactory outputFactory,
                      @Nonnull final X11EventBusFactory x11EventBusFactory) {
         this.display = display;
+        this.libc = libc;
         this.libX11 = libX11;
         this.libxcb = libxcb;
         this.libX11xcb = libX11xcb;
@@ -201,10 +205,115 @@ public class X11OutputFactory {
                                        EventLoop.EVENT_READABLE,
                                        x11EventBus)
                     .check();
+        final Map<String, Integer> x11Atoms = internX11Atoms(connection);
+        setWmProtocol(connection,
+                      window,
+                      x11Atoms.get("WM_PROTOCOLS"),
+                      x11Atoms.get("WM_DELETE_WINDOW"));
+        setName(connection,
+                window,
+                x11Atoms);
+        x11EventBus.register(new Object() {
+            @Subscribe
+            public void handle(final xcb_client_message_event_t event) {
+                X11OutputFactory.this.handle(event,
+                                             x11Atoms);
+            }
+        });
         return new X11Output(this.x11EglOutputFactory,
                              x11EventBus,
                              connection,
                              xDisplay,
-                             window);
+                             window,
+                             x11Atoms);
+    }
+
+    private void handle(final xcb_client_message_event_t event,
+                        final Map<String, Integer> x11Atoms) {
+        final int atom   = event.data.data32[0];
+        final int window = event.window;
+        if (atom == x11Atoms.get("WM_DELETE_WINDOW")) {
+            //TODO destroy window & terminate compositor if no more outputs are left.
+        }
+    }
+
+    private void setName(final Pointer connection,
+                         final int window,
+                         final Map<String, Integer> x11Atoms) {
+        final NativeString titleNativeString = new NativeString("Westmalle");
+        this.libxcb.xcb_change_property(connection,
+                                        (byte) XCB_PROP_MODE_REPLACE,
+                                        window,
+                                        x11Atoms.get("_NET_WM_NAME"),
+                                        x11Atoms.get("UTF8_STRING"),
+                                        (byte) 8,
+                                        titleNativeString.length(),
+                                        titleNativeString.getPointer());
+        this.libxcb.xcb_change_property(connection,
+                                        (byte) XCB_PROP_MODE_REPLACE,
+                                        window,
+                                        x11Atoms.get("WM_CLASS"),
+                                        x11Atoms.get("STRING"),
+                                        (byte) 8,
+                                        titleNativeString.length(),
+                                        titleNativeString.getPointer());
+    }
+
+    private Map<String, Integer> internX11Atoms(final Pointer connection) {
+
+        final String[] atomNames = {
+                "WM_PROTOCOLS",
+                "WM_NORMAL_HINTS",
+                "WM_SIZE_HINTS",
+                "WM_DELETE_WINDOW",
+                "WM_CLASS",
+                "_NET_WM_NAME",
+                "_NET_WM_ICON",
+                "_NET_WM_STATE",
+                "_NET_WM_STATE_FULLSCREEN",
+                "_NET_SUPPORTING_WM_CHECK",
+                "_NET_SUPPORTED",
+                "STRING",
+                "UTF8_STRING",
+                "CARDINAL",
+                "_XKB_RULES_NAMES"
+        };
+
+        final xcb_intern_atom_cookie_t.ByValue cookies[] = new xcb_intern_atom_cookie_t.ByValue[atomNames.length];
+        for (int i = 0; i < atomNames.length; i++) {
+            final NativeString nativeAtomName = new NativeString(atomNames[i]);
+            cookies[i] = this.libxcb.xcb_intern_atom(connection,
+                                                     (byte) 0,
+                                                     (short) nativeAtomName.length(),
+                                                     nativeAtomName.getPointer());
+        }
+
+        final Map<String, Integer> x11Atoms = new HashMap<>(atomNames.length);
+        for (int i = 0; i < atomNames.length; i++) {
+            final xcb_intern_atom_reply_t reply = this.libxcb.xcb_intern_atom_reply(connection,
+                                                                                    cookies[i],
+                                                                                    null);
+            x11Atoms.put(atomNames[i],
+                         reply.atom);
+            this.libc.free(reply.getPointer());
+        }
+        return x11Atoms;
+    }
+
+    private void setWmProtocol(final Pointer connection,
+                               final int window,
+                               final int wmProtocols,
+                               final int wmDeleteWindow) {
+        final Pointer list = new Memory(Integer.BYTES);
+        list.setInt(0,
+                    wmDeleteWindow);
+        this.libxcb.xcb_change_property(connection,
+                                        (byte) XCB_PROP_MODE_REPLACE,
+                                        window,
+                                        wmProtocols,
+                                        XCB_ATOM_ATOM,
+                                        (byte) 32,
+                                        1,
+                                        list);
     }
 }
