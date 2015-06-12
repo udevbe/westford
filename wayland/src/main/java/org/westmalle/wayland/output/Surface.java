@@ -16,17 +16,23 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-import org.freedesktop.wayland.server.*;
+
+import org.freedesktop.wayland.server.ShmBuffer;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
@@ -197,22 +203,22 @@ public class Surface {
         return this.pendingState.getScale() != getState().getScale()
                || !this.pendingState.getBufferTransform()
                                     .equals(getState().getBufferTransform())
-               || !this.pendingCompositorTransforms.isEmpty();
+               || !getPendingCompositorTransforms().isEmpty();
     }
 
     @Nonnull
     public Surface updateCompositorTransform() {
-        for (final Mat4 pendingTransform : this.pendingCompositorTransforms) {
-            this.compositorTransform = pendingTransform.multiply(this.compositorTransform);
+        for (final Mat4 pendingCompositorTransform : getPendingCompositorTransforms()) {
+            this.compositorTransform = pendingCompositorTransform.multiply(getCompositorTransform());
         }
-        this.pendingCompositorTransforms.clear();
+        getPendingCompositorTransforms().clear();
         return this;
     }
 
     @Nonnull
     public Surface updateTransform() {
         //start with server transform
-        Mat4 result = this.compositorTransform;
+        Mat4 result = getCompositorTransform();
 
         //apply client transformation
         final Mat4 bufferTransform = getState().getBufferTransform();
@@ -229,6 +235,11 @@ public class Surface {
         this.transform = result;
         this.inverseTransform = getTransform().invert();
         return this;
+    }
+
+    @Nonnull
+    public Mat4 getCompositorTransform() {
+        return compositorTransform;
     }
 
     @Nonnull
