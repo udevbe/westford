@@ -69,9 +69,6 @@ public class ShellSurfaceTest {
         final Surface           surface           = mock(Surface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
-        final Point surfacePosition = Point.create(75,
-                                                   75);
-        when(surface.getPosition()).thenReturn(surfacePosition);
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.wlCompositor,
@@ -105,7 +102,6 @@ public class ShellSurfaceTest {
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
-        when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
         final Point pointerPositionMotion = mock(Point.class);
 
         final int serial = 12345;

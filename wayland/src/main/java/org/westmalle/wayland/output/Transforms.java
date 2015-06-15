@@ -74,4 +74,15 @@ public class Transforms {
                             0f, 0f, 0f, scale);
     }
     //@formatter:on
+
+    //@formatter:off
+    @Nonnull
+    public static Mat4 TRANSLATE(final int x,
+                                 final int y) {
+        return Mat4.create( 1f, 0f, 0f, x,
+                            0f, 1f, 0f, y,
+                            0f, 0f, 1f, 0f,
+                            0f, 0f, 0f, 1f);
+    }
+    //@formatter:on
 }

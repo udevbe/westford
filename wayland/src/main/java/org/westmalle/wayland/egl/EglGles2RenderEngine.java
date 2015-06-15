@@ -3,28 +3,44 @@ package org.westmalle.wayland.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Maps;
+
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.nativ.LibGLESv2;
 import org.westmalle.wayland.nativ.NativeString;
-import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.Output;
+import org.westmalle.wayland.output.OutputMode;
+import org.westmalle.wayland.output.RenderEngine;
+import org.westmalle.wayland.output.Surface;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.annotation.Nonnull;
+
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.westmalle.wayland.nativ.LibGLESv2.*;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_COLOR_BUFFER_BIT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_DYNAMIC_DRAW;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_ELEMENT_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_FLOAT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_FRAGMENT_SHADER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_INFO_LOG_LENGTH;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TRIANGLES;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_UNSIGNED_INT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_VERTEX_SHADER;
 
 @AutoFactory(className = "EglRenderEngineFactory")
 public class EglGles2RenderEngine implements RenderEngine {
@@ -173,13 +189,14 @@ public class EglGles2RenderEngine implements RenderEngine {
 
         final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
         final Surface   surface        = implementation.getSurface();
-        final Point     position       = surface.getPosition();
+        //@formatter:off
         final float[] vertices = {
-                position.getX(), position.getY(), 0f, 0f,
-                position.getX() + buffer.getWidth(), position.getY(), 1f, 0f,
-                position.getX() + buffer.getWidth(), position.getY() + buffer.getHeight(), 1f, 1f,
-                position.getX(), position.getY() + buffer.getHeight(), 0f, 1f
+                0,                 0,                  0f, 0f,
+                buffer.getWidth(), 0,                  1f, 0f,
+                buffer.getWidth(), buffer.getHeight(), 1f, 1f,
+                0,                 buffer.getHeight(), 0f, 1f
         };
+        //@formatter:on
 
         buffer.beginAccess();
         querySurfaceData(surfaceResource,
@@ -190,7 +207,7 @@ public class EglGles2RenderEngine implements RenderEngine {
 
         final int shaderProgram = queryShaderProgram(queryBufferFormat(buffer));
         configureShaders(shaderProgram,
-                         this.projection,
+                         surface.getTransform().multiply(this.projection),
                          vertices);
         this.libGLESv2.glUseProgram(shaderProgram);
         this.libGLESv2.glDrawElements(GL_TRIANGLES,

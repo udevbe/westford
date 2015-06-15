@@ -1,13 +1,15 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.value.AutoValue;
+
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.output.calc.Mat4;
 
+import java.util.Optional;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 @AutoValue
 public abstract class SurfaceState {
@@ -18,6 +20,7 @@ public abstract class SurfaceState {
                                                    .damage(Optional.<Region>empty())
                                                    .buffer(Optional.<WlBufferResource>empty())
                                                    .bufferTransform(Mat4.IDENTITY)
+                                                   .positionTransform(Mat4.IDENTITY)
                                                    .scale(1);
     }
 
@@ -36,6 +39,9 @@ public abstract class SurfaceState {
     @Nonnull
     public abstract Mat4 getBufferTransform();
 
+    @Nonnull
+    public abstract Mat4  getPositionTransform();
+
     @Nonnegative
     abstract int getScale();
 
@@ -50,6 +56,8 @@ public abstract class SurfaceState {
         Builder buffer(Optional<WlBufferResource> wlBufferResource);
 
         Builder bufferTransform(Mat4 bufferTransform);
+
+        Builder positionTransform(Mat4 positionTransform);
 
         Builder scale(int scale);
 

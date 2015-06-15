@@ -2,21 +2,28 @@ package org.westmalle.wayland.output.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
-import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.Compositor;
+import org.westmalle.wayland.output.Point;
+import org.westmalle.wayland.output.PointerDevice;
+import org.westmalle.wayland.output.Rectangle;
+import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.Transforms;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface {
@@ -87,7 +94,8 @@ public class ShellSurface {
         final Surface   surface   = wlSurface.getSurface();
         final Point pointerPosition = wlPointer.getPointerDevice()
                                                .getPosition();
-        final Point surfacePosition = surface.getPosition();
+        final Point surfacePosition = surface.global(Point.create(0,
+                                                                  0));
         final Point pointerOffset   = pointerPosition.subtract(surfacePosition);
         wlPointer.getPointerDevice()
                  .grabMotion(wlSurfaceResource,

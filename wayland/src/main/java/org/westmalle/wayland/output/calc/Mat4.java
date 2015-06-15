@@ -15,9 +15,10 @@ package org.westmalle.wayland.output.calc;
 
 import com.google.auto.value.AutoValue;
 
+import java.nio.FloatBuffer;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.nio.FloatBuffer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -196,6 +197,14 @@ public abstract class Mat4 {
                            getM20() + other.getM20(), getM21() + other.getM21(), getM22() + other.getM22(), getM23() + other.getM23(),
                            getM30() + other.getM30(), getM31() + other.getM31(), getM32() + other.getM32(), getM33() + other.getM33());
         //@formatter:on
+    }
+
+    public Mat4 scale(final float factor) {
+
+        return Mat4.create(getM00()*factor,getM01()*factor,getM02()*factor,getM03()*factor,
+                           getM10()*factor,getM11()*factor,getM12()*factor,getM13()*factor,
+                           getM20()*factor,getM21()*factor,getM22()*factor,getM23()*factor,
+                           getM30()*factor,getM31()*factor,getM32()*factor,getM33()*factor);
     }
 
     @AutoValue.Builder
