@@ -46,7 +46,7 @@ import static org.westmalle.wayland.nativ.LibGLESv2.GL_VERTEX_SHADER;
 public class EglGles2RenderEngine implements RenderEngine {
 
     @Nonnull
-    private static final String SURFACE_V          =
+    private static final String SURFACE_V =
             "uniform mat4 mu_projection;\n" +
             "\n" +
             "attribute mediump vec2 va_position;\n" +
@@ -56,7 +56,7 @@ public class EglGles2RenderEngine implements RenderEngine {
             "\n" +
             "void main(){\n" +
             "    vv_texcoord = va_texcoord;\n" +
-            "    gl_Position = vec4(va_position, 0.0, 1.0) * mu_projection;\n" +
+            "    gl_Position = mu_projection * vec4(va_position, 0.0, 1.0) ;\n" +
             "}";
     @Nonnull
     private static final String SURFACE_ARGB8888_F =
@@ -79,17 +79,17 @@ public class EglGles2RenderEngine implements RenderEngine {
     @Nonnull
     private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
     @Nonnull
-    private final Map<Gles2BufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
+    private final Map<Gles2BufferFormat, Integer> shaderPrograms = Maps.newHashMap();
 
     @Nonnull
     private final ExecutorService renderThread;
     @Nonnull
-    private final LibGLESv2       libGLESv2;
+    private final LibGLESv2 libGLESv2;
 
     private Memory bufferData;
     private Memory elementBuffer;
     private Memory vertexBuffer;
-    private Mat4   projection;
+    private Mat4 projection;
 
     EglGles2RenderEngine(@Provided @Nonnull final LibGLESv2 libGLESv2) {
         this.renderThread = Executors.newSingleThreadExecutor(r -> new Thread(r,
@@ -103,13 +103,13 @@ public class EglGles2RenderEngine implements RenderEngine {
     }
 
     private void doBegin(@Nonnull final WlOutput wlOutput) {
-        final Output       output       = wlOutput.getOutput();
-        final OutputMode   mode         = output.getMode();
+        final Output output = wlOutput.getOutput();
+        final OutputMode mode = output.getMode();
         final HasEglOutput hasEglOutput = (HasEglOutput) output.getImplementation();
-        final EglOutput    eglOutput    = hasEglOutput.getEglOutput();
+        final EglOutput eglOutput = hasEglOutput.getEglOutput();
         eglOutput.begin();
 
-        final int surfaceWidth  = mode.getWidth();
+        final int surfaceWidth = mode.getWidth();
         final int surfaceHeight = mode.getHeight();
         //@formatter:off
         this.projection = Mat4.create(2.0f / surfaceWidth, 0,                     0, -1,
@@ -188,7 +188,7 @@ public class EglGles2RenderEngine implements RenderEngine {
         }
 
         final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
-        final Surface   surface        = implementation.getSurface();
+        final Surface surface = implementation.getSurface();
         //@formatter:off
         final float[] vertices = {
                 0,                 0,                  0f, 0f,
@@ -207,7 +207,7 @@ public class EglGles2RenderEngine implements RenderEngine {
 
         final int shaderProgram = queryShaderProgram(queryBufferFormat(buffer));
         configureShaders(shaderProgram,
-                         surface.getTransform().multiply(this.projection),
+                         this.projection.multiply(surface.getTransform()),
                          vertices);
         this.libGLESv2.glUseProgram(shaderProgram);
         this.libGLESv2.glDrawElements(GL_TRIANGLES,
@@ -225,8 +225,7 @@ public class EglGles2RenderEngine implements RenderEngine {
                              buffer);
             this.cachedSurfaceData.put(surfaceResource,
                                        surfaceData);
-        }
-        else {
+        } else {
             final int surfaceDataWidth = surfaceData.getWidth();
             final int surfaceDataHeight = surfaceData.getHeight();
             final int bufferWidth = buffer.getWidth();
@@ -245,14 +244,12 @@ public class EglGles2RenderEngine implements RenderEngine {
 
     private Gles2BufferFormat queryBufferFormat(final ShmBuffer buffer) {
         final Gles2BufferFormat format;
-        final int               bufferFormat = buffer.getFormat();
+        final int bufferFormat = buffer.getFormat();
         if (bufferFormat == WlShmFormat.ARGB8888.getValue()) {
             format = Gles2BufferFormat.SHM_ARGB8888;
-        }
-        else if (bufferFormat == WlShmFormat.XRGB8888.getValue()) {
+        } else if (bufferFormat == WlShmFormat.XRGB8888.getValue()) {
             format = Gles2BufferFormat.SHM_XRGB8888;
-        }
-        else {
+        } else {
             throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
         }
         return format;
@@ -278,13 +275,11 @@ public class EglGles2RenderEngine implements RenderEngine {
             fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_ARGB8888_F);
-        }
-        else if (bufferFormat == Gles2BufferFormat.SHM_XRGB8888) {
+        } else if (bufferFormat == Gles2BufferFormat.SHM_XRGB8888) {
             fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
             compileShader(fragmentShader,
                           SURFACE_XRGB8888_F);
-        }
-        else {
+        } else {
             throw new UnsupportedOperationException("Buffer format " + bufferFormat + " is not supported");
         }
 
@@ -299,7 +294,7 @@ public class EglGles2RenderEngine implements RenderEngine {
 
     private void compileShader(final int shaderHandle,
                                final String shaderSource) {
-        final Pointer      lines              = new Memory(Pointer.SIZE);
+        final Pointer lines = new Memory(Pointer.SIZE);
         final NativeString nativeShaderSource = new NativeString(shaderSource);
         lines.setPointer(0,
                          nativeShaderSource.getPointer());
@@ -393,8 +388,8 @@ public class EglGles2RenderEngine implements RenderEngine {
 
     private void doEnd(@Nonnull final WlOutput wlOutput) {
         final HasEglOutput hasEglOutput = (HasEglOutput) wlOutput.getOutput()
-                                                                 .getImplementation();
+                .getImplementation();
         hasEglOutput.getEglOutput()
-                    .end();
+                .end();
     }
 }

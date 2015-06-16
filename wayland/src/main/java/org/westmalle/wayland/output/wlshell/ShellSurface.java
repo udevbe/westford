@@ -142,82 +142,81 @@ public class ShellSurface {
         final int height = size.getHeight();
 
         final Mat4    quadrantTransform;
-        final float[] anchorTranslation = new float[16];
-        final float[] deltaTranslation  = new float[16];
+        final Mat4.Builder anchorTranslationBuilder = Mat4.builder();
+        final Mat4.Builder deltaTranslationBuilder  = Mat4.builder();
         final Vec4    localTransformed;
         switch (quadrant) {
             case TOP:
-                anchorTranslation[0] = 1;
-                anchorTranslation[13] = height;
-                quadrantTransform = Transforms._180.add(Mat4.create(anchorTranslation));
+                anchorTranslationBuilder.m00(1);
+                anchorTranslationBuilder.m31(height);
+                quadrantTransform = Transforms._180.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width;
-                deltaTranslation[13] = height - localTransformed.getY();
+                deltaTranslationBuilder.m30(width);
+                deltaTranslationBuilder.m31(height - localTransformed.getY());
                 break;
             case TOP_LEFT:
-                anchorTranslation[12] = width;
-                anchorTranslation[13] = height;
-                quadrantTransform = Transforms._180.add(Mat4.create(anchorTranslation));
+                anchorTranslationBuilder.m30(width);
+                anchorTranslationBuilder.m31(height);
+                quadrantTransform = Transforms._180.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width - localTransformed.getX();
-                deltaTranslation[13] = height - localTransformed.getY();
+                deltaTranslationBuilder.m30(width - localTransformed.getX());
+                deltaTranslationBuilder.m31(height - localTransformed.getY());
                 break;
             case LEFT:
-                anchorTranslation[5] = -1;
-                anchorTranslation[12] = width;
-                quadrantTransform = Transforms.FLIPPED.add(Mat4.create(anchorTranslation));
+                anchorTranslationBuilder.m11(-1);
+                anchorTranslationBuilder.m30(width);
+                quadrantTransform = Transforms.FLIPPED.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width - localTransformed.getX();
-                deltaTranslation[13] = height;
+                deltaTranslationBuilder.m30(width - localTransformed.getX());
+                deltaTranslationBuilder.m31(height);
                 break;
             case BOTTOM_LEFT:
-                anchorTranslation[12] = width;
-                quadrantTransform = Transforms.FLIPPED.add(Mat4.create(anchorTranslation));
+                anchorTranslationBuilder.m30(width);
+                quadrantTransform = Transforms.FLIPPED.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width - localTransformed.getX();
-                deltaTranslation[13] = height - localTransformed.getY();
+                deltaTranslationBuilder.m30(width - localTransformed.getX());
+                deltaTranslationBuilder.m31(height - localTransformed.getY());
                 break;
             case RIGHT:
-                anchorTranslation[5] = 1;
-                anchorTranslation[13] = height;
-                quadrantTransform = Transforms.FLIPPED_180.add(Mat4.create(anchorTranslation));
+                anchorTranslationBuilder.m11(1);
+                anchorTranslationBuilder.m30(height);
+                quadrantTransform = Transforms.FLIPPED_180.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width - localTransformed.getX();
-                deltaTranslation[13] = 0;
+                deltaTranslationBuilder.m30(width - localTransformed.getX());
                 break;
             case TOP_RIGHT:
-                anchorTranslation[13] = height;
-                quadrantTransform = Transforms.FLIPPED_180.add(Mat4.create(anchorTranslation));
+                anchorTranslationBuilder.m31(height);
+                quadrantTransform = Transforms.FLIPPED_180.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width - localTransformed.getX();
-                deltaTranslation[13] = height - localTransformed.getY();
+                deltaTranslationBuilder.m30(width - localTransformed.getX());
+                deltaTranslationBuilder.m31(height - localTransformed.getY());
                 break;
             case BOTTOM:
-                anchorTranslation[0] = -1;
-                quadrantTransform = Transforms.NORMAL.add(Mat4.create(anchorTranslation));
+                anchorTranslationBuilder.m00(-1);
+                quadrantTransform = Transforms.NORMAL.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width;
-                deltaTranslation[13] = height - localTransformed.getY();
+                deltaTranslationBuilder.m30(width);
+                deltaTranslationBuilder.m31(height - localTransformed.getY());
                 break;
             case BOTTOM_RIGHT:
-                quadrantTransform = Transforms.NORMAL.add(Mat4.create(anchorTranslation));
+                quadrantTransform = Transforms.NORMAL.add(anchorTranslationBuilder.build());
 
                 localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslation[12] = width - localTransformed.getX();
-                deltaTranslation[13] = height - localTransformed.getY();
+                deltaTranslationBuilder.m30(width - localTransformed.getX());
+                deltaTranslationBuilder.m31(height - localTransformed.getY());
                 break;
             default:
                 quadrantTransform = Transforms.NORMAL;
         }
 
-        return quadrantTransform.add(Mat4.create(deltaTranslation));
+        return quadrantTransform.add(deltaTranslationBuilder.build());
     }
 
 

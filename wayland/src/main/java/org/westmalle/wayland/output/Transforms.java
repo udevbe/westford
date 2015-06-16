@@ -67,11 +67,11 @@ public class Transforms {
 
     //@formatter:off
     @Nonnull
-    public static Mat4 SCALE(@Nonnegative final int scale) {
-        return Mat4.create( 1f, 0f, 0f, 0f,
-                            0f, 1f, 0f, 0f,
-                            0f, 0f, 1f, 0f,
-                            0f, 0f, 0f, scale);
+    public static Mat4 SCALE(@Nonnegative final float scale) {
+        return Mat4.create( scale, 0f, 0f, 0f,
+                            0f, scale, 0f, 0f,
+                            0f, 0f, scale, 0f,
+                            0f, 0f, 0f, 1f);
     }
     //@formatter:on
 

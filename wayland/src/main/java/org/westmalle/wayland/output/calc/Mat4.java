@@ -15,12 +15,7 @@ package org.westmalle.wayland.output.calc;
 
 import com.google.auto.value.AutoValue;
 
-import java.nio.FloatBuffer;
-
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 @AutoValue
 public abstract class Mat4 {
@@ -32,23 +27,6 @@ public abstract class Mat4 {
                                                     0.f, 0.f, 1.f, 0.f,
                                                     0.f, 0.f, 0.f, 1.f);
     //@formatter:on
-
-    @Nonnull
-    public static Mat4 create(@Nonnull final float[] array,
-                              @Nonnegative final int offset) {
-        checkArgument(array.length >= 16,
-                      "Array length must be >= 16");
-        checkArgument(offset >= 0,
-                      "Offset must be >= 0");
-        //@formatter:off
-        return Mat4.builder()
-                   .m00(array[offset]).m01(array[1 + offset]).m02(array[2 + offset]).m03(array[3 + offset])
-                   .m10(array[4 + offset]).m11(array[5 + offset]).m12(array[6 + offset]).m13(array[7 + offset])
-                   .m20(array[8 + offset]).m21(array[9 + offset]).m22(array[10 + offset]).m23(array[11 + offset])
-                   .m30(array[12 + offset]).m31(array[13 + offset]).m32(array[14 + offset]).m33(array[15] + offset)
-                   .build();
-        //@formatter:on
-    }
 
     /**
      * Construct a new matrix. Arguments are in column major order.
@@ -74,10 +52,10 @@ public abstract class Mat4 {
      */
     @Nonnull
     //@formatter:off
-    public static Mat4 create(final float m00, final float m01, final float m02, final float m03,
-                              final float m10, final float m11, final float m12, final float m13,
-                              final float m20, final float m21, final float m22, final float m23,
-                              final float m30, final float m31, final float m32, final float m33) {
+    public static Mat4 create(final float m00, final float m10, final float m20, final float m30,
+                              final float m01, final float m11, final float m21, final float m31,
+                              final float m02, final float m12, final float m22, final float m32,
+                              final float m03, final float m13, final float m23, final float m33) {
         return Mat4.builder()
                    .m00(m00).m10(m10).m20(m20).m30(m30)
                    .m01(m01).m11(m11).m21(m21).m31(m31)
@@ -85,17 +63,6 @@ public abstract class Mat4 {
                    .m03(m03).m13(m13).m23(m23).m33(m33)
                    .build();
         //@formatter:on
-    }
-
-    /**
-     * @param array expected format is column major. Index 0 -&gt; column 0, row 0; index 1 -&gt; column 0, row 1 and so forth.
-     *
-     * @return a new 4 by 4 matrix.
-     */
-    @Nonnull
-    public static Mat4 create(@Nonnull final float[] array) {
-        return Mat4.create(array,
-                           0);
     }
 
     public static Builder builder() {
@@ -192,19 +159,11 @@ public abstract class Mat4 {
 
     public Mat4 add(final Mat4 other) {
         //@formatter:off
-        return Mat4.create(getM00() + other.getM00(), getM01() + other.getM01(), getM02() + other.getM02(), getM03() + other.getM03(),
-                           getM10() + other.getM10(), getM11() + other.getM11(), getM12() + other.getM12(), getM13() + other.getM13(),
-                           getM20() + other.getM20(), getM21() + other.getM21(), getM22() + other.getM22(), getM23() + other.getM23(),
-                           getM30() + other.getM30(), getM31() + other.getM31(), getM32() + other.getM32(), getM33() + other.getM33());
+        return Mat4.create(getM00() + other.getM00(), getM10() + other.getM10(), getM20() + other.getM20(), getM30() + other.getM30(),
+                           getM01() + other.getM01(), getM11() + other.getM11(), getM21() + other.getM21(), getM31() + other.getM31(),
+                           getM02() + other.getM02(), getM12() + other.getM12(), getM22() + other.getM22(), getM32() + other.getM32(),
+                           getM03() + other.getM03(), getM13() + other.getM13(), getM23() + other.getM23(), getM33() + other.getM33());
         //@formatter:on
-    }
-
-    public Mat4 scale(final float factor) {
-
-        return Mat4.create(getM00()*factor,getM01()*factor,getM02()*factor,getM03()*factor,
-                           getM10()*factor,getM11()*factor,getM12()*factor,getM13()*factor,
-                           getM20()*factor,getM21()*factor,getM22()*factor,getM23()*factor,
-                           getM30()*factor,getM31()*factor,getM32()*factor,getM33()*factor);
     }
 
     @AutoValue.Builder
@@ -280,19 +239,33 @@ public abstract class Mat4 {
         final float nm33 = this.getM03() * right.getM30() + this.getM13() * right.getM31() + this.getM23() * right.getM32() + this.getM33() * right.getM33();
 
         //@formatter:off
-        return Mat4.create(nm00, nm01, nm02, nm03,
-                           nm10, nm11, nm12, nm13,
-                           nm20, nm21, nm22, nm23,
-                           nm30, nm31, nm32, nm33);
+        return Mat4.create(nm00, nm10, nm20, nm30,
+                           nm01, nm11, nm21, nm31,
+                           nm02, nm12, nm22, nm32,
+                           nm03, nm13, nm23, nm33);
         //@formatter:on
     }
 
     @Nonnull
     public Mat4 invert() {
-        final float[][] matrix2d = new float[][]{{getM00(), getM01(), getM02(), getM03()},
-                                                 {getM10(), getM11(), getM12(), getM13()},
-                                                 {getM20(), getM21(), getM22(), getM23()},
-                                                 {getM30(), getM31(), getM32(), getM33()}};
+        final float[][] matrix2d = new float[4][4];
+        matrix2d[0][0] = getM00();
+        matrix2d[0][1] = getM10();
+        matrix2d[0][2] = getM20();
+        matrix2d[0][3] = getM30();
+        matrix2d[1][0] = getM01();
+        matrix2d[1][1] = getM11();
+        matrix2d[1][2] = getM21();
+        matrix2d[1][3] = getM31();
+        matrix2d[2][0] = getM02();
+        matrix2d[2][1] = getM12();
+        matrix2d[2][2] = getM22();
+        matrix2d[2][3] = getM32();
+        matrix2d[3][0] = getM03();
+        matrix2d[3][1] = getM13();
+        matrix2d[3][2] = getM23();
+        matrix2d[3][3] = getM33();
+
         //FIXME test uninvertable matrix, what will/should happen?
         final float[][] matrix2dInverted = invert(matrix2d);
         //@formatter:off
@@ -376,20 +349,6 @@ public abstract class Mat4 {
     }
 
     @Nonnull
-    public FloatBuffer toBuffer() {
-
-        final FloatBuffer buffer = FloatBuffer.allocate(16);
-        //@formatter:off
-        buffer.put(getM00()).put(getM01()).put(getM02()).put(getM03());
-        buffer.put(getM10()).put(getM11()).put(getM12()).put(getM13());
-        buffer.put(getM20()).put(getM21()).put(getM22()).put(getM23());
-        buffer.put(getM30()).put(getM31()).put(getM32()).put(getM33());
-        //@formatter:on
-        buffer.rewind();
-        return buffer;
-    }
-
-    @Nonnull
     public float[] toArray() {
         return new float[]{
                 getM00(), getM01(), getM02(), getM03(),
@@ -399,5 +358,11 @@ public abstract class Mat4 {
         };
     }
 
-    //TODO toArray
+    @Override
+    public String toString() {
+        return  getM00()+" "+getM10()+" "+getM20()+" "+getM30()+"\n"+
+                getM01()+" "+getM11()+" "+getM21()+" "+getM31()+"\n"+
+                getM02()+" "+getM12()+" "+getM22()+" "+getM32()+"\n"+
+                getM03()+" "+getM13()+" "+getM23()+" "+getM33()+"\n";
+    }
 }

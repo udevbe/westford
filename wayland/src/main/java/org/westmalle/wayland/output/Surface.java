@@ -197,7 +197,7 @@ public class Surface {
         //client buffer transform;
         result = state.getBufferTransform().multiply(result);
         //homogenized
-        result = result.scale(1f/result.getM33());
+        result = Transforms.SCALE(1f/result.getM33()).multiply(result);
 
         this.transform = result;
         this.inverseTransform = getTransform().invert();

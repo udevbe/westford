@@ -14,9 +14,8 @@
 package org.westmalle.wayland.output.calc;
 
 import com.google.common.collect.Range;
-import org.junit.Test;
 
-import java.nio.FloatBuffer;
+import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -238,50 +237,5 @@ public class Mat4Test {
                                                       0.0001f));//0
         assertThat(result.getM33()).isIn(Range.closed(.9999f,
                                                       1.0001f));//1
-    }
-
-    @Test
-    public void testToBuffer() throws Exception {
-        //given
-        final Mat4 left = Mat4.create(1f,
-                                      0f,
-                                      5f,
-                                      0f,
-                                      2f,
-                                      1f,
-                                      6f,
-                                      0f,
-                                      3f,
-                                      4f,
-                                      0f,
-                                      0f,
-                                      0f,
-                                      0f,
-                                      0f,
-                                      1f);
-
-        //when
-        final FloatBuffer buffer = left.toBuffer();
-
-        //then
-        assertThat(buffer.get()).isEqualTo(1f);
-        assertThat(buffer.get()).isEqualTo(0f);
-        assertThat(buffer.get()).isEqualTo(5f);
-        assertThat(buffer.get()).isEqualTo(0f);
-
-        assertThat(buffer.get()).isEqualTo(2f);
-        assertThat(buffer.get()).isEqualTo(1f);
-        assertThat(buffer.get()).isEqualTo(6f);
-        assertThat(buffer.get()).isEqualTo(0f);
-
-        assertThat(buffer.get()).isEqualTo(3f);
-        assertThat(buffer.get()).isEqualTo(4f);
-        assertThat(buffer.get()).isEqualTo(0f);
-        assertThat(buffer.get()).isEqualTo(0f);
-
-        assertThat(buffer.get()).isEqualTo(0f);
-        assertThat(buffer.get()).isEqualTo(0f);
-        assertThat(buffer.get()).isEqualTo(0f);
-        assertThat(buffer.get()).isEqualTo(1f);
     }
 }
