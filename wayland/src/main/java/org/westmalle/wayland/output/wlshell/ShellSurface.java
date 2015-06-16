@@ -121,11 +121,13 @@ public class ShellSurface {
         final Mat4 transform = transform(quadrant,
                                          size,
                                          local);
+
+        final Mat4 inverseTransform = surface.getInverseTransform();
         pointerDevice.grabMotion(wlSurfaceResource,
                                  serial,
                                  motion -> {
-                                     final Vec4 motionLocal = surface.local(motion.getPoint())
-                                                                     .toVec4();
+                                     final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
+                                                                                              .toVec4());
                                      final Vec4 resize = transform.multiply(motionLocal);
                                      wlShellSurfaceResource.configure(quadrant.getValue(),
                                                                       Math.max(1,
