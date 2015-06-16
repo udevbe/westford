@@ -136,82 +136,97 @@ public class ShellSurface {
         final int width  = size.getWidth();
         final int height = size.getHeight();
 
-        final Mat4         quadrantTransform;
-        final Mat4.Builder anchorTranslationBuilder = Mat4.builder();
-        final Mat4.Builder deltaTranslationBuilder  = Mat4.builder();
-        final Vec4         localTransformed;
+        final Mat4.Builder transformationBuilder;
+        final Mat4         transformation;
+        final float        dx;
+        final float        dy;
         switch (quadrant) {
-            case TOP:
-                anchorTranslationBuilder.m00(1);
-                anchorTranslationBuilder.m31(height);
-                quadrantTransform = Transforms._180.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width);
-                deltaTranslationBuilder.m31(height - localTransformed.getY());
+            case TOP: {
+                transformationBuilder = Transforms._180.toBuilder()
+                                                       .m00(1)
+                                                       .m31(height);
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = transformation.multiply(local.toVec4());
+                dx = width;
+                dy = height - localTransformed.getY();
                 break;
-            case TOP_LEFT:
-                anchorTranslationBuilder.m30(width);
-                anchorTranslationBuilder.m31(height);
-                quadrantTransform = Transforms._180.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width - localTransformed.getX());
-                deltaTranslationBuilder.m31(height - localTransformed.getY());
+            }
+            case TOP_LEFT: {
+                transformationBuilder = Transforms._180.toBuilder()
+                                                       .m30(width)
+                                                       .m31(height);
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = transformation.multiply(local.toVec4());
+                dx = width - localTransformed.getX();
+                dy = height - localTransformed.getY();
                 break;
-            case LEFT:
-                anchorTranslationBuilder.m11(-1);
-                anchorTranslationBuilder.m30(width);
-                quadrantTransform = Transforms.FLIPPED.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width - localTransformed.getX());
-                deltaTranslationBuilder.m31(height);
+            }
+            case LEFT: {
+                transformationBuilder = Transforms.FLIPPED.toBuilder()
+                                                          .m11(-1)
+                                                          .m30(width);
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = transformation.multiply(local.toVec4());
+                dx = width - localTransformed.getX();
+                dy = height;
                 break;
-            case BOTTOM_LEFT:
-                anchorTranslationBuilder.m30(width);
-                quadrantTransform = Transforms.FLIPPED.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width - localTransformed.getX());
-                deltaTranslationBuilder.m31(height - localTransformed.getY());
+            }
+            case BOTTOM_LEFT: {
+                transformationBuilder = Transforms.FLIPPED.toBuilder()
+                                                          .m30(width);
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = transformation.multiply(local.toVec4());
+                dx = width - localTransformed.getX();
+                dy = height - localTransformed.getY();
                 break;
-            case RIGHT:
-                anchorTranslationBuilder.m11(1);
-                anchorTranslationBuilder.m30(height);
-                quadrantTransform = Transforms.FLIPPED_180.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width - localTransformed.getX());
+            }
+            case RIGHT: {
+                transformationBuilder = Transforms.FLIPPED_180.toBuilder()
+                                                              .m11(1)
+                                                              .m30(height);
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = transformation.multiply(local.toVec4());
+                dx = width - localTransformed.getX();
+                dy = 0f;
                 break;
-            case TOP_RIGHT:
-                anchorTranslationBuilder.m31(height);
-                quadrantTransform = Transforms.FLIPPED_180.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width - localTransformed.getX());
-                deltaTranslationBuilder.m31(height - localTransformed.getY());
+            }
+            case TOP_RIGHT: {
+                transformationBuilder = Transforms.FLIPPED_180.toBuilder()
+                                                              .m31(height);
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = transformation.multiply(local.toVec4());
+                dx = width - localTransformed.getX();
+                dy = height - localTransformed.getY();
                 break;
-            case BOTTOM:
-                anchorTranslationBuilder.m00(-1);
-                quadrantTransform = Transforms.NORMAL.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width);
-                deltaTranslationBuilder.m31(height - localTransformed.getY());
+            }
+            case BOTTOM: {
+                transformationBuilder = Transforms.NORMAL.toBuilder()
+                                                         .m00(-1);
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = transformation.multiply(local.toVec4());
+                dx = width;
+                dy = height - localTransformed.getY();
                 break;
-            case BOTTOM_RIGHT:
-                quadrantTransform = Transforms.NORMAL.add(anchorTranslationBuilder.build());
-
-                localTransformed = quadrantTransform.multiply(local.toVec4());
-                deltaTranslationBuilder.m30(width - localTransformed.getX());
-                deltaTranslationBuilder.m31(height - localTransformed.getY());
+            }
+            case BOTTOM_RIGHT: {
+                transformationBuilder = Transforms.NORMAL.toBuilder();
+                transformation = transformationBuilder.build();
+                final Vec4 localTransformed = local.toVec4();
+                dx = width - localTransformed.getX();
+                dy = height - localTransformed.getY();
                 break;
-            default:
-                quadrantTransform = Transforms.NORMAL;
+            }
+            default: {
+                transformationBuilder = Transforms.NORMAL.toBuilder();
+                transformation = transformationBuilder.build();
+                dx = 0f;
+                dy = 0f;
+            }
         }
 
-        return quadrantTransform.add(deltaTranslationBuilder.build());
+        return transformationBuilder.m30(transformation.getM30() + dx)
+                                    .m31(transformation.getM31() + dy)
+                                    .build();
     }
 
 
