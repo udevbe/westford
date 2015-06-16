@@ -16,22 +16,16 @@ package org.westmalle.wayland.output;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-
-import org.freedesktop.wayland.server.ShmBuffer;
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlCallbackResource;
-import org.freedesktop.wayland.server.WlCompositorResource;
-import org.freedesktop.wayland.server.WlRegionResource;
+import org.freedesktop.wayland.server.*;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
@@ -43,8 +37,8 @@ public class Surface {
 
     //pending state
     @Nonnull
-    private       SurfaceState pendingState  = SurfaceState.builder()
-                                                           .build();
+    private SurfaceState pendingState = SurfaceState.builder()
+                                                    .build();
 
     //committed state
     @Nonnull
@@ -53,11 +47,11 @@ public class Surface {
     //committed derived states
     private boolean destroyed;
     @Nonnull
-    private Mat4      transform           = Transforms.NORMAL;
+    private Mat4      transform        = Transforms.NORMAL;
     @Nonnull
-    private Mat4      inverseTransform    = Transforms.NORMAL;
+    private Mat4      inverseTransform = Transforms.NORMAL;
     @Nonnull
-    private Rectangle size                = Rectangle.ZERO;
+    private Rectangle size             = Rectangle.ZERO;
 
     @Nonnull
     private final List<WlCallbackResource> callbacks = Lists.newLinkedList();
@@ -152,9 +146,9 @@ public class Surface {
     }
 
     public void updateSize() {
-        final SurfaceState state = getState();
+        final SurfaceState               state  = getState();
         final Optional<WlBufferResource> buffer = state.getBuffer();
-        final int scale = state.getScale();
+        final int                        scale  = state.getScale();
         if (buffer.isPresent()) {
             final WlBufferResource wlBufferResource = buffer.get();
             //FIXME we shouldn't assume the buffer to always be an shm buffer.
@@ -178,12 +172,12 @@ public class Surface {
 
     public boolean needsTransformUpdate() {
         final SurfaceState pendingState = getPendingState();
-        final SurfaceState state = getState();
+        final SurfaceState state        = getState();
         return pendingState.getScale() != state.getScale()
                || !pendingState.getBufferTransform()
-                                    .equals(state.getBufferTransform())
+                               .equals(state.getBufferTransform())
                || !pendingState.getPositionTransform()
-                                    .equals(state.getPositionTransform());
+                               .equals(state.getPositionTransform());
     }
 
     @Nonnull
@@ -193,11 +187,14 @@ public class Surface {
         //set scaling first
         Mat4 result = Transforms.SCALE(state.getScale());
         //apply positioning
-        result = state.getPositionTransform().multiply(result);
+        result = state.getPositionTransform()
+                      .multiply(result);
         //client buffer transform;
-        result = state.getBufferTransform().multiply(result);
+        result = state.getBufferTransform()
+                      .multiply(result);
         //homogenized
-        result = Transforms.SCALE(1f/result.getM33()).multiply(result);
+        result = Transforms.SCALE(1f / result.getM33())
+                           .multiply(result);
 
         this.transform = result;
         this.inverseTransform = getTransform().invert();
@@ -245,10 +242,10 @@ public class Surface {
     @Nonnull
     public Surface setPosition(@Nonnull final Point global) {
         final SurfaceState state = getState();
-        final int scale = state.getScale();
+        final int          scale = state.getScale();
         this.state = state.toBuilder()
-                          .positionTransform(Transforms.TRANSLATE(global.getX()*scale,
-                                                                  global.getY()*scale))
+                          .positionTransform(Transforms.TRANSLATE(global.getX() * scale,
+                                                                  global.getY() * scale))
                           .build();
         updateTransform();
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
@@ -272,8 +269,8 @@ public class Surface {
     public Point local(@Nonnull final Point global) {
         //TODO unit test this method
         final Vec4 localPoint = getInverseTransform().multiply(global.toVec4());
-        return Point.create((int)localPoint.getX(),
-                            (int)localPoint.getY());
+        return Point.create((int) localPoint.getX(),
+                            (int) localPoint.getY());
     }
 
     @Nonnull

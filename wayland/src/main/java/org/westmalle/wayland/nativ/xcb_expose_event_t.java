@@ -30,10 +30,10 @@ public class xcb_expose_event_t extends Structure {
                                                              "width",
                                                              "height",
                                                              "count");
-    public byte response_type;
-    public byte pad0;
+    public byte  response_type;
+    public byte  pad0;
     public short sequence;
-    public int window;
+    public int   window;
     public short x;
     public short y;
     public short width;

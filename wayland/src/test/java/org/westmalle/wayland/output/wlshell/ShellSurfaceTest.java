@@ -101,7 +101,7 @@ public class ShellSurfaceTest {
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final Point pointerPositionStart = mock(Point.class);
+        final Point pointerPositionStart  = mock(Point.class);
         final Point pointerPositionMotion = mock(Point.class);
 
         final int serial = 12345;

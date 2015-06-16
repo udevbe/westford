@@ -14,7 +14,6 @@
 package org.westmalle.wayland.output.calc;
 
 import com.google.common.collect.Range;
-
 import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;

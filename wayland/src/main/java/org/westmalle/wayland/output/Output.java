@@ -14,12 +14,10 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
-
 import org.freedesktop.wayland.server.WlOutputResource;
 
-import java.util.Set;
-
 import javax.annotation.Nonnull;
+import java.util.Set;
 
 @AutoFactory(className = "OutputFactory")
 public class Output {

@@ -35,20 +35,20 @@ public class xcb_enter_notify_event_t extends Structure {
                                                              "state",
                                                              "mode",
                                                              "same_screen_focus");
-    public byte response_type;
-    public byte detail;
+    public byte  response_type;
+    public byte  detail;
     public short sequence;
-    public int time;
-    public int root;
-    public int event;
-    public int child;
+    public int   time;
+    public int   root;
+    public int   event;
+    public int   child;
     public short root_x;
     public short root_y;
     public short event_x;
     public short event_y;
     public short state;
-    public byte mode;
-    public byte same_screen_focus;
+    public byte  mode;
+    public byte  same_screen_focus;
 
     public xcb_enter_notify_event_t(final Pointer p) {
         super(p);

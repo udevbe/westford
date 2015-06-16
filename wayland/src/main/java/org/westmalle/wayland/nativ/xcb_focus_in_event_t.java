@@ -28,11 +28,11 @@ public class xcb_focus_in_event_t extends Structure {
                                                              "mode",
                                                              "pad0");
 
-    public byte response_type;
-    public byte detail;
+    public byte  response_type;
+    public byte  detail;
     public short sequence;
-    public int event;
-    public byte mode;
+    public int   event;
+    public byte  mode;
     public byte[] pad0 = new byte[3];
 
     public xcb_focus_in_event_t(final Pointer p) {

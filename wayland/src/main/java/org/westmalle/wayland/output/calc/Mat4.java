@@ -360,9 +360,9 @@ public abstract class Mat4 {
 
     @Override
     public String toString() {
-        return  getM00()+" "+getM10()+" "+getM20()+" "+getM30()+"\n"+
-                getM01()+" "+getM11()+" "+getM21()+" "+getM31()+"\n"+
-                getM02()+" "+getM12()+" "+getM22()+" "+getM32()+"\n"+
-                getM03()+" "+getM13()+" "+getM23()+" "+getM33()+"\n";
+        return getM00() + " " + getM10() + " " + getM20() + " " + getM30() + "\n" +
+               getM01() + " " + getM11() + " " + getM21() + " " + getM31() + "\n" +
+               getM02() + " " + getM12() + " " + getM22() + " " + getM32() + "\n" +
+               getM03() + " " + getM13() + " " + getM23() + " " + getM33() + "\n";
     }
 }

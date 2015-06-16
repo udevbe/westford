@@ -1,15 +1,13 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.value.AutoValue;
-
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.output.calc.Mat4;
 
-import java.util.Optional;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoValue
 public abstract class SurfaceState {
@@ -40,7 +38,7 @@ public abstract class SurfaceState {
     public abstract Mat4 getBufferTransform();
 
     @Nonnull
-    public abstract Mat4  getPositionTransform();
+    public abstract Mat4 getPositionTransform();
 
     @Nonnegative
     abstract int getScale();
