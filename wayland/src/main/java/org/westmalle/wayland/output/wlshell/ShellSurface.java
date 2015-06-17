@@ -2,21 +2,28 @@ package org.westmalle.wayland.output.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
-import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.Compositor;
+import org.westmalle.wayland.output.Point;
+import org.westmalle.wayland.output.PointerDevice;
+import org.westmalle.wayland.output.Rectangle;
+import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.output.Transforms;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface {
@@ -122,33 +129,33 @@ public class ShellSurface {
                                      final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
                                                                                               .toVec4());
                                      final Vec4 resize = transform.multiply(motionLocal);
+                                     final int width   = (int)resize.getX();
+                                     final int height  = (int)resize.getY();
                                      wlShellSurfaceResource.configure(quadrant.getValue(),
-                                                                      Math.max(1,
-                                                                               Math.round(resize.getX())),
-                                                                      Math.max(1,
-                                                                               Math.round(resize.getY())));
+                                                                      width < 1 ? 1 : width,
+                                                                      height < 1 ? 1 : height);
                                  });
     }
 
     private Mat4 transform(@Nonnull final WlShellSurfaceResize quadrant,
                            @Nonnull final Rectangle size,
-                           @Nonnull final Point local) {
+                           @Nonnull final Point pointerLocal) {
         final int width  = size.getWidth();
         final int height = size.getHeight();
 
         final Mat4.Builder transformationBuilder;
         final Mat4         transformation;
-        final float        dx;
-        final float        dy;
+        final float        pointerdx;
+        final float        pointerdy;
         switch (quadrant) {
             case TOP: {
                 transformationBuilder = Transforms._180.toBuilder()
                                                        .m00(1)
                                                        .m31(height);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(local.toVec4());
-                dx = width;
-                dy = height - localTransformed.getY();
+                final Vec4 pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = width;
+                pointerdy = height - pointerLocalTransformed.getY();
                 break;
             }
             case TOP_LEFT: {
@@ -156,9 +163,9 @@ public class ShellSurface {
                                                        .m30(width)
                                                        .m31(height);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(local.toVec4());
-                dx = width - localTransformed.getX();
-                dy = height - localTransformed.getY();
+                final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = width - localTransformed.getX();
+                pointerdy = height - localTransformed.getY();
                 break;
             }
             case LEFT: {
@@ -166,18 +173,18 @@ public class ShellSurface {
                                                           .m11(-1)
                                                           .m30(width);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(local.toVec4());
-                dx = width - localTransformed.getX();
-                dy = height;
+                final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = width - localTransformed.getX();
+                pointerdy = height;
                 break;
             }
             case BOTTOM_LEFT: {
                 transformationBuilder = Transforms.FLIPPED.toBuilder()
                                                           .m30(width);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(local.toVec4());
-                dx = width - localTransformed.getX();
-                dy = height - localTransformed.getY();
+                final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = width - localTransformed.getX();
+                pointerdy = height - localTransformed.getY();
                 break;
             }
             case RIGHT: {
@@ -185,47 +192,47 @@ public class ShellSurface {
                                                               .m11(1)
                                                               .m30(height);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(local.toVec4());
-                dx = width - localTransformed.getX();
-                dy = 0f;
+                final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = width - localTransformed.getX();
+                pointerdy = 0f;
                 break;
             }
             case TOP_RIGHT: {
                 transformationBuilder = Transforms.FLIPPED_180.toBuilder()
                                                               .m31(height);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(local.toVec4());
-                dx = width - localTransformed.getX();
-                dy = height - localTransformed.getY();
+                final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = width - localTransformed.getX();
+                pointerdy = height - localTransformed.getY();
                 break;
             }
             case BOTTOM: {
                 transformationBuilder = Transforms.NORMAL.toBuilder()
                                                          .m00(-1);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(local.toVec4());
-                dx = width;
-                dy = height - localTransformed.getY();
+                final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = width;
+                pointerdy = height - localTransformed.getY();
                 break;
             }
             case BOTTOM_RIGHT: {
                 transformationBuilder = Transforms.NORMAL.toBuilder();
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = local.toVec4();
-                dx = width - localTransformed.getX();
-                dy = height - localTransformed.getY();
+                final Vec4 localTransformed = pointerLocal.toVec4();
+                pointerdx = width - localTransformed.getX();
+                pointerdy = height - localTransformed.getY();
                 break;
             }
             default: {
                 transformationBuilder = Transforms.NORMAL.toBuilder();
                 transformation = transformationBuilder.build();
-                dx = 0f;
-                dy = 0f;
+                pointerdx = 0f;
+                pointerdy = 0f;
             }
         }
 
-        return transformationBuilder.m30(transformation.getM30() + dx)
-                                    .m31(transformation.getM31() + dy)
+        return transformationBuilder.m30(transformation.getM30() + pointerdx)
+                                    .m31(transformation.getM31() + pointerdy)
                                     .build();
     }
 
