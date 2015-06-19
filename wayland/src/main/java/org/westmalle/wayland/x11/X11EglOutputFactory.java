@@ -61,7 +61,7 @@ public class X11EglOutputFactory {
         final Pointer eglDisplay = this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                                         nativeDisplay,
                                                                         null);
-        if (eglDisplay == EGL_NO_DISPLAY) {
+        if (eglDisplay == null || eglDisplay.equals(EGL_NO_DISPLAY)) {
             throw new RuntimeException("eglGetDisplay() failed");
         }
         if (!this.libEGL.eglInitialize(eglDisplay,
@@ -94,7 +94,7 @@ public class X11EglOutputFactory {
         final Pointer configAttribs = new Memory(Integer.BYTES * size);
         configAttribs.write(0,
                             new int[]{
-                                    //@formatter:off
+                                         //@formatter:off
                                          EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
                                          EGL_BUFFER_SIZE,       32,
                                          EGL_RED_SIZE,          8,
@@ -108,7 +108,7 @@ public class X11EglOutputFactory {
                                          EGL_SURFACE_TYPE,      EGL_WINDOW_BIT,
                                          EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
                                          EGL_NONE
-                                        //@formatter:on
+                                         //@formatter:on
                             },
                             0,
                             size);

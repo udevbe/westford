@@ -33,6 +33,7 @@ public class LibEGL {
     public static final int     EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
     public static final int     EGL_PLATFORM_GBM_MESA       = 0x31D7;
     public static final int     EGL_OPENGL_ES_API           = 0x30A0;
+    public static final int     EGL_OPENGL_API              = 0x30A2;
     public static final int     EGL_WAYLAND_BUFFER_WL       = 0x31D5;
     public static final int     EGL_WAYLAND_PLANE_WL        = 0x31D6;
     public static final int     EGL_TEXTURE_Y_U_V_WL        = 0x31D7;
