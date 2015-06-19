@@ -1,7 +1,6 @@
 package org.westmalle.wayland.x11;
 
 import com.sun.jna.Pointer;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -14,7 +13,7 @@ import static org.mockito.Mockito.verify;
 public class X11EglOutputTest {
 
     @Mock
-    private LibEGL libEGL;
+    private LibEGL  libEGL;
     @Mock
     private Pointer eglDisplay;
     @Mock

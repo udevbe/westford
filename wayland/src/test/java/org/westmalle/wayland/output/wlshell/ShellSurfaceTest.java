@@ -22,6 +22,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.output.*;
+import org.westmalle.wayland.output.calc.Mat4;
+import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.output.events.Motion;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -69,6 +71,10 @@ public class ShellSurfaceTest {
         final Surface           surface           = mock(Surface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
+        final Point surfacePosition = Point.create(75,
+                                                   75);
+        when(surface.global(eq(Point.create(0,
+                                            0)))).thenReturn(surfacePosition);
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.wlCompositor,
@@ -101,9 +107,10 @@ public class ShellSurfaceTest {
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final Point pointerPositionStart  = mock(Point.class);
-        final Point pointerPositionMotion = mock(Point.class);
-
+        final Point pointerPositionStart = mock(Point.class);
+        when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -114,8 +121,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                           80));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(180,
-                                                                           180));
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
+                                                                                               180,
+                                                                                               0,
+                                                                                               1));
 
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,
@@ -158,8 +169,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = mock(Point.class);
-
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -170,8 +181,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                           80));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(180,
-                                                                           180));
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
+                                                                                               180,
+                                                                                               0,
+                                                                                               1));
 
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,
@@ -214,8 +229,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = mock(Point.class);
-
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -226,8 +241,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                           20));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(180,
-                                                                           -80));
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
+                                                                                               -80,
+                                                                                               0,
+                                                                                               1));
 
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,
@@ -270,8 +289,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = mock(Point.class);
-
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -282,8 +301,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                           20));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(180,
-                                                                           -80));
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
+                                                                                               -80,
+                                                                                               0,
+                                                                                               1));
 
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,
@@ -326,8 +349,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = mock(Point.class);
-
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -338,8 +361,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                           20));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(-80,
-                                                                           -80));
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
+                                                                                               -80,
+                                                                                               0,
+                                                                                               1));
 
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,
@@ -382,7 +409,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = mock(Point.class);
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
 
         final int serial = 12345;
 
@@ -394,9 +422,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                           20));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(-80,
-                                                                           -80));
-
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
+                                                                                               -80,
+                                                                                               0,
+                                                                                               1));
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,
                                                             100,
@@ -438,8 +469,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = mock(Point.class);
-
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -450,8 +481,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                           80));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(-80,
-                                                                           180));
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
+                                                                                               180,
+                                                                                               0,
+                                                                                               1));
 
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,
@@ -494,8 +529,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = mock(Point.class);
-
+        final Point pointerPositionMotion = Point.create(1200,
+                                                         900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -506,8 +541,12 @@ public class ShellSurfaceTest {
 
         when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                           80));
-        when(surface.local(pointerPositionMotion)).thenReturn(Point.create(-80,
-                                                                           180));
+        final Mat4 inverseTransform = mock(Mat4.class);
+        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
+                                                                                               180,
+                                                                                               0,
+                                                                                               1));
 
         when(surface.getSize()).thenReturn(Rectangle.create(0,
                                                             0,

@@ -1,131 +1,106 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
-
 import com.sun.jna.Pointer;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.nativ.Libc;
-import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.nativ.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.xcb_client_message_data_t;
-import org.westmalle.wayland.nativ.xcb_enter_notify_event_t;
-import org.westmalle.wayland.nativ.xcb_expose_event_t;
-import org.westmalle.wayland.nativ.xcb_focus_in_event_t;
-import org.westmalle.wayland.nativ.xcb_focus_out_event_t;
-import org.westmalle.wayland.nativ.xcb_generic_event_t;
-import org.westmalle.wayland.nativ.xcb_key_press_event_t;
-import org.westmalle.wayland.nativ.xcb_key_release_event_t;
-import org.westmalle.wayland.nativ.xcb_leave_notify_event_t;
-import org.westmalle.wayland.nativ.xcb_motion_notify_event_t;
+import org.westmalle.wayland.nativ.*;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_BUTTON_PRESS;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_BUTTON_RELEASE;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_CLIENT_MESSAGE;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_ENTER_NOTIFY;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_EXPOSE;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_FOCUS_IN;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_FOCUS_OUT;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_KEY_PRESS;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_KEY_RELEASE;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_LEAVE_NOTIFY;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_MOTION_NOTIFY;
+import static org.westmalle.wayland.nativ.Libxcb.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11EventBusTest {
 
     public class DummyHandler {
 
-        boolean keyPressSeen = false;
-        boolean keyReleaseSeen = false;
-        boolean buttonPressSeen = false;
+        boolean keyPressSeen      = false;
+        boolean keyReleaseSeen    = false;
+        boolean buttonPressSeen   = false;
         boolean buttonReleaseSeen = false;
-        boolean motionSeen = false;
-        boolean exposeSeen = false;
-        boolean enterNotifySeen = false;
-        boolean leaveNotifySeen = false;
+        boolean motionSeen        = false;
+        boolean exposeSeen        = false;
+        boolean enterNotifySeen   = false;
+        boolean leaveNotifySeen   = false;
         boolean clientMessageSeen = false;
-        boolean focusInSeen = false;
-        boolean focusOutSeen = false;
+        boolean focusInSeen       = false;
+        boolean focusOutSeen      = false;
 
         @Subscribe
-        public void handle(xcb_key_press_event_t event) {
-            keyPressSeen = true;
+        public void handle(final xcb_key_press_event_t event) {
+            this.keyPressSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_key_release_event_t event) {
-            keyReleaseSeen = true;
+        public void handle(final xcb_key_release_event_t event) {
+            this.keyReleaseSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_button_press_event_t event) {
-            buttonPressSeen = true;
+        public void handle(final xcb_button_press_event_t event) {
+            this.buttonPressSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_button_release_event_t event) {
-            buttonReleaseSeen = true;
+        public void handle(final xcb_button_release_event_t event) {
+            this.buttonReleaseSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_motion_notify_event_t event) {
-            motionSeen = true;
+        public void handle(final xcb_motion_notify_event_t event) {
+            this.motionSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_expose_event_t event) {
-            exposeSeen = true;
+        public void handle(final xcb_expose_event_t event) {
+            this.exposeSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_enter_notify_event_t event) {
-            enterNotifySeen = true;
+        public void handle(final xcb_enter_notify_event_t event) {
+            this.enterNotifySeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_leave_notify_event_t event) {
-            leaveNotifySeen = true;
+        public void handle(final xcb_leave_notify_event_t event) {
+            this.leaveNotifySeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_client_message_data_t event) {
-            clientMessageSeen = true;
+        public void handle(final xcb_client_message_data_t event) {
+            this.clientMessageSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_focus_in_event_t event) {
-            focusInSeen = true;
+        public void handle(final xcb_focus_in_event_t event) {
+            this.focusInSeen = true;
         }
 
         @Subscribe
-        public void handle(xcb_focus_out_event_t event) {
-            focusOutSeen = true;
+        public void handle(final xcb_focus_out_event_t event) {
+            this.focusOutSeen = true;
         }
     }
 
     @Mock
-    private Libxcb libxcb;
+    private Libxcb      libxcb;
     @Mock
-    private Libc libc;
+    private Libc        libc;
     @Mock
-    private Pointer xcbConnection;
+    private Pointer     xcbConnection;
     @InjectMocks
     private X11EventBus x11EventBus;
 
     @Test
     public void testHandle() throws Exception {
         //given
-        final int fd = 0;
-        final int mask = 0;
+        final int                 fd       = 0;
+        final int                 mask     = 0;
         final xcb_generic_event_t keyPress = new xcb_generic_event_t();
         keyPress.response_type = XCB_KEY_PRESS;
         final xcb_generic_event_t keyRelease = new xcb_generic_event_t();
@@ -165,8 +140,8 @@ public class X11EventBusTest {
         this.x11EventBus.register(dummyHandler);
 
         //when
-        x11EventBus.handle(fd,
-                           mask);
+        this.x11EventBus.handle(fd,
+                                mask);
 
         //then
         verify(this.libc).free(keyPress.getPointer());

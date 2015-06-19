@@ -1,7 +1,6 @@
 package org.westmalle.wayland.x11;
 
 import com.sun.jna.Pointer;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -19,12 +18,12 @@ public class X11OutputTest {
     @Mock
     private X11EglOutputFactory x11EglOutputFactory;
     @Mock
-    private X11EventBus x11EventBus;
+    private X11EventBus         x11EventBus;
     @Mock
-    private Pointer xcbConnection;
-    private int xWindow = 12345;
+    private Pointer             xcbConnection;
+    private final int xWindow = 12345;
     @Mock
-    private Pointer xDisplay;
+    private Pointer              xDisplay;
     @Mock
     private Map<String, Integer> atoms;
 

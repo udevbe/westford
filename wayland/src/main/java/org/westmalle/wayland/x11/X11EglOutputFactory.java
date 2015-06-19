@@ -94,7 +94,7 @@ public class X11EglOutputFactory {
         final Pointer configAttribs = new Memory(Integer.BYTES * size);
         configAttribs.write(0,
                             new int[]{
-                                         //@formatter:off
+                                    //@formatter:off
                                          EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
                                          EGL_BUFFER_SIZE,       32,
                                          EGL_RED_SIZE,          8,

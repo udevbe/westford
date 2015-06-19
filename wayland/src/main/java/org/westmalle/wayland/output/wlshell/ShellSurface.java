@@ -2,28 +2,21 @@ package org.westmalle.wayland.output.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
-import org.westmalle.wayland.output.Compositor;
-import org.westmalle.wayland.output.Point;
-import org.westmalle.wayland.output.PointerDevice;
-import org.westmalle.wayland.output.Rectangle;
-import org.westmalle.wayland.output.Surface;
-import org.westmalle.wayland.output.Transforms;
+import org.westmalle.wayland.output.*;
 import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.output.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface {
@@ -129,8 +122,8 @@ public class ShellSurface {
                                      final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
                                                                                               .toVec4());
                                      final Vec4 resize = transform.multiply(motionLocal);
-                                     final int width   = (int)resize.getX();
-                                     final int height  = (int)resize.getY();
+                                     final int width = (int) resize.getX();
+                                     final int height = (int) resize.getY();
                                      wlShellSurfaceResource.configure(quadrant.getValue(),
                                                                       width < 1 ? 1 : width,
                                                                       height < 1 ? 1 : height);
@@ -150,11 +143,11 @@ public class ShellSurface {
         switch (quadrant) {
             case TOP: {
                 transformationBuilder = Transforms._180.toBuilder()
-                                                       .m00(1)
-                                                       .m31(height);
+                                                       .m00(0)
+                                                       .m30(width);
                 transformation = transformationBuilder.build();
                 final Vec4 pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4());
-                pointerdx = width;
+                pointerdx = 0;
                 pointerdy = height - pointerLocalTransformed.getY();
                 break;
             }
@@ -170,12 +163,12 @@ public class ShellSurface {
             }
             case LEFT: {
                 transformationBuilder = Transforms.FLIPPED.toBuilder()
-                                                          .m11(-1)
-                                                          .m30(width);
+                                                          .m11(0f)
+                                                          .m31(height);
                 transformation = transformationBuilder.build();
                 final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = width - localTransformed.getX();
-                pointerdy = height;
+                pointerdy = 0f;
                 break;
             }
             case BOTTOM_LEFT: {
@@ -188,9 +181,9 @@ public class ShellSurface {
                 break;
             }
             case RIGHT: {
-                transformationBuilder = Transforms.FLIPPED_180.toBuilder()
-                                                              .m11(1)
-                                                              .m30(height);
+                transformationBuilder = Transforms.NORMAL.toBuilder()
+                                                         .m11(0f)
+                                                         .m31(height);
                 transformation = transformationBuilder.build();
                 final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = width - localTransformed.getX();
@@ -208,11 +201,12 @@ public class ShellSurface {
             }
             case BOTTOM: {
                 transformationBuilder = Transforms.NORMAL.toBuilder()
-                                                         .m00(-1);
+                                                         .m00(0)
+                                                         .m30(width);
                 transformation = transformationBuilder.build();
-                final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
-                pointerdx = width;
-                pointerdy = height - localTransformed.getY();
+                final Vec4 pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4());
+                pointerdx = 0;
+                pointerdy = height - pointerLocalTransformed.getY();
                 break;
             }
             case BOTTOM_RIGHT: {
