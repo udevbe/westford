@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.output;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -29,7 +28,6 @@ import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.Optional;
-import java.util.concurrent.Future;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -97,8 +95,6 @@ public class RendererTest {
         final Output   output     = mock(Output.class);
         final Object   outputImpl = mock(Object.class);
         when(output.getImplementation()).thenReturn(outputImpl);
-        final Future future = mock(ListenableFuture.class);
-        when(this.renderEngine.end(wlOutput)).thenReturn(future);
         //when
         this.renderer.endRender(wlOutput);
         //then

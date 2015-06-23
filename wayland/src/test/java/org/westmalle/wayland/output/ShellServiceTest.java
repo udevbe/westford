@@ -34,20 +34,12 @@ public class ShellServiceTest {
     private ShellService shellService;
 
     @Test
-    public void testStartUp() throws Exception {
-        //given
-        //when
-        this.shellService.startUp();
-        //then
-        verify(this.jobExecutor).start();
-    }
-
-    @Test
     public void testRun() throws Exception {
         //given
         //when
-        this.shellService.run();
+        this.shellService.start();
         //then
+        verify(this.jobExecutor).start();
         verify(this.display).initShm();
         verify(this.display).addSocket(startsWith("wayland-"));
         verify(this.display).run();
@@ -57,7 +49,7 @@ public class ShellServiceTest {
     public void testShutDown() throws Exception {
         //given
         //when
-        this.shellService.shutDown();
+        this.shellService.stop();
         //then
         verify(this.display).terminate();
         verify(this.jobExecutor).fireFinishedEvent();

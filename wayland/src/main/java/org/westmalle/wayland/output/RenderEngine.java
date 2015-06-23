@@ -18,7 +18,6 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.Future;
 
 public interface RenderEngine {
 
@@ -27,6 +26,5 @@ public interface RenderEngine {
     void draw(@Nonnull final WlSurfaceResource surfaceResource,
               @Nonnull final WlBufferResource wlBufferResource);
 
-    @Nonnull
-    Future<?> end(@Nonnull final WlOutput wlOutput);
+    void end(@Nonnull final WlOutput wlOutput);
 }

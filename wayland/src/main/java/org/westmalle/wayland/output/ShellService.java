@@ -13,14 +13,12 @@
 //limitations under the License.
 package org.westmalle.wayland.output;
 
-import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import org.freedesktop.wayland.server.Display;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.io.IOException;
 
-public class ShellService extends AbstractExecutionThreadService {
+public class ShellService {
 
     @Nonnull
     private final Display     display;
@@ -34,20 +32,14 @@ public class ShellService extends AbstractExecutionThreadService {
         this.jobExecutor = jobExecutor;
     }
 
-    @Override
-    protected void startUp() throws IOException {
+    public void start() {
         this.jobExecutor.start();
-    }
-
-    @Override
-    protected void run() {
         this.display.initShm();
         this.display.addSocket("wayland-0");
         this.display.run();
     }
 
-    @Override
-    protected void shutDown() throws IOException {
+    public void stop() {
         this.display.terminate();
         this.jobExecutor.fireFinishedEvent();
     }

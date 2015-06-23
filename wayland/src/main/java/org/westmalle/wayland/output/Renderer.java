@@ -14,13 +14,13 @@
 package org.westmalle.wayland.output;
 
 import com.google.auto.factory.AutoFactory;
+
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ExecutionException;
 
 @AutoFactory(className = "RendererFactory")
 public class Renderer {
@@ -47,13 +47,6 @@ public class Renderer {
     }
 
     public void endRender(@Nonnull final WlOutput wlOutput) {
-        try {
-            //wait for rendering to finish
-            this.renderEngine.end(wlOutput)
-                             .get();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        this.renderEngine.end(wlOutput);
     }
 }

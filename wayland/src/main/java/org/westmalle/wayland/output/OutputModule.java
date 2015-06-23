@@ -13,16 +13,14 @@
 //limitations under the License.
 package org.westmalle.wayland.output;
 
-import com.google.common.util.concurrent.Service;
-import dagger.Module;
-import dagger.Provides;
 import org.freedesktop.wayland.server.Display;
 import org.westmalle.wayland.nativ.Libc;
 import org.westmalle.wayland.nativ.NativeModule;
 
 import javax.inject.Singleton;
 
-import static dagger.Provides.Type.SET;
+import dagger.Module;
+import dagger.Provides;
 
 @Module(includes = NativeModule.class)
 public class OutputModule {
@@ -76,10 +74,5 @@ public class OutputModule {
                    writeFlags | Libc.FD_CLOEXEC);
 
         return pipeFds;
-    }
-
-    @Provides(type = SET)
-    Service provideService(final ShellService shellService) {
-        return shellService;
     }
 }

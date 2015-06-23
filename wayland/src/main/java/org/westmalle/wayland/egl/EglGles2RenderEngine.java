@@ -3,8 +3,10 @@ package org.westmalle.wayland.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Maps;
+
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -19,15 +21,23 @@ import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+
+import javax.annotation.Nonnull;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.westmalle.wayland.nativ.LibGLESv2.*;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_COLOR_BUFFER_BIT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_DYNAMIC_DRAW;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_ELEMENT_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_FLOAT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_FRAGMENT_SHADER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_INFO_LOG_LENGTH;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TRIANGLES;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_UNSIGNED_INT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_VERTEX_SHADER;
 
 @AutoFactory(className = "EglRenderEngineFactory")
 public class EglGles2RenderEngine implements RenderEngine {
@@ -69,8 +79,6 @@ public class EglGles2RenderEngine implements RenderEngine {
     private final Map<Gles2BufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
 
     @Nonnull
-    private final ExecutorService renderThread;
-    @Nonnull
     private final LibGLESv2       libGLESv2;
 
     private Memory bufferData;
@@ -79,17 +87,11 @@ public class EglGles2RenderEngine implements RenderEngine {
     private Mat4   projection;
 
     EglGles2RenderEngine(@Provided @Nonnull final LibGLESv2 libGLESv2) {
-        this.renderThread = Executors.newSingleThreadExecutor(r -> new Thread(r,
-                                                                              "GL Render Engine"));
         this.libGLESv2 = libGLESv2;
     }
 
     @Override
     public void begin(@Nonnull final WlOutput wlOutput) {
-        this.renderThread.submit(() -> doBegin(wlOutput));
-    }
-
-    private void doBegin(@Nonnull final WlOutput wlOutput) {
         final Output       output       = wlOutput.getOutput();
         final OutputMode   mode         = output.getMode();
         final HasEglOutput hasEglOutput = (HasEglOutput) output.getImplementation();
@@ -163,12 +165,6 @@ public class EglGles2RenderEngine implements RenderEngine {
     @Override
     public void draw(@Nonnull final WlSurfaceResource surfaceResource,
                      @Nonnull final WlBufferResource wlBufferResource) {
-        this.renderThread.submit(() -> doDraw(surfaceResource,
-                                              wlBufferResource));
-    }
-
-    private void doDraw(@Nonnull final WlSurfaceResource surfaceResource,
-                        @Nonnull final WlBufferResource wlBufferResource) {
         final ShmBuffer buffer = ShmBuffer.get(wlBufferResource);
         if (buffer == null) {
             throw new IllegalArgumentException("Buffer resource is not an ShmBuffer.");
@@ -372,13 +368,8 @@ public class EglGles2RenderEngine implements RenderEngine {
                                              Pointer.createConstant(2 * Float.BYTES));
     }
 
-    @Nonnull
     @Override
-    public Future<?> end(@Nonnull final WlOutput wlOutput) {
-        return this.renderThread.submit(() -> doEnd(wlOutput));
-    }
-
-    private void doEnd(@Nonnull final WlOutput wlOutput) {
+    public void end(@Nonnull final WlOutput wlOutput) {
         final HasEglOutput hasEglOutput = (HasEglOutput) wlOutput.getOutput()
                                                                  .getImplementation();
         hasEglOutput.getEglOutput()
