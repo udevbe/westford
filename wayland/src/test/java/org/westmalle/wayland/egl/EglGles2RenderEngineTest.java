@@ -1,5 +1,7 @@
 package org.westmalle.wayland.egl;
 
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -30,11 +32,23 @@ public class EglGles2RenderEngineTest {
 
     @Test
     public void testDraw() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        //when
+        this.eglGles2RenderEngine.draw(wlSurfaceResource,
+                                       wlBufferResource);
+        //then
 
     }
 
     @Test
     public void testEnd() throws Exception {
+        //given
+        final WlOutput wlOutput = mock(WlOutput.class);
+        //when
+        this.eglGles2RenderEngine.end(wlOutput);
+        //then
 
     }
 }

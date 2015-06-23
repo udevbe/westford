@@ -163,14 +163,14 @@ public class EglGles2RenderEngine implements RenderEngine {
     }
 
     @Override
-    public void draw(@Nonnull final WlSurfaceResource surfaceResource,
+    public void draw(@Nonnull final WlSurfaceResource wlSurfaceResource,
                      @Nonnull final WlBufferResource wlBufferResource) {
         final ShmBuffer buffer = ShmBuffer.get(wlBufferResource);
         if (buffer == null) {
             throw new IllegalArgumentException("Buffer resource is not an ShmBuffer.");
         }
 
-        final WlSurface implementation = (WlSurface) surfaceResource.getImplementation();
+        final WlSurface implementation = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface        = implementation.getSurface();
         //@formatter:off
         final float[] vertices = {
@@ -182,7 +182,7 @@ public class EglGles2RenderEngine implements RenderEngine {
         //@formatter:on
 
         buffer.beginAccess();
-        querySurfaceData(surfaceResource,
+        querySurfaceData(wlSurfaceResource,
                          buffer).makeActive(this.libGLESv2,
                                             buffer);
         buffer.endAccess();
