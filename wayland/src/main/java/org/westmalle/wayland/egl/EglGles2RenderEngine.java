@@ -2,7 +2,6 @@ package org.westmalle.wayland.egl;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.collect.Maps;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
@@ -21,6 +20,7 @@ import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -76,7 +76,7 @@ public class EglGles2RenderEngine implements RenderEngine {
     @Nonnull
     private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
     @Nonnull
-    private final Map<Gles2BufferFormat, Integer>          shaderPrograms    = Maps.newHashMap();
+    private final Map<Gles2BufferFormat, Integer>          shaderPrograms    = new HashMap<>();
 
     @Nonnull
     private final LibGLESv2       libGLESv2;
@@ -165,30 +165,34 @@ public class EglGles2RenderEngine implements RenderEngine {
     @Override
     public void draw(@Nonnull final WlSurfaceResource wlSurfaceResource,
                      @Nonnull final WlBufferResource wlBufferResource) {
-        final ShmBuffer buffer = ShmBuffer.get(wlBufferResource);
-        if (buffer == null) {
+        final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
+        if (shmBuffer == null) {
             throw new IllegalArgumentException("Buffer resource is not an ShmBuffer.");
         }
 
-        final WlSurface implementation = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface   surface        = implementation.getSurface();
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
         //@formatter:off
         final float[] vertices = {
-                0,                 0,                  0f, 0f,
-                buffer.getWidth(), 0,                  1f, 0f,
-                buffer.getWidth(), buffer.getHeight(), 1f, 1f,
-                0,                 buffer.getHeight(), 0f, 1f
+                //top left:
+                0,                    0,                     0f, 0f,
+                //top right:
+                shmBuffer.getWidth(), 0,                     1f, 0f,
+                //bottom right:
+                shmBuffer.getWidth(), shmBuffer.getHeight(), 1f, 1f,
+                //bottom left:
+                0,                    shmBuffer.getHeight(), 0f, 1f
         };
         //@formatter:on
 
-        buffer.beginAccess();
+        shmBuffer.beginAccess();
         querySurfaceData(wlSurfaceResource,
-                         buffer).makeActive(this.libGLESv2,
-                                            buffer);
-        buffer.endAccess();
+                         shmBuffer).makeActive(this.libGLESv2,
+                                            shmBuffer);
+        shmBuffer.endAccess();
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
 
-        final int shaderProgram = queryShaderProgram(queryBufferFormat(buffer));
+        final int shaderProgram = queryShaderProgram(queryBufferFormat(shmBuffer));
         configureShaders(shaderProgram,
                          this.projection.multiply(surface.getTransform()),
                          vertices);
@@ -200,25 +204,25 @@ public class EglGles2RenderEngine implements RenderEngine {
     }
 
     private Gles2SurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
-                                              final ShmBuffer buffer) {
+                                              final ShmBuffer shmBuffer) {
         Gles2SurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
             surfaceData = Gles2SurfaceData.create(this.libGLESv2);
             surfaceData.init(this.libGLESv2,
-                             buffer);
+                             shmBuffer);
             this.cachedSurfaceData.put(surfaceResource,
                                        surfaceData);
         }
         else {
             final int surfaceDataWidth = surfaceData.getWidth();
             final int surfaceDataHeight = surfaceData.getHeight();
-            final int bufferWidth = buffer.getWidth();
-            final int bufferHeight = buffer.getHeight();
+            final int bufferWidth = shmBuffer.getWidth();
+            final int bufferHeight = shmBuffer.getHeight();
             if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
                 surfaceData.destroy(this.libGLESv2);
                 surfaceData = Gles2SurfaceData.create(this.libGLESv2);
                 surfaceData.init(this.libGLESv2,
-                                 buffer);
+                                 shmBuffer);
                 this.cachedSurfaceData.put(surfaceResource,
                                            surfaceData);
             }
