@@ -41,20 +41,20 @@ public class EglGles2RenderEngineTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private LibGLESv2 libGLESv2;
+    private LibGLESv2            libGLESv2;
     @InjectMocks
     private EglGles2RenderEngine eglGles2RenderEngine;
 
     @Test
     public void testBegin() throws Exception {
         //given
-        final WlOutput wlOutput = mock(WlOutput.class);
-        final Output output = mock(Output.class);
-        final OutputMode mode = mock(OutputMode.class);
+        final WlOutput     wlOutput     = mock(WlOutput.class);
+        final Output       output       = mock(Output.class);
+        final OutputMode   mode         = mock(OutputMode.class);
         final HasEglOutput hasEglOutput = mock(HasEglOutput.class);
-        final EglOutput eglOutput = mock(EglOutput.class);
-        final int width = 640;
-        final int height = 480;
+        final EglOutput    eglOutput    = mock(EglOutput.class);
+        final int          width        = 640;
+        final int          height       = 480;
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getMode()).thenReturn(mode);
@@ -74,18 +74,18 @@ public class EglGles2RenderEngineTest {
     public void testDrawExistingBuffer() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
         mockStatic(ShmBuffer.class);
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         final WlSurface wlSurface = mock(WlSurface.class);
-        final Surface surface = mock(Surface.class);
+        final Surface   surface   = mock(Surface.class);
         mockStatic(Gles2SurfaceData.class);
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
-        final int shmFormat = WlShmFormat.XRGB8888.getValue();
+        final int              shmFormat        = WlShmFormat.XRGB8888.getValue();
         final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                          "shaderPrograms");
-        final Integer shaderProgram = 12346;
-        final Mat4 surfaceTransform = Mat4.IDENTITY;
+        final Integer shaderProgram    = 12346;
+        final Mat4    surfaceTransform = Mat4.IDENTITY;
         final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                                      "cachedSurfaceData");
 
@@ -126,7 +126,7 @@ public class EglGles2RenderEngineTest {
         this.exception.expectMessage("Buffer resource is not an ShmBuffer.");
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
         mockStatic(ShmBuffer.class);
 
         when(ShmBuffer.get(wlBufferResource)).thenReturn(null);
@@ -144,18 +144,18 @@ public class EglGles2RenderEngineTest {
     public void testDrawNewBuffer() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
         mockStatic(ShmBuffer.class);
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         final WlSurface wlSurface = mock(WlSurface.class);
-        final Surface surface = mock(Surface.class);
+        final Surface   surface   = mock(Surface.class);
         mockStatic(Gles2SurfaceData.class);
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
-        final int shmFormat = WlShmFormat.XRGB8888.getValue();
+        final int              shmFormat        = WlShmFormat.XRGB8888.getValue();
         final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                          "shaderPrograms");
-        final Integer shaderProgram = 12346;
-        final Mat4 surfaceTransform = Mat4.IDENTITY;
+        final Integer shaderProgram    = 12346;
+        final Mat4    surfaceTransform = Mat4.IDENTITY;
 
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
@@ -198,20 +198,20 @@ public class EglGles2RenderEngineTest {
     public void testDrawResizedBuffer() throws Exception {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
         mockStatic(ShmBuffer.class);
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         final WlSurface wlSurface = mock(WlSurface.class);
-        final Surface surface = mock(Surface.class);
+        final Surface   surface   = mock(Surface.class);
         mockStatic(Gles2SurfaceData.class);
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
-        final int bufferWidth = 640;
-        final int bufferHeight = 480;
-        final int shmFormat = WlShmFormat.XRGB8888.getValue();
+        final int              bufferWidth      = 640;
+        final int              bufferHeight     = 480;
+        final int              shmFormat        = WlShmFormat.XRGB8888.getValue();
         final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                          "shaderPrograms");
-        final Integer shaderProgram = 12346;
-        final Mat4 surfaceTransform = Mat4.IDENTITY;
+        final Integer shaderProgram    = 12346;
+        final Mat4    surfaceTransform = Mat4.IDENTITY;
         final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                                      "cachedSurfaceData");
 
@@ -244,10 +244,10 @@ public class EglGles2RenderEngineTest {
     @Test
     public void testEnd() throws Exception {
         //given
-        final WlOutput wlOutput = mock(WlOutput.class);
-        final Output output = mock(Output.class);
+        final WlOutput     wlOutput     = mock(WlOutput.class);
+        final Output       output       = mock(Output.class);
         final HasEglOutput hasEglOutput = mock(HasEglOutput.class);
-        final EglOutput eglOutput = mock(EglOutput.class);
+        final EglOutput    eglOutput    = mock(EglOutput.class);
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getImplementation()).thenReturn(hasEglOutput);

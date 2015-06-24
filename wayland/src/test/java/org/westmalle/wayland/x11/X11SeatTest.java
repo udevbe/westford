@@ -33,17 +33,17 @@ import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
 public class X11SeatTest {
 
     @Mock
-    private Libxcb libxcb;
+    private Libxcb      libxcb;
     @Mock
-    private X11Output x11Output;
+    private X11Output   x11Output;
     @Mock
-    private Compositor compositor;
+    private Compositor  compositor;
     @Mock
-    private WlSeat wlSeat;
+    private WlSeat      wlSeat;
     @Mock
     private JobExecutor jobExecutor;
     @InjectMocks
-    private X11Seat x11Seat;
+    private X11Seat     x11Seat;
 
 
     @Test
@@ -64,14 +64,14 @@ public class X11SeatTest {
                               BTN_RIGHT);
     }
 
-    private void testHandleButtonPress(byte xEventDetail,
-                                       int waylandEventDetail) {
+    private void testHandleButtonPress(final byte xEventDetail,
+                                       final int waylandEventDetail) {
         //given
         final WlPointer wlPointer = mock(WlPointer.class);
-        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int compositorTime = 9876;
@@ -85,7 +85,8 @@ public class X11SeatTest {
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
         verify(this.jobExecutor).submit(runnableArgument.capture());
         //and when
-        runnableArgument.getValue().run();
+        runnableArgument.getValue()
+                        .run();
         //then
         verify(pointerDevice).button(wlPointerResources,
                                      compositorTime,
@@ -111,14 +112,14 @@ public class X11SeatTest {
                                 BTN_RIGHT);
     }
 
-    private void testHandleButtonRelease(byte xEventDetail,
-                                         int waylandEventDetail) {
+    private void testHandleButtonRelease(final byte xEventDetail,
+                                         final int waylandEventDetail) {
         //given
         final WlPointer wlPointer = mock(WlPointer.class);
-        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int compositorTime = 9876;
@@ -132,7 +133,8 @@ public class X11SeatTest {
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
         verify(this.jobExecutor).submit(runnableArgument.capture());
         //and when
-        runnableArgument.getValue().run();
+        runnableArgument.getValue()
+                        .run();
         //then
         verify(pointerDevice).button(wlPointerResources,
                                      compositorTime,
@@ -144,16 +146,16 @@ public class X11SeatTest {
     public void testHandleMotion() throws Exception {
         //given
         final WlPointer wlPointer = mock(WlPointer.class);
-        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int compositorTime = 9876;
         when(this.compositor.getTime()).thenReturn(compositorTime);
         final xcb_motion_notify_event_t event = mock(xcb_motion_notify_event_t.class);
-        final int x = 80;
+        final int                       x     = 80;
         event.event_x = x;
         final int y = -120;
         event.event_y = y;
@@ -163,7 +165,8 @@ public class X11SeatTest {
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
         verify(this.jobExecutor).submit(runnableArgument.capture());
         //and when
-        runnableArgument.getValue().run();
+        runnableArgument.getValue()
+                        .run();
         //then
         verify(pointerDevice).motion(wlPointerResources,
                                      compositorTime,

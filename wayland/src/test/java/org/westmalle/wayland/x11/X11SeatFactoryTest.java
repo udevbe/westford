@@ -34,33 +34,33 @@ import static org.mockito.Mockito.when;
 public class X11SeatFactoryTest {
 
     @Mock
-    private Libxcb libxcb;
+    private Libxcb               libxcb;
     @Mock
-    private JobExecutor jobExecutor;
+    private JobExecutor          jobExecutor;
     @Mock
-    private WlPointerFactory wlPointerFactory;
+    private WlPointerFactory     wlPointerFactory;
     @Mock
-    private WlKeyboardFactory wlKeyboardFactory;
+    private WlKeyboardFactory    wlKeyboardFactory;
     @Mock
     private PointerDeviceFactory pointerDeviceFactory;
     @Mock
-    private KeyboardFactory keyboardFactory;
+    private KeyboardFactory      keyboardFactory;
     @InjectMocks
-    private X11SeatFactory x11SeatFactory;
+    private X11SeatFactory       x11SeatFactory;
 
     @Test
     public void testCreate() throws Exception {
         //given
-        final WlOutput wlOutput = mock(WlOutput.class);
-        final Output output = mock(Output.class);
-        final X11Output x11Output = mock(X11Output.class);
-        final X11EventBus x11EventBus = mock(X11EventBus.class);
-        final WlSeat wlSeat = mock(WlSeat.class);
-        final Compositor compositor = mock(Compositor.class);
+        final WlOutput      wlOutput      = mock(WlOutput.class);
+        final Output        output        = mock(Output.class);
+        final X11Output     x11Output     = mock(X11Output.class);
+        final X11EventBus   x11EventBus   = mock(X11EventBus.class);
+        final WlSeat        wlSeat        = mock(WlSeat.class);
+        final Compositor    compositor    = mock(Compositor.class);
         final PointerDevice pointerDevice = mock(PointerDevice.class);
-        final WlPointer wlPointer = mock(WlPointer.class);
-        final Keyboard keyboard = mock(Keyboard.class);
-        final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
+        final WlPointer     wlPointer     = mock(WlPointer.class);
+        final Keyboard      keyboard      = mock(Keyboard.class);
+        final WlKeyboard    wlKeyboard    = mock(WlKeyboard.class);
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getImplementation()).thenReturn(x11Output);

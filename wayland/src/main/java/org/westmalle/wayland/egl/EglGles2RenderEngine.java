@@ -2,10 +2,8 @@ package org.westmalle.wayland.egl;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -20,24 +18,13 @@ import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import javax.annotation.Nonnull;
-
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_ARRAY_BUFFER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_COLOR_BUFFER_BIT;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_COMPILE_STATUS;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_DYNAMIC_DRAW;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_ELEMENT_ARRAY_BUFFER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_FLOAT;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_FRAGMENT_SHADER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_INFO_LOG_LENGTH;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_TRIANGLES;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_UNSIGNED_INT;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_VERTEX_SHADER;
+import static org.westmalle.wayland.nativ.LibGLESv2.*;
 
 @AutoFactory(className = "EglRenderEngineFactory")
 public class EglGles2RenderEngine implements RenderEngine {
@@ -79,7 +66,7 @@ public class EglGles2RenderEngine implements RenderEngine {
     private final Map<Gles2BufferFormat, Integer>          shaderPrograms    = new HashMap<>();
 
     @Nonnull
-    private final LibGLESv2       libGLESv2;
+    private final LibGLESv2 libGLESv2;
 
     private Memory bufferData;
     private Memory elementBuffer;
@@ -188,7 +175,7 @@ public class EglGles2RenderEngine implements RenderEngine {
         shmBuffer.beginAccess();
         querySurfaceData(wlSurfaceResource,
                          shmBuffer).makeActive(this.libGLESv2,
-                                            shmBuffer);
+                                               shmBuffer);
         shmBuffer.endAccess();
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
 

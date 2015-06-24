@@ -83,7 +83,8 @@ class Boot {
 
     private void run(final OutputComponent outputComponent) {
         //start all services, 1 thread per service & exit main thread.
-        outputComponent.shellService().start();
+        outputComponent.shellService()
+                       .start();
     }
 
     public static void main(final String[] args) {
