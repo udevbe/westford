@@ -33,10 +33,10 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
                                                                   ProtocolObject<XdgShellResource> {
 
     private final Set<XdgShellResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
-    private final SurfaceFactory surfaceFactory;
+    private final SurfaceFactory    surfaceFactory;
     private final XdgSurfaceFactory xdgSurfaceFactory;
-    private final PopupFactory popupFactory;
-    private final XdgPopupFactory xdgPopupFactory;
+    private final PopupFactory      popupFactory;
+    private final XdgPopupFactory   xdgPopupFactory;
 
     XdgShell(@Provided final Display display,
              final org.westmalle.wayland.xdg.output.SurfaceFactory surfaceFactory,
@@ -67,7 +67,7 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
     public void getXdgSurface(final XdgShellResource requester,
                               final int id,
                               @Nonnull final WlSurfaceResource wlSurfaceResource) {
-        final Surface surface = this.surfaceFactory.create();
+        final Surface    surface    = this.surfaceFactory.create();
         final XdgSurface xdgSurface = this.xdgSurfaceFactory.create(surface);
         final XdgSurfaceResource xdgSurfaceResource = xdgSurface.add(requester.getClient(),
                                                                      VERSION,
@@ -92,11 +92,11 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
                             final int x,
                             final int y) {
         //TODO implement xdg popup semantics of creation and destruction.
-        final Popup popup = this.popupFactory.create();
+        final Popup    popup    = this.popupFactory.create();
         final XdgPopup xdgPopup = this.xdgPopupFactory.create(popup);
         final XdgPopupResource xdgPopupResource = xdgPopup.add(requester.getClient(),
-                                                  VERSION,
-                                                  id);
+                                                               VERSION,
+                                                               id);
         surface.addDestroyListener(new Listener() {
             @Override
             public void handle() {
@@ -107,7 +107,8 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
     }
 
     @Override
-    public void pong(final XdgShellResource requester, final int serial) {
+    public void pong(final XdgShellResource requester,
+                     final int serial) {
 
     }
 
@@ -119,7 +120,9 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
 
     @Nonnull
     @Override
-    public XdgShellResource create(@Nonnull final Client client, @Nonnegative final int version, final int id) {
+    public XdgShellResource create(@Nonnull final Client client,
+                                   @Nonnegative final int version,
+                                   final int id) {
         return new XdgShellResource(client,
                                     version,
                                     id,
@@ -127,7 +130,9 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
     }
 
     @Override
-    public XdgShellResource onBindClient(final Client client, final int version, final int id) {
+    public XdgShellResource onBindClient(final Client client,
+                                         final int version,
+                                         final int id) {
         return null;
     }
 }

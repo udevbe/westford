@@ -55,7 +55,8 @@ public class XdgSurface implements XdgSurfaceRequests,
     public void showWindowMenu(final XdgSurfaceResource requester,
                                @Nonnull final WlSeatResource seat,
                                final int serial,
-                               final int x, final int y) {
+                               final int x,
+                               final int y) {
 
     }
 
@@ -123,7 +124,9 @@ public class XdgSurface implements XdgSurfaceRequests,
 
     @Nonnull
     @Override
-    public XdgSurfaceResource create(@Nonnull final Client client, @Nonnegative final int version, final int id) {
+    public XdgSurfaceResource create(@Nonnull final Client client,
+                                     @Nonnegative final int version,
+                                     final int id) {
         return new XdgSurfaceResource(client,
                                       version,
                                       id,
