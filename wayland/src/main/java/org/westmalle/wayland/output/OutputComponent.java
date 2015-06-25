@@ -9,6 +9,7 @@ import org.westmalle.wayland.x11.X11Component;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import org.westmalle.wayland.xdg.protocol.XdgShellFactory;
 
 @Singleton
 @Component(modules = OutputModule.class)
@@ -24,6 +25,8 @@ public interface OutputComponent {
     WlSeatFactory wlSeatFactory();
 
     WlShellFactory wlShellFactory();
+
+    XdgShellFactory xdgShellFactory();
 
     //running
     ShellService shellService();

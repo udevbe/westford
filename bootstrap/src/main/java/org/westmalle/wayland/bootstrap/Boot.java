@@ -29,6 +29,7 @@ import org.westmalle.wayland.protocol.WlSeatFactory;
 import org.westmalle.wayland.protocol.WlShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
+import org.westmalle.wayland.xdg.protocol.XdgShellFactory;
 
 class Boot {
 
@@ -39,6 +40,7 @@ class Boot {
         final WlCompositorFactory wlCompositorFactory = outputComponent.wlCompositorFactory();
         final WlSeatFactory       wlSeatFactory       = outputComponent.wlSeatFactory();
         final WlShellFactory      wlShellFactory      = outputComponent.wlShellFactory();
+        final XdgShellFactory     xdgShellFactory     = outputComponent.xdgShellFactory();
 
         final X11OutputFactory outputFactory = outputComponent.x11Component()
                                                               .outputFactory();
@@ -78,7 +80,9 @@ class Boot {
 
         //enable wl_shell protocol
         wlShellFactory.create(wlCompositor);
-        //TODO enable xdg_shell protocol
+        //enable xdg_shell protocol
+        //TODO implement xdg_shell protocol
+        xdgShellFactory.create();
     }
 
     private void run(final OutputComponent outputComponent) {

@@ -33,16 +33,17 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
                                                                   ProtocolObject<XdgShellResource> {
 
     private final Set<XdgShellResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+
     private final SurfaceFactory    surfaceFactory;
     private final XdgSurfaceFactory xdgSurfaceFactory;
     private final PopupFactory      popupFactory;
     private final XdgPopupFactory   xdgPopupFactory;
 
     XdgShell(@Provided final Display display,
-             final org.westmalle.wayland.xdg.output.SurfaceFactory surfaceFactory,
-             final org.westmalle.wayland.xdg.protocol.XdgSurfaceFactory xdgSurfaceFactory,
-             final org.westmalle.wayland.xdg.output.PopupFactory popupFactory,
-             final org.westmalle.wayland.xdg.protocol.XdgPopupFactory xdgPopupFactory) {
+             @Provided final org.westmalle.wayland.xdg.output.SurfaceFactory surfaceFactory,
+             @Provided final org.westmalle.wayland.xdg.protocol.XdgSurfaceFactory xdgSurfaceFactory,
+             @Provided final org.westmalle.wayland.xdg.output.PopupFactory popupFactory,
+             @Provided final org.westmalle.wayland.xdg.protocol.XdgPopupFactory xdgPopupFactory) {
         super(display,
               XdgShellResource.class,
               VERSION);
