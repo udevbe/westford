@@ -1,5 +1,6 @@
 package org.westmalle.wayland.xdg.protocol;
 
+import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 
 import org.freedesktop.wayland.server.Client;
@@ -8,6 +9,7 @@ import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.XdgSurfaceRequests;
 import org.freedesktop.wayland.server.XdgSurfaceResource;
 import org.westmalle.wayland.protocol.ProtocolObject;
+import org.westmalle.wayland.xdg.output.Surface;
 
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -15,10 +17,16 @@ import java.util.WeakHashMap;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
+@AutoFactory(className = "XdgSurfaceFactory")
 public class XdgSurface implements XdgSurfaceRequests,
                                    ProtocolObject<XdgSurfaceResource> {
 
     private final Set<XdgSurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Surface surface;
+
+    XdgSurface(final Surface surface) {
+        this.surface = surface;
+    }
 
     @Override
     public void destroy(final XdgSurfaceResource requester) {

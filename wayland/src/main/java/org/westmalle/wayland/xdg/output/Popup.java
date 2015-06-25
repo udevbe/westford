@@ -1,5 +1,9 @@
 package org.westmalle.wayland.xdg.output;
 
-public class Popup {
+import com.google.auto.factory.AutoFactory;
 
+@AutoFactory(className = "PopupFactory")
+public class Popup {
+    Popup() {
+    }
 }
