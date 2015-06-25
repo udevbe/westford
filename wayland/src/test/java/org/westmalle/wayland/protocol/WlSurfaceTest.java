@@ -25,9 +25,9 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.output.Rectangle;
-import org.westmalle.wayland.output.Surface;
-import org.westmalle.wayland.output.calc.Mat4;
+import org.westmalle.wayland.core.Rectangle;
+import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.calc.Mat4;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;

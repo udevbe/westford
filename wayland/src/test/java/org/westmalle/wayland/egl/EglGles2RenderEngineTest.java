@@ -13,22 +13,18 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.westmalle.wayland.core.Output;
+import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.LibGLESv2;
-import org.westmalle.wayland.output.Output;
-import org.westmalle.wayland.output.OutputMode;
-import org.westmalle.wayland.output.Surface;
-import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.Map;
 
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 

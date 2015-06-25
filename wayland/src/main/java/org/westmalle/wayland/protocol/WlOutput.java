@@ -17,7 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
-import org.westmalle.wayland.output.Output;
+import org.westmalle.wayland.core.Output;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

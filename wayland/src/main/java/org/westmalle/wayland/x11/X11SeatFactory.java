@@ -13,11 +13,11 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.JobExecutor;
+import org.westmalle.wayland.core.KeyboardFactory;
+import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.output.Compositor;
-import org.westmalle.wayland.output.JobExecutor;
-import org.westmalle.wayland.output.KeyboardFactory;
-import org.westmalle.wayland.output.PointerDeviceFactory;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlPointerFactory;

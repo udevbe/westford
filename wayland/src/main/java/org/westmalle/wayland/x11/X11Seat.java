@@ -15,9 +15,9 @@ package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.JobExecutor;
 import org.westmalle.wayland.nativ.*;
-import org.westmalle.wayland.output.Compositor;
-import org.westmalle.wayland.output.JobExecutor;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;

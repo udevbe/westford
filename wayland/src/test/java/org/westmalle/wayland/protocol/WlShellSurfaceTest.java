@@ -26,7 +26,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.output.wlshell.ShellSurface;
+import org.westmalle.wayland.wlshell.ShellSurface;
 
 import java.util.Optional;
 

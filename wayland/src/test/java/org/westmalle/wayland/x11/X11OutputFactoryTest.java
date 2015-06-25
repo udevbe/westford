@@ -12,8 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.nativ.*;
-import org.westmalle.wayland.output.OutputFactory;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
 import static org.mockito.Mockito.*;

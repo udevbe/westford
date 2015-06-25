@@ -19,10 +19,10 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.freedesktop.wayland.shared.WlSurfaceError;
-import org.westmalle.wayland.output.Rectangle;
-import org.westmalle.wayland.output.Surface;
-import org.westmalle.wayland.output.Transforms;
-import org.westmalle.wayland.output.calc.Mat4;
+import org.westmalle.wayland.core.Rectangle;
+import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.Transforms;
+import org.westmalle.wayland.core.calc.Mat4;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

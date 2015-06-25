@@ -19,7 +19,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlPointerRequestsV3;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.westmalle.wayland.output.PointerDevice;
+import org.westmalle.wayland.core.PointerDevice;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

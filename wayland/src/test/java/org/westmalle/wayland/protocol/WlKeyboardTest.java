@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.output.Keyboard;
+import org.westmalle.wayland.core.Keyboard;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;

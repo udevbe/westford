@@ -18,7 +18,7 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlKeyboardRequestsV3;
 import org.freedesktop.wayland.server.WlKeyboardResource;
-import org.westmalle.wayland.output.Keyboard;
+import org.westmalle.wayland.core.Keyboard;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

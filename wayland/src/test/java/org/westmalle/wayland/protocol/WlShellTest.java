@@ -26,8 +26,8 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.output.wlshell.ShellSurface;
-import org.westmalle.wayland.output.wlshell.ShellSurfaceFactory;
+import org.westmalle.wayland.wlshell.ShellSurface;
+import org.westmalle.wayland.wlshell.ShellSurfaceFactory;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;

@@ -17,8 +17,8 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
-import org.westmalle.wayland.output.Compositor;
-import org.westmalle.wayland.output.Surface;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.Surface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -31,18 +31,18 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     private final Set<WlCompositorResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
-    private final WlSurfaceFactory                                 wlSurfaceFactory;
-    private final WlRegionFactory                                  wlRegionFactory;
-    private final org.westmalle.wayland.output.FiniteRegionFactory finiteRegionFactory;
-    private final org.westmalle.wayland.output.SurfaceFactory      surfaceFactory;
-    private final Compositor                                       compositor;
+    private final WlSurfaceFactory                               wlSurfaceFactory;
+    private final WlRegionFactory                                wlRegionFactory;
+    private final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory;
+    private final org.westmalle.wayland.core.SurfaceFactory      surfaceFactory;
+    private final Compositor                                     compositor;
 
     @Inject
     WlCompositor(@Provided final Display display,
                  @Provided final WlSurfaceFactory wlSurfaceFactory,
                  @Provided final WlRegionFactory wlRegionFactory,
-                 @Provided final org.westmalle.wayland.output.FiniteRegionFactory finiteRegionFactory,
-                 @Provided final org.westmalle.wayland.output.SurfaceFactory surfaceFactory,
+                 @Provided final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory,
+                 @Provided final org.westmalle.wayland.core.SurfaceFactory surfaceFactory,
                  final Compositor compositor) {
         super(display,
               WlCompositorResource.class,

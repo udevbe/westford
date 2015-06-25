@@ -8,13 +8,13 @@ import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
+import org.westmalle.wayland.core.Output;
+import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.core.RenderEngine;
+import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.LibGLESv2;
 import org.westmalle.wayland.nativ.NativeString;
-import org.westmalle.wayland.output.Output;
-import org.westmalle.wayland.output.OutputMode;
-import org.westmalle.wayland.output.RenderEngine;
-import org.westmalle.wayland.output.Surface;
-import org.westmalle.wayland.output.calc.Mat4;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 

@@ -8,13 +8,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.JobExecutor;
+import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.nativ.xcb_button_press_event_t;
 import org.westmalle.wayland.nativ.xcb_button_release_event_t;
 import org.westmalle.wayland.nativ.xcb_motion_notify_event_t;
-import org.westmalle.wayland.output.Compositor;
-import org.westmalle.wayland.output.JobExecutor;
-import org.westmalle.wayland.output.PointerDevice;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
@@ -22,12 +22,8 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.Input.BTN_LEFT;
-import static org.westmalle.wayland.nativ.Input.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
+import static org.mockito.Mockito.*;
+import static org.westmalle.wayland.nativ.Input.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11SeatTest {

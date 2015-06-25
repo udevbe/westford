@@ -16,7 +16,7 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
-import org.westmalle.wayland.output.wlshell.ShellSurface;
+import org.westmalle.wayland.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

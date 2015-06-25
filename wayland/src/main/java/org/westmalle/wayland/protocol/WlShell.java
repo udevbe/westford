@@ -17,7 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.*;
-import org.westmalle.wayland.output.wlshell.ShellSurface;
+import org.westmalle.wayland.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -29,14 +29,14 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
     private final Set<WlShellResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
-    private final Display                                                  display;
-    private final WlShellSurfaceFactory                                    wlShellSurfaceFactory;
-    private final org.westmalle.wayland.output.wlshell.ShellSurfaceFactory shellSurfaceFactory;
-    private final WlCompositor                                             wlCompositor;
+    private final Display                                           display;
+    private final WlShellSurfaceFactory                             wlShellSurfaceFactory;
+    private final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory;
+    private final WlCompositor                                      wlCompositor;
 
     WlShell(@Provided final Display display,
             @Provided final WlShellSurfaceFactory wlShellSurfaceFactory,
-            @Provided final org.westmalle.wayland.output.wlshell.ShellSurfaceFactory shellSurfaceFactory,
+            @Provided final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory,
             @Nonnull final WlCompositor wlCompositor) {
         super(display,
               WlShellResource.class,

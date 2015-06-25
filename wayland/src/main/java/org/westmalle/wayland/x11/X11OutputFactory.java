@@ -19,11 +19,11 @@ import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.westmalle.wayland.core.Output;
+import org.westmalle.wayland.core.OutputFactory;
+import org.westmalle.wayland.core.OutputGeometry;
+import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.nativ.*;
-import org.westmalle.wayland.output.Output;
-import org.westmalle.wayland.output.OutputFactory;
-import org.westmalle.wayland.output.OutputGeometry;
-import org.westmalle.wayland.output.OutputMode;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 

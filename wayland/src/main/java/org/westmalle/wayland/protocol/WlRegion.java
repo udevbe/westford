@@ -18,8 +18,8 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlRegionRequests;
 import org.freedesktop.wayland.server.WlRegionResource;
-import org.westmalle.wayland.output.Rectangle;
-import org.westmalle.wayland.output.Region;
+import org.westmalle.wayland.core.Rectangle;
+import org.westmalle.wayland.core.Region;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
