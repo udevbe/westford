@@ -122,6 +122,8 @@ public class XdgShell extends Global<XdgShellResource> implements XdgShellReques
     public XdgShellResource onBindClient(final Client client,
                                          final int version,
                                          final int id) {
-        return null;
+        return add(client,
+                   version,
+                   id);
     }
 }

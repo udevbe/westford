@@ -14,6 +14,7 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.shared.WlShmFormat;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -35,6 +36,9 @@ public class ShellService {
     public void start() {
         this.jobExecutor.start();
         this.display.initShm();
+        //TODO check return values of format add
+        this.display.addShmFormat(WlShmFormat.ARGB8888.getValue());
+        this.display.addShmFormat(WlShmFormat.XRGB8888.getValue());
         this.display.addSocket("wayland-0");
         this.display.run();
     }
