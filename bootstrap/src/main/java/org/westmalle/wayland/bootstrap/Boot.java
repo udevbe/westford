@@ -24,13 +24,13 @@ class Boot {
 
     private void strap(final OutputComponent outputComponent) {
 
-        final RendererFactory     rendererFactory     = outputComponent.shmRendererFactory();
-        final CompositorFactory   compositorFactory   = outputComponent.compositorFactory();
-        final WlCompositorFactory wlCompositorFactory = outputComponent.wlCompositorFactory();
-        final WlSeatFactory       wlSeatFactory       = outputComponent.wlSeatFactory();
+        final RendererFactory            rendererFactory            = outputComponent.shmRendererFactory();
+        final CompositorFactory          compositorFactory          = outputComponent.compositorFactory();
+        final WlCompositorFactory        wlCompositorFactory        = outputComponent.wlCompositorFactory();
+        final WlSeatFactory              wlSeatFactory              = outputComponent.wlSeatFactory();
         final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = outputComponent.wlDataDeviceManagerFactory();
-        final WlShellFactory      wlShellFactory      = outputComponent.wlShellFactory();
-        final XdgShellFactory     xdgShellFactory     = outputComponent.xdgShellFactory();
+        final WlShellFactory             wlShellFactory             = outputComponent.wlShellFactory();
+        final XdgShellFactory            xdgShellFactory            = outputComponent.xdgShellFactory();
 
         final X11OutputFactory outputFactory = outputComponent.x11Component()
                                                               .outputFactory();

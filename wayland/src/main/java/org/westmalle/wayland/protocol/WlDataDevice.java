@@ -14,19 +14,13 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.common.collect.Sets;
-
-import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.WlDataDeviceRequestsV2;
-import org.freedesktop.wayland.server.WlDataDeviceResource;
-import org.freedesktop.wayland.server.WlDataSourceResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
-
-import java.util.Set;
-import java.util.WeakHashMap;
+import org.freedesktop.wayland.server.*;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 public class WlDataDevice implements WlDataDeviceRequestsV2, ProtocolObject<WlDataDeviceResource> {
 

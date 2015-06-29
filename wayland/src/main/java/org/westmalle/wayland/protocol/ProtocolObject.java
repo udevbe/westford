@@ -15,6 +15,7 @@ package org.westmalle.wayland.protocol;
 
 import com.google.common.base.Preconditions;
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.Resource;
 
 import javax.annotation.Nonnegative;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface ProtocolObject<T extends Resource<?>> {
+
     /**
      * Get all resources currently associated with this protocol object.
      *
@@ -70,6 +72,13 @@ public interface ProtocolObject<T extends Resource<?>> {
         final T resource = create(client,
                                   version,
                                   id);
+        resource.addDestroyListener(new Listener() {
+            @Override
+            public void handle() {
+                remove();
+                getResources().remove(resource);
+            }
+        });
         getResources().add(resource);
         return resource;
     }

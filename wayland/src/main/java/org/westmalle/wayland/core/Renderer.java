@@ -20,6 +20,7 @@ import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoFactory(className = "RendererFactory")
 public class Renderer {
@@ -33,12 +34,11 @@ public class Renderer {
 
     public void render(@Nonnull final WlSurfaceResource surfaceResource) {
         final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
-        final WlBufferResource wlBufferResource = wlSurface.getSurface()
+        final Optional<WlBufferResource> buffer = wlSurface.getSurface()
                                                            .getState()
-                                                           .getBuffer()
-                                                           .get();
-        this.renderEngine.draw(surfaceResource,
-                               wlBufferResource);
+                                                           .getBuffer();
+        buffer.ifPresent(wlBufferResource -> this.renderEngine.draw(surfaceResource,
+                                                                    wlBufferResource));
     }
 
     public void beginRender(@Nonnull final WlOutput wlOutput) {

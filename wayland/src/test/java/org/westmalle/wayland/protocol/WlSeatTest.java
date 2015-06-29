@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
 public class WlSeatTest {
 
     @Mock
-    private Display display;
+    private Display      display;
     @Mock
     private WlDataDevice wlDataDevice;
 
@@ -167,8 +167,8 @@ public class WlSeatTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final WlSeat wlSeat  = new WlSeat(this.display,
-                                          this.wlDataDevice);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         final Client client  = mock(Client.class);
         final int    version = 2;
         final int    id      = 7;
