@@ -3,17 +3,28 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
+
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Global;
+import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.WlSeatResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.server.XdgPopupResource;
+import org.freedesktop.wayland.server.XdgShellRequests;
+import org.freedesktop.wayland.server.XdgShellResource;
+import org.freedesktop.wayland.server.XdgSurfaceResource;
 import org.westmalle.wayland.xdgshell.Popup;
 import org.westmalle.wayland.xdgshell.PopupFactory;
 import org.westmalle.wayland.xdgshell.Surface;
 import org.westmalle.wayland.xdgshell.SurfaceFactory;
 
+import java.util.Set;
+import java.util.WeakHashMap;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 @Singleton
 @AutoFactory(className = "XdgShellFactory")

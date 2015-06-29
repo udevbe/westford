@@ -28,6 +28,7 @@ class Boot {
         final CompositorFactory   compositorFactory   = outputComponent.compositorFactory();
         final WlCompositorFactory wlCompositorFactory = outputComponent.wlCompositorFactory();
         final WlSeatFactory       wlSeatFactory       = outputComponent.wlSeatFactory();
+        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = outputComponent.wlDataDeviceManagerFactory();
         final WlShellFactory      wlShellFactory      = outputComponent.wlShellFactory();
         final XdgShellFactory     xdgShellFactory     = outputComponent.xdgShellFactory();
 
@@ -59,6 +60,9 @@ class Boot {
         //create a wayland compositor that delegates it's requests to a shell implementation.
         final WlCompositor wlCompositor = wlCompositorFactory.create(compositor);
 
+        //create data device manager
+        wlDataDeviceManagerFactory.create();
+
         //setup seat
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
         //these objects will listen for input events
@@ -72,10 +76,8 @@ class Boot {
         //enable xdg_shell protocol
         //TODO implement xdg_shell protocol
         xdgShellFactory.create();
-    }
 
-    private void run(final OutputComponent outputComponent) {
-        //start all services, 1 thread per service & exit main thread.
+        //start the thingamabah
         outputComponent.shellService()
                        .start();
     }
@@ -85,6 +87,5 @@ class Boot {
 
         final Boot boot = new Boot();
         boot.strap(outputComponent);
-        boot.run(outputComponent);
     }
 }

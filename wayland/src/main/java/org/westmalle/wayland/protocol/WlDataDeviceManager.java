@@ -14,25 +14,31 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Global;
+import org.freedesktop.wayland.server.WlDataDeviceManagerRequestsV2;
+import org.freedesktop.wayland.server.WlDataDeviceManagerResource;
+import org.freedesktop.wayland.server.WlSeatResource;
+
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlDataDeviceManagerFactory")
-public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequests, ProtocolObject<WlDataDeviceManagerResource> {
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
+@AutoFactory
+public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequestsV2, ProtocolObject<WlDataDeviceManagerResource> {
 
     private final Set<WlDataDeviceManagerResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
     private final WlDataSourceFactory wlDataSourceFactory;
 
-    @Inject
-    WlDataDeviceManager(final Display display,
-                        final WlDataSourceFactory wlDataSourceFactory) {
+    WlDataDeviceManager(@Provided final Display display,
+                        @Provided final WlDataSourceFactory wlDataSourceFactory) {
         super(display,
               WlDataDeviceManagerResource.class,
               VERSION);
@@ -62,10 +68,10 @@ public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> imp
                               final int id,
                               @Nonnull final WlSeatResource seat) {
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
-//        wlSeat.getWlDataDevice()
-//              .add(requester.getClient(),
-//                   requester.getVersion(),
-//                   id);
+        wlSeat.getWlDataDevice()
+              .add(requester.getClient(),
+                   requester.getVersion(),
+                   id);
     }
 
     @Nonnull

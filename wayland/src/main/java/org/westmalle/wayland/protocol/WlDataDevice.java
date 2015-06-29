@@ -13,20 +13,26 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.WlDataDeviceRequestsV2;
+import org.freedesktop.wayland.server.WlDataDeviceResource;
+import org.freedesktop.wayland.server.WlDataSourceResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
+
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlDataDeviceFactory")
-public class WlDataDevice implements WlDataDeviceRequests, ProtocolObject<WlDataDeviceResource> {
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+
+public class WlDataDevice implements WlDataDeviceRequestsV2, ProtocolObject<WlDataDeviceResource> {
 
     private final Set<WlDataDeviceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
+    @Inject
     WlDataDevice() {}
 
     @Override
@@ -42,6 +48,11 @@ public class WlDataDevice implements WlDataDeviceRequests, ProtocolObject<WlData
     public void setSelection(final WlDataDeviceResource requester,
                              final WlDataSourceResource source,
                              final int serial) {
+
+    }
+
+    @Override
+    public void release(final WlDataDeviceResource requester) {
 
     }
 

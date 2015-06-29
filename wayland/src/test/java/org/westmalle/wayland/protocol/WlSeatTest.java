@@ -44,6 +44,8 @@ public class WlSeatTest {
 
     @Mock
     private Display display;
+    @Mock
+    private WlDataDevice wlDataDevice;
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
@@ -73,7 +75,8 @@ public class WlSeatTest {
                                                                  any(),
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         //when
         final WlSeatResource wlSeatResource = wlSeat.onBindClient(mock(Client.class),
                                                                   1,
@@ -94,7 +97,8 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
         final WlPointer wlPointer = mock(WlPointer.class);
 
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         wlSeat.getResources()
               .add(wlSeatResource);
         wlSeat.setWlPointer(wlPointer);
@@ -119,7 +123,8 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
         final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
 
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         wlSeat.getResources()
               .add(wlSeatResource);
         wlSeat.setWlKeyboard(wlKeyboard);
@@ -144,7 +149,8 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
         final WlTouch wlTouch = mock(WlTouch.class);
 
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         wlSeat.getResources()
               .add(wlSeatResource);
         wlSeat.setWlTouch(wlTouch);
@@ -161,7 +167,8 @@ public class WlSeatTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final WlSeat wlSeat  = new WlSeat(this.display);
+        final WlSeat wlSeat  = new WlSeat(this.display,
+                                          this.wlDataDevice);
         final Client client  = mock(Client.class);
         final int    version = 2;
         final int    id      = 7;
@@ -186,7 +193,8 @@ public class WlSeatTest {
         final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
         final WlPointer  wlPointer  = mock(WlPointer.class);
 
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         wlSeat.getResources()
               .add(wlSeatResource);
         //when
@@ -212,7 +220,8 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
         final WlPointer wlPointer = mock(WlPointer.class);
 
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         wlSeat.getResources()
               .add(wlSeatResource);
 
@@ -234,7 +243,8 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
         final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
 
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         wlSeat.getResources()
               .add(wlSeatResource);
 
@@ -256,7 +266,8 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
         final WlTouch wlTouch = mock(WlTouch.class);
 
-        final WlSeat wlSeat = new WlSeat(this.display);
+        final WlSeat wlSeat = new WlSeat(this.display,
+                                         this.wlDataDevice);
         wlSeat.getResources()
               .add(wlSeatResource);
 

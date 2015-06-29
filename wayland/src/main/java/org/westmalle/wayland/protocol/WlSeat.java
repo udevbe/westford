@@ -17,28 +17,37 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
+
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Global;
+import org.freedesktop.wayland.server.WlSeatRequestsV4;
+import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "WlSeatFactory")
 public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, ProtocolObject<WlSeatResource> {
 
     private final Set<WlSeatResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final WlDataDevice wlDataDevice;
 
     private Optional<WlPointer>  optionalWlPointer  = Optional.empty();
     private Optional<WlKeyboard> optionalWlKeyboard = Optional.empty();
     private Optional<WlTouch>    optionalWlTouch    = Optional.empty();
 
-    WlSeat(@Provided final Display display) {
+    WlSeat(@Provided final Display display,
+           @Provided WlDataDevice wlDataDevice) {
         super(display,
               WlSeatResource.class,
               VERSION);
+        this.wlDataDevice = wlDataDevice;
     }
 
     @Override
@@ -151,5 +160,9 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     public void removeWlTouch() {
         this.optionalWlTouch = Optional.empty();
         getResources().forEach(this::emiteCapabilities);
+    }
+
+    public WlDataDevice getWlDataDevice() {
+        return this.wlDataDevice;
     }
 }
