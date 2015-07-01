@@ -110,15 +110,17 @@ public class WlCompositorTest {
     public void testCreateSurface() throws Exception {
         //given
         final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        surfacesStack.add(wlSurfaceResource0);
         when(this.compositor.getSurfacesStack()).thenReturn(surfacesStack);
 
         final WlSurface wlSurface = mock(WlSurface.class);
         when(this.wlSurfaceFactory.create(any())).thenReturn(wlSurface);
 
-        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         when(wlSurface.add(any(),
                            anyInt(),
-                           anyInt())).thenReturn(wlSurfaceResource);
+                           anyInt())).thenReturn(wlSurfaceResource1);
 
         final WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
         final Client               client               = mock(Client.class);
@@ -143,18 +145,18 @@ public class WlCompositorTest {
         verify(wlSurface).add(client,
                               version,
                               id);
-
-        assertThat((Iterable) surfacesStack).contains(wlSurfaceResource);
+        assertThat((Iterable<WlSurfaceResource>) surfacesStack).containsExactly(wlSurfaceResource0,
+                                                                                wlSurfaceResource1).inOrder();
 
         final ArgumentCaptor<Listener> destroyListenerCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlSurfaceResource).addDestroyListener(destroyListenerCaptor.capture());
+        verify(wlSurfaceResource1).addDestroyListener(destroyListenerCaptor.capture());
         final Listener destroyListener = destroyListenerCaptor.getValue();
 
         //and later when
         destroyListener.handle();
 
         //then
-        assertThat((Iterable) surfacesStack).doesNotContain(wlSurfaceResource);
+        assertThat((Iterable) surfacesStack).doesNotContain(wlSurfaceResource1);
         verify(this.compositor).requestRender();
     }
 

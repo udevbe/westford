@@ -643,7 +643,7 @@ public class ShellSurfaceTest {
         shellSurface.toFront(wlSurfaceResource0);
 
         //then
-        assertThat(surfacesStack.getFirst()).isSameAs(wlSurfaceResource0);
+        assertThat(surfacesStack.getLast()).isSameAs(wlSurfaceResource0);
     }
 
     @Test
