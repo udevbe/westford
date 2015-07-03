@@ -16,16 +16,23 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-import org.freedesktop.wayland.server.*;
+
+import org.freedesktop.wayland.server.ShmBuffer;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlRegion;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
@@ -34,6 +41,8 @@ public class Surface {
     private final FiniteRegionFactory  finiteRegionFactory;
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
+
+    private Optional<Role> surfaceRole = Optional.empty();
 
     //pending state
     @Nonnull
@@ -85,11 +94,12 @@ public class Surface {
     @Nonnull
     public Surface markDamaged(@Nonnull final Rectangle damage) {
         final Region newDamage = getPendingState().getDamage()
-                                                  .orElse(this.finiteRegionFactory.create())
+                                                  .orElseGet(this.finiteRegionFactory::create)
                                                   .add(damage);
-        this.pendingState = getPendingState().toBuilder()
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
                                              .damage(Optional.of(newDamage))
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 
@@ -97,12 +107,13 @@ public class Surface {
     public Surface attachBuffer(@Nonnull final WlBufferResource buffer,
                                 final int dx,
                                 final int dy) {
-        this.pendingState = getPendingState().toBuilder()
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
                                              .buffer(Optional.of(buffer))
                                              .positionTransform(Transforms.TRANSLATE(dx,
                                                                                      dy)
-                                                                          .multiply(getState().getPositionTransform()))
+                                                                        .multiply(getState().getPositionTransform()))
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 
@@ -113,15 +124,30 @@ public class Surface {
 
     @Nonnull
     public Surface detachBuffer() {
-        this.pendingState = getPendingState().toBuilder()
+        SurfaceState pendingSurfaceState = getPendingState().toBuilder()
                                              .buffer(Optional.<WlBufferResource>empty())
                                              .damage(Optional.<Region>empty())
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
+    }
+
+    public Optional<Role> getSurfaceRole() {
+        return this.surfaceRole;
+    }
+
+    public void setRole(@Nonnull Role role){
+        this.surfaceRole = Optional.of(role);
+    }
+
+    public void setPendingState(@Nonnull final SurfaceState pendingState) {
+        this.pendingState = pendingState;
     }
 
     @Nonnull
     public Surface commit() {
+        getSurfaceRole().ifPresent(Role::beforeCommit);
+
         final Optional<WlBufferResource> buffer = getState().getBuffer();
         if (buffer.isPresent()) {
             //signal client that the previous buffer can be reused as we will now use the
@@ -132,7 +158,7 @@ public class Surface {
         //check update transformation
         final boolean needsTransformUpdate = needsTransformUpdate();
         //flush states
-        this.state = this.pendingState;
+        setState(getPendingState());
         if (needsTransformUpdate) {
             updateTransform();
         }
@@ -168,6 +194,10 @@ public class Surface {
     @Nonnull
     public SurfaceState getState() {
         return this.state;
+    }
+
+    public void setState(@Nonnull final SurfaceState state) {
+        this.state = state;
     }
 
     public boolean needsTransformUpdate() {
@@ -209,33 +239,41 @@ public class Surface {
 
     @Nonnull
     public Surface removeOpaqueRegion() {
-        this.pendingState = this.pendingState.toBuilder()
-                                             .opaqueRegion(Optional.<WlRegionResource>empty())
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
+                                             .opaqueRegion(Optional.<Region>empty())
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 
     @Nonnull
-    public Surface setOpaqueRegion(@Nonnull final WlRegionResource opaqueRegion) {
-        this.pendingState = this.pendingState.toBuilder()
-                                             .opaqueRegion(Optional.of(opaqueRegion))
+    public Surface setOpaqueRegion(@Nonnull final WlRegionResource wlRegionResource) {
+        final WlRegion wlRegion = (WlRegion) wlRegionResource.getImplementation();
+        final Region region = wlRegion.getRegion();
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
+                                             .opaqueRegion(Optional.of(region))
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 
     @Nonnull
     public Surface removeInputRegion() {
-        this.pendingState = this.pendingState.toBuilder()
-                                             .inputRegion(Optional.<WlRegionResource>empty())
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
+                                             .inputRegion(Optional.<Region>empty())
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 
     @Nonnull
-    public Surface setInputRegion(@Nonnull final WlRegionResource inputRegion) {
-        this.pendingState = this.pendingState.toBuilder()
-                                             .inputRegion(Optional.of(inputRegion))
+    public Surface setInputRegion(@Nonnull final WlRegionResource wlRegionResource) {
+        final WlRegion wlRegion = (WlRegion) wlRegionResource.getImplementation();
+        final Region region = wlRegion.getRegion();
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
+                                             .inputRegion(Optional.of(region))
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 
@@ -243,10 +281,11 @@ public class Surface {
     public Surface setPosition(@Nonnull final Point global) {
         final SurfaceState state = getState();
         final int          scale = state.getScale();
-        this.state = state.toBuilder()
+        final SurfaceState currentState = state.toBuilder()
                           .positionTransform(Transforms.TRANSLATE(global.getX() * scale,
                                                                   global.getY() * scale))
                           .build();
+        setState(currentState);
         updateTransform();
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
@@ -287,17 +326,19 @@ public class Surface {
     }
 
     public Surface setScale(@Nonnegative final int scale) {
-        this.pendingState = this.pendingState.toBuilder()
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
                                              .scale(scale)
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 
     @Nonnull
     public Surface setBufferTransform(@Nonnull final Mat4 bufferTransform) {
-        this.pendingState = this.pendingState.toBuilder()
+        SurfaceState pendingSurfaceState =  getPendingState().toBuilder()
                                              .bufferTransform(bufferTransform)
                                              .build();
+        setPendingState(pendingSurfaceState);
         return this;
     }
 

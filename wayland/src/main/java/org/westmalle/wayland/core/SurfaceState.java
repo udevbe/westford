@@ -1,20 +1,22 @@
 package org.westmalle.wayland.core;
 
 import com.google.auto.value.AutoValue;
+
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.core.calc.Mat4;
 
+import java.util.Optional;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 @AutoValue
 public abstract class SurfaceState {
 
     static Builder builder() {
-        return new AutoValue_SurfaceState.Builder().opaqueRegion(Optional.<WlRegionResource>empty())
-                                                   .inputRegion(Optional.<WlRegionResource>empty())
+        return new AutoValue_SurfaceState.Builder().opaqueRegion(Optional.<Region>empty())
+                                                   .inputRegion(Optional.<Region>empty())
                                                    .damage(Optional.<Region>empty())
                                                    .buffer(Optional.<WlBufferResource>empty())
                                                    .bufferTransform(Mat4.IDENTITY)
@@ -23,10 +25,10 @@ public abstract class SurfaceState {
     }
 
     @Nonnull
-    public abstract Optional<WlRegionResource> getOpaqueRegion();
+    public abstract Optional<Region> getOpaqueRegion();
 
     @Nonnull
-    public abstract Optional<WlRegionResource> getInputRegion();
+    public abstract Optional<Region> getInputRegion();
 
     @Nonnull
     public abstract Optional<Region> getDamage();
@@ -45,9 +47,9 @@ public abstract class SurfaceState {
 
     @AutoValue.Builder
     interface Builder {
-        Builder opaqueRegion(Optional<WlRegionResource> wlRegionResource);
+        Builder opaqueRegion(Optional<Region> wlRegionResource);
 
-        Builder inputRegion(Optional<WlRegionResource> wlRegionResource);
+        Builder inputRegion(Optional<Region> wlRegionResource);
 
         Builder damage(Optional<Region> damage);
 

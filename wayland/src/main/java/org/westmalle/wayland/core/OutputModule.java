@@ -13,13 +13,14 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import dagger.Module;
-import dagger.Provides;
 import org.freedesktop.wayland.server.Display;
 import org.westmalle.wayland.nativ.Libc;
 import org.westmalle.wayland.nativ.NativeModule;
 
 import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 
 @Module(includes = NativeModule.class)
 public class OutputModule {
@@ -28,6 +29,12 @@ public class OutputModule {
     @Singleton
     InfiniteRegion provideInfiniteRegion(final FiniteRegionFactory finiteRegionFactory) {
         return new InfiniteRegion(finiteRegionFactory);
+    }
+
+    @Provides
+    @Singleton
+    NullRegion provideNullRegion() {
+        return new NullRegion();
     }
 
     @Provides

@@ -17,20 +17,25 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import org.freedesktop.wayland.server.*;
+
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.WlPointerResource;
+import org.freedesktop.wayland.server.WlSurfaceRequests;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.Motion;
-import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice {
@@ -226,18 +231,9 @@ public class PointerDevice {
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
             final Surface surface = ((WlSurface) implementation).getSurface();
 
-            final Optional<WlRegionResource> inputRegion = surface.getState()
-                                                                  .getInputRegion();
-            final Region region;
-            if (inputRegion.isPresent()) {
-                final WlRegion wlRegion = (WlRegion) inputRegion.get()
-                                                                .getImplementation();
-                region = wlRegion.getRegion();
-            }
-            else {
-                region = this.infiniteRegion;
-            }
-
+            final Optional<Region> inputRegion = surface.getState()
+                                                        .getInputRegion();
+            final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
             if (region.contains(surface.getSize(),
                                 surface.local(getPosition()))) {
                 return Optional.of(surfaceResource);

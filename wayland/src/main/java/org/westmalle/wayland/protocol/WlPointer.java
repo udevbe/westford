@@ -14,13 +14,17 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlPointerRequestsV3;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.core.CursorRole;
 import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.Role;
+import org.westmalle.wayland.core.Surface;
 
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -33,9 +37,12 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
 
     private final Set<WlPointerResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
+    private final org.westmalle.wayland.core.CursorRoleFactory cursorRoleFactory;
     private final PointerDevice pointerDevice;
 
-    WlPointer(final PointerDevice pointerDevice) {
+    WlPointer(@Provided org.westmalle.wayland.core.CursorRoleFactory cursorRoleFactory,
+              final PointerDevice pointerDevice) {
+        this.cursorRoleFactory = cursorRoleFactory;
         this.pointerDevice = pointerDevice;
     }
 
@@ -45,12 +52,30 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
     }
 
     @Override
-    public void setCursor(final WlPointerResource requester,
+    public void setCursor(final WlPointerResource wlPointerResource,
                           final int serial,
-                          final WlSurfaceResource surface,
+                          final WlSurfaceResource wlSurfaceResource,
                           final int hotspotX,
                           final int hotspotY) {
 
+        WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface surface = wlSurface.getSurface();
+
+        final Role role = surface.getSurfaceRole().orElseGet(()-> cursorRoleFactory.create(wlSurfaceResource));
+
+        if (role instanceof CursorRole) {
+            //FIXME we need to check if the cursor role is assigned to this pointer but only if the previous
+            //pointer it was assigned to is not yet destroyed, else we need to raise a protocol error.
+            CursorRole cursorRole = (CursorRole) role;
+            cursorRole.hotSpot(hotspotX,
+                               hotspotY);
+            surface.setRole(cursorRole);
+            cursorRole.assigned(wlPointerResource);
+        } else {
+            //TODO raise protocol error, surface already has another role
+//                Resource<?> wlDisplayResource = wlPointerResource.getClient().getObjectById(Display.OBJECT_ID);
+//                wlDisplayResource.postError(code,msg);
+        }
     }
 
     @Nonnull
