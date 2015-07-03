@@ -46,6 +46,11 @@ public class WlDataOffer implements WlDataOfferRequests, ProtocolObject<WlDataOf
 
     }
 
+    @Override
+    public void destroy(final WlDataOfferResource resource) {
+        resource.destroy();
+    }
+
     @Nonnull
     @Override
     public Set<WlDataOfferResource> getResources() {
@@ -61,10 +66,5 @@ public class WlDataOffer implements WlDataOfferRequests, ProtocolObject<WlDataOf
                                        version,
                                        id,
                                        this);
-    }
-
-    @Override
-    public void destroy(final WlDataOfferResource resource) {
-        resource.destroy();
     }
 }

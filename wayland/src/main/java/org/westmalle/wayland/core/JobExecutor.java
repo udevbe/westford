@@ -59,15 +59,13 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     private final ReentrantLock        jobsLock    = new ReentrantLock();
     @Nonnull
     private final LinkedList<Runnable> pendingJobs = Lists.newLinkedList();
-
-    @Nonnull
-    private Optional<EventSource> eventSource = Optional.empty();
-
     @Nonnull
     private final Display display;
     private final int     pipeR;
     private final int     pipeWR;
     private final Libc    libc;
+    @Nonnull
+    private Optional<EventSource> eventSource = Optional.empty();
 
     @Inject
     JobExecutor(@Nonnull final Display display,
@@ -111,12 +109,10 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         }
     }
 
-    private void clean() {
-        this.libc.close(this.pipeR);
-        this.libc.close(this.pipeWR);
-        this.eventSource.get()
-                        .remove();
-        this.eventSource = Optional.empty();
+    private void fireNewJobEvent() {
+        this.libc.write(this.pipeWR,
+                        this.eventNewJobBuffer,
+                        1);
     }
 
     @Override
@@ -130,6 +126,21 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         }
 
         return 0;
+    }
+
+    private LinkedList<Runnable> commit() {
+        LinkedList<Runnable> jobs = NO_JOBS;
+        try {
+            this.jobsLock.lock();
+            if (!this.pendingJobs.isEmpty()) {
+                jobs = Lists.newLinkedList(this.pendingJobs);
+                this.pendingJobs.clear();
+            }
+        }
+        finally {
+            this.jobsLock.unlock();
+        }
+        return jobs;
     }
 
     private boolean handleNextEvent(final LinkedList<Runnable> jobs) {
@@ -155,24 +166,11 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         return this.eventReadBuffer.getByte(0);
     }
 
-    private LinkedList<Runnable> commit() {
-        LinkedList<Runnable> jobs = NO_JOBS;
-        try {
-            this.jobsLock.lock();
-            if (!this.pendingJobs.isEmpty()) {
-                jobs = Lists.newLinkedList(this.pendingJobs);
-                this.pendingJobs.clear();
-            }
-        }
-        finally {
-            this.jobsLock.unlock();
-        }
-        return jobs;
-    }
-
-    private void fireNewJobEvent() {
-        this.libc.write(this.pipeWR,
-                        this.eventNewJobBuffer,
-                        1);
+    private void clean() {
+        this.libc.close(this.pipeR);
+        this.libc.close(this.pipeWR);
+        this.eventSource.get()
+                        .remove();
+        this.eventSource = Optional.empty();
     }
 }

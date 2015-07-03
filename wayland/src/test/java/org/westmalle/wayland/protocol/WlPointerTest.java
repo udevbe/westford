@@ -24,20 +24,19 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.CursorRoleFactory;
 import org.westmalle.wayland.core.PointerDevice;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(WaylandServerLibrary.class)
 public class WlPointerTest {
 
     @Mock
-    private CursorRoleFactory cursorRoleFactory;
-    @Mock
-    private PointerDevice pointerDevice;
+    private PointerDevice               pointerDevice;
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
 
@@ -51,8 +50,7 @@ public class WlPointerTest {
     public void testRelease() throws Exception {
         //given
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
-        final WlPointer         wlPointer         = new WlPointer(this.cursorRoleFactory,
-                                                                  this.pointerDevice);
+        final WlPointer wlPointer = new WlPointer(this.pointerDevice);
         //when
         wlPointer.release(wlPointerResource);
         //then
@@ -62,11 +60,10 @@ public class WlPointerTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client    client    = mock(Client.class);
-        final int       version   = 1;
-        final int       id        = 1;
-        final WlPointer wlPointer = new WlPointer(this.cursorRoleFactory,
-                                                  this.pointerDevice);
+        final Client client  = mock(Client.class);
+        final int    version = 1;
+        final int    id      = 1;
+        final WlPointer wlPointer = new WlPointer(this.pointerDevice);
         //when
         final WlPointerResource wlPointerResource = wlPointer.create(client,
                                                                      version,

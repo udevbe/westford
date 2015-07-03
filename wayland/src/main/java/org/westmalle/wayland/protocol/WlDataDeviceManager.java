@@ -16,7 +16,12 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Global;
+import org.freedesktop.wayland.server.WlDataDeviceManagerRequestsV2;
+import org.freedesktop.wayland.server.WlDataDeviceManagerResource;
+import org.freedesktop.wayland.server.WlSeatResource;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

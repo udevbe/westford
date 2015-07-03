@@ -8,6 +8,22 @@ public abstract class Point {
 
     public static final Point ZERO = builder().build();
 
+    public Vec4 toVec4() {
+        return Vec4.create(getX(),
+                           getY(),
+                           0,
+                           1);
+    }
+
+    public abstract int getX();
+
+    public abstract int getY();
+
+    public Point add(final Point right) {
+        return Point.create(getX() + right.getX(),
+                            getY() + right.getY());
+    }
+
     public static Point create(final int x,
                                final int y) {
         return builder().x(x)
@@ -20,26 +36,12 @@ public abstract class Point {
                                             .y(0);
     }
 
-    public abstract int getX();
-
-    public abstract int getY();
-
-    public Vec4 toVec4() {
-        return Vec4.create(getX(),
-                           getY(),
-                           0,
-                           1);
-    }
-
-    public Point add(final Point right) {
-        return Point.create(getX() + right.getX(),
-                            getY() + right.getY());
-    }
-
     public Point subtract(final Point right) {
         return Point.create(getX() - right.getX(),
                             getY() - right.getY());
     }
+
+    public abstract Builder toBuilder();
 
     @AutoValue.Builder
     public interface Builder {
@@ -49,6 +51,4 @@ public abstract class Point {
 
         Point build();
     }
-
-    public abstract Builder toBuilder();
 }

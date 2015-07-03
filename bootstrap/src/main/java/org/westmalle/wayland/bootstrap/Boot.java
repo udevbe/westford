@@ -13,14 +13,33 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import org.westmalle.wayland.core.*;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.CompositorFactory;
+import org.westmalle.wayland.core.DaggerOutputComponent;
+import org.westmalle.wayland.core.OutputComponent;
+import org.westmalle.wayland.core.Renderer;
+import org.westmalle.wayland.core.RendererFactory;
 import org.westmalle.wayland.egl.EglGles2RenderEngine;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
-import org.westmalle.wayland.protocol.*;
+import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlCompositorFactory;
+import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
+import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlSeat;
+import org.westmalle.wayland.protocol.WlSeatFactory;
+import org.westmalle.wayland.protocol.WlShellFactory;
+import org.westmalle.wayland.protocol.XdgShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
 class Boot {
+
+    public static void main(final String[] args) {
+        final OutputComponent outputComponent = DaggerOutputComponent.create();
+
+        final Boot boot = new Boot();
+        boot.strap(outputComponent);
+    }
 
     private void strap(final OutputComponent outputComponent) {
 
@@ -80,12 +99,5 @@ class Boot {
         //start the thingamabah
         outputComponent.shellService()
                        .start();
-    }
-
-    public static void main(final String[] args) {
-        final OutputComponent outputComponent = DaggerOutputComponent.create();
-
-        final Boot boot = new Boot();
-        boot.strap(outputComponent);
     }
 }

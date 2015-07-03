@@ -13,7 +13,11 @@
 //limitations under the License.
 package org.westmalle.wayland.wlshell;
 
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.WlShellSurfaceResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +25,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.core.*;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.Point;
+import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.PointerGrabMotion;
+import org.westmalle.wayland.core.Rectangle;
+import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.Motion;
@@ -33,7 +42,11 @@ import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShellSurfaceTest {

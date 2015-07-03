@@ -15,13 +15,13 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class X11OutputTest {
 
+    private final int xWindow = 12345;
     @Mock
     private X11EglOutputFactory x11EglOutputFactory;
     @Mock
     private X11EventBus         x11EventBus;
     @Mock
     private Pointer             xcbConnection;
-    private final int xWindow = 12345;
     @Mock
     private Pointer              xDisplay;
     @Mock

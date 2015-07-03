@@ -24,7 +24,17 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.westmalle.wayland.nativ.LibGLESv2.*;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_COLOR_BUFFER_BIT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_DYNAMIC_DRAW;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_ELEMENT_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_FLOAT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_FRAGMENT_SHADER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_INFO_LOG_LENGTH;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TRIANGLES;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_UNSIGNED_INT;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_VERTEX_SHADER;
 
 @AutoFactory(className = "EglRenderEngineFactory")
 public class EglGles2RenderEngine implements RenderEngine {
@@ -113,6 +123,17 @@ public class EglGles2RenderEngine implements RenderEngine {
     }
 
     @Nonnull
+    private Memory getElementBuffer() {
+        if (this.elementBuffer == null) {
+            final Memory elementBuffer = new Memory(Integer.BYTES);
+            this.libGLESv2.glGenBuffers(1,
+                                        elementBuffer);
+            this.elementBuffer = elementBuffer;
+        }
+        return this.elementBuffer;
+    }
+
+    @Nonnull
     private Memory getBufferData() {
         if (this.bufferData == null) {
             final int[] elements = new int[]{0, 1, 2,
@@ -125,17 +146,6 @@ public class EglGles2RenderEngine implements RenderEngine {
                                   elements.length);
         }
         return this.bufferData;
-    }
-
-    @Nonnull
-    private Memory getElementBuffer() {
-        if (this.elementBuffer == null) {
-            final Memory elementBuffer = new Memory(Integer.BYTES);
-            this.libGLESv2.glGenBuffers(1,
-                                        elementBuffer);
-            this.elementBuffer = elementBuffer;
-        }
-        return this.elementBuffer;
     }
 
     @Nonnull
@@ -217,6 +227,16 @@ public class EglGles2RenderEngine implements RenderEngine {
         return surfaceData;
     }
 
+    private int queryShaderProgram(final Gles2BufferFormat bufferFormat) {
+        Integer shaderProgram = this.shaderPrograms.get(bufferFormat);
+        if (shaderProgram == null) {
+            shaderProgram = createShaderProgram(bufferFormat);
+            this.shaderPrograms.put(bufferFormat,
+                                    shaderProgram);
+        }
+        return shaderProgram;
+    }
+
     private Gles2BufferFormat queryBufferFormat(final ShmBuffer buffer) {
         final Gles2BufferFormat format;
         final int               bufferFormat = buffer.getFormat();
@@ -232,14 +252,51 @@ public class EglGles2RenderEngine implements RenderEngine {
         return format;
     }
 
-    private int queryShaderProgram(final Gles2BufferFormat bufferFormat) {
-        Integer shaderProgram = this.shaderPrograms.get(bufferFormat);
-        if (shaderProgram == null) {
-            shaderProgram = createShaderProgram(bufferFormat);
-            this.shaderPrograms.put(bufferFormat,
-                                    shaderProgram);
-        }
-        return shaderProgram;
+    private void configureShaders(final Integer program,
+                                  final Mat4 projection,
+                                  final float[] vertices) {
+        final int uniTrans = this.libGLESv2.glGetUniformLocation(program,
+                                                                 new NativeString("mu_projection").getPointer());
+        final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
+        projectionBuffer.write(0,
+                               projection.toArray(),
+                               0,
+                               16);
+        this.libGLESv2.glUniformMatrix4fv(uniTrans,
+                                          1,
+                                          false,
+                                          projectionBuffer);
+
+        final Memory verticesBuffer = new Memory(Float.BYTES * vertices.length);
+        verticesBuffer.write(0,
+                             vertices,
+                             0,
+                             vertices.length);
+        this.libGLESv2.glBufferData(GL_ARRAY_BUFFER,
+                                    vertices.length * Float.BYTES,
+                                    verticesBuffer,
+                                    GL_DYNAMIC_DRAW);
+
+        final int posAttrib = this.libGLESv2.glGetAttribLocation(program,
+                                                                 new NativeString("va_position").getPointer());
+        final int texAttrib = this.libGLESv2.glGetAttribLocation(program,
+                                                                 new NativeString("va_texcoord").getPointer());
+
+        this.libGLESv2.glEnableVertexAttribArray(posAttrib);
+        this.libGLESv2.glVertexAttribPointer(posAttrib,
+                                             2,
+                                             GL_FLOAT,
+                                             false,
+                                             4 * Float.BYTES,
+                                             null);
+
+        this.libGLESv2.glEnableVertexAttribArray(texAttrib);
+        this.libGLESv2.glVertexAttribPointer(texAttrib,
+                                             2,
+                                             GL_FLOAT,
+                                             false,
+                                             4 * Float.BYTES,
+                                             Pointer.createConstant(2 * Float.BYTES));
     }
 
     private int createShaderProgram(final Gles2BufferFormat bufferFormat) {
@@ -310,53 +367,6 @@ public class EglGles2RenderEngine implements RenderEngine {
             System.err.println("Error compiling the vertex shader: " + log.getString(0));
             System.exit(1);
         }
-    }
-
-    private void configureShaders(final Integer program,
-                                  final Mat4 projection,
-                                  final float[] vertices) {
-        final int uniTrans = this.libGLESv2.glGetUniformLocation(program,
-                                                                 new NativeString("mu_projection").getPointer());
-        final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
-        projectionBuffer.write(0,
-                               projection.toArray(),
-                               0,
-                               16);
-        this.libGLESv2.glUniformMatrix4fv(uniTrans,
-                                          1,
-                                          false,
-                                          projectionBuffer);
-
-        final Memory verticesBuffer = new Memory(Float.BYTES * vertices.length);
-        verticesBuffer.write(0,
-                             vertices,
-                             0,
-                             vertices.length);
-        this.libGLESv2.glBufferData(GL_ARRAY_BUFFER,
-                                    vertices.length * Float.BYTES,
-                                    verticesBuffer,
-                                    GL_DYNAMIC_DRAW);
-
-        final int posAttrib = this.libGLESv2.glGetAttribLocation(program,
-                                                                 new NativeString("va_position").getPointer());
-        final int texAttrib = this.libGLESv2.glGetAttribLocation(program,
-                                                                 new NativeString("va_texcoord").getPointer());
-
-        this.libGLESv2.glEnableVertexAttribArray(posAttrib);
-        this.libGLESv2.glVertexAttribPointer(posAttrib,
-                                             2,
-                                             GL_FLOAT,
-                                             false,
-                                             4 * Float.BYTES,
-                                             null);
-
-        this.libGLESv2.glEnableVertexAttribArray(texAttrib);
-        this.libGLESv2.glVertexAttribPointer(texAttrib,
-                                             2,
-                                             GL_FLOAT,
-                                             false,
-                                             4 * Float.BYTES,
-                                             Pointer.createConstant(2 * Float.BYTES));
     }
 
     @Override

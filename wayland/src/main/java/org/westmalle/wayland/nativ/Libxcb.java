@@ -21,25 +21,13 @@ import javax.inject.Singleton;
 @Singleton
 public class Libxcb {
 
-    static {
-        Native.register("xcb");
-    }
-
-    Libxcb() {
-    }
-
     public static final int XCB_ATOM_ATOM = 4;
-
     public static final int XCB_PROP_MODE_REPLACE = 0;
-
     public static final int XCB_GRAB_MODE_ASYNC = 1;
-
     public static final int XCB_CURSOR_NONE = 0;
-
     public static final long XCB_COPY_FROM_PARENT          = 0L;
     public static final int  XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
     public static final int  XCB_CW_EVENT_MASK             = 2048;
-
     public static final int XCB_EVENT_MASK_KEY_PRESS      = 1;
     public static final int XCB_EVENT_MASK_KEY_RELEASE    = 2;
     public static final int XCB_EVENT_MASK_BUTTON_PRESS   = 4;
@@ -49,7 +37,6 @@ public class Libxcb {
     public static final int XCB_EVENT_MASK_POINTER_MOTION = 64;
     public static final int XCB_EVENT_MASK_KEYMAP_STATE   = 16384;
     public static final int XCB_EVENT_MASK_FOCUS_CHANGE   = 2097152;
-
     public static final int XCB_KEY_PRESS      = 2;
     public static final int XCB_KEY_RELEASE    = 3;
     public static final int XCB_BUTTON_PRESS   = 4;
@@ -61,6 +48,12 @@ public class Libxcb {
     public static final int XCB_FOCUS_OUT      = 10;
     public static final int XCB_EXPOSE         = 12;
     public static final int XCB_CLIENT_MESSAGE = 33;
+
+    static {
+        Native.register("xcb");
+    }
+    Libxcb() {
+    }
 
     public native int xcb_flush(Pointer c);
 

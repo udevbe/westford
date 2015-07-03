@@ -2,7 +2,6 @@ package org.westmalle.wayland.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
@@ -20,10 +19,9 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface {
@@ -137,6 +135,31 @@ public class ShellSurface {
                                  });
     }
 
+    private WlShellSurfaceResize quadrant(final int edges) {
+        switch (edges) {
+            case 0:
+                return WlShellSurfaceResize.NONE;
+            case 1:
+                return WlShellSurfaceResize.TOP;
+            case 2:
+                return WlShellSurfaceResize.BOTTOM;
+            case 4:
+                return WlShellSurfaceResize.LEFT;
+            case 5:
+                return WlShellSurfaceResize.TOP_LEFT;
+            case 6:
+                return WlShellSurfaceResize.BOTTOM_LEFT;
+            case 8:
+                return WlShellSurfaceResize.RIGHT;
+            case 9:
+                return WlShellSurfaceResize.TOP_RIGHT;
+            case 10:
+                return WlShellSurfaceResize.BOTTOM_RIGHT;
+            default:
+                return WlShellSurfaceResize.NONE;
+        }
+    }
+
     private Mat4 transform(@Nonnull final WlShellSurfaceResize quadrant,
                            @Nonnull final Rectangle size,
                            @Nonnull final Point pointerLocal) {
@@ -235,32 +258,6 @@ public class ShellSurface {
         return transformationBuilder.m30(transformation.getM30() + pointerdx)
                                     .m31(transformation.getM31() + pointerdy)
                                     .build();
-    }
-
-
-    private WlShellSurfaceResize quadrant(final int edges) {
-        switch (edges) {
-            case 0:
-                return WlShellSurfaceResize.NONE;
-            case 1:
-                return WlShellSurfaceResize.TOP;
-            case 2:
-                return WlShellSurfaceResize.BOTTOM;
-            case 4:
-                return WlShellSurfaceResize.LEFT;
-            case 5:
-                return WlShellSurfaceResize.TOP_LEFT;
-            case 6:
-                return WlShellSurfaceResize.BOTTOM_LEFT;
-            case 8:
-                return WlShellSurfaceResize.RIGHT;
-            case 9:
-                return WlShellSurfaceResize.TOP_RIGHT;
-            case 10:
-                return WlShellSurfaceResize.BOTTOM_RIGHT;
-            default:
-                return WlShellSurfaceResize.NONE;
-        }
     }
 
     public void toFront(@Nonnull final WlSurfaceResource wlSurfaceResource) {

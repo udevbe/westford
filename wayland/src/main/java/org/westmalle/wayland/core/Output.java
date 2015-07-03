@@ -23,11 +23,11 @@ import java.util.Set;
 public class Output {
 
     @Nonnull
+    private final Object         outputImplementation;
+    @Nonnull
     private       OutputGeometry outputGeometry;
     @Nonnull
     private       OutputMode     outputMode;
-    @Nonnull
-    private final Object         outputImplementation;
 
     Output(@Nonnull final OutputGeometry outputGeometry,
            @Nonnull final OutputMode outputMode,

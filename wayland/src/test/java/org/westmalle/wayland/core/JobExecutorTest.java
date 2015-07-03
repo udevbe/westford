@@ -29,17 +29,23 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.nativ.Libc;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.verifyNoMoreInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JobExecutorTest {
 
-    @Mock
-    private Display display;
     private final int pipeR  = 1;
     private final int pipeWR = 2;
+    @Mock
+    private Display display;
     @Mock
     private Libc libc;
 

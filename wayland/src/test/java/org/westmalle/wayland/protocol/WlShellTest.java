@@ -14,7 +14,12 @@
 package org.westmalle.wayland.protocol;
 
 import com.sun.jna.Pointer;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.WlShellResource;
+import org.freedesktop.wayland.server.WlShellSurfaceResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.util.InterfaceMeta;
@@ -32,7 +37,10 @@ import org.westmalle.wayland.wlshell.ShellSurfaceFactory;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

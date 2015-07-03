@@ -39,6 +39,23 @@ public abstract class Vec4 {
                    .build();
     }
 
+    public static Builder builder() {
+        return new AutoValue_Vec4.Builder().x(0)
+                                           .y(0)
+                                           .z(0)
+                                           .w(0);
+    }
+
+    public abstract Builder toBuilder();
+
+    public Vec4 add(@Nonnull final Vec4 right) {
+        //TODO unit test
+        return Vec4.create(getX() + right.getX(),
+                           getY() + right.getY(),
+                           getZ() + right.getZ(),
+                           getW() + right.getW());
+    }
+
     public static Vec4 create(final float x,
                               final float y,
                               final float z,
@@ -51,13 +68,6 @@ public abstract class Vec4 {
                    .build();
     }
 
-    public static Builder builder() {
-        return new AutoValue_Vec4.Builder().x(0)
-                                           .y(0)
-                                           .z(0)
-                                           .w(0);
-    }
-
     public abstract float getX();
 
     public abstract float getY();
@@ -66,7 +76,13 @@ public abstract class Vec4 {
 
     public abstract float getW();
 
-    public abstract Builder toBuilder();
+    public Vec4 subtract(@Nonnull final Vec4 right) {
+        //TODO unit test
+        return Vec4.create(getX() - right.getX(),
+                           getY() - right.getY(),
+                           getZ() - right.getZ(),
+                           getW() - right.getW());
+    }
 
     @AutoValue.Builder
     public interface Builder {
@@ -80,21 +96,5 @@ public abstract class Vec4 {
         Builder w(float z);
 
         Vec4 build();
-    }
-
-    public Vec4 add(@Nonnull final Vec4 right) {
-        //TODO unit test
-        return Vec4.create(getX() + right.getX(),
-                           getY() + right.getY(),
-                           getZ() + right.getZ(),
-                           getW() + right.getW());
-    }
-
-    public Vec4 subtract(@Nonnull final Vec4 right) {
-        //TODO unit test
-        return Vec4.create(getX() - right.getX(),
-                           getY() - right.getY(),
-                           getZ() - right.getZ(),
-                           getW() - right.getW());
     }
 }

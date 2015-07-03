@@ -2,7 +2,11 @@ package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.WlOutputResource;
+import org.freedesktop.wayland.server.WlSeatResource;
+import org.freedesktop.wayland.server.XdgSurfaceRequests;
+import org.freedesktop.wayland.server.XdgSurfaceResource;
 import org.westmalle.wayland.xdgshell.Surface;
 
 import javax.annotation.Nonnegative;

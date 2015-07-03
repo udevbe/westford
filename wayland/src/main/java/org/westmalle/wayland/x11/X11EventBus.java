@@ -19,12 +19,35 @@ import com.google.common.eventbus.EventBus;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import org.freedesktop.wayland.server.EventLoop;
-import org.westmalle.wayland.nativ.*;
+import org.westmalle.wayland.nativ.Libc;
+import org.westmalle.wayland.nativ.Libxcb;
+import org.westmalle.wayland.nativ.xcb_button_press_event_t;
+import org.westmalle.wayland.nativ.xcb_button_release_event_t;
+import org.westmalle.wayland.nativ.xcb_client_message_data_t;
+import org.westmalle.wayland.nativ.xcb_enter_notify_event_t;
+import org.westmalle.wayland.nativ.xcb_expose_event_t;
+import org.westmalle.wayland.nativ.xcb_focus_in_event_t;
+import org.westmalle.wayland.nativ.xcb_focus_out_event_t;
+import org.westmalle.wayland.nativ.xcb_generic_event_t;
+import org.westmalle.wayland.nativ.xcb_key_press_event_t;
+import org.westmalle.wayland.nativ.xcb_key_release_event_t;
+import org.westmalle.wayland.nativ.xcb_leave_notify_event_t;
+import org.westmalle.wayland.nativ.xcb_motion_notify_event_t;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.westmalle.wayland.nativ.Libxcb.*;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_BUTTON_PRESS;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_BUTTON_RELEASE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_CLIENT_MESSAGE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_ENTER_NOTIFY;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EXPOSE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_FOCUS_IN;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_FOCUS_OUT;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_KEY_PRESS;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_KEY_RELEASE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_LEAVE_NOTIFY;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_MOTION_NOTIFY;
 
 @AutoFactory
 public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
@@ -43,6 +66,20 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         this.libxcb = libxcb;
         this.libc = libc;
         this.xcbConnection = xcbConnection;
+    }
+
+    public void register(final Object listener) {
+        this.eventBus.register(listener);
+    }
+
+    @Override
+    public int handle(final int fd,
+                      final int mask) {
+        xcb_generic_event_t event;
+        while ((event = this.libxcb.xcb_poll_for_event(this.xcbConnection)) != null) {
+            post(event);
+        }
+        return 0;
     }
 
     private void post(final xcb_generic_event_t event) {
@@ -103,19 +140,5 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
             this.eventBus.post(specificEvent);
         }
         this.libc.free(event.getPointer());
-    }
-
-    public void register(final Object listener) {
-        this.eventBus.register(listener);
-    }
-
-    @Override
-    public int handle(final int fd,
-                      final int mask) {
-        xcb_generic_event_t event;
-        while ((event = this.libxcb.xcb_poll_for_event(this.xcbConnection)) != null) {
-            post(event);
-        }
-        return 0;
     }
 }

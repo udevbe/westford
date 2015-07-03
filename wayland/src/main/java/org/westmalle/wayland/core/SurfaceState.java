@@ -1,15 +1,12 @@
 package org.westmalle.wayland.core;
 
 import com.google.auto.value.AutoValue;
-
 import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.core.calc.Mat4;
-
-import java.util.Optional;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoValue
 public abstract class SurfaceState {
@@ -45,6 +42,8 @@ public abstract class SurfaceState {
     @Nonnegative
     abstract int getScale();
 
+    abstract Builder toBuilder();
+
     @AutoValue.Builder
     interface Builder {
         Builder opaqueRegion(Optional<Region> wlRegionResource);
@@ -63,6 +62,4 @@ public abstract class SurfaceState {
 
         SurfaceState build();
     }
-
-    abstract Builder toBuilder();
 }

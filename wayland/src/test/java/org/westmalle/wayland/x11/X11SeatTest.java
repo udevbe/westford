@@ -22,8 +22,12 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.mockito.Mockito.*;
-import static org.westmalle.wayland.nativ.Input.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.westmalle.wayland.nativ.Input.BTN_LEFT;
+import static org.westmalle.wayland.nativ.Input.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11SeatTest {
@@ -46,18 +50,6 @@ public class X11SeatTest {
     public void testHandleButtonPressLeft() throws Exception {
         testHandleButtonPress((byte) 1,
                               BTN_LEFT);
-    }
-
-    @Test
-    public void testHandleButtonPressMiddle() throws Exception {
-        testHandleButtonPress((byte) 2,
-                              BTN_MIDDLE);
-    }
-
-    @Test
-    public void testHandleButtonPressRight() throws Exception {
-        testHandleButtonPress((byte) 3,
-                              BTN_RIGHT);
     }
 
     private void testHandleButtonPress(final byte xEventDetail,
@@ -91,21 +83,21 @@ public class X11SeatTest {
     }
 
     @Test
+    public void testHandleButtonPressMiddle() throws Exception {
+        testHandleButtonPress((byte) 2,
+                              BTN_MIDDLE);
+    }
+
+    @Test
+    public void testHandleButtonPressRight() throws Exception {
+        testHandleButtonPress((byte) 3,
+                              BTN_RIGHT);
+    }
+
+    @Test
     public void testHandleButtonReleaseLeft() throws Exception {
         testHandleButtonRelease((byte) 1,
                                 BTN_LEFT);
-    }
-
-    @Test
-    public void testHandleButtonReleaseMiddle() throws Exception {
-        testHandleButtonRelease((byte) 2,
-                                BTN_MIDDLE);
-    }
-
-    @Test
-    public void testHandleButtonReleaseRight() throws Exception {
-        testHandleButtonRelease((byte) 3,
-                                BTN_RIGHT);
     }
 
     private void testHandleButtonRelease(final byte xEventDetail,
@@ -136,6 +128,18 @@ public class X11SeatTest {
                                      compositorTime,
                                      waylandEventDetail,
                                      WlPointerButtonState.RELEASED);
+    }
+
+    @Test
+    public void testHandleButtonReleaseMiddle() throws Exception {
+        testHandleButtonRelease((byte) 2,
+                                BTN_MIDDLE);
+    }
+
+    @Test
+    public void testHandleButtonReleaseRight() throws Exception {
+        testHandleButtonRelease((byte) 3,
+                                BTN_RIGHT);
     }
 
     @Test

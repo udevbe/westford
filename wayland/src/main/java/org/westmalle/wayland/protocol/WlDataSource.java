@@ -41,6 +41,11 @@ public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlData
         this.mimeTypes.add(mimeType);
     }
 
+    @Override
+    public void destroy(final WlDataSourceResource resource) {
+        resource.destroy();
+    }
+
     @Nonnull
     @Override
     public Set<WlDataSourceResource> getResources() {
@@ -56,10 +61,5 @@ public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlData
                                         version,
                                         id,
                                         this);
-    }
-
-    @Override
-    public void destroy(final WlDataSourceResource resource) {
-        resource.destroy();
     }
 }

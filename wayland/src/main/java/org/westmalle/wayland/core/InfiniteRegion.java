@@ -46,15 +46,15 @@ public class InfiniteRegion implements Region {
     }
 
     @Override
+    public boolean contains(@Nonnull final Point point) {
+        return true;
+    }
+
+    @Override
     public boolean contains(@Nonnull final Rectangle clipping,
                             @Nonnull final Point point) {
         return this.finiteRegionFactory.create()
                                        .add(clipping)
                                        .contains(point);
-    }
-
-    @Override
-    public boolean contains(@Nonnull final Point point) {
-        return true;
     }
 }

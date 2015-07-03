@@ -14,19 +14,24 @@ import org.westmalle.wayland.nativ.LibEGL;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-import static org.westmalle.wayland.nativ.LibEGL.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_OPENGL_API;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_OPENGL_ES_API;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_PLATFORM_X11_KHR;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11EglOutputFactoryTest {
 
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
     @Mock
     private LibEGL              libEGL;
     @InjectMocks
     private X11EglOutputFactory x11EglOutputFactory;
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void testCreateNoEsAPi() throws Exception {

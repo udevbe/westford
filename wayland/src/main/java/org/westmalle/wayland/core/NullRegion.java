@@ -1,14 +1,13 @@
 package org.westmalle.wayland.core;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
+import java.util.List;
 
 @Singleton
-public class NullRegion implements Region{
+public class NullRegion implements Region {
 
     @Inject
     NullRegion() {
@@ -38,7 +37,8 @@ public class NullRegion implements Region{
     }
 
     @Override
-    public boolean contains(@Nonnull final Rectangle clipping, @Nonnull final Point point) {
+    public boolean contains(@Nonnull final Rectangle clipping,
+                            @Nonnull final Point point) {
         return false;
     }
 }

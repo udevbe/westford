@@ -18,13 +18,6 @@ import com.sun.jna.Pointer;
 
 public class LibEGL {
 
-    static {
-        Native.register("EGL");
-    }
-
-    LibEGL() {
-    }
-
     public static final Pointer EGL_NO_DISPLAY              = Pointer.createConstant(0);
     public static final int     EGL_PLATFORM_ANDROID_KHR    = 0x3141;
     public static final int     EGL_PLATFORM_GBM_KHR        = 0x31D7;
@@ -63,6 +56,11 @@ public class LibEGL {
     public static final int     EGL_RENDER_BUFFER           = 0x3086;
     public static final int     EGL_SINGLE_BUFFER           = 0x3085;
 
+    static {
+        Native.register("EGL");
+    }
+    LibEGL() {
+    }
 
     public native boolean eglBindWaylandDisplayWL(Pointer dpy,
                                                   Pointer display);

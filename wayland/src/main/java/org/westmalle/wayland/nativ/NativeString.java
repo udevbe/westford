@@ -14,7 +14,6 @@ package org.westmalle.wayland.nativ;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.WString;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
@@ -40,17 +39,6 @@ public class NativeString implements CharSequence, Comparable {
     public NativeString(final String string) {
         this(string,
              Native.getDefaultStringEncoding());
-    }
-
-    public NativeString(final String string,
-                        final boolean wide) {
-        this(string,
-             wide ? WIDE_STRING : Native.getDefaultStringEncoding());
-    }
-
-    public NativeString(final WString string) {
-        this(string.toString(),
-             WIDE_STRING);
     }
 
     public NativeString(final String string,
@@ -106,6 +94,11 @@ public class NativeString implements CharSequence, Comparable {
         return other instanceof CharSequence && compareTo(other) == 0;
     }
 
+    public int compareTo(@Nonnull final Object other) {
+
+        return toString().compareTo(other.toString());
+    }
+
     @Nonnull
     public String toString() {
         final boolean wide = Objects.equals(this.encoding,
@@ -118,12 +111,12 @@ public class NativeString implements CharSequence, Comparable {
         return this.pointer;
     }
 
-    public char charAt(final int index) {
-        return toString().charAt(index);
-    }
-
     public int length() {
         return toString().length();
+    }
+
+    public char charAt(final int index) {
+        return toString().charAt(index);
     }
 
     public CharSequence subSequence(final int start,
@@ -131,10 +124,5 @@ public class NativeString implements CharSequence, Comparable {
         return CharBuffer.wrap(toString())
                          .subSequence(start,
                                       end);
-    }
-
-    public int compareTo(@Nonnull final Object other) {
-
-        return toString().compareTo(other.toString());
     }
 }

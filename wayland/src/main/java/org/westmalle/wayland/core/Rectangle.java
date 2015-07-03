@@ -28,10 +28,6 @@ public abstract class Rectangle {
                                                 .height(0);
     }
 
-    public abstract int getX();
-
-    public abstract int getY();
-
     @Nonnegative
     public abstract int getWidth();
 
@@ -43,6 +39,12 @@ public abstract class Rectangle {
         return Point.create(getX(),
                             getY());
     }
+
+    public abstract int getX();
+
+    public abstract int getY();
+
+    public abstract Builder toBuilder();
 
     @AutoValue.Builder
     public interface Builder {
@@ -56,6 +58,4 @@ public abstract class Rectangle {
 
         Rectangle build();
     }
-
-    public abstract Builder toBuilder();
 }

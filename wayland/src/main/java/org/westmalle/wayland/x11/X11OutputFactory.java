@@ -23,7 +23,15 @@ import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.nativ.*;
+import org.westmalle.wayland.nativ.LibX11;
+import org.westmalle.wayland.nativ.LibX11xcb;
+import org.westmalle.wayland.nativ.Libc;
+import org.westmalle.wayland.nativ.Libxcb;
+import org.westmalle.wayland.nativ.NativeString;
+import org.westmalle.wayland.nativ.xcb_client_message_event_t;
+import org.westmalle.wayland.nativ.xcb_intern_atom_cookie_t;
+import org.westmalle.wayland.nativ.xcb_intern_atom_reply_t;
+import org.westmalle.wayland.nativ.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
@@ -35,7 +43,20 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.westmalle.wayland.nativ.LibX11xcb.XCBOwnsEventQueue;
-import static org.westmalle.wayland.nativ.Libxcb.*;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_ATOM_ATOM;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_COPY_FROM_PARENT;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_CW_EVENT_MASK;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_FOCUS_CHANGE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_KEYMAP_STATE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_KEY_PRESS;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_KEY_RELEASE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_PROP_MODE_REPLACE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
 
 public class X11OutputFactory {
 
@@ -169,33 +190,6 @@ public class X11OutputFactory {
         return window;
     }
 
-    private Output createOutput(final X11Output x11Output,
-                                final int width,
-                                final int height,
-                                final xcb_screen_t screen) {
-        final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(0)
-                                                            .y(0)
-                                                            .subpixel(0)
-                                                            .make("Westmalle xcb")
-                                                            .model("X11")
-                                                            .physicalWidth((width / screen.width_in_pixels)
-                                                                           * screen.width_in_millimeters)
-                                                            .physicalHeight((height / screen.height_in_pixels)
-                                                                            * screen.height_in_millimeters)
-                                                            .transform(WlOutputTransform.NORMAL.getValue())
-                                                            .build();
-        final OutputMode outputMode = OutputMode.builder()
-                                                .flags(0)
-                                                .height(height)
-                                                .width(width)
-                                                .refresh(60)
-                                                .build();
-        return this.outputFactory.create(outputGeometry,
-                                         outputMode,
-                                         x11Output);
-    }
-
     private X11Output createX11Output(final Pointer xDisplay,
                                       final Pointer connection,
                                       final int window) {
@@ -228,35 +222,31 @@ public class X11OutputFactory {
                              x11Atoms);
     }
 
-    private void handle(final xcb_client_message_event_t event,
-                        final Map<String, Integer> x11Atoms) {
-        final int atom   = event.data.data32[0];
-        final int window = event.window;
-        if (atom == x11Atoms.get("WM_DELETE_WINDOW")) {
-            //TODO destroy window & terminate compositor if no more outputs are left.
-        }
-    }
-
-    private void setName(final Pointer connection,
-                         final int window,
-                         final Map<String, Integer> x11Atoms) {
-        final NativeString titleNativeString = new NativeString("Westmalle");
-        this.libxcb.xcb_change_property(connection,
-                                        (byte) XCB_PROP_MODE_REPLACE,
-                                        window,
-                                        x11Atoms.get("_NET_WM_NAME"),
-                                        x11Atoms.get("UTF8_STRING"),
-                                        (byte) 8,
-                                        titleNativeString.length(),
-                                        titleNativeString.getPointer());
-        this.libxcb.xcb_change_property(connection,
-                                        (byte) XCB_PROP_MODE_REPLACE,
-                                        window,
-                                        x11Atoms.get("WM_CLASS"),
-                                        x11Atoms.get("STRING"),
-                                        (byte) 8,
-                                        titleNativeString.length(),
-                                        titleNativeString.getPointer());
+    private Output createOutput(final X11Output x11Output,
+                                final int width,
+                                final int height,
+                                final xcb_screen_t screen) {
+        final OutputGeometry outputGeometry = OutputGeometry.builder()
+                                                            .x(0)
+                                                            .y(0)
+                                                            .subpixel(0)
+                                                            .make("Westmalle xcb")
+                                                            .model("X11")
+                                                            .physicalWidth((width / screen.width_in_pixels)
+                                                                           * screen.width_in_millimeters)
+                                                            .physicalHeight((height / screen.height_in_pixels)
+                                                                            * screen.height_in_millimeters)
+                                                            .transform(WlOutputTransform.NORMAL.getValue())
+                                                            .build();
+        final OutputMode outputMode = OutputMode.builder()
+                                                .flags(0)
+                                                .height(height)
+                                                .width(width)
+                                                .refresh(60)
+                                                .build();
+        return this.outputFactory.create(outputGeometry,
+                                         outputMode,
+                                         x11Output);
     }
 
     private Map<String, Integer> internX11Atoms(final Pointer connection) {
@@ -315,5 +305,36 @@ public class X11OutputFactory {
                                         (byte) 32,
                                         1,
                                         list);
+    }
+
+    private void setName(final Pointer connection,
+                         final int window,
+                         final Map<String, Integer> x11Atoms) {
+        final NativeString titleNativeString = new NativeString("Westmalle");
+        this.libxcb.xcb_change_property(connection,
+                                        (byte) XCB_PROP_MODE_REPLACE,
+                                        window,
+                                        x11Atoms.get("_NET_WM_NAME"),
+                                        x11Atoms.get("UTF8_STRING"),
+                                        (byte) 8,
+                                        titleNativeString.length(),
+                                        titleNativeString.getPointer());
+        this.libxcb.xcb_change_property(connection,
+                                        (byte) XCB_PROP_MODE_REPLACE,
+                                        window,
+                                        x11Atoms.get("WM_CLASS"),
+                                        x11Atoms.get("STRING"),
+                                        (byte) 8,
+                                        titleNativeString.length(),
+                                        titleNativeString.getPointer());
+    }
+
+    private void handle(final xcb_client_message_event_t event,
+                        final Map<String, Integer> x11Atoms) {
+        final int atom   = event.data.data32[0];
+        final int window = event.window;
+        if (atom == x11Atoms.get("WM_DELETE_WINDOW")) {
+            //TODO destroy window & terminate compositor if no more outputs are left.
+        }
     }
 }

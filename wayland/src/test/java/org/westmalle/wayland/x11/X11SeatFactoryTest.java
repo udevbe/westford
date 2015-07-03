@@ -6,12 +6,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.*;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.JobExecutor;
+import org.westmalle.wayland.core.Keyboard;
+import org.westmalle.wayland.core.KeyboardFactory;
+import org.westmalle.wayland.core.Output;
+import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.protocol.*;
+import org.westmalle.wayland.protocol.WlKeyboard;
+import org.westmalle.wayland.protocol.WlKeyboardFactory;
+import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlPointer;
+import org.westmalle.wayland.protocol.WlPointerFactory;
+import org.westmalle.wayland.protocol.WlSeat;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WlPointerFactory.class,

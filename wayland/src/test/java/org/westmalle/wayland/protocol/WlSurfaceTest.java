@@ -13,7 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlRegionResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.shared.WlOutputTransform;
@@ -30,7 +36,11 @@ import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

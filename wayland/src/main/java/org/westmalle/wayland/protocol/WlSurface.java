@@ -16,7 +16,13 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlRegionResource;
+import org.freedesktop.wayland.server.WlSurfaceRequestsV3;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.freedesktop.wayland.shared.WlSurfaceError;
 import org.westmalle.wayland.core.Rectangle;
@@ -38,74 +44,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
     private final Set<WlSurfaceResource> resources       = Sets.newSetFromMap(new WeakHashMap<>());
-    private       Optional<Listener>     destroyListener = Optional.empty();
-
     private final WlCallbackFactory wlCallbackFactory;
     private final Surface           surface;
+    private       Optional<Listener>     destroyListener = Optional.empty();
 
     WlSurface(@Provided final WlCallbackFactory wlCallbackFactory,
               final Surface surface) {
         this.wlCallbackFactory = wlCallbackFactory;
         this.surface = surface;
-    }
-
-    public Surface getSurface() {
-        return this.surface;
-    }
-
-    @Override
-    public void setBufferScale(final WlSurfaceResource resource,
-                               @Nonnegative final int scale) {
-        if (scale > 0) {
-            getSurface().setScale(scale);
-        }
-        else {
-            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
-                               String.format("Invalid scale %d. Scale must be positive integer.",
-                                             scale));
-        }
-    }
-
-    @Override
-    public void setBufferTransform(final WlSurfaceResource resource,
-                                   final int transform) {
-        this.surface.setBufferTransform(getMatrix(resource,
-                                                  transform));
-    }
-
-    private Mat4 getMatrix(final WlSurfaceResource resource,
-                           final int transform) {
-        if (WlOutputTransform.NORMAL.getValue() == transform) {
-            return Transforms.NORMAL;
-        }
-        else if (WlOutputTransform._90.getValue() == transform) {
-            return Transforms._90;
-        }
-        else if (WlOutputTransform._180.getValue() == transform) {
-            return Transforms._180;
-        }
-        else if (WlOutputTransform._270.getValue() == transform) {
-            return Transforms._270;
-        }
-        else if (WlOutputTransform.FLIPPED.getValue() == transform) {
-            return Transforms.FLIPPED;
-        }
-        else if (WlOutputTransform.FLIPPED_90.getValue() == transform) {
-            return Transforms.FLIPPED_90;
-        }
-        else if (WlOutputTransform.FLIPPED_180.getValue() == transform) {
-            return Transforms.FLIPPED_180;
-        }
-        else if (WlOutputTransform.FLIPPED_270.getValue() == transform) {
-            return Transforms.FLIPPED_270;
-        }
-        else {
-            resource.postError(WlSurfaceError.INVALID_TRANSFORM.getValue(),
-                               String.format("Invalid transform %d. Supported values are %s.",
-                                             transform,
-                                             Arrays.asList(WlOutputTransform.values())));
-            return Transforms.NORMAL;
-        }
     }
 
     @Nonnull
@@ -124,7 +70,6 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                                      id,
                                      this);
     }
-
 
     @Override
     public void destroy(final WlSurfaceResource resource) {
@@ -197,29 +142,74 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
     @Override
     public void commit(final WlSurfaceResource requester) {
         removeBufferDestroyListener();
-        getSurface().commit();
+        final Surface surface = getSurface();
+        surface.getSurfaceRole()
+               .ifPresent(role -> role.beforeCommit(requester));
+        surface.commit();
+    }
+
+    @Override
+    public void setBufferTransform(final WlSurfaceResource resource,
+                                   final int transform) {
+        this.surface.setBufferTransform(getMatrix(resource,
+                                                  transform));
+    }
+
+    @Override
+    public void setBufferScale(final WlSurfaceResource resource,
+                               @Nonnegative final int scale) {
+        if (scale > 0) {
+            getSurface().setScale(scale);
+        }
+        else {
+            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
+                               String.format("Invalid scale %d. Scale must be positive integer.",
+                                             scale));
+        }
+    }
+
+    public Surface getSurface() {
+        return this.surface;
+    }
+
+    private Mat4 getMatrix(final WlSurfaceResource resource,
+                           final int transform) {
+        if (WlOutputTransform.NORMAL.getValue() == transform) {
+            return Transforms.NORMAL;
+        }
+        else if (WlOutputTransform._90.getValue() == transform) {
+            return Transforms._90;
+        }
+        else if (WlOutputTransform._180.getValue() == transform) {
+            return Transforms._180;
+        }
+        else if (WlOutputTransform._270.getValue() == transform) {
+            return Transforms._270;
+        }
+        else if (WlOutputTransform.FLIPPED.getValue() == transform) {
+            return Transforms.FLIPPED;
+        }
+        else if (WlOutputTransform.FLIPPED_90.getValue() == transform) {
+            return Transforms.FLIPPED_90;
+        }
+        else if (WlOutputTransform.FLIPPED_180.getValue() == transform) {
+            return Transforms.FLIPPED_180;
+        }
+        else if (WlOutputTransform.FLIPPED_270.getValue() == transform) {
+            return Transforms.FLIPPED_270;
+        }
+        else {
+            resource.postError(WlSurfaceError.INVALID_TRANSFORM.getValue(),
+                               String.format("Invalid transform %d. Supported values are %s.",
+                                             transform,
+                                             Arrays.asList(WlOutputTransform.values())));
+            return Transforms.NORMAL;
+        }
     }
 
     private void detachBuffer() {
         removeBufferDestroyListener();
         getSurface().detachBuffer();
-    }
-
-    private void addBufferDestroyListener(final WlBufferResource buffer) {
-        final Listener listener = new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                WlSurface.this.detachBuffer();
-            }
-        };
-        this.destroyListener = Optional.of(listener);
-        buffer.addDestroyListener(listener);
-    }
-
-    private void removeBufferDestroyListener() {
-        this.destroyListener.ifPresent(Listener::remove);
-        this.destroyListener = Optional.empty();
     }
 
     private void attachBuffer(final WlBufferResource buffer,
@@ -232,5 +222,22 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
         getSurface().attachBuffer(buffer,
                                   x,
                                   y);
+    }
+
+    private void removeBufferDestroyListener() {
+        this.destroyListener.ifPresent(Listener::remove);
+        this.destroyListener = Optional.empty();
+    }
+
+    private void addBufferDestroyListener(final WlBufferResource buffer) {
+        final Listener listener = new Listener() {
+            @Override
+            public void handle() {
+                remove();
+                WlSurface.this.detachBuffer();
+            }
+        };
+        this.destroyListener = Optional.of(listener);
+        buffer.addDestroyListener(listener);
     }
 }

@@ -2,7 +2,11 @@ package org.westmalle.wayland.core;
 
 import dagger.Component;
 import org.westmalle.wayland.egl.EglComponent;
-import org.westmalle.wayland.protocol.*;
+import org.westmalle.wayland.protocol.WlCompositorFactory;
+import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
+import org.westmalle.wayland.protocol.WlSeatFactory;
+import org.westmalle.wayland.protocol.WlShellFactory;
+import org.westmalle.wayland.protocol.XdgShellFactory;
 import org.westmalle.wayland.x11.X11Component;
 
 import javax.inject.Singleton;

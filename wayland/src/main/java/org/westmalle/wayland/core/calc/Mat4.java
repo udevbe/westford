@@ -28,6 +28,17 @@ public abstract class Mat4 {
                                                     0.f, 0.f, 0.f, 1.f);
     //@formatter:on
 
+    public abstract Builder toBuilder();
+
+    public Mat4 add(final Mat4 other) {
+        //@formatter:off
+        return Mat4.create(getM00() + other.getM00(), getM10() + other.getM10(), getM20() + other.getM20(), getM30() + other.getM30(),
+                           getM01() + other.getM01(), getM11() + other.getM11(), getM21() + other.getM21(), getM31() + other.getM31(),
+                           getM02() + other.getM02(), getM12() + other.getM12(), getM22() + other.getM22(), getM32() + other.getM32(),
+                           getM03() + other.getM03(), getM13() + other.getM13(), getM23() + other.getM23(), getM33() + other.getM33());
+        //@formatter:on
+    }
+
     /**
      * Construct a new matrix. Arguments are in column major order.
      *
@@ -65,6 +76,86 @@ public abstract class Mat4 {
         //@formatter:on
     }
 
+    /**
+     * @return Column 0, Row 0
+     */
+    public abstract float getM00();
+
+    /**
+     * @return Column 1, Row 0
+     */
+    public abstract float getM10();
+
+    /**
+     * @return Column 2, Row 0
+     */
+    public abstract float getM20();
+
+    /**
+     * @return Column 3, Row 0
+     */
+    public abstract float getM30();
+
+    /**
+     * @return Column 0, Row 1
+     */
+    public abstract float getM01();
+
+    /**
+     * @return Column 1, Row 1
+     */
+    public abstract float getM11();
+
+    /**
+     * @return Column 2, Row 1
+     */
+    public abstract float getM21();
+
+    /**
+     * @return Column 3, Row 1
+     */
+    public abstract float getM31();
+
+    /**
+     * @return Column 0, Row 2
+     */
+    public abstract float getM02();
+
+    /**
+     * @return Column 1, Row 2
+     */
+    public abstract float getM12();
+
+    /**
+     * @return Column 2, Row 2
+     */
+    public abstract float getM22();
+
+    /**
+     * @return Column 3, Row 2
+     */
+    public abstract float getM32();
+
+    /**
+     * @return Column 0, Row 3
+     */
+    public abstract float getM03();
+
+    /**
+     * @return Column 1, Row 3
+     */
+    public abstract float getM13();
+
+    /**
+     * @return Column 2, Row 3
+     */
+    public abstract float getM23();
+
+    /**
+     * @return Column 3, Row 3
+     */
+    public abstract float getM33();
+
     public static Builder builder() {
         //@formatter:off
         return new AutoValue_Mat4.Builder()
@@ -73,135 +164,6 @@ public abstract class Mat4 {
                                  .m02(0.f).m12(0.f).m22(0.f).m32(0.f)
                                  .m03(0.f).m13(0.f).m23(0.f).m33(0.f);
         //@formatter:on
-    }
-
-    /**
-     * @return Column 0, Row 0
-     */
-    public abstract float getM00();
-
-    /**
-     * @return Column 0, Row 1
-     */
-    public abstract float getM01();
-
-    /**
-     * @return Column 0, Row 2
-     */
-    public abstract float getM02();
-
-    /**
-     * @return Column 0, Row 3
-     */
-    public abstract float getM03();
-
-    /**
-     * @return Column 1, Row 0
-     */
-    public abstract float getM10();
-
-    /**
-     * @return Column 1, Row 1
-     */
-    public abstract float getM11();
-
-    /**
-     * @return Column 1, Row 2
-     */
-    public abstract float getM12();
-
-    /**
-     * @return Column 1, Row 3
-     */
-    public abstract float getM13();
-
-    /**
-     * @return Column 2, Row 0
-     */
-    public abstract float getM20();
-
-    /**
-     * @return Column 2, Row 1
-     */
-    public abstract float getM21();
-
-    /**
-     * @return Column 2, Row 2
-     */
-    public abstract float getM22();
-
-    /**
-     * @return Column 2, Row 3
-     */
-    public abstract float getM23();
-
-    /**
-     * @return Column 3, Row 0
-     */
-    public abstract float getM30();
-
-    /**
-     * @return Column 3, Row 1
-     */
-    public abstract float getM31();
-
-    /**
-     * @return Column 3, Row 2
-     */
-    public abstract float getM32();
-
-    /**
-     * @return Column 3, Row 3
-     */
-    public abstract float getM33();
-
-    public abstract Builder toBuilder();
-
-    public Mat4 add(final Mat4 other) {
-        //@formatter:off
-        return Mat4.create(getM00() + other.getM00(), getM10() + other.getM10(), getM20() + other.getM20(), getM30() + other.getM30(),
-                           getM01() + other.getM01(), getM11() + other.getM11(), getM21() + other.getM21(), getM31() + other.getM31(),
-                           getM02() + other.getM02(), getM12() + other.getM12(), getM22() + other.getM22(), getM32() + other.getM32(),
-                           getM03() + other.getM03(), getM13() + other.getM13(), getM23() + other.getM23(), getM33() + other.getM33());
-        //@formatter:on
-    }
-
-    @AutoValue.Builder
-    public interface Builder {
-
-        Builder m00(float element);
-
-        Builder m01(float element);
-
-        Builder m02(float element);
-
-        Builder m03(float element);
-
-        Builder m10(float element);
-
-        Builder m11(float element);
-
-        Builder m12(float element);
-
-        Builder m13(float element);
-
-        Builder m20(float element);
-
-        Builder m21(float element);
-
-        Builder m22(float element);
-
-        Builder m23(float element);
-
-        Builder m30(float element);
-
-        Builder m31(float element);
-
-        Builder m32(float element);
-
-        Builder m33(float element);
-
-        Mat4 build();
     }
 
     @Nonnull
@@ -364,5 +326,43 @@ public abstract class Mat4 {
                getM01() + " " + getM11() + " " + getM21() + " " + getM31() + "\n" +
                getM02() + " " + getM12() + " " + getM22() + " " + getM32() + "\n" +
                getM03() + " " + getM13() + " " + getM23() + " " + getM33() + "\n";
+    }
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder m00(float element);
+
+        Builder m01(float element);
+
+        Builder m02(float element);
+
+        Builder m03(float element);
+
+        Builder m10(float element);
+
+        Builder m11(float element);
+
+        Builder m12(float element);
+
+        Builder m13(float element);
+
+        Builder m20(float element);
+
+        Builder m21(float element);
+
+        Builder m22(float element);
+
+        Builder m23(float element);
+
+        Builder m30(float element);
+
+        Builder m31(float element);
+
+        Builder m32(float element);
+
+        Builder m33(float element);
+
+        Mat4 build();
     }
 }

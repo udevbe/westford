@@ -21,23 +21,30 @@ import org.westmalle.wayland.nativ.LibGLESv2;
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
-import static org.westmalle.wayland.nativ.LibGLESv2.*;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_CLAMP_TO_EDGE;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_NEAREST;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_RGBA;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_2D;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_MAG_FILTER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_MIN_FILTER;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_WRAP_S;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_WRAP_T;
+import static org.westmalle.wayland.nativ.LibGLESv2.GL_UNSIGNED_BYTE;
 
 public class Gles2SurfaceData {
+
+    private final Memory tex;
+    private       int    width;
+    private       int    height;
+    private Gles2SurfaceData(final Memory tex) {
+        this.tex = tex;
+    }
 
     public static Gles2SurfaceData create(@Nonnull final LibGLESv2 libGLESv2) {
         final Memory tex = new Memory(Integer.BYTES);
         libGLESv2.glGenTextures(1,
                                 tex);
         return new Gles2SurfaceData(tex);
-    }
-
-    private final Memory tex;
-    private       int    width;
-    private       int    height;
-
-    private Gles2SurfaceData(final Memory tex) {
-        this.tex = tex;
     }
 
     public void init(@Nonnull final LibGLESv2 libGLESv2,
@@ -72,6 +79,10 @@ public class Gles2SurfaceData {
                                   GL_NEAREST);
     }
 
+    private Memory getTexture() {
+        return this.tex;
+    }
+
     public void makeActive(@Nonnull final LibGLESv2 libGLESv2,
                            @Nonnull final ShmBuffer buffer) {
 
@@ -98,10 +109,6 @@ public class Gles2SurfaceData {
 
     public int getHeight() {
         return this.height;
-    }
-
-    private Memory getTexture() {
-        return this.tex;
     }
 
     public void destroy(@Nonnull final LibGLESv2 libGLESv2) {

@@ -1,8 +1,7 @@
 package org.westmalle.wayland.core;
 
-import org.freedesktop.wayland.server.Resource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 
-public interface Role<T extends Resource<?>> {
-    void assigned(T protocolRoleObject);
-    void beforeCommit();
+public interface Role {
+    void beforeCommit(WlSurfaceResource wlSurfaceResource);
 }

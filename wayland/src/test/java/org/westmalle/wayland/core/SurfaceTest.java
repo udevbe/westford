@@ -13,7 +13,11 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.ShmBuffer;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlCallbackResource;
+import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlRegionResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +28,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.protocol.WlCompositor;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 

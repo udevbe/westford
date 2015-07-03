@@ -17,13 +17,26 @@ import com.google.common.eventbus.Subscribe;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.JobExecutor;
-import org.westmalle.wayland.nativ.*;
+import org.westmalle.wayland.nativ.Libxcb;
+import org.westmalle.wayland.nativ.xcb_button_press_event_t;
+import org.westmalle.wayland.nativ.xcb_button_release_event_t;
+import org.westmalle.wayland.nativ.xcb_key_press_event_t;
+import org.westmalle.wayland.nativ.xcb_key_release_event_t;
+import org.westmalle.wayland.nativ.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 
-import static org.westmalle.wayland.nativ.Input.*;
-import static org.westmalle.wayland.nativ.Libxcb.*;
+import static org.westmalle.wayland.nativ.Input.BTN_LEFT;
+import static org.westmalle.wayland.nativ.Input.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_CURSOR_NONE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
+import static org.westmalle.wayland.nativ.Libxcb.XCB_GRAB_MODE_ASYNC;
 
 public class X11Seat {
 
@@ -77,24 +90,6 @@ public class X11Seat {
                                                                                           wlPointerButtonState)));
     }
 
-    private int linuxInput(final int eventDetail) {
-        final int button;
-        switch (eventDetail) {
-            case 1:
-                button = BTN_LEFT;
-                break;
-            case 2:
-                button = BTN_MIDDLE;
-                break;
-            case 3:
-                button = BTN_RIGHT;
-                break;
-            default:
-                button = 0;
-        }
-        return button;
-    }
-
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
                                                       final boolean pressed) {
         final WlPointerButtonState wlPointerButtonState;
@@ -120,6 +115,24 @@ public class X11Seat {
             wlPointerButtonState = WlPointerButtonState.RELEASED;
         }
         return wlPointerButtonState;
+    }
+
+    private int linuxInput(final int eventDetail) {
+        final int button;
+        switch (eventDetail) {
+            case 1:
+                button = BTN_LEFT;
+                break;
+            case 2:
+                button = BTN_MIDDLE;
+                break;
+            case 3:
+                button = BTN_RIGHT;
+                break;
+            default:
+                button = 0;
+        }
+        return button;
     }
 
     @Subscribe

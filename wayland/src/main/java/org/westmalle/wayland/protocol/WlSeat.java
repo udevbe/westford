@@ -17,7 +17,11 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Global;
+import org.freedesktop.wayland.server.WlSeatRequestsV4;
+import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 
 import javax.annotation.Nonnegative;
@@ -37,7 +41,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     private Optional<WlTouch>    optionalWlTouch    = Optional.empty();
 
     WlSeat(@Provided final Display display,
-           @Provided WlDataDevice wlDataDevice) {
+           @Provided final WlDataDevice wlDataDevice) {
         super(display,
               WlSeatResource.class,
               VERSION);
@@ -81,6 +85,15 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                                            id));
     }
 
+    public Optional<WlKeyboard> getOptionalWlKeyboard() {
+        return this.optionalWlKeyboard;
+    }
+
+    public void setWlKeyboard(final WlKeyboard newWlKeyboard) {
+        this.optionalWlKeyboard = Optional.of(newWlKeyboard);
+        getResources().forEach(this::emiteCapabilities);
+    }
+
     @Nonnull
     @Override
     public Set<WlSeatResource> getResources() {
@@ -112,15 +125,6 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
             capabilities |= WlSeatCapability.TOUCH.getValue();
         }
         wlSeatResource.capabilities(capabilities);
-    }
-
-    public Optional<WlKeyboard> getOptionalWlKeyboard() {
-        return this.optionalWlKeyboard;
-    }
-
-    public void setWlKeyboard(final WlKeyboard newWlKeyboard) {
-        this.optionalWlKeyboard = Optional.of(newWlKeyboard);
-        getResources().forEach(this::emiteCapabilities);
     }
 
     public void removeWlKeyboard() {

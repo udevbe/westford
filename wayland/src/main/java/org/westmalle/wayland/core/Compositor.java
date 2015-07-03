@@ -65,6 +65,11 @@ public class Compositor {
         this.renderer.endRender(wlOutput);
     }
 
+    @Nonnull
+    public LinkedList<WlSurfaceResource> getSurfacesStack() {
+        return this.surfacesStack;
+    }
+
     public void requestRender() {
         if (!this.renderEvent.isPresent()) {
             renderScene();
@@ -79,11 +84,6 @@ public class Compositor {
     @Nonnegative
     public int getTime() {
         return (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-    }
-
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getSurfacesStack() {
-        return this.surfacesStack;
     }
 
     @Nonnull

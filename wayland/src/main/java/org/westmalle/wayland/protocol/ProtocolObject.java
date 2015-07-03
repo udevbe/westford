@@ -27,14 +27,6 @@ import java.util.Set;
 public interface ProtocolObject<T extends Resource<?>> {
 
     /**
-     * Get all resources currently associated with this protocol object.
-     *
-     * @return All associated resources.
-     */
-    @Nonnull
-    Set<T> getResources();
-
-    /**
      * Get the only resource (if any) associated with this protocol object.
      * This method is a convenience method for protocol objects that should have
      * only a single resource associated with it.
@@ -54,6 +46,14 @@ public interface ProtocolObject<T extends Resource<?>> {
             return Optional.empty();
         }
     }
+
+    /**
+     * Get all resources currently associated with this protocol object.
+     *
+     * @return All associated resources.
+     */
+    @Nonnull
+    Set<T> getResources();
 
     /**
      * Associate a new resource object with this protocol object.

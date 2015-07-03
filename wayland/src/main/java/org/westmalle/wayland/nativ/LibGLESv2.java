@@ -4,13 +4,6 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 public class LibGLESv2 {
-    static {
-        Native.register("GLESv2");
-    }
-
-    LibGLESv2() {
-    }
-
     public static final int GL_VERTEX_SHADER        = 0x8B31;
     public static final int GL_FRAGMENT_SHADER      = 0x8B30;
     public static final int GL_COMPILE_STATUS       = 0x8B81;
@@ -33,6 +26,11 @@ public class LibGLESv2 {
     public static final int GL_TEXTURE_MAG_FILTER   = 0x2800;
     public static final int GL_RGBA                 = 0x1908;
 
+    static {
+        Native.register("GLESv2");
+    }
+    LibGLESv2() {
+    }
 
     public native void glViewport(int x,
                                   int y,

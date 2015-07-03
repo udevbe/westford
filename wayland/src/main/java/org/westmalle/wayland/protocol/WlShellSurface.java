@@ -15,7 +15,12 @@ package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.WlOutputResource;
+import org.freedesktop.wayland.server.WlSeatResource;
+import org.freedesktop.wayland.server.WlShellSurfaceRequests;
+import org.freedesktop.wayland.server.WlShellSurfaceResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
@@ -125,6 +130,15 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
         this.shellSurface.setClazz(Optional.of(class_));
     }
 
+    public ShellSurface getShellSurface() {
+        return this.shellSurface;
+    }
+
+    @Nonnull
+    public WlSurfaceResource getWlSurfaceResource() {
+        return this.wlSurfaceResource;
+    }
+
     @Nonnull
     @Override
     public Set<WlShellSurfaceResource> getResources() {
@@ -140,14 +154,5 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                                           version,
                                           id,
                                           this);
-    }
-
-    @Nonnull
-    public WlSurfaceResource getWlSurfaceResource() {
-        return this.wlSurfaceResource;
-    }
-
-    public ShellSurface getShellSurface() {
-        return this.shellSurface;
     }
 }
