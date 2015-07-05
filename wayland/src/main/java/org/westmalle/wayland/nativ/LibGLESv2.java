@@ -29,6 +29,7 @@ public class LibGLESv2 {
     static {
         Native.register("GLESv2");
     }
+
     LibGLESv2() {
     }
 

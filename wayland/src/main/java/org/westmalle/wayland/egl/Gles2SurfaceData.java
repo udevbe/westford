@@ -36,6 +36,7 @@ public class Gles2SurfaceData {
     private final Memory tex;
     private       int    width;
     private       int    height;
+
     private Gles2SurfaceData(final Memory tex) {
         this.tex = tex;
     }

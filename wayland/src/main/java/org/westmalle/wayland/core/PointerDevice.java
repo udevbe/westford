@@ -15,12 +15,12 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -32,20 +32,21 @@ import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
     @Nonnull
-    private final EventBus                            inputBus       = new EventBus();
+    private final EventBus            inputBus       = new EventBus();
     @Nonnull
-    private final Set<Integer>                        pressedButtons = new HashSet<>();
+    private final Set<Integer>        pressedButtons = new HashSet<>();
     @Nonnull
-    private final Multimap<WlPointerResource, Cursor> cursors        = HashMultimap.create();
+    private final Map<Client, Cursor> cursors        = new HashMap<>();
     @Nonnull
     private final InfiniteRegion infiniteRegion;
     private final NullRegion     nullRegion;
@@ -56,11 +57,13 @@ public class PointerDevice implements Role {
     @Nonnull
     private final Display        display;
     @Nonnull
-    private Point position = Point.ZERO;
+    private Point                       position = Point.ZERO;
     @Nonnull
-    private Optional<WlSurfaceResource> grab  = Optional.empty();
+    private Optional<WlSurfaceResource> grab     = Optional.empty();
     @Nonnull
-    private Optional<WlSurfaceResource> focus = Optional.empty();
+    private Optional<WlSurfaceResource> focus    = Optional.empty();
+    @Nonnull
+    private Optional<Cursor>            cursor   = Optional.empty();
     private int pointerSerial;
     @Nonnegative
     private int buttonsPressed;
@@ -98,6 +101,7 @@ public class PointerDevice implements Role {
         final Optional<WlSurfaceResource> newFocus = over();
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
+        updateCursor();
 
         if (getGrab().isPresent()) {
             if (!oldFocus.equals(newFocus)) {
@@ -158,6 +162,26 @@ public class PointerDevice implements Role {
         }
 
         return Optional.empty();
+    }
+
+    private void updateCursor() {
+        //hide the 'old' cursor, we'll make it visible again after this method has finished.
+        this.cursor.ifPresent(Cursor::hide);
+
+        if (this.focus.isPresent()) {
+            final Cursor cursor = this.cursors.get(this.focus.get()
+                                                             .getClient());
+            this.cursor = Optional.ofNullable(cursor);
+        }
+        else {
+            this.cursor = Optional.empty();
+        }
+
+        //we've choosen a (new) cursor, make that one visible.
+        this.cursor.ifPresent(clientCursor -> {
+            clientCursor.updatePosition(getPosition());
+            clientCursor.show();
+        });
     }
 
     @Nonnull
@@ -358,9 +382,8 @@ public class PointerDevice implements Role {
 
     public void removeCursor(final WlPointerResource wlPointerResource,
                              final int serial) {
-        final Collection<Cursor> pointerCursors = this.cursors.get(wlPointerResource);
-        pointerCursors.removeIf(cursor -> cursor.getWlPointerResource()
-                                                .equals(wlPointerResource));
+        this.cursors.remove(wlPointerResource.getClient())
+                    .hide();
     }
 
     public void setCursor(final WlPointerResource wlPointerResource,
@@ -369,44 +392,47 @@ public class PointerDevice implements Role {
                           final int hotspotX,
                           final int hotspotY) {
 
-        final Collection<Cursor> pointerCursors = this.cursors.get(wlPointerResource);
+        Cursor cursor = this.cursors.get(wlPointerResource.getClient());
 
-        Cursor cursor = null;
-        for (final Cursor pointerCursor : pointerCursors) {
-            if (pointerCursor.getWlSurfaceResource()
-                             .equals(wlSurfaceResource)) {
-                cursor = pointerCursor;
-                break;
-            }
-        }
         if (cursor == null) {
-            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Surface surface = wlSurface.getSurface();
-            surface.setState(surface.getState()
-                                    .toBuilder()
-                                    .inputRegion(Optional.of(this.nullRegion))
-                                    .build());
-
-            cursor = this.cursorFactory.create(wlPointerResource,
-                                               wlSurfaceResource);
-            cursor.updateCursorPosition(getPosition());
-            pointerCursors.add(cursor);
-
-            //if the role object is destroyed, the surface should be 'reset' and become invisible until
-            //a new role object of the same type is assigned to it.
+            cursor = create(wlSurfaceResource);
             wlPointerResource.addDestroyListener(new Listener() {
                 @Override
                 public void handle() {
                     remove();
-                    //TODO hide surface
-                    surface.setPosition(Point.ZERO);
-                    PointerDevice.this.cursors.removeAll(wlPointerResource);
+                    PointerDevice.this.cursors.get(wlPointerResource.getClient())
+                                              .hide();
                 }
             });
+            wlSurfaceResource.addDestroyListener(new Listener() {
+                @Override
+                public void handle() {
+                    remove();
+                    PointerDevice.this.cursors.remove(wlSurfaceResource.getClient());
+                }
+            });
+            this.cursors.put(wlPointerResource.getClient(),
+                             cursor);
         }
 
-        cursor.setHotspot(Point.create(hotspotX,
-                                       hotspotY));
+        cursor.update(wlSurfaceResource,
+                      Point.create(hotspotX,
+                                   hotspotY));
+        cursor.show();
+        //TODO request render?
+    }
+
+    private Cursor create(final WlSurfaceResource wlSurfaceResource) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+        surface.setState(surface.getState()
+                                .toBuilder()
+                                .inputRegion(Optional.of(this.nullRegion))
+                                .build());
+
+        final Cursor cursor = this.cursorFactory.create();
+        cursor.updatePosition(getPosition());
+        return cursor;
     }
 
     @Override
@@ -414,11 +440,20 @@ public class PointerDevice implements Role {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        surface.setPendingState(surface.getPendingState()
-                                       .toBuilder()
-                                       .inputRegion(Optional.of(this.nullRegion))
-                                       .build());
+        final SurfaceState         pendingState        = surface.getPendingState();
+        final SurfaceState.Builder pendingStateBuilder = pendingState.toBuilder();
 
-        //TODO if the surface does not match the current cursor, hide the surface
+        pendingStateBuilder.inputRegion(Optional.of(this.nullRegion));
+        pendingStateBuilder.buffer(Optional.<WlBufferResource>empty());
+
+        this.cursor.ifPresent(clientCursor -> {
+            if (clientCursor.getWlSurfaceResource()
+                            .equals(wlSurfaceResource) && !clientCursor.isHidden()) {
+                //set back the buffer we cleared.
+                pendingStateBuilder.buffer(pendingState.getBuffer());
+            }
+        });
+
+        surface.setPendingState(pendingStateBuilder.build());
     }
 }

@@ -17,11 +17,11 @@ public class X11OutputTest {
 
     private final int xWindow = 12345;
     @Mock
-    private X11EglOutputFactory x11EglOutputFactory;
+    private X11EglOutputFactory  x11EglOutputFactory;
     @Mock
-    private X11EventBus         x11EventBus;
+    private X11EventBus          x11EventBus;
     @Mock
-    private Pointer             xcbConnection;
+    private Pointer              xcbConnection;
     @Mock
     private Pointer              xDisplay;
     @Mock

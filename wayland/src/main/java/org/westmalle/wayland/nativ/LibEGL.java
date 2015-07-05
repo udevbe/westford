@@ -59,6 +59,7 @@ public class LibEGL {
     static {
         Native.register("EGL");
     }
+
     LibEGL() {
     }
 

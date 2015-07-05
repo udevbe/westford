@@ -24,33 +24,34 @@ import javax.inject.Singleton;
 public class Libc {
 
     /* command values */
-    public static final int F_DUPFD = 0;	/* duplicate file descriptor */
-    public static final int F_GETFD = 1;		/* get file descriptor flags */
-    public static final int F_SETFD = 2;		/* set file descriptor flags */
-    public static final int F_GETFL = 3;		/* get file status flags */
-    public static final int F_SETFL = 4;		/* set file status flags */
-    public static final int F_GETOWN = 5;	/* get SIGIO/SIGURG proc/pgrp */
-    public static final int F_SETOWN = 6;	/* set SIGIO/SIGURG proc/pgrp */
-    public static final int F_GETLK  = 7;	/* get record locking information */
-    public static final int F_SETLK  = 8;	/* set record locking information */
-    public static final int F_SETLKW = 9;	/* F_SETLK; wait if blocked */
+    public static final int F_DUPFD    = 0;	/* duplicate file descriptor */
+    public static final int F_GETFD    = 1;		/* get file descriptor flags */
+    public static final int F_SETFD    = 2;		/* set file descriptor flags */
+    public static final int F_GETFL    = 3;		/* get file status flags */
+    public static final int F_SETFL    = 4;		/* set file status flags */
+    public static final int F_GETOWN   = 5;	/* get SIGIO/SIGURG proc/pgrp */
+    public static final int F_SETOWN   = 6;	/* set SIGIO/SIGURG proc/pgrp */
+    public static final int F_GETLK    = 7;	/* get record locking information */
+    public static final int F_SETLK    = 8;	/* set record locking information */
+    public static final int F_SETLKW   = 9;	/* F_SETLK; wait if blocked */
     /* file descriptor flags (F_GETFD, F_SETFD) */
     public static final int FD_CLOEXEC = 1;	/* close-on-exec flag */
     /* record locking flags (F_GETLK, F_SETLK, F_SETLKW) */
-    public static final int F_RDLCK = 1;	/* shared or read lock */
-    public static final int F_UNLCK = 2;	/* unlock */
-    public static final int F_WRLCK = 3;	/* exclusive or write lock */
-    public static final int F_WAIT  = 0x010;		/* Wait until lock is granted */
-    public static final int F_FLOCK = 0x020; 	/* Use flock(2) semantics for lock */
-    public static final int F_POSIX = 0x040; 	/* Use POSIX semantics for lock */
-    public static final int O_RDONLY  = 0x0000;
-    public static final int O_WRONLY  = 0x0001;
-    public static final int O_RDWR    = 0x0002;
-    public static final int O_ACCMODE = 0x0003;
+    public static final int F_RDLCK    = 1;	/* shared or read lock */
+    public static final int F_UNLCK    = 2;	/* unlock */
+    public static final int F_WRLCK    = 3;	/* exclusive or write lock */
+    public static final int F_WAIT     = 0x010;		/* Wait until lock is granted */
+    public static final int F_FLOCK    = 0x020; 	/* Use flock(2) semantics for lock */
+    public static final int F_POSIX    = 0x040; 	/* Use POSIX semantics for lock */
+    public static final int O_RDONLY   = 0x0000;
+    public static final int O_WRONLY   = 0x0001;
+    public static final int O_RDWR     = 0x0002;
+    public static final int O_ACCMODE  = 0x0003;
 
     static {
         Native.register(Platform.C_LIBRARY_NAME);
     }
+
     Libc() {
     }
 

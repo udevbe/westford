@@ -47,7 +47,7 @@ public class JobExecutorTest {
     @Mock
     private Display display;
     @Mock
-    private Libc libc;
+    private Libc    libc;
 
     private JobExecutor jobExecutor;
 

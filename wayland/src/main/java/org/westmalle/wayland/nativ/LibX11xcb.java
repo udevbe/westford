@@ -5,7 +5,7 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 public class LibX11xcb {
-    public static final int XCBOwnsEventQueue  = 1;
+    public static final int XCBOwnsEventQueue = 1;
 
     static {
         Native.register("X11-xcb");

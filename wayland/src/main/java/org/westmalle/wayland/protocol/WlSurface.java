@@ -43,10 +43,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 @AutoFactory(className = "WlSurfaceFactory")
 public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
-    private final Set<WlSurfaceResource> resources       = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlSurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final WlCallbackFactory wlCallbackFactory;
     private final Surface           surface;
-    private       Optional<Listener>     destroyListener = Optional.empty();
+    private Optional<Listener> destroyListener = Optional.empty();
 
     WlSurface(@Provided final WlCallbackFactory wlCallbackFactory,
               final Surface surface) {
@@ -168,10 +168,6 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
         }
     }
 
-    public Surface getSurface() {
-        return this.surface;
-    }
-
     private Mat4 getMatrix(final WlSurfaceResource resource,
                            final int transform) {
         if (WlOutputTransform.NORMAL.getValue() == transform) {
@@ -239,5 +235,9 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
         };
         this.destroyListener = Optional.of(listener);
         buffer.addDestroyListener(listener);
+    }
+
+    public Surface getSurface() {
+        return this.surface;
     }
 }
