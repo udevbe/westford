@@ -100,27 +100,17 @@ public class PointerDevice implements Role {
                          final int y) {
         this.position = Point.create(x,
                                      y);
-        final Optional<WlSurfaceResource> newFocus = over();
-        final Optional<WlSurfaceResource> oldFocus = this.focus;
-        this.focus = newFocus;
-        updateActiveCursor();
 
         if (getGrab().isPresent()) {
-            if (!oldFocus.equals(newFocus)) {
-                if (oldFocus.equals(getGrab())) {
-                    reportLeave(pointerResources,
-                                getGrab().get());
-                }
-                else if (newFocus.equals(getGrab())) {
-                    reportEnter(pointerResources,
-                                getGrab().get());
-                }
-            }
             reportMotion(pointerResources,
                          time,
                          getGrab().get());
         }
         else {
+            final Optional<WlSurfaceResource> newFocus = over();
+            final Optional<WlSurfaceResource> oldFocus = this.focus;
+            this.focus = newFocus;
+
             if (!oldFocus.equals(newFocus)) {
                 if (oldFocus.isPresent()) {
                     reportLeave(pointerResources,
@@ -137,6 +127,7 @@ public class PointerDevice implements Role {
                              newFocus.get());
             }
         }
+        updateActiveCursor();
     }
 
     @Nonnull
@@ -168,7 +159,7 @@ public class PointerDevice implements Role {
 
     private void updateActiveCursor() {
         //hide the 'old' activeCursor, we'll make it visible again after this method has finished.
-        this.activeCursor.ifPresent(Cursor::hide);
+        //this.activeCursor.ifPresent(Cursor::hide);
 
         if (this.focus.isPresent()) {
             final Cursor cursor = this.cursors.get(this.focus.get()
@@ -181,7 +172,7 @@ public class PointerDevice implements Role {
 
         //we've chosen a (new) activeCursor, make that one visible.
         this.activeCursor.ifPresent(clientCursor -> {
-            clientCursor.show();
+          //  clientCursor.show();
             clientCursor.updatePosition(getPosition());
         });
     }
