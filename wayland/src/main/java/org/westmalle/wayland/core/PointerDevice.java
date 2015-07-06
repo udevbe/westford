@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -30,14 +31,15 @@ import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -63,7 +65,7 @@ public class PointerDevice implements Role {
     @Nonnull
     private Optional<WlSurfaceResource> focus    = Optional.empty();
     @Nonnull
-    private Optional<Cursor>            cursor   = Optional.empty();
+    private Optional<Cursor> activeCursor = Optional.empty();
     private int pointerSerial;
     @Nonnegative
     private int buttonsPressed;
@@ -101,7 +103,7 @@ public class PointerDevice implements Role {
         final Optional<WlSurfaceResource> newFocus = over();
         final Optional<WlSurfaceResource> oldFocus = this.focus;
         this.focus = newFocus;
-        updateCursor();
+        updateActiveCursor();
 
         if (getGrab().isPresent()) {
             if (!oldFocus.equals(newFocus)) {
@@ -164,23 +166,23 @@ public class PointerDevice implements Role {
         return Optional.empty();
     }
 
-    private void updateCursor() {
-        //hide the 'old' cursor, we'll make it visible again after this method has finished.
-        this.cursor.ifPresent(Cursor::hide);
+    private void updateActiveCursor() {
+        //hide the 'old' activeCursor, we'll make it visible again after this method has finished.
+        this.activeCursor.ifPresent(Cursor::hide);
 
         if (this.focus.isPresent()) {
             final Cursor cursor = this.cursors.get(this.focus.get()
                                                              .getClient());
-            this.cursor = Optional.ofNullable(cursor);
+            this.activeCursor = Optional.ofNullable(cursor);
         }
         else {
-            this.cursor = Optional.empty();
+            this.activeCursor = Optional.empty();
         }
 
-        //we've choosen a (new) cursor, make that one visible.
-        this.cursor.ifPresent(clientCursor -> {
-            clientCursor.updatePosition(getPosition());
+        //we've chosen a (new) activeCursor, make that one visible.
+        this.activeCursor.ifPresent(clientCursor -> {
             clientCursor.show();
+            clientCursor.updatePosition(getPosition());
         });
     }
 
@@ -391,16 +393,18 @@ public class PointerDevice implements Role {
                           final WlSurfaceResource wlSurfaceResource,
                           final int hotspotX,
                           final int hotspotY) {
+        //TODO unit tests for this method
+        //TODO interpret serial
 
-        Cursor cursor = this.cursors.get(wlPointerResource.getClient());
+        Cursor clientCursor = this.cursors.get(wlPointerResource.getClient());
 
-        if (cursor == null) {
-            cursor = create(wlSurfaceResource);
+        if (clientCursor == null) {
+            clientCursor = create(wlSurfaceResource);
             wlPointerResource.addDestroyListener(new Listener() {
                 @Override
                 public void handle() {
                     remove();
-                    PointerDevice.this.cursors.get(wlPointerResource.getClient())
+                    PointerDevice.this.cursors.remove(wlPointerResource.getClient())
                                               .hide();
                 }
             });
@@ -408,52 +412,66 @@ public class PointerDevice implements Role {
                 @Override
                 public void handle() {
                     remove();
-                    PointerDevice.this.cursors.remove(wlSurfaceResource.getClient());
+                    PointerDevice.this.cursors.remove(wlSurfaceResource.getClient())
+                                              .hide();
                 }
             });
             this.cursors.put(wlPointerResource.getClient(),
-                             cursor);
+                             clientCursor);
         }
 
-        cursor.update(wlSurfaceResource,
-                      Point.create(hotspotX,
-                                   hotspotY));
-        cursor.show();
-        //TODO request render?
+        clientCursor.update(wlSurfaceResource,
+                            Point.create(hotspotX,
+                                         hotspotY));
+        clientCursor.show();
+        updateActiveCursor();
+
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+        surface.setState(updateCursorSurfaceState(wlSurfaceResource,
+                                                  surface.getState()));
     }
 
     private Cursor create(final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
         surface.setState(surface.getState()
-                                .toBuilder()
-                                .inputRegion(Optional.of(this.nullRegion))
-                                .build());
+                                 .toBuilder()
+                                 .inputRegion(Optional.of(this.nullRegion))
+                                 .build());
 
-        final Cursor cursor = this.cursorFactory.create();
-        cursor.updatePosition(getPosition());
-        return cursor;
+        return this.cursorFactory.create();
     }
 
     @Override
     public void beforeCommit(final WlSurfaceResource wlSurfaceResource) {
+        //TODO unit tests for this method
+
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        final SurfaceState         pendingState        = surface.getPendingState();
-        final SurfaceState.Builder pendingStateBuilder = pendingState.toBuilder();
+        surface.setPendingState(updateCursorSurfaceState(wlSurfaceResource,
+                                                         surface.getPendingState()));
+    }
 
-        pendingStateBuilder.inputRegion(Optional.of(this.nullRegion));
-        pendingStateBuilder.buffer(Optional.<WlBufferResource>empty());
+    private SurfaceState updateCursorSurfaceState(final WlSurfaceResource wlSurfaceResource,
+                                                  SurfaceState surfaceState){
+        final SurfaceState.Builder surfaceStateBuilder = surfaceState.toBuilder();
 
-        this.cursor.ifPresent(clientCursor -> {
+        surfaceStateBuilder.inputRegion(Optional.of(this.nullRegion));
+        surfaceStateBuilder.buffer(Optional.<WlBufferResource>empty());
+
+        this.activeCursor.ifPresent(clientCursor -> {
             if (clientCursor.getWlSurfaceResource()
-                            .equals(wlSurfaceResource) && !clientCursor.isHidden()) {
+                        .equals(wlSurfaceResource) && !clientCursor.isHidden()) {
                 //set back the buffer we cleared.
-                pendingStateBuilder.buffer(pendingState.getBuffer());
+                surfaceStateBuilder.buffer(surfaceState.getBuffer());
+                //move cursor surface to top of stack
+                this.compositor.getSurfacesStack().remove(wlSurfaceResource);
+                this.compositor.getSurfacesStack().addLast(wlSurfaceResource);
             }
         });
 
-        surface.setPendingState(pendingStateBuilder.build());
+        return surfaceStateBuilder.build();
     }
 }
