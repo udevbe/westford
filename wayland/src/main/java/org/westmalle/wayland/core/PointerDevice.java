@@ -330,7 +330,7 @@ public class PointerDevice implements Role {
     public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
                            final int serial,
                            @Nonnull final PointerGrabMotion pointerGrabMotion,
-                           @Nonnull final PointerGrabSemantic pointerGrabSemantic) {
+                           @Nonnull final GrabSemantics grabSemantics) {
         if (!getGrab().isPresent() ||
             !getGrab().get()
                       .equals(surfaceResource) ||
@@ -339,7 +339,7 @@ public class PointerDevice implements Role {
             return;
         }
 
-        pointerGrabSemantic.hasGrab();
+        grabSemantics.grab();
 
         final Listener motionListener = new Listener() {
             @Subscribe
@@ -356,7 +356,7 @@ public class PointerDevice implements Role {
                     //stop listening for destroy event
                     remove();
 
-                    pointerGrabSemantic.grabLost();
+                    grabSemantics.ungrab();
                 }
             }
 
@@ -367,7 +367,7 @@ public class PointerDevice implements Role {
                 //stop listening for pointer motion.
                 PointerDevice.this.unregister(this);
 
-                pointerGrabSemantic.grabLost();
+                grabSemantics.ungrab();
             }
         };
         //listen for pointer motion
@@ -390,7 +390,7 @@ public class PointerDevice implements Role {
         grabMotion(surfaceResource,
                    serial,
                    pointerGrabMotion,
-                   new PointerGrabSemantic(){});
+                   new GrabSemantics(){});
     }
 
     private int getPointerSerial() {
