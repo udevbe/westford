@@ -2,15 +2,19 @@ package org.westmalle.wayland.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.PointerGrabSemantic;
 import org.westmalle.wayland.core.Rectangle;
+import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.Transforms;
 import org.westmalle.wayland.core.calc.Mat4;
@@ -19,12 +23,14 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 @AutoFactory(className = "ShellSurfaceFactory")
-public class ShellSurface {
+public class ShellSurface implements Role {
 
     @Nonnull
     private final WlCompositor wlCompositor;
@@ -38,9 +44,9 @@ public class ShellSurface {
     @Nonnull
     private Optional<String> title  = Optional.empty();
 
-    public ShellSurface(@Provided @Nonnull final Display display,
-                        @Nonnull final WlCompositor wlCompositor,
-                        final int pingSerial) {
+    ShellSurface(@Provided @Nonnull final Display display,
+                 @Nonnull final WlCompositor wlCompositor,
+                 final int pingSerial) {
         this.wlCompositor = wlCompositor;
         this.pingSerial = pingSerial;
         this.timerEventSource = display.getEventLoop()
@@ -86,30 +92,33 @@ public class ShellSurface {
     }
 
     public void move(@Nonnull final WlSurfaceResource wlSurfaceResource,
-                     @Nonnull final WlPointer wlPointer,
+                     @Nonnull final WlPointerResource wlPointerResource,
                      final int grabSerial) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
-        final Point pointerPosition = wlPointer.getPointerDevice()
-                                               .getPosition();
+
+        final WlPointer wlPointer = (WlPointer) wlPointerResource.getImplementation();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+        final Point pointerPosition = pointerDevice.getPosition();
         final Point surfacePosition = surface.global(Point.create(0,
                                                                   0));
         final Point pointerOffset = pointerPosition.subtract(surfacePosition);
-        wlPointer.getPointerDevice()
-                 .grabMotion(wlSurfaceResource,
-                             grabSerial,
-                             (motion) -> surface.setPosition(motion.getPoint()
-                                                                   .subtract(pointerOffset)));
+        pointerDevice.grabMotion(wlSurfaceResource,
+                                 grabSerial,
+                                 (motion) -> surface.setPosition(motion.getPoint()
+                                                                         .subtract(pointerOffset)));
     }
 
     public void resize(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
                        @Nonnull final WlSurfaceResource wlSurfaceResource,
-                       @Nonnull final WlPointer wlPointer,
+                       @Nonnull final WlPointerResource wlPointerResource,
                        final int serial,
                        final int edges) {
         final WlSurface     wlSurface       = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface       surface         = wlSurface.getSurface();
-        final PointerDevice pointerDevice   = wlPointer.getPointerDevice();
+        final WlPointer wlPointer = (WlPointer) wlPointerResource.getImplementation();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
         final Point         pointerStartPos = pointerDevice.getPosition();
 
         final Point     local = surface.local(pointerStartPos);
@@ -132,6 +141,19 @@ public class ShellSurface {
                                      wlShellSurfaceResource.configure(quadrant.getValue(),
                                                                       width < 1 ? 1 : width,
                                                                       height < 1 ? 1 : height);
+                                 },
+                                 new PointerGrabSemantic() {
+                                     @Override
+                                     public void hasGrab() {
+                                         pointerDevice.reportLeave(Collections.singleton(wlPointerResource),
+                                                                   wlSurfaceResource);
+                                     }
+
+                                     @Override
+                                     public void grabLost() {
+                                         pointerDevice.reportEnter(Collections.singleton(wlPointerResource),
+                                                                   wlSurfaceResource);
+                                     }
                                  });
     }
 

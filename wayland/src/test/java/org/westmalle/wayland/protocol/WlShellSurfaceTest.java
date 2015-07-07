@@ -14,6 +14,7 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -62,6 +63,8 @@ public class WlShellSurfaceTest {
         when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
         when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
@@ -74,7 +77,7 @@ public class WlShellSurfaceTest {
                             serial);
         //then
         verify(this.shellSurface).move(wlSurfaceResource,
-                                       wlPointer,
+                                       wlPointerResource,
                                        serial);
     }
 
@@ -109,6 +112,8 @@ public class WlShellSurfaceTest {
         when(wlSeatResource.getImplementation()).thenReturn(wlSeat);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
         when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
@@ -124,7 +129,7 @@ public class WlShellSurfaceTest {
         //then
         verify(this.shellSurface).resize(wlShellSurfaceResource,
                                          wlSurfaceResource,
-                                         wlPointer,
+                                         wlPointerResource,
                                          serial,
                                          edges);
     }

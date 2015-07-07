@@ -16,6 +16,7 @@ package org.westmalle.wayland.wlshell;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
@@ -70,6 +71,8 @@ public class ShellSurfaceTest {
     public void testMove() throws Exception {
         //given
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -94,7 +97,7 @@ public class ShellSurfaceTest {
                                                            0);
         //when
         shellSurface.move(wlSurfaceResource,
-                          wlPointer,
+                          wlPointerResource,
                           serial);
         //then
         final ArgumentCaptor<PointerGrabMotion> pointerGrabMotionCaptor = ArgumentCaptor.forClass(PointerGrabMotion.class);
@@ -117,6 +120,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -153,7 +158,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.RIGHT.getValue());
         //then
@@ -177,6 +182,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -213,7 +220,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.BOTTOM_RIGHT.getValue());
         //then
@@ -237,6 +244,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -273,7 +282,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.TOP.getValue());
         //then
@@ -297,6 +306,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -333,7 +344,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.TOP_RIGHT.getValue());
         //then
@@ -357,6 +368,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -393,7 +406,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.LEFT.getValue());
         //then
@@ -417,6 +430,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -453,7 +468,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.TOP_LEFT.getValue());
         //then
@@ -477,6 +492,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -513,7 +530,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.BOTTOM.getValue());
         //then
@@ -537,6 +554,8 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
         final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
@@ -573,7 +592,7 @@ public class ShellSurfaceTest {
         //when
         shellSurface.resize(wlShellSurfaceResource,
                             wlSurfaceResource,
-                            wlPointer,
+                            wlPointerResource,
                             serial,
                             WlShellSurfaceResize.BOTTOM_LEFT.getValue());
         //then

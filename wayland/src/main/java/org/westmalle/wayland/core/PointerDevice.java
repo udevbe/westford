@@ -182,8 +182,13 @@ public class PointerDevice implements Role {
         return this.grab;
     }
 
-    private void reportLeave(final Set<WlPointerResource> wlPointer,
-                             final WlSurfaceResource wlSurfaceResource) {
+    @Nonnull
+    public Optional<WlSurfaceResource> getFocus() {
+        return this.focus;
+    }
+
+    public void reportLeave(final Set<WlPointerResource> wlPointer,
+                            final WlSurfaceResource wlSurfaceResource) {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
@@ -193,8 +198,8 @@ public class PointerDevice implements Role {
         }
     }
 
-    private void reportEnter(final Set<WlPointerResource> wlPointer,
-                             final WlSurfaceResource wlSurfaceResource) {
+    public void reportEnter(final Set<WlPointerResource> wlPointer,
+                            final WlSurfaceResource wlSurfaceResource) {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
@@ -313,7 +318,10 @@ public class PointerDevice implements Role {
     }
 
     /**
-     * Listen for motion as long as given surface is grabbed.
+     * Listen for motion as soon as given surface is grabbed.
+     * <p>
+     * If another surface already has the grab, the listener
+     * is never registered and no pointer grab semantic is called.
      *
      * @param surfaceResource   Surface that is grabbed.
      * @param serial            Serial that triggered the grab.
@@ -321,7 +329,8 @@ public class PointerDevice implements Role {
      */
     public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
                            final int serial,
-                           @Nonnull final PointerGrabMotion pointerGrabMotion) {
+                           @Nonnull final PointerGrabMotion pointerGrabMotion,
+                           @Nonnull final PointerGrabSemantic pointerGrabSemantic) {
         if (!getGrab().isPresent() ||
             !getGrab().get()
                       .equals(surfaceResource) ||
@@ -329,6 +338,8 @@ public class PointerDevice implements Role {
             //preconditions not met
             return;
         }
+
+        pointerGrabSemantic.hasGrab();
 
         final Listener motionListener = new Listener() {
             @Subscribe
@@ -344,6 +355,8 @@ public class PointerDevice implements Role {
                     PointerDevice.this.unregister(this);
                     //stop listening for destroy event
                     remove();
+
+                    pointerGrabSemantic.grabLost();
                 }
             }
 
@@ -353,12 +366,31 @@ public class PointerDevice implements Role {
                 remove();
                 //stop listening for pointer motion.
                 PointerDevice.this.unregister(this);
+
+                pointerGrabSemantic.grabLost();
             }
         };
         //listen for pointer motion
         register(motionListener);
         //listen for surface destruction
         surfaceResource.addDestroyListener(motionListener);
+    }
+
+    /**
+     * Listen for motion as soon as given surface is grabbed. If another surface already has the grab, the listener
+     * is never registered.
+     *
+     * @param surfaceResource   Surface that is grabbed.
+     * @param serial            Serial that triggered the grab.
+     * @param pointerGrabMotion Motion listener.
+     */
+    public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
+                           final int serial,
+                           @Nonnull final PointerGrabMotion pointerGrabMotion) {
+        grabMotion(surfaceResource,
+                   serial,
+                   pointerGrabMotion,
+                   new PointerGrabSemantic(){});
     }
 
     private int getPointerSerial() {

@@ -2,10 +2,10 @@ package org.westmalle.wayland.core;
 
 import org.westmalle.wayland.core.events.Motion;
 
-import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @FunctionalInterface
 public interface PointerGrabMotion {
 
-    void motion(@Nonnegative final Motion motion);
+    void motion(@Nonnull final Motion motion);
 }
