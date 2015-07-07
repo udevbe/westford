@@ -55,7 +55,7 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Surface surface = wlSurface.getSurface();
 
-            final Role role = surface.getSurfaceRole()
+            final Role role = surface.getRole()
                                      .orElseGet(this::getPointerDevice);
 
             if (role.equals(getPointerDevice())) {

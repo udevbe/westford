@@ -204,23 +204,23 @@ public class PointerDevice implements Role {
     }
 
     private void updateActiveCursor() {
-        //hide the 'old' activeCursor, we'll make it visible again after this method has finished.
-        //this.activeCursor.ifPresent(Cursor::hide);
 
+        final Cursor newCursor;
         if (this.focus.isPresent()) {
-            final Cursor cursor = this.cursors.get(this.focus.get()
-                                                             .getClient());
-            this.activeCursor = Optional.ofNullable(cursor);
+            newCursor = this.cursors.get(this.focus.get()
+                                                   .getClient());
         }
         else {
-            this.activeCursor = Optional.empty();
+            newCursor = null;
         }
+        final Optional<Cursor> oldCursor = this.activeCursor;
+        this.activeCursor = Optional.ofNullable(newCursor);
 
-        //we've chosen a (new) activeCursor, make that one visible.
-        this.activeCursor.ifPresent(clientCursor -> {
-            //  clientCursor.show();
-            clientCursor.updatePosition(getPosition());
-        });
+        this.activeCursor.ifPresent(clientCursor -> clientCursor.updatePosition(getPosition()));
+
+        if (!oldCursor.equals(this.activeCursor)) {
+            oldCursor.ifPresent(Cursor::hide);
+        }
     }
 
     private Optional<WlPointerResource> findPointerResource(final Set<WlPointerResource> pointerResources,
@@ -425,16 +425,8 @@ public class PointerDevice implements Role {
                 @Override
                 public void handle() {
                     remove();
-                    PointerDevice.this.cursors.remove(wlPointerResource.getClient())
-                                              .hide();
-                }
-            });
-            wlSurfaceResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    remove();
-                    PointerDevice.this.cursors.remove(wlSurfaceResource.getClient())
-                                              .hide();
+                    Optional.ofNullable(PointerDevice.this.cursors.remove(wlPointerResource.getClient()))
+                            .ifPresent(Cursor::hide);
                 }
             });
             this.cursors.put(wlPointerResource.getClient(),
@@ -476,6 +468,8 @@ public class PointerDevice implements Role {
                             .equals(wlSurfaceResource) && !clientCursor.isHidden()) {
                 //set back the buffer we cleared.
                 surfaceStateBuilder.buffer(surfaceState.getBuffer());
+
+                //FIXME this should be taken care of in the compositor class
                 //move cursor surface to top of stack
                 this.compositor.getSurfacesStack()
                                .remove(wlSurfaceResource);
@@ -496,5 +490,11 @@ public class PointerDevice implements Role {
 
         surface.setPendingState(updateCursorSurfaceState(wlSurfaceResource,
                                                          surface.getPendingState()));
+    }
+
+    @Override
+    public void afterDestroy(final WlSurfaceResource wlSurfaceResource) {
+        Optional.ofNullable(this.cursors.remove(wlSurfaceResource.getClient()))
+                .ifPresent(Cursor::hide);
     }
 }

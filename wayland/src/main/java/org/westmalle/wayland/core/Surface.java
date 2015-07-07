@@ -119,7 +119,7 @@ public class Surface {
         this.state = state;
     }
 
-    public Optional<Role> getSurfaceRole() {
+    public Optional<Role> getRole() {
         return this.surfaceRole;
     }
 

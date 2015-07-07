@@ -41,14 +41,12 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
 
     private final Set<WlSeatResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final WlDataDevice wlDataDevice;
-
-    private Optional<WlPointer>  optionalWlPointer  = Optional.empty();
-    private Optional<WlKeyboard> optionalWlKeyboard = Optional.empty();
-    private Optional<WlTouch>    optionalWlTouch    = Optional.empty();
-
     private final Map<WlSeatResource, WlPointerResource>  wlPointerResources  = new HashMap<>();
     private final Map<WlSeatResource, WlKeyboardResource> wlKeyboardResources = new HashMap<>();
     private final Map<WlSeatResource, WlTouchResource>    wlTouchResources    = new HashMap<>();
+    private Optional<WlPointer>  optionalWlPointer  = Optional.empty();
+    private Optional<WlKeyboard> optionalWlKeyboard = Optional.empty();
+    private Optional<WlTouch>    optionalWlTouch    = Optional.empty();
 
     WlSeat(@Provided final Display display,
            @Provided final WlDataDevice wlDataDevice) {

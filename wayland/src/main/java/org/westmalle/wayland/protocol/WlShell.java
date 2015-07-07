@@ -69,12 +69,14 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
         final Surface   surface   = wlSurface.getSurface();
 
         final int pingSerial = this.display.nextSerial();
-        final Role role = surface.getSurfaceRole()
+        final Role role = surface.getRole()
                                  .orElseGet(() -> this.shellSurfaceFactory.create(this.wlCompositor,
                                                                                   pingSerial));
 
         if (role instanceof ShellSurface &&
             !this.activeShellSurfaceRoles.contains(role)) {
+
+            surface.setRole(role);
 
             final ShellSurface shellSurface = (ShellSurface) role;
             final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(shellSurface,

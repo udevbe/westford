@@ -65,10 +65,23 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
     public WlSurfaceResource create(@Nonnull final Client client,
                                     @Nonnegative final int version,
                                     final int id) {
-        return new WlSurfaceResource(client,
-                                     version,
-                                     id,
-                                     this);
+        final WlSurfaceResource wlSurfaceResource = new WlSurfaceResource(client,
+                                                                          version,
+                                                                          id,
+                                                                          this);
+        wlSurfaceResource.addDestroyListener(new Listener() {
+            @Override
+            public void handle() {
+                remove();
+                getSurface().getRole()
+                            .ifPresent(role -> role.afterDestroy(wlSurfaceResource));
+            }
+        });
+        return wlSurfaceResource;
+    }
+
+    public Surface getSurface() {
+        return this.surface;
     }
 
     @Override
@@ -143,7 +156,7 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
     public void commit(final WlSurfaceResource requester) {
         removeBufferDestroyListener();
         final Surface surface = getSurface();
-        surface.getSurfaceRole()
+        surface.getRole()
                .ifPresent(role -> role.beforeCommit(requester));
         surface.commit();
     }
@@ -235,9 +248,5 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
         };
         this.destroyListener = Optional.of(listener);
         buffer.addDestroyListener(listener);
-    }
-
-    public Surface getSurface() {
-        return this.surface;
     }
 }

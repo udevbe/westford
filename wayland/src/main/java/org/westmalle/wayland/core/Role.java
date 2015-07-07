@@ -4,4 +4,6 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 
 public interface Role {
     default void beforeCommit(final WlSurfaceResource wlSurfaceResource) {}
+
+    default void afterDestroy(final WlSurfaceResource wlSurfaceResource) {}
 }

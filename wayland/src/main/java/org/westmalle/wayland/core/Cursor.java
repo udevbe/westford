@@ -37,12 +37,12 @@ public class Cursor {
         final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        surface.setPosition(Point.ZERO);
         surface.setState(surface.getState()
                                 .toBuilder()
                                 .buffer(Optional.<WlBufferResource>empty())
                                 .build());
-        //TODO request render?
+        surface.setPosition(Point.ZERO);
+
         this.hidden = true;
     }
 
