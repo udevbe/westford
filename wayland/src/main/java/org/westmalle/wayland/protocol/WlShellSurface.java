@@ -15,7 +15,6 @@ package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
-
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlOutputResource;
 import org.freedesktop.wayland.server.WlSeatResource;
@@ -24,12 +23,11 @@ import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.wlshell.ShellSurface;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "WlShellSurfaceFactory")
 public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
@@ -57,9 +55,10 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                      @Nonnull final WlSeatResource seat,
                      final int serial) {
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
-        wlSeat.getWlPointerResource(seat).ifPresent(wlPointerResource -> getShellSurface().move(getWlSurfaceResource(),
-                                                                                                wlPointerResource,
-                                                                                                serial));
+        wlSeat.getWlPointerResource(seat)
+              .ifPresent(wlPointerResource -> getShellSurface().move(getWlSurfaceResource(),
+                                                                     wlPointerResource,
+                                                                     serial));
     }
 
     @Override
@@ -68,11 +67,12 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                        final int serial,
                        final int edges) {
         final WlSeat wlSeat = (WlSeat) seat.getImplementation();
-        wlSeat.getWlPointerResource(seat).ifPresent(wlPointerResource -> getShellSurface().resize(requester,
-                                                                                          getWlSurfaceResource(),
-                                                                                          wlPointerResource,
-                                                                                          serial,
-                                                                                          edges));
+        wlSeat.getWlPointerResource(seat)
+              .ifPresent(wlPointerResource -> getShellSurface().resize(requester,
+                                                                       getWlSurfaceResource(),
+                                                                       wlPointerResource,
+                                                                       serial,
+                                                                       edges));
     }
 
     @Override

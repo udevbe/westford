@@ -16,7 +16,6 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
@@ -29,22 +28,21 @@ import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.wlshell.ShellSurface;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "WlShellFactory")
 public class WlShell extends Global<WlShellResource> implements WlShellRequests, ProtocolObject<WlShellResource> {
 
     private final Set<WlShellResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
 
-    private final Display display;
-    private final WlShellSurfaceFactory wlShellSurfaceFactory;
+    private final Display                                           display;
+    private final WlShellSurfaceFactory                             wlShellSurfaceFactory;
     private final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory;
-    private final WlCompositor wlCompositor;
+    private final WlCompositor                                      wlCompositor;
 
     private final Set<ShellSurface> activeShellSurfaceRoles = new HashSet<>();
 
@@ -68,11 +66,12 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
         //TODO check if the given wlSurfaceResource doesn't have a role assigned to it already.
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface surface = wlSurface.getSurface();
+        final Surface   surface   = wlSurface.getSurface();
 
         final int pingSerial = this.display.nextSerial();
-        final Role role = surface.getSurfaceRole().orElseGet(() -> this.shellSurfaceFactory.create(this.wlCompositor,
-                                                                                                   pingSerial));
+        final Role role = surface.getSurfaceRole()
+                                 .orElseGet(() -> this.shellSurfaceFactory.create(this.wlCompositor,
+                                                                                  pingSerial));
 
         if (role instanceof ShellSurface &&
             !this.activeShellSurfaceRoles.contains(role)) {
@@ -103,7 +102,8 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
             shellSurface.pong(wlShellSurfaceResource,
                               pingSerial);
-        } else {
+        }
+        else {
             //TODO report protocol error
         }
     }

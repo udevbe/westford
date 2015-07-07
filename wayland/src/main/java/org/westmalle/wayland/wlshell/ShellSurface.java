@@ -2,7 +2,6 @@ package org.westmalle.wayland.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlPointerResource;
@@ -24,25 +23,24 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface implements Role {
 
     @Nonnull
     private final WlCompositor wlCompositor;
-    private final int pingSerial;
+    private final int          pingSerial;
     @Nonnull
-    private final EventSource timerEventSource;
+    private final EventSource  timerEventSource;
 
-    private boolean active = true;
+    private boolean          active = true;
     @Nonnull
-    private Optional<String> clazz = Optional.empty();
+    private Optional<String> clazz  = Optional.empty();
     @Nonnull
-    private Optional<String> title = Optional.empty();
+    private Optional<String> title  = Optional.empty();
 
     ShellSurface(@Provided @Nonnull final Display display,
                  @Nonnull final WlCompositor wlCompositor,
@@ -50,10 +48,10 @@ public class ShellSurface implements Role {
         this.wlCompositor = wlCompositor;
         this.pingSerial = pingSerial;
         this.timerEventSource = display.getEventLoop()
-                .addTimer(() -> {
-                    this.active = false;
-                    return 0;
-                });
+                                       .addTimer(() -> {
+                                           this.active = false;
+                                           return 0;
+                                       });
     }
 
     @Nonnull
@@ -64,7 +62,7 @@ public class ShellSurface implements Role {
     public void setClazz(@Nonnull final Optional<String> clazz) {
         this.clazz = clazz;
         this.wlCompositor.getCompositor()
-                .requestRender();
+                         .requestRender();
     }
 
     @Nonnull
@@ -75,7 +73,7 @@ public class ShellSurface implements Role {
     public void setTitle(@Nonnull final Optional<String> title) {
         this.title = title;
         this.wlCompositor.getCompositor()
-                .requestRender();
+                         .requestRender();
     }
 
     public void pong(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
@@ -95,9 +93,9 @@ public class ShellSurface implements Role {
                      @Nonnull final WlPointerResource wlPointerResource,
                      final int grabSerial) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface surface = wlSurface.getSurface();
+        final Surface   surface   = wlSurface.getSurface();
 
-        final WlPointer wlPointer = (WlPointer) wlPointerResource.getImplementation();
+        final WlPointer     wlPointer     = (WlPointer) wlPointerResource.getImplementation();
         final PointerDevice pointerDevice = wlPointer.getPointerDevice();
 
         final Point pointerPosition = pointerDevice.getPosition();
@@ -107,7 +105,7 @@ public class ShellSurface implements Role {
         pointerDevice.grabMotion(wlSurfaceResource,
                                  grabSerial,
                                  (motion) -> surface.setPosition(motion.getPoint()
-                                                                         .subtract(pointerOffset)));
+                                                                       .subtract(pointerOffset)));
     }
 
     public void resize(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
@@ -115,14 +113,14 @@ public class ShellSurface implements Role {
                        @Nonnull final WlPointerResource wlPointerResource,
                        final int serial,
                        final int edges) {
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface surface = wlSurface.getSurface();
-        final WlPointer wlPointer = (WlPointer) wlPointerResource.getImplementation();
-        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
-        final Point pointerStartPos = pointerDevice.getPosition();
+        final WlSurface     wlSurface       = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface       surface         = wlSurface.getSurface();
+        final WlPointer     wlPointer       = (WlPointer) wlPointerResource.getImplementation();
+        final PointerDevice pointerDevice   = wlPointer.getPointerDevice();
+        final Point         pointerStartPos = pointerDevice.getPosition();
 
-        final Point local = surface.local(pointerStartPos);
-        final Rectangle size = surface.getSize();
+        final Point     local = surface.local(pointerStartPos);
+        final Rectangle size  = surface.getSize();
 
         final WlShellSurfaceResize quadrant = quadrant(edges);
         final Mat4 transform = transform(quadrant,
@@ -135,7 +133,7 @@ public class ShellSurface implements Role {
                                  serial,
                                  motion -> {
                                      final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
-                                                                                                .toVec4());
+                                                                                              .toVec4());
                                      final Vec4 resize = transform.multiply(motionLocal);
                                      final int width = (int) resize.getX();
                                      final int height = (int) resize.getY();
@@ -188,18 +186,18 @@ public class ShellSurface implements Role {
     private Mat4 transform(@Nonnull final WlShellSurfaceResize quadrant,
                            @Nonnull final Rectangle size,
                            @Nonnull final Point pointerLocal) {
-        final int width = size.getWidth();
+        final int width  = size.getWidth();
         final int height = size.getHeight();
 
         final Mat4.Builder transformationBuilder;
-        final Mat4 transformation;
-        final float pointerdx;
-        final float pointerdy;
+        final Mat4         transformation;
+        final float        pointerdx;
+        final float        pointerdy;
         switch (quadrant) {
             case TOP: {
                 transformationBuilder = Transforms._180.toBuilder()
-                        .m00(0)
-                        .m30(width);
+                                                       .m00(0)
+                                                       .m30(width);
                 transformation = transformationBuilder.build();
                 final Vec4 pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = 0;
@@ -208,8 +206,8 @@ public class ShellSurface implements Role {
             }
             case TOP_LEFT: {
                 transformationBuilder = Transforms._180.toBuilder()
-                        .m30(width)
-                        .m31(height);
+                                                       .m30(width)
+                                                       .m31(height);
                 transformation = transformationBuilder.build();
                 final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = width - localTransformed.getX();
@@ -218,8 +216,8 @@ public class ShellSurface implements Role {
             }
             case LEFT: {
                 transformationBuilder = Transforms.FLIPPED.toBuilder()
-                        .m11(0f)
-                        .m31(height);
+                                                          .m11(0f)
+                                                          .m31(height);
                 transformation = transformationBuilder.build();
                 final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = width - localTransformed.getX();
@@ -228,7 +226,7 @@ public class ShellSurface implements Role {
             }
             case BOTTOM_LEFT: {
                 transformationBuilder = Transforms.FLIPPED.toBuilder()
-                        .m30(width);
+                                                          .m30(width);
                 transformation = transformationBuilder.build();
                 final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = width - localTransformed.getX();
@@ -237,8 +235,8 @@ public class ShellSurface implements Role {
             }
             case RIGHT: {
                 transformationBuilder = Transforms.NORMAL.toBuilder()
-                        .m11(0f)
-                        .m31(height);
+                                                         .m11(0f)
+                                                         .m31(height);
                 transformation = transformationBuilder.build();
                 final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = width - localTransformed.getX();
@@ -247,7 +245,7 @@ public class ShellSurface implements Role {
             }
             case TOP_RIGHT: {
                 transformationBuilder = Transforms.FLIPPED_180.toBuilder()
-                        .m31(height);
+                                                              .m31(height);
                 transformation = transformationBuilder.build();
                 final Vec4 localTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = width - localTransformed.getX();
@@ -256,8 +254,8 @@ public class ShellSurface implements Role {
             }
             case BOTTOM: {
                 transformationBuilder = Transforms.NORMAL.toBuilder()
-                        .m00(0)
-                        .m30(width);
+                                                         .m00(0)
+                                                         .m30(width);
                 transformation = transformationBuilder.build();
                 final Vec4 pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4());
                 pointerdx = 0;
@@ -281,12 +279,12 @@ public class ShellSurface implements Role {
         }
 
         return transformationBuilder.m30(transformation.getM30() + pointerdx)
-                .m31(transformation.getM31() + pointerdy)
-                .build();
+                                    .m31(transformation.getM31() + pointerdy)
+                                    .build();
     }
 
     public void toFront(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        final Compositor compositor = this.wlCompositor.getCompositor();
+        final Compositor                    compositor    = this.wlCompositor.getCompositor();
         final LinkedList<WlSurfaceResource> surfacesStack = compositor.getSurfacesStack();
         if (surfacesStack.remove(wlSurfaceResource)) {
             surfacesStack.addLast(wlSurfaceResource);
@@ -302,10 +300,10 @@ public class ShellSurface implements Role {
         //TODO interprete flags (for keyboard focus)
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
         final Point surfacePosition = parentWlSurface.getSurface()
-                .global(Point.create(x,
-                                     y));
+                                                     .global(Point.create(x,
+                                                                          y));
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         wlSurface.getSurface()
-                .setPosition(surfacePosition);
+                 .setPosition(surfacePosition);
     }
 }

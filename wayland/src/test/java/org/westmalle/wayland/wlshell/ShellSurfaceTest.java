@@ -70,7 +70,7 @@ public class ShellSurfaceTest {
     @Test
     public void testMove() throws Exception {
         //given
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -119,7 +119,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -181,7 +181,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -243,7 +243,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -305,7 +305,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -367,7 +367,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -429,7 +429,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -491,7 +491,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
@@ -553,7 +553,7 @@ public class ShellSurfaceTest {
         //given
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
 
