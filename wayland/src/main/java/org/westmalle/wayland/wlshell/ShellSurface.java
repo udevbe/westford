@@ -9,6 +9,7 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
+import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.GrabSemantics;
 import org.westmalle.wayland.core.Point;
@@ -23,7 +24,6 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -130,6 +130,7 @@ public class ShellSurface implements Role {
                                          local);
 
         final Mat4 inverseTransform = surface.getInverseTransform();
+
         pointerDevice.grabMotion(wlSurfaceResource,
                                  serial,
                                  motion -> {
@@ -145,14 +146,16 @@ public class ShellSurface implements Role {
                                  new GrabSemantics() {
                                      @Override
                                      public void grab() {
-                                         pointerDevice.reportLeave(Collections.singleton(wlPointerResource),
-                                                                   wlSurfaceResource);
+                                         wlPointerResource.leave(pointerDevice.nextPointerSerial(),
+                                                                 wlSurfaceResource);
                                      }
 
                                      @Override
                                      public void ungrab() {
-                                         pointerDevice.reportEnter(Collections.singleton(wlPointerResource),
-                                                                   wlSurfaceResource);
+                                         wlPointerResource.enter(pointerDevice.nextPointerSerial(),
+                                                                 wlSurfaceResource,
+                                                                 Fixed.create(local.getX()),
+                                                                 Fixed.create(local.getY()));
                                      }
                                  });
     }

@@ -187,7 +187,7 @@ public class PointerDevice implements Role {
         return this.focus;
     }
 
-    public void reportLeave(final Set<WlPointerResource> wlPointer,
+    private void reportLeave(final Set<WlPointerResource> wlPointer,
                             final WlSurfaceResource wlSurfaceResource) {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
@@ -241,7 +241,7 @@ public class PointerDevice implements Role {
         return Optional.empty();
     }
 
-    private int nextPointerSerial() {
+    public int nextPointerSerial() {
         this.pointerSerial = this.display.nextSerial();
         return this.pointerSerial;
     }
@@ -393,7 +393,7 @@ public class PointerDevice implements Role {
                    new GrabSemantics(){});
     }
 
-    private int getPointerSerial() {
+    public int getPointerSerial() {
         return this.pointerSerial;
     }
 
