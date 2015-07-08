@@ -28,6 +28,7 @@ import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.Motion;
+import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
@@ -284,6 +285,7 @@ public class PointerDevice implements Role {
         }
         if (this.buttonsPressed == 0) {
             this.grab = Optional.empty();
+            this.inputBus.post(PointerGrab.create(getGrab()));
         }
         else if (!getGrab().isPresent() && this.focus.isPresent()) {
             //no grab, but we do have a focus and a pressed button. Focused surface becomes grab.
@@ -292,6 +294,7 @@ public class PointerDevice implements Role {
                          time,
                          button,
                          buttonState);
+            this.inputBus.post(PointerGrab.create(getGrab()));
         }
     }
 
@@ -316,45 +319,27 @@ public class PointerDevice implements Role {
     }
 
     /**
-     * Listen for motion as soon as given surface is grabbed. If another surface already has the grab, the listener
+     * Listen for motion as soon as given surface is grabbed.
+     * <p>
+     * If another surface already has the grab, the listener
      * is never registered.
      *
      * @param surfaceResource   Surface that is grabbed.
      * @param serial            Serial that triggered the grab.
      * @param pointerGrabMotion Motion listener.
-     */
-    public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
-                           final int serial,
-                           @Nonnull final PointerGrabMotion pointerGrabMotion) {
-        grabMotion(surfaceResource,
-                   serial,
-                   pointerGrabMotion,
-                   new GrabSemantics() {});
-    }
-
-    /**
-     * Listen for motion as soon as given surface is grabbed.
-     * <p>
-     * If another surface already has the grab, the listener
-     * is never registered and no pointer grab semantic is called.
      *
-     * @param surfaceResource   Surface that is grabbed.
-     * @param serial            Serial that triggered the grab.
-     * @param pointerGrabMotion Motion listener.
+     * @return true if the listener was installed, false if not.
      */
-    public void grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
-                           final int serial,
-                           @Nonnull final PointerGrabMotion pointerGrabMotion,
-                           @Nonnull final GrabSemantics grabSemantics) {
+    public boolean grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
+                              final int serial,
+                              @Nonnull final PointerGrabMotion pointerGrabMotion) {
         if (!getGrab().isPresent() ||
             !getGrab().get()
                       .equals(surfaceResource) ||
             getPointerSerial() != serial) {
             //preconditions not met
-            return;
+            return false;
         }
-
-        grabSemantics.grab();
 
         final Listener motionListener = new Listener() {
             @Subscribe
@@ -370,8 +355,6 @@ public class PointerDevice implements Role {
                     PointerDevice.this.unregister(this);
                     //stop listening for destroy event
                     remove();
-
-                    grabSemantics.ungrab();
                 }
             }
 
@@ -381,14 +364,14 @@ public class PointerDevice implements Role {
                 remove();
                 //stop listening for pointer motion.
                 PointerDevice.this.unregister(this);
-
-                grabSemantics.ungrab();
             }
         };
         //listen for pointer motion
         register(motionListener);
         //listen for surface destruction
         surfaceResource.addDestroyListener(motionListener);
+
+        return true;
     }
 
     public int getPointerSerial() {

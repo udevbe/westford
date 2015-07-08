@@ -2,6 +2,7 @@ package org.westmalle.wayland.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import com.google.common.eventbus.Subscribe;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlPointerResource;
@@ -10,7 +11,6 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.GrabSemantics;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.Rectangle;
@@ -19,6 +19,7 @@ import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.Transforms;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
+import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -129,33 +130,35 @@ public class ShellSurface implements Role {
 
         final Mat4 inverseTransform = surface.getInverseTransform();
 
-        pointerDevice.grabMotion(wlSurfaceResource,
-                                 serial,
-                                 motion -> {
-                                     final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
-                                                                                              .toVec4());
-                                     final Vec4 resize = transform.multiply(motionLocal);
-                                     final int width = (int) resize.getX();
-                                     final int height = (int) resize.getY();
-                                     wlShellSurfaceResource.configure(quadrant.getValue(),
-                                                                      width < 1 ? 1 : width,
-                                                                      height < 1 ? 1 : height);
-                                 },
-                                 new GrabSemantics() {
-                                     @Override
-                                     public void grab() {
-                                         wlPointerResource.leave(pointerDevice.nextPointerSerial(),
-                                                                 wlSurfaceResource);
-                                     }
-
-                                     @Override
-                                     public void ungrab() {
-                                         wlPointerResource.enter(pointerDevice.nextPointerSerial(),
-                                                                 wlSurfaceResource,
-                                                                 Fixed.create(local.getX()),
-                                                                 Fixed.create(local.getY()));
-                                     }
-                                 });
+        final boolean grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
+                                                                   serial,
+                                                                   motion -> {
+                                                                       final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
+                                                                                                                                .toVec4());
+                                                                       final Vec4 resize = transform.multiply(motionLocal);
+                                                                       final int width = (int) resize.getX();
+                                                                       final int height = (int) resize.getY();
+                                                                       wlShellSurfaceResource.configure(quadrant.getValue(),
+                                                                                                        width < 1 ? 1 : width,
+                                                                                                        height < 1 ? 1 : height);
+                                                                   });
+        if (grabMotionSuccess) {
+            wlPointerResource.leave(pointerDevice.nextPointerSerial(),
+                                    wlSurfaceResource);
+            pointerDevice.register(new Object() {
+                @Subscribe
+                public void handle(final PointerGrab event) {
+                    if (!event.getWlSurfaceResource()
+                              .isPresent()) {
+                        pointerDevice.unregister(this);
+                        wlPointerResource.enter(pointerDevice.nextPointerSerial(),
+                                                wlSurfaceResource,
+                                                Fixed.create(local.getX()),
+                                                Fixed.create(local.getY()));
+                    }
+                }
+            });
+        }
     }
 
     private WlShellSurfaceResize quadrant(final int edges) {
