@@ -67,7 +67,12 @@ public class PointerDevice implements Role {
     private Optional<WlSurfaceResource> focus        = Optional.empty();
     @Nonnull
     private Optional<Cursor>            activeCursor = Optional.empty();
-    private int pointerSerial;
+
+    private int buttonPressSerial;
+    private int buttonReleaseSerial;
+    private int enterSerial;
+    private int leaveSerial;
+
     @Nonnegative
     private int buttonsPressed;
 
@@ -192,7 +197,7 @@ public class PointerDevice implements Role {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             pointerResource.get()
-                           .leave(nextPointerSerial(),
+                           .leave(nextLeaveSerial(),
                                   wlSurfaceResource);
         }
     }
@@ -206,7 +211,7 @@ public class PointerDevice implements Role {
             final Point relativePoint = wlSurface.getSurface()
                                                  .local(getPosition());
             pointerResource.get()
-                           .enter(nextPointerSerial(),
+                           .enter(nextEnterSerial(),
                                   wlSurfaceResource,
                                   Fixed.create(relativePoint.getX()),
                                   Fixed.create(relativePoint.getY()));
@@ -244,9 +249,40 @@ public class PointerDevice implements Role {
         return Optional.empty();
     }
 
-    public int nextPointerSerial() {
-        this.pointerSerial = this.display.nextSerial();
-        return this.pointerSerial;
+    public int nextButtonPressSerial() {
+        this.buttonPressSerial = this.display.nextSerial();
+        return getButtonPressSerial();
+    }
+
+    public int getButtonPressSerial() {
+        return buttonPressSerial;
+    }
+
+    public int nextButtonReleaseSerial() {
+        this.buttonReleaseSerial = this.display.nextSerial();
+        return getButtonReleaseSerial();
+    }
+
+    public int getButtonReleaseSerial() {
+        return buttonReleaseSerial;
+    }
+
+    public int nextEnterSerial() {
+        this.enterSerial = this.display.nextSerial();
+        return getEnterSerial();
+    }
+
+    public int getEnterSerial() {
+        return enterSerial;
+    }
+
+    public int nextLeaveSerial() {
+        this.leaveSerial = this.display.nextSerial();
+        return getLeaveSerial();
+    }
+
+    public int getLeaveSerial() {
+        return leaveSerial;
     }
 
     @Nonnull
@@ -316,7 +352,8 @@ public class PointerDevice implements Role {
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
             pointerResource.get()
-                           .button(nextPointerSerial(),
+                           .button(buttonState == WlPointerButtonState.PRESSED ?
+                                   nextButtonPressSerial() : nextButtonReleaseSerial(),
                                    time,
                                    button,
                                    buttonState.getValue());
@@ -334,18 +371,18 @@ public class PointerDevice implements Role {
      * is never registered.
      *
      * @param surfaceResource   Surface that is grabbed.
-     * @param serial            Serial that triggered the grab.
+     * @param buttonPressSerial Serial that triggered the grab.
      * @param pointerGrabMotion Motion listener.
      *
      * @return true if the listener was installed, false if not.
      */
     public boolean grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
-                              final int serial,
+                              final int buttonPressSerial,
                               @Nonnull final PointerGrabMotion pointerGrabMotion) {
         if (!getGrab().isPresent() ||
             !getGrab().get()
                       .equals(surfaceResource) ||
-            getPointerSerial() != serial) {
+            getButtonPressSerial() != buttonPressSerial) {
             //preconditions not met
             return false;
         }
@@ -383,10 +420,6 @@ public class PointerDevice implements Role {
         return true;
     }
 
-    public int getPointerSerial() {
-        return this.pointerSerial;
-    }
-
     public void unregister(@Nonnull final Object listener) {
         this.inputBus.unregister(listener);
     }
@@ -419,7 +452,11 @@ public class PointerDevice implements Role {
         // and destroy listener is registered for pointer
         // and when: pointer is destroyed, then: cursor is made invisible
         //
-        //TODO interpret serial
+        //TODO test for serial mismatching
+
+        if(serial != getEnterSerial()){
+            return;
+        }
 
         Cursor clientCursor = this.cursors.get(wlPointerResource.getClient());
 

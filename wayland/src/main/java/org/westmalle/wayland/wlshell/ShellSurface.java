@@ -3,6 +3,7 @@ package org.westmalle.wayland.wlshell;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlPointerResource;
@@ -24,9 +25,10 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface implements Role {
@@ -112,7 +114,7 @@ public class ShellSurface implements Role {
     public void resize(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
                        @Nonnull final WlSurfaceResource wlSurfaceResource,
                        @Nonnull final WlPointerResource wlPointerResource,
-                       final int serial,
+                       final int buttonPressSerial,
                        final int edges) {
         final WlSurface     wlSurface       = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface       surface         = wlSurface.getSurface();
@@ -131,7 +133,7 @@ public class ShellSurface implements Role {
         final Mat4 inverseTransform = surface.getInverseTransform();
 
         final boolean grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
-                                                                   serial,
+                                                                   buttonPressSerial,
                                                                    motion -> {
                                                                        final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
                                                                                                                                 .toVec4());
@@ -142,8 +144,15 @@ public class ShellSurface implements Role {
                                                                                                         width < 1 ? 1 : width,
                                                                                                         height < 1 ? 1 : height);
                                                                    });
+        //TODO extend unit test to account for focus changes on resize
+        //cases:
+        // given: shell surface & surface & pointer & grab, when: this method is called, then: surface is resized & focus is lost
+        //and when: grab is lost, then: focus is gained.
+        //
+        // given: shell surface & surface & pointer & no grab, when: this method is called, then: surface is not resize &
+        //focus is not lost
         if (grabMotionSuccess) {
-            wlPointerResource.leave(pointerDevice.nextPointerSerial(),
+            wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
                                     wlSurfaceResource);
             pointerDevice.register(new Object() {
                 @Subscribe
@@ -151,7 +160,7 @@ public class ShellSurface implements Role {
                     if (!event.getWlSurfaceResource()
                               .isPresent()) {
                         pointerDevice.unregister(this);
-                        wlPointerResource.enter(pointerDevice.nextPointerSerial(),
+                        wlPointerResource.enter(pointerDevice.nextEnterSerial(),
                                                 wlSurfaceResource,
                                                 Fixed.create(local.getX()),
                                                 Fixed.create(local.getY()));
