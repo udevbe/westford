@@ -15,6 +15,7 @@ package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlPointerRequestsV3;
 import org.freedesktop.wayland.server.WlPointerResource;
@@ -23,11 +24,12 @@ import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
 
+import java.util.Set;
+import java.util.WeakHashMap;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlPointerFactory")
 public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerResource> {
@@ -46,7 +48,18 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
                           @Nullable final WlSurfaceResource wlSurfaceResource,
                           final int hotspotX,
                           final int hotspotY) {
-
+        //TODO unit test this method
+        //cases:
+        // given: a pointer with a null surface, when: this method is called, then: cursor is removed on pointer device
+        //
+        //given: a pointer with a surface with no role, when: this method is called, then: cursor is set on pointer device
+        // and role is set for surface
+        //
+        //given: a pointer with a surface with a role that is this pointer device, when: this method is called, then:
+        // cursor is set on pointer device
+        //
+        //given: a pointer with a surface with a role that is not this pointer device, when: this method is called, then:
+        // a protocol error is raised.
         if (wlSurfaceResource == null) {
             getPointerDevice().removeCursor(wlPointerResource,
                                             serial);
