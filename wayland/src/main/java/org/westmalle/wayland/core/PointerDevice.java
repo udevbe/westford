@@ -17,7 +17,6 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -32,15 +31,14 @@ import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -249,22 +247,9 @@ public class PointerDevice implements Role {
         return Optional.empty();
     }
 
-    public int nextButtonPressSerial() {
-        this.buttonPressSerial = this.display.nextSerial();
-        return getButtonPressSerial();
-    }
-
-    public int getButtonPressSerial() {
-        return buttonPressSerial;
-    }
-
-    public int nextButtonReleaseSerial() {
-        this.buttonReleaseSerial = this.display.nextSerial();
-        return getButtonReleaseSerial();
-    }
-
-    public int getButtonReleaseSerial() {
-        return buttonReleaseSerial;
+    public int nextLeaveSerial() {
+        this.leaveSerial = this.display.nextSerial();
+        return getLeaveSerial();
     }
 
     public int nextEnterSerial() {
@@ -272,17 +257,12 @@ public class PointerDevice implements Role {
         return getEnterSerial();
     }
 
-    public int getEnterSerial() {
-        return enterSerial;
-    }
-
-    public int nextLeaveSerial() {
-        this.leaveSerial = this.display.nextSerial();
-        return getLeaveSerial();
-    }
-
     public int getLeaveSerial() {
-        return leaveSerial;
+        return this.leaveSerial;
+    }
+
+    public int getEnterSerial() {
+        return this.enterSerial;
     }
 
     @Nonnull
@@ -360,6 +340,24 @@ public class PointerDevice implements Role {
         }
     }
 
+    public int nextButtonPressSerial() {
+        this.buttonPressSerial = this.display.nextSerial();
+        return getButtonPressSerial();
+    }
+
+    public int nextButtonReleaseSerial() {
+        this.buttonReleaseSerial = this.display.nextSerial();
+        return getButtonReleaseSerial();
+    }
+
+    public int getButtonPressSerial() {
+        return this.buttonPressSerial;
+    }
+
+    public int getButtonReleaseSerial() {
+        return this.buttonReleaseSerial;
+    }
+
     public boolean isButtonPressed(@Nonnegative final int button) {
         return this.pressedButtons.contains(button);
     }
@@ -433,8 +431,10 @@ public class PointerDevice implements Role {
         //TODO unit tests for this method
         //cases:
         // given: pointer with no surface, when: this method is called, then: cursor is hidden.
-        this.cursors.remove(wlPointerResource.getClient())
-                    .hide();
+        if (serial == getEnterSerial()) {
+            this.cursors.remove(wlPointerResource.getClient())
+                        .hide();
+        }
     }
 
     public void setCursor(final WlPointerResource wlPointerResource,
@@ -454,7 +454,7 @@ public class PointerDevice implements Role {
         //
         //TODO test for serial mismatching
 
-        if(serial != getEnterSerial()){
+        if (serial != getEnterSerial()) {
             return;
         }
 

@@ -3,7 +3,6 @@ package org.westmalle.wayland.wlshell;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.Subscribe;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlPointerResource;
@@ -25,10 +24,9 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
-
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface implements Role {
