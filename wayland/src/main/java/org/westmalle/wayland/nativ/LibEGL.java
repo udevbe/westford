@@ -21,55 +21,55 @@ import java.util.Optional;
 
 public class LibEGL {
 
+    public static final Pointer EGL_NO_DISPLAY              = Pointer.createConstant(0);
+    public static final int     EGL_PLATFORM_ANDROID_KHR    = 0x3141;
+    public static final int     EGL_PLATFORM_GBM_KHR        = 0x31D7;
+    public static final int     EGL_PLATFORM_WAYLAND_KHR    = 0x31D8;
+    public static final int     EGL_PLATFORM_X11_KHR        = 0x31D5;
+    public static final int     EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
+    public static final int     EGL_PLATFORM_GBM_MESA       = 0x31D7;
+    public static final int     EGL_OPENGL_ES_API           = 0x30A0;
+    public static final int     EGL_OPENGL_API              = 0x30A2;
+    public static final int     EGL_WAYLAND_BUFFER_WL       = 0x31D5;
+    public static final int     EGL_WAYLAND_PLANE_WL        = 0x31D6;
+    public static final int     EGL_TEXTURE_Y_U_V_WL        = 0x31D7;
+    public static final int     EGL_TEXTURE_Y_UV_WL         = 0x31D8;
+    public static final int     EGL_TEXTURE_Y_XUXV_WL       = 0x31D9;
+    public static final int     EGL_TEXTURE_FORMAT          = 0x3080;
+    public static final int     EGL_WAYLAND_Y_INVERTED_WL   = 0x31DB;
+    public static final int     EGL_COLOR_BUFFER_TYPE       = 0x303F;
+    public static final int     EGL_RGB_BUFFER              = 0x308E;
+    public static final int     EGL_BUFFER_SIZE             = 0x3020;
+    public static final int     EGL_RED_SIZE                = 0x3024;
+    public static final int     EGL_GREEN_SIZE              = 0x3023;
+    public static final int     EGL_BLUE_SIZE               = 0x3022;
+    public static final int     EGL_ALPHA_SIZE              = 0x3021;
+    public static final int     EGL_DEPTH_SIZE              = 0x3025;
+    public static final int     EGL_STENCIL_SIZE            = 0x3026;
+    public static final int     EGL_SAMPLE_BUFFERS          = 0x3032;
+    public static final int     EGL_SAMPLES                 = 0x3031;
+    public static final int     EGL_SURFACE_TYPE            = 0x3033;
+    public static final int     EGL_WINDOW_BIT              = 0x0004;
+    public static final int     EGL_RENDERABLE_TYPE         = 0x3040;
+    public static final int     EGL_OPENGL_ES2_BIT          = 0x0004;
+    public static final int     EGL_NONE                    = 0x3038;
+    public static final int     EGL_CONTEXT_CLIENT_VERSION  = 0x3098;
+    public static final Pointer EGL_NO_CONTEXT              = Pointer.createConstant(0);
+    public static final int     EGL_BACK_BUFFER             = 0x3084;
+    public static final int     EGL_RENDER_BUFFER           = 0x3086;
+    public static final int     EGL_SINGLE_BUFFER           = 0x3085;
+    public static final int     EGL_VENDOR                  = 0x3053;
+    public static final int     EGL_VERSION                 = 0x3054;
+    public static final int     EGL_EXTENSIONS              = 0x3055;
+    public static final int     EGL_CLIENT_APIS             = 0x308D;
+
     static {
         Native.register(LibEGL.class,
                         "EGL");
     }
 
-    public static final Pointer EGL_NO_DISPLAY = Pointer.createConstant(0);
-    public static final int EGL_PLATFORM_ANDROID_KHR = 0x3141;
-    public static final int EGL_PLATFORM_GBM_KHR = 0x31D7;
-    public static final int EGL_PLATFORM_WAYLAND_KHR = 0x31D8;
-    public static final int EGL_PLATFORM_X11_KHR = 0x31D5;
-    public static final int EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
-    public static final int EGL_PLATFORM_GBM_MESA = 0x31D7;
-    public static final int EGL_OPENGL_ES_API = 0x30A0;
-    public static final int EGL_OPENGL_API = 0x30A2;
-    public static final int EGL_WAYLAND_BUFFER_WL = 0x31D5;
-    public static final int EGL_WAYLAND_PLANE_WL = 0x31D6;
-    public static final int EGL_TEXTURE_Y_U_V_WL = 0x31D7;
-    public static final int EGL_TEXTURE_Y_UV_WL = 0x31D8;
-    public static final int EGL_TEXTURE_Y_XUXV_WL = 0x31D9;
-    public static final int EGL_TEXTURE_FORMAT = 0x3080;
-    public static final int EGL_WAYLAND_Y_INVERTED_WL = 0x31DB;
-    public static final int EGL_COLOR_BUFFER_TYPE = 0x303F;
-    public static final int EGL_RGB_BUFFER = 0x308E;
-    public static final int EGL_BUFFER_SIZE = 0x3020;
-    public static final int EGL_RED_SIZE = 0x3024;
-    public static final int EGL_GREEN_SIZE = 0x3023;
-    public static final int EGL_BLUE_SIZE = 0x3022;
-    public static final int EGL_ALPHA_SIZE = 0x3021;
-    public static final int EGL_DEPTH_SIZE = 0x3025;
-    public static final int EGL_STENCIL_SIZE = 0x3026;
-    public static final int EGL_SAMPLE_BUFFERS = 0x3032;
-    public static final int EGL_SAMPLES = 0x3031;
-    public static final int EGL_SURFACE_TYPE = 0x3033;
-    public static final int EGL_WINDOW_BIT = 0x0004;
-    public static final int EGL_RENDERABLE_TYPE = 0x3040;
-    public static final int EGL_OPENGL_ES2_BIT = 0x0004;
-    public static final int EGL_NONE = 0x3038;
-    public static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-    public static final Pointer EGL_NO_CONTEXT = Pointer.createConstant(0);
-    public static final int EGL_BACK_BUFFER = 0x3084;
-    public static final int EGL_RENDER_BUFFER = 0x3086;
-    public static final int EGL_SINGLE_BUFFER = 0x3085;
-    public static final int EGL_VENDOR = 0x3053;
-    public static final int EGL_VERSION = 0x3054;
-    public static final int EGL_EXTENSIONS = 0x3055;
-    public static final int EGL_CLIENT_APIS = 0x308D;
-
     private Optional<Function> eglCreatePlatformWindowSurfaceEXT = Optional.empty();
-    private Optional<Function> eglGetPlatformDisplayEXT = Optional.empty();
+    private Optional<Function> eglGetPlatformDisplayEXT          = Optional.empty();
 
     LibEGL() {
     }
@@ -130,33 +130,31 @@ public class LibEGL {
     public Pointer eglGetPlatformDisplayEXT(final int platform,
                                             final Pointer native_display,
                                             final Pointer attrib_list) {
-        return (Pointer) eglGetPlatformDisplayEXT.orElseThrow(UnsupportedOperationException::new)
-                .invoke(Pointer.class,
-                        new Object[]{
-                                platform,
-                                native_display,
-                                attrib_list
-                        });
+        return (Pointer) this.eglGetPlatformDisplayEXT.orElseThrow(UnsupportedOperationException::new)
+                                                      .invoke(Pointer.class,
+                                                              new Object[]{
+                                                                      platform,
+                                                                      native_display,
+                                                                      attrib_list
+                                                              });
     }
-
-    public native Pointer eglGetProcAddress(Pointer procname);
 
     public native Pointer eglQueryString(Pointer dpy,
                                          int name);
 
-    public Pointer eglCreatePlatformWindowSurfaceEXT(Pointer dpy,
-                                                     Pointer config,
-                                                     Pointer native_window,
-                                                     Pointer attrib_list) {
-        return (Pointer) eglCreatePlatformWindowSurfaceEXT.orElseThrow(UnsupportedOperationException::new)
-                .invoke(
-                        Pointer.class,
-                        new Object[]{
-                                dpy,
-                                config,
-                                native_window,
-                                attrib_list
-                        });
+    public Pointer eglCreatePlatformWindowSurfaceEXT(final Pointer dpy,
+                                                     final Pointer config,
+                                                     final Pointer native_window,
+                                                     final Pointer attrib_list) {
+        return (Pointer) this.eglCreatePlatformWindowSurfaceEXT.orElseThrow(UnsupportedOperationException::new)
+                                                               .invoke(
+                                                                       Pointer.class,
+                                                                       new Object[]{
+                                                                               dpy,
+                                                                               config,
+                                                                               native_window,
+                                                                               attrib_list
+                                                                       });
     }
 
     public native boolean eglChooseConfig(Pointer dpy,
@@ -170,15 +168,17 @@ public class LibEGL {
                                           int attribute,
                                           Pointer value);
 
-    private Function loadFunction(final String name) {
-        final NativeString procname = new NativeString(name);
-        Pointer functionPointer = eglGetProcAddress(procname.getPointer());
-        return Function.getFunction(functionPointer);
-    }
-
     public void loadEglCreatePlatformWindowSurfaceEXT() {
         this.eglCreatePlatformWindowSurfaceEXT = Optional.of(loadFunction("eglCreatePlatformWindowSurfaceEXT"));
     }
+
+    private Function loadFunction(final String name) {
+        final NativeString procname        = new NativeString(name);
+        final Pointer      functionPointer = eglGetProcAddress(procname.getPointer());
+        return Function.getFunction(functionPointer);
+    }
+
+    public native Pointer eglGetProcAddress(Pointer procname);
 
     public void loadEglGetPlatformDisplayEXT() {
         this.eglGetPlatformDisplayEXT = Optional.of(loadFunction("eglGetPlatformDisplayEXT"));

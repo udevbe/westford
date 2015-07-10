@@ -14,10 +14,8 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
-
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.shared.WlOutputTransform;
@@ -39,12 +37,11 @@ import org.westmalle.wayland.nativ.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.westmalle.wayland.nativ.LibX11xcb.XCBOwnsEventQueue;
