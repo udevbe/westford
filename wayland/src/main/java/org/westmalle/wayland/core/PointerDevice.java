@@ -49,14 +49,16 @@ public class PointerDevice implements Role {
     @Nonnull
     private final Map<Client, Cursor> cursors        = new HashMap<>();
     @Nonnull
-    private final InfiniteRegion infiniteRegion;
-    private final NullRegion     nullRegion;
+    private final InfiniteRegion      infiniteRegion;
+    private final NullRegion          nullRegion;
     @Nonnull
-    private final CursorFactory  cursorFactory;
+    private final FiniteRegionFactory finiteRegionFactory;
     @Nonnull
-    private final Compositor     compositor;
+    private final CursorFactory       cursorFactory;
     @Nonnull
-    private final Display        display;
+    private final Compositor          compositor;
+    @Nonnull
+    private final Display             display;
     @Nonnull
     private Point                       position     = Point.ZERO;
     @Nonnull
@@ -77,11 +79,13 @@ public class PointerDevice implements Role {
     PointerDevice(@Provided @Nonnull final Display display,
                   @Provided @Nonnull final InfiniteRegion infiniteRegion,
                   @Provided @Nonnull final NullRegion nullRegion,
+                  @Provided @Nonnull final FiniteRegionFactory finiteRegionFactory,
                   @Provided @Nonnull final CursorFactory cursorFactory,
                   @Nonnull final Compositor compositor) {
         this.display = display;
         this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;
+        this.finiteRegionFactory = finiteRegionFactory;
         this.cursorFactory = cursorFactory;
         this.compositor = compositor;
     }
@@ -112,7 +116,7 @@ public class PointerDevice implements Role {
         }
         else {
             final Optional<WlSurfaceResource> newFocus = over();
-            final Optional<WlSurfaceResource> oldFocus = this.focus;
+            final Optional<WlSurfaceResource> oldFocus = getFocus();
             this.focus = newFocus;
 
             if (!oldFocus.equals(newFocus)) {
@@ -171,22 +175,32 @@ public class PointerDevice implements Role {
     public Optional<WlSurfaceResource> over() {
         final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getSurfacesStack()
                                                                            .descendingIterator();
-
+        Optional<WlSurfaceResource> pointerOver = Optional.empty();
         while (surfaceIterator.hasNext()) {
             final WlSurfaceResource surfaceResource = surfaceIterator.next();
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
             final Surface surface = ((WlSurface) implementation).getSurface();
 
+            final Point local = surface.local(getPosition());
+
+            final Region surfaceRegion = this.finiteRegionFactory.create()
+                                                                 .add(surface.getSize());
+            if (!surfaceRegion.contains(local)) {
+                continue;
+            }
+
             final Optional<Region> inputRegion = surface.getState()
                                                         .getInputRegion();
             final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
+
             if (region.contains(surface.getSize(),
-                                surface.local(getPosition()))) {
-                return Optional.of(surfaceResource);
+                                local)) {
+                pointerOver = Optional.of(surfaceResource);
+                break;
             }
         }
 
-        return Optional.empty();
+        return pointerOver;
     }
 
     private void reportLeave(final Set<WlPointerResource> wlPointer,
@@ -219,8 +233,8 @@ public class PointerDevice implements Role {
     private void updateActiveCursor() {
 
         final Cursor newCursor;
-        if (this.focus.isPresent()) {
-            newCursor = this.cursors.get(this.focus.get()
+        if (getFocus().isPresent()) {
+            newCursor = this.cursors.get(getFocus().get()
                                                    .getClient());
         }
         else {
@@ -314,7 +328,7 @@ public class PointerDevice implements Role {
         }
         else if (!getGrab().isPresent() && this.focus.isPresent()) {
             //no grab, but we do have a focus and a pressed button. Focused surface becomes grab.
-            this.grab = this.focus;
+            this.grab = getFocus();
             reportButton(pointerResources,
                          time,
                          button,
