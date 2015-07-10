@@ -108,8 +108,8 @@ public class X11OutputFactory {
                            @Nonnegative final int width,
                            @Nonnegative final int height) {
         LOGGER.info("Creating X11 output:\n"
-                    + "\tDisplay:\t\t\t{}\n"
-                    + "\tWindow geometry:\t{}x{}",
+                    + "\tDisplay: {}\n"
+                    + "\tWindow geometry: {}x{}",
                     xDisplay,
                     width,
                     height);

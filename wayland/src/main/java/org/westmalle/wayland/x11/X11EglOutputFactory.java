@@ -120,10 +120,10 @@ public class X11EglOutputFactory {
                                              .getString(0);
 
         LOGGER.info("Creating X11 EGL output:\n"
-                    + "\tEGL client apis:\t{}\n"
-                    + "\tEGL vendor:\t\t\t{}\n"
-                    + "\tEGL version:\t\t{}\n"
-                    + "\tEGL extensions:\t\t{}",
+                    + "\tEGL client apis: {}\n"
+                    + "\tEGL vendor: {}\n"
+                    + "\tEGL version: {}\n"
+                    + "\tEGL extensions: {}",
                     eglClientApis,
                     eglVendor,
                     eglVersion,

@@ -42,7 +42,7 @@ class Boot {
 
     public static void main(final String[] args) {
         LOGGER.info("Starting Westmalle:\n"
-                    + "\tArguments:\t\t\t{}",
+                    + "\tArguments: {}",
                     args.length == 0 ? "<none>" : Arrays.toString(args));
         final OutputComponent outputComponent = DaggerOutputComponent.create();
 
