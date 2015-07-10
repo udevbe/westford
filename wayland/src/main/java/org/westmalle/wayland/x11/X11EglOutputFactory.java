@@ -15,6 +15,9 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.nativ.LibEGL;
 
 import javax.annotation.Nonnull;
@@ -46,6 +49,8 @@ import static org.westmalle.wayland.nativ.LibEGL.EGL_WINDOW_BIT;
 
 public class X11EglOutputFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(X11EglOutputFactory.class);
+
     @Nonnull
     private final LibEGL libEGL;
 
@@ -57,18 +62,24 @@ public class X11EglOutputFactory {
     @Nonnull
     public X11EglOutput create(@Nonnull final Pointer display,
                                final int window) {
+        checkEXTCapabilities(window);
+
         if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
             throw new RuntimeException("eglBindAPI failed");
         }
-        final Pointer eglDisplay   = createEglDisplay(display);
-        final int     configs_size = 256 * Pointer.SIZE;
-        final Pointer configs      = new Memory(configs_size);
+        final Pointer eglDisplay = createEglDisplay(display);
+
+        printEglInfo(eglDisplay);
+
+        final int configs_size = 256 * Pointer.SIZE;
+        final Pointer configs = new Memory(configs_size);
         chooseConfig(eglDisplay,
                      configs,
                      configs_size);
         final Pointer config = configs.getPointer(0);
         final Pointer context = createEglContext(eglDisplay,
                                                  config);
+
         return new X11EglOutput(this.libEGL,
                                 eglDisplay,
                                 createEglSurface(eglDisplay,
@@ -76,6 +87,39 @@ public class X11EglOutputFactory {
                                                  context,
                                                  window),
                                 context);
+    }
+
+    private void checkEXTCapabilities(final int window) {
+        final String eglExtensions = this.libEGL.eglQueryString(LibEGL.EGL_NO_DISPLAY,
+                                                                LibEGL.EGL_EXTENSIONS).getString(0);
+        LOGGER.info("Creating X11 EGL output:\n"
+                    + "\tWindow id:\t\t\t{}\n"
+                    + "\tEGL extensions:\t\t{}",
+                    window,
+                    eglExtensions);
+        if(eglExtensions.contains("EGL_EXT_platform_x11")){
+            this.libEGL.loadEglCreatePlatformWindowSurfaceEXT();
+            this.libEGL.loadEglGetPlatformDisplayEXT();
+        }else{
+            throw new UnsupportedOperationException("Required extension EGL_EXT_platform_x11 not available.");
+        }
+    }
+
+    private void printEglInfo(final Pointer eglDisplay) {
+        final String eglCLientApis = this.libEGL.eglQueryString(eglDisplay,
+                                                                LibEGL.EGL_CLIENT_APIS).getString(0);
+        final String eglVendor = this.libEGL.eglQueryString(eglDisplay,
+                                                            LibEGL.EGL_VENDOR).getString(0);
+        final String eglVersion = this.libEGL.eglQueryString(eglDisplay,
+                                                             LibEGL.EGL_VERSION).getString(0);
+
+        LOGGER.info("EGL info:\n"
+                    + "\tEGL client apis:\t{}\n"
+                    + "\tEGL vendor:\t\t\t{}\n"
+                    + "\tEGL version:\t\t{}",
+                    eglCLientApis,
+                    eglVendor,
+                    eglVersion);
     }
 
     private Pointer createEglDisplay(final Pointer nativeDisplay) {
@@ -97,7 +141,7 @@ public class X11EglOutputFactory {
     private void chooseConfig(final Pointer eglDisplay,
                               final Pointer configs,
                               final int configs_size) {
-        final Pointer num_configs        = new Memory(Integer.BYTES);
+        final Pointer num_configs = new Memory(Integer.BYTES);
         final Pointer egl_config_attribs = createEglConfigAttribs();
         if (!this.libEGL.eglChooseConfig(eglDisplay,
                                          egl_config_attribs,
@@ -129,7 +173,7 @@ public class X11EglOutputFactory {
                                      final Pointer context,
                                      final int nativeWindow) {
         final Pointer eglSurfaceAttribs = createSurfaceAttribs();
-        final Memory  surfaceId         = new Memory(Integer.BYTES);
+        final Memory surfaceId = new Memory(Integer.BYTES);
         surfaceId.setInt(0,
                          nativeWindow);
         final Pointer eglSurface = this.libEGL.eglCreatePlatformWindowSurfaceEXT(eglDisplay,
@@ -149,7 +193,7 @@ public class X11EglOutputFactory {
     }
 
     private Pointer createEglConfigAttribs() {
-        final int     size          = (12 * 2) + 1;
+        final int size = (12 * 2) + 1;
         final Pointer configAttribs = new Memory(Integer.BYTES * size);
         configAttribs.write(0,
                             new int[]{

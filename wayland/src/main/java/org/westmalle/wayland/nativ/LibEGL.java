@@ -17,10 +17,13 @@ import com.sun.jna.Function;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
+import java.util.Optional;
+
 public class LibEGL {
 
     static {
-        Native.register("EGL");
+        Native.register(LibEGL.class,
+                        "EGL");
     }
 
     public static final Pointer EGL_NO_DISPLAY = Pointer.createConstant(0);
@@ -65,17 +68,10 @@ public class LibEGL {
     public static final int EGL_EXTENSIONS = 0x3055;
     public static final int EGL_CLIENT_APIS = 0x308D;
 
-    //FIXME move loading & checking of extension to a LibEGL factory
-    private Function eglCreatePlatformWindowSurfaceEXT = loadFunction("eglCreatePlatformWindowSurfaceEXT");
-    private Function eglGetPlatformDisplayEXT = loadFunction("eglGetPlatformDisplayEXT");
+    private Optional<Function> eglCreatePlatformWindowSurfaceEXT = Optional.empty();
+    private Optional<Function> eglGetPlatformDisplayEXT = Optional.empty();
 
     LibEGL() {
-    }
-
-    private Function loadFunction(String name) {
-        final NativeString procname = new NativeString(name);
-        Pointer functionPointer = eglGetProcAddress(procname.getPointer());
-        return Function.getFunction(functionPointer);
     }
 
 //    public boolean eglBindWaylandDisplayWL(Pointer dpy,
@@ -134,12 +130,13 @@ public class LibEGL {
     public Pointer eglGetPlatformDisplayEXT(final int platform,
                                             final Pointer native_display,
                                             final Pointer attrib_list) {
-        return (Pointer) this.eglGetPlatformDisplayEXT.invoke(Pointer.class,
-                                                              new Object[]{
-                                                                      platform,
-                                                                      native_display,
-                                                                      attrib_list
-                                                              });
+        return (Pointer) eglGetPlatformDisplayEXT.orElseThrow(UnsupportedOperationException::new)
+                .invoke(Pointer.class,
+                        new Object[]{
+                                platform,
+                                native_display,
+                                attrib_list
+                        });
     }
 
     public native Pointer eglGetProcAddress(Pointer procname);
@@ -151,13 +148,15 @@ public class LibEGL {
                                                      Pointer config,
                                                      Pointer native_window,
                                                      Pointer attrib_list) {
-        return (Pointer) this.eglCreatePlatformWindowSurfaceEXT.invoke(Pointer.class,
-                                                                       new Object[]{
-                                                                               dpy,
-                                                                               config,
-                                                                               native_window,
-                                                                               attrib_list
-                                                                       });
+        return (Pointer) eglCreatePlatformWindowSurfaceEXT.orElseThrow(UnsupportedOperationException::new)
+                .invoke(
+                        Pointer.class,
+                        new Object[]{
+                                dpy,
+                                config,
+                                native_window,
+                                attrib_list
+                        });
     }
 
     public native boolean eglChooseConfig(Pointer dpy,
@@ -171,5 +170,17 @@ public class LibEGL {
                                           int attribute,
                                           Pointer value);
 
+    private Function loadFunction(final String name) {
+        final NativeString procname = new NativeString(name);
+        Pointer functionPointer = eglGetProcAddress(procname.getPointer());
+        return Function.getFunction(functionPointer);
+    }
 
+    public void loadEglCreatePlatformWindowSurfaceEXT() {
+        this.eglCreatePlatformWindowSurfaceEXT = Optional.of(loadFunction("eglCreatePlatformWindowSurfaceEXT"));
+    }
+
+    public void loadEglGetPlatformDisplayEXT() {
+        this.eglGetPlatformDisplayEXT = Optional.of(loadFunction("eglGetPlatformDisplayEXT"));
+    }
 }

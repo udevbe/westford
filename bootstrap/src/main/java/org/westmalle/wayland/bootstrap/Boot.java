@@ -13,6 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.CompositorFactory;
 import org.westmalle.wayland.core.DaggerOutputComponent;
@@ -32,9 +34,15 @@ import org.westmalle.wayland.protocol.XdgShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
+import java.util.Arrays;
+
 class Boot {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Boot.class);
+
     public static void main(final String[] args) {
+        LOGGER.info("Starting Westmalle:\n"
+                    + "\tArguments:\t\t\t{}", args.length==0?"<none>":Arrays.toString(args));
         final OutputComponent outputComponent = DaggerOutputComponent.create();
 
         final Boot boot = new Boot();

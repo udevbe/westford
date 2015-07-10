@@ -14,11 +14,15 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
+
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
@@ -35,11 +39,12 @@ import org.westmalle.wayland.nativ.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.westmalle.wayland.nativ.LibX11xcb.XCBOwnsEventQueue;
@@ -59,6 +64,8 @@ import static org.westmalle.wayland.nativ.Libxcb.XCB_PROP_MODE_REPLACE;
 import static org.westmalle.wayland.nativ.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
 
 public class X11OutputFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(X11OutputFactory.class);
 
     @Nonnull
     private final Display             display;
@@ -103,6 +110,13 @@ public class X11OutputFactory {
     public WlOutput create(@Nonnull final String xDisplay,
                            @Nonnegative final int width,
                            @Nonnegative final int height) {
+        LOGGER.info("Creating X11 output:\n"
+                    + "\tDisplay:\t\t\t{}\n"
+                    + "\tWindow geometry:\t{}x{}",
+                    xDisplay,
+                    width,
+                    height);
+
         checkArgument(width > 0);
         checkArgument(height > 0);
 
