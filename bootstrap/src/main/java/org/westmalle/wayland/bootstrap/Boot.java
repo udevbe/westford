@@ -30,7 +30,6 @@ import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
 import org.westmalle.wayland.protocol.WlShellFactory;
-import org.westmalle.wayland.protocol.XdgShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
@@ -58,7 +57,6 @@ class Boot {
         final WlSeatFactory              wlSeatFactory              = outputComponent.wlSeatFactory();
         final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = outputComponent.wlDataDeviceManagerFactory();
         final WlShellFactory             wlShellFactory             = outputComponent.wlShellFactory();
-        final XdgShellFactory            xdgShellFactory            = outputComponent.xdgShellFactory();
 
         final X11OutputFactory outputFactory = outputComponent.x11Component()
                                                               .outputFactory();
@@ -103,7 +101,6 @@ class Boot {
         wlShellFactory.create(wlCompositor);
         //enable xdg_shell protocol
         //TODO implement xdg_shell protocol
-        xdgShellFactory.create();
 
         //start the thingamabah
         outputComponent.shellService()
