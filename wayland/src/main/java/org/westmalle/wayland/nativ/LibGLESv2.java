@@ -1,5 +1,6 @@
 package org.westmalle.wayland.nativ;
 
+import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
@@ -98,7 +99,7 @@ public class LibGLESv2 {
                                              int type,
                                              boolean normalized,
                                              int stride,
-                                             Pointer pointer);
+                                             Pointer pointer) throws LastErrorException;
 
     public native void glGenBuffers(int n,
                                     Pointer buffers);
