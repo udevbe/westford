@@ -17,7 +17,6 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -32,15 +31,14 @@ import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -205,6 +203,11 @@ public class PointerDevice implements Role {
         return pointerOver;
     }
 
+    @Nonnull
+    public Optional<WlSurfaceResource> getFocus() {
+        return this.focus;
+    }
+
     private void reportLeave(final Set<WlPointerResource> wlPointer,
                              final WlSurfaceResource wlSurfaceResource) {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
@@ -279,11 +282,6 @@ public class PointerDevice implements Role {
 
     public int getEnterSerial() {
         return this.enterSerial;
-    }
-
-    @Nonnull
-    public Optional<WlSurfaceResource> getFocus() {
-        return this.focus;
     }
 
     public void button(@Nonnull final Set<WlPointerResource> pointerResources,
@@ -491,7 +489,8 @@ public class PointerDevice implements Role {
             });
             this.cursors.put(wlPointerResource.getClient(),
                              clientCursor);
-        }else {
+        }
+        else {
             clientCursor.setWlSurfaceResource(wlSurfaceResource);
             clientCursor.setHotspot(hotspot);
         }

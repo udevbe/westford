@@ -1,26 +1,24 @@
 package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
-
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import java.util.Optional;
-
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoFactory(className = "CursorFactory")
 public class Cursor {
 
     @Nonnull
-    private       WlSurfaceResource wlSurfaceResource;
+    private WlSurfaceResource wlSurfaceResource;
     @Nonnull
-    private       Point             hotspot;
-    private       boolean           hidden;
+    private Point             hotspot;
+    private boolean           hidden;
 
-    Cursor(@Nonnull WlSurfaceResource wlSurfaceResource,
-           @Nonnull Point             hotspot) {
+    Cursor(@Nonnull final WlSurfaceResource wlSurfaceResource,
+           @Nonnull final Point hotspot) {
         this.wlSurfaceResource = wlSurfaceResource;
         this.hotspot = hotspot;
     }

@@ -2,10 +2,8 @@ package org.westmalle.wayland.egl;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -20,11 +18,10 @@ import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import javax.annotation.Nonnull;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.westmalle.wayland.nativ.LibGLESv2.GL_ARRAY_BUFFER;
@@ -341,24 +338,24 @@ public class EglGles2RenderEngine implements RenderEngine {
                                              20 * Float.BYTES,
                                              new Pointer(4 * Float.BYTES));
         //column 1
-        this.libGLESv2.glEnableVertexAttribArray(transAttrib+1);
-        this.libGLESv2.glVertexAttribPointer(transAttrib+1,
+        this.libGLESv2.glEnableVertexAttribArray(transAttrib + 1);
+        this.libGLESv2.glVertexAttribPointer(transAttrib + 1,
                                              4,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              new Pointer(8 * Float.BYTES));
         //column 2
-        this.libGLESv2.glEnableVertexAttribArray(transAttrib+2);
-        this.libGLESv2.glVertexAttribPointer(transAttrib+2,
+        this.libGLESv2.glEnableVertexAttribArray(transAttrib + 2);
+        this.libGLESv2.glVertexAttribPointer(transAttrib + 2,
                                              4,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              new Pointer(12 * Float.BYTES));
         //column 3
-        this.libGLESv2.glEnableVertexAttribArray(transAttrib+3);
-        this.libGLESv2.glVertexAttribPointer(transAttrib+3,
+        this.libGLESv2.glEnableVertexAttribArray(transAttrib + 3);
+        this.libGLESv2.glVertexAttribPointer(transAttrib + 3,
                                              4,
                                              GL_FLOAT,
                                              false,
