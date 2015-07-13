@@ -1,23 +1,28 @@
 package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
+
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 @AutoFactory(className = "CursorFactory")
 public class Cursor {
 
-    private final NullRegion        nullRegion;
+    @Nonnull
     private       WlSurfaceResource wlSurfaceResource;
+    @Nonnull
     private       Point             hotspot;
     private       boolean           hidden;
 
-    Cursor(@Provided final NullRegion nullRegion) {
-        this.nullRegion = nullRegion;
+    Cursor(@Nonnull WlSurfaceResource wlSurfaceResource,
+           @Nonnull Point             hotspot) {
+        this.wlSurfaceResource = wlSurfaceResource;
+        this.hotspot = hotspot;
     }
 
     public void updatePosition(final Point pointerPosition) {
@@ -26,22 +31,13 @@ public class Cursor {
         surface.setPosition(pointerPosition.subtract(getHotspot()));
     }
 
+    @Nonnull
     public Point getHotspot() {
         return this.hotspot;
     }
 
-    public void update(final WlSurfaceResource wlSurfaceResource,
-                       final Point hotspot) {
-        this.wlSurfaceResource = wlSurfaceResource;
+    public void setHotspot(@Nonnull final Point hotspot) {
         this.hotspot = hotspot;
-
-        final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
-        surface.setState(surface.getState()
-                                .toBuilder()
-                                .inputRegion(Optional.of(this.nullRegion))
-                                .build());
-        surface.setPosition(Point.ZERO);
     }
 
     public void hide() {
@@ -65,7 +61,12 @@ public class Cursor {
         return this.hidden;
     }
 
+    @Nonnull
     public WlSurfaceResource getWlSurfaceResource() {
         return this.wlSurfaceResource;
+    }
+
+    public void setWlSurfaceResource(@Nonnull final WlSurfaceResource wlSurfaceResource) {
+        this.wlSurfaceResource = wlSurfaceResource;
     }
 }

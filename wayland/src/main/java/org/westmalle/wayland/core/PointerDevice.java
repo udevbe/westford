@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -31,14 +32,15 @@ import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -386,7 +388,7 @@ public class PointerDevice implements Role {
      * @param buttonPressSerial Serial that triggered the grab.
      * @param pointerGrabMotion Motion listener.
      *
-     * @return true if the listener was installed, false if not.
+     * @return true if the listener was registered, false if not.
      */
     public boolean grabMotion(@Nonnull final WlSurfaceResource surfaceResource,
                               final int buttonPressSerial,
@@ -473,9 +475,12 @@ public class PointerDevice implements Role {
         }
 
         Cursor clientCursor = this.cursors.get(wlPointerResource.getClient());
+        final Point hotspot = Point.create(hotspotX,
+                                           hotspotY);
 
         if (clientCursor == null) {
-            clientCursor = create(wlSurfaceResource);
+            clientCursor = this.cursorFactory.create(wlSurfaceResource,
+                                                     hotspot);
             wlPointerResource.addDestroyListener(new Listener() {
                 @Override
                 public void handle() {
@@ -486,11 +491,11 @@ public class PointerDevice implements Role {
             });
             this.cursors.put(wlPointerResource.getClient(),
                              clientCursor);
+        }else {
+            clientCursor.setWlSurfaceResource(wlSurfaceResource);
+            clientCursor.setHotspot(hotspot);
         }
 
-        clientCursor.update(wlSurfaceResource,
-                            Point.create(hotspotX,
-                                         hotspotY));
         clientCursor.show();
         updateActiveCursor();
 
@@ -498,17 +503,6 @@ public class PointerDevice implements Role {
         final Surface   surface   = wlSurface.getSurface();
         surface.setState(updateCursorSurfaceState(wlSurfaceResource,
                                                   surface.getState()));
-    }
-
-    private Cursor create(final WlSurfaceResource wlSurfaceResource) {
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
-        surface.setState(surface.getState()
-                                .toBuilder()
-                                .inputRegion(Optional.of(this.nullRegion))
-                                .build());
-
-        return this.cursorFactory.create();
     }
 
     private SurfaceState updateCursorSurfaceState(final WlSurfaceResource wlSurfaceResource,
@@ -524,8 +518,7 @@ public class PointerDevice implements Role {
                 //set back the buffer we cleared.
                 surfaceStateBuilder.buffer(surfaceState.getBuffer());
 
-                //FIXME this should be taken care of in the compositor class
-                //move cursor surface to top of stack
+                //move visible cursor to top of surface stack
                 this.compositor.getSurfacesStack()
                                .remove(wlSurfaceResource);
                 this.compositor.getSurfacesStack()
