@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -31,14 +32,15 @@ import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -135,13 +137,6 @@ public class PointerDevice implements Role {
                              newFocus.get());
             }
         }
-        //TODO extend motion unit tests to account for cursor position updating
-        //cases:
-        // given: an active cursor, when: cursor moves outside of client area, then: client cursor is hidden and
-        // new cursor's position is updated.
-        //
-        //given: an active cursor, when: cursor moves inside of client area, then: client cursor is not hidden and
-        // position is updated.
         updateActiveCursor();
     }
 
@@ -442,9 +437,6 @@ public class PointerDevice implements Role {
 
     public void removeCursor(final WlPointerResource wlPointerResource,
                              final int serial) {
-        //TODO unit tests for this method
-        //cases:
-        // given: pointer with no surface, when: this method is called, then: cursor is hidden.
         if (serial == getEnterSerial()) {
             this.cursors.remove(wlPointerResource.getClient())
                         .hide();
@@ -456,17 +448,6 @@ public class PointerDevice implements Role {
                           final WlSurfaceResource wlSurfaceResource,
                           final int hotspotX,
                           final int hotspotY) {
-        //TODO unit tests for this method
-        //cases:
-        // given: pointer with surface, when: surface is same as previous surface, then: cursor hotspot is updated and
-        // no additional destroy listener is registered for pointer
-        // and when: pointer is destroyed, then: cursor is made invisible
-        //
-        // given: pointer with surface, when: previous surface was null, then: cursor is made visible and hotspot is updated
-        // and destroy listener is registered for pointer
-        // and when: pointer is destroyed, then: cursor is made invisible
-        //
-        //TODO test for serial mismatching
 
         if (serial != getEnterSerial()) {
             return;
@@ -530,17 +511,6 @@ public class PointerDevice implements Role {
 
     @Override
     public void beforeCommit(final WlSurfaceResource wlSurfaceResource) {
-        //TODO unit tests for this method
-        //cases:
-        // given: a surface that is not the current cursor, when: the surface state is about to be committed,
-        // then: the surface's input region and buffer is cleared.
-        //
-        // given: a surface that is the current cursor that is not visible, when: the surface state is about to be committed,
-        // then: the surface's input region and buffer is cleared.
-        //
-        // given: a surface that is the current cursor that is visible, when: the surface state is about to be committed,
-        // then: only the surface's input region is cleared.
-
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
@@ -550,9 +520,6 @@ public class PointerDevice implements Role {
 
     @Override
     public void afterDestroy(final WlSurfaceResource wlSurfaceResource) {
-        //TODO unit tests for this method
-        //cases:
-        // given: a destroyed surface, when: this method is called, then: corresponding cursor is no longer tracked
         Optional.ofNullable(this.cursors.remove(wlSurfaceResource.getClient()))
                 .ifPresent(Cursor::hide);
     }
