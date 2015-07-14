@@ -65,7 +65,7 @@ public class WlShellSurfaceTest {
         final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
-        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(wlSeat.getWlPointerResource(wlSeatResource)).thenReturn(Optional.of(wlPointerResource));
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
@@ -114,7 +114,7 @@ public class WlShellSurfaceTest {
         final WlPointer         wlPointer         = mock(WlPointer.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getImplementation()).thenReturn(wlPointer);
-        when(wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(wlSeat.getWlPointerResource(wlSeatResource)).thenReturn(Optional.of(wlPointerResource));
 
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
 
