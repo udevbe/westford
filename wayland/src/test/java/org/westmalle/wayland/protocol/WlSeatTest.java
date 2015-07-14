@@ -16,7 +16,11 @@ package org.westmalle.wayland.protocol;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatResource;
+import org.freedesktop.wayland.server.WlTouchResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.freedesktop.wayland.shared.WlSeatCapability;
@@ -24,6 +28,7 @@ import org.freedesktop.wayland.util.InterfaceMeta;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -97,7 +102,12 @@ public class WlSeatTest {
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
+
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         final WlPointer wlPointer = mock(WlPointer.class);
+        when(wlPointer.add(client,
+                           version,
+                           id)).thenReturn(wlPointerResource);
 
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice);
@@ -112,6 +122,15 @@ public class WlSeatTest {
         verify(wlPointer).add(client,
                               version,
                               id);
+        ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        verify(wlPointerResource).addDestroyListener(listenerArgumentCaptor.capture());
+
+        //and when
+        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        destroyListener.handle();
+
+        //then
+        assertThat(wlSeat.getWlPointerResource(wlSeatResource).isPresent()).isFalse();
     }
 
     @Test
@@ -123,7 +142,10 @@ public class WlSeatTest {
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
+
+        final WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
         final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
+        when(wlKeyboard.add(client,version,id)).thenReturn(wlKeyboardResource);
 
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice);
@@ -138,6 +160,15 @@ public class WlSeatTest {
         verify(wlKeyboard).add(client,
                                version,
                                id);
+        ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        verify(wlKeyboardResource).addDestroyListener(listenerArgumentCaptor.capture());
+
+        //and when
+        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        destroyListener.handle();
+
+        //then
+        assertThat(wlSeat.getWlKeyboardResource(wlSeatResource).isPresent()).isFalse();
     }
 
     @Test
@@ -149,7 +180,10 @@ public class WlSeatTest {
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
+
+        final WlTouchResource wlTouchResource = mock(WlTouchResource.class);
         final WlTouch wlTouch = mock(WlTouch.class);
+        when(wlTouch.add(client,version,id)).thenReturn(wlTouchResource);
 
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice);
@@ -164,6 +198,15 @@ public class WlSeatTest {
         verify(wlTouch).add(client,
                             version,
                             id);
+        ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        verify(wlTouchResource).addDestroyListener(listenerArgumentCaptor.capture());
+
+        //and when
+        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        destroyListener.handle();
+
+        //then
+        assertThat(wlSeat.getWlTouchResource(wlSeatResource).isPresent()).isFalse();
     }
 
     @Test
