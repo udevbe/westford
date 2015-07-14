@@ -238,7 +238,7 @@ public class SurfaceTest {
     public void testRemoveOpaqueRegion() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final WlRegion wlRegion = mock(WlRegion.class);
+        final WlRegion         wlRegion         = mock(WlRegion.class);
         when(wlRegionResource.getImplementation()).thenReturn(wlRegion);
         final Region region = mock(Region.class);
         when(wlRegion.getRegion()).thenReturn(region);
@@ -255,7 +255,7 @@ public class SurfaceTest {
     public void testRemoveInputRegion() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final WlRegion wlRegion = mock(WlRegion.class);
+        final WlRegion         wlRegion         = mock(WlRegion.class);
         when(wlRegionResource.getImplementation()).thenReturn(wlRegion);
         final Region region = mock(Region.class);
         when(wlRegion.getRegion()).thenReturn(region);

@@ -104,7 +104,7 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
 
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
-        final WlPointer wlPointer = mock(WlPointer.class);
+        final WlPointer         wlPointer         = mock(WlPointer.class);
         when(wlPointer.add(client,
                            version,
                            id)).thenReturn(wlPointerResource);
@@ -122,7 +122,7 @@ public class WlSeatTest {
         verify(wlPointer).add(client,
                               version,
                               id);
-        ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlPointerResource).addDestroyListener(listenerArgumentCaptor.capture());
 
         //and when
@@ -130,7 +130,8 @@ public class WlSeatTest {
         destroyListener.handle();
 
         //then
-        assertThat(wlSeat.getWlPointerResource(wlSeatResource).isPresent()).isFalse();
+        assertThat(wlSeat.getWlPointerResource(wlSeatResource)
+                         .isPresent()).isFalse();
     }
 
     @Test
@@ -144,8 +145,10 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
 
         final WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
-        final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
-        when(wlKeyboard.add(client,version,id)).thenReturn(wlKeyboardResource);
+        final WlKeyboard         wlKeyboard         = mock(WlKeyboard.class);
+        when(wlKeyboard.add(client,
+                            version,
+                            id)).thenReturn(wlKeyboardResource);
 
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice);
@@ -160,7 +163,7 @@ public class WlSeatTest {
         verify(wlKeyboard).add(client,
                                version,
                                id);
-        ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlKeyboardResource).addDestroyListener(listenerArgumentCaptor.capture());
 
         //and when
@@ -168,7 +171,8 @@ public class WlSeatTest {
         destroyListener.handle();
 
         //then
-        assertThat(wlSeat.getWlKeyboardResource(wlSeatResource).isPresent()).isFalse();
+        assertThat(wlSeat.getWlKeyboardResource(wlSeatResource)
+                         .isPresent()).isFalse();
     }
 
     @Test
@@ -182,8 +186,10 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
 
         final WlTouchResource wlTouchResource = mock(WlTouchResource.class);
-        final WlTouch wlTouch = mock(WlTouch.class);
-        when(wlTouch.add(client,version,id)).thenReturn(wlTouchResource);
+        final WlTouch         wlTouch         = mock(WlTouch.class);
+        when(wlTouch.add(client,
+                         version,
+                         id)).thenReturn(wlTouchResource);
 
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice);
@@ -198,7 +204,7 @@ public class WlSeatTest {
         verify(wlTouch).add(client,
                             version,
                             id);
-        ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
+        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlTouchResource).addDestroyListener(listenerArgumentCaptor.capture());
 
         //and when
@@ -206,7 +212,8 @@ public class WlSeatTest {
         destroyListener.handle();
 
         //then
-        assertThat(wlSeat.getWlTouchResource(wlSeatResource).isPresent()).isFalse();
+        assertThat(wlSeat.getWlTouchResource(wlSeatResource)
+                         .isPresent()).isFalse();
     }
 
     @Test

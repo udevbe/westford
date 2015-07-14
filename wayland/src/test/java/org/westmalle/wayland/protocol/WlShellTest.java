@@ -44,6 +44,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -83,8 +84,43 @@ public class WlShellTest {
     }
 
     @Test
-    public void testGetShellSurfacePreviousRole() throws Exception {
-        throw new UnsupportedOperationException();
+    public void testGetShellSurfacePreviousNonShellSurfaceRole() throws Exception {
+        //given
+        final WlShellResource   wlShellResource   = mock(WlShellResource.class);
+        final int               id                = 123;
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        final Surface           surface           = mock(Surface.class);
+        final Role              role              = mock(Role.class);
+        final Optional<Role>    roleOptional      = Optional.of(role);
+
+        final Client client  = mock(Client.class);
+        final int    version = 3;
+
+        when(wlShellResource.getClient()).thenReturn(client);
+        when(wlShellResource.getVersion()).thenReturn(version);
+
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getRole()).thenReturn(roleOptional);
+
+        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
+        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
+
+        final WlShell wlShell = new WlShell(this.display,
+                                            this.wlShellSurfaceFactory,
+                                            shellSurfaceFactory,
+                                            wlCompositor);
+
+        //when
+        wlShell.getShellSurface(wlShellResource,
+                                id,
+                                wlSurfaceResource);
+
+        //then
+        verifyZeroInteractions(shellSurfaceFactory);
+        verifyZeroInteractions(this.wlShellSurfaceFactory);
+        //TODO verify protocol error is send out
     }
 
     @Test
@@ -95,10 +131,10 @@ public class WlShellTest {
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
         final Surface           surface           = mock(Surface.class);
-        final Optional<Role>    roleOptional = Optional.empty();
+        final Optional<Role>    roleOptional      = Optional.empty();
 
-        final Client            client            = mock(Client.class);
-        final int               version           = 3;
+        final Client client  = mock(Client.class);
+        final int    version = 3;
 
         when(wlShellResource.getClient()).thenReturn(client);
         when(wlShellResource.getVersion()).thenReturn(version);
@@ -135,6 +171,8 @@ public class WlShellTest {
         verify(wlShellSurface).add(client,
                                    version,
                                    id);
+        verify(surface).setRole(shellSurface);
+
         final ArgumentCaptor<Listener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlSurfaceResource).addDestroyListener(destroyListenerArgumentCaptor.capture());
 
@@ -143,6 +181,16 @@ public class WlShellTest {
         destroyListener.handle();
         //then
         verify(wlShellSurfaceResource).destroy();
+
+        //and when
+        wlShell.getShellSurface(wlShellResource,
+                                id,
+                                wlSurfaceResource);
+
+        //then
+        verify(wlShellSurface).add(client,
+                                   version,
+                                   id);
     }
 
     @Test

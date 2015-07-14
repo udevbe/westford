@@ -2,7 +2,6 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -59,7 +58,7 @@ public class X11EglOutputFactoryTest {
     }
 
     @Test
-    public void testCreateNoEglExtPlatformX11(){
+    public void testCreateNoEglExtPlatformX11() {
         //given
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("Required extension EGL_EXT_platform_x11 not available.");
@@ -159,9 +158,9 @@ public class X11EglOutputFactoryTest {
         final Pointer display            = mock(Pointer.class);
         final int     window             = 12345;
         final Pointer eglDisplay         = mock(Pointer.class);
-        final Pointer eglClientApis = mock(Pointer.class);
-        final Pointer eglVendor = mock(Pointer.class);
-        final Pointer eglVersion = mock(Pointer.class);
+        final Pointer eglClientApis      = mock(Pointer.class);
+        final Pointer eglVendor          = mock(Pointer.class);
+        final Pointer eglVersion         = mock(Pointer.class);
         final Pointer num_configs        = mock(Pointer.class);
         final Pointer egl_config_attribs = mock(Pointer.class);
         final Pointer configs            = mock(Pointer.class);
@@ -220,12 +219,12 @@ public class X11EglOutputFactoryTest {
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("failed to find suitable EGLConfig");
 
-        final Pointer display    = mock(Pointer.class);
-        final int     window     = 12345;
-        final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer display       = mock(Pointer.class);
+        final int     window        = 12345;
+        final Pointer eglDisplay    = mock(Pointer.class);
         final Pointer eglClientApis = mock(Pointer.class);
-        final Pointer eglVendor = mock(Pointer.class);
-        final Pointer eglVersion = mock(Pointer.class);
+        final Pointer eglVendor     = mock(Pointer.class);
+        final Pointer eglVersion    = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
         final Pointer eglQueryString = mock(Pointer.class);
@@ -287,13 +286,13 @@ public class X11EglOutputFactoryTest {
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("eglCreateContext() failed");
 
-        final Pointer display    = mock(Pointer.class);
-        final int     window     = 12345;
-        final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer display       = mock(Pointer.class);
+        final int     window        = 12345;
+        final Pointer eglDisplay    = mock(Pointer.class);
         final Pointer eglClientApis = mock(Pointer.class);
-        final Pointer eglVendor = mock(Pointer.class);
-        final Pointer eglVersion = mock(Pointer.class);
-        final Pointer config     = new Memory(Pointer.SIZE);
+        final Pointer eglVendor     = mock(Pointer.class);
+        final Pointer eglVersion    = mock(Pointer.class);
+        final Pointer config        = new Memory(Pointer.SIZE);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
         final Pointer eglQueryString = mock(Pointer.class);
@@ -368,14 +367,14 @@ public class X11EglOutputFactoryTest {
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("eglCreateWindowSurface() failed");
 
-        final Pointer display    = mock(Pointer.class);
-        final int     window     = 12345;
-        final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer display       = mock(Pointer.class);
+        final int     window        = 12345;
+        final Pointer eglDisplay    = mock(Pointer.class);
         final Pointer eglClientApis = mock(Pointer.class);
-        final Pointer eglVendor = mock(Pointer.class);
-        final Pointer eglVersion = mock(Pointer.class);
-        final Pointer config     = new Memory(Pointer.SIZE);
-        final Pointer context    = mock(Pointer.class);
+        final Pointer eglVendor     = mock(Pointer.class);
+        final Pointer eglVersion    = mock(Pointer.class);
+        final Pointer config        = new Memory(Pointer.SIZE);
+        final Pointer context       = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
         final Pointer eglQueryString = mock(Pointer.class);
@@ -457,15 +456,15 @@ public class X11EglOutputFactoryTest {
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("eglMakeCurrent() failed");
 
-        final Pointer display    = mock(Pointer.class);
-        final int     window     = 12345;
-        final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer display       = mock(Pointer.class);
+        final int     window        = 12345;
+        final Pointer eglDisplay    = mock(Pointer.class);
         final Pointer eglClientApis = mock(Pointer.class);
-        final Pointer eglVendor = mock(Pointer.class);
-        final Pointer eglVersion = mock(Pointer.class);
-        final Pointer config     = new Memory(Pointer.SIZE);
-        final Pointer context    = mock(Pointer.class);
-        final Pointer eglSurface = mock(Pointer.class);
+        final Pointer eglVendor     = mock(Pointer.class);
+        final Pointer eglVersion    = mock(Pointer.class);
+        final Pointer config        = new Memory(Pointer.SIZE);
+        final Pointer context       = mock(Pointer.class);
+        final Pointer eglSurface    = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
         final Pointer eglQueryString = mock(Pointer.class);
@@ -552,15 +551,15 @@ public class X11EglOutputFactoryTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Pointer display    = mock(Pointer.class);
-        final int     window     = 12345;
-        final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer display       = mock(Pointer.class);
+        final int     window        = 12345;
+        final Pointer eglDisplay    = mock(Pointer.class);
         final Pointer eglClientApis = mock(Pointer.class);
-        final Pointer eglVendor = mock(Pointer.class);
-        final Pointer eglVersion = mock(Pointer.class);
-        final Pointer config     = new Memory(Pointer.SIZE);
-        final Pointer context    = mock(Pointer.class);
-        final Pointer eglSurface = mock(Pointer.class);
+        final Pointer eglVendor     = mock(Pointer.class);
+        final Pointer eglVersion    = mock(Pointer.class);
+        final Pointer config        = new Memory(Pointer.SIZE);
+        final Pointer context       = mock(Pointer.class);
+        final Pointer eglSurface    = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
         final Pointer eglQueryString = mock(Pointer.class);
