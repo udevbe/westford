@@ -16,6 +16,7 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
@@ -28,11 +29,12 @@ import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.wlshell.ShellSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "WlShellFactory")
 public class WlShell extends Global<WlShellResource> implements WlShellRequests, ProtocolObject<WlShellResource> {
@@ -64,7 +66,6 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                                 final int id,
                                 @Nonnull final WlSurfaceResource wlSurfaceResource) {
 
-        //TODO check if the given wlSurfaceResource doesn't have a role assigned to it already.
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
@@ -107,6 +108,7 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
         }
         else {
             //TODO report protocol error
+            //TODO add unit test for this
         }
     }
 

@@ -31,8 +31,12 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.core.Role;
+import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.wlshell.ShellSurface;
 import org.westmalle.wayland.wlshell.ShellSurfaceFactory;
+
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -79,15 +83,29 @@ public class WlShellTest {
     }
 
     @Test
-    public void testGetShellSurface() throws Exception {
+    public void testGetShellSurfacePreviousRole() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void testGetShellSurfaceNoPreviousRole() throws Exception {
         //given
         final WlShellResource   wlShellResource   = mock(WlShellResource.class);
         final int               id                = 123;
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        final Surface           surface           = mock(Surface.class);
+        final Optional<Role>    roleOptional = Optional.empty();
+
         final Client            client            = mock(Client.class);
         final int               version           = 3;
+
         when(wlShellResource.getClient()).thenReturn(client);
         when(wlShellResource.getVersion()).thenReturn(version);
+
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getRole()).thenReturn(roleOptional);
 
         final WlShellSurface wlShellSurface = mock(WlShellSurface.class);
         final ShellSurface   shellSurface   = mock(ShellSurface.class);
