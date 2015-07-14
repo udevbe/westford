@@ -32,8 +32,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.Rectangle;
+import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
+
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.eq;
@@ -369,11 +372,13 @@ public class WlSurfaceTest {
     @Test
     public void testCommit() throws Exception {
         //given
+        final Role              role              = mock(Role.class);
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
         final int               x                 = 11;
         final int               y                 = 22;
 
+        when(this.surface.getRole()).thenReturn(Optional.of(role));
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
         wlSurface.attach(wlSurfaceResource,
@@ -383,6 +388,7 @@ public class WlSurfaceTest {
         //when
         wlSurface.commit(wlSurfaceResource);
         //then
+        verify(role).beforeCommit(wlSurfaceResource);
         verify(this.surface).commit();
         final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
         verify(wlBufferResource).addDestroyListener(listenerArgumentCaptor.capture());
@@ -394,12 +400,15 @@ public class WlSurfaceTest {
     @Test
     public void testCommitNoBuffer() throws Exception {
         //given
+        final Role              role              = mock(Role.class);
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
                                                   this.surface);
+        when(this.surface.getRole()).thenReturn(Optional.of(role));
         //when
         wlSurface.commit(wlSurfaceResource);
         //then
+        verify(role).beforeCommit(wlSurfaceResource);
         verify(this.surface).commit();
     }
 }
