@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlRegion;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.any;
@@ -237,6 +238,10 @@ public class SurfaceTest {
     public void testRemoveOpaqueRegion() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final WlRegion wlRegion = mock(WlRegion.class);
+        when(wlRegionResource.getImplementation()).thenReturn(wlRegion);
+        final Region region = mock(Region.class);
+        when(wlRegion.getRegion()).thenReturn(region);
         this.surface.setOpaqueRegion(wlRegionResource);
         //when
         this.surface.removeOpaqueRegion();
@@ -250,6 +255,11 @@ public class SurfaceTest {
     public void testRemoveInputRegion() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final WlRegion wlRegion = mock(WlRegion.class);
+        when(wlRegionResource.getImplementation()).thenReturn(wlRegion);
+        final Region region = mock(Region.class);
+        when(wlRegion.getRegion()).thenReturn(region);
+
         this.surface.setInputRegion(wlRegionResource);
         //when
         this.surface.removeInputRegion();
