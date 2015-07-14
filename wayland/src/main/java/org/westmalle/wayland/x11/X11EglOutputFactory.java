@@ -29,6 +29,7 @@ import static org.westmalle.wayland.nativ.LibEGL.EGL_BUFFER_SIZE;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_COLOR_BUFFER_TYPE;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_DEPTH_SIZE;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_EXTENSIONS;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_GREEN_SIZE;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_NO_CONTEXT;
@@ -85,16 +86,15 @@ public class X11EglOutputFactory {
     }
 
     private Pointer createEglDisplay(final Pointer nativeDisplay) {
-
-        final String eglExtensions = this.libEGL.eglQueryString(LibEGL.EGL_NO_DISPLAY,
-                                                                LibEGL.EGL_EXTENSIONS)
-                                                .getString(0);
-        if (eglExtensions.contains("EGL_EXT_platform_x11")) {
+        final Pointer eglQueryString = this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                                                  EGL_EXTENSIONS);
+        if (eglQueryString != null && eglQueryString.getString(0)
+                                                    .contains("EGL_EXT_platform_x11")) {
             this.libEGL.loadEglCreatePlatformWindowSurfaceEXT();
             this.libEGL.loadEglGetPlatformDisplayEXT();
         }
         else {
-            throw new UnsupportedOperationException("Required extension EGL_EXT_platform_x11 not available.");
+            throw new RuntimeException("Required extension EGL_EXT_platform_x11 not available.");
         }
 
         final Pointer eglDisplay = this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
@@ -127,7 +127,7 @@ public class X11EglOutputFactory {
                     eglClientApis,
                     eglVendor,
                     eglVersion,
-                    eglExtensions);
+                    eglQueryString.getString(0));
 
         return eglDisplay;
     }

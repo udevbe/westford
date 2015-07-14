@@ -14,6 +14,7 @@
 package org.westmalle.wayland.nativ;
 
 import com.sun.jna.Function;
+import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
@@ -140,7 +141,7 @@ public class LibEGL {
     }
 
     public native Pointer eglQueryString(Pointer dpy,
-                                         int name);
+                                         int name) throws LastErrorException;
 
     public Pointer eglCreatePlatformWindowSurfaceEXT(final Pointer dpy,
                                                      final Pointer config,

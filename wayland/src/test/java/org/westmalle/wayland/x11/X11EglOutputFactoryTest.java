@@ -2,6 +2,7 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -18,10 +19,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_CLIENT_APIS;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_EXTENSIONS;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_NO_DISPLAY;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_OPENGL_API;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.LibEGL.EGL_PLATFORM_X11_KHR;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_VENDOR;
+import static org.westmalle.wayland.nativ.LibEGL.EGL_VERSION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11EglOutputFactoryTest {
@@ -52,6 +58,28 @@ public class X11EglOutputFactoryTest {
         verifyNoMoreInteractions(this.libEGL);
     }
 
+    @Test
+    public void testCreateNoEglExtPlatformX11(){
+        //given
+        this.exception.expect(RuntimeException.class);
+        this.exception.expectMessage("Required extension EGL_EXT_platform_x11 not available.");
+
+        final Pointer display = mock(Pointer.class);
+        final int     window  = 12345;
+        when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_foobar");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
+        //when
+        this.x11EglOutputFactory.create(display,
+                                        window);
+        verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
+        //runtime exception is thrown
+        verifyNoMoreInteractions(this.libEGL);
+    }
 
     @Test
     public void testCreateNoEglDisplay() throws Exception {
@@ -62,6 +90,10 @@ public class X11EglOutputFactoryTest {
         final Pointer display = mock(Pointer.class);
         final int     window  = 12345;
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(Pointer.createConstant(0));
@@ -70,6 +102,8 @@ public class X11EglOutputFactoryTest {
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
@@ -88,17 +122,24 @@ public class X11EglOutputFactoryTest {
         final Pointer eglDisplay = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(eglDisplay);
         when(this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)).thenReturn(false);
+
         //when
         this.x11EglOutputFactory.create(display,
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
@@ -118,18 +159,34 @@ public class X11EglOutputFactoryTest {
         final Pointer display            = mock(Pointer.class);
         final int     window             = 12345;
         final Pointer eglDisplay         = mock(Pointer.class);
+        final Pointer eglClientApis = mock(Pointer.class);
+        final Pointer eglVendor = mock(Pointer.class);
+        final Pointer eglVersion = mock(Pointer.class);
         final Pointer num_configs        = mock(Pointer.class);
         final Pointer egl_config_attribs = mock(Pointer.class);
         final Pointer configs            = mock(Pointer.class);
         final int     configs_size       = 256 * Pointer.SIZE;
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(eglDisplay);
         when(this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)).thenReturn(true);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
+        when(eglClientApis.getString(0)).thenReturn("mock egl client apis");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VENDOR)).thenReturn(eglVendor);
+        when(eglVendor.getString(0)).thenReturn("mock egl vendor");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VERSION)).thenReturn(eglVersion);
+        when(eglVersion.getString(0)).thenReturn("mock egl version");
         when(this.libEGL.eglChooseConfig(eglDisplay,
                                          egl_config_attribs,
                                          configs,
@@ -140,6 +197,8 @@ public class X11EglOutputFactoryTest {
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
@@ -164,14 +223,30 @@ public class X11EglOutputFactoryTest {
         final Pointer display    = mock(Pointer.class);
         final int     window     = 12345;
         final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer eglClientApis = mock(Pointer.class);
+        final Pointer eglVendor = mock(Pointer.class);
+        final Pointer eglVersion = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(eglDisplay);
         when(this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)).thenReturn(true);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
+        when(eglClientApis.getString(0)).thenReturn("mock egl client apis");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VENDOR)).thenReturn(eglVendor);
+        when(eglVendor.getString(0)).thenReturn("mock egl vendor");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VERSION)).thenReturn(eglVersion);
+        when(eglVersion.getString(0)).thenReturn("mock egl version");
         when(this.libEGL.eglChooseConfig(eq(eglDisplay),
                                          any(),
                                          any(),
@@ -189,6 +264,8 @@ public class X11EglOutputFactoryTest {
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
@@ -213,15 +290,31 @@ public class X11EglOutputFactoryTest {
         final Pointer display    = mock(Pointer.class);
         final int     window     = 12345;
         final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer eglClientApis = mock(Pointer.class);
+        final Pointer eglVendor = mock(Pointer.class);
+        final Pointer eglVersion = mock(Pointer.class);
         final Pointer config     = new Memory(Pointer.SIZE);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(eglDisplay);
         when(this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)).thenReturn(true);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
+        when(eglClientApis.getString(0)).thenReturn("mock egl client apis");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VENDOR)).thenReturn(eglVendor);
+        when(eglVendor.getString(0)).thenReturn("mock egl vendor");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VERSION)).thenReturn(eglVersion);
+        when(eglVersion.getString(0)).thenReturn("mock egl version");
         when(this.libEGL.eglChooseConfig(eq(eglDisplay),
                                          any(),
                                          any(),
@@ -248,6 +341,8 @@ public class X11EglOutputFactoryTest {
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
@@ -276,16 +371,32 @@ public class X11EglOutputFactoryTest {
         final Pointer display    = mock(Pointer.class);
         final int     window     = 12345;
         final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer eglClientApis = mock(Pointer.class);
+        final Pointer eglVendor = mock(Pointer.class);
+        final Pointer eglVersion = mock(Pointer.class);
         final Pointer config     = new Memory(Pointer.SIZE);
         final Pointer context    = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(eglDisplay);
         when(this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)).thenReturn(true);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
+        when(eglClientApis.getString(0)).thenReturn("mock egl client apis");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VENDOR)).thenReturn(eglVendor);
+        when(eglVendor.getString(0)).thenReturn("mock egl vendor");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VERSION)).thenReturn(eglVersion);
+        when(eglVersion.getString(0)).thenReturn("mock egl version");
         when(this.libEGL.eglChooseConfig(eq(eglDisplay),
                                          any(),
                                          any(),
@@ -315,6 +426,8 @@ public class X11EglOutputFactoryTest {
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
@@ -347,17 +460,33 @@ public class X11EglOutputFactoryTest {
         final Pointer display    = mock(Pointer.class);
         final int     window     = 12345;
         final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer eglClientApis = mock(Pointer.class);
+        final Pointer eglVendor = mock(Pointer.class);
+        final Pointer eglVersion = mock(Pointer.class);
         final Pointer config     = new Memory(Pointer.SIZE);
         final Pointer context    = mock(Pointer.class);
         final Pointer eglSurface = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(eglDisplay);
         when(this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)).thenReturn(true);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
+        when(eglClientApis.getString(0)).thenReturn("mock egl client apis");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VENDOR)).thenReturn(eglVendor);
+        when(eglVendor.getString(0)).thenReturn("mock egl vendor");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VERSION)).thenReturn(eglVersion);
+        when(eglVersion.getString(0)).thenReturn("mock egl version");
         when(this.libEGL.eglChooseConfig(eq(eglDisplay),
                                          any(),
                                          any(),
@@ -391,6 +520,8 @@ public class X11EglOutputFactoryTest {
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
@@ -424,17 +555,33 @@ public class X11EglOutputFactoryTest {
         final Pointer display    = mock(Pointer.class);
         final int     window     = 12345;
         final Pointer eglDisplay = mock(Pointer.class);
+        final Pointer eglClientApis = mock(Pointer.class);
+        final Pointer eglVendor = mock(Pointer.class);
+        final Pointer eglVersion = mock(Pointer.class);
         final Pointer config     = new Memory(Pointer.SIZE);
         final Pointer context    = mock(Pointer.class);
         final Pointer eglSurface = mock(Pointer.class);
 
         when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
+        final Pointer eglQueryString = mock(Pointer.class);
+        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
                                                   null)).thenReturn(eglDisplay);
         when(this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)).thenReturn(true);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
+        when(eglClientApis.getString(0)).thenReturn("mock egl client apis");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VENDOR)).thenReturn(eglVendor);
+        when(eglVendor.getString(0)).thenReturn("mock egl vendor");
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VERSION)).thenReturn(eglVersion);
+        when(eglVersion.getString(0)).thenReturn("mock egl version");
         when(this.libEGL.eglChooseConfig(eq(eglDisplay),
                                          any(),
                                          any(),
@@ -469,6 +616,8 @@ public class X11EglOutputFactoryTest {
                                         window);
         //then
         verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
         verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                      display,
                                                      null);
