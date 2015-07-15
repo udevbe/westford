@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -31,14 +32,15 @@ import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -47,26 +49,33 @@ public class PointerDevice implements Role {
     @Nonnull
     private final Set<Integer>        pressedButtons = new HashSet<>();
     @Nonnull
+    private Point                       position     = Point.ZERO;
+
+    @Nonnull
     private final Map<Client, Cursor> cursors        = new HashMap<>();
     @Nonnull
-    private final InfiniteRegion      infiniteRegion;
-    private final NullRegion          nullRegion;
-    @Nonnull
-    private final FiniteRegionFactory finiteRegionFactory;
+    private Optional<Cursor>            activeCursor = Optional.empty();
     @Nonnull
     private final CursorFactory       cursorFactory;
+
+    @Nonnull
+    private final InfiniteRegion      infiniteRegion;
+    @Nonnull
+    private final NullRegion          nullRegion;
+
     @Nonnull
     private final Compositor          compositor;
     @Nonnull
     private final Display             display;
+
     @Nonnull
-    private Point                       position     = Point.ZERO;
+    private Optional<Listener> destroyListener = Optional.empty();
     @Nonnull
     private Optional<WlSurfaceResource> grab         = Optional.empty();
     @Nonnull
     private Optional<WlSurfaceResource> focus        = Optional.empty();
-    @Nonnull
-    private Optional<Cursor>            activeCursor = Optional.empty();
+
+
 
     private int buttonPressSerial;
     private int buttonReleaseSerial;
@@ -79,13 +88,11 @@ public class PointerDevice implements Role {
     PointerDevice(@Provided @Nonnull final Display display,
                   @Provided @Nonnull final InfiniteRegion infiniteRegion,
                   @Provided @Nonnull final NullRegion nullRegion,
-                  @Provided @Nonnull final FiniteRegionFactory finiteRegionFactory,
                   @Provided @Nonnull final CursorFactory cursorFactory,
                   @Nonnull final Compositor compositor) {
         this.display = display;
         this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;
-        this.finiteRegionFactory = finiteRegionFactory;
         this.cursorFactory = cursorFactory;
         this.compositor = compositor;
     }
@@ -174,20 +181,12 @@ public class PointerDevice implements Role {
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
             final Surface surface = ((WlSurface) implementation).getSurface();
 
-            final Point local = surface.local(getPosition());
-
-            final Region surfaceRegion = this.finiteRegionFactory.create()
-                                                                 .add(surface.getSize());
-            if (!surfaceRegion.contains(local)) {
-                continue;
-            }
-
             final Optional<Region> inputRegion = surface.getState()
                                                         .getInputRegion();
             final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
 
             if (region.contains(surface.getSize(),
-                                local)) {
+                                surface.local(getPosition()))) {
                 pointerOver = Optional.of(surfaceResource);
                 break;
             }
@@ -217,6 +216,7 @@ public class PointerDevice implements Role {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointer,
                                                                                 wlSurfaceResource);
         if (pointerResource.isPresent()) {
+
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Point relativePoint = wlSurface.getSurface()
                                                  .local(getPosition());
@@ -316,18 +316,42 @@ public class PointerDevice implements Role {
                          buttonState);
         }
         if (this.buttonsPressed == 0) {
-            this.grab = Optional.empty();
-            this.inputBus.post(PointerGrab.create(getGrab()));
+            clearGrab();
         }
         else if (!getGrab().isPresent() && this.focus.isPresent()) {
             //no grab, but we do have a focus and a pressed button. Focused surface becomes grab.
-            this.grab = getFocus();
+            updateGrab();
             reportButton(pointerResources,
                          time,
                          button,
                          buttonState);
-            this.inputBus.post(PointerGrab.create(getGrab()));
         }
+    }
+
+    private void updateGrab(){
+        //TODO  add a unit test: listen surface destruction and release the grab
+
+        //grab will be updated, don't listen for previous grab surface destruction.
+        this.destroyListener.ifPresent(Listener::remove);
+        this.grab = getFocus();
+        this.destroyListener = Optional.of(new Listener() {
+            @Override
+            public void handle() {
+                remove();
+                PointerDevice.this.destroyListener = Optional.empty();
+                clearGrab();
+            }
+        });
+        //if the surface having the grab is destroyed, we clear the grab
+        getGrab().get().addDestroyListener(this.destroyListener.get());
+        this.inputBus.post(PointerGrab.create(getGrab()));
+    }
+
+    private void clearGrab(){
+        //grab will be updated, don't listen for previous grab surface destruction.
+        this.destroyListener.ifPresent(Listener::remove);
+        this.grab = Optional.empty();
+        this.inputBus.post(PointerGrab.create(getGrab()));
     }
 
     private void reportButton(@Nonnull final Set<WlPointerResource> pointerResources,
@@ -422,6 +446,8 @@ public class PointerDevice implements Role {
         //listen for surface destruction
         surfaceResource.addDestroyListener(motionListener);
 
+        //TODO should we listen for pointer resource destruction and unregister the listener?
+
         return true;
     }
 
@@ -495,7 +521,6 @@ public class PointerDevice implements Role {
                             .equals(wlSurfaceResource) && !clientCursor.isHidden()) {
                 //set back the buffer we cleared.
                 surfaceStateBuilder.buffer(surfaceState.getBuffer());
-
                 //move visible cursor to top of surface stack
                 this.compositor.getSurfacesStack()
                                .remove(wlSurfaceResource);

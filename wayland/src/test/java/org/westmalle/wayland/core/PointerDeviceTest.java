@@ -402,7 +402,7 @@ public class PointerDeviceTest {
         assertThat(values.get(0)
                          .asInt()).isEqualTo(2);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(3);
+                           .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0).motion(eq(time0),
                                           fixedArgumentCaptor.capture(),
@@ -421,17 +421,17 @@ public class PointerDeviceTest {
                                          fixedArgumentCaptor.capture(),
                                          fixedArgumentCaptor.capture());
         assertThat(values.get(4)
-                         .asInt()).isEqualTo(89);
+                           .asInt()).isEqualTo(89);
         assertThat(values.get(5)
-                         .asInt()).isEqualTo(144);
+                           .asInt()).isEqualTo(144);
 
         verify(wlPointerResource1).motion(eq(time1),
                                           fixedArgumentCaptor.capture(),
                                           fixedArgumentCaptor.capture());
         assertThat(values.get(6)
-                         .asInt()).isEqualTo(89);
+                           .asInt()).isEqualTo(89);
         assertThat(values.get(7)
-                         .asInt()).isEqualTo(144);
+                           .asInt()).isEqualTo(144);
     }
 
     /**
@@ -651,7 +651,7 @@ public class PointerDeviceTest {
         assertThat(values.get(0)
                          .asInt()).isEqualTo(5);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(8);
+                           .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0).motion(eq(time1),
                                           fixedArgumentCaptor.capture(),
@@ -659,7 +659,7 @@ public class PointerDeviceTest {
         assertThat(values.get(2)
                          .asInt()).isEqualTo(5);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(8);
+                           .asInt()).isEqualTo(8);
     }
 
     /**
@@ -775,7 +775,7 @@ public class PointerDeviceTest {
                                          fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(5);
+                           .asInt()).isEqualTo(5);
         assertThat(values.get(1)
                          .asInt()).isEqualTo(8);
 
@@ -783,7 +783,7 @@ public class PointerDeviceTest {
                                           fixedArgumentCaptor.capture(),
                                           fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(5);
+                           .asInt()).isEqualTo(5);
         assertThat(values.get(3)
                          .asInt()).isEqualTo(8);
 
@@ -903,7 +903,7 @@ public class PointerDeviceTest {
                                          fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(2);
+                           .asInt()).isEqualTo(2);
         assertThat(values.get(1)
                          .asInt()).isEqualTo(3);
 
@@ -911,7 +911,7 @@ public class PointerDeviceTest {
                                           fixedArgumentCaptor.capture(),
                                           fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(2);
+                           .asInt()).isEqualTo(2);
         assertThat(values.get(3)
                          .asInt()).isEqualTo(3);
 
@@ -1077,8 +1077,9 @@ public class PointerDeviceTest {
 
     @Test
     public void testCursorMoveOtherClientMotion() {
-        // given: an active cursor, when: cursor moves outside of client area, then: client cursor is hidden and
-        // new cursor's position is updated.
+        // given: an active cursor
+        // when: cursor moves outside of client area
+        // then: client cursor is hidden and new cursor's position is updated.
         throw new UnsupportedOperationException();
     }
 
@@ -1216,57 +1217,75 @@ public class PointerDeviceTest {
 
     @Test
     public void testRemoveCursor() throws Exception {
-        //cases:
-        // given: pointer with no surface, when: this method is called, then: cursor is hidden.
+        // given: pointer with no surface
+        // when: this method is called
+        // then: cursor is hidden.
         throw new UnsupportedOperationException();
     }
 
     @Test
     public void testSetCursor() throws Exception {
-        // given: pointer with surface, when: surface is same as previous surface, then: cursor hotspot is updated and
-        // no additional destroy listener is registered for pointer
+        // given: pointer with surface
+        // when: surface is same as previous surface
+        // then: cursor hotspot is updated and no additional destroy listener is registered for pointer
         // and when: pointer is destroyed, then: cursor is made invisible
         throw new UnsupportedOperationException();
     }
 
     @Test
     public void testPreviousCursorNullSetCursor() throws Exception {
-        // given: pointer with surface, when: previous surface was null, then: cursor is made visible and hotspot is updated
-        // and destroy listener is registered for pointer
-        // and when: pointer is destroyed, then: cursor is made invisible
+        // given: pointer with surface
+        // when: previous surface was null
+        // then: cursor is made visible and hotspot is updated and destroy listener is registered for pointer
+        // and when: pointer is destroyed
+        // then: cursor is made invisible
         throw new UnsupportedOperationException();
     }
 
     @Test
     public void testSerialMismatchSetCursor() throws Exception {
-        //given: pointer with surface with a wrong enter event serial when: set cursor is called, then: call is ignored
+        // given: pointer with surface with a wrong enter event serial
+        // when: set cursor is called, then: call is ignored
         throw new UnsupportedOperationException();
     }
 
     @Test
     public void testBeforeCommit() throws Exception {
-        // given: a surface that is the current cursor that is visible, when: the surface state is about to be committed,
+        // given: a surface that is the current cursor that is visible
+        // when: the surface state is about to be committed,
         // then: only the surface's input region is cleared.
         throw new UnsupportedOperationException();
     }
 
     @Test
     public void testNotCurrentCursorBeforeCommit() throws Exception {
-        // given: a surface that is not the current cursor, when: the surface state is about to be committed,
+        // given: a surface that is not the current cursor
+        // when: the surface state is about to be committed,
         // then: the surface's input region and buffer is cleared.
         throw new UnsupportedOperationException();
     }
 
     @Test
     public void testCurrentCursorNotVisibleBeforeCommit() throws Exception {
-        // given: a surface that is the current cursor that is not visible, when: the surface state is about to be committed,
+        // given: a surface that is the current cursor that is not visible
+        // when: the surface state is about to be committed,
         // then: the surface's input region and buffer is cleared.
         throw new UnsupportedOperationException();
     }
 
     @Test
     public void testAfterDestroy() throws Exception {
-        // given: a destroyed surface, when: this method is called, then: corresponding cursor is no longer tracked
+        // given: a destroyed surface
+        // when: this method is called
+        // then: corresponding cursor is no longer tracked
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void testGrabSurfaceDestroyed() throws Exception {
+        // given: a surface that has the grab
+        // when: the surface is destroyed
+        // then: the grab surface is forgotten
         throw new UnsupportedOperationException();
     }
 }
