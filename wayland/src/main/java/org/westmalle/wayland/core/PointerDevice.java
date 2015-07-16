@@ -17,7 +17,6 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -32,6 +31,8 @@ import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,42 +40,34 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
     @Nonnull
-    private final EventBus            inputBus       = new EventBus();
+    private final EventBus     inputBus       = new EventBus();
     @Nonnull
-    private final Set<Integer>        pressedButtons = new HashSet<>();
+    private final Set<Integer> pressedButtons = new HashSet<>();
     @Nonnull
-    private Point                       position     = Point.ZERO;
-
+    private final Map<Client, Cursor> cursors      = new HashMap<>();
     @Nonnull
-    private final Map<Client, Cursor> cursors        = new HashMap<>();
+    private final CursorFactory cursorFactory;
     @Nonnull
-    private Optional<Cursor>            activeCursor = Optional.empty();
+    private final InfiniteRegion infiniteRegion;
     @Nonnull
-    private final CursorFactory       cursorFactory;
-
+    private final NullRegion     nullRegion;
     @Nonnull
-    private final InfiniteRegion      infiniteRegion;
+    private final Compositor compositor;
     @Nonnull
-    private final NullRegion          nullRegion;
-
+    private final Display    display;
     @Nonnull
-    private final Compositor          compositor;
+    private       Point        position       = Point.ZERO;
     @Nonnull
-    private final Display             display;
-
+    private       Optional<Cursor>    activeCursor = Optional.empty();
     @Nonnull
-    private Optional<Listener> destroyListener = Optional.empty();
+    private Optional<Listener>          destroyListener = Optional.empty();
     @Nonnull
-    private Optional<WlSurfaceResource> grab         = Optional.empty();
+    private Optional<WlSurfaceResource> grab            = Optional.empty();
     @Nonnull
-    private Optional<WlSurfaceResource> focus        = Optional.empty();
-
+    private Optional<WlSurfaceResource> focus           = Optional.empty();
 
 
     private int buttonPressSerial;
@@ -328,32 +321,6 @@ public class PointerDevice implements Role {
         }
     }
 
-    private void updateGrab(){
-        //TODO  add a unit test: listen surface destruction and release the grab
-
-        //grab will be updated, don't listen for previous grab surface destruction.
-        this.destroyListener.ifPresent(Listener::remove);
-        this.grab = getFocus();
-        this.destroyListener = Optional.of(new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                PointerDevice.this.destroyListener = Optional.empty();
-                clearGrab();
-            }
-        });
-        //if the surface having the grab is destroyed, we clear the grab
-        getGrab().get().addDestroyListener(this.destroyListener.get());
-        this.inputBus.post(PointerGrab.create(getGrab()));
-    }
-
-    private void clearGrab(){
-        //grab will be updated, don't listen for previous grab surface destruction.
-        this.destroyListener.ifPresent(Listener::remove);
-        this.grab = Optional.empty();
-        this.inputBus.post(PointerGrab.create(getGrab()));
-    }
-
     private void reportButton(@Nonnull final Set<WlPointerResource> pointerResources,
                               final int time,
                               @Nonnegative final int button,
@@ -369,6 +336,33 @@ public class PointerDevice implements Role {
                                    button,
                                    buttonState.getValue());
         }
+    }
+
+    private void clearGrab() {
+        //grab will be updated, don't listen for previous grab surface destruction.
+        this.destroyListener.ifPresent(Listener::remove);
+        this.grab = Optional.empty();
+        this.inputBus.post(PointerGrab.create(getGrab()));
+    }
+
+    private void updateGrab() {
+        //TODO  add a unit test: listen surface destruction and release the grab
+
+        //grab will be updated, don't listen for previous grab surface destruction.
+        this.destroyListener.ifPresent(Listener::remove);
+        this.grab = getFocus();
+        this.destroyListener = Optional.of(new Listener() {
+            @Override
+            public void handle() {
+                remove();
+                PointerDevice.this.destroyListener = Optional.empty();
+                clearGrab();
+            }
+        });
+        //if the surface having the grab is destroyed, we clear the grab
+        getGrab().get()
+                 .addDestroyListener(this.destroyListener.get());
+        this.inputBus.post(PointerGrab.create(getGrab()));
     }
 
     public int nextButtonPressSerial() {
