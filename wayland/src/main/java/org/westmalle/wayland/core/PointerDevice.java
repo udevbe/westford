@@ -43,25 +43,25 @@ import java.util.Set;
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
     @Nonnull
-    private final EventBus     inputBus       = new EventBus();
+    private final EventBus                       inputBus       = new EventBus();
     @Nonnull
-    private final Set<Integer> pressedButtons = new HashSet<>();
+    private final Set<Integer>                   pressedButtons = new HashSet<>();
     @Nonnull
-    private final Map<Client, Cursor> cursors      = new HashMap<>();
+    private final Map<WlPointerResource, Cursor> cursors        = new HashMap<>();
     @Nonnull
-    private final CursorFactory cursorFactory;
+    private final CursorFactory  cursorFactory;
     @Nonnull
     private final InfiniteRegion infiniteRegion;
     @Nonnull
     private final NullRegion     nullRegion;
     @Nonnull
-    private final Compositor compositor;
+    private final Compositor     compositor;
     @Nonnull
-    private final Display    display;
+    private final Display        display;
     @Nonnull
-    private       Point        position       = Point.ZERO;
+    private Point                       position        = Point.ZERO;
     @Nonnull
-    private       Optional<Cursor>    activeCursor = Optional.empty();
+    private Optional<Cursor>            activeCursor    = Optional.empty();
     @Nonnull
     private Optional<Listener>          destroyListener = Optional.empty();
     @Nonnull
@@ -135,7 +135,13 @@ public class PointerDevice implements Role {
                              newFocus.get());
             }
         }
-        updateActiveCursor();
+        if (getFocus().isPresent()) {
+            updateActiveCursor(findPointerResource(pointerResources,
+                                                   getFocus().get()));
+        }
+        else {
+            updateActiveCursor(Optional.<WlPointerResource>empty());
+        }
     }
 
     @Nonnull
@@ -221,12 +227,11 @@ public class PointerDevice implements Role {
         }
     }
 
-    private void updateActiveCursor() {
+    private void updateActiveCursor(final Optional<WlPointerResource> wlPointerResource) {
 
         final Cursor newCursor;
-        if (getFocus().isPresent()) {
-            newCursor = this.cursors.get(getFocus().get()
-                                                   .getClient());
+        if (wlPointerResource.isPresent()) {
+            newCursor = this.cursors.get(wlPointerResource.get());
         }
         else {
             newCursor = null;
@@ -244,8 +249,12 @@ public class PointerDevice implements Role {
     private Optional<WlPointerResource> findPointerResource(final Set<WlPointerResource> pointerResources,
                                                             final WlSurfaceResource wlSurfaceResource) {
         for (final WlPointerResource wlPointerResource : pointerResources) {
-            if (wlSurfaceResource.getClient()
-                                 .equals(wlPointerResource.getClient())) {
+            final Client client = wlSurfaceResource.getClient();
+            if (client == null) {
+                //client was destroyed
+                continue;
+            }
+            if (client.equals(wlPointerResource.getClient())) {
                 return Optional.of(wlPointerResource);
             }
         }
@@ -455,10 +464,11 @@ public class PointerDevice implements Role {
 
     public void removeCursor(final WlPointerResource wlPointerResource,
                              final int serial) {
-        if (serial == getEnterSerial()) {
-            this.cursors.remove(wlPointerResource.getClient())
-                        .hide();
+        if (serial != getEnterSerial()) {
+            return;
         }
+        Optional.ofNullable(this.cursors.remove(wlPointerResource))
+                .ifPresent(Cursor::hide);
     }
 
     public void setCursor(final WlPointerResource wlPointerResource,
@@ -471,7 +481,7 @@ public class PointerDevice implements Role {
             return;
         }
 
-        Cursor clientCursor = this.cursors.get(wlPointerResource.getClient());
+        Cursor clientCursor = this.cursors.get(wlPointerResource);
         final Point hotspot = Point.create(hotspotX,
                                            hotspotY);
 
@@ -482,11 +492,11 @@ public class PointerDevice implements Role {
                 @Override
                 public void handle() {
                     remove();
-                    Optional.ofNullable(PointerDevice.this.cursors.remove(wlPointerResource.getClient()))
+                    Optional.ofNullable(PointerDevice.this.cursors.remove(wlPointerResource))
                             .ifPresent(Cursor::hide);
                 }
             });
-            this.cursors.put(wlPointerResource.getClient(),
+            this.cursors.put(wlPointerResource,
                              clientCursor);
         }
         else {
@@ -495,7 +505,7 @@ public class PointerDevice implements Role {
         }
 
         clientCursor.show();
-        updateActiveCursor();
+        updateActiveCursor(Optional.of(wlPointerResource));
 
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
@@ -537,7 +547,16 @@ public class PointerDevice implements Role {
 
     @Override
     public void afterDestroy(final WlSurfaceResource wlSurfaceResource) {
-        Optional.ofNullable(this.cursors.remove(wlSurfaceResource.getClient()))
-                .ifPresent(Cursor::hide);
+        this.cursors.values()
+                    .removeIf(cursor -> {
+                        if (cursor.getWlSurfaceResource()
+                                  .equals(wlSurfaceResource)) {
+                            cursor.hide();
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                    });
     }
 }

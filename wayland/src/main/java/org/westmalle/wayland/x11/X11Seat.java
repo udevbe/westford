@@ -83,11 +83,11 @@ public class X11Seat {
                                                                                pressed);
         final int button = linuxInput(eventDetail);
         this.wlSeat.getOptionalWlPointer()
-                   .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
-                                                                                  .button(wlPointer.getResources(),
-                                                                                          this.compositor.getTime(),
-                                                                                          button,
-                                                                                          wlPointerButtonState)));
+                   .ifPresent(wlPointer -> wlPointer.getPointerDevice()
+                                                    .button(wlPointer.getResources(),
+                                                            this.compositor.getTime(),
+                                                            button,
+                                                            wlPointerButtonState));
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -153,10 +153,10 @@ public class X11Seat {
         final int y = event.event_y;
 
         this.wlSeat.getOptionalWlPointer()
-                   .ifPresent(wlPointer -> this.jobExecutor.submit(() -> wlPointer.getPointerDevice()
-                                                                                  .motion(wlPointer.getResources(),
-                                                                                          this.compositor.getTime(),
-                                                                                          x,
-                                                                                          y)));
+                   .ifPresent(wlPointer -> wlPointer.getPointerDevice()
+                                                    .motion(wlPointer.getResources(),
+                                                            this.compositor.getTime(),
+                                                            x,
+                                                            y));
     }
 }
