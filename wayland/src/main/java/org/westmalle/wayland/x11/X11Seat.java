@@ -52,8 +52,7 @@ public class X11Seat {
     X11Seat(@Nonnull final Libxcb libxcb,
             @Nonnull final X11Output x11Output,
             @Nonnull final Compositor compositor,
-            @Nonnull final WlSeat wlSeat,
-            @Nonnull final JobExecutor jobExecutor) {
+            @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
         this.x11Output = x11Output;
         this.compositor = compositor;
