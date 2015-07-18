@@ -48,8 +48,6 @@ public class X11Seat {
     private final Compositor  compositor;
     @Nonnull
     private final WlSeat      wlSeat;
-    @Nonnull
-    private final JobExecutor jobExecutor;
 
     X11Seat(@Nonnull final Libxcb libxcb,
             @Nonnull final X11Output x11Output,
@@ -60,7 +58,6 @@ public class X11Seat {
         this.x11Output = x11Output;
         this.compositor = compositor;
         this.wlSeat = wlSeat;
-        this.jobExecutor = jobExecutor;
     }
 
     @Subscribe
