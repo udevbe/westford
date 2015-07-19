@@ -14,7 +14,6 @@
 package org.westmalle.wayland.x11;
 
 import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.JobExecutor;
 import org.westmalle.wayland.core.KeyboardFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.nativ.Libxcb;
@@ -31,8 +30,6 @@ public class X11SeatFactory {
     @Nonnull
     private final Libxcb               libxcb;
     @Nonnull
-    private final JobExecutor          jobExecutor;
-    @Nonnull
     private final WlPointerFactory     wlPointerFactory;
     @Nonnull
     private final WlKeyboardFactory    wlKeyboardFactory;
@@ -43,13 +40,11 @@ public class X11SeatFactory {
 
     @Inject
     X11SeatFactory(@Nonnull final Libxcb libxcb,
-                   @Nonnull final JobExecutor jobExecutor,
                    @Nonnull final WlPointerFactory wlPointerFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final PointerDeviceFactory pointerDeviceFactory,
                    @Nonnull final KeyboardFactory keyboardFactory) {
         this.libxcb = libxcb;
-        this.jobExecutor = jobExecutor;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.pointerDeviceFactory = pointerDeviceFactory;
@@ -65,8 +60,7 @@ public class X11SeatFactory {
         final X11Seat x11Seat = new X11Seat(this.libxcb,
                                             x11Output,
                                             compositor,
-                                            wlSeat,
-                                            this.jobExecutor);
+                                            wlSeat);
         x11Output.getX11EventBus()
                  .register(x11Seat);
         //FIXME for now we put these here, these should be handled dynamically when a mouse or keyboard is

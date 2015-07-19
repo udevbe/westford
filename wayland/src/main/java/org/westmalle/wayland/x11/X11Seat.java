@@ -16,7 +16,6 @@ package org.westmalle.wayland.x11;
 import com.google.common.eventbus.Subscribe;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.JobExecutor;
 import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.nativ.xcb_button_press_event_t;
 import org.westmalle.wayland.nativ.xcb_button_release_event_t;
@@ -41,13 +40,13 @@ import static org.westmalle.wayland.nativ.Libxcb.XCB_GRAB_MODE_ASYNC;
 public class X11Seat {
 
     @Nonnull
-    private final Libxcb      libxcb;
+    private final Libxcb     libxcb;
     @Nonnull
-    private final X11Output   x11Output;
+    private final X11Output  x11Output;
     @Nonnull
-    private final Compositor  compositor;
+    private final Compositor compositor;
     @Nonnull
-    private final WlSeat      wlSeat;
+    private final WlSeat     wlSeat;
 
     X11Seat(@Nonnull final Libxcb libxcb,
             @Nonnull final X11Output x11Output,
