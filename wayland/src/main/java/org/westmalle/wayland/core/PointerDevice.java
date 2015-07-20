@@ -129,9 +129,6 @@ public class PointerDevice implements Role {
                 oldFocus.ifPresent(oldFocusResource -> reportLeave(findPointerResource(pointerResources,
                                                                                        oldFocusResource),
                                                                    oldFocusResource));
-                newFocus.ifPresent(newFocusResource -> reportEnter(findPointerResource(pointerResources,
-                                                                                       newFocusResource),
-                                                                   newFocusResource));
             }
 
             newFocus.ifPresent(newFocusResource -> reportMotion(pointerResources,
