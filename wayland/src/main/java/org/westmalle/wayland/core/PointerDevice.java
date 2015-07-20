@@ -17,7 +17,6 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -321,12 +320,8 @@ public class PointerDevice implements Role {
     private Optional<WlPointerResource> findPointerResource(final Set<WlPointerResource> pointerResources,
                                                             final WlSurfaceResource wlSurfaceResource) {
         for (final WlPointerResource wlPointerResource : pointerResources) {
-            final Client client = wlSurfaceResource.getClient();
-            if (client == null) {
-                //client was destroyed
-                continue;
-            }
-            if (client.equals(wlPointerResource.getClient())) {
+            if (wlSurfaceResource.getClient()
+                                 .equals(wlPointerResource.getClient())) {
                 return Optional.of(wlPointerResource);
             }
         }
