@@ -5,6 +5,7 @@ import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
@@ -22,7 +23,9 @@ public class KeyboardDevice {
     private final EventBus inputBus       = new EventBus();
     @Nonnull
     private final Display display;
-
+    @Nonnull
+    private Optional<Listener> focusDestroyListener = Optional.empty();
+    @Nonnull
     private Optional<WlSurfaceResource> focus = Optional.empty();
     private int keySerial;
 
@@ -49,25 +52,51 @@ public class KeyboardDevice {
                        final WlKeyboardKeyState wlKeyboardKeyState) {
         getFocus().ifPresent(wlSurfaceResource -> findKeyboardResource(wlKeyboardResources,
                                                                        wlSurfaceResource)
-                .ifPresent(wlKeyboardResource -> wlKeyboardResource.key(nextKeySerial(),
+                .ifPresent(wlKeyboardResource -> wlKeyboardResource.key(nextKeyboardSerial(),
                                                                         time,
                                                                         key,
                                                                         wlKeyboardKeyState.getValue())));
     }
 
-    public int nextKeySerial(){
+    public int nextKeyboardSerial(){
         this.keySerial = this.display.nextSerial();
         return this.keySerial;
     }
 
-    public int getKeySerial() {
+    public int getKeyboardSerial() {
         return this.keySerial;
     }
 
-    public void setFocus(Optional<WlSurfaceResource> wlSurfaceResource){
-        this.focus = wlSurfaceResource;
+    public void setFocus(Set<WlKeyboardResource> wlKeyboardResources,
+                         Optional<WlSurfaceResource> wlSurfaceResource){
+        Optional<WlSurfaceResource> oldFocus = getFocus();
+        updateFocus(wlSurfaceResource);
+        Optional<WlSurfaceResource> newFocus = getFocus();
+        if(!oldFocus.equals(newFocus)){
+            oldFocus.ifPresent(oldFocusResource -> findKeyboardResource(wlKeyboardResources,
+                                                                        oldFocusResource).ifPresent(oldFocusKeyboardResource -> oldFocusKeyboardResource.leave(nextKeyboardSerial(),
+                                                                                                                                                               oldFocusResource)));
+            newFocus.ifPresent(newFocusResource -> findKeyboardResource(wlKeyboardResources,
+                                                                        newFocusResource).ifPresent(newFocusKeyboardResource -> newFocusKeyboardResource.leave(nextKeyboardSerial(),
+                                                                                                                                                               newFocusResource)));
+        }
     }
 
+    private void updateFocus(Optional<WlSurfaceResource> wlSurfaceResource){
+        this.focusDestroyListener.ifPresent(Listener::remove);
+        this.focus = wlSurfaceResource;
+        getFocus().ifPresent(focusResource -> {
+            this.focusDestroyListener = Optional.of(new Listener() {
+                @Override
+                public void handle() {
+                    updateFocus(Optional.<WlSurfaceResource>empty());
+                }
+            });
+            focusResource.addDestroyListener(this.focusDestroyListener.get());
+        });
+    }
+
+    @Nonnull
     public Optional<WlSurfaceResource> getFocus() {
         return this.focus;
     }
