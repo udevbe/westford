@@ -223,8 +223,8 @@ public class PointerDevice implements Role {
     public void button(@Nonnull final Set<WlPointerResource> wlPointerResources,
                        final int time,
                        @Nonnegative final int button,
-                       @Nonnull final WlPointerButtonState buttonState) {
-        if (buttonState == WlPointerButtonState.PRESSED) {
+                       @Nonnull final WlPointerButtonState wlPointerButtonState) {
+        if (wlPointerButtonState == WlPointerButtonState.PRESSED) {
             this.pressedButtons.add(button);
         }
         else {
@@ -233,17 +233,17 @@ public class PointerDevice implements Role {
         doButton(wlPointerResources,
                  time,
                  button,
-                 buttonState);
+                 wlPointerButtonState);
         this.inputBus.post(Button.create(time,
                                          button,
-                                         buttonState));
+                                         wlPointerButtonState));
     }
 
     private void doButton(@Nonnull final Set<WlPointerResource> wlPointerResources,
                           final int time,
                           @Nonnegative final int button,
-                          @Nonnull final WlPointerButtonState buttonState) {
-        if (buttonState == WlPointerButtonState.PRESSED) {
+                          @Nonnull final WlPointerButtonState wlPointerButtonState) {
+        if (wlPointerButtonState == WlPointerButtonState.PRESSED) {
             this.buttonsPressed++;
         }
         else if (this.buttonsPressed > 0) {
@@ -256,7 +256,7 @@ public class PointerDevice implements Role {
             reportButton(wlPointerResources,
                          time,
                          button,
-                         buttonState);
+                         wlPointerButtonState);
         }
         if (this.buttonsPressed == 0) {
             clearGrab();
@@ -267,7 +267,7 @@ public class PointerDevice implements Role {
             reportButton(wlPointerResources,
                          time,
                          button,
-                         buttonState);
+                         wlPointerButtonState);
         }
     }
 
@@ -279,18 +279,14 @@ public class PointerDevice implements Role {
     private void reportButton(@Nonnull final Set<WlPointerResource> wlPointerResources,
                               final int time,
                               @Nonnegative final int button,
-                              @Nonnull final WlPointerButtonState buttonState) {
-        final WlSurfaceResource wlSurfaceResource = getGrab().get();
-        final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointerResources,
-                                                                                wlSurfaceResource);
-        if (pointerResource.isPresent()) {
-            pointerResource.get()
-                           .button(buttonState == WlPointerButtonState.PRESSED ?
-                                   nextButtonPressSerial() : nextButtonReleaseSerial(),
-                                   time,
-                                   button,
-                                   buttonState.getValue());
-        }
+                              @Nonnull final WlPointerButtonState wlPointerButtonState) {
+        findPointerResource(wlPointerResources,
+                            getGrab().get()).ifPresent(wlPointerResource -> wlPointerResource
+                .button(wlPointerButtonState == WlPointerButtonState.PRESSED ?
+                        nextButtonPressSerial() : nextButtonReleaseSerial(),
+                        time,
+                        button,
+                        wlPointerButtonState.getValue()));
     }
 
     private void clearGrab() {

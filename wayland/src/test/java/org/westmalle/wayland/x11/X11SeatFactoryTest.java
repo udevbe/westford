@@ -8,8 +8,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.JobExecutor;
-import org.westmalle.wayland.core.Keyboard;
-import org.westmalle.wayland.core.KeyboardFactory;
+import org.westmalle.wayland.core.KeyboardDevice;
+import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.PointerDeviceFactory;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 @PrepareForTest({WlPointerFactory.class,
                  WlKeyboardFactory.class,
                  PointerDeviceFactory.class,
-                 KeyboardFactory.class})
+                 KeyboardDeviceFactory.class})
 public class X11SeatFactoryTest {
 
     @Mock
@@ -44,7 +44,7 @@ public class X11SeatFactoryTest {
     @Mock
     private PointerDeviceFactory pointerDeviceFactory;
     @Mock
-    private KeyboardFactory      keyboardFactory;
+    private KeyboardDeviceFactory keyboardDeviceFactory;
     @InjectMocks
     private X11SeatFactory       x11SeatFactory;
 
@@ -59,7 +59,7 @@ public class X11SeatFactoryTest {
         final Compositor    compositor    = mock(Compositor.class);
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         final WlPointer     wlPointer     = mock(WlPointer.class);
-        final Keyboard      keyboard      = mock(Keyboard.class);
+        final KeyboardDevice keyboardDevice      = mock(KeyboardDevice.class);
         final WlKeyboard    wlKeyboard    = mock(WlKeyboard.class);
 
         when(wlOutput.getOutput()).thenReturn(output);
@@ -67,8 +67,8 @@ public class X11SeatFactoryTest {
         when(x11Output.getX11EventBus()).thenReturn(x11EventBus);
         when(this.pointerDeviceFactory.create(compositor)).thenReturn(pointerDevice);
         when(this.wlPointerFactory.create(pointerDevice)).thenReturn(wlPointer);
-        when(this.keyboardFactory.create()).thenReturn(keyboard);
-        when(this.wlKeyboardFactory.create(keyboard)).thenReturn(wlKeyboard);
+        when(this.keyboardDeviceFactory.create()).thenReturn(keyboardDevice);
+        when(this.wlKeyboardFactory.create(keyboardDevice)).thenReturn(wlKeyboard);
 
         //when
         final X11Seat x11Seat = this.x11SeatFactory.create(wlOutput,

@@ -14,7 +14,7 @@
 package org.westmalle.wayland.x11;
 
 import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.KeyboardFactory;
+import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
@@ -36,19 +36,19 @@ public class X11SeatFactory {
     @Nonnull
     private final PointerDeviceFactory pointerDeviceFactory;
     @Nonnull
-    private final KeyboardFactory      keyboardFactory;
+    private final KeyboardDeviceFactory keyboardDeviceFactory;
 
     @Inject
     X11SeatFactory(@Nonnull final Libxcb libxcb,
                    @Nonnull final WlPointerFactory wlPointerFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final PointerDeviceFactory pointerDeviceFactory,
-                   @Nonnull final KeyboardFactory keyboardFactory) {
+                   @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory) {
         this.libxcb = libxcb;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.pointerDeviceFactory = pointerDeviceFactory;
-        this.keyboardFactory = keyboardFactory;
+        this.keyboardDeviceFactory = keyboardDeviceFactory;
     }
 
     public X11Seat create(@Nonnull final WlOutput wlOutput,
@@ -67,7 +67,7 @@ public class X11SeatFactory {
         //added or removed
         //enable pointer and keyboard for wlseat
         wlSeat.setWlPointer(this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)));
-        wlSeat.setWlKeyboard(this.wlKeyboardFactory.create(this.keyboardFactory.create()));
+        wlSeat.setWlKeyboard(this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create()));
 
         return x11Seat;
     }
