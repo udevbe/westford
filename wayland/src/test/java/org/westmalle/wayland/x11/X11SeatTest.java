@@ -4,7 +4,6 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -67,11 +66,6 @@ public class X11SeatTest {
         //when
         this.x11Seat.handle(event);
         //then
-        final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        //and when
-        runnableArgument.getValue()
-                        .run();
-        //then
         verify(pointerDevice).button(wlPointerResources,
                                      compositorTime,
                                      waylandEventDetail,
@@ -114,11 +108,6 @@ public class X11SeatTest {
         //when
         this.x11Seat.handle(event);
         //then
-        final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        //and when
-        runnableArgument.getValue()
-                        .run();
-        //then
         verify(pointerDevice).button(wlPointerResources,
                                      compositorTime,
                                      waylandEventDetail,
@@ -156,11 +145,6 @@ public class X11SeatTest {
         event.event_y = y;
         //when
         this.x11Seat.handle(event);
-        //then
-        final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        //and when
-        runnableArgument.getValue()
-                        .run();
         //then
         verify(pointerDevice).motion(wlPointerResources,
                                      compositorTime,
