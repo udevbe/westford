@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -30,14 +31,15 @@ import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -129,6 +131,9 @@ public class PointerDevice implements Role {
                 oldFocus.ifPresent(oldFocusResource -> reportLeave(findPointerResource(pointerResources,
                                                                                        oldFocusResource),
                                                                    oldFocusResource));
+                newFocus.ifPresent(newFocusResource -> reportEnter(findPointerResource(pointerResources,
+                                                                                       newFocusResource),
+                                                                   newFocusResource));
             }
 
             newFocus.ifPresent(newFocusResource -> reportMotion(pointerResources,
@@ -355,21 +360,10 @@ public class PointerDevice implements Role {
             this.focusDestroyListener = Optional.of(new Listener() {
                 @Override
                 public void handle() {
-                    //TODO add unit tests
-                    //given: surface with focus, underlying surface,
-                    // when: surface is destroyed,
-                    // then: underlying surface gets focus, cursor is updated
-                    //
-                    //given: surface with focus, no underlying surface,
-                    // when: surface is destroyed,
-                    // then: focus is cleared, cursor is cleared
                     updateFocus(pointerResources);
                 }
             });
             focusResource.addDestroyListener(this.focusDestroyListener.get());
-            reportEnter(findPointerResource(pointerResources,
-                                            focusResource),
-                        focusResource);
         });
 
         if (getFocus().isPresent()) {
@@ -508,7 +502,7 @@ public class PointerDevice implements Role {
         updateActiveCursor(Optional.of(wlPointerResource));
 
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
+        final Surface surface = wlSurface.getSurface();
         surface.setState(updateCursorSurfaceState(wlSurfaceResource,
                                                   surface.getState()));
     }
@@ -541,12 +535,12 @@ public class PointerDevice implements Role {
 
         this.activeCursor.ifPresent(clientCursor -> {
             if (clientCursor.getWlSurfaceResource()
-                            .equals(wlSurfaceResource) && !clientCursor.isHidden()) {
+                        .equals(wlSurfaceResource) && !clientCursor.isHidden()) {
                 //set back the buffer we cleared.
                 surfaceStateBuilder.buffer(surfaceState.getBuffer());
                 //move visible cursor to top of surface stack
                 this.compositor.getSurfacesStack()
-                               .remove(wlSurfaceResource);
+                        .remove(wlSurfaceResource);
                 this.compositor.getSurfacesStack()
                                .addLast(wlSurfaceResource);
             }
@@ -572,11 +566,11 @@ public class PointerDevice implements Role {
     @Override
     public void afterDestroy(final WlSurfaceResource wlSurfaceResource) {
         this.cursors.values()
-                    .removeIf(cursor -> {
-                        if (cursor.getWlSurfaceResource()
-                                  .equals(wlSurfaceResource)) {
-                            cursor.hide();
-                            return true;
+                .removeIf(cursor -> {
+                    if (cursor.getWlSurfaceResource()
+                            .equals(wlSurfaceResource)) {
+                        cursor.hide();
+                        return true;
                         }
                         else {
                             return false;
