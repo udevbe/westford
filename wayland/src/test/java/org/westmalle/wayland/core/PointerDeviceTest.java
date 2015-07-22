@@ -402,7 +402,7 @@ public class PointerDeviceTest {
         assertThat(values.get(0)
                          .asInt()).isEqualTo(2);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(3);
+                           .asInt()).isEqualTo(3);
 
         verify(wlPointerResource0).motion(eq(time0),
                                           fixedArgumentCaptor.capture(),
@@ -421,17 +421,17 @@ public class PointerDeviceTest {
                                          fixedArgumentCaptor.capture(),
                                          fixedArgumentCaptor.capture());
         assertThat(values.get(4)
-                         .asInt()).isEqualTo(89);
+                           .asInt()).isEqualTo(89);
         assertThat(values.get(5)
-                         .asInt()).isEqualTo(144);
+                           .asInt()).isEqualTo(144);
 
         verify(wlPointerResource1).motion(eq(time1),
                                           fixedArgumentCaptor.capture(),
                                           fixedArgumentCaptor.capture());
         assertThat(values.get(6)
-                         .asInt()).isEqualTo(89);
+                           .asInt()).isEqualTo(89);
         assertThat(values.get(7)
-                         .asInt()).isEqualTo(144);
+                           .asInt()).isEqualTo(144);
     }
 
     /**
@@ -651,7 +651,7 @@ public class PointerDeviceTest {
         assertThat(values.get(0)
                          .asInt()).isEqualTo(5);
         assertThat(values.get(1)
-                         .asInt()).isEqualTo(8);
+                           .asInt()).isEqualTo(8);
 
         verify(wlPointerResource0).motion(eq(time1),
                                           fixedArgumentCaptor.capture(),
@@ -659,7 +659,7 @@ public class PointerDeviceTest {
         assertThat(values.get(2)
                          .asInt()).isEqualTo(5);
         assertThat(values.get(3)
-                         .asInt()).isEqualTo(8);
+                           .asInt()).isEqualTo(8);
     }
 
     /**
@@ -775,7 +775,7 @@ public class PointerDeviceTest {
                                          fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(5);
+                           .asInt()).isEqualTo(5);
         assertThat(values.get(1)
                          .asInt()).isEqualTo(8);
 
@@ -783,7 +783,7 @@ public class PointerDeviceTest {
                                           fixedArgumentCaptor.capture(),
                                           fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(5);
+                           .asInt()).isEqualTo(5);
         assertThat(values.get(3)
                          .asInt()).isEqualTo(8);
 
@@ -903,7 +903,7 @@ public class PointerDeviceTest {
                                          fixedArgumentCaptor.capture());
 
         assertThat(values.get(0)
-                         .asInt()).isEqualTo(2);
+                           .asInt()).isEqualTo(2);
         assertThat(values.get(1)
                          .asInt()).isEqualTo(3);
 
@@ -911,7 +911,7 @@ public class PointerDeviceTest {
                                           fixedArgumentCaptor.capture(),
                                           fixedArgumentCaptor.capture());
         assertThat(values.get(2)
-                         .asInt()).isEqualTo(2);
+                           .asInt()).isEqualTo(2);
         assertThat(values.get(3)
                          .asInt()).isEqualTo(3);
 
@@ -1286,6 +1286,22 @@ public class PointerDeviceTest {
         // given: a surface that has the grab
         // when: the surface is destroyed
         // then: the grab surface is forgotten
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void testFocusSurfaceDestroyedNewFocus() throws Exception {
+        // given: a surface that has the focus, an underlying surface
+        // when: the surface is destroyed
+        // then: the underlying surface gets the focus
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void testFocusSurfaceDestroyedNoFocus() throws Exception {
+        // given: a surface that has the focus
+        // when: the surface is destroyed
+        // then: no surface has the focus
         throw new UnsupportedOperationException();
     }
 }
