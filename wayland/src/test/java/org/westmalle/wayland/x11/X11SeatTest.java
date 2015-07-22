@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.JobExecutor;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.nativ.xcb_button_press_event_t;
@@ -40,8 +39,6 @@ public class X11SeatTest {
     private Compositor  compositor;
     @Mock
     private WlSeat      wlSeat;
-    @Mock
-    private JobExecutor jobExecutor;
     @InjectMocks
     private X11Seat     x11Seat;
 
@@ -71,7 +68,6 @@ public class X11SeatTest {
         this.x11Seat.handle(event);
         //then
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        verify(this.jobExecutor).submit(runnableArgument.capture());
         //and when
         runnableArgument.getValue()
                         .run();
@@ -119,7 +115,6 @@ public class X11SeatTest {
         this.x11Seat.handle(event);
         //then
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        verify(this.jobExecutor).submit(runnableArgument.capture());
         //and when
         runnableArgument.getValue()
                         .run();
@@ -163,7 +158,6 @@ public class X11SeatTest {
         this.x11Seat.handle(event);
         //then
         final ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        verify(this.jobExecutor).submit(runnableArgument.capture());
         //and when
         runnableArgument.getValue()
                         .run();
