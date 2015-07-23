@@ -40,6 +40,10 @@ class Boot {
     private static final Logger LOGGER = LoggerFactory.getLogger(Boot.class);
 
     public static void main(final String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((thread,
+                                                   throwable) -> LOGGER.error("Got uncaught exception",
+                                                                              throwable));
+
         LOGGER.info("Starting Westmalle:\n"
                     + "\tArguments: {}",
                     args.length == 0 ? "<none>" : Arrays.toString(args));
