@@ -28,6 +28,7 @@ import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.Motion;
+import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -118,16 +119,14 @@ public class PointerDevice implements Role {
             reportMotion(wlPointerResources,
                          time,
                          getGrab().get());
-
-            updateActiveCursor(findPointerResource(wlPointerResources,
-                                                   getFocus().get()));
         }
         else {
             final Optional<WlSurfaceResource> oldFocus = getFocus();
-            updateFocus(wlPointerResources);
-            final Optional<WlSurfaceResource> newFocus = getFocus();
+            final Optional<WlSurfaceResource> newFocus = over();
 
             if (!oldFocus.equals(newFocus)) {
+                updateFocus(newFocus);
+
                 oldFocus.ifPresent(oldFocusResource -> reportLeave(findPointerResource(wlPointerResources,
                                                                                        oldFocusResource),
                                                                    oldFocusResource));
@@ -136,26 +135,31 @@ public class PointerDevice implements Role {
                                                                    newFocusResource));
             }
 
-            newFocus.ifPresent(newFocusResource -> reportMotion(wlPointerResources,
-                                                                time,
-                                                                newFocusResource));
+            if (getFocus().isPresent()) {
+                reportMotion(wlPointerResources,
+                             time,
+                             getFocus().get());
+            }
+            else {
+                updateActiveCursor(Optional.<WlPointerResource>empty());
+            }
         }
     }
 
     private void reportMotion(final Set<WlPointerResource> wlPointerResources,
                               final int time,
                               final WlSurfaceResource wlSurfaceResource) {
-        final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointerResources,
-                                                                                wlSurfaceResource);
-        if (pointerResource.isPresent()) {
+        final Optional<WlPointerResource> wlPointerResourceOptional = findPointerResource(wlPointerResources,
+                                                                                          wlSurfaceResource);
+        wlPointerResourceOptional.ifPresent(wlPointerResource -> {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Point relativePoint = wlSurface.getSurface()
-                                                 .local(getPosition());
-            pointerResource.get()
-                           .motion(time,
-                                   Fixed.create(relativePoint.getX()),
-                                   Fixed.create(relativePoint.getY()));
-        }
+                    .local(getPosition());
+            wlPointerResource.motion(time,
+                                     Fixed.create(relativePoint.getX()),
+                                     Fixed.create(relativePoint.getY()));
+            updateActiveCursor(wlPointerResourceOptional);
+        });
     }
 
     @Nonnull
@@ -182,28 +186,23 @@ public class PointerDevice implements Role {
         return pointerOver;
     }
 
-    private void reportLeave(final Optional<WlPointerResource> wlPointerResource,
+    private void reportLeave(final Optional<WlPointerResource> wlPointerResourceOptional,
                              final WlSurfaceResource wlSurfaceResource) {
-        if (wlPointerResource.isPresent()) {
-            wlPointerResource.get()
-                           .leave(nextLeaveSerial(),
-                                  wlSurfaceResource);
-        }
+        wlPointerResourceOptional.ifPresent(wlPointerResource -> wlPointerResource.leave(nextLeaveSerial(),
+                                                                                         wlSurfaceResource));
     }
 
-    public void reportEnter(final Optional<WlPointerResource> wlPointerResource,
+    public void reportEnter(final Optional<WlPointerResource> wlPointerResourceOptional,
                             final WlSurfaceResource wlSurfaceResource) {
-        if (wlPointerResource.isPresent()) {
-
+        wlPointerResourceOptional.ifPresent(wlPointerResource -> {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Point relativePoint = wlSurface.getSurface()
                                                  .local(getPosition());
-            wlPointerResource.get()
-                           .enter(nextEnterSerial(),
-                                  wlSurfaceResource,
-                                  Fixed.create(relativePoint.getX()),
-                                  Fixed.create(relativePoint.getY()));
-        }
+            wlPointerResource.enter(nextEnterSerial(),
+                                    wlSurfaceResource,
+                                    Fixed.create(relativePoint.getX()),
+                                    Fixed.create(relativePoint.getY()));
+        });
     }
 
     public int nextLeaveSerial() {
@@ -349,26 +348,21 @@ public class PointerDevice implements Role {
         return this.buttonReleaseSerial;
     }
 
-    private void updateFocus(final Set<WlPointerResource> wlPointerResources) {
+    private void updateFocus(final Optional<WlSurfaceResource> focus) {
         this.focusDestroyListener.ifPresent(Listener::remove);
-        this.focus = over();
+        this.focus = focus;
+
         this.focus.ifPresent(focusResource -> {
             this.focusDestroyListener = Optional.of(new Listener() {
                 @Override
                 public void handle() {
-                    updateFocus(wlPointerResources);
+                    updateFocus(over());
                 }
             });
             focusResource.addDestroyListener(this.focusDestroyListener.get());
         });
 
-        if (getFocus().isPresent()) {
-            updateActiveCursor(findPointerResource(wlPointerResources,
-                                                   getFocus().get()));
-        }
-        else {
-            updateActiveCursor(Optional.<WlPointerResource>empty());
-        }
+        this.inputBus.post(PointerFocus.create(getFocus()));
     }
 
     private void clearFocus() {
