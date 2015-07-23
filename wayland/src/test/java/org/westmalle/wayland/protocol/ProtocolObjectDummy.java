@@ -29,15 +29,15 @@ public class ProtocolObjectDummy implements ProtocolObject<Resource<?>> {
 
     @Nonnull
     @Override
-    public Set<Resource<?>> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public Resource<?> create(@Nonnull final Client client,
                               @Nonnegative final int version,
                               final int id) {
         return mock(Resource.class);
+    }
+
+    @Nonnull
+    @Override
+    public Set<Resource<?>> getResources() {
+        return this.resources;
     }
 }

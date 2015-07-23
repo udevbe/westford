@@ -48,12 +48,6 @@ public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlData
 
     @Nonnull
     @Override
-    public Set<WlDataSourceResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlDataSourceResource create(@Nonnull final Client client,
                                        @Nonnegative final int version,
                                        final int id) {
@@ -61,5 +55,11 @@ public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlData
                                         version,
                                         id,
                                         this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlDataSourceResource> getResources() {
+        return this.resources;
     }
 }

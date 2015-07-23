@@ -56,12 +56,6 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
 
     @Nonnull
     @Override
-    public Set<WlSurfaceResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlSurfaceResource create(@Nonnull final Client client,
                                     @Nonnegative final int version,
                                     final int id) {
@@ -78,6 +72,12 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
             }
         });
         return wlSurfaceResource;
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlSurfaceResource> getResources() {
+        return this.resources;
     }
 
     public Surface getSurface() {

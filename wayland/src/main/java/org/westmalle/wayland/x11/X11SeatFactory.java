@@ -14,7 +14,6 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
-
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
@@ -31,13 +30,13 @@ import javax.inject.Inject;
 public class X11SeatFactory {
 
     @Nonnull
-    private final Libxcb               libxcb;
+    private final Libxcb                libxcb;
     @Nonnull
-    private final WlPointerFactory     wlPointerFactory;
+    private final WlPointerFactory      wlPointerFactory;
     @Nonnull
-    private final WlKeyboardFactory    wlKeyboardFactory;
+    private final WlKeyboardFactory     wlKeyboardFactory;
     @Nonnull
-    private final PointerDeviceFactory pointerDeviceFactory;
+    private final PointerDeviceFactory  pointerDeviceFactory;
     @Nonnull
     private final KeyboardDeviceFactory keyboardDeviceFactory;
 
@@ -74,15 +73,17 @@ public class X11SeatFactory {
 
         //FIXME for new we use the pointer focus to set the keyboard focus. Ideally this should be something
         //configurable or implemented by a 3rd party
-        wlSeat.getOptionalWlPointer().ifPresent(wlPointer -> wlPointer.getPointerDevice().register(new Object(){
-            @Subscribe
-            public void handle(PointerFocus event){
-                wlSeat.getOptionalWlKeyboard()
-                      .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
-                              .setFocus(wlKeyboard.getResources(),
-                                        event.getWlSurfaceResource()));
-            }
-        }));
+        wlSeat.getOptionalWlPointer()
+              .ifPresent(wlPointer -> wlPointer.getPointerDevice()
+                                               .register(new Object() {
+                                                   @Subscribe
+                                                   public void handle(final PointerFocus event) {
+                                                       wlSeat.getOptionalWlKeyboard()
+                                                             .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
+                                                                                                .setFocus(wlKeyboard.getResources(),
+                                                                                                          event.getWlSurfaceResource()));
+                                                   }
+                                               }));
 
         return x11Seat;
     }

@@ -141,12 +141,6 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
 
     @Nonnull
     @Override
-    public Set<WlShellSurfaceResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlShellSurfaceResource create(@Nonnull final Client client,
                                          @Nonnegative final int version,
                                          final int id) {
@@ -154,5 +148,11 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                                           version,
                                           id,
                                           this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlShellSurfaceResource> getResources() {
+        return this.resources;
     }
 }

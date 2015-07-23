@@ -56,12 +56,6 @@ public class WlDataDevice implements WlDataDeviceRequestsV2, ProtocolObject<WlDa
 
     @Nonnull
     @Override
-    public Set<WlDataDeviceResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlDataDeviceResource create(@Nonnull final Client client,
                                        @Nonnegative final int version,
                                        final int id) {
@@ -69,5 +63,11 @@ public class WlDataDevice implements WlDataDeviceRequestsV2, ProtocolObject<WlDa
                                         version,
                                         id,
                                         this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlDataDeviceResource> getResources() {
+        return this.resources;
     }
 }

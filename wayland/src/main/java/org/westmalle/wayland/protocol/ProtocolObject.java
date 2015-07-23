@@ -17,20 +17,11 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.Resource;
 
-import java.util.Set;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Set;
 
 public interface ProtocolObject<T extends Resource<?>> {
-
-    /**
-     * Get all resources currently associated with this protocol object.
-     *
-     * @return All associated resources.
-     */
-    @Nonnull
-    Set<T> getResources();
 
     /**
      * Associate a new resource object with this protocol object.
@@ -73,4 +64,12 @@ public interface ProtocolObject<T extends Resource<?>> {
     T create(@Nonnull final Client client,
              @Nonnegative final int version,
              final int id);
+
+    /**
+     * Get all resources currently associated with this protocol object.
+     *
+     * @return All associated resources.
+     */
+    @Nonnull
+    Set<T> getResources();
 }

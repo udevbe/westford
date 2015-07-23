@@ -73,12 +73,6 @@ public class WlSubCompositor extends Global<WlSubcompositorResource> implements 
 
     @Nonnull
     @Override
-    public Set<WlSubcompositorResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlSubcompositorResource create(@Nonnull final Client client,
                                           @Nonnegative final int version,
                                           final int id) {
@@ -86,6 +80,12 @@ public class WlSubCompositor extends Global<WlSubcompositorResource> implements 
                                            version,
                                            id,
                                            this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlSubcompositorResource> getResources() {
+        return this.resources;
     }
 
     @Override

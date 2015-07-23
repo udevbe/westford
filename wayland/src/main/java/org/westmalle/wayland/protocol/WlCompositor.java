@@ -104,12 +104,6 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     @Nonnull
     @Override
-    public Set<WlCompositorResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlCompositorResource create(@Nonnull final Client client,
                                        @Nonnegative final int version,
                                        final int id) {
@@ -117,6 +111,12 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                                         version,
                                         id,
                                         this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlCompositorResource> getResources() {
+        return this.resources;
     }
 
     public Compositor getCompositor() {

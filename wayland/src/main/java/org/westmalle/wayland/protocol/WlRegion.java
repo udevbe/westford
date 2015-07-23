@@ -41,12 +41,6 @@ public class WlRegion implements WlRegionRequests, ProtocolObject<WlRegionResour
 
     @Nonnull
     @Override
-    public Set<WlRegionResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlRegionResource create(@Nonnull final Client client,
                                    @Nonnegative final int version,
                                    final int id) {
@@ -54,6 +48,12 @@ public class WlRegion implements WlRegionRequests, ProtocolObject<WlRegionResour
                                     version,
                                     id,
                                     this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlRegionResource> getResources() {
+        return this.resources;
     }
 
     @Override

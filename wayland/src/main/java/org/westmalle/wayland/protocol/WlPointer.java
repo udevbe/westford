@@ -97,12 +97,6 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
 
     @Nonnull
     @Override
-    public Set<WlPointerResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlPointerResource create(@Nonnull final Client client,
                                     @Nonnegative final int version,
                                     final int id) {
@@ -110,5 +104,11 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
                                      version,
                                      id,
                                      this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlPointerResource> getResources() {
+        return this.resources;
     }
 }
