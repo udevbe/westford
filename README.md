@@ -13,6 +13,10 @@ Building
 ========
 Run `maven install` in the root of the project.
 
+Running
+=======
+Go in the `bootstrap/target` folder. Type `java -jar bootstrap-1.0.0-SNAPSHOT.jar`.
+
 Dependencies
 ============
 
