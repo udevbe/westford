@@ -106,6 +106,7 @@ public class KeyboardDevice {
 
     private void updateFocus(Optional<WlSurfaceResource> wlSurfaceResource){
         this.focusDestroyListener.ifPresent(Listener::remove);
+        this.focusDestroyListener = Optional.empty();
         this.focus = wlSurfaceResource;
         getFocus().ifPresent(focusResource -> {
             this.focusDestroyListener = Optional.of(new Listener() {

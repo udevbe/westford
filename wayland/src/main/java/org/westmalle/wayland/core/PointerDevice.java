@@ -350,6 +350,7 @@ public class PointerDevice implements Role {
 
     private void updateFocus(final Optional<WlSurfaceResource> focus) {
         this.focusDestroyListener.ifPresent(Listener::remove);
+        this.focusDestroyListener = Optional.empty();
         this.focus = focus;
 
         this.focus.ifPresent(focusResource -> {
@@ -363,13 +364,6 @@ public class PointerDevice implements Role {
         });
 
         this.inputBus.post(PointerFocus.create(getFocus()));
-    }
-
-    private void clearFocus() {
-        this.focusDestroyListener.ifPresent(Listener::remove);
-        this.focusDestroyListener = Optional.empty();
-        this.focus = Optional.empty();
-        //update cursor?
     }
 
     public boolean isButtonPressed(@Nonnegative final int button) {
