@@ -2,8 +2,10 @@ package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
-public interface Role {
-    default void beforeCommit(final WlSurfaceResource wlSurfaceResource) {}
+import javax.annotation.Nonnull;
 
-    default void afterDestroy(final WlSurfaceResource wlSurfaceResource) {}
+public interface Role {
+    default void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {}
+
+    default void afterDestroy(@Nonnull final WlSurfaceResource wlSurfaceResource) {}
 }

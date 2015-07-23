@@ -96,7 +96,7 @@ public class PointerDevice implements Role {
         this.compositor = compositor;
     }
 
-    public void motion(final Set<WlPointerResource> wlPointerResources,
+    public void motion(@Nonnull final Set<WlPointerResource> wlPointerResources,
                        final int time,
                        final int x,
                        final int y) {
@@ -192,8 +192,8 @@ public class PointerDevice implements Role {
                                                                                          wlSurfaceResource));
     }
 
-    public void reportEnter(final Optional<WlPointerResource> wlPointerResourceOptional,
-                            final WlSurfaceResource wlSurfaceResource) {
+    public void reportEnter(@Nonnull final Optional<WlPointerResource> wlPointerResourceOptional,
+                            @Nonnull final WlSurfaceResource wlSurfaceResource) {
         wlPointerResourceOptional.ifPresent(wlPointerResource -> {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Point relativePoint = wlSurface.getSurface()
@@ -442,7 +442,7 @@ public class PointerDevice implements Role {
         this.inputBus.register(listener);
     }
 
-    public void removeCursor(final WlPointerResource wlPointerResource,
+    public void removeCursor(@Nonnull final WlPointerResource wlPointerResource,
                              final int serial) {
         if (serial != getEnterSerial()) {
             return;
@@ -455,9 +455,9 @@ public class PointerDevice implements Role {
         return this.enterSerial;
     }
 
-    public void setCursor(final WlPointerResource wlPointerResource,
+    public void setCursor(@Nonnull final WlPointerResource wlPointerResource,
                           final int serial,
-                          final WlSurfaceResource wlSurfaceResource,
+                          @Nonnull final WlSurfaceResource wlSurfaceResource,
                           final int hotspotX,
                           final int hotspotY) {
 
@@ -545,7 +545,7 @@ public class PointerDevice implements Role {
     }
 
     @Override
-    public void beforeCommit(final WlSurfaceResource wlSurfaceResource) {
+    public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
@@ -554,7 +554,7 @@ public class PointerDevice implements Role {
     }
 
     @Override
-    public void afterDestroy(final WlSurfaceResource wlSurfaceResource) {
+    public void afterDestroy(@Nonnull final WlSurfaceResource wlSurfaceResource) {
         this.cursors.values()
                 .removeIf(cursor -> {
                     if (cursor.getWlSurfaceResource()

@@ -39,10 +39,10 @@ public class KeyboardDevice {
         this.display = display;
     }
 
-    public void key(final Set<WlKeyboardResource> wlKeyboardResources,
+    public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
                     final int time,
                     final int key,
-                    final WlKeyboardKeyState wlKeyboardKeyState){
+                    @Nonnull final WlKeyboardKeyState wlKeyboardKeyState){
         if(wlKeyboardKeyState.equals(WlKeyboardKeyState.PRESSED)) {
             getPressedKeys().add(key);
         }else{
@@ -84,8 +84,8 @@ public class KeyboardDevice {
         return this.keySerial;
     }
 
-    public void setFocus(Set<WlKeyboardResource> wlKeyboardResources,
-                         Optional<WlSurfaceResource> wlSurfaceResource){
+    public void setFocus(@Nonnull Set<WlKeyboardResource> wlKeyboardResources,
+                         @Nonnull Optional<WlSurfaceResource> wlSurfaceResource){
         Optional<WlSurfaceResource> oldFocus = getFocus();
         updateFocus(wlSurfaceResource);
         Optional<WlSurfaceResource> newFocus = getFocus();
@@ -124,7 +124,7 @@ public class KeyboardDevice {
     }
 
     private Optional<WlKeyboardResource> findKeyboardResource(final Set<WlKeyboardResource> wlKeyboardResources,
-                                                            final WlSurfaceResource wlSurfaceResource) {
+                                                              final WlSurfaceResource wlSurfaceResource) {
         for (final WlKeyboardResource wlKeyboardResource : wlKeyboardResources) {
             if (wlSurfaceResource.getClient()
                     .equals(wlKeyboardResource.getClient())) {
@@ -134,11 +134,11 @@ public class KeyboardDevice {
         return Optional.empty();
     }
 
-    public void register(final Object listener) {
+    public void register(@Nonnull final Object listener) {
         this.inputBus.register(listener);
     }
 
-    public void unregister(final Object listener) {
+    public void unregister(@Nonnull final Object listener) {
         this.inputBus.unregister(listener);
     }
 }
