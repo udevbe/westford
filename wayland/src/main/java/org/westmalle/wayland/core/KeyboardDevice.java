@@ -3,6 +3,7 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
+import com.google.common.primitives.Ints;
 
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Listener;
@@ -11,6 +12,8 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.westmalle.wayland.core.events.Key;
 
+import java.nio.ByteBuffer;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +30,9 @@ public class KeyboardDevice {
     private Optional<Listener> focusDestroyListener = Optional.empty();
     @Nonnull
     private Optional<WlSurfaceResource> focus = Optional.empty();
+    @Nonnull
+    private Set<Integer> pressedKeys = new HashSet<>();
+
     private int keySerial;
 
     KeyboardDevice(@Provided @Nonnull final Display display) {
@@ -37,6 +43,12 @@ public class KeyboardDevice {
                     final int time,
                     final int key,
                     final WlKeyboardKeyState wlKeyboardKeyState){
+        if(wlKeyboardKeyState.equals(WlKeyboardKeyState.PRESSED)) {
+            getPressedKeys().add(key);
+        }else{
+            getPressedKeys().remove(key);
+        }
+
         doKey(wlKeyboardResources,
               time,
               key,
@@ -58,6 +70,11 @@ public class KeyboardDevice {
                                                                         wlKeyboardKeyState.getValue())));
     }
 
+    @Nonnull
+    public Set<Integer> getPressedKeys() {
+        return this.pressedKeys;
+    }
+
     public int nextKeyboardSerial(){
         this.keySerial = this.display.nextSerial();
         return this.keySerial;
@@ -77,8 +94,13 @@ public class KeyboardDevice {
                                                                         oldFocusResource).ifPresent(oldFocusKeyboardResource -> oldFocusKeyboardResource.leave(nextKeyboardSerial(),
                                                                                                                                                                oldFocusResource)));
             newFocus.ifPresent(newFocusResource -> findKeyboardResource(wlKeyboardResources,
-                                                                        newFocusResource).ifPresent(newFocusKeyboardResource -> newFocusKeyboardResource.leave(nextKeyboardSerial(),
-                                                                                                                                                               newFocusResource)));
+                                                                        newFocusResource).ifPresent(newFocusKeyboardResource -> {
+                final ByteBuffer keys = ByteBuffer.allocateDirect(Integer.BYTES * this.pressedKeys.size());
+                keys.asIntBuffer().put(Ints.toArray(this.pressedKeys));
+                newFocusKeyboardResource.enter(nextKeyboardSerial(),
+                                               newFocusResource,
+                                               keys);
+            }));
         }
     }
 
