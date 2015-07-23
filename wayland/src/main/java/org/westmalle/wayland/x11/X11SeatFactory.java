@@ -13,9 +13,12 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import com.google.common.eventbus.Subscribe;
+
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
+import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -68,6 +71,18 @@ public class X11SeatFactory {
         //enable pointer and keyboard for wlseat
         wlSeat.setWlPointer(this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)));
         wlSeat.setWlKeyboard(this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create()));
+
+        //FIXME for new we use the pointer focus to set the keyboard focus. Ideally this should be something
+        //configurable or implemented by a 3rd party
+        wlSeat.getOptionalWlPointer().ifPresent(wlPointer -> wlPointer.getPointerDevice().register(new Object(){
+            @Subscribe
+            public void handle(PointerFocus event){
+                wlSeat.getOptionalWlKeyboard()
+                      .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
+                              .setFocus(wlKeyboard.getResources(),
+                                        event.getWlSurfaceResource()));
+            }
+        }));
 
         return x11Seat;
     }
