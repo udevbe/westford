@@ -13,39 +13,16 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.common.base.Preconditions;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.Resource;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 public interface ProtocolObject<T extends Resource<?>> {
-
-    /**
-     * Get the only resource (if any) associated with this protocol object.
-     * This method is a convenience method for protocol objects that should have
-     * only a single resource associated with it.
-     * It is an error to call this method if more than 1 resource is associated
-     * with this protocol object.
-     *
-     * @return The only resource (if any) associated with this protocol object.
-     */
-    default Optional<T> getResource() {
-        Preconditions.checkState(getResources().size() <= 1);
-
-        final Iterator<T> iterator = getResources().iterator();
-        if (iterator.hasNext()) {
-            return Optional.of(iterator.next());
-        }
-        else {
-            return Optional.empty();
-        }
-    }
 
     /**
      * Get all resources currently associated with this protocol object.
