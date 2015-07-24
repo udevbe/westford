@@ -122,12 +122,6 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
     @Nonnull
     @Override
-    public Set<WlShellResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlShellResource create(@Nonnull final Client client,
                                   @Nonnegative final int version,
                                   final int id) {
@@ -135,5 +129,11 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                                    version,
                                    id,
                                    this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlShellResource> getResources() {
+        return this.resources;
     }
 }

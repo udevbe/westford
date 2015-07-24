@@ -36,12 +36,6 @@ public class WlSubSurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
 
     @Nonnull
     @Override
-    public Set<WlSubsurfaceResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlSubsurfaceResource create(@Nonnull final Client client,
                                        @Nonnegative final int version,
                                        final int id) {
@@ -49,6 +43,12 @@ public class WlSubSurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
                                         version,
                                         id,
                                         this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlSubsurfaceResource> getResources() {
+        return this.resources;
     }
 
     @Override

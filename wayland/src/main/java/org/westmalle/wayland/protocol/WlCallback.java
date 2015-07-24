@@ -36,12 +36,6 @@ public class WlCallback implements WlCallbackRequests, ProtocolObject<WlCallback
 
     @Nonnull
     @Override
-    public Set<WlCallbackResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlCallbackResource create(@Nonnull final Client client,
                                      @Nonnegative final int version,
                                      final int id) {
@@ -49,5 +43,11 @@ public class WlCallback implements WlCallbackRequests, ProtocolObject<WlCallback
                                       version,
                                       id,
                                       this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlCallbackResource> getResources() {
+        return this.resources;
     }
 }

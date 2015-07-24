@@ -59,12 +59,6 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
 
     @Nonnull
     @Override
-    public Set<WlOutputResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlOutputResource create(@Nonnull final Client client,
                                    @Nonnegative final int version,
                                    final int id) {
@@ -72,6 +66,12 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                     version,
                                     id,
                                     this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlOutputResource> getResources() {
+        return this.resources;
     }
 
     @Nonnull

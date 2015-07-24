@@ -74,12 +74,6 @@ public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> imp
 
     @Nonnull
     @Override
-    public Set<WlDataDeviceManagerResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlDataDeviceManagerResource create(@Nonnull final Client client,
                                               @Nonnegative final int version,
                                               final int id) {
@@ -87,5 +81,11 @@ public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> imp
                                                version,
                                                id,
                                                this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlDataDeviceManagerResource> getResources() {
+        return this.resources;
     }
 }

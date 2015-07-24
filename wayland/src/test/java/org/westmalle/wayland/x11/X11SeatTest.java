@@ -31,15 +31,15 @@ import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
 public class X11SeatTest {
 
     @Mock
-    private Libxcb      libxcb;
+    private Libxcb     libxcb;
     @Mock
-    private X11Output   x11Output;
+    private X11Output  x11Output;
     @Mock
-    private Compositor  compositor;
+    private Compositor compositor;
     @Mock
-    private WlSeat      wlSeat;
+    private WlSeat     wlSeat;
     @InjectMocks
-    private X11Seat     x11Seat;
+    private X11Seat    x11Seat;
 
 
     @Test
