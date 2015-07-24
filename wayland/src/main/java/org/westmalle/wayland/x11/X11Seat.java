@@ -14,6 +14,8 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
+
+import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.nativ.Libxcb;
@@ -60,7 +62,8 @@ public class X11Seat {
 
     @Subscribe
     public void handle(final xcb_key_press_event_t event) {
-
+        deliverKey(event.detail,
+                   true);
     }
 
     @Subscribe
@@ -70,19 +73,45 @@ public class X11Seat {
                       true);
     }
 
+    private void deliverKey(final short eventDetail,
+                            final boolean pressed){
+        final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
+        final int key = toLinuxKey(eventDetail);
+        this.wlSeat.getOptionalWlKeyboard().ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice().key(wlKeyboard.getResources(),
+                                           this.compositor.getTime(),
+                                           key,
+                                           wlKeyboardKeyState));
+    }
+
+    private int toLinuxKey(final short eventDetail) {
+        //TODO convert from X keycodes to input.h keycodes, -> properly use xkbcommon
+        return eventDetail;
+    }
+
+    private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed){
+        final WlKeyboardKeyState wlKeyboardKeyState;
+        if(pressed){
+            wlKeyboardKeyState = WlKeyboardKeyState.PRESSED;
+        }
+        else{
+            wlKeyboardKeyState = WlKeyboardKeyState.RELEASED;
+        }
+        return wlKeyboardKeyState;
+    }
+
     private void deliverButton(final int buttonTime,
                                final short eventDetail,
                                final boolean pressed) {
 
         final WlPointerButtonState wlPointerButtonState = wlPointerButtonState(buttonTime,
                                                                                pressed);
-        final int button = linuxInput(eventDetail);
+        final int button = toLinuxButton(eventDetail);
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                                    .button(wlPointer.getResources(),
-                                                            this.compositor.getTime(),
-                                                            button,
-                                                            wlPointerButtonState));
+                           .button(wlPointer.getResources(),
+                                   this.compositor.getTime(),
+                                   button,
+                                   wlPointerButtonState));
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -112,7 +141,7 @@ public class X11Seat {
         return wlPointerButtonState;
     }
 
-    private int linuxInput(final int eventDetail) {
+    private int toLinuxButton(final int eventDetail) {
         final int button;
         switch (eventDetail) {
             case 1:
@@ -132,7 +161,8 @@ public class X11Seat {
 
     @Subscribe
     public void handle(final xcb_key_release_event_t event) {
-
+        deliverKey(event.detail,
+                   false);
     }
 
     @Subscribe
@@ -149,9 +179,9 @@ public class X11Seat {
 
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                                    .motion(wlPointer.getResources(),
-                                                            this.compositor.getTime(),
-                                                            x,
-                                                            y));
+                           .motion(wlPointer.getResources(),
+                                   this.compositor.getTime(),
+                                   x,
+                                   y));
     }
 }
