@@ -1,7 +1,7 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
@@ -87,11 +87,11 @@ public class ProtocolObjectTest {
                                                         1,
                                                         1);
         //then
-        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(resource).addDestroyListener(listenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(resource).register(listenerArgumentCaptor.capture());
 
         //and when
-        final Listener listener = listenerArgumentCaptor.getValue();
+        final DestroyListener listener = listenerArgumentCaptor.getValue();
         listener.handle();
 
         //then

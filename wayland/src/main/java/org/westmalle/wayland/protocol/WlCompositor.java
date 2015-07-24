@@ -16,21 +16,22 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlCompositorRequestsV3;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Surface;
 
+import java.util.Set;
+import java.util.WeakHashMap;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlCompositorFactory")
 public class WlCompositor extends Global<WlCompositorResource> implements WlCompositorRequestsV3, ProtocolObject<WlCompositorResource> {
@@ -78,15 +79,11 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         final WlSurfaceResource surfaceResource = wlSurface.add(compositorResource.getClient(),
                                                                 compositorResource.getVersion(),
                                                                 id);
-        surfaceResource.addDestroyListener(new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                WlCompositor.this.compositor.getSurfacesStack()
-                                            .remove(surfaceResource);
-                surface.markDestroyed();
-                WlCompositor.this.compositor.requestRender();
-            }
+        surfaceResource.register(() -> {
+            WlCompositor.this.compositor.getSurfacesStack()
+                    .remove(surfaceResource);
+            surface.markDestroyed();
+            WlCompositor.this.compositor.requestRender();
         });
 
         this.compositor.getSurfacesStack()

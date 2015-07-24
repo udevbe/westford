@@ -4,29 +4,37 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
+
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.events.Key;
 
-import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 @AutoFactory(className = "KeyboardDeviceFactory")
 public class KeyboardDevice {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyboardDevice.class);
+
     @Nonnull
-    private final EventBus inputBus = new EventBus();
+    private final EventBus  inputBus       = new EventBus((exception,
+                                                           context) -> LOGGER.error("",
+                                                                                    exception));
     @Nonnull
     private final Display display;
 
     @Nonnull
-    private       Optional<Listener>          focusDestroyListener = Optional.empty();
+    private       Optional<DestroyListener>          focusDestroyListener = Optional.empty();
     @Nonnull
     private       Optional<WlSurfaceResource> focus                = Optional.empty();
     @Nonnull
@@ -122,17 +130,12 @@ public class KeyboardDevice {
     }
 
     private void updateFocus(final Optional<WlSurfaceResource> wlSurfaceResource) {
-        this.focusDestroyListener.ifPresent(Listener::remove);
+        this.focus.ifPresent(oldFocusResource -> oldFocusResource.unregister(this.focusDestroyListener.get()));
         this.focusDestroyListener = Optional.empty();
         this.focus = wlSurfaceResource;
         getFocus().ifPresent(focusResource -> {
-            this.focusDestroyListener = Optional.of(new Listener() {
-                @Override
-                public void handle() {
-                    updateFocus(Optional.<WlSurfaceResource>empty());
-                }
-            });
-            focusResource.addDestroyListener(this.focusDestroyListener.get());
+            this.focusDestroyListener = Optional.of(() -> updateFocus(Optional.<WlSurfaceResource>empty()));
+            focusResource.register(this.focusDestroyListener.get());
         });
     }
 

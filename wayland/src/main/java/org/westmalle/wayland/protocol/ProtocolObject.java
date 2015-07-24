@@ -14,12 +14,12 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.Resource;
+
+import java.util.Set;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.Set;
 
 public interface ProtocolObject<T extends Resource<?>> {
 
@@ -40,13 +40,7 @@ public interface ProtocolObject<T extends Resource<?>> {
         final T resource = create(client,
                                   version,
                                   id);
-        resource.addDestroyListener(new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                getResources().remove(resource);
-            }
-        });
+        resource.register(() -> getResources().remove(resource));
         getResources().add(resource);
         return resource;
     }

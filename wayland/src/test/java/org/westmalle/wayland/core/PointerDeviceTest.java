@@ -14,8 +14,8 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -1202,10 +1202,10 @@ public class PointerDeviceTest {
         verify(pointerGrabMotion).motion(eq(Motion.create(time3,
                                                           x1,
                                                           y1)));
-        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlSurfaceResource0).addDestroyListener(listenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlSurfaceResource0).register(listenerArgumentCaptor.capture());
         //and when
-        final Listener listener = listenerArgumentCaptor.getValue();
+        final DestroyListener listener = listenerArgumentCaptor.getValue();
         listener.handle();
         this.pointerDevice.motion(pointerResources,
                                   time3,

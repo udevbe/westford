@@ -16,10 +16,10 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlShellRequests;
 import org.freedesktop.wayland.server.WlShellResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
@@ -28,11 +28,12 @@ import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.wlshell.ShellSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "WlShellFactory")
 public class WlShell extends Global<WlShellResource> implements WlShellRequests, ProtocolObject<WlShellResource> {
@@ -85,21 +86,8 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                                                                                      id);
             this.activeShellSurfaceRoles.add(shellSurface);
 
-            wlShellSurfaceResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    remove();
-                    WlShell.this.activeShellSurfaceRoles.remove(shellSurface);
-                }
-            });
-
-            wlSurfaceResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    remove();
-                    wlShellSurfaceResource.destroy();
-                }
-            });
+            wlShellSurfaceResource.register(() -> this.activeShellSurfaceRoles.remove(shellSurface));
+            wlSurfaceResource.register(wlShellSurfaceResource::destroy);
 
             shellSurface.pong(wlShellSurfaceResource,
                               pingSerial);

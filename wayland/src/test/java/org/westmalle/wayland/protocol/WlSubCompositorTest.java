@@ -15,8 +15,8 @@ package org.westmalle.wayland.protocol;
 
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlSubcompositorResource;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -120,9 +120,9 @@ public class WlSubCompositorTest {
         verify(wlSubSurface).add(client,
                                  version,
                                  id);
-        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(surface).addDestroyListener(listenerArgumentCaptor.capture());
-        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(surface).register(listenerArgumentCaptor.capture());
+        final DestroyListener destroyListener = listenerArgumentCaptor.getValue();
         //and when
         destroyListener.handle();
         //then

@@ -17,10 +17,10 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatRequestsV4;
@@ -28,13 +28,14 @@ import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlTouchResource;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "WlSeatFactory")
 public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, ProtocolObject<WlSeatResource> {
@@ -64,13 +65,10 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
         final WlSeatResource wlSeatResource = add(client,
                                                   version,
                                                   id);
-        wlSeatResource.addDestroyListener(new Listener() {
-            @Override
-            public void handle() {
-                WlSeat.this.wlPointerResources.remove(wlSeatResource);
-                WlSeat.this.wlKeyboardResources.remove(wlSeatResource);
-                WlSeat.this.wlTouchResources.remove(wlSeatResource);
-            }
+        wlSeatResource.register(() -> {
+            WlSeat.this.wlPointerResources.remove(wlSeatResource);
+            WlSeat.this.wlKeyboardResources.remove(wlSeatResource);
+            WlSeat.this.wlTouchResources.remove(wlSeatResource);
         });
         return wlSeatResource;
     }
@@ -84,12 +82,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                                                       id);
             this.wlPointerResources.put(wlSeatResource,
                                         wlPointerResource);
-            wlPointerResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    WlSeat.this.wlPointerResources.remove(wlSeatResource);
-                }
-            });
+            wlPointerResource.register(() -> WlSeat.this.wlPointerResources.remove(wlSeatResource));
         });
     }
 
@@ -102,12 +95,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                                                          id);
             this.wlKeyboardResources.put(wlSeatResource,
                                          wlKeyboardResource);
-            wlKeyboardResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    WlSeat.this.wlKeyboardResources.remove(wlSeatResource);
-                }
-            });
+            wlKeyboardResource.register(() -> WlSeat.this.wlKeyboardResources.remove(wlSeatResource));
         });
     }
 
@@ -120,12 +108,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                                                 id);
             this.wlTouchResources.put(wlSeatResource,
                                       wlTouchResource);
-            wlTouchResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    WlSeat.this.wlTouchResources.remove(wlSeatResource);
-                }
-            });
+            wlTouchResource.register(() -> WlSeat.this.wlTouchResources.remove(wlSeatResource));
         });
     }
 

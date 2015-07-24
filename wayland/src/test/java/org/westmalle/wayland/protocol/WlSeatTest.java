@@ -16,7 +16,7 @@ package org.westmalle.wayland.protocol;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatResource;
@@ -122,11 +122,11 @@ public class WlSeatTest {
         verify(wlPointer).add(client,
                               version,
                               id);
-        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlPointerResource).addDestroyListener(listenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlPointerResource).register(listenerArgumentCaptor.capture());
 
         //and when
-        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        final DestroyListener destroyListener = listenerArgumentCaptor.getValue();
         destroyListener.handle();
 
         //then
@@ -163,11 +163,11 @@ public class WlSeatTest {
         verify(wlKeyboard).add(client,
                                version,
                                id);
-        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlKeyboardResource).addDestroyListener(listenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlKeyboardResource).register(listenerArgumentCaptor.capture());
 
         //and when
-        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        final DestroyListener destroyListener = listenerArgumentCaptor.getValue();
         destroyListener.handle();
 
         //then
@@ -204,11 +204,11 @@ public class WlSeatTest {
         verify(wlTouch).add(client,
                             version,
                             id);
-        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlTouchResource).addDestroyListener(listenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlTouchResource).register(listenerArgumentCaptor.capture());
 
         //and when
-        final Listener destroyListener = listenerArgumentCaptor.getValue();
+        final DestroyListener destroyListener = listenerArgumentCaptor.getValue();
         destroyListener.handle();
 
         //then
