@@ -14,7 +14,6 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
-
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Compositor;
@@ -66,21 +65,27 @@ public class X11Seat {
                    true);
     }
 
-    @Subscribe
-    public void handle(final xcb_button_press_event_t event) {
-        deliverButton(event.time,
-                      event.detail,
-                      true);
+    private void deliverKey(final short eventDetail,
+                            final boolean pressed) {
+        final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
+        final int                key                = toLinuxKey(eventDetail);
+        this.wlSeat.getOptionalWlKeyboard()
+                   .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
+                                                      .key(wlKeyboard.getResources(),
+                                                           this.compositor.getTime(),
+                                                           key,
+                                                           wlKeyboardKeyState));
     }
 
-    private void deliverKey(final short eventDetail,
-                            final boolean pressed){
-        final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
-        final int key = toLinuxKey(eventDetail);
-        this.wlSeat.getOptionalWlKeyboard().ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice().key(wlKeyboard.getResources(),
-                                           this.compositor.getTime(),
-                                           key,
-                                           wlKeyboardKeyState));
+    private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed) {
+        final WlKeyboardKeyState wlKeyboardKeyState;
+        if (pressed) {
+            wlKeyboardKeyState = WlKeyboardKeyState.PRESSED;
+        }
+        else {
+            wlKeyboardKeyState = WlKeyboardKeyState.RELEASED;
+        }
+        return wlKeyboardKeyState;
     }
 
     private int toLinuxKey(final short eventDetail) {
@@ -88,15 +93,11 @@ public class X11Seat {
         return eventDetail;
     }
 
-    private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed){
-        final WlKeyboardKeyState wlKeyboardKeyState;
-        if(pressed){
-            wlKeyboardKeyState = WlKeyboardKeyState.PRESSED;
-        }
-        else{
-            wlKeyboardKeyState = WlKeyboardKeyState.RELEASED;
-        }
-        return wlKeyboardKeyState;
+    @Subscribe
+    public void handle(final xcb_button_press_event_t event) {
+        deliverButton(event.time,
+                      event.detail,
+                      true);
     }
 
     private void deliverButton(final int buttonTime,
@@ -108,10 +109,10 @@ public class X11Seat {
         final int button = toLinuxButton(eventDetail);
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                           .button(wlPointer.getResources(),
-                                   this.compositor.getTime(),
-                                   button,
-                                   wlPointerButtonState));
+                                                    .button(wlPointer.getResources(),
+                                                            this.compositor.getTime(),
+                                                            button,
+                                                            wlPointerButtonState));
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -179,9 +180,9 @@ public class X11Seat {
 
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                           .motion(wlPointer.getResources(),
-                                   this.compositor.getTime(),
-                                   x,
-                                   y));
+                                                    .motion(wlPointer.getResources(),
+                                                            this.compositor.getTime(),
+                                                            x,
+                                                            y));
     }
 }

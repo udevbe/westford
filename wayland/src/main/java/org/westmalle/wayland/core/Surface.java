@@ -16,7 +16,6 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Lists;
-
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -28,12 +27,11 @@ import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlRegion;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
@@ -43,17 +41,17 @@ public class Surface {
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
     @Nonnull
-    private final List<WlCallbackResource> callbacks    = Lists.newLinkedList();
-    private       Optional<Role>           surfaceRole  = Optional.empty();
-    private Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
+    private final List<WlCallbackResource>  callbacks                    = Lists.newLinkedList();
+    private       Optional<Role>            surfaceRole                  = Optional.empty();
+    private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
     //pending state
     @Nonnull
-    private       SurfaceState             pendingState = SurfaceState.builder()
-                                                                      .build();
+    private       SurfaceState              pendingState                 = SurfaceState.builder()
+                                                                                       .build();
     //committed state
     @Nonnull
-    private       SurfaceState             state        = SurfaceState.builder()
-                                                                      .build();
+    private       SurfaceState              state                        = SurfaceState.builder()
+                                                                                       .build();
     //committed derived states
     private boolean destroyed;
     @Nonnull
@@ -104,7 +102,8 @@ public class Surface {
     public Surface attachBuffer(@Nonnull final WlBufferResource buffer,
                                 final int dx,
                                 final int dy) {
-        getPendingState().getBuffer().ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
+        getPendingState().getBuffer()
+                         .ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
         this.pendingBufferDestroyListener = Optional.of(this::detachBuffer);
         buffer.register(this.pendingBufferDestroyListener.get());
         final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
@@ -212,7 +211,8 @@ public class Surface {
 
     @Nonnull
     public Surface detachBuffer() {
-        getPendingState().getBuffer().ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
+        getPendingState().getBuffer()
+                         .ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
         this.pendingBufferDestroyListener = Optional.empty();
         final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
                                                                   .buffer(Optional.<WlBufferResource>empty())

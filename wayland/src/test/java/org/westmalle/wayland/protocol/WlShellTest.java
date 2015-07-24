@@ -15,8 +15,8 @@ package org.westmalle.wayland.protocol;
 
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.DestroyListener;
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlShellResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;

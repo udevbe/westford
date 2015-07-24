@@ -16,7 +16,6 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
-
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
@@ -30,13 +29,12 @@ import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.Transforms;
 import org.westmalle.wayland.core.calc.Mat4;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

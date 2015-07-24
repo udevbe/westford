@@ -63,7 +63,7 @@ class Boot {
         final X11OutputFactory outputFactory = component.x11Component()
                                                         .outputFactory();
         final X11SeatFactory seatFactory = component.x11Component()
-                                                          .seatFactory();
+                                                    .seatFactory();
         //setup egl render engine
         final EglRenderEngineFactory renderEngineFactory = component.eglComponent()
                                                                     .renderEngineFactory();

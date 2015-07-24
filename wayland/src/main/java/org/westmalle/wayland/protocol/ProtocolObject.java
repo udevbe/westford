@@ -16,10 +16,9 @@ package org.westmalle.wayland.protocol;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 
-import java.util.Set;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Set;
 
 public interface ProtocolObject<T extends Resource<?>> {
 

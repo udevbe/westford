@@ -17,7 +17,6 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -34,15 +33,14 @@ import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -73,14 +71,14 @@ public class PointerDevice implements Role {
     private Optional<Cursor> activeCursor = Optional.empty();
 
     @Nonnull
-    private Optional<DestroyListener>          grabDestroyListener = Optional.empty();
+    private Optional<DestroyListener>   grabDestroyListener = Optional.empty();
     @Nonnull
     private Optional<WlSurfaceResource> grab                = Optional.empty();
 
     @Nonnull
     private Optional<WlSurfaceResource> focus                = Optional.empty();
     @Nonnull
-    private Optional<DestroyListener>          focusDestroyListener = Optional.empty();
+    private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
 
     private int buttonPressSerial;
     private int buttonReleaseSerial;
@@ -148,7 +146,8 @@ public class PointerDevice implements Role {
         final Optional<WlPointerResource> wlPointerResourceOptional = findPointerResource(wlPointerResources,
                                                                                           wlSurfaceResource);
         wlPointerResourceOptional.ifPresent(wlPointerResource -> {
-            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.get().getImplementation();
+            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.get()
+                                                                     .getImplementation();
             final Point relativePoint = wlSurface.getSurface()
                                                  .local(getPosition());
             wlPointerResource.motion(time,
@@ -300,14 +299,15 @@ public class PointerDevice implements Role {
         this.grab = getFocus();
         this.grabDestroyListener = Optional.of((DestroyListener) PointerDevice.this::clearGrab);
         //if the surface having the grab is destroyed, we clear the grab
-        getGrab().get().register(this.grabDestroyListener.get());
+        getGrab().get()
+                 .register(this.grabDestroyListener.get());
         this.inputBus.post(PointerGrab.create(getGrab()));
     }
 
     private Optional<WlPointerResource> findPointerResource(final Set<WlPointerResource> wlPointerResources,
                                                             final Optional<WlSurfaceResource> optionalWlSurfaceResource) {
 
-        if(!optionalWlSurfaceResource.isPresent()) {
+        if (!optionalWlSurfaceResource.isPresent()) {
             return Optional.empty();
         }
         final WlSurfaceResource wlSurfaceResource = optionalWlSurfaceResource.get();
@@ -317,7 +317,8 @@ public class PointerDevice implements Role {
                 return Optional.of(wlPointerResource);
             }
         }
-        return Optional.empty();    }
+        return Optional.empty();
+    }
 
     public int nextButtonPressSerial() {
         this.buttonPressSerial = this.display.nextSerial();
@@ -475,7 +476,7 @@ public class PointerDevice implements Role {
             clientCursor = this.cursorFactory.create(wlSurfaceResource,
                                                      hotspot);
             wlPointerResource.register(() -> Optional.ofNullable(PointerDevice.this.cursors.remove(wlPointerResource))
-                                                                                           .ifPresent(Cursor::hide));
+                                                     .ifPresent(Cursor::hide));
             this.cursors.put(wlPointerResource,
                              clientCursor);
         }
