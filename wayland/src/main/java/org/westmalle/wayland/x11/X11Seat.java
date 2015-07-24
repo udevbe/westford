@@ -65,14 +65,14 @@ public class X11Seat {
 
     @Subscribe
     public void handle(final xcb_button_press_event_t event) {
-        deliver(event.time,
-                event.detail,
-                true);
+        deliverButton(event.time,
+                      event.detail,
+                      true);
     }
 
-    private void deliver(final int buttonTime,
-                         final short eventDetail,
-                         final boolean pressed) {
+    private void deliverButton(final int buttonTime,
+                               final short eventDetail,
+                               final boolean pressed) {
 
         final WlPointerButtonState wlPointerButtonState = wlPointerButtonState(buttonTime,
                                                                                pressed);
@@ -137,9 +137,9 @@ public class X11Seat {
 
     @Subscribe
     public void handle(final xcb_button_release_event_t event) {
-        deliver(event.time,
-                event.detail,
-                false);
+        deliverButton(event.time,
+                      event.detail,
+                      false);
     }
 
     @Subscribe

@@ -15,19 +15,18 @@ package org.westmalle.wayland.bootstrap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.westmalle.wayland.DaggerWMComponent;
+import org.westmalle.wayland.WMComponent;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.CompositorFactory;
-import org.westmalle.wayland.core.DaggerOutputComponent;
-import org.westmalle.wayland.core.OutputComponent;
+import org.westmalle.wayland.core.RenderEngine;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.core.RendererFactory;
-import org.westmalle.wayland.egl.EglGles2RenderEngine;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
 import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
 import org.westmalle.wayland.protocol.WlShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
@@ -47,67 +46,64 @@ class Boot {
         LOGGER.info("Starting Westmalle:\n"
                     + "\tArguments: {}",
                     args.length == 0 ? "<none>" : Arrays.toString(args));
-        final OutputComponent outputComponent = DaggerOutputComponent.create();
 
-        final Boot boot = new Boot();
-        boot.strap(outputComponent);
+        new Boot().strap(DaggerWMComponent.create());
     }
 
-    private void strap(final OutputComponent outputComponent) {
+    private void strap(final WMComponent component) {
+        //get all required factory instances
+        final RendererFactory            rendererFactory            = component.shmRendererFactory();
+        final CompositorFactory          compositorFactory          = component.compositorFactory();
+        final WlCompositorFactory        wlCompositorFactory        = component.wlCompositorFactory();
+        final WlSeatFactory              wlSeatFactory              = component.wlSeatFactory();
+        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = component.wlDataDeviceManagerFactory();
+        final WlShellFactory             wlShellFactory             = component.wlShellFactory();
 
-        final RendererFactory            rendererFactory            = outputComponent.shmRendererFactory();
-        final CompositorFactory          compositorFactory          = outputComponent.compositorFactory();
-        final WlCompositorFactory        wlCompositorFactory        = outputComponent.wlCompositorFactory();
-        final WlSeatFactory              wlSeatFactory              = outputComponent.wlSeatFactory();
-        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = outputComponent.wlDataDeviceManagerFactory();
-        final WlShellFactory             wlShellFactory             = outputComponent.wlShellFactory();
-
-        final X11OutputFactory outputFactory = outputComponent.x11Component()
-                                                              .outputFactory();
-        final X11SeatFactory seatFactory = outputComponent.x11Component()
+        //setup X11 input/output back-end.
+        final X11OutputFactory outputFactory = component.x11Component()
+                                                        .outputFactory();
+        final X11SeatFactory seatFactory = component.x11Component()
                                                           .seatFactory();
-
-        final EglRenderEngineFactory renderEngineFactory = outputComponent.eglComponent()
-                                                                          .renderEngineFactory();
-
+        //setup egl render engine
+        final EglRenderEngineFactory renderEngineFactory = component.eglComponent()
+                                                                    .renderEngineFactory();
         //create an output
         //create an X opengl enabled x11 window
         final WlOutput wlOutput = outputFactory.create(System.getenv("DISPLAY"),
                                                        800,
                                                        600);
         //setup our render engine
-        final EglGles2RenderEngine renderEngine = renderEngineFactory.create();
+        final RenderEngine renderEngine = renderEngineFactory.create();
         //create an shm renderer that passes on shm buffers to it's render implementation
         final Renderer renderer = rendererFactory.create(renderEngine);
 
-        //setup compositing
+        //setup compositing for output support
         //create a compositor with shell and scene logic
         final Compositor compositor = compositorFactory.create(renderer);
         //add our output to the compositor
         //TODO add hotplug functionality
         compositor.getWlOutputs()
                   .add(wlOutput);
-        //create a wayland compositor that delegates it's requests to a shell implementation.
+        //create a wayland compositor that delegates it's requests to a compositor implementation.
         final WlCompositor wlCompositor = wlCompositorFactory.create(compositor);
 
-        //create data device manager
+        //create data device manager for drag and drop support
         wlDataDeviceManagerFactory.create();
 
-        //setup seat
+        //setup seat for input support
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
-        //these objects will listen for input events
-        final WlSeat wlSeat = wlSeatFactory.create();
         seatFactory.create(wlOutput,
-                           wlSeat,
+                           wlSeatFactory.create(),
                            compositor);
 
-        //enable wl_shell protocol
+        //enable wl_shell protocol for minimal desktop-like features (move, resize, cursor changes ...)
         wlShellFactory.create(wlCompositor);
-        //enable xdg_shell protocol
+
+        //enable xdg_shell protocol for full desktop-like features
         //TODO implement xdg_shell protocol
 
         //start the thingamabah
-        outputComponent.shellService()
-                       .start();
+        component.shellService()
+                 .start();
     }
 }
