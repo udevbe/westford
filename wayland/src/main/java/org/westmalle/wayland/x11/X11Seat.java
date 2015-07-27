@@ -14,9 +14,9 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.nativ.Libxcb;
 import org.westmalle.wayland.nativ.xcb_button_press_event_t;
 import org.westmalle.wayland.nativ.xcb_button_release_event_t;
@@ -45,17 +45,13 @@ public class X11Seat {
     @Nonnull
     private final X11Output  x11Output;
     @Nonnull
-    private final Compositor compositor;
-    @Nonnull
     private final WlSeat     wlSeat;
 
     X11Seat(@Nonnull final Libxcb libxcb,
             @Nonnull final X11Output x11Output,
-            @Nonnull final Compositor compositor,
             @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
         this.x11Output = x11Output;
-        this.compositor = compositor;
         this.wlSeat = wlSeat;
     }
 
@@ -72,7 +68,6 @@ public class X11Seat {
         this.wlSeat.getOptionalWlKeyboard()
                    .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
                                                       .key(wlKeyboard.getResources(),
-                                                           this.compositor.getTime(),
                                                            key,
                                                            wlKeyboardKeyState));
     }
@@ -110,7 +105,6 @@ public class X11Seat {
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
                                                     .button(wlPointer.getResources(),
-                                                            this.compositor.getTime(),
                                                             button,
                                                             wlPointerButtonState));
     }
@@ -181,7 +175,6 @@ public class X11Seat {
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
                                                     .motion(wlPointer.getResources(),
-                                                            this.compositor.getTime(),
                                                             x,
                                                             y));
     }

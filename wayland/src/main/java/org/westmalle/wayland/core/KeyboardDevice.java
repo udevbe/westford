@@ -4,6 +4,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
+
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
@@ -13,11 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.events.Key;
 
-import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "KeyboardDeviceFactory")
 public class KeyboardDevice {
@@ -31,6 +33,8 @@ public class KeyboardDevice {
     @Nonnull
     private final Display display;
     @Nonnull
+    private final Compositor compositor;
+    @Nonnull
     private final Set<Integer>                pressedKeys          = new HashSet<>();
     @Nonnull
     private       Optional<DestroyListener>   focusDestroyListener = Optional.empty();
@@ -38,14 +42,16 @@ public class KeyboardDevice {
     private       Optional<WlSurfaceResource> focus                = Optional.empty();
     private int keySerial;
 
-    KeyboardDevice(@Provided @Nonnull final Display display) {
+    KeyboardDevice(@Provided @Nonnull final Display display,
+                   @Nonnull final Compositor compositor) {
         this.display = display;
+        this.compositor = compositor;
     }
 
     public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
-                    final int time,
                     final int key,
                     @Nonnull final WlKeyboardKeyState wlKeyboardKeyState) {
+        final int time = this.compositor.getTime();
         if (wlKeyboardKeyState.equals(WlKeyboardKeyState.PRESSED)) {
             getPressedKeys().add(key);
         }

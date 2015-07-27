@@ -67,7 +67,7 @@ public class X11SeatFactoryTest {
         when(x11Output.getX11EventBus()).thenReturn(x11EventBus);
         when(this.pointerDeviceFactory.create(compositor)).thenReturn(pointerDevice);
         when(this.wlPointerFactory.create(pointerDevice)).thenReturn(wlPointer);
-        when(this.keyboardDeviceFactory.create()).thenReturn(keyboardDevice);
+        when(this.keyboardDeviceFactory.create(compositor)).thenReturn(keyboardDevice);
         when(this.wlKeyboardFactory.create(keyboardDevice)).thenReturn(wlKeyboard);
 
         //when

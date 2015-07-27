@@ -63,6 +63,8 @@ public class PointerDevice implements Role {
     @Nonnull
     private final NullRegion     nullRegion;
     @Nonnull
+    private final JobExecutor jobExecutor;
+    @Nonnull
     private final Compositor     compositor;
     @Nonnull
     private final Display        display;
@@ -94,18 +96,20 @@ public class PointerDevice implements Role {
                   @Provided @Nonnull final InfiniteRegion infiniteRegion,
                   @Provided @Nonnull final NullRegion nullRegion,
                   @Provided @Nonnull final CursorFactory cursorFactory,
+                  @Provided @Nonnull final JobExecutor jobExecutor,
                   @Nonnull final Compositor compositor) {
         this.display = display;
         this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;
         this.cursorFactory = cursorFactory;
+        this.jobExecutor = jobExecutor;
         this.compositor = compositor;
     }
 
     public void motion(@Nonnull final Set<WlPointerResource> wlPointerResources,
-                       final int time,
                        final int x,
                        final int y) {
+        final int time = this.compositor.getTime();
         doMotion(wlPointerResources,
                  time,
                  x,
@@ -127,18 +131,21 @@ public class PointerDevice implements Role {
                          getGrab());
         }
         else {
-            final Optional<WlSurfaceResource> oldFocus = getFocus();
-            final Optional<WlSurfaceResource> newFocus = over();
-
-            if (!oldFocus.equals(newFocus)) {
-                updateFocus(wlPointerResources,
-                            oldFocus,
-                            newFocus);
-            }
-
+            calculateFocus(wlPointerResources);
             reportMotion(wlPointerResources,
                          time,
                          getFocus());
+        }
+    }
+
+    private void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources){
+        final Optional<WlSurfaceResource> oldFocus = getFocus();
+        final Optional<WlSurfaceResource> newFocus = over();
+
+        if (!oldFocus.equals(newFocus)) {
+            updateFocus(wlPointerResources,
+                        oldFocus,
+                        newFocus);
         }
     }
 
@@ -222,9 +229,9 @@ public class PointerDevice implements Role {
     }
 
     public void button(@Nonnull final Set<WlPointerResource> wlPointerResources,
-                       final int time,
                        @Nonnegative final int button,
                        @Nonnull final WlPointerButtonState wlPointerButtonState) {
+        final int time = this.compositor.getTime();
         if (wlPointerButtonState == WlPointerButtonState.PRESSED) {
             this.pressedButtons.add(button);
         }
@@ -361,10 +368,9 @@ public class PointerDevice implements Role {
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointerResources,
                                                                                 newFocus);
         newFocus.ifPresent(focusResource -> {
-            //if focus resource is destroyed, trigger a focus update.
-            this.focusDestroyListener = Optional.of(() -> updateFocus(wlPointerResources,
-                                                                      Optional.empty(),
-                                                                      over()));
+            //if focus resource is destroyed, trigger schedule focus update. This guarantees that
+            //the compositor removes and updates the list of active surfaces first.
+            this.focusDestroyListener = Optional.of(() -> this.jobExecutor.submit(() -> calculateFocus(wlPointerResources)));
             //add destroy listener
             focusResource.register(this.focusDestroyListener.get());
             //notify client of new focus

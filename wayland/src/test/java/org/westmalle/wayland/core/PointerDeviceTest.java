@@ -194,15 +194,12 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.motion(pointerResources,
-                                  time2,
                                   x1,
                                   y1);
         //then
@@ -382,11 +379,9 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
-                                  time1,
                                   x1,
                                   y1);
         //then
@@ -515,11 +510,9 @@ public class PointerDeviceTest {
                                                    serial2);
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
-                                  time1,
                                   x1,
                                   y1);
         //then
@@ -631,11 +624,9 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
-                                  time1,
                                   x1,
                                   y1);
         //then
@@ -749,19 +740,15 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.motion(pointerResources,
-                                  time2,
                                   x1,
                                   y1);
         this.pointerDevice.button(pointerResources,
-                                  time3,
                                   button0,
                                   WlPointerButtonState.RELEASED);
         //then
@@ -881,15 +868,12 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.button(pointerResources,
-                                  time2,
                                   button0,
                                   WlPointerButtonState.RELEASED);
         //then
@@ -1007,11 +991,9 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         //then
@@ -1179,22 +1161,18 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
-                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
-                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.button(pointerResources,
-                                  time2,
                                   button1,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.grabMotion(wlSurfaceResource0,
                                       serial2,
                                       pointerGrabMotion);
         this.pointerDevice.motion(pointerResources,
-                                  time3,
                                   x1,
                                   y1);
 
@@ -1208,7 +1186,6 @@ public class PointerDeviceTest {
         final DestroyListener listener = listenerArgumentCaptor.getValue();
         listener.handle();
         this.pointerDevice.motion(pointerResources,
-                                  time3,
                                   x1,
                                   y1);
         //then

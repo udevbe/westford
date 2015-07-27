@@ -67,7 +67,6 @@ public class X11SeatTest {
         this.x11Seat.handle(event);
         //then
         verify(pointerDevice).button(wlPointerResources,
-                                     compositorTime,
                                      waylandEventDetail,
                                      WlPointerButtonState.PRESSED);
     }
@@ -109,7 +108,6 @@ public class X11SeatTest {
         this.x11Seat.handle(event);
         //then
         verify(pointerDevice).button(wlPointerResources,
-                                     compositorTime,
                                      waylandEventDetail,
                                      WlPointerButtonState.RELEASED);
     }
@@ -147,7 +145,6 @@ public class X11SeatTest {
         this.x11Seat.handle(event);
         //then
         verify(pointerDevice).motion(wlPointerResources,
-                                     compositorTime,
                                      x,
                                      y);
     }

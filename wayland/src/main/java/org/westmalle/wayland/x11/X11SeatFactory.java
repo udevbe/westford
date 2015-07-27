@@ -61,7 +61,6 @@ public class X11SeatFactory {
                                                         .getImplementation();
         final X11Seat x11Seat = new X11Seat(this.libxcb,
                                             x11Output,
-                                            compositor,
                                             wlSeat);
         x11Output.getX11EventBus()
                  .register(x11Seat);
@@ -69,7 +68,7 @@ public class X11SeatFactory {
         //added or removed
         //enable pointer and keyboard for wlseat
         wlSeat.setWlPointer(this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)));
-        wlSeat.setWlKeyboard(this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create()));
+        wlSeat.setWlKeyboard(this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create(compositor)));
 
         //FIXME for new we use the pointer focus to set the keyboard focus. Ideally this should be something
         //configurable or implemented by a 3rd party
