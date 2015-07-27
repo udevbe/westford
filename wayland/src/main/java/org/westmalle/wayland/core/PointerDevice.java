@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -33,14 +34,15 @@ import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
@@ -167,8 +169,13 @@ public class PointerDevice implements Role {
             final WlSurfaceRequests implementation = surfaceResource.getImplementation();
             final Surface surface = ((WlSurface) implementation).getSurface();
 
+            //surface can be invisible (null buffer), in which case we should ignore it.
+            if(!surface.getState().getBuffer().isPresent()){
+                continue;
+            }
+
             final Optional<Region> inputRegion = surface.getState()
-                                                        .getInputRegion();
+                    .getInputRegion();
             final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
 
             if (region.contains(surface.getSize(),
