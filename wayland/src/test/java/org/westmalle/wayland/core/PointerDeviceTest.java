@@ -455,6 +455,7 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -568,6 +569,7 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -681,6 +683,7 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,time1,time2,time3);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -933,6 +936,7 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -1097,6 +1101,7 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,time1,time2,time3);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
