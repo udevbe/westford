@@ -110,18 +110,6 @@ public class PointerDevice implements Role {
                        final int x,
                        final int y) {
         final int time = this.compositor.getTime();
-        doMotion(wlPointerResources,
-                 time,
-                 x,
-                 y);
-        this.inputBus.post(Motion.create(time,
-                                         getPosition()));
-    }
-
-    public void doMotion(@Nonnull final Set<WlPointerResource> wlPointerResources,
-                         final int time,
-                         final int x,
-                         final int y) {
         this.position = Point.create(x,
                                      y);
         //TODO update unit tests to reflect changed pointer grab implementation
@@ -136,9 +124,11 @@ public class PointerDevice implements Role {
                          time,
                          getFocus());
         }
+        this.inputBus.post(Motion.create(time,
+                                         getPosition()));
     }
 
-    private void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources){
+    public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources){
         final Optional<WlSurfaceResource> oldFocus = getFocus();
         final Optional<WlSurfaceResource> newFocus = over();
 
@@ -201,8 +191,8 @@ public class PointerDevice implements Role {
                                                                                          wlSurfaceResource));
     }
 
-    public void reportEnter(@Nonnull final Optional<WlPointerResource> wlPointerResourceOptional,
-                            @Nonnull final WlSurfaceResource wlSurfaceResource) {
+    private void reportEnter(final Optional<WlPointerResource> wlPointerResourceOptional,
+                             final WlSurfaceResource wlSurfaceResource) {
         wlPointerResourceOptional.ifPresent(wlPointerResource -> {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Point relativePoint = wlSurface.getSurface()
@@ -247,10 +237,10 @@ public class PointerDevice implements Role {
                                          wlPointerButtonState));
     }
 
-    private void doButton(@Nonnull final Set<WlPointerResource> wlPointerResources,
+    private void doButton(final Set<WlPointerResource> wlPointerResources,
                           final int time,
-                          @Nonnegative final int button,
-                          @Nonnull final WlPointerButtonState wlPointerButtonState) {
+                          final int button,
+                          final WlPointerButtonState wlPointerButtonState) {
         if (wlPointerButtonState == WlPointerButtonState.PRESSED) {
             this.buttonsPressed++;
         }
