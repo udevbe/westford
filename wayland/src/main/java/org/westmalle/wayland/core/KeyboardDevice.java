@@ -27,14 +27,15 @@ public class KeyboardDevice {
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyboardDevice.class);
 
     @Nonnull
-    private final EventBus inputBus = new EventBus((exception,
+    private final EventBus eventBus = new EventBus((exception,
                                                     context) -> LOGGER.error("",
                                                                              exception));
     @Nonnull
     private final Display display;
     @Nonnull
     private final Compositor compositor;
-    private KeyboardMapping keyboardMapping;
+    @Nonnull
+    private Optional<KeyboardMapping> keyboardMapping = Optional.empty();
     @Nonnull
     private final Set<Integer>                pressedKeys          = new HashSet<>();
     @Nonnull
@@ -44,11 +45,9 @@ public class KeyboardDevice {
     private int keySerial;
 
     KeyboardDevice(@Provided @Nonnull final Display display,
-                   @Nonnull final Compositor compositor,
-                   @Nonnull KeyboardMapping keyboardMapping) {
+                   @Nonnull final Compositor compositor) {
         this.display = display;
         this.compositor = compositor;
-        this.keyboardMapping = keyboardMapping;
     }
 
     public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
@@ -66,7 +65,7 @@ public class KeyboardDevice {
               time,
               key,
               wlKeyboardKeyState);
-        this.inputBus.post(Key.create(time,
+        this.eventBus.post(Key.create(time,
                                       key,
                                       wlKeyboardKeyState));
     }
@@ -145,20 +144,24 @@ public class KeyboardDevice {
     }
 
     public void register(@Nonnull final Object listener) {
-        this.inputBus.register(listener);
+        this.eventBus.register(listener);
     }
 
     public void unregister(@Nonnull final Object listener) {
-        this.inputBus.unregister(listener);
+        this.eventBus.unregister(listener);
     }
 
-    public KeyboardMapping getKeyboardMapping() {
+    @Nonnull
+    public Optional<KeyboardMapping> getKeyboardMapping() {
         return this.keyboardMapping;
     }
 
     public void setKeyboardMapping(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
-                                   final KeyboardMapping keyboardMapping) {
+                                   @Nonnull final Optional<KeyboardMapping> keyboardMapping) {
         this.keyboardMapping = keyboardMapping;
-        //wlKeyboardResources.forEach(wlKeyboardResource -> wlKeyboardResource.keymap());
+        //TODO send out keyboard mapping to clients
+//        getKeyboardMapping().ifPresent(keyboardMapping1 ->
+//                                               wlKeyboardResources.forEach(wlKeyboardResource ->
+//                                                                                   wlKeyboardResource.keymap()));
     }
 }

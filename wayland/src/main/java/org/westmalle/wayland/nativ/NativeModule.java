@@ -24,6 +24,7 @@ import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
+import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
 
 import javax.inject.Singleton;
 
@@ -95,5 +96,13 @@ public class NativeModule {
         Native.register(Libxkbcommon.class,
                         "xkbcommon");
         return new Libxkbcommon();
+    }
+
+    @Singleton
+    @Provides
+    Libxkbcommonx11 provideLibxkbcommonx11() {
+        Native.register(Libxkbcommonx11.class,
+                        "xkbcommon-x11");
+        return new Libxkbcommonx11();
     }
 }

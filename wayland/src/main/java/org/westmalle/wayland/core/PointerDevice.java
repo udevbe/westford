@@ -49,7 +49,7 @@ public class PointerDevice implements Role {
     private static final Logger LOGGER = LoggerFactory.getLogger(PointerDevice.class);
 
     @Nonnull
-    private final EventBus                       inputBus       = new EventBus((exception,
+    private final EventBus                             eventBus = new EventBus((exception,
                                                                                 context) -> LOGGER.error("",
                                                                                                          exception));
     @Nonnull
@@ -124,7 +124,7 @@ public class PointerDevice implements Role {
                          time,
                          getFocus());
         }
-        this.inputBus.post(Motion.create(time,
+        this.eventBus.post(Motion.create(time,
                                          getPosition()));
     }
 
@@ -232,7 +232,7 @@ public class PointerDevice implements Role {
                  time,
                  button,
                  wlPointerButtonState);
-        this.inputBus.post(Button.create(time,
+        this.eventBus.post(Button.create(time,
                                          button,
                                          wlPointerButtonState));
     }
@@ -292,7 +292,7 @@ public class PointerDevice implements Role {
         getGrab().ifPresent(wlSurfaceResource -> wlSurfaceResource.unregister(this.grabDestroyListener.get()));
         this.grabDestroyListener = Optional.empty();
         this.grab = Optional.empty();
-        this.inputBus.post(PointerGrab.create(getGrab()));
+        this.eventBus.post(PointerGrab.create(getGrab()));
     }
 
     private void updateGrab() {
@@ -305,7 +305,7 @@ public class PointerDevice implements Role {
         //if the surface having the grab is destroyed, we clear the grab
         getGrab().get()
                  .register(this.grabDestroyListener.get());
-        this.inputBus.post(PointerGrab.create(getGrab()));
+        this.eventBus.post(PointerGrab.create(getGrab()));
     }
 
     private Optional<WlPointerResource> findPointerResource(final Set<WlPointerResource> wlPointerResources,
@@ -377,7 +377,7 @@ public class PointerDevice implements Role {
         //update focus to new focus
         this.focus = newFocus;
         //notify listeners focus has changed
-        this.inputBus.post(PointerFocus.create(getFocus()));
+        this.eventBus.post(PointerFocus.create(getFocus()));
     }
 
     public boolean isButtonPressed(@Nonnegative final int button) {
@@ -441,11 +441,11 @@ public class PointerDevice implements Role {
     }
 
     public void unregister(@Nonnull final Object listener) {
-        this.inputBus.unregister(listener);
+        this.eventBus.unregister(listener);
     }
 
     public void register(@Nonnull final Object listener) {
-        this.inputBus.register(listener);
+        this.eventBus.register(listener);
     }
 
     public void removeCursor(@Nonnull final WlPointerResource wlPointerResource,
