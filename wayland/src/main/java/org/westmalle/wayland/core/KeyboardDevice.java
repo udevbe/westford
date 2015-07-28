@@ -34,6 +34,7 @@ public class KeyboardDevice {
     private final Display display;
     @Nonnull
     private final Compositor compositor;
+    private KeyboardMapping keyboardMapping;
     @Nonnull
     private final Set<Integer>                pressedKeys          = new HashSet<>();
     @Nonnull
@@ -43,9 +44,11 @@ public class KeyboardDevice {
     private int keySerial;
 
     KeyboardDevice(@Provided @Nonnull final Display display,
-                   @Nonnull final Compositor compositor) {
+                   @Nonnull final Compositor compositor,
+                   @Nonnull KeyboardMapping keyboardMapping) {
         this.display = display;
         this.compositor = compositor;
+        this.keyboardMapping = keyboardMapping;
     }
 
     public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
@@ -147,5 +150,15 @@ public class KeyboardDevice {
 
     public void unregister(@Nonnull final Object listener) {
         this.inputBus.unregister(listener);
+    }
+
+    public KeyboardMapping getKeyboardMapping() {
+        return this.keyboardMapping;
+    }
+
+    public void setKeyboardMapping(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
+                                   final KeyboardMapping keyboardMapping) {
+        this.keyboardMapping = keyboardMapping;
+        //wlKeyboardResources.forEach(wlKeyboardResource -> wlKeyboardResource.keymap());
     }
 }
