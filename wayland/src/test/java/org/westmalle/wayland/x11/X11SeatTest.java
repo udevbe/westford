@@ -9,10 +9,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.nativ.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.xcb_motion_notify_event_t;
+import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 

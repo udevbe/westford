@@ -13,7 +13,7 @@ import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.PointerDeviceFactory;
-import org.westmalle.wayland.nativ.Libxcb;
+import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlOutput;

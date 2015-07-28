@@ -17,7 +17,7 @@ import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
-import org.westmalle.wayland.nativ.LibGLESv2;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 

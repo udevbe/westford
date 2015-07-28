@@ -16,20 +16,20 @@ package org.westmalle.wayland.egl;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import org.freedesktop.wayland.server.ShmBuffer;
-import org.westmalle.wayland.nativ.LibGLESv2;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_CLAMP_TO_EDGE;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_NEAREST;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_RGBA;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_2D;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_MAG_FILTER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_MIN_FILTER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_WRAP_S;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_TEXTURE_WRAP_T;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_UNSIGNED_BYTE;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_CLAMP_TO_EDGE;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_RGBA;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_S;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_T;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 
 public class Gles2SurfaceData {
 

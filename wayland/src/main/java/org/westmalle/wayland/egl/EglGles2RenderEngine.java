@@ -13,7 +13,7 @@ import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.RenderEngine;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
-import org.westmalle.wayland.nativ.LibGLESv2;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -24,17 +24,17 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_ARRAY_BUFFER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_COLOR_BUFFER_BIT;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_COMPILE_STATUS;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_DYNAMIC_DRAW;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_ELEMENT_ARRAY_BUFFER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_FLOAT;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_FRAGMENT_SHADER;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_INFO_LOG_LENGTH;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_TRIANGLES;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_UNSIGNED_INT;
-import static org.westmalle.wayland.nativ.LibGLESv2.GL_VERTEX_SHADER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_DYNAMIC_DRAW;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ELEMENT_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_INT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
 @AutoFactory(className = "EglRenderEngineFactory")
 public class EglGles2RenderEngine implements RenderEngine {

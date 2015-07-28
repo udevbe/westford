@@ -3,9 +3,9 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.sun.jna.ptr.IntByReference;
-import org.westmalle.wayland.nativ.Libpixman1;
-import org.westmalle.wayland.nativ.pixman_box32;
-import org.westmalle.wayland.nativ.pixman_region32;
+import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
+import org.westmalle.wayland.nativ.libpixman1.pixman_box32;
+import org.westmalle.wayland.nativ.libpixman1.pixman_region32;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
