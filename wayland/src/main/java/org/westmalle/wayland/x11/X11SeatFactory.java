@@ -19,6 +19,7 @@ import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlPointerFactory;
@@ -32,6 +33,8 @@ public class X11SeatFactory {
     @Nonnull
     private final Libxcb                libxcb;
     @Nonnull
+    private final Libxkbcommonx11 libxkbcommonx11;
+    @Nonnull
     private final WlPointerFactory      wlPointerFactory;
     @Nonnull
     private final WlKeyboardFactory     wlKeyboardFactory;
@@ -42,11 +45,13 @@ public class X11SeatFactory {
 
     @Inject
     X11SeatFactory(@Nonnull final Libxcb libxcb,
+                   @Nonnull final Libxkbcommonx11 libxkbcommonx11,
                    @Nonnull final WlPointerFactory wlPointerFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final PointerDeviceFactory pointerDeviceFactory,
                    @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory) {
         this.libxcb = libxcb;
+        this.libxkbcommonx11 = libxkbcommonx11;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.pointerDeviceFactory = pointerDeviceFactory;
@@ -60,30 +65,44 @@ public class X11SeatFactory {
         final X11Output x11Output = (X11Output) wlOutput.getOutput()
                                                         .getImplementation();
         final X11Seat x11Seat = new X11Seat(this.libxcb,
+                                            this.libxkbcommonx11,
                                             x11Output,
                                             wlSeat);
+        x11Seat.updateKeymap();
+
         x11Output.getX11EventBus()
                  .register(x11Seat);
+
+        addInputDevices(wlSeat,
+                        compositor);
+        addKeyboardFocus(wlSeat);
+
+        return x11Seat;
+    }
+
+    private void addInputDevices(final WlSeat wlSeat,
+                                 final Compositor compositor) {
         //FIXME for now we put these here, these should be handled dynamically when a mouse or keyboard is
         //added or removed
         //enable pointer and keyboard for wlseat
         wlSeat.setWlPointer(this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)));
         wlSeat.setWlKeyboard(this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create(compositor)));
+    }
 
-        //FIXME for new we use the pointer focus to set the keyboard focus. Ideally this should be something
+    private void addKeyboardFocus(final WlSeat wlSeat) {
+        //FIXME for now we use the pointer focus to set the keyboard focus. Ideally this should be something
         //configurable or implemented by a 3rd party
         wlSeat.getOptionalWlPointer()
-              .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                               .register(new Object() {
-                                                   @Subscribe
-                                                   public void handle(final PointerFocus event) {
-                                                       wlSeat.getOptionalWlKeyboard()
-                                                             .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
-                                                                                                .setFocus(wlKeyboard.getResources(),
-                                                                                                          event.getWlSurfaceResource()));
-                                                   }
-                                               }));
-
-        return x11Seat;
+              .ifPresent(wlPointer ->
+                                 wlPointer.getPointerDevice()
+                                          .register(new Object() {
+                                              @Subscribe
+                                              public void handle(final PointerFocus event) {
+                                                  wlSeat.getOptionalWlKeyboard()
+                                                          .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
+                                                                  .setFocus(wlKeyboard.getResources(),
+                                                                            event.getWlSurfaceResource()));
+                                              }
+                                          }));
     }
 }
