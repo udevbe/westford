@@ -105,4 +105,10 @@ public class NativeModule {
                         "xkbcommon-x11");
         return new Libxkbcommonx11();
     }
+
+    @Singleton
+    @Provides
+    NativeFileFactory provideNativeFileFactory(final Libc libc) {
+        return new NativeFileFactory(libc);
+    }
 }

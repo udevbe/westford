@@ -13,6 +13,8 @@ import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.events.Key;
+import org.westmalle.wayland.nativ.NativeFileFactory;
+import org.westmalle.wayland.nativ.NativeString;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
@@ -33,9 +35,11 @@ public class KeyboardDevice {
     @Nonnull
     private final Display display;
     @Nonnull
+    private final NativeFileFactory nativeFileFactory;
+    @Nonnull
     private final Compositor compositor;
     @Nonnull
-    private Optional<KeyboardMapping> keyboardMapping = Optional.empty();
+    private Optional<Keymap> keymap =Optional.empty();
     @Nonnull
     private final Set<Integer>                pressedKeys          = new HashSet<>();
     @Nonnull
@@ -45,8 +49,10 @@ public class KeyboardDevice {
     private int keySerial;
 
     KeyboardDevice(@Provided @Nonnull final Display display,
+                   @Provided @Nonnull final NativeFileFactory nativeFileFactory,
                    @Nonnull final Compositor compositor) {
         this.display = display;
+        this.nativeFileFactory = nativeFileFactory;
         this.compositor = compositor;
     }
 
@@ -151,17 +157,27 @@ public class KeyboardDevice {
         this.eventBus.unregister(listener);
     }
 
-    @Nonnull
-    public Optional<KeyboardMapping> getKeyboardMapping() {
-        return this.keyboardMapping;
+    public void updateKeymap(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
+                             @Nonnull final Optional<Keymap> keymap) {
+        this.keymap = keymap;
+        getKeymap().ifPresent(keymapping -> {
+            final NativeString nativeKeyMapping = new NativeString(keymapping.getMap());
+            wlKeyboardResources.forEach(wlKeyboardResource ->
+                                                wlKeyboardResource.keymap(keymapping.getFormat()
+                                                                                    .getValue(),
+                                                                          updateKeymapFile(nativeKeyMapping),
+                                                                          nativeKeyMapping.length()));
+        });
     }
 
-    public void setKeyboardMapping(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
-                                   @Nonnull final Optional<KeyboardMapping> keyboardMapping) {
-        this.keyboardMapping = keyboardMapping;
-        //TODO send out keyboard mapping to clients
-//        getKeyboardMapping().ifPresent(keyboardMapping1 ->
-//                                               wlKeyboardResources.forEach(wlKeyboardResource ->
-//                                                                                   wlKeyboardResource.keymap()));
+    private int updateKeymapFile(final NativeString nativeKeyMapping) {
+        final int fd = this.nativeFileFactory.createAnonymousFile(nativeKeyMapping.length());
+        //TODO mmap
+        return fd;
+    }
+
+    @Nonnull
+    public Optional<Keymap> getKeymap() {
+        return this.keymap;
     }
 }
