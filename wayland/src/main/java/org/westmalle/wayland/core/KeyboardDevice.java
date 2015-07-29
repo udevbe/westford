@@ -5,6 +5,10 @@ import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
 
+import com.sun.jna.LastErrorException;
+import com.sun.jna.Native;
+import com.sun.jna.Pointer;
+
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
@@ -15,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.events.Key;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.NativeString;
+import org.westmalle.wayland.nativ.libc.Libc;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
@@ -22,6 +27,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+
+import static org.westmalle.wayland.nativ.libc.Libc.MAP_FAILED;
+import static org.westmalle.wayland.nativ.libc.Libc.MAP_SHARED;
+import static org.westmalle.wayland.nativ.libc.Libc.PROT_READ;
+import static org.westmalle.wayland.nativ.libc.Libc.PROT_WRITE;
 
 @AutoFactory(className = "KeyboardDeviceFactory")
 public class KeyboardDevice {
@@ -37,6 +47,8 @@ public class KeyboardDevice {
     @Nonnull
     private final NativeFileFactory nativeFileFactory;
     @Nonnull
+    private final Libc libc;
+    @Nonnull
     private final Compositor compositor;
     @Nonnull
     private Optional<Keymap> keymap =Optional.empty();
@@ -50,9 +62,11 @@ public class KeyboardDevice {
 
     KeyboardDevice(@Provided @Nonnull final Display display,
                    @Provided @Nonnull final NativeFileFactory nativeFileFactory,
+                   @Provided @Nonnull final Libc libc,
                    @Nonnull final Compositor compositor) {
         this.display = display;
         this.nativeFileFactory = nativeFileFactory;
+        this.libc = libc;
         this.compositor = compositor;
     }
 
@@ -171,8 +185,22 @@ public class KeyboardDevice {
     }
 
     private int updateKeymapFile(final NativeString nativeKeyMapping) {
-        final int fd = this.nativeFileFactory.createAnonymousFile(nativeKeyMapping.length());
-        //TODO mmap
+        final int length = (int) nativeKeyMapping.getPointer()
+                                                 .size();
+        final int fd = this.nativeFileFactory.createAnonymousFile(length);
+        Pointer keymapArea = this.libc.mmap(null,
+                                            length,
+                                            PROT_READ | PROT_WRITE,
+                                            MAP_SHARED,
+                                            fd,
+                                            0);
+        if (keymapArea == MAP_FAILED) {
+            this.libc.close(fd);
+            throw new LastErrorException(Native.getLastError());
+        }
+
+        this.libc.strcpy(keymapArea,
+                         nativeKeyMapping.getPointer());
         return fd;
     }
 

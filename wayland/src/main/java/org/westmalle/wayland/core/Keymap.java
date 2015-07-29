@@ -15,5 +15,6 @@ public abstract class Keymap {
     }
 
     public abstract WlKeyboardKeymapFormat getFormat();
+
     public abstract String getMap();
 }

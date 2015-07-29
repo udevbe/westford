@@ -233,6 +233,34 @@ public class Libc {
      */
     public static final int ERANGE = 34;
 
+    /**
+     * pages can be read
+     */
+    public static final int PROT_READ = 0x04;
+    /**
+     * pages can be written
+     */
+    public static final int PROT_WRITE = 0x02;
+    /**
+     * pages can be executed
+     */
+    public static final int PROT_EXEC = 0x01;
+
+    /**
+     * "copy" region at mmap time
+     */
+    public static final int MAP_COPY = 0x0020;
+    /**
+     * share changes
+     */
+    public static final int MAP_SHARED = 0x0010;
+    /**
+     * changes are private
+     */
+    public static final int MAP_PRIVATE = 0x0000;
+
+    public static final Pointer MAP_FAILED = Pointer.createConstant(-1);
+
     public native int open(String pathname,
                            int flags);
 
@@ -258,5 +286,19 @@ public class Libc {
 
     public native int mkstemp(final Pointer template) throws LastErrorException;
 
-    public native int ftruncate(int fd, int length) throws LastErrorException;
+    public native int ftruncate(int fd,
+                                int length) throws LastErrorException;
+
+    public native Pointer mmap(Pointer addr,
+                               int len,
+                               int prot,
+                               int flags,
+                               int fildes,
+                               int off) throws LastErrorException;
+
+    public native int munmap(Pointer addr,
+                             int length) throws LastErrorException;
+
+    public native Pointer strcpy(Pointer dest,
+                                 Pointer src);
 }
