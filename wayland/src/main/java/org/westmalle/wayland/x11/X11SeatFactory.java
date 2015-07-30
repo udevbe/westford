@@ -19,6 +19,7 @@ import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -33,7 +34,9 @@ public class X11SeatFactory {
     @Nonnull
     private final Libxcb                libxcb;
     @Nonnull
-    private final Libxkbcommonx11       libxkbcommonx11;
+    private final Libxkbcommon          libxkbcommon;
+    @Nonnull
+    private final Libxkbcommonx11 libxkbcommonx11;
     @Nonnull
     private final WlPointerFactory      wlPointerFactory;
     @Nonnull
@@ -45,12 +48,14 @@ public class X11SeatFactory {
 
     @Inject
     X11SeatFactory(@Nonnull final Libxcb libxcb,
+                   @Nonnull final Libxkbcommon libxkbcommon,
                    @Nonnull final Libxkbcommonx11 libxkbcommonx11,
                    @Nonnull final WlPointerFactory wlPointerFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final PointerDeviceFactory pointerDeviceFactory,
                    @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory) {
         this.libxcb = libxcb;
+        this.libxkbcommon = libxkbcommon;
         this.libxkbcommonx11 = libxkbcommonx11;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
@@ -66,6 +71,7 @@ public class X11SeatFactory {
                                                         .getImplementation();
         final X11Seat x11Seat = new X11Seat(this.libxcb,
                                             this.libxkbcommonx11,
+                                            this.libxkbcommon.xkb_context_new(Libxkbcommon.XKB_CONTEXT_NO_FLAGS),
                                             x11Output,
                                             wlSeat);
         x11Seat.updateKeymap();
