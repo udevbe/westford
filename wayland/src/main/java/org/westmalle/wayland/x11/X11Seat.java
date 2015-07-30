@@ -45,15 +45,15 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
 public class X11Seat {
 
     @Nonnull
-    private final Libxcb     libxcb;
+    private final Libxcb          libxcb;
     @Nonnull
     private final Libxkbcommonx11 libxkbcommonx11;
     @Nonnull
-    private final Pointer xkbContext;
+    private final Pointer         xkbContext;
     @Nonnull
-    private final X11Output  x11Output;
+    private final X11Output       x11Output;
     @Nonnull
-    private final WlSeat     wlSeat;
+    private final WlSeat          wlSeat;
 
     X11Seat(@Nonnull final Libxcb libxcb,
             @Nonnull final Libxkbcommonx11 libxkbcommonx11,
@@ -79,9 +79,9 @@ public class X11Seat {
         final int                key                = toLinuxKey(eventDetail);
         this.wlSeat.getOptionalWlKeyboard()
                    .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
-                           .key(wlKeyboard.getResources(),
-                                key,
-                                wlKeyboardKeyState));
+                                                      .key(wlKeyboard.getResources(),
+                                                           key,
+                                                           wlKeyboardKeyState));
     }
 
     private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed) {
@@ -116,9 +116,9 @@ public class X11Seat {
         final int button = toLinuxButton(eventDetail);
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                           .button(wlPointer.getResources(),
-                                   button,
-                                   wlPointerButtonState));
+                                                    .button(wlPointer.getResources(),
+                                                            button,
+                                                            wlPointerButtonState));
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -186,15 +186,15 @@ public class X11Seat {
 
         this.wlSeat.getOptionalWlPointer()
                    .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                           .motion(wlPointer.getResources(),
-                                   x,
-                                   y));
+                                                    .motion(wlPointer.getResources(),
+                                                            x,
+                                                            y));
     }
 
-    public void updateKeymap(){
+    public void updateKeymap() {
 
         Pointer conn = this.x11Output.getXcbConnection();
-        int device_id;
+        int     device_id;
         device_id = this.libxkbcommonx11.xkb_x11_get_core_keyboard_device_id(conn);
         if (device_id == -1) {
             //TODO error

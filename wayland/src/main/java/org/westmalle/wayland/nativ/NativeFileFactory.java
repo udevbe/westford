@@ -3,7 +3,6 @@ package org.westmalle.wayland.nativ;
 
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Pointer;
-
 import org.westmalle.wayland.nativ.libc.Libc;
 
 import javax.annotation.Nonnull;
@@ -74,7 +73,9 @@ public class NativeFileFactory {
             return -1;
         }
 
-        flags = this.libc.fcntl(fd, Libc.F_GETFD, 0);
+        flags = this.libc.fcntl(fd,
+                                Libc.F_GETFD,
+                                0);
         if (flags == -1) {
             this.libc.close(fd);
             return -1;

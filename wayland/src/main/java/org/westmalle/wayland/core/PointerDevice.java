@@ -17,13 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-
-import org.freedesktop.wayland.server.DestroyListener;
-import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlPointerResource;
-import org.freedesktop.wayland.server.WlSurfaceRequests;
-import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.server.*;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.slf4j.Logger;
@@ -34,22 +28,16 @@ import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.*;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {
     private static final Logger LOGGER = LoggerFactory.getLogger(PointerDevice.class);
 
     @Nonnull
-    private final EventBus                             eventBus = new EventBus((exception,
+    private final EventBus                       eventBus       = new EventBus((exception,
                                                                                 context) -> LOGGER.error("",
                                                                                                          exception));
     @Nonnull
@@ -63,7 +51,7 @@ public class PointerDevice implements Role {
     @Nonnull
     private final NullRegion     nullRegion;
     @Nonnull
-    private final JobExecutor jobExecutor;
+    private final JobExecutor    jobExecutor;
     @Nonnull
     private final Compositor     compositor;
     @Nonnull
@@ -128,7 +116,7 @@ public class PointerDevice implements Role {
                                          getPosition()));
     }
 
-    public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources){
+    public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources) {
         final Optional<WlSurfaceResource> oldFocus = getFocus();
         final Optional<WlSurfaceResource> newFocus = over();
 
@@ -167,12 +155,14 @@ public class PointerDevice implements Role {
             final Surface surface = ((WlSurface) implementation).getSurface();
 
             //surface can be invisible (null buffer), in which case we should ignore it.
-            if(!surface.getState().getBuffer().isPresent()){
+            if (!surface.getState()
+                        .getBuffer()
+                        .isPresent()) {
                 continue;
             }
 
             final Optional<Region> inputRegion = surface.getState()
-                    .getInputRegion();
+                                                        .getInputRegion();
             final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
 
             if (region.contains(surface.getSize(),
@@ -386,7 +376,7 @@ public class PointerDevice implements Role {
 
     /**
      * Listen for motion as soon as given surface is grabbed.
-     * <p>
+     * <p/>
      * If another surface already has the grab, the listener
      * is never registered.
      *

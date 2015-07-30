@@ -33,7 +33,7 @@ public class X11SeatFactory {
     @Nonnull
     private final Libxcb                libxcb;
     @Nonnull
-    private final Libxkbcommonx11 libxkbcommonx11;
+    private final Libxkbcommonx11       libxkbcommonx11;
     @Nonnull
     private final WlPointerFactory      wlPointerFactory;
     @Nonnull
@@ -99,9 +99,9 @@ public class X11SeatFactory {
                                               @Subscribe
                                               public void handle(final PointerFocus event) {
                                                   wlSeat.getOptionalWlKeyboard()
-                                                          .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
-                                                                  .setFocus(wlKeyboard.getResources(),
-                                                                            event.getWlSurfaceResource()));
+                                                        .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
+                                                                                           .setFocus(wlKeyboard.getResources(),
+                                                                                                     event.getWlSurfaceResource()));
                                               }
                                           }));
     }

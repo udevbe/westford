@@ -9,7 +9,7 @@ import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 public abstract class Keymap {
 
     public Keymap create(WlKeyboardKeymapFormat format,
-                         String map){
+                         String map) {
         return new AutoValue_Keymap(format,
                                     map);
     }

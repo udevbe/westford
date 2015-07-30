@@ -4,11 +4,9 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
-
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
@@ -21,17 +19,13 @@ import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libc.Libc;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
-import static org.westmalle.wayland.nativ.libc.Libc.MAP_FAILED;
-import static org.westmalle.wayland.nativ.libc.Libc.MAP_SHARED;
-import static org.westmalle.wayland.nativ.libc.Libc.PROT_READ;
-import static org.westmalle.wayland.nativ.libc.Libc.PROT_WRITE;
+import static org.westmalle.wayland.nativ.libc.Libc.*;
 
 @AutoFactory(className = "KeyboardDeviceFactory")
 public class KeyboardDevice {
@@ -43,15 +37,15 @@ public class KeyboardDevice {
                                                     context) -> LOGGER.error("",
                                                                              exception));
     @Nonnull
-    private final Display display;
+    private final Display           display;
     @Nonnull
     private final NativeFileFactory nativeFileFactory;
     @Nonnull
-    private final Libc libc;
+    private final Libc              libc;
     @Nonnull
-    private final Compositor compositor;
+    private final Compositor        compositor;
     @Nonnull
-    private Optional<Keymap> keymap =Optional.empty();
+    private       Optional<Keymap>            keymap               = Optional.empty();
     @Nonnull
     private final Set<Integer>                pressedKeys          = new HashSet<>();
     @Nonnull
