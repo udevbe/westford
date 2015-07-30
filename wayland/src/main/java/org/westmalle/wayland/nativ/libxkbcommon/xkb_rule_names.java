@@ -4,9 +4,17 @@ package org.westmalle.wayland.nativ.libxkbcommon;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class xkb_rule_names extends Structure {
+
+    private static final List<?> FIELD_ORDER = Arrays.asList("rules",
+                                                             "model",
+                                                             "layout",
+                                                             "variant",
+                                                             "options");
+
     /**
      * The rules file to use. The rules file describes how to interpret
      * the values of the model, layout, variant and options fields.
@@ -59,6 +67,6 @@ public class xkb_rule_names extends Structure {
 
     @Override
     protected List getFieldOrder() {
-        return null;
+        return FIELD_ORDER;
     }
 }
