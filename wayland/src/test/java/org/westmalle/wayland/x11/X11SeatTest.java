@@ -23,9 +23,9 @@ import java.util.Set;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.Input.BTN_LEFT;
-import static org.westmalle.wayland.nativ.Input.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11SeatTest {

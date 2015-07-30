@@ -1,4 +1,4 @@
-package org.westmalle.wayland.nativ;
+package org.westmalle.wayland.nativ.linux;
 
 /**
  * input.h

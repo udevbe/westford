@@ -182,12 +182,12 @@ public class KeyboardDevice {
         final int length = (int) nativeKeyMapping.getPointer()
                                                  .size();
         final int fd = this.nativeFileFactory.createAnonymousFile(length);
-        Pointer keymapArea = this.libc.mmap(null,
-                                            length,
-                                            PROT_READ | PROT_WRITE,
-                                            MAP_SHARED,
-                                            fd,
-                                            0);
+        final Pointer keymapArea = this.libc.mmap(null,
+                                                  length,
+                                                  PROT_READ | PROT_WRITE,
+                                                  MAP_SHARED,
+                                                  fd,
+                                                  0);
         if (keymapArea == MAP_FAILED) {
             this.libc.close(fd);
             throw new LastErrorException(Native.getLastError());

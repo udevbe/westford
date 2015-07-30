@@ -36,7 +36,7 @@ public class X11SeatFactory {
     @Nonnull
     private final Libxkbcommon          libxkbcommon;
     @Nonnull
-    private final Libxkbcommonx11 libxkbcommonx11;
+    private final Libxkbcommonx11       libxkbcommonx11;
     @Nonnull
     private final WlPointerFactory      wlPointerFactory;
     @Nonnull
@@ -70,7 +70,9 @@ public class X11SeatFactory {
         final X11Output x11Output = (X11Output) wlOutput.getOutput()
                                                         .getImplementation();
         final X11Seat x11Seat = new X11Seat(this.libxcb,
+                                            this.libxkbcommon,
                                             this.libxkbcommonx11,
+                                            //FIXME check & handle null
                                             this.libxkbcommon.xkb_context_new(Libxkbcommon.XKB_CONTEXT_NO_FLAGS),
                                             x11Output,
                                             wlSeat);

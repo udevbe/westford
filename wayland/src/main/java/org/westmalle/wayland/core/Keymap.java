@@ -8,8 +8,8 @@ import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 @AutoValue
 public abstract class Keymap {
 
-    public Keymap create(WlKeyboardKeymapFormat format,
-                         String map) {
+    public static Keymap create(WlKeyboardKeymapFormat format,
+                                String map) {
         return new AutoValue_Keymap(format,
                                     map);
     }

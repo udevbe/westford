@@ -29,11 +29,7 @@ import org.freedesktop.wayland.shared.WlSeatCapability;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 @AutoFactory(className = "WlSeatFactory")
 public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, ProtocolObject<WlSeatResource> {
@@ -74,6 +70,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     @Override
     public void getPointer(final WlSeatResource wlSeatResource,
                            final int id) {
+        //FIXME protocol requires to always generate pointer resource
         this.optionalWlPointer.ifPresent(wlPointer -> {
             final WlPointerResource wlPointerResource = wlPointer.add(wlSeatResource.getClient(),
                                                                       wlSeatResource.getVersion(),
@@ -87,6 +84,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     @Override
     public void getKeyboard(final WlSeatResource wlSeatResource,
                             final int id) {
+        //FIXME protocol requires to always generate keyboard resource
         this.optionalWlKeyboard.ifPresent(wlKeyboard -> {
             final WlKeyboardResource wlKeyboardResource = wlKeyboard.add(wlSeatResource.getClient(),
                                                                          wlSeatResource.getVersion(),
@@ -94,12 +92,17 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
             this.wlKeyboardResources.put(wlSeatResource,
                                          wlKeyboardResource);
             wlKeyboardResource.register(() -> WlSeat.this.wlKeyboardResources.remove(wlSeatResource));
+            wlKeyboard.getKeyboardDevice()
+                      .updateKeymap(Collections.singleton(wlKeyboardResource),
+                                    wlKeyboard.getKeyboardDevice()
+                                              .getKeymap());
         });
     }
 
     @Override
     public void getTouch(final WlSeatResource wlSeatResource,
                          final int id) {
+        //FIXME protocol requires to always generate touch resource
         this.optionalWlTouch.ifPresent(wlTouch -> {
             final WlTouchResource wlTouchResource = wlTouch.add(wlSeatResource.getClient(),
                                                                 wlSeatResource.getVersion(),

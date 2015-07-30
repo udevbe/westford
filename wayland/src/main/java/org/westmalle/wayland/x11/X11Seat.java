@@ -14,38 +14,30 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
-
 import com.sun.jna.Pointer;
-
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
+import org.westmalle.wayland.core.Keymap;
+import org.westmalle.wayland.nativ.libxcb.*;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
-import static org.westmalle.wayland.nativ.Input.BTN_LEFT;
-import static org.westmalle.wayland.nativ.Input.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CURSOR_NONE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.*;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_COMPILE_NO_FLAGS;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_FORMAT_TEXT_V1;
+import static org.westmalle.wayland.nativ.linux.Input.*;
 
 public class X11Seat {
 
     @Nonnull
     private final Libxcb          libxcb;
+    @Nonnull
+    private final Libxkbcommon    libxkbcommon;
     @Nonnull
     private final Libxkbcommonx11 libxkbcommonx11;
     @Nonnull
@@ -56,11 +48,13 @@ public class X11Seat {
     private final WlSeat          wlSeat;
 
     X11Seat(@Nonnull final Libxcb libxcb,
+            @Nonnull final Libxkbcommon libxkbcommon,
             @Nonnull final Libxkbcommonx11 libxkbcommonx11,
             @Nonnull final Pointer xkbContext,
             @Nonnull final X11Output x11Output,
             @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
+        this.libxkbcommon = libxkbcommon;
         this.libxkbcommonx11 = libxkbcommonx11;
         this.xkbContext = xkbContext;
         this.x11Output = x11Output;
@@ -193,15 +187,23 @@ public class X11Seat {
 
     public void updateKeymap() {
 
-        Pointer conn = this.x11Output.getXcbConnection();
-        int     device_id;
-        device_id = this.libxkbcommonx11.xkb_x11_get_core_keyboard_device_id(conn);
+        final Pointer xcbConnection = this.x11Output.getXcbConnection();
+        final int     device_id     = this.libxkbcommonx11.xkb_x11_get_core_keyboard_device_id(xcbConnection);
         if (device_id == -1) {
             //TODO error
         }
-        Pointer keymap = this.libxkbcommonx11.xkb_x11_keymap_new_from_device(xkbContext,
-                                                                             conn,
-                                                                             device_id,
-                                                                             Libxkbcommon.XKB_KEYMAP_COMPILE_NO_FLAGS);
+        final Pointer keymap = this.libxkbcommonx11.xkb_x11_keymap_new_from_device(xkbContext,
+                                                                                   xcbConnection,
+                                                                                   device_id,
+                                                                                   XKB_KEYMAP_COMPILE_NO_FLAGS);
+        //FIXME check and handle null
+        final Pointer keymapAsStringPointer = this.libxkbcommon.xkb_keymap_get_as_string(keymap,
+                                                                                         XKB_KEYMAP_FORMAT_TEXT_V1);
+        this.wlSeat.getOptionalWlKeyboard()
+                   .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
+                                                      .updateKeymap(wlKeyboard.getResources(),
+                                                                    Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
+                                                                                              //FIXME check and handle null
+                                                                                              keymapAsStringPointer.getString(0)))));
     }
 }
