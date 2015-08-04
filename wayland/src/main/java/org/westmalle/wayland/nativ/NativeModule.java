@@ -15,7 +15,8 @@ package org.westmalle.wayland.nativ;
 
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
-
+import dagger.Module;
+import dagger.Provides;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.nativ.libX11.LibX11;
@@ -27,9 +28,6 @@ import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
 
 import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
 
 @Module
 public class NativeModule {

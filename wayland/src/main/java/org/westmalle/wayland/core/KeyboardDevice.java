@@ -25,7 +25,10 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.westmalle.wayland.nativ.libc.Libc.*;
+import static org.westmalle.wayland.nativ.libc.Libc.MAP_FAILED;
+import static org.westmalle.wayland.nativ.libc.Libc.MAP_SHARED;
+import static org.westmalle.wayland.nativ.libc.Libc.PROT_READ;
+import static org.westmalle.wayland.nativ.libc.Libc.PROT_WRITE;
 
 @AutoFactory(className = "KeyboardDeviceFactory")
 public class KeyboardDevice {
@@ -45,9 +48,9 @@ public class KeyboardDevice {
     @Nonnull
     private final Compositor        compositor;
     @Nonnull
-    private       Optional<Keymap>            keymap               = Optional.empty();
-    @Nonnull
     private final Set<Integer>                pressedKeys          = new HashSet<>();
+    @Nonnull
+    private       Optional<Keymap>            keymap               = Optional.empty();
     @Nonnull
     private       Optional<DestroyListener>   focusDestroyListener = Optional.empty();
     @Nonnull
@@ -178,6 +181,11 @@ public class KeyboardDevice {
         });
     }
 
+    @Nonnull
+    public Optional<Keymap> getKeymap() {
+        return this.keymap;
+    }
+
     private int updateKeymapFile(final NativeString nativeKeyMapping) {
         final int length = (int) nativeKeyMapping.getPointer()
                                                  .size();
@@ -188,7 +196,7 @@ public class KeyboardDevice {
                                                   MAP_SHARED,
                                                   fd,
                                                   0);
-        if (keymapArea == MAP_FAILED) {
+        if (keymapArea.equals(MAP_FAILED)) {
             this.libc.close(fd);
             throw new LastErrorException(Native.getLastError());
         }
@@ -196,10 +204,5 @@ public class KeyboardDevice {
         this.libc.strcpy(keymapArea,
                          nativeKeyMapping.getPointer());
         return fd;
-    }
-
-    @Nonnull
-    public Optional<Keymap> getKeymap() {
-        return this.keymap;
     }
 }

@@ -16,7 +16,7 @@ import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = OutputModule.class)
-public interface WMComponent {
+public interface Application {
     //generic compositor output
     RendererFactory shmRendererFactory();
 
@@ -35,7 +35,7 @@ public interface WMComponent {
     ShellService shellService();
 
     //render implementations
-    X11Component x11Component();
+    X11Component x11();
 
-    EglComponent eglComponent();
+    EglComponent egl();
 }

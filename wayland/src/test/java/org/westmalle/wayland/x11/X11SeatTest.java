@@ -17,7 +17,6 @@ import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
@@ -52,7 +51,7 @@ public class X11SeatTest {
                                        final int waylandEventDetail) {
         //given
         final WlPointer wlPointer = mock(WlPointer.class);
-        when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(this.wlSeat.getWlPointer()).thenReturn(wlPointer);
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
@@ -93,7 +92,7 @@ public class X11SeatTest {
                                          final int waylandEventDetail) {
         //given
         final WlPointer wlPointer = mock(WlPointer.class);
-        when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(this.wlSeat.getWlPointer()).thenReturn(wlPointer);
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
@@ -128,7 +127,7 @@ public class X11SeatTest {
     public void testHandleMotion() throws Exception {
         //given
         final WlPointer wlPointer = mock(WlPointer.class);
-        when(this.wlSeat.getOptionalWlPointer()).thenReturn(Optional.of(wlPointer));
+        when(this.wlSeat.getWlPointer()).thenReturn(wlPointer);
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);

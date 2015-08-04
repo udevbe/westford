@@ -83,8 +83,13 @@ public class Output {
         return this.outputGeometry;
     }
 
+    /**
+     * Exposes platform specific functionality for eg. X11, GBM/KSM, ...
+     *
+     * @return A platform specific output implementation.
+     */
     @Nonnull
-    public Object getImplementation() {
+    public Object getPlatformImplementation() {
         return this.outputImplementation;
     }
 }

@@ -89,6 +89,14 @@ public class NativeString implements CharSequence, Comparable {
         return toString().hashCode();
     }
 
+    @Nonnull
+    public String toString() {
+        final boolean wide = Objects.equals(this.encoding,
+                                            WIDE_STRING);
+        return wide ? this.pointer.getWideString(0) : this.pointer.getString(0,
+                                                                             this.encoding);
+    }
+
     public boolean equals(final Object other) {
         return other instanceof CharSequence && compareTo(other) == 0;
     }
@@ -96,14 +104,6 @@ public class NativeString implements CharSequence, Comparable {
     public int compareTo(@Nonnull final Object other) {
 
         return toString().compareTo(other.toString());
-    }
-
-    @Nonnull
-    public String toString() {
-        final boolean wide = Objects.equals(this.encoding,
-                                            WIDE_STRING);
-        return wide ? this.pointer.getWideString(0) : this.pointer.getString(0,
-                                                                             this.encoding);
     }
 
     public Memory getPointer() {

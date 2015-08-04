@@ -58,7 +58,7 @@ public class EglGles2RenderEngineTest {
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getMode()).thenReturn(mode);
-        when(output.getImplementation()).thenReturn(hasEglOutput);
+        when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
         when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
         when(mode.getWidth()).thenReturn(width);
         when(mode.getHeight()).thenReturn(height);
@@ -250,7 +250,7 @@ public class EglGles2RenderEngineTest {
         final EglOutput    eglOutput    = mock(EglOutput.class);
 
         when(wlOutput.getOutput()).thenReturn(output);
-        when(output.getImplementation()).thenReturn(hasEglOutput);
+        when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
         when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
         //when
         this.eglGles2RenderEngine.end(wlOutput);

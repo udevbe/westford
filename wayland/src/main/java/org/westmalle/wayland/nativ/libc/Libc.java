@@ -259,7 +259,8 @@ public class Libc {
      */
     public static final int MAP_PRIVATE = 0x0000;
 
-    public static final Pointer MAP_FAILED = Pointer.createConstant(-1);
+    //-1
+    public static final Pointer MAP_FAILED = Pointer.createConstant(0xFFFFFFFF);
 
     public native int open(String pathname,
                            int flags);
@@ -294,7 +295,7 @@ public class Libc {
                                int prot,
                                int flags,
                                int fildes,
-                               int off) throws LastErrorException;
+                               int off);
 
     public native int munmap(Pointer addr,
                              int length) throws LastErrorException;

@@ -15,8 +15,8 @@ package org.westmalle.wayland.bootstrap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.westmalle.wayland.DaggerWMComponent;
-import org.westmalle.wayland.WMComponent;
+import org.westmalle.wayland.Application;
+import org.westmalle.wayland.DaggerApplication;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.CompositorFactory;
 import org.westmalle.wayland.core.RenderEngine;
@@ -27,7 +27,6 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
 import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.protocol.WlSeatFactory;
 import org.westmalle.wayland.protocol.WlShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
@@ -47,26 +46,25 @@ class Boot {
                     + "\tArguments: {}",
                     args.length == 0 ? "<none>" : Arrays.toString(args));
 
-        new Boot().strap(DaggerWMComponent.create());
+        new Boot().strap(DaggerApplication.create());
     }
 
-    private void strap(final WMComponent component) {
+    private void strap(final Application application) {
         //get all required factory instances
-        final RendererFactory            rendererFactory            = component.shmRendererFactory();
-        final CompositorFactory          compositorFactory          = component.compositorFactory();
-        final WlCompositorFactory        wlCompositorFactory        = component.wlCompositorFactory();
-        final WlSeatFactory              wlSeatFactory              = component.wlSeatFactory();
-        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = component.wlDataDeviceManagerFactory();
-        final WlShellFactory             wlShellFactory             = component.wlShellFactory();
+        final RendererFactory            rendererFactory            = application.shmRendererFactory();
+        final CompositorFactory          compositorFactory          = application.compositorFactory();
+        final WlCompositorFactory        wlCompositorFactory        = application.wlCompositorFactory();
+        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = application.wlDataDeviceManagerFactory();
+        final WlShellFactory             wlShellFactory             = application.wlShellFactory();
 
         //setup X11 input/output back-end.
-        final X11OutputFactory outputFactory = component.x11Component()
-                                                        .outputFactory();
-        final X11SeatFactory seatFactory = component.x11Component()
-                                                    .seatFactory();
+        final X11OutputFactory outputFactory = application.x11()
+                                                          .outputFactory();
+        final X11SeatFactory seatFactory = application.x11()
+                                                      .seatFactory();
         //setup egl render engine
-        final EglRenderEngineFactory renderEngineFactory = component.eglComponent()
-                                                                    .renderEngineFactory();
+        final EglRenderEngineFactory renderEngineFactory = application.egl()
+                                                                      .renderEngineFactory();
         //create an output
         //create an X opengl enabled x11 window
         final WlOutput wlOutput = outputFactory.create(System.getenv("DISPLAY"),
@@ -93,7 +91,6 @@ class Boot {
         //setup seat for input support
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
         seatFactory.create(wlOutput,
-                           wlSeatFactory.create(),
                            compositor);
 
         //enable wl_shell protocol for minimal desktop-like features (move, resize, cursor changes ...)
@@ -103,7 +100,7 @@ class Boot {
         //TODO implement xdg_shell protocol
 
         //start the thingamabah
-        component.shellService()
-                 .start();
+        application.shellService()
+                   .start();
     }
 }

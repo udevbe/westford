@@ -16,8 +16,8 @@ package org.westmalle.wayland.core;
 import dagger.Module;
 import dagger.Provides;
 import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.NativeModule;
+import org.westmalle.wayland.nativ.libc.Libc;
 
 import javax.inject.Singleton;
 

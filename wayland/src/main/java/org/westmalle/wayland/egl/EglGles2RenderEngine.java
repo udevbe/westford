@@ -13,8 +13,8 @@ import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.RenderEngine;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
-import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.nativ.NativeString;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -92,7 +92,7 @@ public class EglGles2RenderEngine implements RenderEngine {
     public void begin(@Nonnull final WlOutput wlOutput) {
         final Output       output       = wlOutput.getOutput();
         final OutputMode   mode         = output.getMode();
-        final HasEglOutput hasEglOutput = (HasEglOutput) output.getImplementation();
+        final HasEglOutput hasEglOutput = (HasEglOutput) output.getPlatformImplementation();
         final EglOutput    eglOutput    = hasEglOutput.getEglOutput();
         eglOutput.begin();
 
@@ -436,7 +436,7 @@ public class EglGles2RenderEngine implements RenderEngine {
     @Override
     public void end(@Nonnull final WlOutput wlOutput) {
         final HasEglOutput hasEglOutput = (HasEglOutput) wlOutput.getOutput()
-                                                                 .getImplementation();
+                                                                 .getPlatformImplementation();
         hasEglOutput.getEglOutput()
                     .end();
     }

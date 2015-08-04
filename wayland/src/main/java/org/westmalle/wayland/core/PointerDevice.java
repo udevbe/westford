@@ -17,7 +17,12 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import org.freedesktop.wayland.server.*;
+import org.freedesktop.wayland.server.DestroyListener;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlPointerResource;
+import org.freedesktop.wayland.server.WlSurfaceRequests;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.slf4j.Logger;
@@ -30,7 +35,12 @@ import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @AutoFactory(className = "PointerDeviceFactory")
 public class PointerDevice implements Role {

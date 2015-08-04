@@ -25,30 +25,50 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatRequestsV4;
 import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlTouchResource;
-import org.freedesktop.wayland.shared.WlSeatCapability;
+import org.westmalle.wayland.core.Seat;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlSeatFactory")
 public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, ProtocolObject<WlSeatResource> {
 
     private final Set<WlSeatResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+
     private final WlDataDevice wlDataDevice;
+    private final Seat         seat;
+
+    @Nonnull
+    private final WlPointer  wlPointer;
+    @Nonnull
+    private final WlKeyboard wlKeyboard;
+    @Nonnull
+    private final WlTouch    wlTouch;
+
     private final Map<WlSeatResource, WlPointerResource>  wlPointerResources  = new HashMap<>();
     private final Map<WlSeatResource, WlKeyboardResource> wlKeyboardResources = new HashMap<>();
     private final Map<WlSeatResource, WlTouchResource>    wlTouchResources    = new HashMap<>();
-    private       Optional<WlPointer>                     optionalWlPointer   = Optional.empty();
-    private       Optional<WlKeyboard>                    optionalWlKeyboard  = Optional.empty();
-    private       Optional<WlTouch>                       optionalWlTouch     = Optional.empty();
 
-    WlSeat(@Provided final Display display,
-           @Provided final WlDataDevice wlDataDevice) {
+    WlSeat(@Provided @Nonnull final Display display,
+           @Provided @Nonnull final WlDataDevice wlDataDevice,
+           @Provided @Nonnull final Seat seat,
+           @Nonnull final WlPointer wlPointer,
+           @Nonnull final WlKeyboard wlKeyboard,
+           @Nonnull final WlTouch wlTouch) {
         super(display,
               WlSeatResource.class,
               VERSION);
         this.wlDataDevice = wlDataDevice;
+        this.seat = seat;
+        this.wlPointer = wlPointer;
+        this.wlKeyboard = wlKeyboard;
+        this.wlTouch = wlTouch;
     }
 
     @Override
@@ -71,55 +91,59 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     public void getPointer(final WlSeatResource wlSeatResource,
                            final int id) {
         //FIXME protocol requires to always generate pointer resource
-        this.optionalWlPointer.ifPresent(wlPointer -> {
-            final WlPointerResource wlPointerResource = wlPointer.add(wlSeatResource.getClient(),
-                                                                      wlSeatResource.getVersion(),
-                                                                      id);
-            this.wlPointerResources.put(wlSeatResource,
-                                        wlPointerResource);
-            wlPointerResource.register(() -> WlSeat.this.wlPointerResources.remove(wlSeatResource));
-        });
+        final WlPointerResource wlPointerResource = getWlPointer().add(wlSeatResource.getClient(),
+                                                                       wlSeatResource.getVersion(),
+                                                                       id);
+        this.wlPointerResources.put(wlSeatResource,
+                                    wlPointerResource);
+        wlPointerResource.register(() -> WlSeat.this.wlPointerResources.remove(wlSeatResource));
+    }
+
+    @Nonnull
+    public WlPointer getWlPointer() {
+        return this.wlPointer;
     }
 
     @Override
     public void getKeyboard(final WlSeatResource wlSeatResource,
                             final int id) {
         //FIXME protocol requires to always generate keyboard resource
-        this.optionalWlKeyboard.ifPresent(wlKeyboard -> {
-            final WlKeyboardResource wlKeyboardResource = wlKeyboard.add(wlSeatResource.getClient(),
-                                                                         wlSeatResource.getVersion(),
-                                                                         id);
-            this.wlKeyboardResources.put(wlSeatResource,
-                                         wlKeyboardResource);
-            wlKeyboardResource.register(() -> WlSeat.this.wlKeyboardResources.remove(wlSeatResource));
-            wlKeyboard.getKeyboardDevice()
-                      .updateKeymap(Collections.singleton(wlKeyboardResource),
-                                    wlKeyboard.getKeyboardDevice()
-                                              .getKeymap());
-        });
+        final WlKeyboardResource wlKeyboardResource = getWlKeyboard().add(wlSeatResource.getClient(),
+                                                                          wlSeatResource.getVersion(),
+                                                                          id);
+        this.wlKeyboardResources.put(wlSeatResource,
+                                     wlKeyboardResource);
+        wlKeyboardResource.register(() -> WlSeat.this.wlKeyboardResources.remove(wlSeatResource));
+        getWlKeyboard().getKeyboardDevice()
+                       .updateKeymap(Collections.singleton(wlKeyboardResource),
+                                     getWlKeyboard().getKeyboardDevice()
+                                                    .getKeymap());
+    }
+
+    @Nonnull
+    public WlKeyboard getWlKeyboard() {
+        return this.wlKeyboard;
     }
 
     @Override
     public void getTouch(final WlSeatResource wlSeatResource,
                          final int id) {
         //FIXME protocol requires to always generate touch resource
-        this.optionalWlTouch.ifPresent(wlTouch -> {
-            final WlTouchResource wlTouchResource = wlTouch.add(wlSeatResource.getClient(),
-                                                                wlSeatResource.getVersion(),
-                                                                id);
-            this.wlTouchResources.put(wlSeatResource,
-                                      wlTouchResource);
-            wlTouchResource.register(() -> WlSeat.this.wlTouchResources.remove(wlSeatResource));
-        });
+        final WlTouchResource wlTouchResource = getWlTouch().add(wlSeatResource.getClient(),
+                                                                 wlSeatResource.getVersion(),
+                                                                 id);
+        this.wlTouchResources.put(wlSeatResource,
+                                  wlTouchResource);
+        wlTouchResource.register(() -> WlSeat.this.wlTouchResources.remove(wlSeatResource));
+    }
+
+    @Nonnull
+    public WlTouch getWlTouch() {
+        return this.wlTouch;
     }
 
     public Optional<WlKeyboardResource> getWlKeyboardResource(final WlSeatResource wlSeatResource) {
         return Optional.ofNullable(this.wlKeyboardResources.get(wlSeatResource));
-    }
-
-    public void setWlKeyboard(final WlKeyboard newWlKeyboard) {
-        this.optionalWlKeyboard = Optional.of(newWlKeyboard);
-        getResources().forEach(this::emiteCapabilities);
     }
 
     @Nonnull
@@ -137,67 +161,20 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                                            version,
                                                            id,
                                                            this);
-        emiteCapabilities(resource);
+        getSeat().emitCapabilities(Collections.singleton(resource));
         return resource;
     }
 
-    private void emiteCapabilities(final WlSeatResource wlSeatResource) {
-        int capabilities = 0;
-        if (this.optionalWlPointer.isPresent()) {
-            capabilities |= WlSeatCapability.POINTER.getValue();
-        }
-        if (this.optionalWlKeyboard.isPresent()) {
-            capabilities |= WlSeatCapability.KEYBOARD.getValue();
-        }
-        if (this.optionalWlTouch.isPresent()) {
-            capabilities |= WlSeatCapability.TOUCH.getValue();
-        }
-        wlSeatResource.capabilities(capabilities);
-    }
-
-    public void removeWlKeyboard() {
-        this.optionalWlKeyboard = Optional.empty();
-        getResources().forEach(this::emiteCapabilities);
+    public Seat getSeat() {
+        return this.seat;
     }
 
     public Optional<WlPointerResource> getWlPointerResource(final WlSeatResource wlSeatResource) {
         return Optional.ofNullable(this.wlPointerResources.get(wlSeatResource));
     }
 
-    public void setWlPointer(@Nonnull final WlPointer newWlPointer) {
-        this.optionalWlPointer = Optional.of(newWlPointer);
-        getResources().forEach(this::emiteCapabilities);
-    }
-
-    public Optional<WlPointer> getOptionalWlPointer() {
-        return this.optionalWlPointer;
-    }
-
-    public void removeWlPointer() {
-        this.optionalWlPointer = Optional.empty();
-        getResources().forEach(this::emiteCapabilities);
-    }
-
     public Optional<WlTouchResource> getWlTouchResource(final WlSeatResource wlSeatResource) {
         return Optional.ofNullable(this.wlTouchResources.get(wlSeatResource));
-    }
-
-    public void setWlTouch(final WlTouch wlTouch) {
-        this.optionalWlTouch = Optional.of(wlTouch);
-        getResources().forEach(this::emiteCapabilities);
-    }
-
-    public Optional<WlKeyboard> getOptionalWlKeyboard() {
-        return this.optionalWlKeyboard;
-    }
-
-    public Optional<WlTouch> getOptionalWlTouch() {
-        return this.optionalWlTouch;
-    }
-
-    public void removeWlTouch() {
-        this.optionalWlTouch = Optional.empty();
-        getResources().forEach(this::emiteCapabilities);
     }
 
     public WlDataDevice getWlDataDevice() {

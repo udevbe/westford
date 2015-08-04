@@ -2,7 +2,6 @@ package org.westmalle.wayland.core;
 
 
 import com.google.auto.value.AutoValue;
-
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 
 @AutoValue

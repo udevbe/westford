@@ -65,14 +65,14 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
         return wlSurfaceResource;
     }
 
+    public Surface getSurface() {
+        return this.surface;
+    }
+
     @Nonnull
     @Override
     public Set<WlSurfaceResource> getResources() {
         return this.resources;
-    }
-
-    public Surface getSurface() {
-        return this.surface;
     }
 
     @Override
@@ -158,19 +158,6 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                                                   transform));
     }
 
-    @Override
-    public void setBufferScale(final WlSurfaceResource resource,
-                               @Nonnegative final int scale) {
-        if (scale > 0) {
-            getSurface().setScale(scale);
-        }
-        else {
-            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
-                               String.format("Invalid scale %d. Scale must be positive integer.",
-                                             scale));
-        }
-    }
-
     private Mat4 getMatrix(final WlSurfaceResource resource,
                            final int transform) {
         if (WlOutputTransform.NORMAL.getValue() == transform) {
@@ -203,6 +190,19 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                                              transform,
                                              Arrays.asList(WlOutputTransform.values())));
             return Transforms.NORMAL;
+        }
+    }
+
+    @Override
+    public void setBufferScale(final WlSurfaceResource resource,
+                               @Nonnegative final int scale) {
+        if (scale > 0) {
+            getSurface().setScale(scale);
+        }
+        else {
+            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
+                               String.format("Invalid scale %d. Scale must be positive integer.",
+                                             scale));
         }
     }
 }

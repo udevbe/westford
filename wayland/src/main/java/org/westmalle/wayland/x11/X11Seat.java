@@ -19,18 +19,33 @@ import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Keymap;
-import org.westmalle.wayland.nativ.libxcb.*;
+import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
+import org.westmalle.wayland.protocol.WlKeyboard;
+import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.*;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CURSOR_NONE;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_COMPILE_NO_FLAGS;
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_FORMAT_TEXT_V1;
-import static org.westmalle.wayland.nativ.linux.Input.*;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 
 public class X11Seat {
 
@@ -71,11 +86,11 @@ public class X11Seat {
                             final boolean pressed) {
         final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
         final int                key                = toLinuxKey(eventDetail);
-        this.wlSeat.getOptionalWlKeyboard()
-                   .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
-                                                      .key(wlKeyboard.getResources(),
-                                                           key,
-                                                           wlKeyboardKeyState));
+        final WlKeyboard         wlKeyboard         = this.wlSeat.getWlKeyboard();
+        wlKeyboard.getKeyboardDevice()
+                  .key(wlKeyboard.getResources(),
+                       key,
+                       wlKeyboardKeyState);
     }
 
     private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed) {
@@ -108,11 +123,12 @@ public class X11Seat {
         final WlPointerButtonState wlPointerButtonState = wlPointerButtonState(buttonTime,
                                                                                pressed);
         final int button = toLinuxButton(eventDetail);
-        this.wlSeat.getOptionalWlPointer()
-                   .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                                    .button(wlPointer.getResources(),
-                                                            button,
-                                                            wlPointerButtonState));
+
+        final WlPointer wlPointer = this.wlSeat.getWlPointer();
+        wlPointer.getPointerDevice()
+                 .button(wlPointer.getResources(),
+                         button,
+                         wlPointerButtonState);
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -178,11 +194,11 @@ public class X11Seat {
         final int x = event.event_x;
         final int y = event.event_y;
 
-        this.wlSeat.getOptionalWlPointer()
-                   .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                                    .motion(wlPointer.getResources(),
-                                                            x,
-                                                            y));
+        final WlPointer wlPointer = this.wlSeat.getWlPointer();
+        wlPointer.getPointerDevice()
+                 .motion(wlPointer.getResources(),
+                         x,
+                         y);
     }
 
     public void updateKeymap() {
@@ -199,11 +215,12 @@ public class X11Seat {
         //FIXME check and handle null
         final Pointer keymapAsStringPointer = this.libxkbcommon.xkb_keymap_get_as_string(keymap,
                                                                                          XKB_KEYMAP_FORMAT_TEXT_V1);
-        this.wlSeat.getOptionalWlKeyboard()
-                   .ifPresent(wlKeyboard -> wlKeyboard.getKeyboardDevice()
-                                                      .updateKeymap(wlKeyboard.getResources(),
-                                                                    Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
-                                                                                              //FIXME check and handle null
-                                                                                              keymapAsStringPointer.getString(0)))));
+
+        final WlKeyboard wlKeyboard = this.wlSeat.getWlKeyboard();
+        wlKeyboard.getKeyboardDevice()
+                  .updateKeymap(wlKeyboard.getResources(),
+                                Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
+                                                          //FIXME check and handle null
+                                                          keymapAsStringPointer.getString(0))));
     }
 }

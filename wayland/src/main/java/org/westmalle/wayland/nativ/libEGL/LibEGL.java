@@ -16,7 +16,6 @@ package org.westmalle.wayland.nativ.libEGL;
 import com.sun.jna.Function;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Pointer;
-
 import org.westmalle.wayland.nativ.NativeString;
 
 import java.util.Optional;
