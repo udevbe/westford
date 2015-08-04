@@ -17,6 +17,8 @@ import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import dagger.Module;
 import dagger.Provides;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.nativ.libX11.LibX11;
@@ -31,6 +33,15 @@ import javax.inject.Singleton;
 
 @Module
 public class NativeModule {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NativeModule.class);
+
+
+    public NativeModule() {
+        Native.setCallbackExceptionHandler((thread,
+                                            throwable) -> LOGGER.error("Got uncaught exception",
+                                                                       throwable));
+    }
 
     @Singleton
     @Provides
