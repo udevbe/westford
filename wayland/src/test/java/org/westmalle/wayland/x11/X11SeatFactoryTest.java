@@ -55,7 +55,6 @@ public class X11SeatFactoryTest {
         final Output         output         = mock(Output.class);
         final X11Output      x11Output      = mock(X11Output.class);
         final X11EventBus    x11EventBus    = mock(X11EventBus.class);
-        final WlSeat         wlSeat         = mock(WlSeat.class);
         final Compositor     compositor     = mock(Compositor.class);
         final PointerDevice  pointerDevice  = mock(PointerDevice.class);
         final WlPointer      wlPointer      = mock(WlPointer.class);
@@ -71,10 +70,10 @@ public class X11SeatFactoryTest {
         when(this.wlKeyboardFactory.create(keyboardDevice)).thenReturn(wlKeyboard);
 
         //when
-        final X11Seat x11Seat = this.x11SeatFactory.create(wlOutput,
-                                                           compositor);
+        final WlSeat wlSeat = this.x11SeatFactory.create(wlOutput,
+                                                         compositor);
         //then
-        assertThat(x11Seat).isNotNull();
-        verify(x11EventBus).register(x11Seat);
+        assertThat(wlSeat).isNotNull();
+        verify(x11EventBus).register(wlSeat);
     }
 }

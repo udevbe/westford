@@ -1,24 +1,27 @@
 package org.westmalle.wayland.core;
 
 
+import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.util.EnumSet;
 import java.util.Set;
 
+@AutoFactory
 public class Seat {
 
     @Nonnull
+    private final Object platformImplementation;
+    @Nonnull
     private EnumSet<WlSeatCapability> capabilities = EnumSet.noneOf(WlSeatCapability.class);
 
-    @Inject
-    Seat() {
+    Seat(@Nonnull final Object platformImplementation) {
+        this.platformImplementation = platformImplementation;
     }
 
-    public void emitCapabilities(final Set<WlSeatResource> wlSeatResources) {
+    public void emitCapabilities(@Nonnull final Set<WlSeatResource> wlSeatResources) {
         final int capabilitiesFlag = capabilitiesFlag();
         wlSeatResources.forEach(wlSeatResource -> wlSeatResource.capabilities(capabilitiesFlag));
     }
@@ -33,5 +36,10 @@ public class Seat {
 
     public void setCapabilities(@Nonnull final EnumSet<WlSeatCapability> capability) {
         this.capabilities = capability;
+    }
+
+    @Nonnull
+    public Object getPlatformImplementation() {
+        return this.platformImplementation;
     }
 }

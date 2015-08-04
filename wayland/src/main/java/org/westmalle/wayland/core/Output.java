@@ -23,7 +23,7 @@ import java.util.Set;
 public class Output {
 
     @Nonnull
-    private final Object         outputImplementation;
+    private final Object         platformImplementation;
     @Nonnull
     private       OutputGeometry outputGeometry;
     @Nonnull
@@ -31,10 +31,10 @@ public class Output {
 
     Output(@Nonnull final OutputGeometry outputGeometry,
            @Nonnull final OutputMode outputMode,
-           @Nonnull final Object outputImplementation) {
+           @Nonnull final Object platformImplementation) {
         this.outputGeometry = outputGeometry;
         this.outputMode = outputMode;
-        this.outputImplementation = outputImplementation;
+        this.platformImplementation = platformImplementation;
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
@@ -90,6 +90,6 @@ public class Output {
      */
     @Nonnull
     public Object getPlatformImplementation() {
-        return this.outputImplementation;
+        return this.platformImplementation;
     }
 }

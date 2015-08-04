@@ -57,7 +57,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
 
     WlSeat(@Provided @Nonnull final Display display,
            @Provided @Nonnull final WlDataDevice wlDataDevice,
-           @Provided @Nonnull final Seat seat,
+           @Nonnull final Seat seat,
            @Nonnull final WlPointer wlPointer,
            @Nonnull final WlKeyboard wlKeyboard,
            @Nonnull final WlTouch wlTouch) {
@@ -84,6 +84,9 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
             WlSeat.this.wlKeyboardResources.remove(wlSeatResource);
             WlSeat.this.wlTouchResources.remove(wlSeatResource);
         });
+
+        getSeat().emitCapabilities(Collections.singleton(wlSeatResource));
+
         return wlSeatResource;
     }
 
@@ -157,12 +160,10 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     public WlSeatResource create(@Nonnull final Client client,
                                  @Nonnegative final int version,
                                  final int id) {
-        final WlSeatResource resource = new WlSeatResource(client,
-                                                           version,
-                                                           id,
-                                                           this);
-        getSeat().emitCapabilities(Collections.singleton(resource));
-        return resource;
+        return new WlSeatResource(client,
+                                  version,
+                                  id,
+                                  this);
     }
 
     public Seat getSeat() {

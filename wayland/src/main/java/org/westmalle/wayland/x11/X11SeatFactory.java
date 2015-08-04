@@ -18,6 +18,7 @@ import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
+import org.westmalle.wayland.core.SeatFactory;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
@@ -44,11 +45,15 @@ public class X11SeatFactory {
     private final Libxkbcommonx11 libxkbcommonx11;
 
     @Nonnull
-    private final WlSeatFactory     wlSeatFactory;
+    private final X11InputEventListenerFactory x11InputEventListenerFactory;
     @Nonnull
-    private final WlPointerFactory  wlPointerFactory;
+    private final WlSeatFactory                wlSeatFactory;
     @Nonnull
-    private final WlKeyboardFactory wlKeyboardFactory;
+    private final SeatFactory                  seatFactory;
+    @Nonnull
+    private final WlPointerFactory             wlPointerFactory;
+    @Nonnull
+    private final WlKeyboardFactory            wlKeyboardFactory;
 
     @Nonnull
     private final WlTouchFactory        wlTouchFactory;
@@ -61,7 +66,9 @@ public class X11SeatFactory {
     X11SeatFactory(@Nonnull final Libxcb libxcb,
                    @Nonnull final Libxkbcommon libxkbcommon,
                    @Nonnull final Libxkbcommonx11 libxkbcommonx11,
+                   @Nonnull final X11InputEventListenerFactory x11InputEventListenerFactory,
                    @Nonnull final WlSeatFactory wlSeatFactory,
+                   @Nonnull final SeatFactory seatFactory,
                    @Nonnull final WlPointerFactory wlPointerFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final WlTouchFactory wlTouchFactory,
@@ -70,7 +77,9 @@ public class X11SeatFactory {
         this.libxcb = libxcb;
         this.libxkbcommon = libxkbcommon;
         this.libxkbcommonx11 = libxkbcommonx11;
+        this.x11InputEventListenerFactory = x11InputEventListenerFactory;
         this.wlSeatFactory = wlSeatFactory;
+        this.seatFactory = seatFactory;
         this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.wlTouchFactory = wlTouchFactory;
@@ -78,31 +87,31 @@ public class X11SeatFactory {
         this.keyboardDeviceFactory = keyboardDeviceFactory;
     }
 
-    public X11Seat create(@Nonnull final WlOutput wlOutput,
-                          @Nonnull final Compositor compositor) {
+    public WlSeat create(@Nonnull final WlOutput wlOutput,
+                         @Nonnull final Compositor compositor) {
 
-        final WlSeat wlSeat = this.wlSeatFactory.create(this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)),
-                                                        this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create(compositor)),
-                                                        this.wlTouchFactory.create());
         final X11Output x11Output = (X11Output) wlOutput.getOutput()
                                                         .getPlatformImplementation();
-
         final X11Seat x11Seat = new X11Seat(this.libxcb,
                                             this.libxkbcommon,
                                             this.libxkbcommonx11,
                                             //FIXME check & handle null
                                             this.libxkbcommon.xkb_context_new(Libxkbcommon.XKB_CONTEXT_NO_FLAGS),
-                                            x11Output,
-                                            wlSeat);
-        x11Seat.updateKeymap();
+                                            x11Output);
+        final WlSeat wlSeat = this.wlSeatFactory.create(this.seatFactory.create(x11Seat),
+                                                        this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)),
+                                                        this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create(compositor)),
+                                                        this.wlTouchFactory.create());
 
         x11Output.getX11EventBus()
-                 .register(x11Seat);
+                 .register(this.x11InputEventListenerFactory.create(wlSeat,
+                                                                    x11Seat));
 
         enableInputDevices(wlSeat);
         addKeyboardFocus(wlSeat);
+        x11Seat.updateKeymap(wlSeat);
 
-        return x11Seat;
+        return wlSeat;
     }
 
     private void enableInputDevices(final WlSeat wlSeat) {

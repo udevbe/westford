@@ -10,9 +10,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
@@ -59,11 +56,11 @@ public class X11SeatTest {
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int compositorTime = 9876;
         when(this.compositor.getTime()).thenReturn(compositorTime);
-        final xcb_button_press_event_t event = mock(xcb_button_press_event_t.class);
-        event.time = 123;
-        event.detail = xEventDetail;
         //when
-        this.x11Seat.handle(event);
+        this.x11Seat.deliverButton(this.wlSeat,
+                                   123,
+                                   xEventDetail,
+                                   true);
         //then
         verify(pointerDevice).button(wlPointerResources,
                                      waylandEventDetail,
@@ -100,11 +97,11 @@ public class X11SeatTest {
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int compositorTime = 9876;
         when(this.compositor.getTime()).thenReturn(compositorTime);
-        final xcb_button_release_event_t event = mock(xcb_button_release_event_t.class);
-        event.time = 123;
-        event.detail = xEventDetail;
         //when
-        this.x11Seat.handle(event);
+        this.x11Seat.deliverButton(this.wlSeat,
+                                   123,
+                                   xEventDetail,
+                                   false);
         //then
         verify(pointerDevice).button(wlPointerResources,
                                      waylandEventDetail,
@@ -135,13 +132,12 @@ public class X11SeatTest {
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int compositorTime = 9876;
         when(this.compositor.getTime()).thenReturn(compositorTime);
-        final xcb_motion_notify_event_t event = mock(xcb_motion_notify_event_t.class);
-        final int                       x     = 80;
-        event.event_x = x;
+        final int x = 80;
         final int y = -120;
-        event.event_y = y;
         //when
-        this.x11Seat.handle(event);
+        this.x11Seat.deliverMotion(this.wlSeat,
+                                   x,
+                                   y);
         //then
         verify(pointerDevice).motion(wlPointerResources,
                                      x,
