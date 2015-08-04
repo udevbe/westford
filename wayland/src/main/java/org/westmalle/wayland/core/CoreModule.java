@@ -22,7 +22,7 @@ import org.westmalle.wayland.nativ.libc.Libc;
 import javax.inject.Singleton;
 
 @Module(includes = NativeModule.class)
-public class OutputModule {
+public class CoreModule {
 
     @Provides
     @Singleton

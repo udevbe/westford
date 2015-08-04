@@ -2,7 +2,7 @@ package org.westmalle.wayland;
 
 import dagger.Component;
 import org.westmalle.wayland.core.CompositorFactory;
-import org.westmalle.wayland.core.OutputModule;
+import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.RendererFactory;
 import org.westmalle.wayland.core.ShellService;
 import org.westmalle.wayland.egl.EglComponent;
@@ -15,7 +15,7 @@ import org.westmalle.wayland.x11.X11Component;
 import javax.inject.Singleton;
 
 @Singleton
-@Component(modules = OutputModule.class)
+@Component(modules = CoreModule.class)
 public interface Application {
     //generic compositor output
     RendererFactory shmRendererFactory();
