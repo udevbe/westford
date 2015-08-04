@@ -10,6 +10,10 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static org.westmalle.wayland.nativ.libc.Libc.FD_CLOEXEC;
+import static org.westmalle.wayland.nativ.libc.Libc.F_GETFD;
+import static org.westmalle.wayland.nativ.libc.Libc.F_SETFD;
+
 @Singleton
 public class NativeFileFactory {
 
@@ -76,7 +80,7 @@ public class NativeFileFactory {
         }
 
         flags = this.libc.fcntl(fd,
-                                Libc.F_GETFD,
+                                F_GETFD,
                                 0);
         if (flags == -1) {
             this.libc.close(fd);
@@ -84,8 +88,8 @@ public class NativeFileFactory {
         }
 
         if (this.libc.fcntl(fd,
-                            Libc.F_SETFD,
-                            flags | Libc.FD_CLOEXEC) == -1) {
+                            F_SETFD,
+                            flags | FD_CLOEXEC) == -1) {
             this.libc.close(fd);
             return -1;
         }
