@@ -96,12 +96,13 @@ public class KeyboardDevice {
                        final int time,
                        final int key,
                        final WlKeyboardKeyState wlKeyboardKeyState) {
-        getFocus().ifPresent(wlSurfaceResource -> findKeyboardResource(wlKeyboardResources,
-                                                                       wlSurfaceResource)
-                .ifPresent(wlKeyboardResource -> wlKeyboardResource.key(nextKeyboardSerial(),
-                                                                        time,
-                                                                        key,
-                                                                        wlKeyboardKeyState.getValue())));
+        getFocus().ifPresent(wlSurfaceResource ->
+                                     findKeyboardResource(wlKeyboardResources,
+                                                          wlSurfaceResource).ifPresent(wlKeyboardResource ->
+                                                                                               wlKeyboardResource.key(nextKeyboardSerial(),
+                                                                                                                      time,
+                                                                                                                      key,
+                                                                                                                      wlKeyboardKeyState.getValue())));
     }
 
     @Nonnull
