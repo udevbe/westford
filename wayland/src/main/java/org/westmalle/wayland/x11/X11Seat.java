@@ -90,8 +90,10 @@ public class X11Seat {
     }
 
     private int toLinuxKey(final short eventDetail) {
-        //TODO convert from X keycodes to input.h keycodes, -> properly use xkbcommon
-        return eventDetail;
+        //TODO properly use xkbcommon
+
+        //convert from X keycodes to input.h keycodes
+        return eventDetail - 8;
     }
 
     public void deliverButton(@Nonnull final WlSeat wlSeat,
