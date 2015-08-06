@@ -2,6 +2,7 @@ package org.westmalle.wayland.nativ;
 
 
 import com.sun.jna.LastErrorException;
+import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import org.westmalle.wayland.nativ.libc.Libc;
 
@@ -9,10 +10,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import static org.westmalle.wayland.nativ.libc.Libc.FD_CLOEXEC;
-import static org.westmalle.wayland.nativ.libc.Libc.F_GETFD;
-import static org.westmalle.wayland.nativ.libc.Libc.F_SETFD;
 
 @Singleton
 public class NativeFileFactory {
@@ -40,60 +37,35 @@ public class NativeFileFactory {
      * using the SCM_RIGHTS methods.
      */
     public int createAnonymousFile(@Nonnegative final int size) throws LastErrorException {
+
         final String path = System.getenv("XDG_RUNTIME_DIR");
         if (path == null) {
-            throw new LastErrorException(Libc.ENOENT);
+            throw new IllegalStateException("Cannot create temporary file: XDG_RUNTIME_DIR not set");
         }
 
         final String name = path + TEMPLATE;
+        //FIXME assumes ascii-only string
+        final Pointer m = new Memory(name.length() + 1);
+        m.setString(0,
+                    name);
+        final int fd = this.libc.mkstemp(m);
 
-        final int fd = createTmpfileCloexec(new NativeString(name).getPointer());
-
-        if (fd < 0) {
-            return -1;
+        try {
+            int flags = this.libc.fcntl(fd,
+                                        Libc.F_GETFD,
+                                        0);
+            flags |= Libc.FD_CLOEXEC;
+            this.libc.fcntl(fd,
+                            Libc.F_SETFD,
+                            flags);
+            this.libc.ftruncate(fd,
+                                size);
+            this.libc.unlink(m);
         }
-
-        if (this.libc.ftruncate(fd,
-                                size) < 0) {
+        catch (LastErrorException e) {
             this.libc.close(fd);
-            return -1;
+            throw e;
         }
-
-        return fd;
-    }
-
-    private int createTmpfileCloexec(final Pointer tmpname) {
-        int fd = this.libc.mkstemp(tmpname);
-        if (fd >= 0) {
-            fd = setCloexecOrClose(fd);
-            this.libc.unlink(tmpname);
-        }
-
-        return fd;
-    }
-
-    private int setCloexecOrClose(final int fd) {
-        final int flags;
-
-        if (fd == -1) {
-            return -1;
-        }
-
-        flags = this.libc.fcntl(fd,
-                                F_GETFD,
-                                0);
-        if (flags == -1) {
-            this.libc.close(fd);
-            return -1;
-        }
-
-        if (this.libc.fcntl(fd,
-                            F_SETFD,
-                            flags | FD_CLOEXEC) == -1) {
-            this.libc.close(fd);
-            return -1;
-        }
-
         return fd;
     }
 }
