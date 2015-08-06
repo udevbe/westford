@@ -187,11 +187,11 @@ public class KeyboardDevice {
     }
 
     private int updateKeymapFile(final NativeString nativeKeyMapping) {
-        final int length = (int) nativeKeyMapping.getPointer()
-                                                 .size();
-        final int fd = this.nativeFileFactory.createAnonymousFile(length);
+        final int size = (int) nativeKeyMapping.getPointer()
+                                               .size();
+        final int fd = this.nativeFileFactory.createAnonymousFile(size);
         final Pointer keymapArea = this.libc.mmap(null,
-                                                  length,
+                                                  size,
                                                   PROT_READ | PROT_WRITE,
                                                   MAP_SHARED,
                                                   fd,
