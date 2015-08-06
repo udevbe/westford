@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.Keyboard;
+import org.westmalle.wayland.core.KeyboardDevice;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 public class WlKeyboardTest {
 
     @Mock
-    private Keyboard keyboard;
+    private KeyboardDevice keyboardDevice;
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
@@ -51,7 +51,7 @@ public class WlKeyboardTest {
     public void testRelease() throws Exception {
         //given
         final WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
-        final WlKeyboard         wlKeyboard         = new WlKeyboard(this.keyboard);
+        final WlKeyboard         wlKeyboard         = new WlKeyboard(this.keyboardDevice);
         //when
         wlKeyboard.release(wlKeyboardResource);
         //then
@@ -64,7 +64,7 @@ public class WlKeyboardTest {
         final Client     client     = mock(Client.class);
         final int        version    = 4;
         final int        id         = 4;
-        final WlKeyboard wlKeyboard = new WlKeyboard(this.keyboard);
+        final WlKeyboard wlKeyboard = new WlKeyboard(this.keyboardDevice);
         //when
         final WlKeyboardResource wlKeyboardResource = wlKeyboard.create(client,
                                                                         version,

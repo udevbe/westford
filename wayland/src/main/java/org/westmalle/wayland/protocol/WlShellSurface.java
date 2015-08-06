@@ -61,6 +61,15 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                                                                      serial));
     }
 
+    public ShellSurface getShellSurface() {
+        return this.shellSurface;
+    }
+
+    @Nonnull
+    public WlSurfaceResource getWlSurfaceResource() {
+        return this.wlSurfaceResource;
+    }
+
     @Override
     public void resize(final WlShellSurfaceResource requester,
                        @Nonnull final WlSeatResource seat,
@@ -130,21 +139,6 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
         this.shellSurface.setClazz(Optional.of(class_));
     }
 
-    public ShellSurface getShellSurface() {
-        return this.shellSurface;
-    }
-
-    @Nonnull
-    public WlSurfaceResource getWlSurfaceResource() {
-        return this.wlSurfaceResource;
-    }
-
-    @Nonnull
-    @Override
-    public Set<WlShellSurfaceResource> getResources() {
-        return this.resources;
-    }
-
     @Nonnull
     @Override
     public WlShellSurfaceResource create(@Nonnull final Client client,
@@ -154,5 +148,11 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                                           version,
                                           id,
                                           this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlShellSurfaceResource> getResources() {
+        return this.resources;
     }
 }

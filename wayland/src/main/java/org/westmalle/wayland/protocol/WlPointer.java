@@ -86,19 +86,13 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
         }
     }
 
-    @Override
-    public void release(final WlPointerResource resource) {
-        resource.destroy();
-    }
-
     public PointerDevice getPointerDevice() {
         return this.pointerDevice;
     }
 
-    @Nonnull
     @Override
-    public Set<WlPointerResource> getResources() {
-        return this.resources;
+    public void release(final WlPointerResource resource) {
+        resource.destroy();
     }
 
     @Nonnull
@@ -110,5 +104,11 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
                                      version,
                                      id,
                                      this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlPointerResource> getResources() {
+        return this.resources;
     }
 }

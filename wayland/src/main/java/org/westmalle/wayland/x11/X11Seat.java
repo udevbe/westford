@@ -13,76 +13,100 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.google.common.eventbus.Subscribe;
+import com.sun.jna.Pointer;
+import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
-import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.nativ.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.xcb_key_press_event_t;
-import org.westmalle.wayland.nativ.xcb_key_release_event_t;
-import org.westmalle.wayland.nativ.xcb_motion_notify_event_t;
+import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
+import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
+import org.westmalle.wayland.protocol.WlKeyboard;
+import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 
-import static org.westmalle.wayland.nativ.Input.BTN_LEFT;
-import static org.westmalle.wayland.nativ.Input.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.Input.BTN_RIGHT;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_CURSOR_NONE;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_GRAB_MODE_ASYNC;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CURSOR_NONE;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_COMPILE_NO_FLAGS;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_FORMAT_TEXT_V1;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 
 public class X11Seat {
 
     @Nonnull
-    private final Libxcb     libxcb;
+    private final Libxcb          libxcb;
     @Nonnull
-    private final X11Output  x11Output;
+    private final Libxkbcommon    libxkbcommon;
     @Nonnull
-    private final Compositor compositor;
+    private final Libxkbcommonx11 libxkbcommonx11;
     @Nonnull
-    private final WlSeat     wlSeat;
+    private final Pointer         xkbContext;
+    @Nonnull
+    private final X11Output       x11Output;
 
     X11Seat(@Nonnull final Libxcb libxcb,
-            @Nonnull final X11Output x11Output,
-            @Nonnull final Compositor compositor,
-            @Nonnull final WlSeat wlSeat) {
+            @Nonnull final Libxkbcommon libxkbcommon,
+            @Nonnull final Libxkbcommonx11 libxkbcommonx11,
+            @Nonnull final Pointer xkbContext,
+            @Nonnull final X11Output x11Output) {
         this.libxcb = libxcb;
+        this.libxkbcommon = libxkbcommon;
+        this.libxkbcommonx11 = libxkbcommonx11;
+        this.xkbContext = xkbContext;
         this.x11Output = x11Output;
-        this.compositor = compositor;
-        this.wlSeat = wlSeat;
     }
 
-    @Subscribe
-    public void handle(final xcb_key_press_event_t event) {
-
+    public void deliverKey(@Nonnull final WlSeat wlSeat,
+                           final short eventDetail,
+                           final boolean pressed) {
+        final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
+        final int                key                = toLinuxKey(eventDetail);
+        final WlKeyboard         wlKeyboard         = wlSeat.getWlKeyboard();
+        wlKeyboard.getKeyboardDevice()
+                  .key(wlKeyboard.getResources(),
+                       key,
+                       wlKeyboardKeyState);
     }
 
-    @Subscribe
-    public void handle(final xcb_button_press_event_t event) {
-        deliver(event.time,
-                event.detail,
-                true);
+    private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed) {
+        final WlKeyboardKeyState wlKeyboardKeyState;
+        if (pressed) {
+            wlKeyboardKeyState = WlKeyboardKeyState.PRESSED;
+        }
+        else {
+            wlKeyboardKeyState = WlKeyboardKeyState.RELEASED;
+        }
+        return wlKeyboardKeyState;
     }
 
-    private void deliver(final int buttonTime,
-                         final short eventDetail,
-                         final boolean pressed) {
+    private int toLinuxKey(final short eventDetail) {
+        //TODO properly use xkbcommon
+
+        //convert from X keycodes to input.h keycodes
+        return eventDetail - 8;
+    }
+
+    public void deliverButton(@Nonnull final WlSeat wlSeat,
+                              final int buttonTime,
+                              final short eventDetail,
+                              final boolean pressed) {
 
         final WlPointerButtonState wlPointerButtonState = wlPointerButtonState(buttonTime,
                                                                                pressed);
-        final int button = linuxInput(eventDetail);
-        this.wlSeat.getOptionalWlPointer()
-                   .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                                    .button(wlPointer.getResources(),
-                                                            this.compositor.getTime(),
-                                                            button,
-                                                            wlPointerButtonState));
+        final int button = toLinuxButton(eventDetail);
+
+        final WlPointer wlPointer = wlSeat.getWlPointer();
+        wlPointer.getPointerDevice()
+                 .button(wlPointer.getResources(),
+                         button,
+                         wlPointerButtonState);
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -112,7 +136,7 @@ public class X11Seat {
         return wlPointerButtonState;
     }
 
-    private int linuxInput(final int eventDetail) {
+    private int toLinuxButton(final int eventDetail) {
         final int button;
         switch (eventDetail) {
             case 1:
@@ -130,28 +154,30 @@ public class X11Seat {
         return button;
     }
 
-    @Subscribe
-    public void handle(final xcb_key_release_event_t event) {
-
+    public void deliverMotion(final WlSeat wlSeat,
+                              final int x,
+                              final int y) {
+        final WlPointer wlPointer = wlSeat.getWlPointer();
+        wlPointer.getPointerDevice()
+                 .motion(wlPointer.getResources(),
+                         x,
+                         y);
     }
 
-    @Subscribe
-    public void handle(final xcb_button_release_event_t event) {
-        deliver(event.time,
-                event.detail,
-                false);
-    }
+    public String getXKeymap() {
 
-    @Subscribe
-    public void handle(final xcb_motion_notify_event_t event) {
-        final int x = event.event_x;
-        final int y = event.event_y;
-
-        this.wlSeat.getOptionalWlPointer()
-                   .ifPresent(wlPointer -> wlPointer.getPointerDevice()
-                                                    .motion(wlPointer.getResources(),
-                                                            this.compositor.getTime(),
-                                                            x,
-                                                            y));
+        final Pointer xcbConnection = this.x11Output.getXcbConnection();
+        final int     device_id     = this.libxkbcommonx11.xkb_x11_get_core_keyboard_device_id(xcbConnection);
+        if (device_id == -1) {
+            //TODO error
+        }
+        final Pointer keymap = this.libxkbcommonx11.xkb_x11_keymap_new_from_device(this.xkbContext,
+                                                                                   xcbConnection,
+                                                                                   device_id,
+                                                                                   XKB_KEYMAP_COMPILE_NO_FLAGS);
+        //FIXME check and handle nulls
+        return this.libxkbcommon.xkb_keymap_get_as_string(keymap,
+                                                          XKB_KEYMAP_FORMAT_TEXT_V1)
+                                .getString(0);
     }
 }

@@ -17,7 +17,6 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlRegionResource;
@@ -34,7 +33,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -46,18 +44,11 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
     private final Set<WlSurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
     private final WlCallbackFactory wlCallbackFactory;
     private final Surface           surface;
-    private Optional<Listener> destroyListener = Optional.empty();
 
     WlSurface(@Provided final WlCallbackFactory wlCallbackFactory,
               final Surface surface) {
         this.wlCallbackFactory = wlCallbackFactory;
         this.surface = surface;
-    }
-
-    @Nonnull
-    @Override
-    public Set<WlSurfaceResource> getResources() {
-        return this.resources;
     }
 
     @Nonnull
@@ -69,19 +60,19 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                                                                           version,
                                                                           id,
                                                                           this);
-        wlSurfaceResource.addDestroyListener(new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                getSurface().getRole()
-                            .ifPresent(role -> role.afterDestroy(wlSurfaceResource));
-            }
-        });
+        wlSurfaceResource.register(() -> getSurface().getRole()
+                                                     .ifPresent(role -> role.afterDestroy(wlSurfaceResource)));
         return wlSurfaceResource;
     }
 
     public Surface getSurface() {
         return this.surface;
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlSurfaceResource> getResources() {
+        return this.resources;
     }
 
     @Override
@@ -96,12 +87,12 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                        final int x,
                        final int y) {
         if (buffer == null) {
-            detachBuffer();
+            getSurface().detachBuffer();
         }
         else {
-            attachBuffer(buffer,
-                         x,
-                         y);
+            getSurface().attachBuffer(buffer,
+                                      x,
+                                      y);
         }
     }
 
@@ -154,7 +145,6 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
 
     @Override
     public void commit(final WlSurfaceResource requester) {
-        removeBufferDestroyListener();
         final Surface surface = getSurface();
         surface.getRole()
                .ifPresent(role -> role.beforeCommit(requester));
@@ -166,19 +156,6 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                                    final int transform) {
         this.surface.setBufferTransform(getMatrix(resource,
                                                   transform));
-    }
-
-    @Override
-    public void setBufferScale(final WlSurfaceResource resource,
-                               @Nonnegative final int scale) {
-        if (scale > 0) {
-            getSurface().setScale(scale);
-        }
-        else {
-            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
-                               String.format("Invalid scale %d. Scale must be positive integer.",
-                                             scale));
-        }
     }
 
     private Mat4 getMatrix(final WlSurfaceResource resource,
@@ -216,37 +193,16 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
         }
     }
 
-    private void detachBuffer() {
-        removeBufferDestroyListener();
-        getSurface().detachBuffer();
-    }
-
-    private void attachBuffer(final WlBufferResource buffer,
-                              final int x,
-                              final int y) {
-
-        removeBufferDestroyListener();
-        addBufferDestroyListener(buffer);
-
-        getSurface().attachBuffer(buffer,
-                                  x,
-                                  y);
-    }
-
-    private void removeBufferDestroyListener() {
-        this.destroyListener.ifPresent(Listener::remove);
-        this.destroyListener = Optional.empty();
-    }
-
-    private void addBufferDestroyListener(final WlBufferResource buffer) {
-        final Listener listener = new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                WlSurface.this.detachBuffer();
-            }
-        };
-        this.destroyListener = Optional.of(listener);
-        buffer.addDestroyListener(listener);
+    @Override
+    public void setBufferScale(final WlSurfaceResource resource,
+                               @Nonnegative final int scale) {
+        if (scale > 0) {
+            getSurface().setScale(scale);
+        }
+        else {
+            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
+                               String.format("Invalid scale %d. Scale must be positive integer.",
+                                             scale));
+        }
     }
 }

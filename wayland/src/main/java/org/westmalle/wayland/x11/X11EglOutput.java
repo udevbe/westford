@@ -15,7 +15,7 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Pointer;
 import org.westmalle.wayland.egl.EglOutput;
-import org.westmalle.wayland.nativ.LibEGL;
+import org.westmalle.wayland.nativ.libEGL.LibEGL;
 
 import javax.annotation.Nonnull;
 

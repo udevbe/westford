@@ -55,14 +55,14 @@ public class CompositorTest {
         final WlOutput wlOutput0 = mock(WlOutput.class);
         final Output   output0   = mock(Output.class);
         when(wlOutput0.getOutput()).thenReturn(output0);
-        when(output0.getImplementation()).thenReturn(outputImpl0);
+        when(output0.getPlatformImplementation()).thenReturn(outputImpl0);
         this.compositor.getWlOutputs()
                        .add(wlOutput0);
 
         final WlOutput wlOutput1 = mock(WlOutput.class);
         final Output   output1   = mock(Output.class);
         when(wlOutput1.getOutput()).thenReturn(output1);
-        when(output1.getImplementation()).thenReturn(outputImpl1);
+        when(output1.getPlatformImplementation()).thenReturn(outputImpl1);
         this.compositor.getWlOutputs()
                        .add(wlOutput1);
 

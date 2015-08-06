@@ -15,8 +15,8 @@ package org.westmalle.wayland.protocol;
 
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlShellResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -173,11 +173,11 @@ public class WlShellTest {
                                    id);
         verify(surface).setRole(shellSurface);
 
-        final ArgumentCaptor<Listener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(wlSurfaceResource).addDestroyListener(destroyListenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlSurfaceResource).register(destroyListenerArgumentCaptor.capture());
 
         //and when
-        final Listener destroyListener = destroyListenerArgumentCaptor.getValue();
+        final DestroyListener destroyListener = destroyListenerArgumentCaptor.getValue();
         destroyListener.handle();
         //then
         verify(wlShellSurfaceResource).destroy();

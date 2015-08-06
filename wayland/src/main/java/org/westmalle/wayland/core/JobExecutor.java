@@ -19,7 +19,7 @@ import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.nativ.Libc;
+import org.westmalle.wayland.nativ.libc.Libc;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

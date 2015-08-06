@@ -19,7 +19,6 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlCompositorRequestsV3;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -78,15 +77,11 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         final WlSurfaceResource surfaceResource = wlSurface.add(compositorResource.getClient(),
                                                                 compositorResource.getVersion(),
                                                                 id);
-        surfaceResource.addDestroyListener(new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                WlCompositor.this.compositor.getSurfacesStack()
-                                            .remove(surfaceResource);
-                surface.markDestroyed();
-                WlCompositor.this.compositor.requestRender();
-            }
+        surfaceResource.register(() -> {
+            WlCompositor.this.compositor.getSurfacesStack()
+                                        .remove(surfaceResource);
+            surface.markDestroyed();
+            WlCompositor.this.compositor.requestRender();
         });
 
         this.compositor.getSurfacesStack()
@@ -104,12 +99,6 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     @Nonnull
     @Override
-    public Set<WlCompositorResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlCompositorResource create(@Nonnull final Client client,
                                        @Nonnegative final int version,
                                        final int id) {
@@ -117,6 +106,12 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                                         version,
                                         id,
                                         this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlCompositorResource> getResources() {
+        return this.resources;
     }
 
     public Compositor getCompositor() {

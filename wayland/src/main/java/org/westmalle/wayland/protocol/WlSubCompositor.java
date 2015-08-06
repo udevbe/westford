@@ -18,7 +18,6 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlSubcompositorRequests;
 import org.freedesktop.wayland.server.WlSubcompositorResource;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
@@ -62,19 +61,7 @@ public class WlSubCompositor extends Global<WlSubcompositorResource> implements 
                                                                                   .add(requester.getClient(),
                                                                                        requester.getVersion(),
                                                                                        id);
-        surface.addDestroyListener(new Listener() {
-            @Override
-            public void handle() {
-                remove();
-                wlSubsurfaceResource.destroy();
-            }
-        });
-    }
-
-    @Nonnull
-    @Override
-    public Set<WlSubcompositorResource> getResources() {
-        return this.resources;
+        surface.register(wlSubsurfaceResource::destroy);
     }
 
     @Nonnull
@@ -86,6 +73,12 @@ public class WlSubCompositor extends Global<WlSubcompositorResource> implements 
                                            version,
                                            id,
                                            this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlSubcompositorResource> getResources() {
+        return this.resources;
     }
 
     @Override

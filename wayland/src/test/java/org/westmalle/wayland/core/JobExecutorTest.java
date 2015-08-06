@@ -26,7 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.nativ.Libc;
+import org.westmalle.wayland.nativ.libc.Libc;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.any;

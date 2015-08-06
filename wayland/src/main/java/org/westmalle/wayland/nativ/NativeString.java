@@ -13,7 +13,6 @@ package org.westmalle.wayland.nativ;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
@@ -33,8 +32,8 @@ public class NativeString implements CharSequence, Comparable {
 
     static final String WIDE_STRING = "--WIDE-STRING--";
 
-    private final Pointer pointer;
-    private final String  encoding;
+    private final Memory pointer;
+    private final String encoding;
 
     public NativeString(final String string) {
         this(string,
@@ -90,6 +89,14 @@ public class NativeString implements CharSequence, Comparable {
         return toString().hashCode();
     }
 
+    @Nonnull
+    public String toString() {
+        final boolean wide = Objects.equals(this.encoding,
+                                            WIDE_STRING);
+        return wide ? this.pointer.getWideString(0) : this.pointer.getString(0,
+                                                                             this.encoding);
+    }
+
     public boolean equals(final Object other) {
         return other instanceof CharSequence && compareTo(other) == 0;
     }
@@ -99,15 +106,7 @@ public class NativeString implements CharSequence, Comparable {
         return toString().compareTo(other.toString());
     }
 
-    @Nonnull
-    public String toString() {
-        final boolean wide = Objects.equals(this.encoding,
-                                            WIDE_STRING);
-        return wide ? this.pointer.getWideString(0) : this.pointer.getString(0,
-                                                                             this.encoding);
-    }
-
-    public Pointer getPointer() {
+    public Memory getPointer() {
         return this.pointer;
     }
 

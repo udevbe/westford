@@ -17,7 +17,7 @@ import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
-import org.westmalle.wayland.nativ.LibGLESv2;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -58,7 +58,7 @@ public class EglGles2RenderEngineTest {
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getMode()).thenReturn(mode);
-        when(output.getImplementation()).thenReturn(hasEglOutput);
+        when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
         when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
         when(mode.getWidth()).thenReturn(width);
         when(mode.getHeight()).thenReturn(height);
@@ -250,7 +250,7 @@ public class EglGles2RenderEngineTest {
         final EglOutput    eglOutput    = mock(EglOutput.class);
 
         when(wlOutput.getOutput()).thenReturn(output);
-        when(output.getImplementation()).thenReturn(hasEglOutput);
+        when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
         when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
         //when
         this.eglGles2RenderEngine.end(wlOutput);

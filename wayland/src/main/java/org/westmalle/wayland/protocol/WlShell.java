@@ -19,7 +19,6 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
-import org.freedesktop.wayland.server.Listener;
 import org.freedesktop.wayland.server.WlShellRequests;
 import org.freedesktop.wayland.server.WlShellResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
@@ -85,21 +84,8 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                                                                                      id);
             this.activeShellSurfaceRoles.add(shellSurface);
 
-            wlShellSurfaceResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    remove();
-                    WlShell.this.activeShellSurfaceRoles.remove(shellSurface);
-                }
-            });
-
-            wlSurfaceResource.addDestroyListener(new Listener() {
-                @Override
-                public void handle() {
-                    remove();
-                    wlShellSurfaceResource.destroy();
-                }
-            });
+            wlShellSurfaceResource.register(() -> this.activeShellSurfaceRoles.remove(shellSurface));
+            wlSurfaceResource.register(wlShellSurfaceResource::destroy);
 
             shellSurface.pong(wlShellSurfaceResource,
                               pingSerial);
@@ -122,12 +108,6 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
     @Nonnull
     @Override
-    public Set<WlShellResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlShellResource create(@Nonnull final Client client,
                                   @Nonnegative final int version,
                                   final int id) {
@@ -135,5 +115,11 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                                    version,
                                    id,
                                    this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlShellResource> getResources() {
+        return this.resources;
     }
 }

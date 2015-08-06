@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.nativ.LibEGL;
+import org.westmalle.wayland.nativ.libEGL.LibEGL;
 
 import static org.mockito.Mockito.verify;
 

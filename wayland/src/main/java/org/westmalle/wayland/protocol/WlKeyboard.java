@@ -18,7 +18,7 @@ import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlKeyboardRequestsV4;
 import org.freedesktop.wayland.server.WlKeyboardResource;
-import org.westmalle.wayland.core.Keyboard;
+import org.westmalle.wayland.core.KeyboardDevice;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -29,21 +29,15 @@ import java.util.WeakHashMap;
 public class WlKeyboard implements WlKeyboardRequestsV4, ProtocolObject<WlKeyboardResource> {
 
     private final Set<WlKeyboardResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
-    private final Keyboard keyboard;
+    private final KeyboardDevice keyboardDevice;
 
-    WlKeyboard(final Keyboard keyboard) {
-        this.keyboard = keyboard;
+    WlKeyboard(final KeyboardDevice keyboardDevice) {
+        this.keyboardDevice = keyboardDevice;
     }
 
     @Override
     public void release(final WlKeyboardResource resource) {
         resource.destroy();
-    }
-
-    @Nonnull
-    @Override
-    public Set<WlKeyboardResource> getResources() {
-        return this.resources;
     }
 
     @Nonnull
@@ -57,7 +51,13 @@ public class WlKeyboard implements WlKeyboardRequestsV4, ProtocolObject<WlKeyboa
                                       this);
     }
 
-    public Keyboard getKeyboard() {
-        return this.keyboard;
+    @Nonnull
+    @Override
+    public Set<WlKeyboardResource> getResources() {
+        return this.resources;
+    }
+
+    public KeyboardDevice getKeyboardDevice() {
+        return this.keyboardDevice;
     }
 }

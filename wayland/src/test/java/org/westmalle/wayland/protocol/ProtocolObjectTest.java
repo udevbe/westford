@@ -1,7 +1,7 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
@@ -13,8 +13,6 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
@@ -32,44 +30,6 @@ public class ProtocolObjectTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
-    }
-
-    @Test
-    public void testGetResourceSingleResource() throws Exception {
-        //given
-        final Client client = mock(Client.class);
-        //when
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
-        final Resource<?> resource = protocolObject.add(client,
-                                                        1,
-                                                        1);
-        //then
-        assertThat(protocolObject.getResource()).isEqualTo(Optional.of(resource));
-    }
-
-    @Test
-    public void testGetResourceNoResource() throws Exception {
-        //given
-        //when
-        //then
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
-        assertThat(protocolObject.getResource()).isEqualTo(Optional.empty());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testGetResourceMultipleResourceResource() throws Exception {
-        //given
-        final Client                      client         = mock(Client.class);
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
-        protocolObject.add(client,
-                           1,
-                           1);
-        protocolObject.add(client,
-                           1,
-                           2);
-        //when
-        protocolObject.getResource();
-        //then
     }
 
     @Test
@@ -127,11 +87,11 @@ public class ProtocolObjectTest {
                                                         1,
                                                         1);
         //then
-        final ArgumentCaptor<Listener> listenerArgumentCaptor = ArgumentCaptor.forClass(Listener.class);
-        verify(resource).addDestroyListener(listenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(resource).register(listenerArgumentCaptor.capture());
 
         //and when
-        final Listener listener = listenerArgumentCaptor.getValue();
+        final DestroyListener listener = listenerArgumentCaptor.getValue();
         listener.handle();
 
         //then

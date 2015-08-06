@@ -41,12 +41,6 @@ public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResourc
 
     @Nonnull
     @Override
-    public Set<WlTouchResource> getResources() {
-        return this.resources;
-    }
-
-    @Nonnull
-    @Override
     public WlTouchResource create(@Nonnull final Client client,
                                   @Nonnegative final int version,
                                   final int id) {
@@ -54,5 +48,11 @@ public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResourc
                                    version,
                                    id,
                                    this);
+    }
+
+    @Nonnull
+    @Override
+    public Set<WlTouchResource> getResources() {
+        return this.resources;
     }
 }

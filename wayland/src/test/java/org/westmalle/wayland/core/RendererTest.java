@@ -81,7 +81,7 @@ public class RendererTest {
         final Output   output   = mock(Output.class);
         when(wlOutput.getOutput()).thenReturn(output);
         final Object outputImpl = mock(Object.class);
-        when(output.getImplementation()).thenReturn(outputImpl);
+        when(output.getPlatformImplementation()).thenReturn(outputImpl);
         //when
         this.renderer.beginRender(wlOutput);
         //then
@@ -94,7 +94,7 @@ public class RendererTest {
         final WlOutput wlOutput   = mock(WlOutput.class);
         final Output   output     = mock(Output.class);
         final Object   outputImpl = mock(Object.class);
-        when(output.getImplementation()).thenReturn(outputImpl);
+        when(output.getPlatformImplementation()).thenReturn(outputImpl);
         //when
         this.renderer.endRender(wlOutput);
         //then

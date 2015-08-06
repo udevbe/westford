@@ -13,14 +13,14 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.OutputFactory;
-import org.westmalle.wayland.nativ.LibX11;
-import org.westmalle.wayland.nativ.LibX11xcb;
-import org.westmalle.wayland.nativ.Libc;
-import org.westmalle.wayland.nativ.Libxcb;
-import org.westmalle.wayland.nativ.xcb_intern_atom_cookie_t;
-import org.westmalle.wayland.nativ.xcb_intern_atom_reply_t;
-import org.westmalle.wayland.nativ.xcb_screen_iterator_t;
-import org.westmalle.wayland.nativ.xcb_screen_t;
+import org.westmalle.wayland.nativ.libX11.LibX11;
+import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
+import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_cookie_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
 import static org.mockito.Mockito.any;
@@ -33,8 +33,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.LibX11xcb.XCBOwnsEventQueue;
-import static org.westmalle.wayland.nativ.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
+import static org.westmalle.wayland.nativ.libX11xcb.LibX11xcb.XCBOwnsEventQueue;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WlOutputFactory.class,

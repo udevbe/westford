@@ -3,9 +3,9 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.sun.jna.ptr.IntByReference;
-import org.westmalle.wayland.nativ.Libpixman1;
-import org.westmalle.wayland.nativ.pixman_box32;
-import org.westmalle.wayland.nativ.pixman_region32;
+import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
+import org.westmalle.wayland.nativ.libpixman1.pixman_box32;
+import org.westmalle.wayland.nativ.libpixman1.pixman_region32;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -25,22 +25,6 @@ public class FiniteRegion implements Region {
     @Override
     public int hashCode() {
         return Objects.hashCode(asList());
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Region)) {
-            return false;
-        }
-
-        final Region region = (Region) o;
-
-        return (region.asList()
-                      .containsAll(asList())
-                && asList().containsAll(region.asList()));
     }
 
     @Nonnull
@@ -67,6 +51,27 @@ public class FiniteRegion implements Region {
                                        height));
         }
         return boxes;
+    }
+
+    @Nonnull
+    public pixman_region32 getPixmanRegion32() {
+        return this.pixman_region32;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Region)) {
+            return false;
+        }
+
+        final Region region = (Region) o;
+
+        return (region.asList()
+                      .containsAll(asList())
+                && asList().containsAll(region.asList()));
     }
 
     @Nonnull
@@ -122,10 +127,5 @@ public class FiniteRegion implements Region {
                                                               point.getX(),
                                                               point.getY(),
                                                               null) != 0;
-    }
-
-    @Nonnull
-    public pixman_region32 getPixmanRegion32() {
-        return this.pixman_region32;
     }
 }
