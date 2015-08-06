@@ -14,7 +14,6 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
@@ -26,7 +25,6 @@ import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -138,14 +136,6 @@ public class WlSurfaceTest {
         verify(this.surface).attachBuffer(wlBufferResource,
                                           x,
                                           y);
-        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlBufferResource,
-               times(1)).register(listenerArgumentCaptor.capture());
-        final DestroyListener destroyListener = listenerArgumentCaptor.getValue();
-        //and when
-        destroyListener.handle();
-        //then
-        this.surface.detachBuffer();
     }
 
     @Test
@@ -175,10 +165,6 @@ public class WlSurfaceTest {
         verify(this.surface).attachBuffer(wlBufferResource1,
                                           x,
                                           y);
-
-        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor0 = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlBufferResource0,
-               times(1)).register(listenerArgumentCaptor0.capture());
     }
 
     @Test
@@ -223,10 +209,6 @@ public class WlSurfaceTest {
                                       y);
         verify(this.surface,
                times(1)).detachBuffer();
-
-        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlBufferResource,
-               times(1)).register(listenerArgumentCaptor.capture());
     }
 
     @Test
@@ -382,8 +364,6 @@ public class WlSurfaceTest {
         //then
         verify(role).beforeCommit(wlSurfaceResource);
         verify(this.surface).commit();
-        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlBufferResource).register(listenerArgumentCaptor.capture());
     }
 
     @Test
