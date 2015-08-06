@@ -15,9 +15,7 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
-import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
-import org.westmalle.wayland.core.Keymap;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
@@ -26,7 +24,6 @@ import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CURSOR_NONE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
@@ -167,7 +164,7 @@ public class X11Seat {
                          y);
     }
 
-    public void updateKeymap(final WlSeat wlSeat) {
+    public String getXKeymap() {
 
         final Pointer xcbConnection = this.x11Output.getXcbConnection();
         final int     device_id     = this.libxkbcommonx11.xkb_x11_get_core_keyboard_device_id(xcbConnection);
@@ -178,15 +175,9 @@ public class X11Seat {
                                                                                    xcbConnection,
                                                                                    device_id,
                                                                                    XKB_KEYMAP_COMPILE_NO_FLAGS);
-        //FIXME check and handle null
-        final Pointer keymapAsStringPointer = this.libxkbcommon.xkb_keymap_get_as_string(keymap,
-                                                                                         XKB_KEYMAP_FORMAT_TEXT_V1);
-
-        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
-        wlKeyboard.getKeyboardDevice()
-                  .updateKeymap(wlKeyboard.getResources(),
-                                Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
-                                                          //FIXME check and handle null
-                                                          keymapAsStringPointer.getString(0))));
+        //FIXME check and handle nulls
+        return this.libxkbcommon.xkb_keymap_get_as_string(keymap,
+                                                          XKB_KEYMAP_FORMAT_TEXT_V1)
+                                .getString(0);
     }
 }

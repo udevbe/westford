@@ -14,9 +14,11 @@
 package org.westmalle.wayland.x11;
 
 import com.google.common.eventbus.Subscribe;
+import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
+import org.westmalle.wayland.core.Keymap;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.core.SeatFactory;
 import org.westmalle.wayland.core.events.PointerFocus;
@@ -34,6 +36,7 @@ import org.westmalle.wayland.protocol.WlTouchFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.EnumSet;
+import java.util.Optional;
 
 public class X11SeatFactory {
 
@@ -62,6 +65,7 @@ public class X11SeatFactory {
     @Nonnull
     private final KeyboardDeviceFactory keyboardDeviceFactory;
 
+    //TODO this class has too many dependencies. See if we can lower this.
     @Inject
     X11SeatFactory(@Nonnull final Libxcb libxcb,
                    @Nonnull final Libxkbcommon libxkbcommon,
@@ -109,9 +113,20 @@ public class X11SeatFactory {
 
         enableInputDevices(wlSeat);
         addKeyboardFocus(wlSeat);
-        x11Seat.updateKeymap(wlSeat);
+        updateKeymap(x11Seat,
+                     wlSeat);
 
         return wlSeat;
+    }
+
+    private void updateKeymap(final X11Seat x11Seat,
+                              final WlSeat wlSeat) {
+        final String     xKeymap    = x11Seat.getXKeymap();
+        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
+        wlKeyboard.getKeyboardDevice()
+                  .updateKeymap(wlKeyboard.getResources(),
+                                Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
+                                                          xKeymap)));
     }
 
     private void enableInputDevices(final WlSeat wlSeat) {
