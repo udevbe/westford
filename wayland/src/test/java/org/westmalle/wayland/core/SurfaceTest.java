@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
@@ -21,6 +22,7 @@ import org.freedesktop.wayland.server.WlRegionResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -31,6 +33,7 @@ import org.westmalle.wayland.protocol.WlRegion;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -201,7 +204,28 @@ public class SurfaceTest {
                                                               .width(123)
                                                               .height(456)
                                                               .build());
+    }
 
+    @Test
+    public void testAttachDestroyBuffer(){
+        //given
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final Integer          relX0   = -10;
+        final Integer          relY0   = 200;
+
+        //when
+        this.surface.attachBuffer(wlBufferResource,
+                                  relX0,
+                                  relY0);
+        //then
+        final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlBufferResource,
+               times(1)).register(listenerArgumentCaptor.capture());
+        final DestroyListener destroyListener = listenerArgumentCaptor.getValue();
+        //and when
+        destroyListener.handle();
+        //then
+        this.surface.detachBuffer();
     }
 
     @Test
