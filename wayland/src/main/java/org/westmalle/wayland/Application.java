@@ -8,7 +8,6 @@ import org.westmalle.wayland.core.ShellService;
 import org.westmalle.wayland.egl.EglComponent;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
 import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
-import org.westmalle.wayland.protocol.WlSeatFactory;
 import org.westmalle.wayland.protocol.WlShellFactory;
 import org.westmalle.wayland.x11.X11Component;
 
@@ -22,10 +21,8 @@ public interface Application {
 
     CompositorFactory compositorFactory();
 
-    //protocol
+    //core protocol
     WlCompositorFactory wlCompositorFactory();
-
-    WlSeatFactory wlSeatFactory();
 
     WlDataDeviceManagerFactory wlDataDeviceManagerFactory();
 
