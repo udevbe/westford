@@ -93,7 +93,7 @@ public class WlSeatTest {
                                                                  any(),
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
-        //FIXME
+
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
                                          this.seat,
@@ -124,7 +124,6 @@ public class WlSeatTest {
                                 version,
                                 id)).thenReturn(wlPointerResource);
 
-        //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
                                          this.seat,
@@ -169,7 +168,6 @@ public class WlSeatTest {
                                  id)).thenReturn(wlKeyboardResource);
         when(this.wlKeyboard.getKeyboardDevice()).thenReturn(keyboardDevice);
 
-        //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
                                          this.seat,
@@ -214,7 +212,6 @@ public class WlSeatTest {
                               version,
                               id)).thenReturn(wlTouchResource);
 
-        //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
                                          this.seat,
@@ -245,7 +242,6 @@ public class WlSeatTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
                                          this.seat,
