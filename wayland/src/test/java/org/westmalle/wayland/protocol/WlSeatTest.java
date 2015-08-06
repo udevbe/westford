@@ -23,7 +23,6 @@ import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlTouchResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
-import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.freedesktop.wayland.util.InterfaceMeta;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +32,10 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.core.KeyboardDevice;
+import org.westmalle.wayland.core.Seat;
+
+import java.util.Collections;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -53,6 +56,14 @@ public class WlSeatTest {
     private Display      display;
     @Mock
     private WlDataDevice wlDataDevice;
+    @Mock
+    private Seat         seat;
+    @Mock
+    private WlPointer    wlPointer;
+    @Mock
+    private WlKeyboard   wlKeyboard;
+    @Mock
+    private WlTouch      wlTouch;
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
@@ -85,10 +96,10 @@ public class WlSeatTest {
         //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
-                                         null,
-                                         null,
-                                         null,
-                                         null);
+                                         this.seat,
+                                         this.wlPointer,
+                                         this.wlKeyboard,
+                                         this.wlTouch);
         //when
         final WlSeatResource wlSeatResource = wlSeat.onBindClient(mock(Client.class),
                                                                   1,
@@ -109,28 +120,26 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
 
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
-        final WlPointer         wlPointer         = mock(WlPointer.class);
-        when(wlPointer.add(client,
-                           version,
-                           id)).thenReturn(wlPointerResource);
+        when(this.wlPointer.add(client,
+                                version,
+                                id)).thenReturn(wlPointerResource);
 
         //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
-                                         null,
-                                         wlPointer,
-                                         null,
-                                         null);
+                                         this.seat,
+                                         this.wlPointer,
+                                         this.wlKeyboard,
+                                         this.wlTouch);
         wlSeat.getResources()
               .add(wlSeatResource);
         //when
         wlSeat.getPointer(wlSeatResource,
                           id);
         //then
-        verify(wlSeatResource).capabilities(WlSeatCapability.POINTER.getValue());
-        verify(wlPointer).add(client,
-                              version,
-                              id);
+        verify(this.wlPointer).add(client,
+                                   version,
+                                   id);
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlPointerResource).register(listenerArgumentCaptor.capture());
 
@@ -152,30 +161,32 @@ public class WlSeatTest {
         final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
         when(wlSeatResource.getClient()).thenReturn(client);
         when(wlSeatResource.getVersion()).thenReturn(version);
+        final KeyboardDevice keyboardDevice = mock(KeyboardDevice.class);
 
         final WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
-        final WlKeyboard         wlKeyboard         = mock(WlKeyboard.class);
-        when(wlKeyboard.add(client,
-                            version,
-                            id)).thenReturn(wlKeyboardResource);
+        when(this.wlKeyboard.add(client,
+                                 version,
+                                 id)).thenReturn(wlKeyboardResource);
+        when(this.wlKeyboard.getKeyboardDevice()).thenReturn(keyboardDevice);
 
         //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
-                                         null,
-                                         null,
-                                         wlKeyboard,
-                                         null);
+                                         this.seat,
+                                         this.wlPointer,
+                                         this.wlKeyboard,
+                                         this.wlTouch);
         wlSeat.getResources()
               .add(wlSeatResource);
         //when
         wlSeat.getKeyboard(wlSeatResource,
                            id);
         //then
-        verify(wlSeatResource).capabilities(WlSeatCapability.KEYBOARD.getValue());
-        verify(wlKeyboard).add(client,
-                               version,
-                               id);
+        verify(this.wlKeyboard).add(client,
+                                    version,
+                                    id);
+        verify(keyboardDevice).updateKeymap(Collections.singleton(wlKeyboardResource),
+                                            keyboardDevice.getKeymap());
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlKeyboardResource).register(listenerArgumentCaptor.capture());
 
@@ -199,28 +210,26 @@ public class WlSeatTest {
         when(wlSeatResource.getVersion()).thenReturn(version);
 
         final WlTouchResource wlTouchResource = mock(WlTouchResource.class);
-        final WlTouch         wlTouch         = mock(WlTouch.class);
-        when(wlTouch.add(client,
-                         version,
-                         id)).thenReturn(wlTouchResource);
+        when(this.wlTouch.add(client,
+                              version,
+                              id)).thenReturn(wlTouchResource);
 
         //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
-                                         null,
-                                         null,
-                                         null,
-                                         wlTouch);
+                                         this.seat,
+                                         this.wlPointer,
+                                         this.wlKeyboard,
+                                         this.wlTouch);
         wlSeat.getResources()
               .add(wlSeatResource);
         //when
         wlSeat.getTouch(wlSeatResource,
                         id);
         //then
-        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue());
-        verify(wlTouch).add(client,
-                            version,
-                            id);
+        verify(this.wlTouch).add(client,
+                                 version,
+                                 id);
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlTouchResource).register(listenerArgumentCaptor.capture());
 
@@ -239,10 +248,10 @@ public class WlSeatTest {
         //FIXME
         final WlSeat wlSeat = new WlSeat(this.display,
                                          this.wlDataDevice,
-                                         null,
-                                         null,
-                                         null,
-                                         null);
+                                         this.seat,
+                                         this.wlPointer,
+                                         this.wlKeyboard,
+                                         this.wlTouch);
         final Client client  = mock(Client.class);
         final int    version = 2;
         final int    id      = 7;
@@ -253,115 +262,5 @@ public class WlSeatTest {
         //then
         assertThat(wlSeatResource).isNotNull();
         assertThat(wlSeatResource.getImplementation()).isSameAs(wlSeat);
-    }
-
-    @Test
-    public void testSetMultipleInputDevices() {
-        //given
-        final int            version        = 3;
-        final Client         client         = mock(Client.class);
-        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
-        when(wlSeatResource.getClient()).thenReturn(client);
-        when(wlSeatResource.getVersion()).thenReturn(version);
-        final WlTouch    wlTouch    = mock(WlTouch.class);
-        final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
-        final WlPointer  wlPointer  = mock(WlPointer.class);
-
-        //FIXME
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         null,
-                                         wlPointer,
-                                         wlKeyboard,
-                                         wlTouch);
-        wlSeat.getResources()
-              .add(wlSeatResource);
-        //when
-        //then
-        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue());
-        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue() |
-                                            WlSeatCapability.KEYBOARD.getValue());
-        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue() |
-                                            WlSeatCapability.KEYBOARD.getValue() |
-                                            WlSeatCapability.POINTER.getValue());
-    }
-
-    @Test
-    public void testRemoveWlPointer() throws Exception {
-        //given
-        final int            version        = 3;
-        final Client         client         = mock(Client.class);
-        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
-        when(wlSeatResource.getClient()).thenReturn(client);
-        when(wlSeatResource.getVersion()).thenReturn(version);
-        final WlPointer wlPointer = mock(WlPointer.class);
-
-        //FIXME
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         null,
-                                         null,
-                                         null,
-                                         null);
-        wlSeat.getResources()
-              .add(wlSeatResource);
-
-        //when
-
-        //then
-        verify(wlSeatResource).capabilities(WlSeatCapability.POINTER.getValue());
-        verify(wlSeatResource).capabilities(0);
-    }
-
-    @Test
-    public void testRemoveWlKeyboard() throws Exception {
-        //given
-        final int            version        = 3;
-        final Client         client         = mock(Client.class);
-        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
-        when(wlSeatResource.getClient()).thenReturn(client);
-        when(wlSeatResource.getVersion()).thenReturn(version);
-        final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
-
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         null,
-                                         null,
-                                         wlKeyboard,
-                                         null);
-        wlSeat.getResources()
-              .add(wlSeatResource);
-
-        //when
-
-        //then
-        verify(wlSeatResource).capabilities(WlSeatCapability.KEYBOARD.getValue());
-        verify(wlSeatResource).capabilities(0);
-    }
-
-    @Test
-    public void testRemoveWlTouch() throws Exception {
-        //given
-        final int            version        = 3;
-        final Client         client         = mock(Client.class);
-        final WlSeatResource wlSeatResource = mock(WlSeatResource.class);
-        when(wlSeatResource.getClient()).thenReturn(client);
-        when(wlSeatResource.getVersion()).thenReturn(version);
-        final WlTouch wlTouch = mock(WlTouch.class);
-
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         null,
-                                         null,
-                                         null,
-                                         wlTouch);
-        wlSeat.getResources()
-              .add(wlSeatResource);
-
-        //when
-
-        //then
-        verify(wlSeatResource).capabilities(WlSeatCapability.TOUCH.getValue());
-        verify(wlSeatResource).capabilities(0);
     }
 }

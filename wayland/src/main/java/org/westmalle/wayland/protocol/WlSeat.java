@@ -25,6 +25,7 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatRequestsV4;
 import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlTouchResource;
+import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.Seat;
 
 import javax.annotation.Nonnegative;
@@ -111,16 +112,17 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     public void getKeyboard(final WlSeatResource wlSeatResource,
                             final int id) {
         //FIXME protocol requires to always generate keyboard resource
-        final WlKeyboardResource wlKeyboardResource = getWlKeyboard().add(wlSeatResource.getClient(),
-                                                                          wlSeatResource.getVersion(),
-                                                                          id);
+        final WlKeyboard wlKeyboard = getWlKeyboard();
+        final WlKeyboardResource wlKeyboardResource = wlKeyboard.add(wlSeatResource.getClient(),
+                                                                     wlSeatResource.getVersion(),
+                                                                     id);
         this.wlKeyboardResources.put(wlSeatResource,
                                      wlKeyboardResource);
         wlKeyboardResource.register(() -> WlSeat.this.wlKeyboardResources.remove(wlSeatResource));
-        getWlKeyboard().getKeyboardDevice()
-                       .updateKeymap(Collections.singleton(wlKeyboardResource),
-                                     getWlKeyboard().getKeyboardDevice()
-                                                    .getKeymap());
+
+        final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
+        keyboardDevice.updateKeymap(Collections.singleton(wlKeyboardResource),
+                                    keyboardDevice.getKeymap());
     }
 
     @Nonnull
