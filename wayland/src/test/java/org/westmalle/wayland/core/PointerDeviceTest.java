@@ -99,6 +99,9 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,
+                                                   time1,
+                                                   time2);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -113,7 +116,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
@@ -152,7 +155,7 @@ public class PointerDeviceTest {
         when(surface1.getSize()).thenReturn(size1);
         final SurfaceState surfaceState1 = mock(SurfaceState.class);
         when(surface1.getState()).thenReturn(surfaceState1);
-        final WlBufferResource wlBufferResource1  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
         when(surfaceState1.getBuffer()).thenReturn(Optional.of(wlBufferResource1));
         final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
         final WlRegion         wlRegion1         = mock(WlRegion.class);
@@ -209,6 +212,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
+        //TODO bug has been fixed. Don't use argument captor any more
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
@@ -287,6 +291,8 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,
+                                                   time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -299,8 +305,8 @@ public class PointerDeviceTest {
         when(wlSurface0.getSurface()).thenReturn(surface0);
         final Rectangle size0 = mock(Rectangle.class);
         when(surface0.getSize()).thenReturn(size0);
-        final SurfaceState surfaceState0 = mock(SurfaceState.class);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final SurfaceState     surfaceState0     = mock(SurfaceState.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         when(surface0.getState()).thenReturn(surfaceState0);
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
@@ -340,7 +346,7 @@ public class PointerDeviceTest {
         when(surface1.getSize()).thenReturn(size1);
         final SurfaceState surfaceState1 = mock(SurfaceState.class);
         when(surface1.getState()).thenReturn(surfaceState1);
-        final WlBufferResource wlBufferResource1  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
         when(surfaceState1.getBuffer()).thenReturn(Optional.of(wlBufferResource1));
         final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
         final WlRegion         wlRegion1         = mock(WlRegion.class);
@@ -395,6 +401,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
+        //TODO bug has been fixed. Don't use argument captor any more
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
@@ -480,7 +487,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
@@ -530,6 +537,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
+        //TODO bug has been fixed. Don't use argument captor any more
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
@@ -597,7 +605,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
@@ -648,6 +656,7 @@ public class PointerDeviceTest {
                                   y1);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
+        //TODO bug has been fixed. Don't use argument captor any more
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
@@ -716,7 +725,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
@@ -776,6 +785,7 @@ public class PointerDeviceTest {
                                   WlPointerButtonState.RELEASED);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
+        //TODO bug has been fixed. Don't use argument captor any more
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
@@ -833,6 +843,9 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.compositor.getTime()).thenReturn(time0,
+                                                   time1,
+                                                   time2);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -847,7 +860,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
@@ -903,6 +916,7 @@ public class PointerDeviceTest {
                                   WlPointerButtonState.RELEASED);
         //then
         //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
+        //TODO bug has been fixed. Don't use argument captor any more
         final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
         final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
 
@@ -974,7 +988,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
@@ -1044,7 +1058,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
@@ -1068,7 +1082,7 @@ public class PointerDeviceTest {
         when(surface1.getSize()).thenReturn(size1);
         final SurfaceState surfaceState1 = mock(SurfaceState.class);
         when(surface1.getState()).thenReturn(surfaceState1);
-        final WlBufferResource wlBufferResource1  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
         when(surfaceState1.getBuffer()).thenReturn(Optional.of(wlBufferResource1));
         final WlRegionResource wlRegionResource1 = mock(WlRegionResource.class);
         final WlRegion         wlRegion1         = mock(WlRegion.class);
@@ -1148,7 +1162,7 @@ public class PointerDeviceTest {
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0  = mock(WlBufferResource.class);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
         when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
         final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
         final WlRegion         wlRegion0         = mock(WlRegion.class);
