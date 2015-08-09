@@ -211,43 +211,22 @@ public class PointerDeviceTest {
                                   x1,
                                   y1);
         //then
-        //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        //TODO bug has been fixed. Don't use argument captor any more
-        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
-
         verify(wlPointerResource0).enter(eq(this.display.nextSerial()),
                                          eq(wlSurfaceResource0),
-                                         fixedArgumentCaptor.capture(),
-                                         fixedArgumentCaptor.capture());
-
-        assertThat(values.get(0)
-                         .asInt()).isEqualTo(2);
-        assertThat(values.get(1)
-                         .asInt()).isEqualTo(3);
+                                         eq(Fixed.create(2)),
+                                         eq(Fixed.create(3)));
 
         verify(wlPointerResource0).motion(eq(time0),
-                                          fixedArgumentCaptor.capture(),
-                                          fixedArgumentCaptor.capture());
+                                          eq(Fixed.create(2)),
+                                          eq(Fixed.create(3)));
         verify(wlPointerResource0).motion(eq(time2),
-                                          fixedArgumentCaptor.capture(),
-                                          fixedArgumentCaptor.capture());
-        assertThat(values.get(2)
-                         .asInt()).isEqualTo(2);
-        assertThat(values.get(3)
-                         .asInt()).isEqualTo(3);
-        assertThat(values.get(4)
-                         .asInt()).isEqualTo(5);
-        assertThat(values.get(5)
-                         .asInt()).isEqualTo(8);
+                                          eq(Fixed.create(5)),
+                                          eq(Fixed.create(8)));
 
         verify(wlPointerResource0).button(serial,
                                           time1,
                                           button0,
                                           WlPointerButtonState.PRESSED.getValue());
-
-        verify(wlPointerResource0).leave(this.display.nextSerial(),
-                                         wlSurfaceResource0);
 
         verify(wlPointerResource1,
                never()).enter(anyInt(),
