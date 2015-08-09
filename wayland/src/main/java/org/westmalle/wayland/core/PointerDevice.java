@@ -354,6 +354,10 @@ public class PointerDevice implements Role {
         getFocus().ifPresent(wlSurfaceResource -> wlSurfaceResource.unregister(this.focusDestroyListener.get()));
         //clear ref to old destroy listener
         this.focusDestroyListener = Optional.empty();
+        //notify clients that focus has changed
+        oldFocus.ifPresent(oldFocusResource -> reportLeave(findPointerResource(wlPointerResources,
+                                                                               Optional.of(oldFocusResource)),
+                                                           oldFocusResource));
         //find pointer resource of new focus
         final Optional<WlPointerResource> pointerResource = findPointerResource(wlPointerResources,
                                                                                 newFocus);
@@ -369,11 +373,7 @@ public class PointerDevice implements Role {
         });
         //update cursor to reflect new focus
         updateActiveCursor(pointerResource);
-        //notify clients that focus has changed
-        oldFocus.ifPresent(oldFocusResource -> reportLeave(findPointerResource(wlPointerResources,
-                                                                               Optional.of(
-                                                                                       oldFocusResource)),
-                                                           oldFocusResource));
+
         //update focus to new focus
         this.focus = newFocus;
         //notify listeners focus has changed
@@ -386,7 +386,7 @@ public class PointerDevice implements Role {
 
     /**
      * Listen for motion as soon as given surface is grabbed.
-     * <p/>
+     * <p>
      * If another surface already has the grab, the listener
      * is never registered.
      *

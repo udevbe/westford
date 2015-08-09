@@ -367,9 +367,11 @@ public class PointerDeviceTest {
         final int serial0 = 90879;
         final int serial1 = 90881;
         final int serial2 = 90882;
+        final int serial3 = 90883;
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
-                                                   serial2);
+                                                   serial2,
+                                                   serial3);
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -379,49 +381,26 @@ public class PointerDeviceTest {
                                   x1,
                                   y1);
         //then
-        //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        //TODO bug has been fixed. Don't use argument captor any more
-        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
-
         verify(wlPointerResource0).enter(eq(serial0),
                                          eq(wlSurfaceResource0),
-                                         fixedArgumentCaptor.capture(),
-                                         fixedArgumentCaptor.capture());
-
-        assertThat(values.get(0)
-                         .asInt()).isEqualTo(2);
-        assertThat(values.get(1)
-                         .asInt()).isEqualTo(3);
+                                         eq(Fixed.create(2)),
+                                         eq(Fixed.create(3)));
 
         verify(wlPointerResource0).motion(eq(time0),
-                                          fixedArgumentCaptor.capture(),
-                                          fixedArgumentCaptor.capture());
-        assertThat(values.get(2)
-                         .asInt()).isEqualTo(2);
-        assertThat(values.get(3)
-                         .asInt()).isEqualTo(3);
-
+                                          eq(Fixed.create(2)),
+                                          eq(Fixed.create(3)));
 
         verify(wlPointerResource0).leave(serial1,
                                          wlSurfaceResource0);
 
         verify(wlPointerResource1).enter(eq(serial2),
                                          eq(wlSurfaceResource1),
-                                         fixedArgumentCaptor.capture(),
-                                         fixedArgumentCaptor.capture());
-        assertThat(values.get(4)
-                         .asInt()).isEqualTo(89);
-        assertThat(values.get(5)
-                         .asInt()).isEqualTo(144);
+                                         eq(Fixed.create(89)),
+                                         eq(Fixed.create(144)));
 
         verify(wlPointerResource1).motion(eq(time1),
-                                          fixedArgumentCaptor.capture(),
-                                          fixedArgumentCaptor.capture());
-        assertThat(values.get(6)
-                         .asInt()).isEqualTo(89);
-        assertThat(values.get(7)
-                         .asInt()).isEqualTo(144);
+                                          eq(Fixed.create(89)),
+                                          eq(Fixed.create(144)));
     }
 
     /**
