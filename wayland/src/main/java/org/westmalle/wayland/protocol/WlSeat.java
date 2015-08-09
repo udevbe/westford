@@ -94,7 +94,6 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     @Override
     public void getPointer(final WlSeatResource wlSeatResource,
                            final int id) {
-        //FIXME protocol requires to always generate pointer resource
         final WlPointerResource wlPointerResource = getWlPointer().add(wlSeatResource.getClient(),
                                                                        wlSeatResource.getVersion(),
                                                                        id);
@@ -111,7 +110,6 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     @Override
     public void getKeyboard(final WlSeatResource wlSeatResource,
                             final int id) {
-        //FIXME protocol requires to always generate keyboard resource
         final WlKeyboard wlKeyboard = getWlKeyboard();
         final WlKeyboardResource wlKeyboardResource = wlKeyboard.add(wlSeatResource.getClient(),
                                                                      wlSeatResource.getVersion(),
@@ -133,7 +131,6 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
     @Override
     public void getTouch(final WlSeatResource wlSeatResource,
                          final int id) {
-        //FIXME protocol requires to always generate touch resource
         final WlTouchResource wlTouchResource = getWlTouch().add(wlSeatResource.getClient(),
                                                                  wlSeatResource.getVersion(),
                                                                  id);
