@@ -110,7 +110,6 @@ public class PointerDevice implements Role {
         final int time = this.compositor.getTime();
         this.position = Point.create(x,
                                      y);
-        //TODO update unit tests to reflect changed pointer grab implementation
         if (getGrab().isPresent()) {
             reportMotion(wlPointerResources,
                          time,
