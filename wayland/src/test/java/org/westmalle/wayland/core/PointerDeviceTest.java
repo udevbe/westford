@@ -50,6 +50,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.verifyNoMoreInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -62,6 +63,8 @@ public class PointerDeviceTest {
     private Display       display;
     @Mock
     private Compositor    compositor;
+    @Mock
+    private JobExecutor   jobExecutor;
     @InjectMocks
     private PointerDevice pointerDevice;
 
@@ -1192,10 +1195,11 @@ public class PointerDeviceTest {
                                                           x1,
                                                           y1)));
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlSurfaceResource0).register(listenerArgumentCaptor.capture());
+        verify(wlSurfaceResource0,
+               times(3)).register(listenerArgumentCaptor.capture());
         //and when
-        final DestroyListener listener = listenerArgumentCaptor.getValue();
-        listener.handle();
+        final List<DestroyListener> listeners = listenerArgumentCaptor.getAllValues();
+        listeners.forEach(DestroyListener::handle);
         this.pointerDevice.motion(pointerResources,
                                   x1,
                                   y1);
