@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,7 +103,38 @@ public class KeyboardDeviceTest {
 
     @Test
     public void testSetFocus() throws Exception {
-        throw new UnsupportedOperationException();
+        //given
+        final Client client0 = mock(Client.class);
+
+        final WlKeyboardResource wlKeyboardResource0 = mock(WlKeyboardResource.class);
+
+        when(wlKeyboardResource0.getClient()).thenReturn(client0);
+
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        when(wlSurfaceResource.getClient()).thenReturn(client0);
+
+        final int serial0 = 1278;
+        final int serial1 = 1279;
+        final int serial2 = 1280;
+        when(this.display.nextSerial()).thenReturn(serial0,
+                                                   serial1,
+                                                   serial2);
+
+        //when
+        this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
+                                     Optional.of(wlSurfaceResource));
+
+        //then
+        verify(wlKeyboardResource0).enter(eq(serial0),
+                                          eq(wlSurfaceResource),
+                                          any());
+        //and when
+        this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
+                                     Optional.empty());
+
+        //then
+        verify(wlKeyboardResource0).leave(eq(serial1),
+                                          eq(wlSurfaceResource));
     }
 
     @Test
