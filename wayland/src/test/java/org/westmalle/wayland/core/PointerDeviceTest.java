@@ -1410,9 +1410,35 @@ public class PointerDeviceTest {
     @Test
     public void testRemoveCursor() throws Exception {
         // given: pointer with no surface
-        // when: this method is called
+        final Client            client            = mock(Client.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getClient()).thenReturn(client);
+
+        final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
+        when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
+        final WlSurface wlSurfaceCursor = mock(WlSurface.class);
+        when(wlSurfaceResourceCursor.getImplementation()).thenReturn(wlSurfaceCursor);
+        final Surface surfaceCursor = mock(Surface.class);
+        when(wlSurfaceCursor.getSurface()).thenReturn(surfaceCursor);
+        final SurfaceState surfaceStateCursor = SurfaceState.builder()
+                                                            .build();
+        when(surfaceCursor.getState()).thenReturn(surfaceStateCursor);
+        final Cursor cursor = mock(Cursor.class);
+        when(this.cursorFactory.create(eq(wlSurfaceResourceCursor),
+                                       any())).thenReturn(cursor);
+        when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
+
+        this.pointerDevice.setCursor(wlPointerResource,
+                                     this.pointerDevice.getEnterSerial(),
+                                     wlSurfaceResourceCursor,
+                                     0,
+                                     0);
+
+        // when: remove cursor is called
+        this.pointerDevice.removeCursor(wlPointerResource,
+                                        this.pointerDevice.getEnterSerial());
         // then: cursor is hidden.
-        throw new UnsupportedOperationException();
+        verify(cursor).hide();
     }
 
     @Test
