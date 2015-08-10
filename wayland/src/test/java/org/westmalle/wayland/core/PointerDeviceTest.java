@@ -1442,12 +1442,51 @@ public class PointerDeviceTest {
     }
 
     @Test
-    public void testSetCursor() throws Exception {
+    public void testSetCursorUpdateHotspot() throws Exception {
         // given: pointer with surface
+        final Client            client            = mock(Client.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getClient()).thenReturn(client);
+
+        final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
+        when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
+        final WlSurface wlSurfaceCursor = mock(WlSurface.class);
+        when(wlSurfaceResourceCursor.getImplementation()).thenReturn(wlSurfaceCursor);
+        final Surface surfaceCursor = mock(Surface.class);
+        when(wlSurfaceCursor.getSurface()).thenReturn(surfaceCursor);
+        final SurfaceState surfaceStateCursor = SurfaceState.builder()
+                                                            .build();
+        when(surfaceCursor.getState()).thenReturn(surfaceStateCursor);
+        final Cursor cursor = mock(Cursor.class);
+        when(this.cursorFactory.create(eq(wlSurfaceResourceCursor),
+                                       any())).thenReturn(cursor);
+        when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
+
+        this.pointerDevice.setCursor(wlPointerResource,
+                                     this.pointerDevice.getEnterSerial(),
+                                     wlSurfaceResourceCursor,
+                                     0,
+                                     0);
+
         // when: surface is same as previous surface
+        this.pointerDevice.setCursor(wlPointerResource,
+                                     this.pointerDevice.getEnterSerial(),
+                                     wlSurfaceResourceCursor,
+                                     10,
+                                     20);
+
         // then: cursor hotspot is updated and no additional destroy listener is registered for pointer
-        // and when: pointer is destroyed, then: cursor is made invisible
-        throw new UnsupportedOperationException();
+        verify(cursor).setHotspot(Point.create(10,
+                                               20));
+        ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlPointerResource).register(destroyListenerArgumentCaptor.capture());
+
+        // and when: pointer is destroyed
+        destroyListenerArgumentCaptor.getValue()
+                                     .handle();
+
+        // then: cursor is made invisible
+        verify(cursor).hide();
     }
 
     @Test
