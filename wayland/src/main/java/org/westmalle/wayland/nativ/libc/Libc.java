@@ -236,37 +236,37 @@ public class Libc {
     /**
      * Page can be read.
      */
-    public static final int PROT_READ      = 0x1;
+    public static final int     PROT_READ      = 0x1;
     /**
      * Page can be written.
      */
-    public static final int PROT_WRITE     = 0x2;
+    public static final int     PROT_WRITE     = 0x2;
     /**
      * Page can be executed.
      */
-    public static final int PROT_EXEC      = 0x4;
+    public static final int     PROT_EXEC      = 0x4;
     /**
      * Page can not be accessed.
      */
-    public static final int PROT_NONE      = 0x0;
+    public static final int     PROT_NONE      = 0x0;
     /**
      * Extend change to start of  growsdown vma (mprotect only).
      */
-    public static final int PROT_GROWSDOWN = 0x01000000;
+    public static final int     PROT_GROWSDOWN = 0x01000000;
     /**
      * Extend change to start of  growsup vma (mprotect only).
      */
-    public static final int PROT_GROWSUP   = 0x02000000;
+    public static final int     PROT_GROWSUP   = 0x02000000;
     /**
      * Share changes.
      */
-    public static final int MAP_SHARED     = 0x01;
+    public static final int     MAP_SHARED     = 0x01;
     /**
      * Changes are private.
      */
-    public static final int MAP_PRIVATE    = 0x02;
+    public static final int     MAP_PRIVATE    = 0x02;
     //-1
-    public static final Pointer MAP_FAILED = Pointer.createConstant(0xFFFFFFFF);
+    public static final Pointer MAP_FAILED     = Pointer.createConstant(0xFFFFFFFF);
 
     public native int open(String pathname,
                            int flags);

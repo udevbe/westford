@@ -207,11 +207,11 @@ public class SurfaceTest {
     }
 
     @Test
-    public void testAttachDestroyBuffer(){
+    public void testAttachDestroyBuffer() {
         //given
         final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
-        final Integer          relX0   = -10;
-        final Integer          relY0   = 200;
+        final Integer          relX0            = -10;
+        final Integer          relY0            = 200;
 
         //when
         this.surface.attachBuffer(wlBufferResource,
