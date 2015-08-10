@@ -5,6 +5,7 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -107,7 +108,6 @@ public class KeyboardDeviceTest {
         final Client client0 = mock(Client.class);
 
         final WlKeyboardResource wlKeyboardResource0 = mock(WlKeyboardResource.class);
-
         when(wlKeyboardResource0.getClient()).thenReturn(client0);
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -139,6 +139,23 @@ public class KeyboardDeviceTest {
 
     @Test
     public void testUpdateKeymap() throws Exception {
+        //given
+        final Client client0 = mock(Client.class);
+
+        final WlKeyboardResource wlKeyboardResource0 = mock(WlKeyboardResource.class);
+        when(wlKeyboardResource0.getClient()).thenReturn(client0);
+
+        final String keymapString = "foo keymap";
+        final Keymap keymap = Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
+                                            keymapString);
+        //when
+        this.keyboardDevice.updateKeymap(Collections.singleton(wlKeyboardResource0),
+                                         Optional.of(keymap));
+
+        //then
+//        verify(wlKeyboardResource0).keymap(WlKeyboardKeymapFormat.XKB_V1.getValue(),
+//                                           fd,
+//                                           size);
         throw new UnsupportedOperationException();
     }
 }
