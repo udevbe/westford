@@ -23,6 +23,7 @@ import org.freedesktop.wayland.server.WlShellRequests;
 import org.freedesktop.wayland.server.WlShellResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlShellError;
 import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.wlshell.ShellSurface;
@@ -91,8 +92,13 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                               pingSerial);
         }
         else {
-            //TODO report protocol error
             //TODO add unit test for this
+            requester.getClient()
+                     .getObject(Display.OBJECT_ID)
+                     .postError(WlShellError.ROLE.getValue(),
+                                String.format("Desired shell surface already has another role (%s)",
+                                              role.getClass()
+                                                  .getSimpleName()));
         }
     }
 
