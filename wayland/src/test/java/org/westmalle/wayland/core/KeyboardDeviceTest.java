@@ -1,7 +1,9 @@
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,10 +13,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.libc.Libc;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KeyboardDeviceTest {
@@ -33,25 +40,63 @@ public class KeyboardDeviceTest {
     @Test
     public void testKey() throws Exception {
         //given
+        final Client client0 = mock(Client.class);
+        final Client client1 = mock(Client.class);
+
         final WlKeyboardResource      wlKeyboardResource0 = mock(WlKeyboardResource.class);
         final WlKeyboardResource      wlKeyboardResource1 = mock(WlKeyboardResource.class);
         final Set<WlKeyboardResource> wlKeyboardResources = new HashSet<>();
         wlKeyboardResources.add(wlKeyboardResource0);
         wlKeyboardResources.add(wlKeyboardResource1);
 
-        //TODO set keyboard focus
+        when(wlKeyboardResource0.getClient()).thenReturn(client0);
+        when(wlKeyboardResource1.getClient()).thenReturn(client1);
 
-        final int                key                = 123;
-        final WlKeyboardKeyState wlKeyboardKeyState = WlKeyboardKeyState.PRESSED;
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        when(wlSurfaceResource.getClient()).thenReturn(client0);
+        this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
+                                     Optional.of(wlSurfaceResource));
 
+        final int                key                        = 123;
+        final WlKeyboardKeyState wlKeyboardKeyStatePressed  = WlKeyboardKeyState.PRESSED;
+        final WlKeyboardKeyState wlKeyboardKeyStateReleased = WlKeyboardKeyState.RELEASED;
+
+        final int serial0 = 1278;
+        final int serial1 = 1279;
+        final int serial2 = 1280;
+        when(this.display.nextSerial()).thenReturn(serial0,
+                                                   serial1,
+                                                   serial2);
+        final int time0 = 27646;
+        final int time1 = 29253;
+        final int time2 = 30898;
+        when(this.compositor.getTime()).thenReturn(time0,
+                                                   time1,
+                                                   time2);
         //when
         this.keyboardDevice.key(wlKeyboardResources,
                                 key,
-                                wlKeyboardKeyState);
+                                wlKeyboardKeyStatePressed);
 
         //then
+        assertThat((Iterable<Integer>) this.keyboardDevice.getPressedKeys()).contains(key);
+        verify(wlKeyboardResource0).key(serial0,
+                                        time0,
+                                        key,
+                                        wlKeyboardKeyStatePressed.getValue());
 
-        throw new UnsupportedOperationException();
+        //and when
+        this.keyboardDevice.key(wlKeyboardResources,
+                                key,
+                                wlKeyboardKeyStateReleased);
+
+        //then
+        assertThat((Iterable<Integer>) this.keyboardDevice.getPressedKeys()).doesNotContain(key);
+        verify(wlKeyboardResource0).key(serial1,
+                                        time1,
+                                        key,
+                                        wlKeyboardKeyStateReleased.getValue());
+
     }
 
     @Test
