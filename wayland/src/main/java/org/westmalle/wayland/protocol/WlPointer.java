@@ -16,9 +16,11 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlPointerRequestsV3;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlPointerError;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.Role;
 import org.westmalle.wayland.core.Surface;
@@ -46,18 +48,6 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
                           @Nullable final WlSurfaceResource wlSurfaceResource,
                           final int hotspotX,
                           final int hotspotY) {
-        //TODO unit test this method
-        //cases:
-        // given: a pointer with a null surface, when: this method is called, then: cursor is removed on pointer device
-        //
-        //given: a pointer with a surface with no role, when: this method is called, then: cursor is set on pointer device
-        // and role is set for surface
-        //
-        //given: a pointer with a surface with a role that is this pointer device, when: this method is called, then:
-        // cursor is set on pointer device
-        //
-        //given: a pointer with a surface with a role that is not this pointer device, when: this method is called, then:
-        // a protocol error is raised.
         if (wlSurfaceResource == null) {
             getPointerDevice().removeCursor(wlPointerResource,
                                             serial);
@@ -79,9 +69,12 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
                                         hotspotY);
             }
             else {
-                //TODO raise protocol error, surface already has another role
-//                Resource<?> wlDisplayResource = wlPointerResource.getClient().getObjectById(Display.OBJECT_ID);
-//                wlDisplayResource.postError(code,msg);
+                wlPointerResource.getClient()
+                                 .getObject(Display.OBJECT_ID)
+                                 .postError(WlPointerError.ROLE.getValue(),
+                                            String.format("Desired cursor surface already has another role (%s)",
+                                                          role.getClass()
+                                                              .getSimpleName()));
             }
         }
     }

@@ -72,4 +72,36 @@ public class WlPointerTest {
         assertThat(wlPointerResource).isNotNull();
         assertThat(wlPointerResource.getImplementation()).isSameAs(wlPointer);
     }
+
+    @Test
+    public void testSetCursorNullSurface() {
+        //given: a pointer with a null surface
+        //when: SetCursor is called
+        //then: cursor is removed on pointer device
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void testSetCursor() {
+        //given: a pointer with a surface with no role
+        //when: SetCursor is called
+        //then: cursor is set on pointer device and role is set for surface
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void testSetCursorSameSurface() {
+        //given: a pointer with a surface with a role that is this pointer device
+        //when: SetCursor is called
+        //then: cursor is set on pointer device
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void testSetCursorOtherRoleSurface() {
+        //given: a pointer with a surface with a role that is not this pointer device
+        //when: SetCursor is called
+        //then: a protocol error is raised.
+        throw new UnsupportedOperationException();
+    }
 }
