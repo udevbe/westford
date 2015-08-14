@@ -40,19 +40,21 @@ public class WlPointerTest {
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
 
+    private WlPointer wlPointer;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.wlPointer = new WlPointer(this.pointerDevice);
     }
 
     @Test
     public void testRelease() throws Exception {
         //given
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
-        final WlPointer         wlPointer         = new WlPointer(this.pointerDevice);
         //when
-        wlPointer.release(wlPointerResource);
+        this.wlPointer.release(wlPointerResource);
         //then
         verify(wlPointerResource).destroy();
     }
@@ -84,7 +86,9 @@ public class WlPointerTest {
     @Test
     public void testSetCursor() {
         //given: a pointer with a surface with no role
+
         //when: SetCursor is called
+
         //then: cursor is set on pointer device and role is set for surface
         throw new UnsupportedOperationException();
     }

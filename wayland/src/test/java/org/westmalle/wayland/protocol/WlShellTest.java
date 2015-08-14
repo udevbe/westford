@@ -73,6 +73,12 @@ public class WlShellTest {
     private InterfaceMeta               interfaceMeta;
     @Mock
     private Pointer                     globalPointer;
+    @Mock
+    private ShellSurfaceFactory         shellSurfaceFactory;
+    @Mock
+    private WlCompositor                wlCompositor;
+
+    private WlShell wlShell;
 
     @Before
     public void setUp() throws Exception {
@@ -85,6 +91,10 @@ public class WlShellTest {
                                                                anyInt(),
                                                                any(),
                                                                any())).thenReturn(this.globalPointer);
+        this.wlShell = new WlShell(this.display,
+                                   this.wlShellSurfaceFactory,
+                                   this.shellSurfaceFactory,
+                                   this.wlCompositor);
     }
 
     @Test
@@ -111,21 +121,13 @@ public class WlShellTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getRole()).thenReturn(roleOptional);
 
-        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
-        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
-
-        final WlShell wlShell = new WlShell(this.display,
-                                            this.wlShellSurfaceFactory,
-                                            shellSurfaceFactory,
-                                            wlCompositor);
-
         //when
-        wlShell.getShellSurface(wlShellResource,
-                                id,
-                                wlSurfaceResource);
+        this.wlShell.getShellSurface(wlShellResource,
+                                     id,
+                                     wlSurfaceResource);
 
         //then
-        verifyZeroInteractions(shellSurfaceFactory);
+        verifyZeroInteractions(this.shellSurfaceFactory);
         verifyZeroInteractions(this.wlShellSurfaceFactory);
         verify(displayResource).postError(eq(WlShellError.ROLE.getValue()),
                                           anyString());
@@ -161,20 +163,12 @@ public class WlShellTest {
         when(wlShellSurface.add(any(),
                                 anyInt(),
                                 anyInt())).thenReturn(wlShellSurfaceResource);
-
-        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
-        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
-        when(shellSurfaceFactory.create(eq(wlCompositor),
-                                        anyInt())).thenReturn(shellSurface);
-
-        final WlShell wlShell = new WlShell(this.display,
-                                            this.wlShellSurfaceFactory,
-                                            shellSurfaceFactory,
-                                            wlCompositor);
+        when(this.shellSurfaceFactory.create(eq(this.wlCompositor),
+                                             anyInt())).thenReturn(shellSurface);
         //when
-        wlShell.getShellSurface(wlShellResource,
-                                id,
-                                wlSurfaceResource);
+        this.wlShell.getShellSurface(wlShellResource,
+                                     id,
+                                     wlSurfaceResource);
         //then
         verify(wlShellSurface).add(client,
                                    version,
@@ -197,9 +191,9 @@ public class WlShellTest {
         verify(wlShellSurfaceResource).destroy();
 
         //and when
-        wlShell.getShellSurface(wlShellResource,
-                                id,
-                                wlSurfaceResource);
+        this.wlShell.getShellSurface(wlShellResource,
+                                     id,
+                                     wlSurfaceResource);
 
         //then
         verify(wlShellSurface,
@@ -216,39 +210,27 @@ public class WlShellTest {
                                                                  any(),
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
-        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
-        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
-        final WlShell wlShell = new WlShell(this.display,
-                                            this.wlShellSurfaceFactory,
-                                            shellSurfaceFactory,
-                                            wlCompositor);
         //when
-        final WlShellResource wlShellResource = wlShell.onBindClient(mock(Client.class),
-                                                                     1,
-                                                                     1);
+        final WlShellResource wlShellResource = this.wlShell.onBindClient(mock(Client.class),
+                                                                          1,
+                                                                          1);
         //then
         assertThat(wlShellResource).isNotNull();
-        assertThat(wlShellResource.getImplementation()).isSameAs(wlShell);
+        assertThat(wlShellResource.getImplementation()).isSameAs(this.wlShell);
     }
 
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client              client              = mock(Client.class);
-        final int                 version             = 2;
-        final int                 id                  = 7;
-        final ShellSurfaceFactory shellSurfaceFactory = mock(ShellSurfaceFactory.class);
-        final WlCompositor        wlCompositor        = mock(WlCompositor.class);
-        final WlShell wlShell = new WlShell(this.display,
-                                            this.wlShellSurfaceFactory,
-                                            shellSurfaceFactory,
-                                            wlCompositor);
+        final Client client  = mock(Client.class);
+        final int    version = 2;
+        final int    id      = 7;
         //when
-        final WlShellResource wlShellResource = wlShell.create(client,
-                                                               version,
-                                                               id);
+        final WlShellResource wlShellResource = this.wlShell.create(client,
+                                                                    version,
+                                                                    id);
         //then
         assertThat(wlShellResource).isNotNull();
-        assertThat(wlShellResource.getImplementation()).isSameAs(wlShell);
+        assertThat(wlShellResource.getImplementation()).isSameAs(this.wlShell);
     }
 }

@@ -39,38 +39,39 @@ public class WlRegionTest {
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
+    @Mock
+    private Region                      region;
+
+    private WlRegion wlRegion;
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.wlRegion = new WlRegion(this.region);
     }
 
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client   client   = mock(Client.class);
-        final int      version  = 1;
-        final int      id       = 1;
-        final Region   region   = mock(Region.class);
-        final WlRegion wlRegion = new WlRegion(region);
+        final Client client  = mock(Client.class);
+        final int    version = 1;
+        final int    id      = 1;
         //when
-        final WlRegionResource wlRegionResource = wlRegion.create(client,
-                                                                  version,
-                                                                  id);
+        final WlRegionResource wlRegionResource = this.wlRegion.create(client,
+                                                                       version,
+                                                                       id);
         //then
         assertThat(wlRegionResource).isNotNull();
-        assertThat(wlRegionResource.getImplementation()).isSameAs(wlRegion);
+        assertThat(wlRegionResource.getImplementation()).isSameAs(this.wlRegion);
     }
 
     @Test
     public void testDestroy() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region           region           = mock(Region.class);
-        final WlRegion         wlRegion         = new WlRegion(region);
         //when
-        wlRegion.destroy(wlRegionResource);
+        this.wlRegion.destroy(wlRegionResource);
         //then
         verify(wlRegionResource).destroy();
     }
@@ -79,83 +80,77 @@ public class WlRegionTest {
     public void testAdd() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region           region           = mock(Region.class);
-        final WlRegion         wlRegion         = new WlRegion(region);
         final int              x                = 10;
         final int              y                = -12;
         final int              width            = 123;
         final int              height           = 111;
         //when
-        wlRegion.add(wlRegionResource,
-                     x,
-                     y,
-                     width,
-                     height);
-        //then
-        verify(region).add(eq(Rectangle.create(x,
-                                               y,
-                                               width,
-                                               height)));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddNegativeWidthHeight() throws Exception {
-        //given
-        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region           region           = mock(Region.class);
-        final WlRegion         wlRegion         = new WlRegion(region);
-        final int              x                = 10;
-        final int              y                = 12;
-        final int              width            = -100;
-        final int              height           = -200;
-        //when
-        wlRegion.add(wlRegionResource,
-                     x,
-                     y,
-                     width,
-                     height);
-        //then
-    }
-
-    @Test
-    public void testSubtract() throws Exception {
-        //given
-        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region           region           = mock(Region.class);
-        final WlRegion         wlRegion         = new WlRegion(region);
-        final int              x                = -12;
-        final int              y                = -10;
-        final int              width            = 321;
-        final int              height           = 111;
-        //when
-        wlRegion.subtract(wlRegionResource,
+        this.wlRegion.add(wlRegionResource,
                           x,
                           y,
                           width,
                           height);
         //then
-        verify(region).subtract(eq(Rectangle.create(x,
+        verify(this.region).add(eq(Rectangle.create(x,
                                                     y,
                                                     width,
                                                     height)));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSubtractNativeWidthHeight() throws Exception {
+    public void testAddNegativeWidthHeight() throws Exception {
         //given
         final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
-        final Region           region           = mock(Region.class);
-        final WlRegion         wlRegion         = new WlRegion(region);
-        final int              x                = 22;
-        final int              y                = 11;
-        final int              width            = -222;
-        final int              height           = -333;
+        final int              x                = 10;
+        final int              y                = 12;
+        final int              width            = -100;
+        final int              height           = -200;
         //when
-        wlRegion.subtract(wlRegionResource,
+        this.wlRegion.add(wlRegionResource,
                           x,
                           y,
                           width,
                           height);
         //then
+        //exception is thrown
+    }
+
+    @Test
+    public void testSubtract() throws Exception {
+        //given
+        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final int              x                = -12;
+        final int              y                = -10;
+        final int              width            = 321;
+        final int              height           = 111;
+        //when
+        this.wlRegion.subtract(wlRegionResource,
+                               x,
+                               y,
+                               width,
+                               height);
+        //then
+        verify(this.region).subtract(eq(Rectangle.create(x,
+                                                         y,
+                                                         width,
+                                                         height)));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSubtractNativeWidthHeight() throws Exception {
+        //given
+        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final int              x                = 22;
+        final int              y                = 11;
+        final int              width            = -222;
+        final int              height           = -333;
+        //when
+        this.wlRegion.subtract(wlRegionResource,
+                               x,
+                               y,
+                               width,
+                               height);
+        //then
+        //exception is thrown
     }
 }

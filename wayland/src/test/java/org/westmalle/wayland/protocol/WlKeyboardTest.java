@@ -40,20 +40,21 @@ public class WlKeyboardTest {
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
+    private WlKeyboard                  wlKeyboard;
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.wlKeyboard = new WlKeyboard(this.keyboardDevice);
     }
 
     @Test
     public void testRelease() throws Exception {
         //given
         final WlKeyboardResource wlKeyboardResource = mock(WlKeyboardResource.class);
-        final WlKeyboard         wlKeyboard         = new WlKeyboard(this.keyboardDevice);
         //when
-        wlKeyboard.release(wlKeyboardResource);
+        this.wlKeyboard.release(wlKeyboardResource);
         //then
         verify(wlKeyboardResource).destroy();
     }
@@ -61,16 +62,15 @@ public class WlKeyboardTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client     client     = mock(Client.class);
-        final int        version    = 4;
-        final int        id         = 4;
-        final WlKeyboard wlKeyboard = new WlKeyboard(this.keyboardDevice);
+        final Client client  = mock(Client.class);
+        final int    version = 4;
+        final int    id      = 4;
         //when
-        final WlKeyboardResource wlKeyboardResource = wlKeyboard.create(client,
-                                                                        version,
-                                                                        id);
+        final WlKeyboardResource wlKeyboardResource = this.wlKeyboard.create(client,
+                                                                             version,
+                                                                             id);
         //then
         assertThat(wlKeyboardResource).isNotNull();
-        assertThat(wlKeyboardResource.getImplementation()).isSameAs(wlKeyboard);
+        assertThat(wlKeyboardResource.getImplementation()).isSameAs(this.wlKeyboard);
     }
 }

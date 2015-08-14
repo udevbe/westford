@@ -61,6 +61,8 @@ public class WlSubCompositorTest {
     @Mock
     private Pointer                     globalPointer;
 
+    private WlSubCompositor wlSubCompositor;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class,
@@ -72,17 +74,16 @@ public class WlSubCompositorTest {
                                                                anyInt(),
                                                                any(),
                                                                any())).thenReturn(this.globalPointer);
+        this.wlSubCompositor = new WlSubCompositor(this.display,
+                                                   this.wlSubSurfaceFactory);
     }
 
     @Test
     public void testDestroy() throws Exception {
         //given
         final WlSubcompositorResource subcompositorResource = mock(WlSubcompositorResource.class);
-
-        final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                                                                    this.wlSubSurfaceFactory);
         //when
-        wlSubCompositor.destroy(subcompositorResource);
+        this.wlSubCompositor.destroy(subcompositorResource);
         //then
         verify(subcompositorResource).destroy();
     }
@@ -108,14 +109,11 @@ public class WlSubCompositorTest {
         when(wlSubSurface.add(any(),
                               anyInt(),
                               anyInt())).thenReturn(wlSubsurfaceResource);
-
-        final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                                                                    this.wlSubSurfaceFactory);
         //when
-        wlSubCompositor.getSubsurface(subcompositorResource,
-                                      id,
-                                      surface,
-                                      parent);
+        this.wlSubCompositor.getSubsurface(subcompositorResource,
+                                           id,
+                                           surface,
+                                           parent);
         //then
         verify(wlSubSurface).add(client,
                                  version,
@@ -135,16 +133,13 @@ public class WlSubCompositorTest {
         final Client client  = mock(Client.class);
         final int    version = 2;
         final int    id      = 12;
-
-        final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                                                                    this.wlSubSurfaceFactory);
         //when
-        final WlSubcompositorResource wlSubcompositorResource = wlSubCompositor.create(client,
-                                                                                       version,
-                                                                                       id);
+        final WlSubcompositorResource wlSubcompositorResource = this.wlSubCompositor.create(client,
+                                                                                            version,
+                                                                                            id);
         //then
         assertThat(wlSubcompositorResource).isNotNull();
-        assertThat(wlSubcompositorResource.getImplementation()).isSameAs(wlSubCompositor);
+        assertThat(wlSubcompositorResource.getImplementation()).isSameAs(this.wlSubCompositor);
     }
 
     @Test
@@ -155,15 +150,12 @@ public class WlSubCompositorTest {
                                                                  any(),
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
-
-        final WlSubCompositor wlSubCompositor = new WlSubCompositor(this.display,
-                                                                    this.wlSubSurfaceFactory);
         //when
-        final WlSubcompositorResource wlSubcompositorResource = wlSubCompositor.onBindClient(mock(Client.class),
-                                                                                             1,
-                                                                                             1);
+        final WlSubcompositorResource wlSubcompositorResource = this.wlSubCompositor.onBindClient(mock(Client.class),
+                                                                                                  1,
+                                                                                                  1);
         //then
         assertThat(wlSubcompositorResource).isNotNull();
-        assertThat(wlSubcompositorResource.getImplementation()).isSameAs(wlSubCompositor);
+        assertThat(wlSubcompositorResource.getImplementation()).isSameAs(this.wlSubCompositor);
     }
 }

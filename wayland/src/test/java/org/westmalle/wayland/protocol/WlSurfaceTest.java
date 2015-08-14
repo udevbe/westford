@@ -62,10 +62,14 @@ public class WlSurfaceTest {
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
 
+    private WlSurface wlSurface;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.wlSurface = new WlSurface(this.wlCallbackFactory,
+                                       this.surface);
     }
 
     @Test
@@ -74,12 +78,9 @@ public class WlSurfaceTest {
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final int               transform         = WlOutputTransform.NORMAL.getValue();
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
-
         //when
-        wlSurface.setBufferTransform(wlSurfaceResource,
-                                     transform);
+        this.wlSurface.setBufferTransform(wlSurfaceResource,
+                                          transform);
         //then
         verify(this.surface).setBufferTransform(Mat4.IDENTITY);
 
@@ -92,15 +93,13 @@ public class WlSurfaceTest {
         final int    version = 5;
         final int    id      = 100;
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        final WlSurfaceResource wlSurfaceResource = wlSurface.create(client,
-                                                                     version,
-                                                                     id);
+        final WlSurfaceResource wlSurfaceResource = this.wlSurface.create(client,
+                                                                          version,
+                                                                          id);
         //then
         assertThat(wlSurfaceResource).isNotNull();
-        assertThat(wlSurfaceResource.getImplementation()).isSameAs(wlSurface);
+        assertThat(wlSurfaceResource.getImplementation()).isSameAs(this.wlSurface);
     }
 
     @Test
@@ -108,10 +107,8 @@ public class WlSurfaceTest {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.destroy(wlSurfaceResource);
+        this.wlSurface.destroy(wlSurfaceResource);
         //then
         verify(wlSurfaceResource,
                times(1)).destroy();
@@ -125,13 +122,11 @@ public class WlSurfaceTest {
         final int               x                 = 11;
         final int               y                 = 22;
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.attach(wlSurfaceResource,
-                         wlBufferResource,
-                         x,
-                         y);
+        this.wlSurface.attach(wlSurfaceResource,
+                              wlBufferResource,
+                              x,
+                              y);
         //then
         verify(this.surface).attachBuffer(wlBufferResource,
                                           x,
@@ -147,17 +142,15 @@ public class WlSurfaceTest {
         final int               x                 = 11;
         final int               y                 = 22;
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.attach(wlSurfaceResource,
-                         wlBufferResource0,
-                         x,
-                         y);
-        wlSurface.attach(wlSurfaceResource,
-                         wlBufferResource1,
-                         x,
-                         y);
+        this.wlSurface.attach(wlSurfaceResource,
+                              wlBufferResource0,
+                              x,
+                              y);
+        this.wlSurface.attach(wlSurfaceResource,
+                              wlBufferResource1,
+                              x,
+                              y);
         //then
         verify(this.surface).attachBuffer(wlBufferResource0,
                                           x,
@@ -172,13 +165,11 @@ public class WlSurfaceTest {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.attach(wlSurfaceResource,
-                         null,
-                         0,
-                         0);
+        this.wlSurface.attach(wlSurfaceResource,
+                              null,
+                              0,
+                              0);
         //then
         verify(this.surface).detachBuffer();
     }
@@ -191,17 +182,15 @@ public class WlSurfaceTest {
         final int               x                 = 11;
         final int               y                 = 22;
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.attach(wlSurfaceResource,
-                         wlBufferResource,
-                         x,
-                         y);
-        wlSurface.attach(wlSurfaceResource,
-                         null,
-                         0,
-                         0);
+        this.wlSurface.attach(wlSurfaceResource,
+                              wlBufferResource,
+                              x,
+                              y);
+        this.wlSurface.attach(wlSurfaceResource,
+                              null,
+                              0,
+                              0);
         //then
         verify(this.surface,
                times(1)).attachBuffer(wlBufferResource,
@@ -220,14 +209,12 @@ public class WlSurfaceTest {
         final int               width             = 500;
         final int               height            = 1000;
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.damage(wlSurfaceResource,
-                         x,
-                         y,
-                         width,
-                         height);
+        this.wlSurface.damage(wlSurfaceResource,
+                              x,
+                              y,
+                              width,
+                              height);
         //then
         verify(this.surface,
                times(1)).markDamaged(eq(Rectangle.create(x,
@@ -245,14 +232,12 @@ public class WlSurfaceTest {
         final int               width             = -500;
         final int               height            = -1000;
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.damage(wlSurfaceResource,
-                         x,
-                         y,
-                         width,
-                         height);
+        this.wlSurface.damage(wlSurfaceResource,
+                              x,
+                              y,
+                              width,
+                              height);
         //then
     }
 
@@ -261,9 +246,6 @@ public class WlSurfaceTest {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final int               callbackId        = 987;
-
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
 
         final Client client  = mock(Client.class);
         final int    version = 5;
@@ -279,8 +261,8 @@ public class WlSurfaceTest {
                             version,
                             callbackId)).thenReturn(wlCallbackResource);
         //when
-        wlSurface.frame(wlSurfaceResource,
-                        callbackId);
+        this.wlSurface.frame(wlSurfaceResource,
+                             callbackId);
         //then
         verify(this.surface).addCallback(wlCallbackResource);
     }
@@ -291,11 +273,9 @@ public class WlSurfaceTest {
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlRegionResource  wlRegionResource  = mock(WlRegionResource.class);
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.setOpaqueRegion(wlSurfaceResource,
-                                  wlRegionResource);
+        this.wlSurface.setOpaqueRegion(wlSurfaceResource,
+                                       wlRegionResource);
         //then
         verify(this.surface).setOpaqueRegion(wlRegionResource);
     }
@@ -305,11 +285,9 @@ public class WlSurfaceTest {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.setOpaqueRegion(wlSurfaceResource,
-                                  null);
+        this.wlSurface.setOpaqueRegion(wlSurfaceResource,
+                                       null);
         //then
         verify(this.surface).removeOpaqueRegion();
     }
@@ -320,11 +298,9 @@ public class WlSurfaceTest {
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlRegionResource  wlRegionResource  = mock(WlRegionResource.class);
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.setInputRegion(wlSurfaceResource,
-                                 wlRegionResource);
+        this.wlSurface.setInputRegion(wlSurfaceResource,
+                                      wlRegionResource);
         //then
         verify(this.surface).setInputRegion(wlRegionResource);
     }
@@ -334,11 +310,9 @@ public class WlSurfaceTest {
         //given
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
 
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         //when
-        wlSurface.setInputRegion(wlSurfaceResource,
-                                 null);
+        this.wlSurface.setInputRegion(wlSurfaceResource,
+                                      null);
         //then
         verify(this.surface).removeInputRegion();
     }
@@ -353,14 +327,13 @@ public class WlSurfaceTest {
         final int               y                 = 22;
 
         when(this.surface.getRole()).thenReturn(Optional.of(role));
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
-        wlSurface.attach(wlSurfaceResource,
-                         wlBufferResource,
-                         x,
-                         y);
+
+        this.wlSurface.attach(wlSurfaceResource,
+                              wlBufferResource,
+                              x,
+                              y);
         //when
-        wlSurface.commit(wlSurfaceResource);
+        this.wlSurface.commit(wlSurfaceResource);
         //then
         verify(role).beforeCommit(wlSurfaceResource);
         verify(this.surface).commit();
@@ -371,11 +344,9 @@ public class WlSurfaceTest {
         //given
         final Role              role              = mock(Role.class);
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = new WlSurface(this.wlCallbackFactory,
-                                                  this.surface);
         when(this.surface.getRole()).thenReturn(Optional.of(role));
         //when
-        wlSurface.commit(wlSurfaceResource);
+        this.wlSurface.commit(wlSurfaceResource);
         //then
         verify(role).beforeCommit(wlSurfaceResource);
         verify(this.surface).commit();

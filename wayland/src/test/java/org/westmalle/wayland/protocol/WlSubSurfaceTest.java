@@ -42,10 +42,14 @@ public class WlSubSurfaceTest {
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
 
+    private WlSubSurface wlSubSurface;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.wlSubSurface = new WlSubSurface(this.surface,
+                                             this.parent);
     }
 
     @Test
@@ -54,15 +58,12 @@ public class WlSubSurfaceTest {
         final Client client  = mock(Client.class);
         final int    version = 1;
         final int    id      = 15;
-
-        final WlSubSurface wlSubSurface = new WlSubSurface(this.surface,
-                                                           this.parent);
         //when
-        final WlSubsurfaceResource wlSubsurfaceResource = wlSubSurface.create(client,
-                                                                              version,
-                                                                              id);
+        final WlSubsurfaceResource wlSubsurfaceResource = this.wlSubSurface.create(client,
+                                                                                   version,
+                                                                                   id);
         //then
         assertThat(wlSubsurfaceResource).isNotNull();
-        assertThat(wlSubsurfaceResource.getImplementation()).isSameAs(wlSubSurface);
+        assertThat(wlSubsurfaceResource.getImplementation()).isSameAs(this.wlSubSurface);
     }
 }

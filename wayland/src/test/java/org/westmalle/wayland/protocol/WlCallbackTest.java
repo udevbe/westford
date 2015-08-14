@@ -35,26 +35,27 @@ public class WlCallbackTest {
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
+    private WlCallback                  wlCallback;
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.wlCallback = new WlCallback();
     }
 
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client     client     = mock(Client.class);
-        final int        version    = 2;
-        final int        id         = 3;
-        final WlCallback wlCallback = new WlCallback();
+        final Client client  = mock(Client.class);
+        final int    version = 2;
+        final int    id      = 3;
         //when
-        final WlCallbackResource wlCallbackResource = wlCallback.create(client,
-                                                                        version,
-                                                                        id);
+        final WlCallbackResource wlCallbackResource = this.wlCallback.create(client,
+                                                                             version,
+                                                                             id);
         //then
         assertThat(wlCallbackResource).isNotNull();
-        assertThat(wlCallbackResource.getImplementation()).isSameAs(wlCallback);
+        assertThat(wlCallbackResource.getImplementation()).isSameAs(this.wlCallback);
     }
 }

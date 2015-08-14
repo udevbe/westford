@@ -72,6 +72,8 @@ public class WlSeatTest {
     @Mock
     private Pointer                     globalPointer;
 
+    private WlSeat wlSeat;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class,
@@ -83,6 +85,12 @@ public class WlSeatTest {
                                                                anyInt(),
                                                                any(),
                                                                any())).thenReturn(this.globalPointer);
+        this.wlSeat = new WlSeat(this.display,
+                                 this.wlDataDevice,
+                                 this.seat,
+                                 this.wlPointer,
+                                 this.wlKeyboard,
+                                 this.wlTouch);
     }
 
     @Test
@@ -93,20 +101,13 @@ public class WlSeatTest {
                                                                  any(),
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
-
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         this.seat,
-                                         this.wlPointer,
-                                         this.wlKeyboard,
-                                         this.wlTouch);
         //when
-        final WlSeatResource wlSeatResource = wlSeat.onBindClient(mock(Client.class),
-                                                                  1,
-                                                                  1);
+        final WlSeatResource wlSeatResource = this.wlSeat.onBindClient(mock(Client.class),
+                                                                       1,
+                                                                       1);
         //then
         assertThat(wlSeatResource).isNotNull();
-        assertThat(wlSeatResource.getImplementation()).isSameAs(wlSeat);
+        assertThat(wlSeatResource.getImplementation()).isSameAs(this.wlSeat);
     }
 
     @Test
@@ -123,18 +124,11 @@ public class WlSeatTest {
         when(this.wlPointer.add(client,
                                 version,
                                 id)).thenReturn(wlPointerResource);
-
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         this.seat,
-                                         this.wlPointer,
-                                         this.wlKeyboard,
-                                         this.wlTouch);
-        wlSeat.getResources()
-              .add(wlSeatResource);
+        this.wlSeat.getResources()
+                   .add(wlSeatResource);
         //when
-        wlSeat.getPointer(wlSeatResource,
-                          id);
+        this.wlSeat.getPointer(wlSeatResource,
+                               id);
         //then
         verify(this.wlPointer).add(client,
                                    version,
@@ -147,8 +141,8 @@ public class WlSeatTest {
         destroyListener.handle();
 
         //then
-        assertThat(wlSeat.getWlPointerResource(wlSeatResource)
-                         .isPresent()).isFalse();
+        assertThat(this.wlSeat.getWlPointerResource(wlSeatResource)
+                              .isPresent()).isFalse();
     }
 
     @Test
@@ -168,17 +162,11 @@ public class WlSeatTest {
                                  id)).thenReturn(wlKeyboardResource);
         when(this.wlKeyboard.getKeyboardDevice()).thenReturn(keyboardDevice);
 
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         this.seat,
-                                         this.wlPointer,
-                                         this.wlKeyboard,
-                                         this.wlTouch);
-        wlSeat.getResources()
-              .add(wlSeatResource);
+        this.wlSeat.getResources()
+                   .add(wlSeatResource);
         //when
-        wlSeat.getKeyboard(wlSeatResource,
-                           id);
+        this.wlSeat.getKeyboard(wlSeatResource,
+                                id);
         //then
         verify(this.wlKeyboard).add(client,
                                     version,
@@ -193,8 +181,8 @@ public class WlSeatTest {
         destroyListener.handle();
 
         //then
-        assertThat(wlSeat.getWlKeyboardResource(wlSeatResource)
-                         .isPresent()).isFalse();
+        assertThat(this.wlSeat.getWlKeyboardResource(wlSeatResource)
+                              .isPresent()).isFalse();
     }
 
     @Test
@@ -211,18 +199,11 @@ public class WlSeatTest {
         when(this.wlTouch.add(client,
                               version,
                               id)).thenReturn(wlTouchResource);
-
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         this.seat,
-                                         this.wlPointer,
-                                         this.wlKeyboard,
-                                         this.wlTouch);
-        wlSeat.getResources()
-              .add(wlSeatResource);
+        this.wlSeat.getResources()
+                   .add(wlSeatResource);
         //when
-        wlSeat.getTouch(wlSeatResource,
-                        id);
+        this.wlSeat.getTouch(wlSeatResource,
+                             id);
         //then
         verify(this.wlTouch).add(client,
                                  version,
@@ -235,28 +216,22 @@ public class WlSeatTest {
         destroyListener.handle();
 
         //then
-        assertThat(wlSeat.getWlTouchResource(wlSeatResource)
-                         .isPresent()).isFalse();
+        assertThat(this.wlSeat.getWlTouchResource(wlSeatResource)
+                              .isPresent()).isFalse();
     }
 
     @Test
     public void testCreate() throws Exception {
         //given
-        final WlSeat wlSeat = new WlSeat(this.display,
-                                         this.wlDataDevice,
-                                         this.seat,
-                                         this.wlPointer,
-                                         this.wlKeyboard,
-                                         this.wlTouch);
         final Client client  = mock(Client.class);
         final int    version = 2;
         final int    id      = 7;
         //when
-        final WlSeatResource wlSeatResource = wlSeat.create(client,
-                                                            version,
-                                                            id);
+        final WlSeatResource wlSeatResource = this.wlSeat.create(client,
+                                                                 version,
+                                                                 id);
         //then
         assertThat(wlSeatResource).isNotNull();
-        assertThat(wlSeatResource.getImplementation()).isSameAs(wlSeat);
+        assertThat(wlSeatResource.getImplementation()).isSameAs(this.wlSeat);
     }
 }

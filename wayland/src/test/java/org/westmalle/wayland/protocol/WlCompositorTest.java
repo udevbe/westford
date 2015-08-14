@@ -78,6 +78,8 @@ public class WlCompositorTest {
     @Mock
     private Pointer                     globalPointer;
 
+    private WlCompositor wlCompositor;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class,
@@ -89,7 +91,12 @@ public class WlCompositorTest {
                                                                anyInt(),
                                                                any(),
                                                                any())).thenReturn(this.globalPointer);
-
+        this.wlCompositor = new WlCompositor(this.display,
+                                             this.wlSurfaceFactory,
+                                             this.wlRegionFactory,
+                                             this.finiteRegionFactory,
+                                             this.surfaceFactory,
+                                             this.compositor);
     }
 
     @Test
@@ -100,20 +107,14 @@ public class WlCompositorTest {
                                                                  any(),
                                                                  anyInt(),
                                                                  anyInt())).thenReturn(resourcePointer);
-        final WlCompositor wlCompositor = new WlCompositor(this.display,
-                                                           this.wlSurfaceFactory,
-                                                           this.wlRegionFactory,
-                                                           this.finiteRegionFactory,
-                                                           this.surfaceFactory,
-                                                           this.compositor);
 
         //when
-        final WlCompositorResource wlCompositorResource = wlCompositor.onBindClient(mock(Client.class),
-                                                                                    1,
-                                                                                    1);
+        final WlCompositorResource wlCompositorResource = this.wlCompositor.onBindClient(mock(Client.class),
+                                                                                         1,
+                                                                                         1);
         //then
         assertThat(wlCompositorResource).isNotNull();
-        assertThat(wlCompositorResource.getImplementation()).isSameAs(wlCompositor);
+        assertThat(wlCompositorResource.getImplementation()).isSameAs(this.wlCompositor);
     }
 
     @Test
@@ -140,17 +141,10 @@ public class WlCompositorTest {
 
         final Surface surface = mock(Surface.class);
         when(this.surfaceFactory.create(wlCompositorResource)).thenReturn(surface);
-
-        final WlCompositor wlCompositor = new WlCompositor(this.display,
-                                                           this.wlSurfaceFactory,
-                                                           this.wlRegionFactory,
-                                                           this.finiteRegionFactory,
-                                                           this.surfaceFactory,
-                                                           this.compositor);
         //when
         final int id = 1;
-        wlCompositor.createSurface(wlCompositorResource,
-                                   1);
+        this.wlCompositor.createSurface(wlCompositorResource,
+                                        1);
         //then
         verify(wlSurface).add(client,
                               version,
@@ -185,17 +179,10 @@ public class WlCompositorTest {
         when(wlCompositorResource.getClient()).thenReturn(client);
         final int version = 2;
         when(wlCompositorResource.getVersion()).thenReturn(version);
-
-        final WlCompositor wlCompositor = new WlCompositor(this.display,
-                                                           this.wlSurfaceFactory,
-                                                           this.wlRegionFactory,
-                                                           this.finiteRegionFactory,
-                                                           this.surfaceFactory,
-                                                           this.compositor);
         //when
         final int id = 5;
-        wlCompositor.createRegion(wlCompositorResource,
-                                  id);
+        this.wlCompositor.createRegion(wlCompositorResource,
+                                       id);
         //then
         verify(wlRegion).add(client,
                              version,
@@ -205,19 +192,13 @@ public class WlCompositorTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final WlCompositor wlCompositor = new WlCompositor(this.display,
-                                                           this.wlSurfaceFactory,
-                                                           this.wlRegionFactory,
-                                                           this.finiteRegionFactory,
-                                                           this.surfaceFactory,
-                                                           this.compositor);
         final Client client  = mock(Client.class);
         final int    version = 1;
         final int    id      = 6;
         //when
-        final WlCompositorResource wlCompositorResource = wlCompositor.create(client,
-                                                                              version,
-                                                                              id);
+        final WlCompositorResource wlCompositorResource = this.wlCompositor.create(client,
+                                                                                   version,
+                                                                                   id);
         //then
         assertThat(wlCompositorResource).isNotNull();
     }

@@ -25,67 +25,65 @@ public class ProtocolObjectTest {
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
+    private ProtocolObjectDummy         protocolObject;
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.protocolObject = new ProtocolObjectDummy();
     }
 
     @Test
     public void testAddNone() throws Exception {
         //given
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
         //when
         //then
-        assertThat((Iterable) protocolObject.getResources()).isEmpty();
+        assertThat((Iterable) this.protocolObject.getResources()).isEmpty();
     }
 
     @Test
     public void testAddSingle() throws Exception {
         //given
-        final Client                      client         = mock(Client.class);
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final Client client = mock(Client.class);
         //when
-        final Resource<?> resource = protocolObject.add(client,
-                                                        1,
-                                                        1);
+        final Resource<?> resource = this.protocolObject.add(client,
+                                                             1,
+                                                             1);
         //then
-        assertThat((Iterable) protocolObject.getResources()).contains(resource);
-        assertThat((Iterable) protocolObject.getResources()).hasSize(1);
+        assertThat((Iterable) this.protocolObject.getResources()).contains(resource);
+        assertThat((Iterable) this.protocolObject.getResources()).hasSize(1);
     }
 
     @Test
     public void testAddMultiple() throws Exception {
         //given
-        final Client                      client         = mock(Client.class);
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final Client client = mock(Client.class);
         //when
-        final Resource<?> resource0 = protocolObject.add(client,
-                                                         1,
-                                                         1);
-        final Resource<?> resource1 = protocolObject.add(client,
-                                                         1,
-                                                         2);
-        final Resource<?> resource2 = protocolObject.add(client,
-                                                         1,
-                                                         3);
+        final Resource<?> resource0 = this.protocolObject.add(client,
+                                                              1,
+                                                              1);
+        final Resource<?> resource1 = this.protocolObject.add(client,
+                                                              1,
+                                                              2);
+        final Resource<?> resource2 = this.protocolObject.add(client,
+                                                              1,
+                                                              3);
         //then
-        assertThat((Iterable) protocolObject.getResources()).contains(resource0);
-        assertThat((Iterable) protocolObject.getResources()).contains(resource1);
-        assertThat((Iterable) protocolObject.getResources()).contains(resource2);
-        assertThat((Iterable) protocolObject.getResources()).hasSize(3);
+        assertThat((Iterable) this.protocolObject.getResources()).contains(resource0);
+        assertThat((Iterable) this.protocolObject.getResources()).contains(resource1);
+        assertThat((Iterable) this.protocolObject.getResources()).contains(resource2);
+        assertThat((Iterable) this.protocolObject.getResources()).hasSize(3);
     }
 
     @Test
     public void testDestroyed() {
         //given
-        final Client                      client         = mock(Client.class);
-        final ProtocolObject<Resource<?>> protocolObject = new ProtocolObjectDummy();
+        final Client client = mock(Client.class);
         //when
-        final Resource<?> resource = protocolObject.add(client,
-                                                        1,
-                                                        1);
+        final Resource<?> resource = this.protocolObject.add(client,
+                                                             1,
+                                                             1);
         //then
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(resource).register(listenerArgumentCaptor.capture());
@@ -95,6 +93,6 @@ public class ProtocolObjectTest {
         listener.handle();
 
         //then
-        assertThat((Iterable<Resource<?>>) protocolObject.getResources()).doesNotContain(resource);
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).doesNotContain(resource);
     }
 }

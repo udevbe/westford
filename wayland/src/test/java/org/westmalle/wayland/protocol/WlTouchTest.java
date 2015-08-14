@@ -37,20 +37,21 @@ public class WlTouchTest {
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
 
+    private WlTouch wlTouch;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        this.wlTouch = new WlTouch();
     }
 
     @Test
     public void testRelease() throws Exception {
         //given
         final WlTouchResource wlTouchResource = mock(WlTouchResource.class);
-
-        final WlTouch wlTouch = new WlTouch();
         //when
-        wlTouch.release(wlTouchResource);
+        this.wlTouch.release(wlTouchResource);
         //then
         verify(wlTouchResource).destroy();
     }
@@ -61,14 +62,12 @@ public class WlTouchTest {
         final Client client  = mock(Client.class);
         final int    version = 1;
         final int    id      = 1;
-
-        final WlTouch wlTouch = new WlTouch();
         //when
-        final WlTouchResource wlTouchResource = wlTouch.create(client,
-                                                               version,
-                                                               id);
+        final WlTouchResource wlTouchResource = this.wlTouch.create(client,
+                                                                    version,
+                                                                    id);
         //then
         assertThat(wlTouchResource).isNotNull();
-        assertThat(wlTouchResource.getImplementation()).isSameAs(wlTouch);
+        assertThat(wlTouchResource.getImplementation()).isSameAs(this.wlTouch);
     }
 }
