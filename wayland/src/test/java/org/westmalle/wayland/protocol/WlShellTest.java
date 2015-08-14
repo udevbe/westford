@@ -17,11 +17,13 @@ import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.WlShellResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
+import org.freedesktop.wayland.shared.WlShellError;
 import org.freedesktop.wayland.util.InterfaceMeta;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +43,7 @@ import java.util.Optional;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -94,9 +97,12 @@ public class WlShellTest {
         final Surface           surface           = mock(Surface.class);
         final Role              role              = mock(Role.class);
         final Optional<Role>    roleOptional      = Optional.of(role);
+        final Resource          displayResource   = mock(Resource.class);
 
         final Client client  = mock(Client.class);
         final int    version = 3;
+
+        when(client.getObject(Display.OBJECT_ID)).thenReturn(displayResource);
 
         when(wlShellResource.getClient()).thenReturn(client);
         when(wlShellResource.getVersion()).thenReturn(version);
@@ -121,7 +127,8 @@ public class WlShellTest {
         //then
         verifyZeroInteractions(shellSurfaceFactory);
         verifyZeroInteractions(this.wlShellSurfaceFactory);
-        //TODO verify protocol error is send out
+        verify(displayResource).postError(eq(WlShellError.ROLE.getValue()),
+                                          anyString());
     }
 
     @Test
