@@ -1,5 +1,6 @@
 package org.westmalle.wayland.core;
 
+import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -140,6 +142,13 @@ public class KeyboardDeviceTest {
     @Test
     public void testUpdateKeymap() throws Exception {
         //given
+        final Pointer pointer = mock(Pointer.class);
+        when(this.libc.mmap(any(),
+                            anyInt(),
+                            anyInt(),
+                            anyInt(),
+                            anyInt(),
+                            anyInt())).thenReturn(pointer);
         final Client client0 = mock(Client.class);
 
         final WlKeyboardResource wlKeyboardResource0 = mock(WlKeyboardResource.class);
@@ -153,9 +162,8 @@ public class KeyboardDeviceTest {
                                          Optional.of(keymap));
 
         //then
-//        verify(wlKeyboardResource0).keymap(WlKeyboardKeymapFormat.XKB_V1.getValue(),
-//                                           fd,
-//                                           size);
-        throw new UnsupportedOperationException();
+        verify(wlKeyboardResource0).keymap(WlKeyboardKeymapFormat.XKB_V1.getValue(),
+                                           0,
+                                           keymapString.length());
     }
 }
