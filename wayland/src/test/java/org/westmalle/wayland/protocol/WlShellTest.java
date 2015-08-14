@@ -43,6 +43,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -173,12 +174,18 @@ public class WlShellTest {
                                    id);
         verify(surface).setRole(shellSurface);
 
-        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlSurfaceResource).register(destroyListenerArgumentCaptor.capture());
+        final ArgumentCaptor<DestroyListener> surfaceResourceDestroyListenerCaptor      = ArgumentCaptor.forClass(DestroyListener.class);
+        final ArgumentCaptor<DestroyListener> shellSurfaceResourceDestroyListenerCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+
+        verify(wlSurfaceResource).register(surfaceResourceDestroyListenerCaptor.capture());
+        verify(wlShellSurfaceResource).register(shellSurfaceResourceDestroyListenerCaptor.capture());
 
         //and when
-        final DestroyListener destroyListener = destroyListenerArgumentCaptor.getValue();
-        destroyListener.handle();
+        final DestroyListener surfaceDestroyListener = surfaceResourceDestroyListenerCaptor.getValue();
+        surfaceDestroyListener.handle();
+        final DestroyListener shellSurfaceDestroyListener = shellSurfaceResourceDestroyListenerCaptor.getValue();
+        shellSurfaceDestroyListener.handle();
+
         //then
         verify(wlShellSurfaceResource).destroy();
 
@@ -188,9 +195,10 @@ public class WlShellTest {
                                 wlSurfaceResource);
 
         //then
-        verify(wlShellSurface).add(client,
-                                   version,
-                                   id);
+        verify(wlShellSurface,
+               times(2)).add(client,
+                             version,
+                             id);
     }
 
     @Test
