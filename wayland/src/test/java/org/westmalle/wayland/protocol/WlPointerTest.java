@@ -14,10 +14,13 @@
 package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
+import org.freedesktop.wayland.shared.WlPointerError;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +35,8 @@ import org.westmalle.wayland.core.Surface;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -132,16 +137,60 @@ public class WlPointerTest {
     @Test
     public void testSetCursorSameSurface() {
         //given: a pointer with a surface with a role that is this pointer device
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final int               serial            = 12345;
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getRole()).thenReturn(Optional.of(this.pointerDevice));
+
+        final int hotspotX = 10;
+        final int hotspotY = 15;
+
         //when: SetCursor is called
+        this.wlPointer.setCursor(wlPointerResource,
+                                 serial,
+                                 wlSurfaceResource,
+                                 hotspotX,
+                                 hotspotY);
         //then: cursor is set on pointer device
-        throw new UnsupportedOperationException();
+        verify(this.pointerDevice).setCursor(wlPointerResource,
+                                             serial,
+                                             wlSurfaceResource,
+                                             hotspotX,
+                                             hotspotY);
     }
 
     @Test
     public void testSetCursorOtherRoleSurface() {
         //given: a pointer with a surface with a role that is not this pointer device
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        final Client            client            = mock(Client.class);
+        when(wlPointerResource.getClient()).thenReturn(client);
+        final Resource displayResource = mock(Resource.class);
+        when(client.getObject(Display.OBJECT_ID)).thenReturn(displayResource);
+        final int               serial            = 12345;
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getRole()).thenReturn(Optional.of(new Role() {}));
+
+        final int hotspotX = 10;
+        final int hotspotY = 15;
+
         //when: SetCursor is called
+        this.wlPointer.setCursor(wlPointerResource,
+                                 serial,
+                                 wlSurfaceResource,
+                                 hotspotX,
+                                 hotspotY);
+
         //then: a protocol error is raised.
-        throw new UnsupportedOperationException();
+        verify(displayResource).postError(eq(WlPointerError.ROLE.getValue()),
+                                          anyString());
     }
 }
