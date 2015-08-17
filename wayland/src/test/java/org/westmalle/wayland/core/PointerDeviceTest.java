@@ -1077,8 +1077,13 @@ public class PointerDeviceTest {
     public void testCursorMoveOtherClientMotion() {
         // given: an active cursor for a surface, a second surface
 
-        final WlPointerResource      wlPointerResource0 = mock(WlPointerResource.class);
-        final WlPointerResource      wlPointerResource1 = mock(WlPointerResource.class);
+        final Client client0 = mock(Client.class);
+        final Client client1 = mock(Client.class);
+
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
+        when(wlPointerResource0.getClient()).thenReturn(client0);
+        final WlPointerResource wlPointerResource1 = mock(WlPointerResource.class);
+        when(wlPointerResource1.getClient()).thenReturn(client1);
         final Set<WlPointerResource> wlPointerResources = new HashSet<>();
         wlPointerResources.add(wlPointerResource0);
         wlPointerResources.add(wlPointerResource1);
@@ -1090,7 +1095,7 @@ public class PointerDeviceTest {
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         wlSurfaceResources.add(wlSurfaceResource0);
-        final Client client0 = mock(Client.class);
+
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
@@ -1116,7 +1121,6 @@ public class PointerDeviceTest {
 
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         wlSurfaceResources.add(wlSurfaceResource1);
-        final Client client1 = mock(Client.class);
         when(wlSurfaceResource1.getClient()).thenReturn(client1);
         final WlSurface wlSurface1 = mock(WlSurface.class);
         when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
@@ -1195,9 +1199,85 @@ public class PointerDeviceTest {
     @Test
     public void testCursorMoveSameClientMotion() {
         //given: an active cursor
+        final Client client0 = mock(Client.class);
+
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
+        when(wlPointerResource0.getClient()).thenReturn(client0);
+        final Set<WlPointerResource> wlPointerResources = new HashSet<>();
+        wlPointerResources.add(wlPointerResource0);
+
+        final int x = 100;
+        final int y = 200;
+
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource0);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
+        when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegion         wlRegion0         = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(region0));
+
+        final Point localPointerPosition0 = mock(Point.class);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(region0.contains(size0,
+                              localPointerPosition0)).thenReturn(true);
+
+        final Point localPointerPosition1 = mock(Point.class);
+        when(surface0.local(Point.create(x,
+                                         y))).thenReturn(localPointerPosition1);
+        when(region0.contains(size0,
+                              localPointerPosition1)).thenReturn(true);
+
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+
+        final WlSurfaceResource wlSurfaceResourceCursor0 = mock(WlSurfaceResource.class);
+        when(wlSurfaceResourceCursor0.getClient()).thenReturn(client0);
+        final WlSurface wlSurfaceCursor0 = mock(WlSurface.class);
+        when(wlSurfaceResourceCursor0.getImplementation()).thenReturn(wlSurfaceCursor0);
+        final Surface surfaceCursor0 = mock(Surface.class);
+        when(wlSurfaceCursor0.getSurface()).thenReturn(surfaceCursor0);
+        final SurfaceState surfaceStateCursor0 = SurfaceState.builder()
+                                                             .build();
+        when(surfaceCursor0.getState()).thenReturn(surfaceStateCursor0);
+        final Cursor cursor0 = mock(Cursor.class);
+        when(this.cursorFactory.create(eq(wlSurfaceResourceCursor0),
+                                       any())).thenReturn(cursor0);
+        when(cursor0.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor0);
+
+        this.pointerDevice.motion(wlPointerResources,
+                                  0,
+                                  0);
+
+        this.pointerDevice.setCursor(wlPointerResource0,
+                                     this.pointerDevice.getEnterSerial(),
+                                     wlSurfaceResourceCursor0,
+                                     0,
+                                     0);
+
         //when: cursor moves inside of client area
+        this.pointerDevice.motion(wlPointerResources,
+                                  x,
+                                  y);
+
         //then: client cursor is not hidden and position is updated.
-        throw new UnsupportedOperationException();
+        verify(cursor0,
+               never()).hide();
+        verify(cursor0).updatePosition(Point.create(x,
+                                                    y));
     }
 
     @Test
