@@ -78,10 +78,12 @@ class Boot {
         //setup compositing for output support
         //create a compositor with shell and scene logic
         final Compositor compositor = compositorFactory.create(renderer);
+
         //add our output to the compositor
-        //TODO add hotplug functionality
+        //TODO add output hotplug functionality (eg monitor hotplug)
         compositor.getWlOutputs()
                   .add(wlOutput);
+
         //create a wayland compositor that delegates it's requests to a compositor implementation.
         final WlCompositor wlCompositor = wlCompositorFactory.create(compositor);
 
@@ -90,6 +92,7 @@ class Boot {
 
         //setup seat for input support
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
+        //TODO add seat hotplug functionality (eg multiple mouses)
         seatFactory.create(wlOutput,
                            compositor);
 
