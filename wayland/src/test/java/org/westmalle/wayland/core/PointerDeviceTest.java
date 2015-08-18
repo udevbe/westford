@@ -1213,36 +1213,36 @@ public class PointerDeviceTest {
 
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
 
-        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
-        when(wlSurfaceResource0.getClient()).thenReturn(client0);
-        final WlSurface wlSurface0 = mock(WlSurface.class);
-        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-        final Surface surface0 = mock(Surface.class);
-        when(wlSurface0.getSurface()).thenReturn(surface0);
-        final Rectangle size0 = mock(Rectangle.class);
-        when(surface0.getSize()).thenReturn(size0);
-        final SurfaceState surfaceState0 = mock(SurfaceState.class);
-        when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
-        when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
-        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
-        final WlRegion         wlRegion0         = mock(WlRegion.class);
-        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
-        final Region region0 = mock(Region.class);
-        when(wlRegion0.getRegion()).thenReturn(region0);
-        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(region0));
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource);
+        when(wlSurfaceResource.getClient()).thenReturn(client0);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        final Rectangle size = mock(Rectangle.class);
+        when(surface.getSize()).thenReturn(size);
+        final SurfaceState surfaceState = mock(SurfaceState.class);
+        when(surface.getState()).thenReturn(surfaceState);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
+        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final WlRegion         wlRegion         = mock(WlRegion.class);
+        when(wlRegionResource.getImplementation()).thenReturn(wlRegion);
+        final Region region = mock(Region.class);
+        when(wlRegion.getRegion()).thenReturn(region);
+        when(surfaceState.getInputRegion()).thenReturn(Optional.of(region));
 
         final Point localPointerPosition0 = mock(Point.class);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
-        when(region0.contains(size0,
-                              localPointerPosition0)).thenReturn(true);
+        when(surface.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(region.contains(size,
+                             localPointerPosition0)).thenReturn(true);
 
         final Point localPointerPosition1 = mock(Point.class);
-        when(surface0.local(Point.create(x,
-                                         y))).thenReturn(localPointerPosition1);
-        when(region0.contains(size0,
-                              localPointerPosition1)).thenReturn(true);
+        when(surface.local(Point.create(x,
+                                        y))).thenReturn(localPointerPosition1);
+        when(region.contains(size,
+                             localPointerPosition1)).thenReturn(true);
 
         when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
@@ -1582,9 +1582,83 @@ public class PointerDeviceTest {
     @Test
     public void testBeforeCommit() throws Exception {
         // given: a surface that is the current cursor that is visible
+
+        final Client client = mock(Client.class);
+
+        final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
+        when(wlPointerResource0.getClient()).thenReturn(client);
+        final Set<WlPointerResource> wlPointerResources = new HashSet<>();
+        wlPointerResources.add(wlPointerResource0);
+
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource);
+        when(wlSurfaceResource.getClient()).thenReturn(client);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        final Rectangle size = mock(Rectangle.class);
+        when(surface.getSize()).thenReturn(size);
+        final SurfaceState surfaceState = mock(SurfaceState.class);
+        when(surface.getState()).thenReturn(surfaceState);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
+        final WlRegionResource wlRegionResource = mock(WlRegionResource.class);
+        final WlRegion         wlRegion         = mock(WlRegion.class);
+        when(wlRegionResource.getImplementation()).thenReturn(wlRegion);
+        final Region region = mock(Region.class);
+        when(wlRegion.getRegion()).thenReturn(region);
+        when(surfaceState.getInputRegion()).thenReturn(Optional.of(region));
+
+        final Point localPointerPosition0 = mock(Point.class);
+        when(surface.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(region.contains(size,
+                             localPointerPosition0)).thenReturn(true);
+
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+
+        final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
+        when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
+        final WlSurface wlSurfaceCursor = mock(WlSurface.class);
+        when(wlSurfaceResourceCursor.getImplementation()).thenReturn(wlSurfaceCursor);
+        final Surface surfaceCursor = mock(Surface.class);
+        when(wlSurfaceCursor.getSurface()).thenReturn(surfaceCursor);
+        final WlBufferResource wlBufferResourceCursor = mock(WlBufferResource.class);
+        final Region           inputRegion            = mock(Region.class);
+        final int              scale                  = 2;
+        final SurfaceState surfaceStateCursor = SurfaceState.builder()
+                                                            .scale(scale)
+                                                            .buffer(Optional.of(wlBufferResourceCursor))
+                                                            .inputRegion(Optional.of(inputRegion))
+                                                            .build();
+        when(surfaceCursor.getState()).thenReturn(surfaceStateCursor);
+        when(surfaceCursor.getPendingState()).thenReturn(surfaceStateCursor);
+        final Cursor cursor = mock(Cursor.class);
+        when(this.cursorFactory.create(eq(wlSurfaceResourceCursor),
+                                       any())).thenReturn(cursor);
+        when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
+
+        this.pointerDevice.motion(wlPointerResources,
+                                  0,
+                                  0);
+
+        this.pointerDevice.setCursor(wlPointerResource0,
+                                     this.pointerDevice.getEnterSerial(),
+                                     wlSurfaceResourceCursor,
+                                     0,
+                                     0);
+
         // when: the surface state is about to be committed,
-        // then: only the surface's input region is cleared.
-        throw new UnsupportedOperationException();
+        this.pointerDevice.beforeCommit(wlSurfaceResourceCursor);
+
+        // then: the cursor surface's input region is set to the null region
+        verify(surfaceCursor).setPendingState(eq(SurfaceState.builder()
+                                                             .scale(scale)
+                                                             .buffer(Optional.of(wlBufferResourceCursor))
+                                                             .inputRegion(Optional.of(this.nullRegion))
+                                                             .build()));
     }
 
     @Test
