@@ -53,6 +53,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.powermock.api.mockito.PowerMockito.verifyNoMoreInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -1542,9 +1543,40 @@ public class PointerDeviceTest {
     @Test
     public void testSerialMismatchSetCursor() throws Exception {
         // given: pointer with surface with a wrong enter event serial
+        final Client            client            = mock(Client.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getClient()).thenReturn(client);
+
+        final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
+        when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
+        final WlSurface wlSurfaceCursor = mock(WlSurface.class);
+        when(wlSurfaceResourceCursor.getImplementation()).thenReturn(wlSurfaceCursor);
+        final Surface surfaceCursor = mock(Surface.class);
+        when(wlSurfaceCursor.getSurface()).thenReturn(surfaceCursor);
+        final SurfaceState surfaceStateCursor = SurfaceState.builder()
+                                                            .build();
+        when(surfaceCursor.getState()).thenReturn(surfaceStateCursor);
+        final Cursor cursor   = mock(Cursor.class);
+        final int    hotspotX = 12;
+        final int    hotspotY = 34;
+        when(this.cursorFactory.create(eq(wlSurfaceResourceCursor),
+                                       eq(Point.create(hotspotX,
+                                                       hotspotY)))).thenReturn(cursor);
+        when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
+
+        final int wrongSerial = 12356;
+
         // when: set cursor is called
+        this.pointerDevice.setCursor(wlPointerResource,
+                                     wrongSerial,
+                                     wlSurfaceResourceCursor,
+                                     hotspotX,
+                                     hotspotY);
+
         // then: call is ignored
-        throw new UnsupportedOperationException();
+        verifyZeroInteractions(this.cursorFactory);
+        verifyZeroInteractions(wlPointerResource);
+        verifyZeroInteractions(wlSurfaceResourceCursor);
     }
 
     @Test
