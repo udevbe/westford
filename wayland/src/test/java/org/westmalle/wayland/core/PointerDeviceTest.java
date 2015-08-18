@@ -1895,10 +1895,39 @@ public class PointerDeviceTest {
 
     @Test
     public void testAfterDestroy() throws Exception {
-        // given: a destroyed surface
-        // when: this method is called
+        // given: a cursor surface
+        final Client            client            = mock(Client.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getClient()).thenReturn(client);
+
+        final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
+        when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
+        final WlSurface wlSurfaceCursor = mock(WlSurface.class);
+        when(wlSurfaceResourceCursor.getImplementation()).thenReturn(wlSurfaceCursor);
+        final Surface surfaceCursor = mock(Surface.class);
+        when(wlSurfaceCursor.getSurface()).thenReturn(surfaceCursor);
+        final SurfaceState surfaceStateCursor = SurfaceState.builder()
+                                                            .build();
+        when(surfaceCursor.getState()).thenReturn(surfaceStateCursor);
+        final Cursor cursor   = mock(Cursor.class);
+        final int    hotspotX = 12;
+        final int    hotspotY = 34;
+        when(this.cursorFactory.create(eq(wlSurfaceResourceCursor),
+                                       eq(Point.create(hotspotX,
+                                                       hotspotY)))).thenReturn(cursor);
+        when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
+
+        this.pointerDevice.setCursor(wlPointerResource,
+                                     this.pointerDevice.getEnterSerial(),
+                                     wlSurfaceResourceCursor,
+                                     hotspotX,
+                                     hotspotY);
+
+        // when: cursor surface is destroyed
+        this.pointerDevice.afterDestroy(wlSurfaceResourceCursor);
+
         // then: corresponding cursor is no longer tracked
-        throw new UnsupportedOperationException();
+        verify(cursor).hide();
     }
 
     @Test
