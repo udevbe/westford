@@ -48,6 +48,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -1468,18 +1469,22 @@ public class PointerDeviceTest {
                                      0,
                                      0);
 
+        final int hotspotX = 11;
+        final int hotspotY = 23;
+
         // when: surface is same as previous surface
         this.pointerDevice.setCursor(wlPointerResource,
                                      this.pointerDevice.getEnterSerial(),
                                      wlSurfaceResourceCursor,
-                                     10,
-                                     20);
+                                     hotspotX,
+                                     hotspotY);
 
         // then: cursor hotspot is updated and no additional destroy listener is registered for pointer
-        verify(cursor).setHotspot(Point.create(10,
-                                               20));
-        ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlPointerResource).register(destroyListenerArgumentCaptor.capture());
+        verify(cursor).setHotspot(Point.create(hotspotX,
+                                               hotspotY));
+        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlPointerResource,
+               atMost(1)).register(destroyListenerArgumentCaptor.capture());
 
         // and when: pointer is destroyed
         destroyListenerArgumentCaptor.getValue()
@@ -1491,18 +1496,54 @@ public class PointerDeviceTest {
 
     @Test
     public void testPreviousCursorNullSetCursor() throws Exception {
-        // given: pointer with surface
-        // when: previous surface was null
+        // given: pointer with no surface
+        final Client            client            = mock(Client.class);
+        final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
+        when(wlPointerResource.getClient()).thenReturn(client);
+
+        final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
+        when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
+        final WlSurface wlSurfaceCursor = mock(WlSurface.class);
+        when(wlSurfaceResourceCursor.getImplementation()).thenReturn(wlSurfaceCursor);
+        final Surface surfaceCursor = mock(Surface.class);
+        when(wlSurfaceCursor.getSurface()).thenReturn(surfaceCursor);
+        final SurfaceState surfaceStateCursor = SurfaceState.builder()
+                                                            .build();
+        when(surfaceCursor.getState()).thenReturn(surfaceStateCursor);
+        final Cursor cursor   = mock(Cursor.class);
+        final int    hotspotX = 12;
+        final int    hotspotY = 34;
+        when(this.cursorFactory.create(eq(wlSurfaceResourceCursor),
+                                       eq(Point.create(hotspotX,
+                                                       hotspotY)))).thenReturn(cursor);
+        when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
+
+        // when: cursor surface is set
+        this.pointerDevice.setCursor(wlPointerResource,
+                                     this.pointerDevice.getEnterSerial(),
+                                     wlSurfaceResourceCursor,
+                                     hotspotX,
+                                     hotspotY);
+
         // then: cursor is made visible and hotspot is updated and destroy listener is registered for pointer
+        verify(cursor).updatePosition(this.pointerDevice.getPosition());
+
+        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlPointerResource).register(destroyListenerArgumentCaptor.capture());
+
         // and when: pointer is destroyed
+        destroyListenerArgumentCaptor.getValue()
+                                     .handle();
+
         // then: cursor is made invisible
-        throw new UnsupportedOperationException();
+        verify(cursor).hide();
     }
 
     @Test
     public void testSerialMismatchSetCursor() throws Exception {
         // given: pointer with surface with a wrong enter event serial
-        // when: set cursor is called, then: call is ignored
+        // when: set cursor is called
+        // then: call is ignored
         throw new UnsupportedOperationException();
     }
 
