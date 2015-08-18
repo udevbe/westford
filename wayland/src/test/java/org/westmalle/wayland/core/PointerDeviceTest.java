@@ -1998,6 +1998,18 @@ public class PointerDeviceTest {
     public void testFocusSurfaceDestroyedNewFocus() throws Exception {
         // given: a surface that has the focus, an underlying surface
 
+
+
+        // when: the surface is destroyed
+
+
+        // then: the underlying surface gets the focus
+
+    }
+
+    @Test
+    public void testFocusSurfaceDestroyedNoFocus() throws Exception {
+        // given: a surface that has the focus
         //mock jobexecutor
         doAnswer(invocation -> {
             Runnable runnable = (Runnable) invocation.getArguments()[0];
@@ -2056,17 +2068,8 @@ public class PointerDeviceTest {
                        .remove(wlSurfaceResource0);
         destroyListenerArgumentCaptor.getAllValues()
                                      .forEach(DestroyListener::handle);
-
-        // then: the underlying surface gets the focus
+        // then: no surface has the focus
         assertThat(this.pointerDevice.getFocus()
                                      .isPresent()).isFalse();
-    }
-
-    @Test
-    public void testFocusSurfaceDestroyedNoFocus() throws Exception {
-        // given: a surface that has the focus
-        // when: the surface is destroyed
-        // then: no surface has the focus
-        throw new UnsupportedOperationException();
     }
 }
