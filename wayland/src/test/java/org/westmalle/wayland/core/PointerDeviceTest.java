@@ -48,7 +48,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -1933,17 +1935,131 @@ public class PointerDeviceTest {
     @Test
     public void testGrabSurfaceDestroyed() throws Exception {
         // given: a surface that has the grab
+
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+
+        //mock surface 0
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
+        when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegion         wlRegion0         = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(region0));
+
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = mock(Point.class);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+
+        //mock pointer 0 resource
+        final Set<WlPointerResource> pointerResources   = new HashSet<>();
+        final WlPointerResource      wlPointerResource0 = mock(WlPointerResource.class);
+        when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
+
+        this.pointerDevice.motion(pointerResources,
+                                  0,
+                                  0);
+
+        this.pointerDevice.button(pointerResources,
+                                  1,
+                                  WlPointerButtonState.PRESSED);
+
         // when: the surface is destroyed
+        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlSurfaceResource0,
+               atLeastOnce()).register(destroyListenerArgumentCaptor.capture());
+        destroyListenerArgumentCaptor.getAllValues()
+                                     .forEach(DestroyListener::handle);
+
         // then: the grab surface is forgotten
-        throw new UnsupportedOperationException();
+        assertThat(this.pointerDevice.getGrab()
+                                     .isPresent()).isFalse();
     }
 
     @Test
     public void testFocusSurfaceDestroyedNewFocus() throws Exception {
         // given: a surface that has the focus, an underlying surface
+
+        //mock jobexecutor
+        doAnswer(invocation -> {
+            Runnable runnable = (Runnable) invocation.getArguments()[0];
+            runnable.run();
+            return null;
+        }).when(this.jobExecutor)
+          .submit(any());
+
+        //mock compositor
+        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
+        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+
+        //mock surface 0
+        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        wlSurfaceResources.add(wlSurfaceResource0);
+        final Client client0 = mock(Client.class);
+        when(wlSurfaceResource0.getClient()).thenReturn(client0);
+        final WlSurface wlSurface0 = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Rectangle size0 = mock(Rectangle.class);
+        when(surface0.getSize()).thenReturn(size0);
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
+        when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
+        final WlRegionResource wlRegionResource0 = mock(WlRegionResource.class);
+        final WlRegion         wlRegion0         = mock(WlRegion.class);
+        when(wlRegionResource0.getImplementation()).thenReturn(wlRegion0);
+        final Region region0 = mock(Region.class);
+        when(wlRegion0.getRegion()).thenReturn(region0);
+        when(surfaceState0.getInputRegion()).thenReturn(Optional.of(region0));
+
+        //mock surface 0 local coordinates
+        final Point localPointerPosition0Start = mock(Point.class);
+        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(region0.contains(size0,
+                              localPointerPosition0Start)).thenReturn(true);
+
+        //mock pointer 0 resource
+        final Set<WlPointerResource> pointerResources   = new HashSet<>();
+        final WlPointerResource      wlPointerResource0 = mock(WlPointerResource.class);
+        when(wlPointerResource0.getClient()).thenReturn(client0);
+        pointerResources.add(wlPointerResource0);
+
+        this.pointerDevice.motion(pointerResources,
+                                  0,
+                                  0);
+
         // when: the surface is destroyed
+        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlSurfaceResource0,
+               atLeastOnce()).register(destroyListenerArgumentCaptor.capture());
+        this.compositor.getSurfacesStack()
+                       .remove(wlSurfaceResource0);
+        destroyListenerArgumentCaptor.getAllValues()
+                                     .forEach(DestroyListener::handle);
+
         // then: the underlying surface gets the focus
-        throw new UnsupportedOperationException();
+        assertThat(this.pointerDevice.getFocus()
+                                     .isPresent()).isFalse();
     }
 
     @Test

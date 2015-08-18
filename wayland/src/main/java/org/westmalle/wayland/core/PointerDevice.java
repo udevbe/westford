@@ -295,8 +295,6 @@ public class PointerDevice implements Role {
     }
 
     private void updateGrab() {
-        //TODO  add a unit test: listen surface destruction and release the grab
-
         //grab will be updated, don't listen for previous grab surface destruction.
         getGrab().ifPresent(wlSurfaceResource -> wlSurfaceResource.unregister(this.grabDestroyListener.get()));
         this.grab = getFocus();
