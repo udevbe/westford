@@ -13,12 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.sun.jna.Pointer;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
-import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -32,8 +29,6 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WIN
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_COMPILE_NO_FLAGS;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_FORMAT_TEXT_V1;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
@@ -43,23 +38,11 @@ public class X11Seat {
     @Nonnull
     private final Libxcb          libxcb;
     @Nonnull
-    private final Libxkbcommon    libxkbcommon;
-    @Nonnull
-    private final Libxkbcommonx11 libxkbcommonx11;
-    @Nonnull
-    private final Pointer         xkbContext;
-    @Nonnull
     private final X11Output       x11Output;
 
     X11Seat(@Nonnull final Libxcb libxcb,
-            @Nonnull final Libxkbcommon libxkbcommon,
-            @Nonnull final Libxkbcommonx11 libxkbcommonx11,
-            @Nonnull final Pointer xkbContext,
             @Nonnull final X11Output x11Output) {
         this.libxcb = libxcb;
-        this.libxkbcommon = libxkbcommon;
-        this.libxkbcommonx11 = libxkbcommonx11;
-        this.xkbContext = xkbContext;
         this.x11Output = x11Output;
     }
 
@@ -162,22 +145,5 @@ public class X11Seat {
                  .motion(wlPointer.getResources(),
                          x,
                          y);
-    }
-
-    public String getXKeymap() {
-
-        final Pointer xcbConnection = this.x11Output.getXcbConnection();
-        final int     device_id     = this.libxkbcommonx11.xkb_x11_get_core_keyboard_device_id(xcbConnection);
-        if (device_id == -1) {
-            //TODO error
-        }
-        final Pointer keymap = this.libxkbcommonx11.xkb_x11_keymap_new_from_device(this.xkbContext,
-                                                                                   xcbConnection,
-                                                                                   device_id,
-                                                                                   XKB_KEYMAP_COMPILE_NO_FLAGS);
-        //FIXME check and handle nulls
-        return this.libxkbcommon.xkb_keymap_get_as_string(keymap,
-                                                          XKB_KEYMAP_FORMAT_TEXT_V1)
-                                .getString(0);
     }
 }

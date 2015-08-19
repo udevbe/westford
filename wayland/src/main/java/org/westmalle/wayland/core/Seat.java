@@ -13,11 +13,15 @@ import java.util.Set;
 public class Seat {
 
     @Nonnull
+    private final Xkb xkb;
+    @Nonnull
     private final Object platformImplementation;
     @Nonnull
     private EnumSet<WlSeatCapability> capabilities = EnumSet.noneOf(WlSeatCapability.class);
 
-    Seat(@Nonnull final Object platformImplementation) {
+    Seat(@Nonnull final Xkb xkb,
+         @Nonnull final Object platformImplementation) {
+        this.xkb = xkb;
         this.platformImplementation = platformImplementation;
     }
 
@@ -41,5 +45,10 @@ public class Seat {
     @Nonnull
     public Object getPlatformImplementation() {
         return this.platformImplementation;
+    }
+
+    @Nonnull
+    public Xkb getXkb() {
+        return this.xkb;
     }
 }
