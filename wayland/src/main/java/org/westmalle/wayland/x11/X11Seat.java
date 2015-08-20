@@ -15,6 +15,8 @@ package org.westmalle.wayland.x11;
 
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
+import org.westmalle.wayland.core.KeyboardDevice;
+import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -36,9 +38,9 @@ import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 public class X11Seat {
 
     @Nonnull
-    private final Libxcb          libxcb;
+    private final Libxcb    libxcb;
     @Nonnull
-    private final X11Output       x11Output;
+    private final X11Output x11Output;
 
     X11Seat(@Nonnull final Libxcb libxcb,
             @Nonnull final X11Output x11Output) {
@@ -52,10 +54,13 @@ public class X11Seat {
         final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
         final int                key                = toLinuxKey(eventDetail);
         final WlKeyboard         wlKeyboard         = wlSeat.getWlKeyboard();
-        wlKeyboard.getKeyboardDevice()
-                  .key(wlKeyboard.getResources(),
-                       key,
-                       wlKeyboardKeyState);
+        //TODO properly use xkbcommon
+        final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
+        final Xkb            xkb            = keyboardDevice.getXkb();
+
+        keyboardDevice.key(wlKeyboard.getResources(),
+                           key,
+                           wlKeyboardKeyState);
     }
 
     private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed) {
@@ -70,8 +75,6 @@ public class X11Seat {
     }
 
     private int toLinuxKey(final short eventDetail) {
-        //TODO properly use xkbcommon
-
         //convert from X keycodes to input.h keycodes
         return eventDetail - 8;
     }
@@ -145,5 +148,10 @@ public class X11Seat {
                  .motion(wlPointer.getResources(),
                          x,
                          y);
+    }
+
+    @Nonnull
+    public X11Output getX11Output() {
+        return this.x11Output;
     }
 }

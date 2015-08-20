@@ -45,6 +45,7 @@ public class Libxcb {
     public static final int  XCB_LEAVE_NOTIFY              = 8;
     public static final int  XCB_FOCUS_IN                  = 9;
     public static final int  XCB_FOCUS_OUT                 = 10;
+    public static final int  XCB_KEYMAP_NOTIFY             = 11;
     public static final int  XCB_EXPOSE                    = 12;
     public static final int  XCB_CLIENT_MESSAGE            = 33;
 

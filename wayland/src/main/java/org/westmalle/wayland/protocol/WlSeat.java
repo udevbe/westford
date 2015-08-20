@@ -25,7 +25,6 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatRequestsV4;
 import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlTouchResource;
-import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.Seat;
 
 import javax.annotation.Nonnegative;
@@ -91,6 +90,10 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
         return wlSeatResource;
     }
 
+    public Seat getSeat() {
+        return this.seat;
+    }
+
     @Override
     public void getPointer(final WlSeatResource wlSeatResource,
                            final int id) {
@@ -118,9 +121,8 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                      wlKeyboardResource);
         wlKeyboardResource.register(() -> WlSeat.this.wlKeyboardResources.remove(wlSeatResource));
 
-        final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
-        keyboardDevice.updateKeymap(Collections.singleton(wlKeyboardResource),
-                                    keyboardDevice.getKeymap());
+        wlKeyboard.getKeyboardDevice()
+                  .emitKeymap(Collections.singleton(wlKeyboardResource));
     }
 
     @Nonnull
@@ -163,10 +165,6 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
                                   version,
                                   id,
                                   this);
-    }
-
-    public Seat getSeat() {
-        return this.seat;
     }
 
     public Optional<WlPointerResource> getWlPointerResource(final WlSeatResource wlSeatResource) {

@@ -49,16 +49,15 @@ public class KeyboardDevice {
     @Nonnull
     private final Compositor compositor;
     @Nonnull
-    private final Xkb        xkb;
-
+    private final Set<Integer> pressedKeys = new HashSet<>();
     @Nonnull
-    private final Set<Integer>                pressedKeys          = new HashSet<>();
+    private Xkb xkb;
     @Nonnull
-    private       Optional<Keymap>            keymap               = Optional.empty();
+    private Optional<Keymap>            keymap               = Optional.empty();
     @Nonnull
-    private       Optional<DestroyListener>   focusDestroyListener = Optional.empty();
+    private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
     @Nonnull
-    private       Optional<WlSurfaceResource> focus                = Optional.empty();
+    private Optional<WlSurfaceResource> focus                = Optional.empty();
 
     private int keySerial;
 
@@ -176,17 +175,27 @@ public class KeyboardDevice {
         this.eventBus.unregister(listener);
     }
 
-    public void updateKeymap(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
-                             @Nonnull final Optional<Keymap> keymap) {
+    public void setKeymap(@Nonnull final Optional<Keymap> keymap) {
         this.keymap = keymap;
+    }
+
+    public void emitKeymap(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources) {
         getKeymap().ifPresent(keymapping -> {
             final NativeString nativeKeyMapping = new NativeString(keymapping.getMap());
-            wlKeyboardResources.forEach(wlKeyboardResource ->
-                                                wlKeyboardResource.keymap(keymapping.getFormat()
-                                                                                    .getValue(),
-                                                                          updateKeymapFile(nativeKeyMapping),
-                                                                          nativeKeyMapping.length()));
+            //FIXME store keymap file information when setting keymap & reuse it when emitting
+            final int keymapFormat = keymapping.getFormat()
+                                               .getValue();
+            final int keymapFile = updateKeymapFile(nativeKeyMapping);
+            final int length = nativeKeyMapping.length();
+            wlKeyboardResources.forEach(wlKeyboardResource -> wlKeyboardResource.keymap(keymapFormat,
+                                                                                        keymapFile,
+                                                                                        length));
         });
+    }
+
+    @Nonnull
+    public Xkb getXkb() {
+        return this.xkb;
     }
 
     @Nonnull
@@ -214,8 +223,7 @@ public class KeyboardDevice {
         return fd;
     }
 
-    @Nonnull
-    public Xkb getXkb() {
-        return this.xkb;
+    public void setXkb(@Nonnull final Xkb xkb) {
+        this.xkb = xkb;
     }
 }

@@ -34,7 +34,6 @@ import java.util.EnumSet;
 import java.util.Optional;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -52,27 +51,27 @@ import static org.mockito.Mockito.when;
 public class X11SeatFactoryTest {
 
     @Mock
-    private Libxcb libxcb;
+    private Libxcb                       libxcb;
     @Mock
-    private X11XkbFactory x11XkbFactory;
+    private X11XkbFactory                x11XkbFactory;
     @Mock
     private X11InputEventListenerFactory x11InputEventListenerFactory;
     @Mock
-    private WlSeatFactory wlSeatFactory;
+    private WlSeatFactory                wlSeatFactory;
     @Mock
-    private SeatFactory seatFactory;
+    private SeatFactory                  seatFactory;
     @Mock
-    private WlPointerFactory wlPointerFactory;
+    private WlPointerFactory             wlPointerFactory;
     @Mock
-    private WlKeyboardFactory wlKeyboardFactory;
+    private WlKeyboardFactory            wlKeyboardFactory;
     @Mock
-    private WlTouchFactory wlTouchFactory;
+    private WlTouchFactory               wlTouchFactory;
     @Mock
-    private PointerDeviceFactory pointerDeviceFactory;
+    private PointerDeviceFactory         pointerDeviceFactory;
     @Mock
-    private KeyboardDeviceFactory keyboardDeviceFactory;
+    private KeyboardDeviceFactory        keyboardDeviceFactory;
     @InjectMocks
-    private X11SeatFactory        x11SeatFactory;
+    private X11SeatFactory               x11SeatFactory;
 
     @Test
     public void testCreate() throws Exception {
@@ -101,6 +100,7 @@ public class X11SeatFactoryTest {
         when(x11Output.getXcbConnection()).thenReturn(xcbConnection);
 
         when(xkb.getKeymapString()).thenReturn(keymapString);
+        when(keyboardDevice.getXkb()).thenReturn(xkb);
         when(this.wlTouchFactory.create()).thenReturn(wlTouch);
         when(this.seatFactory.create(any())).thenReturn(seat);
         when(wlSeat.getSeat()).thenReturn(seat);
@@ -112,8 +112,7 @@ public class X11SeatFactoryTest {
                                        wlPointer,
                                        wlKeyboard,
                                        wlTouch)).thenReturn(wlSeat);
-        when(this.x11InputEventListenerFactory.create(eq(wlSeat),
-                                                      any())).thenReturn(x11InputEventListener);
+        when(this.x11InputEventListenerFactory.create(wlSeat)).thenReturn(x11InputEventListener);
         when(this.x11XkbFactory.create(xcbConnection)).thenReturn(xkb);
         when(this.pointerDeviceFactory.create(compositor)).thenReturn(pointerDevice);
         when(this.wlPointerFactory.create(pointerDevice)).thenReturn(wlPointer);
@@ -128,8 +127,7 @@ public class X11SeatFactoryTest {
         verify(x11EventBus).register(x11InputEventListener);
         verify(seat).setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
                                                 WlSeatCapability.POINTER));
-        verify(keyboardDevice).updateKeymap(anySet(),
-                                            eq(Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
-                                                                         keymapString))));
+        verify(keyboardDevice).setKeymap(eq(Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
+                                                                      keymapString))));
     }
 }

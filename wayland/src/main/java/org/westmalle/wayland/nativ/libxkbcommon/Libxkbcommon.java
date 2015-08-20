@@ -91,7 +91,7 @@ public class Libxkbcommon {
 
     /**
      * Create a keymap from RMLVO names.
-     * <p>
+     * <p/>
      * The primary keymap entry point: creates a new XKB keymap from a set of RMLVO (Rules + Model + Layouts + Variants + Options) names.
      *
      * @param context The context in which to create the keymap.
@@ -117,16 +117,16 @@ public class Libxkbcommon {
 
     /**
      * Update the keyboard state to reflect a given key being pressed or released.
-     * <p>
+     * <p/>
      * This entry point is intended for programs which track the keyboard state explictly (like an evdev client).
      * If the state is serialized to you by a master process (like a Wayland compositor) using functions like
      * xkb_state_serialize_mods(), you should use xkb_state_update_mask() instead. The two functins should not
      * generally be used together.
-     * <p>
+     * <p/>
      * A series of calls to this function should be consistent; that is, a call with XKB_KEY_DOWN for a key should be
      * matched by an XKB_KEY_UP; if a key is pressed twice, it should be released twice; etc. Otherwise (e.g. due to
      * missed input events), situations like "stuck modifiers" may occur.
-     * <p>
+     * <p/>
      * This function is often used in conjunction with the function xkb_state_key_get_syms() (or
      * xkb_state_key_get_one_sym()), for example, when handling a key event. In this case, you should prefer to get
      * the keysyms before updating the key, such that the keysyms reported for the key event are not affected by the
@@ -145,7 +145,7 @@ public class Libxkbcommon {
 
     /**
      * Determine whether a key should repeat or not.
-     * <p>
+     * <p/>
      * A keymap may specify different repeat behaviors for different keys. Most keys should generally exhibit repeat
      * behavior; for example, holding the 'a' key down in a text editor should normally insert a single 'a' character
      * every few milliseconds, until the key is released. However, there are keys which should not or do not need to be
@@ -162,15 +162,15 @@ public class Libxkbcommon {
 
     /**
      * Update a keyboard state from a set of explicit masks.
-     * <p>
+     * <p/>
      * This entry point is intended for window systems and the like, where a master process holds an xkb_state, then
      * serializes it over a wire protocol, and clients then use the serialization to feed in to their own xkb_state.
-     * <p>
+     * <p/>
      * All parameters must always be passed, or the resulting state may be incoherent.
-     * <p>
+     * <p/>
      * The serialization is lossy and will not survive round trips; it must only be used to feed slave state objects,
      * and must not be used to update the master state.
-     * <p>
+     * <p/>
      * If you do not fit the description above, you should use {@link Libxkbcommon#xkb_state_update_key} instead. The
      * two functions should not generally be used together.
      *

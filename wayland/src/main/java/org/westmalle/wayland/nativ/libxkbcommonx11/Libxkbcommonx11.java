@@ -20,7 +20,7 @@ public class Libxkbcommonx11 {
 
     /**
      * Create a keymap from an X11 keyboard device.
-     * <p>
+     * <p/>
      * This function queries the X server with various requests, fetches the details of the active keymap on a keyboard
      * device, and creates an xkb_keymap from these details.
      *
@@ -40,7 +40,7 @@ public class Libxkbcommonx11 {
 
     /**
      * Create a new keyboard state object from an X11 keyboard device.
-     * <p>
+     * <p/>
      * This function is the same as xkb_state_new(), only pre-initialized with the state of the device at the time this
      * function is called.
      *

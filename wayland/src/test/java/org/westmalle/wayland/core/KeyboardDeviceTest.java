@@ -140,7 +140,7 @@ public class KeyboardDeviceTest {
     }
 
     @Test
-    public void testUpdateKeymap() throws Exception {
+    public void testEmitKeymap() throws Exception {
         //given
         final Pointer pointer = mock(Pointer.class);
         when(this.libc.mmap(any(),
@@ -157,9 +157,9 @@ public class KeyboardDeviceTest {
         final String keymapString = "foo keymap";
         final Keymap keymap = Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
                                             keymapString);
+        this.keyboardDevice.setKeymap(Optional.of(keymap));
         //when
-        this.keyboardDevice.updateKeymap(Collections.singleton(wlKeyboardResource0),
-                                         Optional.of(keymap));
+        this.keyboardDevice.emitKeymap(Collections.singleton(wlKeyboardResource0));
 
         //then
         verify(wlKeyboardResource0).keymap(WlKeyboardKeymapFormat.XKB_V1.getValue(),

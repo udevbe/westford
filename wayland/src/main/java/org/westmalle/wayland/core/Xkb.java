@@ -4,6 +4,7 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.sun.jna.Pointer;
+import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 
 import javax.annotation.Nonnull;
@@ -14,6 +15,8 @@ import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_F
 public class Xkb {
 
     @Nonnull
+    private final Libc         libc;
+    @Nonnull
     private final Libxkbcommon libxkbcommon;
 
     @Nonnull
@@ -23,10 +26,12 @@ public class Xkb {
     @Nonnull
     private final Pointer xkbKeymap;
 
-    Xkb(@Provided @Nonnull final Libxkbcommon libxkbcommon,
+    Xkb(@Provided @Nonnull final Libc libc,
+        @Provided @Nonnull final Libxkbcommon libxkbcommon,
         @Nonnull final Pointer xkbContext,
         @Nonnull final Pointer xkbState,
         @Nonnull final Pointer xkbKeymap) {
+        this.libc = libc;
         this.libxkbcommon = libxkbcommon;
         this.xkbContext = xkbContext;
         this.xkbState = xkbState;
@@ -42,6 +47,32 @@ public class Xkb {
                                        "about the error, so you'll have to do it with this lousy exception.");
         }
 
-        return keymapStringPointer.getString(0);
+        final String keymapString = keymapStringPointer.getString(0);
+        this.libc.free(keymapStringPointer);
+
+        return keymapString;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        this.libxkbcommon.xkb_context_unref(getXkbContext());
+        this.libxkbcommon.xkb_keymap_unref(getXkbKeymap());
+        this.libxkbcommon.xkb_state_unref(getXkbState());
+        super.finalize();
+    }
+
+    @Nonnull
+    public Pointer getXkbContext() {
+        return this.xkbContext;
+    }
+
+    @Nonnull
+    public Pointer getXkbKeymap() {
+        return this.xkbKeymap;
+    }
+
+    @Nonnull
+    public Pointer getXkbState() {
+        return this.xkbState;
     }
 }

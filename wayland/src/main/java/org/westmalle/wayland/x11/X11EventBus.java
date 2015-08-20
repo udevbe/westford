@@ -31,6 +31,7 @@ import org.westmalle.wayland.nativ.libxcb.xcb_focus_out_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_keymap_notify_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_leave_notify_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 
@@ -44,6 +45,7 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_ENTER_NOTIFY;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EXPOSE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_FOCUS_IN;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_FOCUS_OUT;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEYMAP_NOTIFY;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_PRESS;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_RELEASE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_LEAVE_NOTIFY;
@@ -86,12 +88,8 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         final int                 responseType = (event.response_type & ~0x80);
         final Optional<Structure> optionalEvent;
         switch (responseType) {
-            case XCB_KEY_PRESS: {
-                optionalEvent = Optional.of(new xcb_key_press_event_t(event.getPointer()));
-                break;
-            }
-            case XCB_KEY_RELEASE: {
-                optionalEvent = Optional.of(new xcb_key_release_event_t(event.getPointer()));
+            case XCB_MOTION_NOTIFY: {
+                optionalEvent = Optional.of(new xcb_motion_notify_event_t(event.getPointer()));
                 break;
             }
             case XCB_BUTTON_PRESS: {
@@ -102,8 +100,12 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
                 optionalEvent = Optional.of(new xcb_button_release_event_t(event.getPointer()));
                 break;
             }
-            case XCB_MOTION_NOTIFY: {
-                optionalEvent = Optional.of(new xcb_motion_notify_event_t(event.getPointer()));
+            case XCB_KEY_PRESS: {
+                optionalEvent = Optional.of(new xcb_key_press_event_t(event.getPointer()));
+                break;
+            }
+            case XCB_KEY_RELEASE: {
+                optionalEvent = Optional.of(new xcb_key_release_event_t(event.getPointer()));
                 break;
             }
             case XCB_EXPOSE: {
@@ -128,6 +130,10 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
             }
             case XCB_FOCUS_OUT: {
                 optionalEvent = Optional.of(new xcb_focus_out_event_t(event.getPointer()));
+                break;
+            }
+            case XCB_KEYMAP_NOTIFY: {
+                optionalEvent = Optional.of(new xcb_keymap_notify_event_t(event.getPointer()));
                 break;
             }
             default: {

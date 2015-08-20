@@ -383,7 +383,7 @@ public class PointerDevice implements Role {
 
     /**
      * Listen for motion as soon as given surface is grabbed.
-     * <p>
+     * <p/>
      * If another surface already has the grab, the listener
      * is never registered.
      *

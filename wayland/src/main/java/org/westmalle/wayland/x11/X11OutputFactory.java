@@ -222,7 +222,8 @@ public class X11OutputFactory {
             @Subscribe
             public void handle(final xcb_client_message_event_t event) {
                 X11OutputFactory.this.handle(event,
-                                             x11Atoms);
+                                             x11Atoms,
+                                             window);
             }
         });
         return new X11Output(this.x11EglOutputFactory,
@@ -341,11 +342,13 @@ public class X11OutputFactory {
     }
 
     private void handle(final xcb_client_message_event_t event,
-                        final Map<String, Integer> x11Atoms) {
-        final int atom   = event.data.data32[0];
-        final int window = event.window;
-        if (atom == x11Atoms.get("WM_DELETE_WINDOW")) {
-            //TODO destroy window & terminate compositor if no more outputs are left.
+                        final Map<String, Integer> x11Atoms,
+                        final int window) {
+        final int atom         = event.data.data32[0];
+        final int sourceWindow = event.window;
+        if (atom == x11Atoms.get("WM_DELETE_WINDOW") &&
+            window == sourceWindow) {
+            System.exit(0);
         }
     }
 }
