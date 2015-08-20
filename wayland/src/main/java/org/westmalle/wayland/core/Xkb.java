@@ -33,23 +33,8 @@ public class Xkb {
         this.xkbKeymap = xkbKeymap;
     }
 
-    @Nonnull
-    public Pointer getXkbContext() {
-        return this.xkbContext;
-    }
-
-    @Nonnull
-    public Pointer getXkbState() {
-        return this.xkbState;
-    }
-
-    @Nonnull
-    public Pointer getXkbKeymap() {
-        return this.xkbKeymap;
-    }
-
     public String getKeymapString() {
-        final Pointer keymapStringPointer = this.libxkbcommon.xkb_keymap_get_as_string(getXkbKeymap(),
+        final Pointer keymapStringPointer = this.libxkbcommon.xkb_keymap_get_as_string(this.xkbKeymap,
                                                                                        XKB_KEYMAP_FORMAT_TEXT_V1);
         if (keymapStringPointer == null) {
             throw new RuntimeException("Got an error while trying to get keymap as string. " +

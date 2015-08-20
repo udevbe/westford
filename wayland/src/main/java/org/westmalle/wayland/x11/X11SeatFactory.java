@@ -96,12 +96,11 @@ public class X11SeatFactory {
         final X11Seat x11Seat = new X11Seat(this.libxcb,
                                             x11Output);
 
-        final Xkb        xkb        = this.x11XkbFactory.create(x11Output.getXcbConnection());
-        final WlPointer  wlPointer  = this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor));
-        final WlKeyboard wlKeyboard = this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create(compositor));
-
-        final WlSeat wlSeat = this.wlSeatFactory.create(this.seatFactory.create(xkb,
-                                                                                x11Seat),
+        final Xkb       xkb       = this.x11XkbFactory.create(x11Output.getXcbConnection());
+        final WlPointer wlPointer = this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor));
+        final WlKeyboard wlKeyboard = this.wlKeyboardFactory.create(this.keyboardDeviceFactory.create(compositor,
+                                                                                                      xkb));
+        final WlSeat wlSeat = this.wlSeatFactory.create(this.seatFactory.create(x11Seat),
                                                         wlPointer,
                                                         wlKeyboard,
                                                         this.wlTouchFactory.create());

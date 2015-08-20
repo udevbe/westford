@@ -45,8 +45,12 @@ public class KeyboardDevice {
     private final NativeFileFactory nativeFileFactory;
     @Nonnull
     private final Libc              libc;
+
     @Nonnull
-    private final Compositor        compositor;
+    private final Compositor compositor;
+    @Nonnull
+    private final Xkb        xkb;
+
     @Nonnull
     private final Set<Integer>                pressedKeys          = new HashSet<>();
     @Nonnull
@@ -55,16 +59,19 @@ public class KeyboardDevice {
     private       Optional<DestroyListener>   focusDestroyListener = Optional.empty();
     @Nonnull
     private       Optional<WlSurfaceResource> focus                = Optional.empty();
+
     private int keySerial;
 
     KeyboardDevice(@Provided @Nonnull final Display display,
                    @Provided @Nonnull final NativeFileFactory nativeFileFactory,
                    @Provided @Nonnull final Libc libc,
-                   @Nonnull final Compositor compositor) {
+                   @Nonnull final Compositor compositor,
+                   @Nonnull final Xkb xkb) {
         this.display = display;
         this.nativeFileFactory = nativeFileFactory;
         this.libc = libc;
         this.compositor = compositor;
+        this.xkb = xkb;
     }
 
     public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
@@ -205,5 +212,10 @@ public class KeyboardDevice {
         this.libc.strcpy(keymapArea,
                          nativeKeyMapping.getPointer());
         return fd;
+    }
+
+    @Nonnull
+    public Xkb getXkb() {
+        return this.xkb;
     }
 }
