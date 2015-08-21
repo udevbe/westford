@@ -78,7 +78,7 @@ public class KeyboardDeviceTest {
         when(wlKeyboardResource0.getClient()).thenReturn(client0);
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -88,8 +88,8 @@ public class KeyboardDeviceTest {
         this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
                                      Optional.of(wlSurfaceResource));
 
-        final int                key                        = 123;
-        final WlKeyboardKeyState wlKeyboardKeyStatePressed  = WlKeyboardKeyState.PRESSED;
+        final int                key                       = 123;
+        final WlKeyboardKeyState wlKeyboardKeyStatePressed = WlKeyboardKeyState.PRESSED;
 
         final int serial0 = 1278;
         final int serial1 = 1279;
@@ -157,7 +157,7 @@ public class KeyboardDeviceTest {
         when(wlKeyboardResource1.getClient()).thenReturn(client1);
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -219,7 +219,7 @@ public class KeyboardDeviceTest {
         when(wlKeyboardResource0.getClient()).thenReturn(client0);
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
-        final WlSurface wlSurface = mock(WlSurface.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);

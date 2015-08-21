@@ -23,7 +23,6 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlKeyboardResource;
-import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
@@ -52,6 +51,8 @@ public class Surface {
     @Nonnull
     private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
     @Nonnull
+    private final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
+    @Nonnull
     private       Optional<Role>            surfaceRole                  = Optional.empty();
     @Nonnull
     private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
@@ -71,13 +72,6 @@ public class Surface {
     private Mat4      inverseTransform = Transforms.NORMAL;
     @Nonnull
     private Rectangle size             = Rectangle.ZERO;
-
-    @Nonnull
-    private final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
-    @Nonnull
-    private final Set<WlPointerResource>  pointerFocuses  = new HashSet<>();
-    @Nonnull
-    private final Set<WlPointerResource>  pointerGrabs    = new HashSet<>();
 
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
             @Nonnull final WlCompositorResource wlCompositorResource) {
@@ -362,32 +356,6 @@ public class Surface {
                                                                   .build();
         setPendingState(pendingSurfaceState);
         return this;
-    }
-
-    /**
-     * The pointers that will be used to notify the client of any button events on this surface. This collection is
-     * updated each time the pointer grab changes for this surface. To keep the client from receiving button events,
-     * clear this list each time the grab is set for this surface. To listen for grab updates, register a grab listener
-     * on this surface.
-     *
-     * @return a set of pointer resources.
-     */
-    @Nonnull
-    public Set<WlPointerResource> getPointerGrabs() {
-        return this.pointerGrabs;
-    }
-
-    /**
-     * The pointers that will be used to notify the client of any motion events on this surface. This collection is
-     * updated each time the pointer focus changes for this surface. To keep the client from receiving motion events,
-     * clear this list each time the focus is set for this surface. To listen for focus updates, register a pointer focus
-     * listener on this surface.
-     *
-     * @return a set of pointer resources.
-     */
-    @Nonnull
-    public Set<WlPointerResource> getPointerFocuses() {
-        return this.pointerFocuses;
     }
 
     /**

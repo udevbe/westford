@@ -28,7 +28,7 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.westmalle.wayland.core.events.Key;
-import org.westmalle.wayland.core.events.KeyboardFocusChanged;
+import org.westmalle.wayland.core.events.KeyboardFocus;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.KeyboardFocusLost;
 import org.westmalle.wayland.nativ.NativeFileFactory;
@@ -233,7 +233,7 @@ public class KeyboardDevice {
                              final Optional<WlSurfaceResource> oldFocus,
                              final Optional<WlSurfaceResource> newFocus) {
         this.focus = newFocus;
-        this.bus.post(KeyboardFocusChanged.create(newFocus));
+        this.bus.post(KeyboardFocus.create(newFocus));
 
         oldFocus.ifPresent(oldFocusResource -> {
             oldFocusResource.unregister(this.focusDestroyListener.get());

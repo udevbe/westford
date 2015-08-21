@@ -7,10 +7,10 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 @AutoValue
-public abstract class KeyboardFocusChanged {
+public abstract class KeyboardFocus {
 
-    public static KeyboardFocusChanged create(@Nonnull final Optional<WlSurfaceResource> wlSurfaceResource) {
-        return new AutoValue_KeyboardFocusChanged(wlSurfaceResource);
+    public static KeyboardFocus create(@Nonnull final Optional<WlSurfaceResource> wlSurfaceResource) {
+        return new AutoValue_KeyboardFocus(wlSurfaceResource);
     }
 
     public abstract Optional<WlSurfaceResource> getWlSurfaceResource();

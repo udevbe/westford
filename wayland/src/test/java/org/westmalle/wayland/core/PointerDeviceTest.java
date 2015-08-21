@@ -888,28 +888,14 @@ public class PointerDeviceTest {
                                   button0,
                                   WlPointerButtonState.RELEASED);
         //then
-        //bug in wayland java bindings, we have to use an argument captor to compare Fixed object equality.
-        //TODO bug has been fixed. Don't use argument captor any more
-        final ArgumentCaptor<Fixed> fixedArgumentCaptor = ArgumentCaptor.forClass(Fixed.class);
-        final List<Fixed>           values              = fixedArgumentCaptor.getAllValues();
-
         verify(wlPointerResource0).enter(eq(serial0),
                                          eq(wlSurfaceResource0),
-                                         fixedArgumentCaptor.capture(),
-                                         fixedArgumentCaptor.capture());
-
-        assertThat(values.get(0)
-                         .asInt()).isEqualTo(2);
-        assertThat(values.get(1)
-                         .asInt()).isEqualTo(3);
+                                         eq(Fixed.create(2)),
+                                         eq(Fixed.create(3)));
 
         verify(wlPointerResource0).motion(eq(time0),
-                                          fixedArgumentCaptor.capture(),
-                                          fixedArgumentCaptor.capture());
-        assertThat(values.get(2)
-                         .asInt()).isEqualTo(2);
-        assertThat(values.get(3)
-                         .asInt()).isEqualTo(3);
+                                          eq(Fixed.create(2)),
+                                          eq(Fixed.create(3)));
 
         verify(wlPointerResource0).button(serial1,
                                           time1,
