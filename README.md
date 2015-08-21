@@ -27,7 +27,7 @@ Dependencies
  - Google Guava. Available on maven central.
  - jsr305. Available on maven central.
  - SLF4J. Available on maven central.
- - Wayland-Java-Bindings. 1.3.0-SNAPSHOT Available on github.
+ - Wayland-Java-Bindings. Available on maven central.
 
 State
 =====
