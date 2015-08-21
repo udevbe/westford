@@ -52,6 +52,8 @@ public class KeyboardDeviceTest {
     private Libc              libc;
     @Mock
     private Compositor        compositor;
+    @Mock
+    private Xkb               xkb;
     @InjectMocks
     private KeyboardDevice    keyboardDevice;
 
@@ -168,9 +170,9 @@ public class KeyboardDeviceTest {
         when(wlKeyboardResource0.getClient()).thenReturn(client0);
 
         final String keymapString = "foo keymap";
-        final Keymap keymap = Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
-                                            keymapString);
-        this.keyboardDevice.setKeymap(Optional.of(keymap));
+        when(this.xkb.getKeymapString()).thenReturn(keymapString);
+
+        this.keyboardDevice.updateKeymap();
         //when
         this.keyboardDevice.emitKeymap(Collections.singleton(wlKeyboardResource0));
 

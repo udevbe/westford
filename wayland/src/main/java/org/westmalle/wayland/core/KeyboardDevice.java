@@ -25,6 +25,7 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.events.Key;
@@ -32,6 +33,7 @@ import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libc.Libc;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
@@ -66,11 +68,13 @@ public class KeyboardDevice {
     @Nonnull
     private Xkb xkb;
     @Nonnull
-    private Optional<Keymap>            keymap               = Optional.empty();
-    @Nonnull
     private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
     @Nonnull
     private Optional<WlSurfaceResource> focus                = Optional.empty();
+
+    private int keymapFd   = -1;
+    @Nonnegative
+    private int keymapSize = 0;
 
     private int keySerial;
 
@@ -188,37 +192,21 @@ public class KeyboardDevice {
         this.eventBus.unregister(listener);
     }
 
-    public void setKeymap(@Nonnull final Optional<Keymap> keymap) {
-        this.keymap = keymap;
-    }
-
     public void emitKeymap(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources) {
-        getKeymap().ifPresent(keymapping -> {
-            final NativeString nativeKeyMapping = new NativeString(keymapping.getMap());
-            //FIXME store keymap file information when setting keymap & reuse it when emitting
-            final int keymapFormat = keymapping.getFormat()
-                                               .getValue();
-            final int keymapFile = updateKeymapFile(nativeKeyMapping);
-            final int length = nativeKeyMapping.length();
-            wlKeyboardResources.forEach(wlKeyboardResource -> wlKeyboardResource.keymap(keymapFormat,
-                                                                                        keymapFile,
-                                                                                        length));
-        });
+        if (this.keymapFd >= 0) {
+            wlKeyboardResources.forEach(wlKeyboardResource ->
+                                                wlKeyboardResource.keymap(WlKeyboardKeymapFormat.XKB_V1.getValue(),
+                                                                          this.keymapFd,
+                                                                          this.keymapSize));
+        }
     }
 
-    @Nonnull
-    public Xkb getXkb() {
-        return this.xkb;
-    }
+    public void updateKeymap() {
+        final NativeString nativeKeyMapping = new NativeString(getXkb().getKeymapString());
 
-    @Nonnull
-    public Optional<Keymap> getKeymap() {
-        return this.keymap;
-    }
-
-    private int updateKeymapFile(final NativeString nativeKeyMapping) {
+        //-1 to get rid of the null terminator
         final int size = (int) nativeKeyMapping.getPointer()
-                                               .size();
+                                               .size() - 1;
         final int fd = this.nativeFileFactory.createAnonymousFile(size);
         final Pointer keymapArea = this.libc.mmap(null,
                                                   size,
@@ -233,7 +221,17 @@ public class KeyboardDevice {
 
         this.libc.strcpy(keymapArea,
                          nativeKeyMapping.getPointer());
-        return fd;
+
+        if (this.keymapFd >= 0) {
+            this.libc.close(this.keymapFd);
+        }
+        this.keymapFd = fd;
+        this.keymapSize = size;
+    }
+
+    @Nonnull
+    public Xkb getXkb() {
+        return this.xkb;
     }
 
     public void setXkb(@Nonnull final Xkb xkb) {

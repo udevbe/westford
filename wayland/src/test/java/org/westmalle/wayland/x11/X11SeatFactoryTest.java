@@ -14,7 +14,6 @@
 package org.westmalle.wayland.x11;
 
 import com.sun.jna.Pointer;
-import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +24,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
-import org.westmalle.wayland.core.Keymap;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.PointerDeviceFactory;
@@ -44,10 +42,8 @@ import org.westmalle.wayland.protocol.WlTouch;
 import org.westmalle.wayland.protocol.WlTouchFactory;
 
 import java.util.EnumSet;
-import java.util.Optional;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -140,7 +136,6 @@ public class X11SeatFactoryTest {
         verify(x11EventBus).register(x11InputEventListener);
         verify(seat).setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
                                                 WlSeatCapability.POINTER));
-        verify(keyboardDevice).setKeymap(eq(Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
-                                                                      keymapString))));
+        verify(keyboardDevice).updateKeymap();
     }
 }

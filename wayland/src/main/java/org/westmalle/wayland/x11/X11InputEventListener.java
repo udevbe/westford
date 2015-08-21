@@ -17,9 +17,7 @@ package org.westmalle.wayland.x11;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.google.common.eventbus.Subscribe;
-import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.westmalle.wayland.core.KeyboardDevice;
-import org.westmalle.wayland.core.Keymap;
 import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
@@ -31,7 +29,6 @@ import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 @AutoFactory
 public class X11InputEventListener {
@@ -103,8 +100,7 @@ public class X11InputEventListener {
         final Xkb xkb = this.x11XkbFactory.create(x11Seat.getX11Output()
                                                          .getXcbConnection());
         keyboardDevice.setXkb(xkb);
-        keyboardDevice.setKeymap(Optional.of(Keymap.create(WlKeyboardKeymapFormat.XKB_V1,
-                                                           xkb.getKeymapString())));
+        keyboardDevice.updateKeymap();
         keyboardDevice.emitKeymap(wlKeyboard.getResources());
     }
 }
