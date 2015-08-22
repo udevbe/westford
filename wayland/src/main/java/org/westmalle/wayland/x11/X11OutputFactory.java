@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.squareup.otto.Subscribe;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
@@ -218,7 +217,6 @@ public class X11OutputFactory {
                 window,
                 x11Atoms);
         x11EventBus.register(new Object() {
-            @Subscribe
             public void handle(final xcb_client_message_event_t event) {
                 X11OutputFactory.this.handle(event,
                                              x11Atoms,

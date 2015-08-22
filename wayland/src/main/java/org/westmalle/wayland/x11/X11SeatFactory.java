@@ -13,15 +13,12 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.squareup.otto.Subscribe;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
-import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.core.SeatFactory;
-import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;

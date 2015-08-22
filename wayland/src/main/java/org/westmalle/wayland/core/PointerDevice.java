@@ -15,9 +15,6 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
-import com.squareup.otto.ThreadEnforcer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
@@ -31,6 +28,8 @@ import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
@@ -47,7 +46,14 @@ import java.util.stream.Collectors;
 public class PointerDevice implements Role {
 
     @Nonnull
-    private final Bus                            bus            = new Bus(ThreadEnforcer.ANY);
+    private final Signal<Motion, Slot<Motion>>             motionSignal       = new Signal<>();
+    @Nonnull
+    private final Signal<Button, Slot<Button>>             buttonSignal       = new Signal<>();
+    @Nonnull
+    private final Signal<PointerGrab, Slot<PointerGrab>>   pointerGrabSignal  = new Signal<>();
+    @Nonnull
+    private final Signal<PointerFocus, Slot<PointerFocus>> pointerFocusSignal = new Signal<>();
+
     @Nonnull
     private final Set<Integer>                   pressedButtons = new HashSet<>();
     @Nonnull
@@ -117,8 +123,8 @@ public class PointerDevice implements Role {
                                      reportMotion(wlPointerResources,
                                                   time,
                                                   wlSurfaceResource));
-        this.bus.post(Motion.create(time,
-                                    getPosition()));
+        this.motionSignal.emit(Motion.create(time,
+                                             getPosition()));
     }
 
     public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources) {
@@ -229,9 +235,9 @@ public class PointerDevice implements Role {
                  time,
                  button,
                  wlPointerButtonState);
-        this.bus.post(Button.create(time,
-                                    button,
-                                    wlPointerButtonState));
+        this.buttonSignal.emit(Button.create(time,
+                                             button,
+                                             wlPointerButtonState));
     }
 
     private void doButton(final Set<WlPointerResource> wlPointerResources,
@@ -285,7 +291,7 @@ public class PointerDevice implements Role {
         //if the surface having the grab is destroyed, we clear the grab
         wlSurfaceResource.register(this.grabDestroyListener.get());
 
-        this.bus.post(PointerGrab.create(getGrab()));
+        this.pointerGrabSignal.emit(PointerGrab.create(getGrab()));
     }
 
     private void reportButton(final Set<WlPointerResource> wlPointerResources,
@@ -307,7 +313,7 @@ public class PointerDevice implements Role {
         getGrab().ifPresent(wlSurfaceResource -> wlSurfaceResource.unregister(this.grabDestroyListener.get()));
         this.grabDestroyListener = Optional.empty();
         this.grab = Optional.empty();
-        this.bus.post(PointerGrab.create(getGrab()));
+        this.pointerGrabSignal.emit(PointerGrab.create(getGrab()));
     }
 
     @Nonnull
@@ -373,7 +379,7 @@ public class PointerDevice implements Role {
         //update focus to new focus
         this.focus = newFocus;
         //notify listeners focus has changed
-        this.bus.post(PointerFocus.create());
+        this.pointerFocusSignal.emit(PointerFocus.create());
     }
 
     public boolean isButtonPressed(@Nonnegative final int button) {
@@ -403,9 +409,10 @@ public class PointerDevice implements Role {
             return false;
         }
 
-        final DestroyListener motionListener = new DestroyListener() {
-            @Subscribe
-            public void handle(final Motion motion) {
+
+        final Slot<Motion> motionSlot = new Slot<Motion>() {
+
+            public void handle(@Nonnull final Motion motion) {
                 if (getGrab().isPresent() &&
                     getGrab().get()
                              .equals(wlSurfaceResource)) {
@@ -414,32 +421,40 @@ public class PointerDevice implements Role {
                 }
                 else {
                     //another surface has the grab, stop listening for pointer motion.
-                    PointerDevice.this.unregister(this);
-                    //stop listening for destroy event
-                    wlSurfaceResource.unregister(this);
+                    getMotionSignal().remove(this);
                 }
             }
-
-            @Override
-            public void handle() {
-                //the surface was destroyed, stop listening for pointer motion.
-                PointerDevice.this.unregister(this);
-            }
         };
+
         //listen for pointer motion
-        register(motionListener);
+        getMotionSignal().add(motionSlot);
         //listen for surface destruction
-        wlSurfaceResource.register(motionListener);
+        wlSurfaceResource.register(() -> {
+            //another surface has the grab, stop listening for pointer motion.
+            getMotionSignal().remove(motionSlot);
+        });
 
         return true;
     }
 
-    public void unregister(@Nonnull final Object listener) {
-        this.bus.unregister(listener);
+    @Nonnull
+    public Signal<Button, Slot<Button>> getButtonSignal() {
+        return this.buttonSignal;
     }
 
-    public void register(@Nonnull final Object listener) {
-        this.bus.register(listener);
+    @Nonnull
+    public Signal<PointerFocus, Slot<PointerFocus>> getPointerFocusSignal() {
+        return this.pointerFocusSignal;
+    }
+
+    @Nonnull
+    public Signal<PointerGrab, Slot<PointerGrab>> getPointerGrabSignal() {
+        return this.pointerGrabSignal;
+    }
+
+    @Nonnull
+    public Signal<Motion, Slot<Motion>> getMotionSignal() {
+        return this.motionSignal;
     }
 
     public void removeCursor(@Nonnull final WlPointerResource wlPointerResource,

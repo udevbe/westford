@@ -15,8 +15,6 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -40,9 +38,6 @@ import java.util.Set;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
-
-    @Nonnull
-    private final Bus bus = new Bus(ThreadEnforcer.ANY);
 
     @Nonnull
     private final FiniteRegionFactory  finiteRegionFactory;
@@ -371,17 +366,5 @@ public class Surface {
     @Nonnull
     public Set<WlKeyboardResource> getKeyboardFocuses() {
         return this.keyboardFocuses;
-    }
-
-    public void post(final Object event) {
-        this.bus.post(event);
-    }
-
-    public void register(final Object listener) {
-        this.bus.register(listener);
-    }
-
-    public void unregister(final Object listener) {
-        this.bus.unregister(listener);
     }
 }

@@ -15,11 +15,11 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import org.freedesktop.wayland.server.EventLoop;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
@@ -55,7 +55,7 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
 @AutoFactory(className = "X11EventBusFactory")
 public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
 
-    private final Bus bus = new Bus(ThreadEnforcer.ANY);
+    private final Signal<Structure, Slot<Structure>> xEventSignal = new Signal<>();
     @Nonnull
     private final Libxcb  libxcb;
     @Nonnull
@@ -71,8 +71,8 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         this.xcbConnection = xcbConnection;
     }
 
-    public void register(final Object listener) {
-        this.bus.register(listener);
+    public Signal<Structure, Slot<Structure>> getxEventSignal() {
+        return this.xEventSignal;
     }
 
     @Override
@@ -144,7 +144,7 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         if (optionalEvent.isPresent()) {
             final Structure specificEvent = optionalEvent.get();
             specificEvent.read();
-            this.bus.post(specificEvent);
+            getxEventSignal().emit(specificEvent);
         }
         this.libc.free(event.getPointer());
     }

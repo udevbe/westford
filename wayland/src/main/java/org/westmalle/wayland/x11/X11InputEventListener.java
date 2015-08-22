@@ -16,7 +16,6 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.squareup.otto.Subscribe;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
@@ -44,7 +43,6 @@ public class X11InputEventListener {
         this.wlSeat = wlSeat;
     }
 
-    @Subscribe
     public void handle(final xcb_key_press_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
@@ -53,7 +51,6 @@ public class X11InputEventListener {
                            true);
     }
 
-    @Subscribe
     public void handle(final xcb_button_press_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
@@ -63,7 +60,6 @@ public class X11InputEventListener {
                               true);
     }
 
-    @Subscribe
     public void handle(final xcb_key_release_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
@@ -72,7 +68,6 @@ public class X11InputEventListener {
                            false);
     }
 
-    @Subscribe
     public void handle(final xcb_button_release_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
@@ -82,7 +77,6 @@ public class X11InputEventListener {
                               false);
     }
 
-    @Subscribe
     public void handle(final xcb_motion_notify_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
@@ -91,7 +85,6 @@ public class X11InputEventListener {
                               event.event_y);
     }
 
-    @Subscribe
     public void handle(final xcb_keymap_notify_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();

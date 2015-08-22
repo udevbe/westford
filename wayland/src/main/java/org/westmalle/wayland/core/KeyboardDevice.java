@@ -15,8 +15,6 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -31,6 +29,8 @@ import org.westmalle.wayland.core.events.Key;
 import org.westmalle.wayland.core.events.KeyboardFocus;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.KeyboardFocusLost;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libc.Libc;
@@ -60,7 +60,10 @@ import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MO
 public class KeyboardDevice {
 
     @Nonnull
-    private final Bus bus = new Bus(ThreadEnforcer.ANY);
+    private final Signal<Key, Slot<Key>>                     keySignal           = new Signal<>();
+    @Nonnull
+    private final Signal<KeyboardFocus, Slot<KeyboardFocus>> keyboardFocusSignal = new Signal<>();
+
     @Nonnull
     private final Display           display;
     @Nonnull
@@ -124,9 +127,9 @@ public class KeyboardDevice {
         }
 
         final int time = this.compositor.getTime();
-        this.bus.post(Key.create(time,
-                                 key,
-                                 wlKeyboardKeyState));
+        getKeySignal().emit(Key.create(time,
+                                       key,
+                                       wlKeyboardKeyState));
         doKey(wlKeyboardResources,
               time,
               key,
@@ -134,6 +137,16 @@ public class KeyboardDevice {
 
         handleStateComponentMask(wlKeyboardResources,
                                  stateComponentMask);
+    }
+
+    @Nonnull
+    public Signal<Key, Slot<Key>> getKeySignal() {
+        return this.keySignal;
+    }
+
+    @Nonnull
+    public Signal<KeyboardFocus, Slot<KeyboardFocus>> getKeyboardFocusSignal() {
+        return this.keyboardFocusSignal;
     }
 
     @Nonnull
@@ -233,7 +246,7 @@ public class KeyboardDevice {
                              final Optional<WlSurfaceResource> oldFocus,
                              final Optional<WlSurfaceResource> newFocus) {
         this.focus = newFocus;
-        this.bus.post(KeyboardFocus.create(newFocus));
+        getKeyboardFocusSignal().emit(KeyboardFocus.create(newFocus));
 
         oldFocus.ifPresent(oldFocusResource -> {
             oldFocusResource.unregister(this.focusDestroyListener.get());
@@ -288,14 +301,6 @@ public class KeyboardDevice {
                                   .filter(wlKeyboardResource -> wlKeyboardResource.getClient()
                                                                                   .equals(client))
                                   .collect(Collectors.toSet());
-    }
-
-    public void register(@Nonnull final Object listener) {
-        this.bus.register(listener);
-    }
-
-    public void unregister(@Nonnull final Object listener) {
-        this.bus.unregister(listener);
     }
 
     public void emitKeymap(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources) {

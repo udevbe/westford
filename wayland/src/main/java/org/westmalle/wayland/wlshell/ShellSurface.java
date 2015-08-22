@@ -15,7 +15,6 @@ package org.westmalle.wayland.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.squareup.otto.Subscribe;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlKeyboardResource;
@@ -37,6 +36,7 @@ import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.PointerGrab;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -167,19 +167,21 @@ public class ShellSurface implements Role {
         if (grabMotionSuccess) {
             wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
                                     wlSurfaceResource);
-            pointerDevice.register(new Object() {
-                @Subscribe
-                public void handle(final PointerGrab event) {
-                    if (!event.getWlSurfaceResource()
-                              .isPresent()) {
-                        pointerDevice.unregister(this);
-                        wlPointerResource.enter(pointerDevice.nextEnterSerial(),
-                                                wlSurfaceResource,
-                                                Fixed.create(local.getX()),
-                                                Fixed.create(local.getY()));
-                    }
-                }
-            });
+            pointerDevice.getPointerGrabSignal()
+                         .add(new Slot<PointerGrab>() {
+                             @Override
+                             public void handle(@Nonnull final PointerGrab event) {
+                                 if (!event.getWlSurfaceResource()
+                                           .isPresent()) {
+                                     pointerDevice.getPointerGrabSignal()
+                                                  .remove(this);
+                                     wlPointerResource.enter(pointerDevice.nextEnterSerial(),
+                                                             wlSurfaceResource,
+                                                             Fixed.create(local.getX()),
+                                                             Fixed.create(local.getY()));
+                                 }
+                             }
+                         });
         }
     }
 
@@ -329,7 +331,6 @@ public class ShellSurface implements Role {
 
         if (flags.contains(WlShellSurfaceTransient.INACTIVE)) {
             final Object listener = new Object() {
-                @Subscribe
                 public void handle(final KeyboardFocusGained keyboardFocusGained) {
                     //clean collection of focuses, so they don't get notify of keyboard related events
                     surface.getKeyboardFocuses()
