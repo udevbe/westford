@@ -74,18 +74,18 @@ public class Compositor {
         this.renderer.endRender(wlOutput);
     }
 
-    private void render(final WlSurfaceResource surface) {
-        final WlSurface wlSurface = (WlSurface) surface.getImplementation();
+    private void render(final WlSurfaceResource wlSurfaceResource) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         //don't bother rendering subsurfaces if the parent doesn't have a buffer.
         wlSurface.getSurface()
                  .getState()
                  .getBuffer()
                  .ifPresent(wlBufferResource -> {
-                     final LinkedList<WlSurfaceResource> subsurfaces = getSubsurfaceStack(surface);
+                     final LinkedList<WlSurfaceResource> subsurfaces = getSubsurfaceStack(wlSurfaceResource);
+                     this.renderer.render(wlSurfaceResource,
+                                          wlBufferResource);
                      subsurfaces.forEach((subsurface) -> {
-                         this.renderer.render(surface,
-                                              wlBufferResource);
-                         if (subsurface != surface) {
+                         if (subsurface != wlSurfaceResource) {
                              render(subsurface);
                          }
                      });
@@ -110,7 +110,7 @@ public class Compositor {
         return subsurfaces;
     }
 
-    public void removeSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface){
+    public void removeSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
         this.subsurfaceStack.remove(parentSurface);
         this.pendingSubsurfaceStack.remove(parentSurface);
     }
