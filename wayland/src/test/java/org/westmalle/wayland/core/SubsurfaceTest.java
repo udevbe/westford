@@ -190,20 +190,38 @@ public class SubsurfaceTest {
 
     @Test
     public void testBeforeCommitInert() throws Exception {
-        //TODO
-
         //given: an inert subsurface
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        this.subsurface.setInert(true);
+
         //when: the before commit hook is called
+        this.subsurface.beforeCommit(this.wlSurfaceResource);
+
         //then: nothing happens
+        verifyZeroInteractions(surface);
     }
 
     @Test
     public void testCommitSync() throws Exception {
-        //TODO
-
         //given: a subsurface in sync mode
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        final SurfaceState newSurfaceState = mock(SurfaceState.class);
+
         //when: the commit hook is called
+        this.subsurface.apply(newSurfaceState);
+
         //then: the surface new state is cached and the surface is reset to the pre-commit state.
+        verify(surface).apply(this.surfaceState);
     }
 
     @Test
