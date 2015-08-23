@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
+import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -45,6 +46,12 @@ class Boot {
     }
 
     private void strap(final X11EglCompositor x11EglCompositor) {
+        /*
+         * Keep this first as weston demo clients *really* like their globals
+         * to be initialized in a certain order, else they segfault...
+         */
+        final LifeCycle lifeCycle = x11EglCompositor.lifeCycle();
+
         //setup X11 input/output back-end.
         final X11OutputFactory outputFactory = x11EglCompositor.x11()
                                                                .outputFactory();
@@ -55,16 +62,6 @@ class Boot {
         final WlOutput wlOutput = outputFactory.create(System.getenv("DISPLAY"),
                                                        800,
                                                        600);
-
-        //add our output to the compositor
-        //TODO automatically add the output in X11OutputFactory
-        x11EglCompositor.wlCompositor()
-                        .getCompositor()
-                        .getWlOutputs()
-                        .add(wlOutput);
-
-        //create data device manager for drag and drop support
-        x11EglCompositor.wlDataDeviceManager();
 
         //setup seat for input support
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
@@ -78,15 +75,7 @@ class Boot {
                      .connect(event -> wlKeyboard.getKeyboardDevice()
                                                  .setFocus(wlKeyboard.getResources(),
                                                            pointerDevice.getFocus()));
-
-        //enable wl_shell protocol for minimal desktop-like features (move, resize, cursor changes ...)
-        x11EglCompositor.wlShell();
-
-        //enable xdg_shell protocol for full desktop-like features
-        //TODO implement xdg_shell protocol
-
-        //start the thingamabah
-        x11EglCompositor.lifeCycle()
-                        .start();
+        //start the compositor
+        lifeCycle.start();
     }
 }

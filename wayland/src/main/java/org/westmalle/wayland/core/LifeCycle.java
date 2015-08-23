@@ -14,6 +14,10 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Display;
+import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlDataDeviceManager;
+import org.westmalle.wayland.protocol.WlShell;
+import org.westmalle.wayland.protocol.WlSubcompositor;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -21,15 +25,27 @@ import javax.inject.Inject;
 public class LifeCycle {
 
     @Nonnull
-    private final Display     display;
+    private final Display             display;
     @Nonnull
-    private final JobExecutor jobExecutor;
+    private final JobExecutor         jobExecutor;
+    private final WlCompositor        wlCompositor;
+    private final WlDataDeviceManager wlDataDeviceManager;
+    private final WlShell             wlShell;
+    private final WlSubcompositor     wlSubcompositor;
 
     @Inject
     LifeCycle(@Nonnull final Display display,
-              @Nonnull final JobExecutor jobExecutor) {
+              @Nonnull final JobExecutor jobExecutor,
+              @Nonnull final WlCompositor wlCompositor,
+              @Nonnull final WlDataDeviceManager wlDataDeviceManager,
+              @Nonnull final WlShell wlShell,
+              @Nonnull final WlSubcompositor wlSubcompositor) {
         this.display = display;
         this.jobExecutor = jobExecutor;
+        this.wlCompositor = wlCompositor;
+        this.wlDataDeviceManager = wlDataDeviceManager;
+        this.wlShell = wlShell;
+        this.wlSubcompositor = wlSubcompositor;
     }
 
     public void start() {
@@ -40,6 +56,11 @@ public class LifeCycle {
     }
 
     public void stop() {
+        this.wlCompositor.destroy();
+        this.wlDataDeviceManager.destroy();
+        this.wlShell.destroy();
+        this.wlSubcompositor.destroy();
+
         this.display.terminate();
         this.jobExecutor.fireFinishedEvent();
     }

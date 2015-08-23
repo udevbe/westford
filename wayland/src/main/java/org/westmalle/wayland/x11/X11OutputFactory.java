@@ -31,6 +31,7 @@ import org.westmalle.wayland.nativ.libxcb.xcb_client_message_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_cookie_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
+import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
@@ -81,6 +82,8 @@ public class X11OutputFactory {
     private final OutputFactory           outputFactory;
     @Nonnull
     private final X11EventBusFactory      x11EventBusFactory;
+    @Nonnull
+    private final WlCompositor            wlCompositor;
 
     @Inject
     X11OutputFactory(@Nonnull final Display display,
@@ -91,7 +94,8 @@ public class X11OutputFactory {
                      @Nonnull final PrivateX11OutputFactory privateX11OutputFactory,
                      @Nonnull final WlOutputFactory wlOutputFactory,
                      @Nonnull final OutputFactory outputFactory,
-                     @Nonnull final X11EventBusFactory x11EventBusFactory) {
+                     @Nonnull final X11EventBusFactory x11EventBusFactory,
+                     @Nonnull final WlCompositor wlCompositor) {
         this.display = display;
         this.libc = libc;
         this.libX11 = libX11;
@@ -101,6 +105,7 @@ public class X11OutputFactory {
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.x11EventBusFactory = x11EventBusFactory;
+        this.wlCompositor = wlCompositor;
     }
 
     public WlOutput create(@Nonnull final String xDisplay,
@@ -116,9 +121,14 @@ public class X11OutputFactory {
             throw new IllegalArgumentException("Got negative width or height");
         }
 
-        return createXPlatformOutput(xDisplay,
-                                     width,
-                                     height);
+        final WlOutput wlOutput = createXPlatformOutput(xDisplay,
+                                                        width,
+                                                        height);
+        this.wlCompositor.getCompositor()
+                         .getWlOutputs()
+                         .addLast(wlOutput);
+
+        return wlOutput;
     }
 
 

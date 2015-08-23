@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
@@ -30,13 +28,14 @@ import org.westmalle.wayland.core.Surface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlSubcompositorFactory",
-             allowSubclasses = true)
+@Singleton
 public class WlSubcompositor extends Global<WlSubcompositorResource> implements WlSubcompositorRequests, ProtocolObject<WlSubcompositorResource> {
 
     private final Set<WlSubcompositorResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
@@ -44,9 +43,10 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
     private final WlSubsurfaceFactory wlSubSurfaceFactory;
     private final SubsurfaceFactory   subsurfaceFactory;
 
-    WlSubcompositor(@Provided final Display display,
-                    @Provided final WlSubsurfaceFactory wlSubSurfaceFactory,
-                    @Provided final org.westmalle.wayland.core.SubsurfaceFactory subsurfaceFactory) {
+    @Inject
+    WlSubcompositor(@Nonnull final Display display,
+                    @Nonnull final WlSubsurfaceFactory wlSubSurfaceFactory,
+                    @Nonnull final org.westmalle.wayland.core.SubsurfaceFactory subsurfaceFactory) {
         super(display,
               WlSubcompositorResource.class,
               VERSION);
