@@ -18,7 +18,7 @@ import org.freedesktop.wayland.server.Display;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-public class ShellService {
+public class LifeCycle {
 
     @Nonnull
     private final Display     display;
@@ -26,8 +26,8 @@ public class ShellService {
     private final JobExecutor jobExecutor;
 
     @Inject
-    ShellService(@Nonnull final Display display,
-                 @Nonnull final JobExecutor jobExecutor) {
+    LifeCycle(@Nonnull final Display display,
+              @Nonnull final JobExecutor jobExecutor) {
         this.display = display;
         this.jobExecutor = jobExecutor;
     }

@@ -26,14 +26,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ShellServiceTest {
+public class LifeCycleTest {
 
     @Mock
     private Display      display;
     @Mock
     private JobExecutor  jobExecutor;
     @InjectMocks
-    private ShellService shellService;
+    private LifeCycle lifeCycle;
 
     @Test
     public void testRun() throws Exception {
@@ -42,7 +42,7 @@ public class ShellServiceTest {
         when(this.display.addShmFormat(WlShmFormat.XRGB8888.getValue())).thenReturn(5678);
 
         //when
-        this.shellService.start();
+        this.lifeCycle.start();
         //then
         verify(this.jobExecutor).start();
         verify(this.display).initShm();
@@ -54,7 +54,7 @@ public class ShellServiceTest {
     public void testShutDown() throws Exception {
         //given
         //when
-        this.shellService.stop();
+        this.lifeCycle.stop();
         //then
         verify(this.display).terminate();
         verify(this.jobExecutor).fireFinishedEvent();

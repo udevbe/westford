@@ -16,7 +16,7 @@ package org.westmalle.wayland;
 import dagger.Component;
 import org.westmalle.wayland.core.CompositorFactory;
 import org.westmalle.wayland.core.CoreModule;
-import org.westmalle.wayland.core.ShellService;
+import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.egl.EglComponent;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
 import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
@@ -39,7 +39,7 @@ public interface Application {
     WlShellFactory wlShellFactory();
 
     //running
-    ShellService shellService();
+    LifeCycle lifeCycle();
 
     //render implementations
     X11Component x11();
