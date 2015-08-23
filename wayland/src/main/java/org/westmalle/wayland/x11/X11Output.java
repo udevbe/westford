@@ -13,6 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import com.sun.jna.Pointer;
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
@@ -20,6 +22,8 @@ import org.westmalle.wayland.egl.HasEglOutput;
 import javax.annotation.Nonnull;
 import java.util.Map;
 
+@AutoFactory(className = "PrivateX11OutputFactory",
+             allowSubclasses = true)
 public class X11Output implements HasEglOutput {
 
     @Nonnull
@@ -36,7 +40,7 @@ public class X11Output implements HasEglOutput {
 
     private X11EglOutput eglOutput;
 
-    X11Output(@Nonnull final X11EglOutputFactory x11EglOutputFactory,
+    X11Output(@Provided @Nonnull final X11EglOutputFactory x11EglOutputFactory,
               @Nonnull final X11EventBus x11EventBus,
               @Nonnull final Pointer xcbConnection,
               @Nonnull final Pointer xDisplay,

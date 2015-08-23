@@ -62,25 +62,27 @@ public class X11OutputFactoryTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private Display             display;
+    private Display                 display;
     @Mock
-    private Libc                libc;
+    private Libc                    libc;
     @Mock
-    private LibX11              libX11;
+    private LibX11                  libX11;
     @Mock
-    private Libxcb              libxcb;
+    private Libxcb                  libxcb;
     @Mock
-    private LibX11xcb           libX11xcb;
+    private PrivateX11OutputFactory privateX11OutputFactory;
     @Mock
-    private X11EglOutputFactory x11EglOutputFactory;
+    private LibX11xcb               libX11xcb;
     @Mock
-    private WlOutputFactory     wlOutputFactory;
+    private X11EglOutputFactory     x11EglOutputFactory;
     @Mock
-    private OutputFactory       outputFactory;
+    private WlOutputFactory         wlOutputFactory;
     @Mock
-    private X11EventBusFactory  x11EventBusFactory;
+    private OutputFactory           outputFactory;
+    @Mock
+    private X11EventBusFactory      x11EventBusFactory;
     @InjectMocks
-    private X11OutputFactory    x11OutputFactory;
+    private X11OutputFactory        x11OutputFactory;
 
     @Test
     public void testCreateOpenDisplayFailed() throws Exception {

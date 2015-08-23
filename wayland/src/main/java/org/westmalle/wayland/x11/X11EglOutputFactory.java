@@ -52,11 +52,15 @@ public class X11EglOutputFactory {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
-    private final LibEGL libEGL;
+    private final LibEGL                     libEGL;
+    @Nonnull
+    private final PrivateX11EglOutputFactory privateX11EglOutputFactory;
 
     @Inject
-    X11EglOutputFactory(@Nonnull final LibEGL libEGL) {
+    X11EglOutputFactory(@Nonnull final LibEGL libEGL,
+                        @Nonnull final PrivateX11EglOutputFactory privateX11EglOutputFactory) {
         this.libEGL = libEGL;
+        this.privateX11EglOutputFactory = privateX11EglOutputFactory;
     }
 
     @Nonnull
@@ -76,13 +80,12 @@ public class X11EglOutputFactory {
         final Pointer context = createEglContext(eglDisplay,
                                                  config);
 
-        return new X11EglOutput(this.libEGL,
-                                eglDisplay,
-                                createEglSurface(eglDisplay,
-                                                 config,
-                                                 context,
-                                                 window),
-                                context);
+        return this.privateX11EglOutputFactory.create(eglDisplay,
+                                                      createEglSurface(eglDisplay,
+                                                                       config,
+                                                                       context,
+                                                                       window),
+                                                      context);
     }
 
     private Pointer createEglDisplay(final Pointer nativeDisplay) {

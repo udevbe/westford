@@ -47,9 +47,11 @@ public class X11EglOutputFactoryTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
     @Mock
-    private LibEGL              libEGL;
+    private LibEGL                     libEGL;
+    @Mock
+    private PrivateX11EglOutputFactory privateX11EglOutputFactory;
     @InjectMocks
-    private X11EglOutputFactory x11EglOutputFactory;
+    private X11EglOutputFactory        x11EglOutputFactory;
 
     @Test
     public void testCreateNoEsAPi() throws Exception {
