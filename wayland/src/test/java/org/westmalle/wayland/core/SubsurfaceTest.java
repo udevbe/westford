@@ -21,8 +21,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -75,7 +78,6 @@ public class SubsurfaceTest {
     @Test
     public void testSetPositionInert() throws Exception {
         //given: an inert subsurface
-
         final WlSurface wlSurface = mock(WlSurface.class);
         final Surface   surface   = mock(Surface.class);
 
@@ -120,29 +122,70 @@ public class SubsurfaceTest {
 
     @Test
     public void testApplyPositionInert() throws Exception {
-        //TODO
-
         //given: an inert subsurface
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        this.subsurface.setInert(true);
+
         //when: the subsurface position is applied
+        this.subsurface.applyPosition();
+
         //then: nothing happens
+        verifyZeroInteractions(surface);
     }
 
     @Test
     public void testBeforeCommitSync() throws Exception {
-        //TODO
-
         //given: a subsurface in sync mode
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        final SurfaceState newSurfaceState = mock(SurfaceState.class);
+        this.subsurface.apply(newSurfaceState);
+
         //when: the before commit hook is called
-        //then: the pending surface state is restored
+        this.subsurface.beforeCommit(this.wlSurfaceResource);
+
+        //then: the cached surface state is restored
+        verify(surface).setState(newSurfaceState);
     }
 
     @Test
     public void testBeforeCommitDesync() throws Exception {
-        //TODO
-
         //given: a subsurface in desync mode
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        final WlSurface  parentWlSurface  = mock(WlSurface.class);
+        final Surface    parentSurface    = mock(Surface.class);
+        final Subsurface parentSubsurface = mock(Subsurface.class);
+
+        when(this.parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+        when(parentSurface.getRole()).thenReturn(Optional.of(parentSubsurface));
+        when(parentSubsurface.isEffectiveSync()).thenReturn(false);
+
+        final SurfaceState newSurfaceState = mock(SurfaceState.class);
+        this.subsurface.apply(newSurfaceState);
+
+        this.subsurface.setSync(false);
+
         //when: the before commit hook is called
-        //then: nothing happens
+        this.subsurface.beforeCommit(this.wlSurfaceResource);
+
+        //then: no cached state was set
+        verify(surface,
+               times(0)).setState(newSurfaceState);
     }
 
     @Test
