@@ -56,6 +56,11 @@ public class Subsurface implements Role {
                                      y);
     }
 
+    @Nonnull
+    public Point getPosition() {
+        return this.position;
+    }
+
     public void applyPosition() {
         if (isInert()) {
             return;
@@ -66,7 +71,7 @@ public class Subsurface implements Role {
 
         wlSurface.getSurface()
                  .setPosition(parentWlSurface.getSurface()
-                                             .global(this.position));
+                                             .global(getPosition()));
     }
 
     @Override
@@ -112,14 +117,11 @@ public class Subsurface implements Role {
             return;
         }
 
-        if (useSync()) {
-            final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-            final Surface surface = wlSurface.getSurface();
-
+        if (useSync() &&
+            !this.surfaceState.equals(this.cachedSurfaceState)) {
             //sync mode. update old state with cached state
             this.surfaceState = this.cachedSurfaceState;
-            surface.getCommitSignal()
-                   .emit(this.surfaceState);
+            commit();
         }
 
         applyPosition();
