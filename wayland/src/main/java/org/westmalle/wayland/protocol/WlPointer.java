@@ -31,7 +31,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlPointerFactory")
+@AutoFactory(className = "WlPointerFactory",
+             allowSubclasses = true)
 public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerResource> {
 
     private final Set<WlPointerResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

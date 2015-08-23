@@ -30,7 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-@AutoFactory(className = "CompositorFactory")
+@AutoFactory(className = "CompositorFactory",
+             allowSubclasses = true)
 public class Compositor {
     @Nonnull
     private final Display      display;
@@ -41,15 +42,13 @@ public class Compositor {
     @Nonnull
     private final EventLoop.IdleHandler idleHandler;
     @Nonnull
-    private Optional<EventSource> renderEvent = Optional.empty();
-
-    @Nonnull
     private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-
     @Nonnull
     private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> subsurfaceStack        = new HashMap<>();
     @Nonnull
     private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> pendingSubsurfaceStack = new HashMap<>();
+    @Nonnull
+    private Optional<EventSource> renderEvent = Optional.empty();
 
     Compositor(@Nonnull @Provided final Display display,
                @Nonnull final RenderEngine renderEngine) {
@@ -74,6 +73,11 @@ public class Compositor {
         this.renderEngine.end(wlOutput);
     }
 
+    @Nonnull
+    public LinkedList<WlSurfaceResource> getSurfacesStack() {
+        return this.surfacesStack;
+    }
+
     private void render(final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         //don't bother rendering subsurfaces if the parent doesn't have a buffer.
@@ -92,26 +96,14 @@ public class Compositor {
                  });
     }
 
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getSurfacesStack() {
-        return this.surfacesStack;
-    }
-
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        LinkedList<WlSurfaceResource> subsurfaces = this.subsurfaceStack.get(parentSurface);
-        if (subsurfaces == null) {
-            //TODO unit test subsurface stack initialization
-            subsurfaces = new LinkedList<>();
-            subsurfaces.add(parentSurface);
-            this.subsurfaceStack.put(parentSurface,
-                                     subsurfaces);
-        }
-        return subsurfaces;
-    }
-
     public void removeSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
         this.subsurfaceStack.remove(parentSurface);
+        this.pendingSubsurfaceStack.remove(parentSurface);
+    }
+
+    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        this.subsurfaceStack.put(parentSurface,
+                                 getPendingSubsurfaceStack(parentSurface));
         this.pendingSubsurfaceStack.remove(parentSurface);
     }
 
@@ -135,10 +127,17 @@ public class Compositor {
         return subsurfaces;
     }
 
-    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        this.subsurfaceStack.put(parentSurface,
-                                 getPendingSubsurfaceStack(parentSurface));
-        this.pendingSubsurfaceStack.remove(parentSurface);
+    @Nonnull
+    public LinkedList<WlSurfaceResource> getSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        LinkedList<WlSurfaceResource> subsurfaces = this.subsurfaceStack.get(parentSurface);
+        if (subsurfaces == null) {
+            //TODO unit test subsurface stack initialization
+            subsurfaces = new LinkedList<>();
+            subsurfaces.add(parentSurface);
+            this.subsurfaceStack.put(parentSurface,
+                                     subsurfaces);
+        }
+        return subsurfaces;
     }
 
     public void requestRender() {

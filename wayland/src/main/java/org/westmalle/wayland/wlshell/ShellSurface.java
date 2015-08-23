@@ -48,7 +48,8 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
 
-@AutoFactory(className = "ShellSurfaceFactory")
+@AutoFactory(className = "ShellSurfaceFactory",
+             allowSubclasses = true)
 public class ShellSurface implements Role {
 
     @Nonnull

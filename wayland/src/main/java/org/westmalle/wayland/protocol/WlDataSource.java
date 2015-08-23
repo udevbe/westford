@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlDataSourceFactory")
+@AutoFactory(className = "WlDataSourceFactory",
+             allowSubclasses = true)
 public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlDataSourceResource> {
 
     private final Set<WlDataSourceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

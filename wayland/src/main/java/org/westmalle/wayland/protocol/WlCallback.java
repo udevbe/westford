@@ -25,7 +25,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlCallbackFactory")
+@AutoFactory(className = "WlCallbackFactory",
+             allowSubclasses = true)
 public class WlCallback implements WlCallbackRequests, ProtocolObject<WlCallbackResource> {
 
     private final Set<WlCallbackResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

@@ -42,7 +42,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AutoFactory(className = "PointerDeviceFactory")
+@AutoFactory(className = "PointerDeviceFactory",
+             allowSubclasses = true)
 public class PointerDevice implements Role {
 
     @Nonnull
@@ -388,7 +389,7 @@ public class PointerDevice implements Role {
 
     /**
      * Listen for motion as soon as given surface is grabbed.
-     * <p/>
+     * <p>
      * If another surface already has the grab, the listener
      * is never registered.
      *
@@ -438,6 +439,11 @@ public class PointerDevice implements Role {
     }
 
     @Nonnull
+    public Signal<Motion, Slot<Motion>> getMotionSignal() {
+        return this.motionSignal;
+    }
+
+    @Nonnull
     public Signal<Button, Slot<Button>> getButtonSignal() {
         return this.buttonSignal;
     }
@@ -450,11 +456,6 @@ public class PointerDevice implements Role {
     @Nonnull
     public Signal<PointerGrab, Slot<PointerGrab>> getPointerGrabSignal() {
         return this.pointerGrabSignal;
-    }
-
-    @Nonnull
-    public Signal<Motion, Slot<Motion>> getMotionSignal() {
-        return this.motionSignal;
     }
 
     public void removeCursor(@Nonnull final WlPointerResource wlPointerResource,

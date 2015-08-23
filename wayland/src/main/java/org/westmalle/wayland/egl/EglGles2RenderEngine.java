@@ -36,7 +36,8 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_INT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
-@AutoFactory(className = "EglRenderEngineFactory")
+@AutoFactory(className = "EglRenderEngineFactory",
+             allowSubclasses = true)
 public class EglGles2RenderEngine implements RenderEngine {
 
     @Nonnull

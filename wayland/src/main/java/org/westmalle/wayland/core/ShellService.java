@@ -14,7 +14,6 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.shared.WlShmFormat;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

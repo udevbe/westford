@@ -40,7 +40,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@AutoFactory(className = "SurfaceFactory")
+@AutoFactory(className = "SurfaceFactory",
+             allowSubclasses = true)
 public class Surface {
 
     /*
@@ -204,6 +205,19 @@ public class Surface {
     }
 
     @Nonnull
+    public Surface detachBuffer() {
+        getPendingState().getBuffer()
+                         .ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
+        this.pendingBufferDestroyListener = Optional.empty();
+        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
+                                                                  .buffer(Optional.<WlBufferResource>empty())
+                                                                  .damage(Optional.<Region>empty())
+                                                                  .build();
+        setPendingState(pendingSurfaceState);
+        return this;
+    }
+
+    @Nonnull
     public Surface updateTransform() {
         final SurfaceState state = getState();
 
@@ -247,16 +261,13 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface detachBuffer() {
-        getPendingState().getBuffer()
-                         .ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
-        this.pendingBufferDestroyListener = Optional.empty();
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .buffer(Optional.<WlBufferResource>empty())
-                                                                  .damage(Optional.<Region>empty())
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
-        return this;
+    public WlCompositorResource getWlCompositorResource() {
+        return this.wlCompositorResource;
+    }
+
+    @Nonnull
+    public Signal<SurfaceState, Slot<SurfaceState>> getApplySurfaceStateSignal() {
+        return this.applySurfaceStateSignal;
     }
 
     @Nonnull
@@ -333,6 +344,11 @@ public class Surface {
     }
 
     @Nonnull
+    public Signal<Point, Slot<Point>> getPositionSignal() {
+        return this.positionSignal;
+    }
+
+    @Nonnull
     public Surface firePaintCallbacks(final int serial) {
         final List<WlCallbackResource> callbacks = new ArrayList<>(getFrameCallbacks());
         getFrameCallbacks().clear();
@@ -389,7 +405,6 @@ public class Surface {
         return this;
     }
 
-
     /**
      * The keyboards that will be used to notify the client of any keyboard events on this surface. This collection is
      * updated each time the keyboard focus changes for this surface. To keep the client from receiving keyboard events,
@@ -401,20 +416,5 @@ public class Surface {
     @Nonnull
     public Set<WlKeyboardResource> getKeyboardFocuses() {
         return this.keyboardFocuses;
-    }
-
-    @Nonnull
-    public Signal<Point, Slot<Point>> getPositionSignal() {
-        return this.positionSignal;
-    }
-
-    @Nonnull
-    public Signal<SurfaceState, Slot<SurfaceState>> getApplySurfaceStateSignal() {
-        return this.applySurfaceStateSignal;
-    }
-
-    @Nonnull
-    public WlCompositorResource getWlCompositorResource() {
-        return this.wlCompositorResource;
     }
 }

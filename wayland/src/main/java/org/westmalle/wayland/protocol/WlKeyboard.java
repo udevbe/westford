@@ -25,7 +25,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlKeyboardFactory")
+@AutoFactory(className = "WlKeyboardFactory",
+             allowSubclasses = true)
 public class WlKeyboard implements WlKeyboardRequestsV4, ProtocolObject<WlKeyboardResource> {
 
     private final Set<WlKeyboardResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

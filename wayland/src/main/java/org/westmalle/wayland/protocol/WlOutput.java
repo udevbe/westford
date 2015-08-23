@@ -28,7 +28,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlOutputFactory")
+@AutoFactory(className = "WlOutputFactory",
+             allowSubclasses = true)
 public class WlOutput extends Global<WlOutputResource> implements WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
 
     private final Set<WlOutputResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

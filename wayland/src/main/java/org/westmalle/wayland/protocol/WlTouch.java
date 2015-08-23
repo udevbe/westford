@@ -25,7 +25,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlTouchFactory")
+@AutoFactory(className = "WlTouchFactory",
+             allowSubclasses = true)
 public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResource> {
 
     private final Set<WlTouchResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

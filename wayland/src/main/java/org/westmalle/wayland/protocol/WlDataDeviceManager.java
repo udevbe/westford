@@ -28,7 +28,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlDataDeviceManagerFactory")
+@AutoFactory(className = "WlDataDeviceManagerFactory",
+             allowSubclasses = true)
 public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequestsV2, ProtocolObject<WlDataDeviceManagerResource> {
 
     private final Set<WlDataDeviceManagerResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

@@ -19,7 +19,8 @@ import org.freedesktop.wayland.server.WlOutputResource;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
-@AutoFactory(className = "OutputFactory")
+@AutoFactory(className = "OutputFactory",
+             allowSubclasses = true)
 public class Output {
 
     @Nonnull

@@ -25,7 +25,8 @@ import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 
 import javax.annotation.Nonnull;
 
-@AutoFactory(className = "X11EventBusFactory")
+@AutoFactory(className = "X11EventBusFactory",
+             allowSubclasses = true)
 public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
 
     private final Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> xEventSignal = new Signal<>();
@@ -44,10 +45,6 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         this.xcbConnection = xcbConnection;
     }
 
-    public Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> getXEventSignal() {
-        return this.xEventSignal;
-    }
-
     @Override
     public int handle(final int fd,
                       final int mask) {
@@ -57,5 +54,9 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
             this.libc.free(event.getPointer());
         }
         return 0;
+    }
+
+    public Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> getXEventSignal() {
+        return this.xEventSignal;
     }
 }

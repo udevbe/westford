@@ -36,7 +36,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlSurfaceFactory")
+@AutoFactory(className = "WlSurfaceFactory",
+             allowSubclasses = true)
 public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
     private final Set<WlSurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

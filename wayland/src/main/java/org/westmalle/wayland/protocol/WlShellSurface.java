@@ -31,7 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlShellSurfaceFactory")
+@AutoFactory(className = "WlShellSurfaceFactory",
+             allowSubclasses = true)
 public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
 
     private final Set<WlShellSurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

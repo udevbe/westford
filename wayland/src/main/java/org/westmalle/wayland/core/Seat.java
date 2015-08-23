@@ -9,7 +9,8 @@ import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.Set;
 
-@AutoFactory(className = "SeatFactory")
+@AutoFactory(className = "SeatFactory",
+             allowSubclasses = true)
 public class Seat {
 
     @Nonnull
