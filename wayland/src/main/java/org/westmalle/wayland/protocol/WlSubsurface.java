@@ -18,6 +18,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlSubsurfaceRequests;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlSubsurfaceError;
 import org.westmalle.wayland.core.Subsurface;
 
 import javax.annotation.Nonnegative;
@@ -71,15 +72,39 @@ public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
     @Override
     public void placeAbove(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
-        //TODO check if sibling argument is sibling or parent of this subsurface else raise protocol error
-        getSubsurface().above(sibling);
+        //TODO unit test
+        if (isSibling(sibling)) {
+            getSubsurface().above(sibling);
+        }
+        else {
+            requester.postError(WlSubsurfaceError.BAD_SURFACE.getValue(),
+                                "placeAbove request failed. wl_surface is not a sibling or the parent");
+        }
+    }
+
+    private boolean isSibling(final WlSurfaceResource sibling) {
+        final WlSurfaceResource parentWlSurfaceResource = getSubsurface().getParentWlSurfaceResource();
+
+        final WlSurface siblingWlSurfaceResource = (WlSurface) sibling.getImplementation();
+        final WlCompositor wlCompositor = (WlCompositor) siblingWlSurfaceResource.getSurface()
+                                                                                 .getWlCompositorResource()
+                                                                                 .getImplementation();
+        return wlCompositor.getCompositor()
+                           .getSubsurfaceStack(parentWlSurfaceResource)
+                           .contains(sibling);
     }
 
     @Override
     public void placeBelow(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
-        //TODO check if sibling argument is sibling or parent of this subsurface else raise protocol error
-        getSubsurface().below(sibling);
+        //TODO unit test
+        if (isSibling(sibling)) {
+            getSubsurface().below(sibling);
+        }
+        else {
+            requester.postError(WlSubsurfaceError.BAD_SURFACE.getValue(),
+                                "placeBelow request failed. wl_surface is not a sibling or the parent");
+        }
     }
 
     @Override

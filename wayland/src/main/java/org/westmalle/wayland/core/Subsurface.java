@@ -37,9 +37,6 @@ public class Subsurface implements Role {
     @Nonnull
     private SurfaceState cachedSurfaceState;
 
-    private Optional<WlSurfaceResource> siblingPlacement = Optional.empty();
-    private boolean below;
-
     Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                @Nonnull final WlSurfaceResource wlSurfaceResource,
                @Nonnull final SurfaceState surfaceState) {
@@ -56,8 +53,8 @@ public class Subsurface implements Role {
     }
 
     public void applyPosition() {
-        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
-        final WlSurface wlSurface       = (WlSurface) this.wlSurfaceResource.getImplementation();
+        final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
+        final WlSurface wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
 
         wlSurface.getSurface()
                  .setPosition(parentWlSurface.getSurface()
@@ -76,7 +73,7 @@ public class Subsurface implements Role {
     }
 
     public void commit() {
-        final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
+        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
         //update cached state with new state
@@ -95,10 +92,8 @@ public class Subsurface implements Role {
     }
 
     public void parentCommit() {
-        //TODO visibility
-
         if (useSync()) {
-            final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
+            final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
             final Surface surface = wlSurface.getSurface();
 
             //sync mode. update old state with cached state
@@ -108,9 +103,6 @@ public class Subsurface implements Role {
         }
 
         applyPosition();
-        this.siblingPlacement.ifPresent(sibling -> placement(this.below,
-                                                             sibling));
-        this.siblingPlacement = Optional.empty();
     }
 
     public void setSync() {
@@ -131,8 +123,7 @@ public class Subsurface implements Role {
             return true;
         }
         else {
-
-            final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
+            final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
             final Surface parentSurface = parentWlSurface.getSurface();
 
             boolean parentSync = false;
@@ -150,33 +141,39 @@ public class Subsurface implements Role {
         }
     }
 
-    public void above(final WlSurfaceResource sibling) {
-        //TODO destroy listener for sibling;
-        this.siblingPlacement = Optional.of(sibling);
-        this.below = false;
+    public void above(@Nonnull final WlSurfaceResource sibling) {
+        placement(false,
+                  sibling);
     }
 
-    public void below(final WlSurfaceResource sibling) {
-        //TODO destroy listener for sibling;
-        this.siblingPlacement = Optional.of(sibling);
-        this.below = true;
+    public void below(@Nonnull final WlSurfaceResource sibling) {
+        placement(true,
+                  sibling);
     }
 
     private void placement(final boolean below,
                            final WlSurfaceResource sibling) {
-        //FIXME different placements (of the same parent surface) must be done in order as the requests from the protocol come in
-
-        final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
+        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
         final WlCompositorResource wlCompositorResource = surface.getWlCompositorResource();
         final WlCompositor         wlCompositor         = (WlCompositor) wlCompositorResource.getImplementation();
         final Compositor           compositor           = wlCompositor.getCompositor();
 
-        final LinkedList<WlSurfaceResource> surfacesStack   = compositor.getSurfacesStack();
-        final int                           siblingPosition = surfacesStack.indexOf(sibling);
-        surfacesStack.remove(this.wlSurfaceResource);
-        surfacesStack.add(below ? siblingPosition : siblingPosition + 1,
-                          this.wlSurfaceResource);
+        final LinkedList<WlSurfaceResource> subsurfaceStack = compositor.getPendingSubsurfaceStack(getParentWlSurfaceResource());
+        final int                           siblingPosition = subsurfaceStack.indexOf(sibling);
+        subsurfaceStack.remove(getWlSurfaceResource());
+        subsurfaceStack.add(below ? siblingPosition : siblingPosition + 1,
+                            getWlSurfaceResource());
+    }
+
+    @Nonnull
+    public WlSurfaceResource getWlSurfaceResource() {
+        return this.wlSurfaceResource;
+    }
+
+    @Nonnull
+    public WlSurfaceResource getParentWlSurfaceResource() {
+        return this.parentWlSurfaceResource;
     }
 }

@@ -17,10 +17,8 @@ import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 @AutoFactory(className = "RendererFactory")
 public class Renderer {
@@ -32,13 +30,10 @@ public class Renderer {
         this.renderEngine = renderEngine;
     }
 
-    public void render(@Nonnull final WlSurfaceResource surfaceResource) {
-        final WlSurface wlSurface = (WlSurface) surfaceResource.getImplementation();
-        final Optional<WlBufferResource> buffer = wlSurface.getSurface()
-                                                           .getState()
-                                                           .getBuffer();
-        buffer.ifPresent(wlBufferResource -> this.renderEngine.draw(surfaceResource,
-                                                                    wlBufferResource));
+    public void render(@Nonnull final WlSurfaceResource surfaceResource,
+                       @Nonnull final WlBufferResource wlBufferResource) {
+        this.renderEngine.draw(surfaceResource,
+                               wlBufferResource);
     }
 
     public void beginRender(@Nonnull final WlOutput wlOutput) {

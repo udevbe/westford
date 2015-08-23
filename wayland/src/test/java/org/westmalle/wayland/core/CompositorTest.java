@@ -16,6 +16,7 @@ package org.westmalle.wayland.core;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,10 +24,14 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -77,8 +82,41 @@ public class CompositorTest {
         });
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface0         = mock(WlSurface.class);
+        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
+        final Surface surface0 = mock(Surface.class);
+        when(wlSurface0.getSurface()).thenReturn(surface0);
+        final Signal<SurfaceState, Slot<SurfaceState>> commitSignal0 = mock(Signal.class);
+        when(surface0.getCommitSignal()).thenReturn(commitSignal0);
+        final SurfaceState surfaceState0 = mock(SurfaceState.class);
+        when(surface0.getState()).thenReturn(surfaceState0);
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
+        when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
+
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface1         = mock(WlSurface.class);
+        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
+        final Surface surface1 = mock(Surface.class);
+        when(wlSurface1.getSurface()).thenReturn(surface1);
+        final Signal<SurfaceState, Slot<SurfaceState>> commitSignal1 = mock(Signal.class);
+        when(surface1.getCommitSignal()).thenReturn(commitSignal1);
+        final SurfaceState surfaceState1 = mock(SurfaceState.class);
+        when(surface1.getState()).thenReturn(surfaceState1);
+        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
+        when(surfaceState1.getBuffer()).thenReturn(Optional.of(wlBufferResource1));
+
         final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface2         = mock(WlSurface.class);
+        when(wlSurfaceResource2.getImplementation()).thenReturn(wlSurface2);
+        final Surface surface2 = mock(Surface.class);
+        when(wlSurface2.getSurface()).thenReturn(surface2);
+        final Signal<SurfaceState, Slot<SurfaceState>> commitSignal2 = mock(Signal.class);
+        when(surface2.getCommitSignal()).thenReturn(commitSignal2);
+        final SurfaceState surfaceState2 = mock(SurfaceState.class);
+        when(surface2.getState()).thenReturn(surfaceState2);
+        final WlBufferResource wlBufferResource2 = mock(WlBufferResource.class);
+        when(surfaceState2.getBuffer()).thenReturn(Optional.of(wlBufferResource2));
+
         this.compositor.getSurfacesStack()
                        .add(wlSurfaceResource0);
         this.compositor.getSurfacesStack()
@@ -96,11 +134,14 @@ public class CompositorTest {
         inOrder0.verify(this.renderer)
                 .beginRender(wlOutput0);
         inOrder0.verify(this.renderer)
-                .render(wlSurfaceResource0);
+                .render(wlSurfaceResource0,
+                        wlBufferResource0);
         inOrder0.verify(this.renderer)
-                .render(wlSurfaceResource1);
+                .render(wlSurfaceResource1,
+                        wlBufferResource1);
         inOrder0.verify(this.renderer)
-                .render(wlSurfaceResource2);
+                .render(wlSurfaceResource2,
+                        wlBufferResource2);
         inOrder0.verify(this.renderer)
                 .endRender(wlOutput0);
 
@@ -109,11 +150,14 @@ public class CompositorTest {
         inOrder1.verify(this.renderer)
                 .beginRender(wlOutput1);
         inOrder1.verify(this.renderer)
-                .render(wlSurfaceResource0);
+                .render(wlSurfaceResource0,
+                        wlBufferResource0);
         inOrder1.verify(this.renderer)
-                .render(wlSurfaceResource1);
+                .render(wlSurfaceResource1,
+                        wlBufferResource1);
         inOrder1.verify(this.renderer)
-                .render(wlSurfaceResource2);
+                .render(wlSurfaceResource2,
+                        wlBufferResource2);
         inOrder1.verify(this.renderer)
                 .endRender(wlOutput1);
 

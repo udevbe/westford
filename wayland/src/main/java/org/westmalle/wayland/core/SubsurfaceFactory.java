@@ -14,6 +14,7 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
@@ -22,8 +23,6 @@ public class SubsurfaceFactory {
 
     public Subsurface create(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                              @Nonnull final WlSurfaceResource wlSurfaceResource) {
-
-        //TODO destroy listener for parent;
         //TODO destroy listener for surface
 
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
@@ -42,6 +41,21 @@ public class SubsurfaceFactory {
                      .connect(event -> subsurface.parentCommit());
         parentSurface.getPositionSignal()
                      .connect(event -> subsurface.applyPosition());
+
+        final WlCompositor wlCompositor = (WlCompositor) surface.getWlCompositorResource()
+                                                                .getImplementation();
+        final Compositor compositor = wlCompositor.getCompositor();
+        compositor.getSurfacesStack()
+                  .remove(wlSurfaceResource);
+        compositor.getSubsurfaceStack(parentWlSurfaceResource)
+                  .addLast(wlSurfaceResource);
+
+        wlSurfaceResource.register(() -> {
+            compositor.getSubsurfaceStack(parentWlSurfaceResource)
+                      .remove(wlSurfaceResource);
+            compositor.getPendingSubsurfaceStack(parentWlSurfaceResource)
+                      .remove(wlSurfaceResource);
+        });
 
         return subsurface;
     }

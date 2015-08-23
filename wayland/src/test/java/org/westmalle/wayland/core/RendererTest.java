@@ -51,24 +51,10 @@ public class RendererTest {
     public void testRender() throws Exception {
         //given
         final WlSurfaceResource surfaceResource = mock(WlSurfaceResource.class);
-
-        final WlSurface wlSurface = mock(WlSurface.class);
-        when(surfaceResource.getImplementation()).thenReturn(wlSurface);
-
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
-
-        final SurfaceState surfaceState = mock(SurfaceState.class);
-        when(surface.getState()).thenReturn(surfaceState);
-
         final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
-        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
-
-        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
-        when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
-
         //when
-        this.renderer.render(surfaceResource);
+        this.renderer.render(surfaceResource,
+                             wlBufferResource);
         //then
         verify(this.renderEngine).draw(surfaceResource,
                                        wlBufferResource);

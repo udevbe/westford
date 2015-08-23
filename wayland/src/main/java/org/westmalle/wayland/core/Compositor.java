@@ -20,6 +20,7 @@ import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -62,6 +63,7 @@ public class Compositor {
                         .remove();
         this.renderEvent = Optional.empty();
         //TODO unit test with subsurfaces render order
+        //TODO unit test with parent surface without buffer while clients have a buffer.
         this.wlOutputs.forEach(this::render);
         this.display.flushClients();
     }
@@ -73,13 +75,21 @@ public class Compositor {
     }
 
     private void render(final WlSurfaceResource surface) {
-        final LinkedList<WlSurfaceResource> subsurfaces = getSubsurfaceStack(surface);
-        subsurfaces.forEach((subsurface) -> {
-            this.renderer.render(surface);
-            if (subsurface != surface) {
-                render(subsurface);
-            }
-        });
+        final WlSurface wlSurface = (WlSurface) surface.getImplementation();
+        //don't bother rendering subsurfaces if the parent doesn't have a buffer.
+        wlSurface.getSurface()
+                 .getState()
+                 .getBuffer()
+                 .ifPresent(wlBufferResource -> {
+                     final LinkedList<WlSurfaceResource> subsurfaces = getSubsurfaceStack(surface);
+                     subsurfaces.forEach((subsurface) -> {
+                         this.renderer.render(surface,
+                                              wlBufferResource);
+                         if (subsurface != surface) {
+                             render(subsurface);
+                         }
+                     });
+                 });
     }
 
     @Nonnull
@@ -89,38 +99,41 @@ public class Compositor {
 
     @Nonnull
     public LinkedList<WlSurfaceResource> getSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        //TODO unit tests
-
         LinkedList<WlSurfaceResource> subsurfaces = this.subsurfaceStack.get(parentSurface);
         if (subsurfaces == null) {
+            //TODO unit test subsurface stack initialization
             subsurfaces = new LinkedList<>();
             subsurfaces.add(parentSurface);
             this.subsurfaceStack.put(parentSurface,
                                      subsurfaces);
 
-            parentSurface.register(() -> this.subsurfaceStack.remove(parentSurface));
+            //TODO unit test parent surface destroy & commit handlers
+            parentSurface.register(() -> {
+                this.subsurfaceStack.remove(parentSurface);
+                this.pendingSubsurfaceStack.remove(parentSurface);
+            });
+
+            final WlSurface parentWlSurface = (WlSurface) parentSurface.getImplementation();
+            parentWlSurface.getSurface()
+                           .getCommitSignal()
+                           .connect(event -> commitSubsurfaceStack(parentSurface));
         }
         return subsurfaces;
     }
 
     @Nonnull
     public LinkedList<WlSurfaceResource> getPendingSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        //TODO unit tests
-
         LinkedList<WlSurfaceResource> subsurfaces = this.pendingSubsurfaceStack.get(parentSurface);
         if (subsurfaces == null) {
+            //TODO unit test pending subsurface stack initialization
             subsurfaces = new LinkedList<>(getSubsurfaceStack(parentSurface));
             this.pendingSubsurfaceStack.put(parentSurface,
                                             subsurfaces);
-
-            parentSurface.register(() -> this.pendingSubsurfaceStack.remove(parentSurface));
         }
         return subsurfaces;
     }
 
-    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        //TODO unit tests
-
+    private void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
         this.subsurfaceStack.put(parentSurface,
                                  getPendingSubsurfaceStack(parentSurface));
     }
