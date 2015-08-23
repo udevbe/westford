@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 public class WlSubsurfaceTest {
 
     @Mock
-    private Subsurface        subsurface;
+    private Subsurface subsurface;
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
@@ -62,5 +62,61 @@ public class WlSubsurfaceTest {
         //then
         assertThat(wlSubsurfaceResource).isNotNull();
         assertThat(wlSubsurfaceResource.getImplementation()).isSameAs(this.wlSubsurface);
+    }
+
+    @Test
+    public void testSetPosition() throws Exception {
+        //TODO
+        //given: a wlsubsurface, a subsurface, an x and y coordinate
+        //when: set position is called
+        //then: subsurface set position is called with x and y coordinates
+    }
+
+    @Test
+    public void testPlaceAbove() throws Exception {
+        //TODO
+        //given: a wlsubsurface, a subsurface, a sibling or parent
+        //when: place above is called
+        //then: above is called on the subsurface
+    }
+
+    @Test
+    public void testPlaceAboveBadSibling() throws Exception {
+        //TODO
+        //given: a wlsubsurface, a bad sibling or parent
+        //when: place above is called
+        //then: a protocol error is raised
+    }
+
+    @Test
+    public void testPlaceBelow() throws Exception {
+        //TODO
+        //given: a wlsubsurface, a subsurface, a sibling or parent
+        //when: place below is called
+        //then: below is called on the subsurface
+    }
+
+    @Test
+    public void testPlaceBelowBadSibling() throws Exception {
+        //TODO
+        //given: a wlsubsurface, a bad sibling or parent
+        //when: place below is called
+        //then: a protocol error is raised
+    }
+
+    @Test
+    public void testSetSync() throws Exception {
+        //TODO
+        //given: a wlsubsurface, a subsurface
+        //when: set sync is called
+        //then: sync is called on the subsurface
+    }
+
+    @Test
+    public void testSetDesync() throws Exception {
+        //TODO
+        //given: a wlsubsurface, a subsurface
+        //when: set desync is called
+        //then: desync is called on the subsurface
     }
 }
