@@ -30,7 +30,7 @@ import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 
-@AutoFactory
+@AutoFactory(className = "X11InputEventListenerFactory")
 public class X11InputEventListener {
 
     @Nonnull

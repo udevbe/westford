@@ -32,7 +32,7 @@ public class xcb_intern_atom_reply_t extends Structure {
     public int  atom;
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 }

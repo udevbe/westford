@@ -51,7 +51,7 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_RELEASE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_LEAVE_NOTIFY;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
 
-@AutoFactory
+@AutoFactory(className = "X11EventBusFactory")
 public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
 
     private final EventBus eventBus = new EventBus();

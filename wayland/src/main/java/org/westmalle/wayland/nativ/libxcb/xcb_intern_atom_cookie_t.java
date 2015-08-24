@@ -24,7 +24,7 @@ public class xcb_intern_atom_cookie_t extends Structure {
     public int sequence;
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 

@@ -79,7 +79,7 @@ public class xkb_rule_names extends Structure {
 
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 }

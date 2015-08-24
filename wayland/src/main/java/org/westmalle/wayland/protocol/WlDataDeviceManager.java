@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory
+@AutoFactory(className = "WlDataDeviceManagerFactory")
 public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequestsV2, ProtocolObject<WlDataDeviceManagerResource> {
 
     private final Set<WlDataDeviceManagerResource> resources = Sets.newSetFromMap(new WeakHashMap<>());

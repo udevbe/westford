@@ -161,7 +161,7 @@ public class WlCompositorTest {
         destroyListener.handle();
 
         //then
-        assertThat((Iterable) surfacesStack).doesNotContain(wlSurfaceResource1);
+        assertThat((Iterable<WlSurfaceResource>) surfacesStack).doesNotContain(wlSurfaceResource1);
         verify(this.compositor).requestRender();
     }
 

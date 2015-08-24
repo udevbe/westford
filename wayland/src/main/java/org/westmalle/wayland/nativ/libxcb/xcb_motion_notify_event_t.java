@@ -57,7 +57,7 @@ public class xcb_motion_notify_event_t extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 }

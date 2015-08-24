@@ -40,7 +40,7 @@ public class xcb_focus_in_event_t extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return FIELD_ORDER;
     }
 }

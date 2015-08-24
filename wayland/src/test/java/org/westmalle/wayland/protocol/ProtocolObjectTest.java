@@ -52,7 +52,7 @@ public class ProtocolObjectTest {
         //given
         //when
         //then
-        assertThat((Iterable) this.protocolObject.getResources()).isEmpty();
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).isEmpty();
     }
 
     @Test
@@ -64,8 +64,8 @@ public class ProtocolObjectTest {
                                                              1,
                                                              1);
         //then
-        assertThat((Iterable) this.protocolObject.getResources()).contains(resource);
-        assertThat((Iterable) this.protocolObject.getResources()).hasSize(1);
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).contains(resource);
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).hasSize(1);
     }
 
     @Test
@@ -83,10 +83,10 @@ public class ProtocolObjectTest {
                                                               1,
                                                               3);
         //then
-        assertThat((Iterable) this.protocolObject.getResources()).contains(resource0);
-        assertThat((Iterable) this.protocolObject.getResources()).contains(resource1);
-        assertThat((Iterable) this.protocolObject.getResources()).contains(resource2);
-        assertThat((Iterable) this.protocolObject.getResources()).hasSize(3);
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).contains(resource0);
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).contains(resource1);
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).contains(resource2);
+        assertThat((Iterable<Resource<?>>) this.protocolObject.getResources()).hasSize(3);
     }
 
     @Test

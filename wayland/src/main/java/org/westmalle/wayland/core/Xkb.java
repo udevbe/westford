@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_FORMAT_TEXT_V1;
 
-@AutoFactory
+@AutoFactory(className = "XkbFactory")
 public class Xkb {
 
     @Nonnull

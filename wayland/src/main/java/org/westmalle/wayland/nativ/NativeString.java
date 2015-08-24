@@ -28,7 +28,7 @@ import java.util.Objects;
  * @author Todd Fast, todd.fast@sun.com
  * @author twall@users.sf.net
  */
-public class NativeString implements CharSequence, Comparable {
+public class NativeString implements CharSequence, Comparable<Object> {
 
     static final String WIDE_STRING = "--WIDE-STRING--";
 
