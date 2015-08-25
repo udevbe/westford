@@ -14,7 +14,6 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlRegionRequests;
 import org.freedesktop.wayland.server.WlRegionResource;
@@ -23,15 +22,14 @@ import org.westmalle.wayland.core.Region;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 @AutoFactory(className = "WlRegionFactory")
 public class WlRegion implements WlRegionRequests, ProtocolObject<WlRegionResource> {
 
-    private final Set<WlRegionResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlRegionResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
     private final Region region;
 
@@ -67,8 +65,9 @@ public class WlRegion implements WlRegionRequests, ProtocolObject<WlRegionResour
                     final int y,
                     @Nonnegative final int width,
                     @Nonnegative final int height) {
-        checkArgument(width > 0);
-        checkArgument(height > 0);
+        if (width < 0 || height < 0) {
+            throw new IllegalArgumentException("Got negative width or height");
+        }
 
         this.region.add(Rectangle.create(x,
                                          y,
@@ -82,8 +81,9 @@ public class WlRegion implements WlRegionRequests, ProtocolObject<WlRegionResour
                          final int y,
                          @Nonnegative final int width,
                          @Nonnegative final int height) {
-        checkArgument(width > 0);
-        checkArgument(height > 0);
+        if (width < 0 || height < 0) {
+            throw new IllegalArgumentException("Got negative width or height");
+        }
 
         this.region.subtract(Rectangle.create(x,
                                               y,

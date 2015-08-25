@@ -14,7 +14,6 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlPointerRequestsV3;
@@ -28,13 +27,14 @@ import org.westmalle.wayland.core.Surface;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlPointerFactory")
 public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerResource> {
 
-    private final Set<WlPointerResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlPointerResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
     private final PointerDevice pointerDevice;
 

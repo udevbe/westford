@@ -13,7 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.google.common.eventbus.Subscribe;
+import com.squareup.otto.Subscribe;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDevice;

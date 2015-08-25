@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import com.google.common.collect.Lists;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
@@ -27,8 +26,6 @@ import javax.inject.Singleton;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @Singleton
 public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
@@ -58,7 +55,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     @Nonnull
     private final ReentrantLock        jobsLock    = new ReentrantLock();
     @Nonnull
-    private final LinkedList<Runnable> pendingJobs = Lists.newLinkedList();
+    private final LinkedList<Runnable> pendingJobs = new LinkedList<>();
     @Nonnull
     private final Display display;
     private final int     pipeR;
@@ -97,7 +94,6 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     }
 
     public void submit(@Nonnull final Runnable job) {
-        checkNotNull(job);
         try {
             this.jobsLock.lock();
             this.pendingJobs.add(job);
@@ -133,7 +129,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         try {
             this.jobsLock.lock();
             if (!this.pendingJobs.isEmpty()) {
-                jobs = Lists.newLinkedList(this.pendingJobs);
+                jobs = new LinkedList<>(this.pendingJobs);
                 this.pendingJobs.clear();
             }
         }

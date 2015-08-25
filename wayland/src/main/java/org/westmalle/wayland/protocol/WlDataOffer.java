@@ -14,20 +14,20 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataOfferRequests;
 import org.freedesktop.wayland.server.WlDataOfferResource;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataOfferFactory")
 public class WlDataOffer implements WlDataOfferRequests, ProtocolObject<WlDataOfferResource> {
 
-    private final Set<WlDataOfferResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlDataOfferResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
     WlDataOffer() {
     }

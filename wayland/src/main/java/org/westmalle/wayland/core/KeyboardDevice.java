@@ -15,8 +15,8 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.eventbus.EventBus;
-import com.google.common.primitives.Ints;
+import com.squareup.otto.Bus;
+import com.squareup.otto.ThreadEnforcer;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -26,12 +26,11 @@ import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.events.Key;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -44,16 +43,18 @@ import static org.westmalle.wayland.nativ.libc.Libc.MAP_FAILED;
 import static org.westmalle.wayland.nativ.libc.Libc.MAP_SHARED;
 import static org.westmalle.wayland.nativ.libc.Libc.PROT_READ;
 import static org.westmalle.wayland.nativ.libc.Libc.PROT_WRITE;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_DOWN;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_UP;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_LAYOUT_EFFECTIVE;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_DEPRESSED;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LATCHED;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LOCKED;
 
 @AutoFactory(className = "KeyboardDeviceFactory")
 public class KeyboardDevice {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyboardDevice.class);
-
     @Nonnull
-    private final EventBus eventBus = new EventBus((exception,
-                                                    context) -> LOGGER.error("",
-                                                                             exception));
+    private final Bus bus = new Bus(ThreadEnforcer.ANY);
     @Nonnull
     private final Display           display;
     @Nonnull
@@ -62,7 +63,9 @@ public class KeyboardDevice {
     private final Libc              libc;
 
     @Nonnull
-    private final Compositor compositor;
+    private final Libxkbcommon libxkbcommon;
+    @Nonnull
+    private final Compositor   compositor;
     @Nonnull
     private final Set<Integer> pressedKeys = new HashSet<>();
     @Nonnull
@@ -81,11 +84,13 @@ public class KeyboardDevice {
     KeyboardDevice(@Provided @Nonnull final Display display,
                    @Provided @Nonnull final NativeFileFactory nativeFileFactory,
                    @Provided @Nonnull final Libc libc,
+                   @Provided @Nonnull final Libxkbcommon libxkbcommon,
                    @Nonnull final Compositor compositor,
                    @Nonnull final Xkb xkb) {
         this.display = display;
         this.nativeFileFactory = nativeFileFactory;
         this.libc = libc;
+        this.libxkbcommon = libxkbcommon;
         this.compositor = compositor;
         this.xkb = xkb;
     }
@@ -93,21 +98,42 @@ public class KeyboardDevice {
     public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
                     final int key,
                     @Nonnull final WlKeyboardKeyState wlKeyboardKeyState) {
-        final int time = this.compositor.getTime();
+
+        int           stateComponentMask = 0;
+        final Pointer xkbState           = getXkb().getState();
+        final int     evdevKey           = key + 8;
         if (wlKeyboardKeyState.equals(WlKeyboardKeyState.PRESSED)) {
-            getPressedKeys().add(key);
+            if (getPressedKeys().add(key)) {
+                //TODO unit test this
+                stateComponentMask = this.libxkbcommon.xkb_state_update_key(xkbState,
+                                                                            evdevKey,
+                                                                            XKB_KEY_DOWN);
+            }
         }
         else {
-            getPressedKeys().remove(key);
+            if (getPressedKeys().remove(key)) {
+                stateComponentMask = this.libxkbcommon.xkb_state_update_key(xkbState,
+                                                                            evdevKey,
+                                                                            XKB_KEY_UP);
+            }
         }
 
+        final int time = this.compositor.getTime();
         doKey(wlKeyboardResources,
               time,
               key,
               wlKeyboardKeyState);
-        this.eventBus.post(Key.create(time,
-                                      key,
-                                      wlKeyboardKeyState));
+        this.bus.post(Key.create(time,
+                                 key,
+                                 wlKeyboardKeyState));
+
+        handleStateComponentMask(wlKeyboardResources,
+                                 stateComponentMask);
+    }
+
+    @Nonnull
+    public Xkb getXkb() {
+        return this.xkb;
     }
 
     @Nonnull
@@ -126,6 +152,29 @@ public class KeyboardDevice {
                                                                                                                       time,
                                                                                                                       key,
                                                                                                                       wlKeyboardKeyState.getValue())));
+    }
+
+    private void handleStateComponentMask(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
+                                          final int stateComponentMask) {
+        if ((stateComponentMask & (XKB_STATE_MODS_DEPRESSED |
+                                   XKB_STATE_MODS_LATCHED |
+                                   XKB_STATE_MODS_LOCKED |
+                                   XKB_STATE_LAYOUT_EFFECTIVE)) != 0) {
+            final int modsDepressed = this.libxkbcommon.xkb_state_serialize_mods(getXkb().getState(),
+                                                                                 XKB_STATE_MODS_DEPRESSED);
+            final int modsLatched = this.libxkbcommon.xkb_state_serialize_mods(getXkb().getState(),
+                                                                               XKB_STATE_MODS_LATCHED);
+            final int modsLocked = this.libxkbcommon.xkb_state_serialize_mods(getXkb().getState(),
+                                                                              XKB_STATE_MODS_LOCKED);
+            final int group = this.libxkbcommon.xkb_state_serialize_layout(getXkb().getState(),
+                                                                           XKB_STATE_LAYOUT_EFFECTIVE);
+            wlKeyboardResources.forEach(wlKeyboardResource ->
+                                                wlKeyboardResource.modifiers(this.display.nextSerial(),
+                                                                             modsDepressed,
+                                                                             modsLatched,
+                                                                             modsLocked,
+                                                                             group));
+        }
     }
 
     @Nonnull
@@ -149,6 +198,11 @@ public class KeyboardDevice {
         return this.keySerial;
     }
 
+    public void setXkb(@Nonnull final Xkb xkb) {
+        this.xkb = xkb;
+        //TODO report pressed keys to xkb state when setting new xkb
+    }
+
     public int getKeyboardSerial() {
         return this.keySerial;
     }
@@ -166,12 +220,19 @@ public class KeyboardDevice {
                                                                         newFocusResource).ifPresent(newFocusKeyboardResource -> {
                 final ByteBuffer keys = ByteBuffer.allocateDirect(Integer.BYTES * this.pressedKeys.size());
                 keys.asIntBuffer()
-                    .put(Ints.toArray(this.pressedKeys));
+                    .put(toIntArray(getPressedKeys()));
                 newFocusKeyboardResource.enter(nextKeyboardSerial(),
                                                newFocusResource,
                                                keys);
             }));
         }
+    }
+
+    private int[] toIntArray(final Set<Integer> set) {
+        final int[] ret = new int[set.size()];
+        int         i   = 0;
+        for (final Integer e : set) { ret[i++] = e; }
+        return ret;
     }
 
     private void updateFocus(final Optional<WlSurfaceResource> wlSurfaceResource) {
@@ -185,11 +246,11 @@ public class KeyboardDevice {
     }
 
     public void register(@Nonnull final Object listener) {
-        this.eventBus.register(listener);
+        this.bus.register(listener);
     }
 
     public void unregister(@Nonnull final Object listener) {
-        this.eventBus.unregister(listener);
+        this.bus.unregister(listener);
     }
 
     public void emitKeymap(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources) {
@@ -227,14 +288,5 @@ public class KeyboardDevice {
         }
         this.keymapFd = fd;
         this.keymapSize = size;
-    }
-
-    @Nonnull
-    public Xkb getXkb() {
-        return this.xkb;
-    }
-
-    public void setXkb(@Nonnull final Xkb xkb) {
-        this.xkb = xkb;
     }
 }

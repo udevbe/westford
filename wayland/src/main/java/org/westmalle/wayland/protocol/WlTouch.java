@@ -14,7 +14,6 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlTouchRequestsV3;
 import org.freedesktop.wayland.server.WlTouchResource;
@@ -22,13 +21,14 @@ import org.freedesktop.wayland.server.WlTouchResource;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlTouchFactory")
 public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResource> {
 
-    private final Set<WlTouchResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlTouchResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Inject
     WlTouch() {

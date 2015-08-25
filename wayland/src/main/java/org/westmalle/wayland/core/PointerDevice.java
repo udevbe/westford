@@ -15,8 +15,9 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+import com.squareup.otto.ThreadEnforcer;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -47,9 +48,7 @@ public class PointerDevice implements Role {
     private static final Logger LOGGER = LoggerFactory.getLogger(PointerDevice.class);
 
     @Nonnull
-    private final EventBus                       eventBus       = new EventBus((exception,
-                                                                                context) -> LOGGER.error("",
-                                                                                                         exception));
+    private final Bus                            bus            = new Bus(ThreadEnforcer.ANY);
     @Nonnull
     private final Set<Integer>                   pressedButtons = new HashSet<>();
     @Nonnull
@@ -121,8 +120,8 @@ public class PointerDevice implements Role {
                          time,
                          getFocus());
         }
-        this.eventBus.post(Motion.create(time,
-                                         getPosition()));
+        this.bus.post(Motion.create(time,
+                                    getPosition()));
     }
 
     public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources) {
@@ -231,9 +230,9 @@ public class PointerDevice implements Role {
                  time,
                  button,
                  wlPointerButtonState);
-        this.eventBus.post(Button.create(time,
-                                         button,
-                                         wlPointerButtonState));
+        this.bus.post(Button.create(time,
+                                    button,
+                                    wlPointerButtonState));
     }
 
     private void doButton(final Set<WlPointerResource> wlPointerResources,
@@ -291,7 +290,7 @@ public class PointerDevice implements Role {
         getGrab().ifPresent(wlSurfaceResource -> wlSurfaceResource.unregister(this.grabDestroyListener.get()));
         this.grabDestroyListener = Optional.empty();
         this.grab = Optional.empty();
-        this.eventBus.post(PointerGrab.create(getGrab()));
+        this.bus.post(PointerGrab.create(getGrab()));
     }
 
     private void updateGrab() {
@@ -302,7 +301,7 @@ public class PointerDevice implements Role {
         //if the surface having the grab is destroyed, we clear the grab
         getGrab().get()
                  .register(this.grabDestroyListener.get());
-        this.eventBus.post(PointerGrab.create(getGrab()));
+        this.bus.post(PointerGrab.create(getGrab()));
     }
 
     private Optional<WlPointerResource> findPointerResource(final Set<WlPointerResource> wlPointerResources,
@@ -374,7 +373,7 @@ public class PointerDevice implements Role {
         //update focus to new focus
         this.focus = newFocus;
         //notify listeners focus has changed
-        this.eventBus.post(PointerFocus.create(getFocus()));
+        this.bus.post(PointerFocus.create(getFocus()));
     }
 
     public boolean isButtonPressed(@Nonnegative final int button) {
@@ -383,7 +382,7 @@ public class PointerDevice implements Role {
 
     /**
      * Listen for motion as soon as given surface is grabbed.
-     * <p>
+     * <p/>
      * If another surface already has the grab, the listener
      * is never registered.
      *
@@ -438,11 +437,11 @@ public class PointerDevice implements Role {
     }
 
     public void unregister(@Nonnull final Object listener) {
-        this.eventBus.unregister(listener);
+        this.bus.unregister(listener);
     }
 
     public void register(@Nonnull final Object listener) {
-        this.eventBus.register(listener);
+        this.bus.register(listener);
     }
 
     public void removeCursor(@Nonnull final WlPointerResource wlPointerResource,

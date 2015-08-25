@@ -13,7 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.google.common.eventbus.Subscribe;
+import com.squareup.otto.Subscribe;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Display;
@@ -43,7 +43,6 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.westmalle.wayland.nativ.libX11xcb.LibX11xcb.XCBOwnsEventQueue;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_ATOM_ATOM;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_COPY_FROM_PARENT;
@@ -113,9 +112,9 @@ public class X11OutputFactory {
                     xDisplay,
                     width,
                     height);
-
-        checkArgument(width > 0);
-        checkArgument(height > 0);
+        if (width < 0 || height < 0) {
+            throw new IllegalArgumentException("Got negative width or height");
+        }
 
         return createXPlatformOutput(xDisplay,
                                      width,

@@ -31,24 +31,24 @@
 
     <properties>
         <!-- dep versions -->
-        <auto.factory.version>0.1-beta1</auto.factory.version>
+        <otto.version>1.3.8</otto.version>
+        <auto.factory.version>1.0-beta2</auto.factory.version>
         <auto.value.version>1.1</auto.value.version>
-        <dagger.version>2.0</dagger.version>
-        <guava.version>18.0</guava.version>
+        <dagger.version>2.0.1</dagger.version>
         <findbugs.version>3.0.0</findbugs.version>
         <slf4j.version>1.7.12</slf4j.version>
 
         <!-- test dep versions -->
-        <junit.version><!--Don't use 4.12, powermock can't handle it. -->4.11</junit.version>
-        <mockito.version>1.10.8</mockito.version>
-        <powermock.version>1.6.0</powermock.version>
-        <truth.version>0.25</truth.version>
+        <junit.version>4.12</junit.version>
+        <mockito.version>1.10.19</mockito.version>
+        <powermock.version>1.6.2</powermock.version>
+        <truth.version>0.27</truth.version>
 
         <!-- plugin dep versions-->
-        <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>2.5.4</maven.bundle.plugin.version>
         <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
-        <maven.source.plugin.version>2.2.1</maven.source.plugin.version>
-        <maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
+        <maven.source.plugin.version>2.4</maven.source.plugin.version>
+        <maven.javadoc.plugin.version>2.10.3</maven.javadoc.plugin.version>
         <umlgraph.version>5.6.6</umlgraph.version>
 
         <!-- java version -->
@@ -81,11 +81,10 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- google guava -->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <groupId>com.squareup</groupId>
+            <artifactId>otto</artifactId>
+            <version>${otto.version}</version>
         </dependency>
 
         <!-- google auto -->

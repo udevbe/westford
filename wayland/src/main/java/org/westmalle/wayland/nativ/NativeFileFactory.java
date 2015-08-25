@@ -40,12 +40,12 @@ public class NativeFileFactory {
     /**
      * Create a new, unique, anonymous file of the given size, and return the file descriptor for it. The file
      * descriptor is set CLOEXEC. The file is immediately suitable for mmap()'ing the given size at offset zero.
-     * <p>
+     * <p/>
      * The file should not have a permanent backing store like a disk, but may have if XDG_RUNTIME_DIR is not properly
      * implemented in OS.
-     * <p>
+     * <p/>
      * The file name is deleted from the file system.
-     * <p>
+     * <p/>
      * The file is suitable for buffer sharing between processes by transmitting the file descriptor over Unix sockets
      * using the SCM_RIGHTS methods.
      */

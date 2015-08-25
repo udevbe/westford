@@ -14,7 +14,6 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlOutputResource;
 import org.freedesktop.wayland.server.WlSeatResource;
@@ -25,6 +24,7 @@ import org.westmalle.wayland.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -32,7 +32,7 @@ import java.util.WeakHashMap;
 @AutoFactory(className = "WlShellSurfaceFactory")
 public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<WlShellSurfaceResource> {
 
-    private final Set<WlShellSurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlShellSurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
     private final ShellSurface      shellSurface;
     @Nonnull
     private final WlSurfaceResource wlSurfaceResource;

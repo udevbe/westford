@@ -67,24 +67,24 @@ public class Xkb {
 
     @Override
     protected void finalize() throws Throwable {
-        this.libxkbcommon.xkb_context_unref(getXkbContext());
-        this.libxkbcommon.xkb_keymap_unref(getXkbKeymap());
-        this.libxkbcommon.xkb_state_unref(getXkbState());
+        this.libxkbcommon.xkb_context_unref(getContext());
+        this.libxkbcommon.xkb_keymap_unref(getKeymap());
+        this.libxkbcommon.xkb_state_unref(getState());
         super.finalize();
     }
 
     @Nonnull
-    public Pointer getXkbContext() {
+    public Pointer getContext() {
         return this.xkbContext;
     }
 
     @Nonnull
-    public Pointer getXkbKeymap() {
+    public Pointer getKeymap() {
         return this.xkbKeymap;
     }
 
     @Nonnull
-    public Pointer getXkbState() {
+    public Pointer getState() {
         return this.xkbState;
     }
 }

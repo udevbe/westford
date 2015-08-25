@@ -14,7 +14,6 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlSubsurfaceRequests;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
@@ -22,13 +21,14 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlSubSurfaceFactory")
 public class WlSubSurface implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
 
-    private final Set<WlSubsurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlSubsurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
     WlSubSurface(final WlSurfaceResource surface,
                  final WlSurfaceResource parent) {

@@ -15,7 +15,8 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.eventbus.EventBus;
+import com.squareup.otto.Bus;
+import com.squareup.otto.ThreadEnforcer;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import org.freedesktop.wayland.server.EventLoop;
@@ -54,7 +55,7 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
 @AutoFactory(className = "X11EventBusFactory")
 public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
 
-    private final EventBus eventBus = new EventBus();
+    private final Bus bus = new Bus(ThreadEnforcer.ANY);
     @Nonnull
     private final Libxcb  libxcb;
     @Nonnull
@@ -71,7 +72,7 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
     }
 
     public void register(final Object listener) {
-        this.eventBus.register(listener);
+        this.bus.register(listener);
     }
 
     @Override
@@ -143,7 +144,7 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         if (optionalEvent.isPresent()) {
             final Structure specificEvent = optionalEvent.get();
             specificEvent.read();
-            this.eventBus.post(specificEvent);
+            this.bus.post(specificEvent);
         }
         this.libc.free(event.getPointer());
     }

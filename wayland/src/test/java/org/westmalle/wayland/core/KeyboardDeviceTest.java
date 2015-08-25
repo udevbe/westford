@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,11 +52,18 @@ public class KeyboardDeviceTest {
     @Mock
     private Libc              libc;
     @Mock
+    private Libxkbcommon      libxkbcommon;
+    @Mock
     private Compositor        compositor;
     @Mock
     private Xkb               xkb;
     @InjectMocks
     private KeyboardDevice    keyboardDevice;
+
+    @Test
+    public void testModifierKey() throws Exception {
+        throw new UnsupportedOperationException();
+    }
 
     @Test
     public void testKey() throws Exception {

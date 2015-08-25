@@ -15,7 +15,6 @@ package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
@@ -33,15 +32,14 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 @AutoFactory(className = "WlSurfaceFactory")
 public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
 
-    private final Set<WlSurfaceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlSurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
     private final WlCallbackFactory wlCallbackFactory;
     private final Surface           surface;
 
@@ -102,8 +100,9 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                        final int y,
                        @Nonnegative final int width,
                        @Nonnegative final int height) {
-        checkArgument(width > 0);
-        checkArgument(height > 0);
+        if (width < 0 || height < 0) {
+            throw new IllegalArgumentException("Got negative width or height");
+        }
 
         getSurface().markDamaged(Rectangle.create(x,
                                                   y,

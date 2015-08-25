@@ -15,7 +15,7 @@ package org.westmalle.wayland.wlshell;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.eventbus.Subscribe;
+import com.squareup.otto.Subscribe;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlPointerResource;

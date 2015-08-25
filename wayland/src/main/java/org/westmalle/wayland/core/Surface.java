@@ -15,7 +15,6 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.collect.Lists;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -30,6 +29,7 @@ import org.westmalle.wayland.protocol.WlRegion;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ public class Surface {
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
     @Nonnull
-    private final List<WlCallbackResource>  callbacks                    = Lists.newLinkedList();
+    private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
     private       Optional<Role>            surfaceRole                  = Optional.empty();
     private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
     //pending state

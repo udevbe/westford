@@ -14,14 +14,14 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataSourceRequests;
 import org.freedesktop.wayland.server.WlDataSourceResource;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -29,8 +29,8 @@ import java.util.WeakHashMap;
 @AutoFactory(className = "WlDataSourceFactory")
 public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlDataSourceResource> {
 
-    private final Set<WlDataSourceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
-    private final List<String>              mimeTypes = Lists.newArrayList();
+    private final Set<WlDataSourceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
+    private final List<String>              mimeTypes = new ArrayList<>();
 
     WlDataSource() {
     }

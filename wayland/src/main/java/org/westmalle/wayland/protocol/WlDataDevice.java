@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.common.collect.Sets;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataDeviceRequestsV2;
 import org.freedesktop.wayland.server.WlDataDeviceResource;
@@ -23,12 +22,13 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 public class WlDataDevice implements WlDataDeviceRequestsV2, ProtocolObject<WlDataDeviceResource> {
 
-    private final Set<WlDataDeviceResource> resources = Sets.newSetFromMap(new WeakHashMap<>());
+    private final Set<WlDataDeviceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Inject
     WlDataDevice() {}

@@ -13,7 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.google.common.eventbus.Subscribe;
+import com.squareup.otto.Subscribe;
 import com.sun.jna.Pointer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
