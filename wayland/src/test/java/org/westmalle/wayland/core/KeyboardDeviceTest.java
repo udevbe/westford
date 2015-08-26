@@ -41,6 +41,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_DOWN;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_LAYOUT_EFFECTIVE;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_DEPRESSED;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LATCHED;
+import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LOCKED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KeyboardDeviceTest {
@@ -62,7 +67,71 @@ public class KeyboardDeviceTest {
 
     @Test
     public void testModifierKey() throws Exception {
-        throw new UnsupportedOperationException();
+        //given
+        final Client client0 = mock(Client.class);
+
+        final WlKeyboardResource      wlKeyboardResource0 = mock(WlKeyboardResource.class);
+        final Set<WlKeyboardResource> wlKeyboardResources = new HashSet<>();
+        wlKeyboardResources.add(wlKeyboardResource0);
+
+        when(wlKeyboardResource0.getClient()).thenReturn(client0);
+
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        when(wlSurfaceResource.getClient()).thenReturn(client0);
+        this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
+                                     Optional.of(wlSurfaceResource));
+
+        final int                key                        = 123;
+        final WlKeyboardKeyState wlKeyboardKeyStatePressed  = WlKeyboardKeyState.PRESSED;
+        final WlKeyboardKeyState wlKeyboardKeyStateReleased = WlKeyboardKeyState.RELEASED;
+
+        final int serial0 = 1278;
+        final int serial1 = 1279;
+        final int serial2 = 1280;
+        when(this.display.nextSerial()).thenReturn(serial0,
+                                                   serial1,
+                                                   serial2);
+        final int time0 = 27646;
+        final int time1 = 29253;
+        final int time2 = 30898;
+        when(this.compositor.getTime()).thenReturn(time0,
+                                                   time1,
+                                                   time2);
+        final Pointer xkbState = mock(Pointer.class);
+        when(this.xkb.getState()).thenReturn(xkbState);
+        when(this.libxkbcommon.xkb_state_update_key(xkbState,
+                                                    //xkb expects evdev key, which has an offset of 8
+                                                    key + 8,
+                                                    XKB_KEY_DOWN)).thenReturn(XKB_STATE_MODS_DEPRESSED);
+
+        final int modsDepressed = 10;
+        when(this.libxkbcommon.xkb_state_serialize_mods(this.xkb.getState(),
+                                                        XKB_STATE_MODS_DEPRESSED)).thenReturn(modsDepressed);
+        final int modsLatched = 20;
+        when(this.libxkbcommon.xkb_state_serialize_mods(this.xkb.getState(),
+                                                        XKB_STATE_MODS_LATCHED)).thenReturn(modsLatched);
+        final int modsLocked = 30;
+        when(this.libxkbcommon.xkb_state_serialize_mods(this.xkb.getState(),
+                                                        XKB_STATE_MODS_LOCKED)).thenReturn(modsLocked);
+        final int group = 40;
+        when(this.libxkbcommon.xkb_state_serialize_layout(this.xkb.getState(),
+                                                          XKB_STATE_LAYOUT_EFFECTIVE)).thenReturn(group);
+
+        //when
+        this.keyboardDevice.key(wlKeyboardResources,
+                                key,
+                                wlKeyboardKeyStatePressed);
+
+        //then
+        verify(wlKeyboardResource0).key(serial0,
+                                        time0,
+                                        key,
+                                        wlKeyboardKeyStatePressed.getValue());
+        verify(wlKeyboardResource0).modifiers(serial1,
+                                              modsDepressed,
+                                              modsLatched,
+                                              modsLocked,
+                                              group);
     }
 
     @Test
