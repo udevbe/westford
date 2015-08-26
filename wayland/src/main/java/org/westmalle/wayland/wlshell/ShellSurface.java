@@ -22,6 +22,7 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
+import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Point;
@@ -50,11 +51,13 @@ public class ShellSurface implements Role {
     @Nonnull
     private final EventSource  timerEventSource;
 
-    private boolean          active = true;
+    private boolean noKeyboardFocus = false;
+    private boolean active          = true;
+
     @Nonnull
-    private Optional<String> clazz  = Optional.empty();
+    private Optional<String> clazz = Optional.empty();
     @Nonnull
-    private Optional<String> title  = Optional.empty();
+    private Optional<String> title = Optional.empty();
 
     ShellSurface(@Provided @Nonnull final Display display,
                  @Nonnull final WlCompositor wlCompositor,
@@ -155,13 +158,6 @@ public class ShellSurface implements Role {
                                                                                                         width < 1 ? 1 : width,
                                                                                                         height < 1 ? 1 : height);
                                                                    });
-        //TODO extend unit test to account for focus changes on resize
-        //cases:
-        // given: shell surface & surface & pointer & grab, when: this method is called, then: surface is resized & focus is lost
-        //and when: grab is lost, then: focus is gained.
-        //
-        // given: shell surface & surface & pointer & no grab, when: this method is called, then: surface is not resize &
-        //focus is not lost
         if (grabMotionSuccess) {
             wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
                                     wlSurfaceResource);
@@ -320,6 +316,12 @@ public class ShellSurface implements Role {
                              final int x,
                              final int y,
                              final int flags) {
+
+        this.noKeyboardFocus = (flags & WlShellSurfaceTransient.INACTIVE.getValue()) != 0;
+        if (this.noKeyboardFocus) {
+            clearKeyboardFocus();
+        }
+
         //TODO interprete flags (for keyboard focus)
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
         final Point surfacePosition = parentWlSurface.getSurface()
@@ -328,5 +330,16 @@ public class ShellSurface implements Role {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         wlSurface.getSurface()
                  .setPosition(surfacePosition);
+    }
+
+    @Override
+    public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
+        if (this.noKeyboardFocus) {
+            clearKeyboardFocus();
+        }
+    }
+
+    private void clearKeyboardFocus() {
+        //TODO we need to keep track of *all* seats somewhere and iterate all keyboard focus resources
     }
 }
