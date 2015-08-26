@@ -370,8 +370,6 @@ public class PointerDevice implements Role {
             reportEnter(pointerResource,
                         focusResource);
         });
-        //update cursor to reflect new focus
-        updateActiveCursor(pointerResource);
 
         //update focus to new focus
         this.focus = newFocus;
@@ -470,24 +468,24 @@ public class PointerDevice implements Role {
             return;
         }
 
-        Cursor clientCursor = this.cursors.get(wlPointerResource);
+        Cursor cursor = this.cursors.get(wlPointerResource);
         final Point hotspot = Point.create(hotspotX,
                                            hotspotY);
 
-        if (clientCursor == null) {
-            clientCursor = this.cursorFactory.create(wlSurfaceResource,
-                                                     hotspot);
+        if (cursor == null) {
+            cursor = this.cursorFactory.create(wlSurfaceResource,
+                                               hotspot);
             wlPointerResource.register(() -> Optional.ofNullable(PointerDevice.this.cursors.remove(wlPointerResource))
                                                      .ifPresent(Cursor::hide));
             this.cursors.put(wlPointerResource,
-                             clientCursor);
+                             cursor);
         }
         else {
-            clientCursor.setWlSurfaceResource(wlSurfaceResource);
-            clientCursor.setHotspot(hotspot);
+            cursor.setWlSurfaceResource(wlSurfaceResource);
+            cursor.setHotspot(hotspot);
         }
 
-        clientCursor.show();
+        cursor.show();
         updateActiveCursor(Optional.of(wlPointerResource));
 
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
