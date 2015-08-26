@@ -68,13 +68,13 @@ Roadmap
 ====
 | Topic         | Progress  |
 | :-----------: | :-------: |
-| unit tests    | 99%       |
+| unit tests    | 100%      |
 | core protocol | 70%       |
 | wl_shell      | 60%       |
 | sw rendering  | 0%        |
 | xdg_shell     | 0%        |
 | xwayland      | 0%        |
-| DRM/KMS       | 10%        |
+| DRM/KMS       | 0%        |
 | multi seat    | 0%        |
 
 License
