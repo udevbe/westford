@@ -146,6 +146,7 @@ public class KeyboardDevice {
                        final int key,
                        final WlKeyboardKeyState wlKeyboardKeyState) {
         getFocus().ifPresent(wlSurfaceResource ->
+                //TODO instead of finding the keyboard resource each time, store it in the surface and update it when the focus changes
                                      findKeyboardResource(wlKeyboardResources,
                                                           wlSurfaceResource).ifPresent(wlKeyboardResource ->
                                                                                                wlKeyboardResource.key(nextKeyboardSerial(),
@@ -213,6 +214,7 @@ public class KeyboardDevice {
         updateFocus(wlSurfaceResource);
         final Optional<WlSurfaceResource> newFocus = getFocus();
         if (!oldFocus.equals(newFocus)) {
+            //TODO store keyboard resource as keyboard focus in the surface
             oldFocus.ifPresent(oldFocusResource -> findKeyboardResource(wlKeyboardResources,
                                                                         oldFocusResource).ifPresent(oldFocusKeyboardResource -> oldFocusKeyboardResource.leave(nextKeyboardSerial(),
                                                                                                                                                                oldFocusResource)));

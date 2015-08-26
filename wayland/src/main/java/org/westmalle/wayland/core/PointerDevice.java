@@ -138,6 +138,7 @@ public class PointerDevice implements Role {
     private void reportMotion(final Set<WlPointerResource> wlPointerResources,
                               final int time,
                               final Optional<WlSurfaceResource> wlSurfaceResource) {
+        //TODO instead of finding the pointer resource each time, store it in the focussed surface
         final Optional<WlPointerResource> wlPointerResourceOptional = findPointerResource(wlPointerResources,
                                                                                           wlSurfaceResource);
         wlPointerResourceOptional.ifPresent(wlPointerResource -> {
@@ -276,6 +277,7 @@ public class PointerDevice implements Role {
                               final int time,
                               @Nonnegative final int button,
                               @Nonnull final WlPointerButtonState wlPointerButtonState) {
+        //TODO instead of finding the pointer resource each time, store it in the focussed surface
         findPointerResource(wlPointerResources,
                             getGrab()).ifPresent(wlPointerResource -> wlPointerResource
                 .button(wlPointerButtonState == WlPointerButtonState.PRESSED ?
@@ -351,6 +353,7 @@ public class PointerDevice implements Role {
         //clear ref to old destroy listener
         this.focusDestroyListener = Optional.empty();
         //notify clients that focus has changed
+        //TODO store pointer resource as pointer focus in the surface
         oldFocus.ifPresent(oldFocusResource -> reportLeave(findPointerResource(wlPointerResources,
                                                                                Optional.of(oldFocusResource)),
                                                            oldFocusResource));
