@@ -19,6 +19,7 @@ Go in the `bootstrap/target` folder. Type `java -jar bootstrap-1.0.0-SNAPSHOT.ja
 
 Dependencies
 ============
+Java:
 
  - JDK8.
  - Google Auto-Factory. Available on maven central.
@@ -28,6 +29,19 @@ Dependencies
  - jsr305. Available on maven central.
  - SLF4J. Available on maven central.
  - Wayland-Java-Bindings. Available on maven central.
+ 
+Native:
+
+ - libc
+ - pixman-1
+ - EGL
+ - GLESv2
+ - X11
+ - xcb
+ - X11-xcb
+ - xkbcommon
+ - xkbcommon-x11
+ - linux
 
 State
 =====
@@ -42,7 +56,7 @@ State
 | Window moving               | :heavy_check_mark: |
 | Window resizing             | :heavy_check_mark: |
 | Mouse input                 | :heavy_check_mark: |
-| Keyboard input              | :x:                |
+| Keyboard input              | :heavy_check_mark: |
 | Touch input                 | :x:                |
 | Drag and Drop               | :x:                |
 
