@@ -307,7 +307,6 @@ public class Surface {
 
     @Nonnull
     public Point local(@Nonnull final Point global) {
-        //TODO unit test this method
         final Vec4 localPoint = getInverseTransform().multiply(global.toVec4());
         return Point.create((int) localPoint.getX(),
                             (int) localPoint.getY());
@@ -320,7 +319,6 @@ public class Surface {
 
     @Nonnull
     public Point global(@Nonnull final Point local) {
-        //TODO unit test this method
         final Vec4 localPoint = getTransform().multiply(local.toVec4());
         return Point.create(Math.round(localPoint.getX()),
                             Math.round(localPoint.getY()));
