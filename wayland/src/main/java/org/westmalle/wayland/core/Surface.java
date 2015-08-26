@@ -20,6 +20,8 @@ import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
@@ -29,9 +31,11 @@ import org.westmalle.wayland.protocol.WlRegion;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
@@ -60,6 +64,13 @@ public class Surface {
     private Mat4      inverseTransform = Transforms.NORMAL;
     @Nonnull
     private Rectangle size             = Rectangle.ZERO;
+
+    @Nonnull
+    private Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
+    @Nonnull
+    private Set<WlPointerResource>  pointerFocuses  = new HashSet<>();
+    @Nonnull
+    private Set<WlPointerResource>  pointerGrabs    = new HashSet<>();
 
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
             @Nonnull final WlCompositorResource wlCompositorResource) {
@@ -344,5 +355,20 @@ public class Surface {
                                                                   .build();
         setPendingState(pendingSurfaceState);
         return this;
+    }
+
+    @Nonnull
+    public Set<WlPointerResource> getPointerGrabs() {
+        return this.pointerGrabs;
+    }
+
+    @Nonnull
+    public Set<WlPointerResource> getPointerFocuses() {
+        return this.pointerFocuses;
+    }
+
+    @Nonnull
+    public Set<WlKeyboardResource> getKeyboardFocuses() {
+        return this.keyboardFocuses;
     }
 }
