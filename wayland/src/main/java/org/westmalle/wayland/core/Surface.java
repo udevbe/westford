@@ -15,6 +15,8 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import com.squareup.otto.Bus;
+import com.squareup.otto.ThreadEnforcer;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
@@ -41,12 +43,17 @@ import java.util.Set;
 public class Surface {
 
     @Nonnull
+    private final Bus bus = new Bus(ThreadEnforcer.ANY);
+
+    @Nonnull
     private final FiniteRegionFactory  finiteRegionFactory;
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
     @Nonnull
     private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
+    @Nonnull
     private       Optional<Role>            surfaceRole                  = Optional.empty();
+    @Nonnull
     private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
     //pending state
     @Nonnull
@@ -66,11 +73,11 @@ public class Surface {
     private Rectangle size             = Rectangle.ZERO;
 
     @Nonnull
-    private Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
+    private final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
     @Nonnull
-    private Set<WlPointerResource>  pointerFocuses  = new HashSet<>();
+    private final Set<WlPointerResource>  pointerFocuses  = new HashSet<>();
     @Nonnull
-    private Set<WlPointerResource>  pointerGrabs    = new HashSet<>();
+    private final Set<WlPointerResource>  pointerGrabs    = new HashSet<>();
 
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
             @Nonnull final WlCompositorResource wlCompositorResource) {
@@ -357,18 +364,54 @@ public class Surface {
         return this;
     }
 
+    /**
+     * The pointers that will be used to notify the client of any button events on this surface. This collection is
+     * updated each time the pointer grab changes for this surface. To keep the client from receiving button events,
+     * clear this list each time the grab is set for this surface. To listen for grab updates, register a grab listener
+     * on this surface.
+     *
+     * @return a set of pointer resources.
+     */
     @Nonnull
     public Set<WlPointerResource> getPointerGrabs() {
         return this.pointerGrabs;
     }
 
+    /**
+     * The pointers that will be used to notify the client of any motion events on this surface. This collection is
+     * updated each time the pointer focus changes for this surface. To keep the client from receiving motion events,
+     * clear this list each time the focus is set for this surface. To listen for focus updates, register a pointer focus
+     * listener on this surface.
+     *
+     * @return a set of pointer resources.
+     */
     @Nonnull
     public Set<WlPointerResource> getPointerFocuses() {
         return this.pointerFocuses;
     }
 
+    /**
+     * The keyboards that will be used to notify the client of any keyboard events on this surface. This collection is
+     * updated each time the keyboard focus changes for this surface. To keep the client from receiving keyboard events,
+     * clear this list each time the focus is set for this surface. To listen for focus updates, register a keyboard focus
+     * listener on this surface.
+     *
+     * @return a set of keyboard resources.
+     */
     @Nonnull
     public Set<WlKeyboardResource> getKeyboardFocuses() {
         return this.keyboardFocuses;
+    }
+
+    public void post(final Object event) {
+        this.bus.post(event);
+    }
+
+    public void register(final Object listener) {
+        this.bus.register(listener);
+    }
+
+    public void unregister(final Object listener) {
+        this.bus.unregister(listener);
     }
 }

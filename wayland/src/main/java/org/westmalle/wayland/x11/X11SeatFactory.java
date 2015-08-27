@@ -18,9 +18,10 @@ import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
+import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.core.SeatFactory;
-import org.westmalle.wayland.core.events.PointerFocus;
+import org.westmalle.wayland.core.events.PointerFocusChanged;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
@@ -124,16 +125,15 @@ public class X11SeatFactory {
                                   final WlKeyboard wlKeyboard) {
         //FIXME for now we use the pointer focus to set the keyboard focus. Ideally this should be something
         //configurable or implemented by a 3rd party
-        wlPointer.getPointerDevice()
-                 .register(new Object() {
-                     @Subscribe
-                     public void handle(final PointerFocus event) {
-                         wlKeyboard.getKeyboardDevice()
-                                   .setFocus(wlKeyboard
-                                                     .getResources(),
-                                             event.getWlSurfaceResource());
-                     }
-                 });
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+        pointerDevice.register(new Object() {
+            @Subscribe
+            public void handle(final PointerFocusChanged event) {
+                wlKeyboard.getKeyboardDevice()
+                          .setFocus(wlKeyboard.getResources(),
+                                    pointerDevice.getFocus());
+            }
+        });
     }
 
 

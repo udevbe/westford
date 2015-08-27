@@ -28,6 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
+import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -77,13 +78,18 @@ public class KeyboardDeviceTest {
         when(wlKeyboardResource0.getClient()).thenReturn(client0);
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
+        when(surface.getKeyboardFocuses()).thenReturn(keyboardFocuses);
         when(wlSurfaceResource.getClient()).thenReturn(client0);
         this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
                                      Optional.of(wlSurfaceResource));
 
         final int                key                        = 123;
         final WlKeyboardKeyState wlKeyboardKeyStatePressed  = WlKeyboardKeyState.PRESSED;
-        final WlKeyboardKeyState wlKeyboardKeyStateReleased = WlKeyboardKeyState.RELEASED;
 
         final int serial0 = 1278;
         final int serial1 = 1279;
@@ -140,8 +146,9 @@ public class KeyboardDeviceTest {
         final Client client0 = mock(Client.class);
         final Client client1 = mock(Client.class);
 
-        final WlKeyboardResource      wlKeyboardResource0 = mock(WlKeyboardResource.class);
-        final WlKeyboardResource      wlKeyboardResource1 = mock(WlKeyboardResource.class);
+        final WlKeyboardResource wlKeyboardResource0 = mock(WlKeyboardResource.class);
+        final WlKeyboardResource wlKeyboardResource1 = mock(WlKeyboardResource.class);
+
         final Set<WlKeyboardResource> wlKeyboardResources = new HashSet<>();
         wlKeyboardResources.add(wlKeyboardResource0);
         wlKeyboardResources.add(wlKeyboardResource1);
@@ -150,6 +157,13 @@ public class KeyboardDeviceTest {
         when(wlKeyboardResource1.getClient()).thenReturn(client1);
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
+        when(surface.getKeyboardFocuses()).thenReturn(keyboardFocuses);
+
         when(wlSurfaceResource.getClient()).thenReturn(client0);
         this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
                                      Optional.of(wlSurfaceResource));
@@ -205,6 +219,12 @@ public class KeyboardDeviceTest {
         when(wlKeyboardResource0.getClient()).thenReturn(client0);
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface wlSurface = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
+        when(surface.getKeyboardFocuses()).thenReturn(keyboardFocuses);
         when(wlSurfaceResource.getClient()).thenReturn(client0);
 
         final int serial0 = 1278;

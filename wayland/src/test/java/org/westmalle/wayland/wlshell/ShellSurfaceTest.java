@@ -107,8 +107,8 @@ public class ShellSurfaceTest {
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
         pointerGrabMotion.motion(Motion.create(98765,
-                                               110,
-                                               110));
+                                               Point.create(110,
+                                                            110)));
         //then
         verify(surface).setPosition(Point.create(85,
                                                  85));

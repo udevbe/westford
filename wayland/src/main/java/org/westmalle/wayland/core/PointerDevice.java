@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.Motion;
-import org.westmalle.wayland.core.events.PointerFocus;
+import org.westmalle.wayland.core.events.PointerFocusChanged;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -374,7 +374,7 @@ public class PointerDevice implements Role {
         //update focus to new focus
         this.focus = newFocus;
         //notify listeners focus has changed
-        this.bus.post(PointerFocus.create(getFocus()));
+        this.bus.post(PointerFocusChanged.create());
     }
 
     public boolean isButtonPressed(@Nonnegative final int button) {

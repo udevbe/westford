@@ -27,14 +27,6 @@ public abstract class Motion {
                                     point);
     }
 
-    public static Motion create(final int time,
-                                final int x,
-                                final int y) {
-        return new AutoValue_Motion(time,
-                                    Point.create(x,
-                                                 y));
-    }
-
     public abstract int getTime();
 
     @Nonnull

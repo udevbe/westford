@@ -1396,8 +1396,8 @@ public class PointerDeviceTest {
 
         //then
         verify(pointerGrabMotion).motion(eq(Motion.create(time3,
-                                                          x1,
-                                                          y1)));
+                                                          Point.create(x1,
+                                                                       y1))));
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource0,
                times(3)).register(listenerArgumentCaptor.capture());

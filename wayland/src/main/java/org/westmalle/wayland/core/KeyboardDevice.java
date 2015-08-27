@@ -20,6 +20,7 @@ import com.squareup.otto.ThreadEnforcer;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
@@ -27,10 +28,12 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.westmalle.wayland.core.events.Key;
+import org.westmalle.wayland.core.events.KeyboardFocusChanged;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
+import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -38,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.westmalle.wayland.nativ.libc.Libc.MAP_FAILED;
 import static org.westmalle.wayland.nativ.libc.Libc.MAP_SHARED;
@@ -104,7 +108,6 @@ public class KeyboardDevice {
         final int     evdevKey           = key + 8;
         if (wlKeyboardKeyState.equals(WlKeyboardKeyState.PRESSED)) {
             if (getPressedKeys().add(key)) {
-                //TODO unit test this
                 stateComponentMask = this.libxkbcommon.xkb_state_update_key(xkbState,
                                                                             evdevKey,
                                                                             XKB_KEY_DOWN);
@@ -119,13 +122,13 @@ public class KeyboardDevice {
         }
 
         final int time = this.compositor.getTime();
+        this.bus.post(Key.create(time,
+                                 key,
+                                 wlKeyboardKeyState));
         doKey(wlKeyboardResources,
               time,
               key,
               wlKeyboardKeyState);
-        this.bus.post(Key.create(time,
-                                 key,
-                                 wlKeyboardKeyState));
 
         handleStateComponentMask(wlKeyboardResources,
                                  stateComponentMask);
@@ -146,13 +149,12 @@ public class KeyboardDevice {
                        final int key,
                        final WlKeyboardKeyState wlKeyboardKeyState) {
         getFocus().ifPresent(wlSurfaceResource ->
-                //TODO instead of finding the keyboard resource each time, store it in the surface and update it when the focus changes
-                                     findKeyboardResource(wlKeyboardResources,
-                                                          wlSurfaceResource).ifPresent(wlKeyboardResource ->
-                                                                                               wlKeyboardResource.key(nextKeyboardSerial(),
-                                                                                                                      time,
-                                                                                                                      key,
-                                                                                                                      wlKeyboardKeyState.getValue())));
+                                     match(wlKeyboardResources,
+                                           wlSurfaceResource).forEach(wlKeyboardResource ->
+                                                                              wlKeyboardResource.key(nextKeyboardSerial(),
+                                                                                                     time,
+                                                                                                     key,
+                                                                                                     wlKeyboardKeyState.getValue())));
     }
 
     private void handleStateComponentMask(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
@@ -183,15 +185,15 @@ public class KeyboardDevice {
         return this.focus;
     }
 
-    private Optional<WlKeyboardResource> findKeyboardResource(final Set<WlKeyboardResource> wlKeyboardResources,
-                                                              final WlSurfaceResource wlSurfaceResource) {
-        for (final WlKeyboardResource wlKeyboardResource : wlKeyboardResources) {
-            if (wlSurfaceResource.getClient()
-                                 .equals(wlKeyboardResource.getClient())) {
-                return Optional.of(wlKeyboardResource);
-            }
-        }
-        return Optional.empty();
+    private Set<WlKeyboardResource> match(final Set<WlKeyboardResource> wlKeyboardResources,
+                                          final WlSurfaceResource wlSurfaceResource) {
+        //find keyboard resources that match this keyboard device
+        final WlSurface               wlSurface       = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface                 surface         = wlSurface.getSurface();
+        final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>(surface.getKeyboardFocuses());
+        keyboardFocuses.retainAll(wlKeyboardResources);
+
+        return keyboardFocuses;
     }
 
     public int nextKeyboardSerial() {
@@ -209,24 +211,29 @@ public class KeyboardDevice {
     }
 
     public void setFocus(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
-                         @Nonnull final Optional<WlSurfaceResource> wlSurfaceResource) {
+                         @Nonnull final Optional<WlSurfaceResource> newFocus) {
         final Optional<WlSurfaceResource> oldFocus = getFocus();
-        updateFocus(wlSurfaceResource);
-        final Optional<WlSurfaceResource> newFocus = getFocus();
         if (!oldFocus.equals(newFocus)) {
-            //TODO store keyboard resource as keyboard focus in the surface
-            oldFocus.ifPresent(oldFocusResource -> findKeyboardResource(wlKeyboardResources,
-                                                                        oldFocusResource).ifPresent(oldFocusKeyboardResource -> oldFocusKeyboardResource.leave(nextKeyboardSerial(),
-                                                                                                                                                               oldFocusResource)));
-            newFocus.ifPresent(newFocusResource -> findKeyboardResource(wlKeyboardResources,
-                                                                        newFocusResource).ifPresent(newFocusKeyboardResource -> {
-                final ByteBuffer keys = ByteBuffer.allocateDirect(Integer.BYTES * this.pressedKeys.size());
-                keys.asIntBuffer()
-                    .put(toIntArray(getPressedKeys()));
-                newFocusKeyboardResource.enter(nextKeyboardSerial(),
-                                               newFocusResource,
-                                               keys);
-            }));
+
+            updateFocus(wlKeyboardResources,
+                        oldFocus,
+                        newFocus);
+
+            oldFocus.ifPresent(oldFocusResource ->
+                                       filter(wlKeyboardResources,
+                                              oldFocusResource.getClient()).forEach(oldFocusKeyboardResource ->
+                                                                                            oldFocusKeyboardResource.leave(nextKeyboardSerial(),
+                                                                                                                           oldFocusResource)));
+            newFocus.ifPresent(newFocusResource ->
+                                       match(wlKeyboardResources,
+                                             newFocusResource).forEach(newFocusKeyboardResource -> {
+                                           final ByteBuffer keys = ByteBuffer.allocateDirect(Integer.BYTES * this.pressedKeys.size());
+                                           keys.asIntBuffer()
+                                               .put(toIntArray(getPressedKeys()));
+                                           newFocusKeyboardResource.enter(nextKeyboardSerial(),
+                                                                          newFocusResource,
+                                                                          keys);
+                                       }));
         }
     }
 
@@ -237,14 +244,52 @@ public class KeyboardDevice {
         return ret;
     }
 
-    private void updateFocus(final Optional<WlSurfaceResource> wlSurfaceResource) {
-        this.focus.ifPresent(oldFocusResource -> oldFocusResource.unregister(this.focusDestroyListener.get()));
-        this.focusDestroyListener = Optional.empty();
-        this.focus = wlSurfaceResource;
-        getFocus().ifPresent(focusResource -> {
-            this.focusDestroyListener = Optional.of(() -> updateFocus(Optional.<WlSurfaceResource>empty()));
-            focusResource.register(this.focusDestroyListener.get());
+    private void updateFocus(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
+                             final Optional<WlSurfaceResource> oldFocus,
+                             final Optional<WlSurfaceResource> newFocus) {
+        final KeyboardFocusChanged keyboardFocusChanged = KeyboardFocusChanged.create();
+
+        this.focus = newFocus;
+        this.bus.post(keyboardFocusChanged);
+
+        oldFocus.ifPresent(oldFocusResource -> {
+            oldFocusResource.unregister(this.focusDestroyListener.get());
+            this.focusDestroyListener = Optional.empty();
+
+            final WlSurface wlSurface = (WlSurface) oldFocusResource.getImplementation();
+            final Surface surface = wlSurface.getSurface();
+
+            final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
+                                                                           oldFocusResource.getClient());
+            surface.getKeyboardFocuses()
+                   .removeAll(clientKeyboardResources);
+            surface.post(keyboardFocusChanged);
         });
+
+        newFocus.ifPresent(newFocusResource -> {
+            this.focusDestroyListener = Optional.of(() -> updateFocus(wlKeyboardResources,
+                                                                      newFocus,
+                                                                      Optional.<WlSurfaceResource>empty()));
+            newFocusResource.register(this.focusDestroyListener.get());
+
+            final WlSurface wlSurface = (WlSurface) newFocusResource.getImplementation();
+            final Surface surface = wlSurface.getSurface();
+
+            final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
+                                                                           newFocusResource.getClient());
+            surface.getKeyboardFocuses()
+                   .addAll(clientKeyboardResources);
+            surface.post(keyboardFocusChanged);
+        });
+    }
+
+    private Set<WlKeyboardResource> filter(final Set<WlKeyboardResource> wlKeyboardResources,
+                                           final Client client) {
+        //filter out keyboard resources that do not belong to the given client.
+        return wlKeyboardResources.stream()
+                                  .filter(wlKeyboardResource -> wlKeyboardResource.getClient()
+                                                                                  .equals(client))
+                                  .collect(Collectors.toSet());
     }
 
     public void register(@Nonnull final Object listener) {
