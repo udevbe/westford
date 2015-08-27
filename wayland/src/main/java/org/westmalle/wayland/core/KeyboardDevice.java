@@ -29,6 +29,8 @@ import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
 import org.westmalle.wayland.core.events.Key;
 import org.westmalle.wayland.core.events.KeyboardFocusChanged;
+import org.westmalle.wayland.core.events.KeyboardFocusGained;
+import org.westmalle.wayland.core.events.KeyboardFocusLost;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libc.Libc;
@@ -247,10 +249,8 @@ public class KeyboardDevice {
     private void updateFocus(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
                              final Optional<WlSurfaceResource> oldFocus,
                              final Optional<WlSurfaceResource> newFocus) {
-        final KeyboardFocusChanged keyboardFocusChanged = KeyboardFocusChanged.create();
-
         this.focus = newFocus;
-        this.bus.post(keyboardFocusChanged);
+        this.bus.post(KeyboardFocusChanged.create(newFocus));
 
         oldFocus.ifPresent(oldFocusResource -> {
             oldFocusResource.unregister(this.focusDestroyListener.get());
@@ -263,7 +263,7 @@ public class KeyboardDevice {
                                                                            oldFocusResource.getClient());
             surface.getKeyboardFocuses()
                    .removeAll(clientKeyboardResources);
-            surface.post(keyboardFocusChanged);
+            surface.post(KeyboardFocusLost.create(clientKeyboardResources));
         });
 
         newFocus.ifPresent(newFocusResource -> {
@@ -279,7 +279,7 @@ public class KeyboardDevice {
                                                                            newFocusResource.getClient());
             surface.getKeyboardFocuses()
                    .addAll(clientKeyboardResources);
-            surface.post(keyboardFocusChanged);
+            surface.post(KeyboardFocusGained.create(clientKeyboardResources));
         });
     }
 
