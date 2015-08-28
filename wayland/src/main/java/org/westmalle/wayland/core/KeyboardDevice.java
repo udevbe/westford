@@ -216,26 +216,9 @@ public class KeyboardDevice {
                          @Nonnull final Optional<WlSurfaceResource> newFocus) {
         final Optional<WlSurfaceResource> oldFocus = getFocus();
         if (!oldFocus.equals(newFocus)) {
-
             updateFocus(wlKeyboardResources,
                         oldFocus,
                         newFocus);
-
-            oldFocus.ifPresent(oldFocusResource ->
-                                       filter(wlKeyboardResources,
-                                              oldFocusResource.getClient()).forEach(oldFocusKeyboardResource ->
-                                                                                            oldFocusKeyboardResource.leave(nextKeyboardSerial(),
-                                                                                                                           oldFocusResource)));
-            newFocus.ifPresent(newFocusResource ->
-                                       match(wlKeyboardResources,
-                                             newFocusResource).forEach(newFocusKeyboardResource -> {
-                                           final ByteBuffer keys = ByteBuffer.allocateDirect(Integer.BYTES * this.pressedKeys.size());
-                                           keys.asIntBuffer()
-                                               .put(toIntArray(getPressedKeys()));
-                                           newFocusKeyboardResource.enter(nextKeyboardSerial(),
-                                                                          newFocusResource,
-                                                                          keys);
-                                       }));
         }
     }
 
@@ -264,6 +247,10 @@ public class KeyboardDevice {
             surface.getKeyboardFocuses()
                    .removeAll(clientKeyboardResources);
             surface.post(KeyboardFocusLost.create(clientKeyboardResources));
+
+            clientKeyboardResources.forEach(oldFocusKeyboardResource ->
+                                                    oldFocusKeyboardResource.leave(nextKeyboardSerial(),
+                                                                                   oldFocusResource));
         });
 
         newFocus.ifPresent(newFocusResource -> {
@@ -280,8 +267,19 @@ public class KeyboardDevice {
             surface.getKeyboardFocuses()
                    .addAll(clientKeyboardResources);
             surface.post(KeyboardFocusGained.create(clientKeyboardResources));
+
+            match(wlKeyboardResources,
+                  newFocusResource).forEach(newFocusKeyboardResource -> {
+                final ByteBuffer keys = ByteBuffer.allocateDirect(Integer.BYTES * this.pressedKeys.size());
+                keys.asIntBuffer()
+                    .put(toIntArray(getPressedKeys()));
+                newFocusKeyboardResource.enter(nextKeyboardSerial(),
+                                               newFocusResource,
+                                               keys);
+            });
         });
     }
+
 
     private Set<WlKeyboardResource> filter(final Set<WlKeyboardResource> wlKeyboardResources,
                                            final Client client) {
