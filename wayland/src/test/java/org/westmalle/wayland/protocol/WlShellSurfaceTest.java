@@ -20,6 +20,7 @@ import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
+import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.wlshell.ShellSurface;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -190,7 +192,7 @@ public class WlShellSurfaceTest {
         final WlSurfaceResource      parentWlSurfaceResource = mock(WlSurfaceResource.class);
         final int                    x                       = 1235;
         final int                    y                       = 9876;
-        final int                    flags                   = 0;
+        final int                    flags                   = WlShellSurfaceTransient.INACTIVE.getValue();
 
         //when
         this.wlShellSurface.setTransient(wlShellSurfaceResource,
@@ -204,6 +206,6 @@ public class WlShellSurfaceTest {
                                                parentWlSurfaceResource,
                                                x,
                                                y,
-                                               flags);
+                                               EnumSet.of(WlShellSurfaceTransient.INACTIVE));
     }
 }

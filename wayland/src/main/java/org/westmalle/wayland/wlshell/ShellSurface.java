@@ -18,6 +18,7 @@ import com.google.auto.factory.Provided;
 import com.squareup.otto.Subscribe;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -25,6 +26,7 @@ import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.Rectangle;
@@ -33,14 +35,18 @@ import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.Transforms;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
+import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Set;
 
 @AutoFactory(className = "ShellSurfaceFactory")
 public class ShellSurface implements Role {
@@ -51,8 +57,8 @@ public class ShellSurface implements Role {
     @Nonnull
     private final EventSource  timerEventSource;
 
-    private boolean noKeyboardFocus = false;
-    private boolean active          = true;
+    private Optional<Object> keyboardFocusListener = Optional.empty();
+    private boolean          active                = true;
 
     @Nonnull
     private Optional<String> clazz = Optional.empty();
@@ -315,31 +321,40 @@ public class ShellSurface implements Role {
                              @Nonnull final WlSurfaceResource parent,
                              final int x,
                              final int y,
-                             final int flags) {
+                             final EnumSet<WlShellSurfaceTransient> flags) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
 
-        this.noKeyboardFocus = (flags & WlShellSurfaceTransient.INACTIVE.getValue()) != 0;
-        if (this.noKeyboardFocus) {
-            clearKeyboardFocus();
+        this.keyboardFocusListener.ifPresent(surface::unregister);
+
+        if (flags.contains(WlShellSurfaceTransient.INACTIVE)) {
+            final Object listener = new Object() {
+                @Subscribe
+                public void handle(final KeyboardFocusGained keyboardFocusGained) {
+                    //clean collection of focuses, so they don't get notify of keyboard related events
+                    surface.getKeyboardFocuses()
+                           .clear();
+                }
+            };
+            surface.register(listener);
+
+            //first time focus clearing, also send out leave events
+            final Set<WlKeyboardResource> keyboardFocuses = surface.getKeyboardFocuses();
+            keyboardFocuses.forEach(wlKeyboardResource -> {
+                final WlKeyboard wlKeyboard = (WlKeyboard) wlKeyboardResource.getImplementation();
+                final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
+                wlKeyboardResource.leave(keyboardDevice.nextKeyboardSerial(),
+                                         wlSurfaceResource);
+            });
+            keyboardFocuses.clear();
+
+            this.keyboardFocusListener = Optional.of(listener);
         }
 
-        //TODO interprete flags (for keyboard focus)
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
         final Point surfacePosition = parentWlSurface.getSurface()
                                                      .global(Point.create(x,
                                                                           y));
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        wlSurface.getSurface()
-                 .setPosition(surfacePosition);
-    }
-
-    @Override
-    public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        if (this.noKeyboardFocus) {
-            clearKeyboardFocus();
-        }
-    }
-
-    private void clearKeyboardFocus() {
-        //TODO we need to keep track of *all* seats somewhere and iterate all keyboard focus resources
+        surface.setPosition(surfacePosition);
     }
 }

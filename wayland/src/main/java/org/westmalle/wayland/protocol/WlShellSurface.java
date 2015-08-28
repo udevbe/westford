@@ -20,11 +20,13 @@ import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlShellSurfaceRequests;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.westmalle.wayland.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -95,11 +97,18 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                              final int x,
                              final int y,
                              final int flags) {
+        final EnumSet<WlShellSurfaceTransient> transientFlags = EnumSet.noneOf(WlShellSurfaceTransient.class);
+        for (final WlShellSurfaceTransient wlShellSurfaceTransient : WlShellSurfaceTransient.values()) {
+            if ((wlShellSurfaceTransient.getValue() & flags) != 0) {
+                transientFlags.add(wlShellSurfaceTransient);
+            }
+        }
+
         getShellSurface().setTransient(getWlSurfaceResource(),
                                        parent,
                                        x,
                                        y,
-                                       flags);
+                                       transientFlags);
     }
 
     @Override

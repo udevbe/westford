@@ -13,13 +13,17 @@
 //limitations under the License.
 package org.westmalle.wayland.wlshell;
 
+import com.squareup.otto.Bus;
+import com.squareup.otto.ThreadEnforcer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
+import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.PointerGrabMotion;
@@ -34,12 +39,18 @@ import org.westmalle.wayland.core.Rectangle;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
+import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.Motion;
 import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.eq;
@@ -712,10 +723,86 @@ public class ShellSurfaceTest {
                                   parentWlSurfaceResource,
                                   localX,
                                   localY,
-                                  0);
+                                  EnumSet.noneOf(WlShellSurfaceTransient.class));
 
         //then
         verify(surface).setPosition(Point.create(globalX,
                                                  globalY));
+    }
+
+    @Test
+    public void testSetTransientInactive() throws Exception {
+        //given
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        final Surface surface = mock(Surface.class);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        final WlKeyboardResource      wlKeyboardResource0 = mock(WlKeyboardResource.class);
+        final WlKeyboardResource      wlKeyboardResource1 = mock(WlKeyboardResource.class);
+        final Set<WlKeyboardResource> keyboardFocuses     = new HashSet<>();
+        keyboardFocuses.add(wlKeyboardResource0);
+        keyboardFocuses.add(wlKeyboardResource1);
+        when(surface.getKeyboardFocuses()).thenReturn(keyboardFocuses);
+
+        final WlKeyboard wlKeyboard = mock(WlKeyboard.class);
+        when(wlKeyboardResource0.getImplementation()).thenReturn(wlKeyboard);
+        when(wlKeyboardResource1.getImplementation()).thenReturn(wlKeyboard);
+
+        final KeyboardDevice keyboardDevice = mock(KeyboardDevice.class);
+        when(wlKeyboard.getKeyboardDevice()).thenReturn(keyboardDevice);
+
+        final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         parentWlSurface         = mock(WlSurface.class);
+        when(parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        final Surface parentSurface = mock(Surface.class);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+
+        final int localX = 75;
+        final int localY = 120;
+
+        final int globalX = 100;
+        final int globalY = 150;
+
+        when(parentSurface.global(Point.create(localX,
+                                               localY))).thenReturn(Point.create(globalX,
+                                                                                 globalY));
+
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.wlCompositor,
+                                                           12345);
+
+        //when
+        shellSurface.setTransient(wlSurfaceResource,
+                                  parentWlSurfaceResource,
+                                  localX,
+                                  localY,
+                                  EnumSet.of(WlShellSurfaceTransient.INACTIVE));
+
+        //then
+        final ArgumentCaptor<Object> listenerArgumentCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(surface).register(listenerArgumentCaptor.capture());
+        verify(surface).setPosition(Point.create(globalX,
+                                                 globalY));
+        verify(wlKeyboardResource0).leave(anyInt(),
+                                          eq(wlSurfaceResource));
+        verify(wlKeyboardResource1).leave(anyInt(),
+                                          eq(wlSurfaceResource));
+        assertThat(keyboardFocuses).isEmpty();
+
+        //and when
+        final WlKeyboardResource wlKeyboardResource2 = mock(WlKeyboardResource.class);
+        when(wlKeyboardResource2.getImplementation()).thenReturn(wlKeyboard);
+
+        keyboardFocuses.add(wlKeyboardResource2);
+
+        final Object listener = listenerArgumentCaptor.getValue();
+        final Bus    bus      = new Bus(ThreadEnforcer.ANY);
+        bus.register(listener);
+        bus.post(KeyboardFocusGained.create(Collections.singleton(wlKeyboardResource2)));
+
+        //then
+        assertThat(keyboardFocuses).isEmpty();
     }
 }
