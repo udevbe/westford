@@ -33,6 +33,8 @@ import org.westmalle.wayland.core.events.PointerFocusChanged;
 import org.westmalle.wayland.core.events.PointerFocusGained;
 import org.westmalle.wayland.core.events.PointerFocusLost;
 import org.westmalle.wayland.core.events.PointerGrabChanged;
+import org.westmalle.wayland.core.events.PointerGrabGained;
+import org.westmalle.wayland.core.events.PointerGrabLost;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
@@ -296,7 +298,7 @@ public class PointerDevice implements Role {
                                                           wlSurfaceResource.getClient());
             surface.getPointerGrabs()
                    .removeAll(ungrabs);
-            //surface.post(PointerGrabLost.create(ungrabs));
+            surface.post(PointerGrabLost.create(ungrabs));
         });
         this.grabDestroyListener = Optional.empty();
         this.grab = Optional.empty();
@@ -316,7 +318,7 @@ public class PointerDevice implements Role {
                                                     wlSurfaceResource.getClient());
         surface.getPointerGrabs()
                .addAll(grabs);
-        //surface.post(PointerGrabGained.create(grabs));
+        surface.post(PointerGrabGained.create(grabs));
 
         this.bus.post(PointerGrabChanged.create(getGrab()));
     }
