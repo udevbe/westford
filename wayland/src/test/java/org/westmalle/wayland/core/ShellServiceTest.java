@@ -14,6 +14,7 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.shared.WlShmFormat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShellServiceTest {
@@ -36,6 +38,9 @@ public class ShellServiceTest {
     @Test
     public void testRun() throws Exception {
         //given
+        when(this.display.addShmFormat(WlShmFormat.ARGB8888.getValue())).thenReturn(1234);
+        when(this.display.addShmFormat(WlShmFormat.XRGB8888.getValue())).thenReturn(5678);
+
         //when
         this.shellService.start();
         //then

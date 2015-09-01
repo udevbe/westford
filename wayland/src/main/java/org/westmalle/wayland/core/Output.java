@@ -39,7 +39,6 @@ public class Output {
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
                          @Nonnull final OutputGeometry outputGeometry) {
-        //TODO unit test
         this.outputGeometry = outputGeometry;
         resources.forEach(this::notifyGeometry);
         return this;
@@ -47,7 +46,6 @@ public class Output {
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
                          @Nonnull final OutputMode outputMode) {
-        //TODO unit test
         this.outputMode = outputMode;
         resources.forEach(this::notifyMode);
         return this;

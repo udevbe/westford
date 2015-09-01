@@ -36,9 +36,16 @@ public class ShellService {
     public void start() {
         this.jobExecutor.start();
         this.display.initShm();
-        //TODO check return values of format add
-        this.display.addShmFormat(WlShmFormat.ARGB8888.getValue());
-        this.display.addShmFormat(WlShmFormat.XRGB8888.getValue());
+        if(this.display.addShmFormat(WlShmFormat.ARGB8888.getValue())==0){
+            throw new RuntimeException("Something went wrong when adding 'ARGB8888' shm format.\n" +
+                                       "Unfortunately the docs do not tell us how to get more information" +
+                                       "about this error so you'll have to do it with this lousy exception.");
+        };
+        if(this.display.addShmFormat(WlShmFormat.XRGB8888.getValue())==0){
+            throw new RuntimeException("Something went wrong when adding 'XRGB8888' shm format.\n" +
+                                       "Unfortunately the docs do not tell us how to get more information" +
+                                       "about this error so you'll have to do it with this lousy exception.");
+        }
         this.display.addSocket("wayland-0");
         this.display.run();
     }

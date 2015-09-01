@@ -207,8 +207,10 @@ public class Surface {
         final int                        scale  = state.getScale();
         if (buffer.isPresent()) {
             final WlBufferResource wlBufferResource = buffer.get();
-            //FIXME we shouldn't assume the buffer to always be an shm buffer.
             final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
+            if(shmBuffer == null){
+                throw new RuntimeException("Got a buffer that is not an shm buffer!");
+            }
             final int width = shmBuffer.getWidth() / scale;
             final int height = shmBuffer.getHeight() / scale;
             this.size = Rectangle.builder()

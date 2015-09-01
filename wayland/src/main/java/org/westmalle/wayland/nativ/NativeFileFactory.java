@@ -57,11 +57,9 @@ public class NativeFileFactory {
         }
 
         final String name = path + TEMPLATE;
-        //FIXME assumes ascii-only string
-        final Pointer m = new Memory(name.length() + 1);
-        m.setString(0,
-                    name);
-        final int fd = this.libc.mkstemp(m);
+        final NativeString m = new NativeString(name);
+        final Memory       namePointer = m.getPointer();
+        final int fd = this.libc.mkstemp(namePointer);
 
         try {
             int flags = this.libc.fcntl(fd,
@@ -73,7 +71,7 @@ public class NativeFileFactory {
                             flags);
             this.libc.ftruncate(fd,
                                 size);
-            this.libc.unlink(m);
+            this.libc.unlink(namePointer);
         }
         catch (LastErrorException e) {
             this.libc.close(fd);
