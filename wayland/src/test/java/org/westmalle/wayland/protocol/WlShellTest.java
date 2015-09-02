@@ -203,6 +203,34 @@ public class WlShellTest {
     }
 
     @Test
+    public void testGetShellSurfacePreviousRole() throws Exception {
+        //given
+        final WlShellResource   wlShellResource   = mock(WlShellResource.class);
+        final int               id                = 123;
+        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        final Surface           surface           = mock(Surface.class);
+        final Optional<Role>    roleOptional      = Optional.of(mock(Role.class));
+        final Client            client            = mock(Client.class);
+        final Resource          displayResource   = mock(Resource.class);
+
+        when(wlShellResource.getClient()).thenReturn(client);
+        when(client.getObject(Display.OBJECT_ID)).thenReturn(displayResource);
+
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getRole()).thenReturn(roleOptional);
+
+        //when
+        this.wlShell.getShellSurface(wlShellResource,
+                                     id,
+                                     wlSurfaceResource);
+        //then
+        verify(displayResource).postError(eq(WlShellError.ROLE.getValue()),
+                                          anyString());
+    }
+
+    @Test
     public void testOnBindClient() throws Exception {
         //given
         final Pointer resourcePointer = mock(Pointer.class);
