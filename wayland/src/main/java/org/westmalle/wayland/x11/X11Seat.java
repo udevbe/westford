@@ -54,13 +54,11 @@ public class X11Seat {
         final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
         final int                key                = toLinuxKey(eventDetail);
         final WlKeyboard         wlKeyboard         = wlSeat.getWlKeyboard();
-        //TODO properly use xkbcommon
-        final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
-        final Xkb            xkb            = keyboardDevice.getXkb();
 
-        keyboardDevice.key(wlKeyboard.getResources(),
-                           key,
-                           wlKeyboardKeyState);
+        wlKeyboard.getKeyboardDevice()
+                  .key(wlKeyboard.getResources(),
+                       key,
+                       wlKeyboardKeyState);
     }
 
     private WlKeyboardKeyState wlKeyboardKeyState(final boolean pressed) {
