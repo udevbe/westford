@@ -92,7 +92,6 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
                               pingSerial);
         }
         else {
-            //TODO add unit test for this
             requester.getClient()
                      .getObject(Display.OBJECT_ID)
                      .postError(WlShellError.ROLE.getValue(),
