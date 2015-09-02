@@ -36,7 +36,9 @@ import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.Map;
 
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -59,7 +61,51 @@ public class EglGles2RenderEngineTest {
     private EglGles2RenderEngine eglGles2RenderEngine;
 
     @Test
-    public void testBegin() throws Exception {
+    public void testBeginNoProjectionUpdate() throws Exception {
+        //given
+        final WlOutput     wlOutput      = mock(WlOutput.class);
+        final Output       output        = mock(Output.class);
+        final OutputMode   mode          = mock(OutputMode.class);
+        final HasEglOutput hasEglOutput  = mock(HasEglOutput.class);
+        final EglOutput    eglOutput     = mock(EglOutput.class);
+        final int          width         = 640;
+        final int          height        = 480;
+        final Integer      shaderProgram = 12346;
+
+        when(wlOutput.getOutput()).thenReturn(output);
+        when(output.getMode()).thenReturn(mode);
+        when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
+        when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
+        when(mode.getWidth()).thenReturn(width);
+        when(mode.getHeight()).thenReturn(height);
+
+        final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
+                                                                                         "shaderPrograms");
+        for (Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
+            shaderPrograms.put(gles2BufferFormat,
+                               shaderProgram);
+        }
+        //@formatter:off
+        Whitebox.setInternalState(this.eglGles2RenderEngine,
+                                  Mat4.create(2.0f / width, 0,              0, -1,
+                                              0,            2.0f / -height, 0,  1,
+                                              0,            0,              1,  0,
+                                              0,            0,              0,  1));
+        //@formatter:on
+        //when
+        this.eglGles2RenderEngine.begin(wlOutput);
+
+        //then
+        verify(eglOutput).begin();
+        verify(this.libGLESv2,
+               times(0)).glUniformMatrix4fv(anyInt(),
+                                            anyInt(),
+                                            anyBoolean(),
+                                            anyObject());
+    }
+
+    @Test
+    public void testBeginProjectionUpdate() throws Exception {
         //given
         final WlOutput     wlOutput      = mock(WlOutput.class);
         final Output       output        = mock(Output.class);
@@ -88,6 +134,11 @@ public class EglGles2RenderEngineTest {
 
         //then
         verify(eglOutput).begin();
+        verify(this.libGLESv2,
+               times(Gles2BufferFormat.values().length)).glUniformMatrix4fv(anyInt(),
+                                                                            anyInt(),
+                                                                            anyBoolean(),
+                                                                            anyObject());
     }
 
     @Test
