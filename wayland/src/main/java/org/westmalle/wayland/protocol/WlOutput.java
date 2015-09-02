@@ -47,7 +47,6 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
     public WlOutputResource onBindClient(final Client client,
                                          final int version,
                                          final int id) {
-        //TODO unit test
         final WlOutputResource wlOutputResource = add(client,
                                                       version,
                                                       id);
