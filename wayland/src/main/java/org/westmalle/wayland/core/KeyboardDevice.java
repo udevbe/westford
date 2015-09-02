@@ -204,8 +204,8 @@ public class KeyboardDevice {
     }
 
     public void setXkb(@Nonnull final Xkb xkb) {
+        //we're not updating the state when updating xkb as that would potentially introduce to much bugs
         this.xkb = xkb;
-        //TODO report pressed keys to xkb state when setting new xkb
     }
 
     public int getKeyboardSerial() {
