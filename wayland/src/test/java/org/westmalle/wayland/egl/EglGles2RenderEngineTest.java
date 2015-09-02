@@ -61,13 +61,14 @@ public class EglGles2RenderEngineTest {
     @Test
     public void testBegin() throws Exception {
         //given
-        final WlOutput     wlOutput     = mock(WlOutput.class);
-        final Output       output       = mock(Output.class);
-        final OutputMode   mode         = mock(OutputMode.class);
-        final HasEglOutput hasEglOutput = mock(HasEglOutput.class);
-        final EglOutput    eglOutput    = mock(EglOutput.class);
-        final int          width        = 640;
-        final int          height       = 480;
+        final WlOutput     wlOutput      = mock(WlOutput.class);
+        final Output       output        = mock(Output.class);
+        final OutputMode   mode          = mock(OutputMode.class);
+        final HasEglOutput hasEglOutput  = mock(HasEglOutput.class);
+        final EglOutput    eglOutput     = mock(EglOutput.class);
+        final int          width         = 640;
+        final int          height        = 480;
+        final Integer      shaderProgram = 12346;
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getMode()).thenReturn(mode);
@@ -76,6 +77,12 @@ public class EglGles2RenderEngineTest {
         when(mode.getWidth()).thenReturn(width);
         when(mode.getHeight()).thenReturn(height);
 
+        final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
+                                                                                         "shaderPrograms");
+        for (Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
+            shaderPrograms.put(gles2BufferFormat,
+                               shaderProgram);
+        }
         //when
         this.eglGles2RenderEngine.begin(wlOutput);
 

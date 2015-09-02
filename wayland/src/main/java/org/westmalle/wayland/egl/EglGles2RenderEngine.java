@@ -99,11 +99,29 @@ public class EglGles2RenderEngine implements RenderEngine {
         final int surfaceWidth  = mode.getWidth();
         final int surfaceHeight = mode.getHeight();
         //@formatter:off
-        this.projection = Mat4.create(2.0f / surfaceWidth, 0,                     0, -1,
+        Mat4 projection = Mat4.create(2.0f / surfaceWidth, 0,                     0, -1,
                                       0,                   2.0f / -surfaceHeight, 0,  1,
                                       0,                   0,                     1,  0,
                                       0,                   0,                     0,  1);
         //@formatter:on
+        if (!projection.equals(this.projection)) {
+            this.projection = projection;
+            for (Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
+                final int program = queryShaderProgram(gles2BufferFormat);
+                final int uniTrans = this.libGLESv2.glGetUniformLocation(program,
+                                                                         new NativeString("mu_projection").getPointer());
+                final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
+                projectionBuffer.write(0,
+                                       projection.toArray(),
+                                       0,
+                                       16);
+                this.libGLESv2.glUniformMatrix4fv(uniTrans,
+                                                  1,
+                                                  false,
+                                                  projectionBuffer);
+            }
+        }
+
         this.libGLESv2.glViewport(0,
                                   0,
                                   surfaceWidth,
@@ -218,9 +236,7 @@ public class EglGles2RenderEngine implements RenderEngine {
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
 
         final int shaderProgram = queryShaderProgram(queryBufferFormat(shmBuffer));
-        //TODO move setting of uniform projection matrix to begin().
         configureShaders(shaderProgram,
-                         this.projection,
                          vertices);
         this.libGLESv2.glUseProgram(shaderProgram);
         this.libGLESv2.glDrawElements(GL_TRIANGLES,
@@ -282,19 +298,7 @@ public class EglGles2RenderEngine implements RenderEngine {
     }
 
     private void configureShaders(final Integer program,
-                                  final Mat4 projection,
                                   final float[] vertices) {
-        final int uniTrans = this.libGLESv2.glGetUniformLocation(program,
-                                                                 new NativeString("mu_projection").getPointer());
-        final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
-        projectionBuffer.write(0,
-                               projection.toArray(),
-                               0,
-                               16);
-        this.libGLESv2.glUniformMatrix4fv(uniTrans,
-                                          1,
-                                          false,
-                                          projectionBuffer);
 
         final Memory verticesBuffer = new Memory(Float.BYTES * vertices.length);
         verticesBuffer.write(0,
@@ -428,7 +432,7 @@ public class EglGles2RenderEngine implements RenderEngine {
                                               logSize,
                                               null,
                                               log);
-            System.err.println("Error compiling the vertex shader: " + log.getString(0));
+            System.err.println("Bug - Error compiling the vertex shader: " + log.getString(0));
             System.exit(1);
         }
     }
