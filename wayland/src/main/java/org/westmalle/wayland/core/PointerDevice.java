@@ -431,8 +431,6 @@ public class PointerDevice implements Role {
         //listen for surface destruction
         wlSurfaceResource.register(motionListener);
 
-        //TODO should we listen for pointer resource destruction and unregister the listener?
-
         return true;
     }
 
