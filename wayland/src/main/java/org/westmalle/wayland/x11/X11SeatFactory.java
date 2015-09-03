@@ -61,7 +61,6 @@ public class X11SeatFactory {
     @Nonnull
     private final KeyboardDeviceFactory keyboardDeviceFactory;
 
-    //TODO this class has too many dependencies. See if we can lower this.
     @Inject
     X11SeatFactory(@Nonnull final Libxcb libxcb,
                    @Nonnull final X11XkbFactory x11XkbFactory,
