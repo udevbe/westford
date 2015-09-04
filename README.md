@@ -16,6 +16,9 @@ Run `maven install` in the root of the project.
 Running
 =======
 Go in the `bootstrap/target` folder. Type `java -jar bootstrap-1.0.0-SNAPSHOT.jar`.
+Next you can fire up some test clients from the Weston compositor (eg `weston-terminal`). 
+Make sure you use Weston 1.4 as more recent versions depend on xdg-shell which is not 
+yet implemented by Westmalle.
 
 Dependencies
 ============
@@ -25,7 +28,7 @@ Java:
  - Google Auto-Factory. Available on maven central.
  - Google Auto-Value. Available on maven central.
  - Google Dagger. Available on maven central.
- - Google Guava. Available on maven central.
+ - Square Otto. Available on maven central.
  - jsr305. Available on maven central.
  - SLF4J. Available on maven central.
  - Wayland-Java-Bindings. Available on maven central.
