@@ -104,36 +104,11 @@ public class X11SeatFactory {
                                                         this.wlTouchFactory.create());
         x11Output.getX11EventBus()
                  .register(this.x11InputEventListenerFactory.create(wlSeat));
-        enableInputDevices(wlSeat);
-        addKeyboardFocus(wlPointer,
-                         wlKeyboard);
-
-        return wlSeat;
-    }
-
-    private void enableInputDevices(final WlSeat wlSeat) {
-        //FIXME for now we put these here, these should be handled dynamically when a mouse or keyboard is
-        //added or removed
-        //enable pointer and keyboard for wlseat
+        //enable pointer and keyboard for wlseat as an X11 seat always has these.
         wlSeat.getSeat()
               .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
                                           WlSeatCapability.POINTER));
+
+        return wlSeat;
     }
-
-    private void addKeyboardFocus(final WlPointer wlPointer,
-                                  final WlKeyboard wlKeyboard) {
-        //FIXME for now we use the pointer focus to set the keyboard focus. Ideally this should be something
-        //configurable or implemented by a 3rd party
-        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
-        pointerDevice.register(new Object() {
-            @Subscribe
-            public void handle(final PointerFocus event) {
-                wlKeyboard.getKeyboardDevice()
-                          .setFocus(wlKeyboard.getResources(),
-                                    pointerDevice.getFocus());
-            }
-        });
-    }
-
-
 }

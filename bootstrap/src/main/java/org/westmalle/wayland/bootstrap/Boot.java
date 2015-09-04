@@ -13,20 +13,25 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
+import com.squareup.otto.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.Application;
 import org.westmalle.wayland.DaggerApplication;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.CompositorFactory;
+import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.RenderEngine;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.core.RendererFactory;
+import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
 import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
+import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
@@ -93,8 +98,20 @@ class Boot {
         //setup seat for input support
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
         //TODO add seat hotplug functionality (eg multiple mouses)
-        seatFactory.create(wlOutput,
-                           compositor);
+        final WlSeat wlSeat = seatFactory.create(wlOutput,
+                                                 compositor);
+        //setup keyboard focus tracking to follow mouse pointer
+        final WlKeyboard    wlKeyboard    = wlSeat.getWlKeyboard();
+        final PointerDevice pointerDevice = wlSeat.getWlPointer()
+                                                  .getPointerDevice();
+        pointerDevice.register(new Object() {
+            @Subscribe
+            public void handle(final PointerFocus event) {
+                wlKeyboard.getKeyboardDevice()
+                          .setFocus(wlKeyboard.getResources(),
+                                    pointerDevice.getFocus());
+            }
+        });
 
         //enable wl_shell protocol for minimal desktop-like features (move, resize, cursor changes ...)
         wlShellFactory.create(wlCompositor);
