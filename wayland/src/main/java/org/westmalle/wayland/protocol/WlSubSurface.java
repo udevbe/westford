@@ -18,6 +18,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlSubsurfaceRequests;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.core.Subsurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -29,9 +30,19 @@ import java.util.WeakHashMap;
 public class WlSubSurface implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
 
     private final Set<WlSubsurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
+    @Nonnull
+    private final Subsurface subsurface;
+    @Nonnull
+    private final WlSurfaceResource surface;
+    @Nonnull
+    private final WlSurfaceResource parent;
 
-    WlSubSurface(final WlSurfaceResource surface,
-                 final WlSurfaceResource parent) {
+    WlSubSurface(@Nonnull final Subsurface subsurface,
+                 @Nonnull final WlSurfaceResource surface,
+                 @Nonnull final WlSurfaceResource parent) {
+        this.subsurface = subsurface;
+        this.surface = surface;
+        this.parent = parent;
     }
 
     @Nonnull

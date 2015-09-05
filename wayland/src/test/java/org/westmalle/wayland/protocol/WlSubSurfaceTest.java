@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.core.Subsurface;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
@@ -32,8 +33,10 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(WaylandServerLibrary.class)
-public class WlSubSurfaceTest {
+public class WlSubsurfaceTest {
 
+    @Mock
+    private Subsurface        subsurface;
     @Mock
     private WlSurfaceResource surface;
     @Mock
@@ -48,7 +51,8 @@ public class WlSubSurfaceTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
-        this.wlSubSurface = new WlSubSurface(this.surface,
+        this.wlSubSurface = new WlSubSurface(this.subsurface,
+                                             this.surface,
                                              this.parent);
     }
 
