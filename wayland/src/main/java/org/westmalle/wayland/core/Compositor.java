@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-//TODO lot's of low hanging optimizations here.
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
 
