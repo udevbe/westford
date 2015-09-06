@@ -26,23 +26,23 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlSubSurfaceFactory")
-public class WlSubSurface implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
+@AutoFactory(className = "WlSubsurfaceFactory")
+public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
 
     private final Set<WlSubsurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
     @Nonnull
     private final Subsurface subsurface;
     @Nonnull
-    private final WlSurfaceResource surface;
+    private final WlSurfaceResource wlSurfaceResource;
     @Nonnull
-    private final WlSurfaceResource parent;
+    private final WlSurfaceResource parentWlSurfaceResource;
 
-    WlSubSurface(@Nonnull final Subsurface subsurface,
-                 @Nonnull final WlSurfaceResource surface,
-                 @Nonnull final WlSurfaceResource parent) {
+    WlSubsurface(@Nonnull final Subsurface subsurface,
+                 @Nonnull final WlSurfaceResource wlSurfaceResource,
+                 @Nonnull final WlSurfaceResource parentWlSurfaceResource) {
         this.subsurface = subsurface;
-        this.surface = surface;
-        this.parent = parent;
+        this.wlSurfaceResource = wlSurfaceResource;
+        this.parentWlSurfaceResource = parentWlSurfaceResource;
     }
 
     @Nonnull

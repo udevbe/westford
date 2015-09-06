@@ -40,13 +40,13 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
 
     private final Set<WlSubcompositorResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
-    private final WlSubSurfaceFactory wlSubSurfaceFactory;
-    private       SubsurfaceFactory   subsurfaceFactory;
+    private final WlSubsurfaceFactory wlSubSurfaceFactory;
+    private final SubsurfaceFactory   subsurfaceFactory;
 
     private final Set<Subsurface> activeSubsurfaceRoles = new HashSet<>();
 
     WlSubcompositor(@Provided final Display display,
-                    @Provided final WlSubSurfaceFactory wlSubSurfaceFactory,
+                    @Provided final WlSubsurfaceFactory wlSubSurfaceFactory,
                     @Provided final org.westmalle.wayland.core.SubsurfaceFactory subsurfaceFactory) {
         super(display,
               WlSubcompositorResource.class,
@@ -76,10 +76,10 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
             surface.setRole(role);
 
             final Subsurface subsurface = (Subsurface) role;
-            final WlSubSurface wlSubSurface = this.wlSubSurfaceFactory.create(subsurface,
+            final WlSubsurface wlSubsurface = this.wlSubSurfaceFactory.create(subsurface,
                                                                               wlSurfaceResource,
                                                                               parent);
-            final WlSubsurfaceResource wlSubsurfaceResource = wlSubSurface.add(requester.getClient(),
+            final WlSubsurfaceResource wlSubsurfaceResource = wlSubsurface.add(requester.getClient(),
                                                                                requester.getVersion(),
                                                                                id);
             this.activeSubsurfaceRoles.add(subsurface);

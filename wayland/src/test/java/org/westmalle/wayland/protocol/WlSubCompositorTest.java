@@ -18,13 +18,11 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Resource;
-import org.freedesktop.wayland.server.WlShellResource;
 import org.freedesktop.wayland.server.WlSubcompositorResource;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
-import org.freedesktop.wayland.shared.WlShellError;
 import org.freedesktop.wayland.shared.WlSubcompositorError;
 import org.freedesktop.wayland.util.InterfaceMeta;
 import org.junit.Before;
@@ -57,7 +55,7 @@ import static org.mockito.Mockito.when;
                         WaylandServerLibrary.class,
                         InterfaceMeta.class,
                         //following classes are final, so we have to powermock them:
-                        WlSubSurfaceFactory.class,
+                        WlSubsurfaceFactory.class,
                         SubsurfaceFactory.class
                 })
 public class WlSubcompositorTest {
@@ -65,7 +63,7 @@ public class WlSubcompositorTest {
     @Mock
     private Display             display;
     @Mock
-    private WlSubSurfaceFactory wlSubSurfaceFactory;
+    private WlSubsurfaceFactory wlSubSurfaceFactory;
     @Mock
     private SubsurfaceFactory   subsurfaceFactory;
 
@@ -127,13 +125,13 @@ public class WlSubcompositorTest {
 
         when(this.subsurfaceFactory.create()).thenReturn(subsurface);
 
-        final WlSubSurface wlSubSurface = mock(WlSubSurface.class);
+        final WlSubsurface wlSubsurface = mock(WlSubsurface.class);
         when(this.wlSubSurfaceFactory.create(subsurface,
                                              wlSurfaceResource,
-                                             parent)).thenReturn(wlSubSurface);
+                                             parent)).thenReturn(wlSubsurface);
 
         final WlSubsurfaceResource wlSubsurfaceResource = mock(WlSubsurfaceResource.class);
-        when(wlSubSurface.add(any(),
+        when(wlSubsurface.add(any(),
                               anyInt(),
                               anyInt())).thenReturn(wlSubsurfaceResource);
         //when
@@ -142,7 +140,7 @@ public class WlSubcompositorTest {
                                            wlSurfaceResource,
                                            parent);
         //then
-        verify(wlSubSurface).add(client,
+        verify(wlSubsurface).add(client,
                                  version,
                                  id);
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
