@@ -6,4 +6,4 @@ branches:
   only:
     - master
 install:
-    - mvn install
+    - mvn test
