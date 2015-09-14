@@ -21,4 +21,6 @@ public interface Role {
     default void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {}
 
     default void afterDestroy(@Nonnull final WlSurfaceResource wlSurfaceResource) {}
+
+    //TODO let role decide what should happen after a commit(?)
 }

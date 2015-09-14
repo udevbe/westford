@@ -52,18 +52,30 @@ public class Subsurface implements Role {
     public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
-        surface.setPosition(this.position);
+
+        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
+        final Surface   parentSurface   = parentWlSurface.getSurface();
+
+        if (parentSurface.getCommitSignal()
+                         .isConnected(this.parentCommitSlot)) {
+            //TODO sync mode. cache surface states until parent commits.
+
+        }
+        else {
+            //desync mode. commit as usual but keep position relative to parent
+            surface.setPosition(this.position);
+        }
     }
 
     public void setSync() {
-        final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
+        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
         parentSurface.getCommitSignal()
                      .connect(this.parentCommitSlot);
     }
 
     public void setDesync() {
-        final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
+        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
         parentSurface.getCommitSignal()
                      .disconnect(this.parentCommitSlot);

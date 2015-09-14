@@ -31,7 +31,7 @@ public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
 
     private final Set<WlSubsurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
     @Nonnull
-    private final Subsurface        subsurface;
+    private final Subsurface subsurface;
 
     WlSubsurface(@Nonnull final Subsurface subsurface) {
         this.subsurface = subsurface;
@@ -63,7 +63,7 @@ public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
     public void setPosition(final WlSubsurfaceResource wlSubsurfaceResource,
                             final int x,
                             final int y) {
-        this.subsurface.setPosition(x,
+        getSubsurface().setPosition(x,
                                     y);
     }
 
@@ -81,11 +81,16 @@ public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
 
     @Override
     public void setSync(final WlSubsurfaceResource requester) {
-
+        getSubsurface().setSync();
     }
 
     @Override
     public void setDesync(final WlSubsurfaceResource requester) {
+        getSubsurface().setDesync();
+    }
 
+    @Nonnull
+    public Subsurface getSubsurface() {
+        return this.subsurface;
     }
 }
