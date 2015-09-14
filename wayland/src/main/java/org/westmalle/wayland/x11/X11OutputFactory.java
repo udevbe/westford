@@ -217,7 +217,7 @@ public class X11OutputFactory {
         setName(connection,
                 window,
                 x11Atoms);
-        x11EventBus.getxEventSignal()
+        x11EventBus.getXEventSignal()
                    .connect(event -> {
                        final int responseType = (event.response_type & ~0x80);
                        switch (responseType) {

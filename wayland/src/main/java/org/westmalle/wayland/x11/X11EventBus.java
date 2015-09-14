@@ -44,7 +44,7 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         this.xcbConnection = xcbConnection;
     }
 
-    public Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> getxEventSignal() {
+    public Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> getXEventSignal() {
         return this.xEventSignal;
     }
 
@@ -53,7 +53,7 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
                       final int mask) {
         xcb_generic_event_t event;
         while ((event = this.libxcb.xcb_poll_for_event(this.xcbConnection)) != null) {
-            getxEventSignal().emit(event);
+            getXEventSignal().emit(event);
             this.libc.free(event.getPointer());
         }
         return 0;

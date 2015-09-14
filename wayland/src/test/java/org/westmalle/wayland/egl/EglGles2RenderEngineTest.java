@@ -127,11 +127,6 @@ public class EglGles2RenderEngineTest {
 
         //then
         verify(eglOutput).begin();
-        verify(this.libGLESv2,
-               times(Gles2BufferFormat.values().length)).glUniformMatrix4fv(anyInt(),
-                                                                            anyInt(),
-                                                                            anyBoolean(),
-                                                                            anyObject());
     }
 
     @Test

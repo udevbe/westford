@@ -24,9 +24,8 @@ import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 
-import javax.annotation.Nonnull;
-
-import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,35 +44,25 @@ public class X11EventBusTest {
     @Test
     public void testHandle() throws Exception {
         //given
-        final int                 fd       = 0;
-        final int                 mask     = 0;
+        final int                 fd            = 0;
+        final int                 mask          = 0;
         final xcb_generic_event_t generic_event = new xcb_generic_event_t();
 
-        when(this.libxcb.xcb_poll_for_event(this.xcbConnection)).thenReturn(generic_event);
-        final DummyHandler dummyHandler = new DummyHandler();
-        this.x11EventBus.getxEventSignal()
-                        .connect(dummyHandler);
+        when(this.libxcb.xcb_poll_for_event(this.xcbConnection)).thenReturn(generic_event,
+                                                                            generic_event,
+                                                                            null);
+        final Slot<xcb_generic_event_t> slot = mock(Slot.class);
+        this.x11EventBus.getXEventSignal()
+                        .connect(slot);
 
         //when
         this.x11EventBus.handle(fd,
                                 mask);
 
         //then
-        verify(this.libc).free(generic_event.getPointer());
-
-        assertThat(dummyHandler.isEventSeen()).isTrue();
-    }
-
-    public class DummyHandler implements Slot<xcb_generic_event_t> {
-
-        private boolean eventSeen = false;
-
-        public void handle(@Nonnull final xcb_generic_event_t event) {
-            this.eventSeen = true;
-        }
-
-        public boolean isEventSeen() {
-            return this.eventSeen;
-        }
+        verify(this.libc,
+               times(2)).free(generic_event.getPointer());
+        verify(slot,
+               times(2)).handle(generic_event);
     }
 }

@@ -39,6 +39,8 @@ import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.Motion;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -736,6 +738,8 @@ public class ShellSurfaceTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
+        final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = new Signal<>();
+        when(surface.getKeyboardFocusGainedSignal()).thenReturn(keyboardFocusGainedSignal);
 
         final WlKeyboardResource      wlKeyboardResource0 = mock(WlKeyboardResource.class);
         final WlKeyboardResource      wlKeyboardResource1 = mock(WlKeyboardResource.class);

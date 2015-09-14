@@ -26,10 +26,13 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.OutputFactory;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.libX11.LibX11;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_cookie_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
@@ -174,19 +177,20 @@ public class X11OutputFactoryTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final EventLoop                        eventLoop     = mock(EventLoop.class);
-        final EventSource                      eventSource   = mock(EventSource.class);
-        final X11EventBus                      x11EventBus   = mock(X11EventBus.class);
-        final String                           xDisplayName  = ":0";
-        final int                              width         = 640;
-        final int                              height        = 480;
-        final Pointer                          xDisplay      = mock(Pointer.class);
-        final Pointer                          xcbConnection = mock(Pointer.class);
-        final Pointer                          setup         = mock(Pointer.class);
-        final xcb_screen_t.ByReference         screen        = new xcb_screen_t.ByReference();
-        final xcb_intern_atom_cookie_t.ByValue cookie        = new xcb_intern_atom_cookie_t.ByValue();
-        final xcb_intern_atom_reply_t          atom_reply    = new xcb_intern_atom_reply_t();
-        final int                              window        = 431;
+        final EventLoop                                              eventLoop     = mock(EventLoop.class);
+        final EventSource                                            eventSource   = mock(EventSource.class);
+        final X11EventBus                                            x11EventBus   = mock(X11EventBus.class);
+        final Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> xEventSignal  = mock(Signal.class);
+        final String                                                 xDisplayName  = ":0";
+        final int                                                    width         = 640;
+        final int                                                    height        = 480;
+        final Pointer                                                xDisplay      = mock(Pointer.class);
+        final Pointer                                                xcbConnection = mock(Pointer.class);
+        final Pointer                                                setup         = mock(Pointer.class);
+        final xcb_screen_t.ByReference                               screen        = new xcb_screen_t.ByReference();
+        final xcb_intern_atom_cookie_t.ByValue                       cookie        = new xcb_intern_atom_cookie_t.ByValue();
+        final xcb_intern_atom_reply_t                                atom_reply    = new xcb_intern_atom_reply_t();
+        final int                                                    window        = 431;
         screen.root = 127;
         screen.root_visual = 10;
         screen.width_in_pixels = 640;
@@ -202,6 +206,7 @@ public class X11OutputFactoryTest {
         when(this.libxcb.xcb_generate_id(xcbConnection)).thenReturn(window);
         when(this.display.getEventLoop()).thenReturn(eventLoop);
         when(this.x11EventBusFactory.create(xcbConnection)).thenReturn(x11EventBus);
+        when(x11EventBus.getXEventSignal()).thenReturn(xEventSignal);
         when(eventLoop.addFileDescriptor(anyInt(),
                                          anyInt(),
                                          any())).thenReturn(eventSource);

@@ -25,6 +25,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.core.events.KeyboardFocusGained;
+import org.westmalle.wayland.core.events.KeyboardFocusLost;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.NativeFileFactory;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
@@ -84,6 +88,8 @@ public class KeyboardDeviceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
         when(surface.getKeyboardFocuses()).thenReturn(keyboardFocuses);
+        final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = mock(Signal.class);
+        when(surface.getKeyboardFocusGainedSignal()).thenReturn(keyboardFocusGainedSignal);
         when(wlSurfaceResource.getClient()).thenReturn(client0);
         this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
                                      Optional.of(wlSurfaceResource));
@@ -163,6 +169,8 @@ public class KeyboardDeviceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
         when(surface.getKeyboardFocuses()).thenReturn(keyboardFocuses);
+        final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = mock(Signal.class);
+        when(surface.getKeyboardFocusGainedSignal()).thenReturn(keyboardFocusGainedSignal);
 
         when(wlSurfaceResource.getClient()).thenReturn(client0);
         this.keyboardDevice.setFocus(Collections.singleton(wlKeyboardResource0),
@@ -195,6 +203,7 @@ public class KeyboardDeviceTest {
                                         time0,
                                         key,
                                         wlKeyboardKeyStatePressed.getValue());
+        verify(keyboardFocusGainedSignal).emit(any());
 
         //and when
         this.keyboardDevice.key(wlKeyboardResources,
@@ -225,7 +234,13 @@ public class KeyboardDeviceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
         when(surface.getKeyboardFocuses()).thenReturn(keyboardFocuses);
+        final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = mock(Signal.class);
+        when(surface.getKeyboardFocusGainedSignal()).thenReturn(keyboardFocusGainedSignal);
         when(wlSurfaceResource.getClient()).thenReturn(client0);
+        final Signal<KeyboardFocusLost, Slot<KeyboardFocusLost>> keyboardFocusLostSignal = mock(Signal.class);
+        when(surface.getKeyboardFocusLostSignal()).thenReturn(keyboardFocusLostSignal);
+        when(wlSurfaceResource.getClient()).thenReturn(client0);
+
 
         final int serial0 = 1278;
         final int serial1 = 1279;
