@@ -6,13 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.core.Seat;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
+import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 import org.westmalle.wayland.protocol.WlSeat;
 
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyShort;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,13 +32,14 @@ public class X11InputEventListenerTest {
         final Seat    seat    = mock(Seat.class);
         when(seat.getPlatformImplementation()).thenReturn(x11Seat);
         when(this.wlSeat.getSeat()).thenReturn(seat);
-        final xcb_key_press_event_t event = mock(xcb_key_press_event_t.class);
+        final xcb_generic_event_t event = mock(xcb_generic_event_t.class);
+        event.response_type = Libxcb.XCB_KEY_PRESS;
         //when
         this.x11InputEventListener.handle(event);
         //then
-        verify(x11Seat).deliverKey(this.wlSeat,
-                                   event.detail,
-                                   true);
+        verify(x11Seat).deliverKey(eq(this.wlSeat),
+                                   anyShort(),
+                                   eq(true));
     }
 
     @Test
@@ -48,14 +49,15 @@ public class X11InputEventListenerTest {
         final Seat    seat    = mock(Seat.class);
         when(seat.getPlatformImplementation()).thenReturn(x11Seat);
         when(this.wlSeat.getSeat()).thenReturn(seat);
-        final xcb_button_press_event_t event = mock(xcb_button_press_event_t.class);
+        final xcb_generic_event_t event = mock(xcb_generic_event_t.class);
+        event.response_type = Libxcb.XCB_BUTTON_PRESS;
         //when
         this.x11InputEventListener.handle(event);
         //then
-        verify(x11Seat).deliverButton(this.wlSeat,
-                                      event.time,
-                                      event.detail,
-                                      true);
+        verify(x11Seat).deliverButton(eq(this.wlSeat),
+                                      anyInt(),
+                                      anyShort(),
+                                      eq(true));
     }
 
     @Test
@@ -65,13 +67,14 @@ public class X11InputEventListenerTest {
         final Seat    seat    = mock(Seat.class);
         when(seat.getPlatformImplementation()).thenReturn(x11Seat);
         when(this.wlSeat.getSeat()).thenReturn(seat);
-        final xcb_key_release_event_t event = mock(xcb_key_release_event_t.class);
+        final xcb_generic_event_t event = mock(xcb_generic_event_t.class);
+        event.response_type = Libxcb.XCB_KEY_RELEASE;
         //when
         this.x11InputEventListener.handle(event);
         //then
-        verify(x11Seat).deliverKey(this.wlSeat,
-                                   event.detail,
-                                   false);
+        verify(x11Seat).deliverKey(eq(this.wlSeat),
+                                   anyShort(),
+                                   eq(false));
     }
 
     @Test
@@ -81,14 +84,15 @@ public class X11InputEventListenerTest {
         final Seat    seat    = mock(Seat.class);
         when(seat.getPlatformImplementation()).thenReturn(x11Seat);
         when(this.wlSeat.getSeat()).thenReturn(seat);
-        final xcb_button_release_event_t event = mock(xcb_button_release_event_t.class);
+        final xcb_generic_event_t event = mock(xcb_generic_event_t.class);
+        event.response_type = Libxcb.XCB_BUTTON_RELEASE;
         //when
         this.x11InputEventListener.handle(event);
         //then
-        verify(x11Seat).deliverButton(this.wlSeat,
-                                      event.time,
-                                      event.detail,
-                                      false);
+        verify(x11Seat).deliverButton(eq(this.wlSeat),
+                                      anyInt(),
+                                      anyShort(),
+                                      eq(false));
     }
 
     @Test
@@ -98,12 +102,13 @@ public class X11InputEventListenerTest {
         final Seat    seat    = mock(Seat.class);
         when(seat.getPlatformImplementation()).thenReturn(x11Seat);
         when(this.wlSeat.getSeat()).thenReturn(seat);
-        final xcb_motion_notify_event_t event = mock(xcb_motion_notify_event_t.class);
+        final xcb_generic_event_t event = mock(xcb_generic_event_t.class);
+        event.response_type = Libxcb.XCB_MOTION_NOTIFY;
         //when
         this.x11InputEventListener.handle(event);
         //then
-        x11Seat.deliverMotion(this.wlSeat,
-                              event.event_x,
-                              event.event_y);
+        x11Seat.deliverMotion(eq(this.wlSeat),
+                              anyInt(),
+                              anyInt());
     }
 }

@@ -100,7 +100,8 @@ public class X11SeatFactory {
                                                         wlKeyboard,
                                                         this.wlTouchFactory.create());
         x11Output.getX11EventBus()
-                 .register(this.x11InputEventListenerFactory.create(wlSeat));
+                 .getxEventSignal()
+                 .connect(this.x11InputEventListenerFactory.create(wlSeat));
         //enable pointer and keyboard for wlseat as an X11 seat always has these.
         wlSeat.getSeat()
               .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,

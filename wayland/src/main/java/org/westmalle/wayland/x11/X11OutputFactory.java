@@ -44,6 +44,7 @@ import java.util.Map;
 
 import static org.westmalle.wayland.nativ.libX11xcb.LibX11xcb.XCBOwnsEventQueue;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_ATOM_ATOM;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CLIENT_MESSAGE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_COPY_FROM_PARENT;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CW_EVENT_MASK;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
@@ -216,13 +217,21 @@ public class X11OutputFactory {
         setName(connection,
                 window,
                 x11Atoms);
-        x11EventBus.register(new Object() {
-            public void handle(final xcb_client_message_event_t event) {
-                X11OutputFactory.this.handle(event,
-                                             x11Atoms,
-                                             window);
-            }
-        });
+        x11EventBus.getxEventSignal()
+                   .connect(event -> {
+                       final int responseType = (event.response_type & ~0x80);
+                       switch (responseType) {
+                           case XCB_CLIENT_MESSAGE: {
+                               final xcb_client_message_event_t client_message_event = new xcb_client_message_event_t(event.getPointer());
+                               client_message_event.read();
+                               X11OutputFactory.this.handle(client_message_event,
+                                                            x11Atoms,
+                                                            window);
+                               break;
+                           }
+                       }
+                   });
+
         return new X11Output(this.x11EglOutputFactory,
                              x11EventBus,
                              connection,

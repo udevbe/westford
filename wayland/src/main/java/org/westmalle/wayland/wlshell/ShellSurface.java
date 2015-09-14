@@ -57,8 +57,8 @@ public class ShellSurface implements Role {
     @Nonnull
     private final EventSource  timerEventSource;
 
-    private Optional<Object> keyboardFocusListener = Optional.empty();
-    private boolean          active                = true;
+    private Optional<Slot<KeyboardFocusGained>> keyboardFocusListener = Optional.empty();
+    private boolean                             active                = true;
 
     @Nonnull
     private Optional<String> clazz = Optional.empty();
@@ -168,13 +168,13 @@ public class ShellSurface implements Role {
             wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
                                     wlSurfaceResource);
             pointerDevice.getPointerGrabSignal()
-                         .add(new Slot<PointerGrab>() {
+                         .connect(new Slot<PointerGrab>() {
                              @Override
                              public void handle(@Nonnull final PointerGrab event) {
                                  if (!event.getWlSurfaceResource()
                                            .isPresent()) {
                                      pointerDevice.getPointerGrabSignal()
-                                                  .remove(this);
+                                                  .disconnect(this);
                                      wlPointerResource.enter(pointerDevice.nextEnterSerial(),
                                                              wlSurfaceResource,
                                                              Fixed.create(local.getX()),
@@ -327,17 +327,17 @@ public class ShellSurface implements Role {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        this.keyboardFocusListener.ifPresent(surface::unregister);
+        this.keyboardFocusListener.ifPresent(slot -> surface.getKeyboardFocusGainedSignal()
+                                                            .disconnect(slot));
 
         if (flags.contains(WlShellSurfaceTransient.INACTIVE)) {
-            final Object listener = new Object() {
-                public void handle(final KeyboardFocusGained keyboardFocusGained) {
-                    //clean collection of focuses, so they don't get notify of keyboard related events
-                    surface.getKeyboardFocuses()
-                           .clear();
-                }
+            final Slot<KeyboardFocusGained> slot = keyboardFocusGained -> {
+                //clean collection of focuses, so they don't get notify of keyboard related events
+                surface.getKeyboardFocuses()
+                       .clear();
             };
-            surface.register(listener);
+            surface.getKeyboardFocusGainedSignal()
+                   .connect(slot);
 
             //first time focus clearing, also send out leave events
             final Set<WlKeyboardResource> keyboardFocuses = surface.getKeyboardFocuses();
@@ -349,7 +349,7 @@ public class ShellSurface implements Role {
             });
             keyboardFocuses.clear();
 
-            this.keyboardFocusListener = Optional.of(listener);
+            this.keyboardFocusListener = Optional.of(slot);
         }
 
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();

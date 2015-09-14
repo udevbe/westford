@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import com.squareup.otto.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.Application;
@@ -24,7 +23,6 @@ import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.RenderEngine;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.core.RendererFactory;
-import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
@@ -101,17 +99,13 @@ class Boot {
         final WlSeat wlSeat = seatFactory.create(wlOutput,
                                                  compositor);
         //setup keyboard focus tracking to follow mouse pointer
-        final WlKeyboard    wlKeyboard    = wlSeat.getWlKeyboard();
+        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
         final PointerDevice pointerDevice = wlSeat.getWlPointer()
                                                   .getPointerDevice();
-        pointerDevice.register(new Object() {
-            @Subscribe
-            public void handle(final PointerFocus event) {
-                wlKeyboard.getKeyboardDevice()
-                          .setFocus(wlKeyboard.getResources(),
-                                    pointerDevice.getFocus());
-            }
-        });
+        pointerDevice.getPointerFocusSignal()
+                     .connect(event -> wlKeyboard.getKeyboardDevice()
+                                                 .setFocus(wlKeyboard.getResources(),
+                                                           pointerDevice.getFocus()));
 
         //enable wl_shell protocol for minimal desktop-like features (move, resize, cursor changes ...)
         wlShellFactory.create(wlCompositor);

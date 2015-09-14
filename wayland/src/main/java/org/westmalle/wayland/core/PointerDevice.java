@@ -388,7 +388,7 @@ public class PointerDevice implements Role {
 
     /**
      * Listen for motion as soon as given surface is grabbed.
-     * <p>
+     * <p/>
      * If another surface already has the grab, the listener
      * is never registered.
      *
@@ -421,17 +421,17 @@ public class PointerDevice implements Role {
                 }
                 else {
                     //another surface has the grab, stop listening for pointer motion.
-                    getMotionSignal().remove(this);
+                    getMotionSignal().disconnect(this);
                 }
             }
         };
 
         //listen for pointer motion
-        getMotionSignal().add(motionSlot);
+        getMotionSignal().connect(motionSlot);
         //listen for surface destruction
         wlSurfaceResource.register(() -> {
             //another surface has the grab, stop listening for pointer motion.
-            getMotionSignal().remove(motionSlot);
+            getMotionSignal().disconnect(motionSlot);
         });
 
         return true;

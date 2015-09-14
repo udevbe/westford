@@ -259,7 +259,8 @@ public class KeyboardDevice {
                                                                            oldFocusResource.getClient());
             surface.getKeyboardFocuses()
                    .removeAll(clientKeyboardResources);
-            surface.post(KeyboardFocusLost.create(clientKeyboardResources));
+            surface.getKeyboardFocusLostSignal()
+                   .emit(KeyboardFocusLost.create(clientKeyboardResources));
 
             clientKeyboardResources.forEach(oldFocusKeyboardResource ->
                                                     oldFocusKeyboardResource.leave(nextKeyboardSerial(),
@@ -279,7 +280,8 @@ public class KeyboardDevice {
                                                                            newFocusResource.getClient());
             surface.getKeyboardFocuses()
                    .addAll(clientKeyboardResources);
-            surface.post(KeyboardFocusGained.create(clientKeyboardResources));
+            surface.getKeyboardFocusGainedSignal()
+                   .emit(KeyboardFocusGained.create(clientKeyboardResources));
 
             match(wlKeyboardResources,
                   newFocusResource).forEach(newFocusKeyboardResource -> {

@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 import java.util.Arrays;
@@ -33,6 +34,10 @@ public class xcb_client_message_event_t extends Structure {
     public int                               window;
     public int                               type;
     public xcb_client_message_data_t.ByValue data;
+
+    public xcb_client_message_event_t(final Pointer p) {
+        super(p);
+    }
 
     @Override
     protected List<?> getFieldOrder() {

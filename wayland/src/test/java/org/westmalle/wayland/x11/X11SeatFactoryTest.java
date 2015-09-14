@@ -133,7 +133,6 @@ public class X11SeatFactoryTest {
         this.x11SeatFactory.create(wlOutput,
                                    compositor);
         //then
-        verify(x11EventBus).register(x11InputEventListener);
         verify(seat).setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
                                                 WlSeatCapability.POINTER));
         verify(keyboardDevice).updateKeymap();

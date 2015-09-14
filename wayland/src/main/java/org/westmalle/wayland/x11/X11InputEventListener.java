@@ -18,19 +18,38 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.Xkb;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_enter_notify_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_expose_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_focus_in_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_focus_out_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_keymap_notify_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_leave_notify_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_BUTTON_PRESS;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_BUTTON_RELEASE;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_ENTER_NOTIFY;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EXPOSE;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_FOCUS_IN;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_FOCUS_OUT;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEYMAP_NOTIFY;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_PRESS;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_RELEASE;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_LEAVE_NOTIFY;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
+
 @AutoFactory(className = "X11InputEventListenerFactory")
-public class X11InputEventListener {
+public class X11InputEventListener implements Slot<xcb_generic_event_t> {
 
     @Nonnull
     private final X11XkbFactory x11XkbFactory;
@@ -43,7 +62,79 @@ public class X11InputEventListener {
         this.wlSeat = wlSeat;
     }
 
-    public void handle(final xcb_key_press_event_t event) {
+    public void handle(@Nonnull final xcb_generic_event_t event) {
+        final int responseType = (event.response_type & ~0x80);
+        switch (responseType) {
+            case XCB_MOTION_NOTIFY: {
+                final xcb_motion_notify_event_t motion_notify_event = new xcb_motion_notify_event_t(event.getPointer());
+                motion_notify_event.read();
+                handle(motion_notify_event);
+                break;
+            }
+            case XCB_BUTTON_PRESS: {
+                final xcb_button_press_event_t button_press_event = new xcb_button_press_event_t(event.getPointer());
+                button_press_event.read();
+                handle(button_press_event);
+                break;
+            }
+            case XCB_BUTTON_RELEASE: {
+                final xcb_button_release_event_t button_release_event = new xcb_button_release_event_t(event.getPointer());
+                button_release_event.read();
+                handle(button_release_event);
+                break;
+            }
+            case XCB_KEY_PRESS: {
+                final xcb_key_press_event_t key_press_event = new xcb_key_press_event_t(event.getPointer());
+                key_press_event.read();
+                handle(key_press_event);
+                break;
+            }
+            case XCB_KEY_RELEASE: {
+                final xcb_key_release_event_t key_release_event = new xcb_key_release_event_t(event.getPointer());
+                key_release_event.read();
+                handle(key_release_event);
+                break;
+            }
+            case XCB_EXPOSE: {
+                final xcb_expose_event_t expose_event = new xcb_expose_event_t(event.getPointer());
+                expose_event.read();
+                //handle(expose_event);
+                break;
+            }
+            case XCB_ENTER_NOTIFY: {
+                final xcb_enter_notify_event_t enter_notify_event = new xcb_enter_notify_event_t(event.getPointer());
+                enter_notify_event.read();
+                //handle(enter_notify_event);
+                break;
+            }
+            case XCB_LEAVE_NOTIFY: {
+                final xcb_leave_notify_event_t leave_notify_event = new xcb_leave_notify_event_t(event.getPointer());
+                leave_notify_event.read();
+                //handle(leave_notify_event);
+                break;
+            }
+            case XCB_FOCUS_IN: {
+                final xcb_focus_in_event_t focus_in_event = new xcb_focus_in_event_t(event.getPointer());
+                focus_in_event.read();
+                //handle(focus_in_event);
+                break;
+            }
+            case XCB_FOCUS_OUT: {
+                final xcb_focus_out_event_t focus_out_event = new xcb_focus_out_event_t(event.getPointer());
+                focus_out_event.read();
+                //handle(focus_out_event);
+                break;
+            }
+            case XCB_KEYMAP_NOTIFY: {
+                final xcb_keymap_notify_event_t keymap_notify_event = new xcb_keymap_notify_event_t(event.getPointer());
+                keymap_notify_event.read();
+                handle(keymap_notify_event);
+                break;
+            }
+        }
+    }
+
+    private void handle(final xcb_key_press_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
         x11Seat.deliverKey(this.wlSeat,
@@ -51,7 +142,7 @@ public class X11InputEventListener {
                            true);
     }
 
-    public void handle(final xcb_button_press_event_t event) {
+    private void handle(final xcb_button_press_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
         x11Seat.deliverButton(this.wlSeat,
@@ -60,7 +151,7 @@ public class X11InputEventListener {
                               true);
     }
 
-    public void handle(final xcb_key_release_event_t event) {
+    private void handle(final xcb_key_release_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
         x11Seat.deliverKey(this.wlSeat,
@@ -68,7 +159,7 @@ public class X11InputEventListener {
                            false);
     }
 
-    public void handle(final xcb_button_release_event_t event) {
+    private void handle(final xcb_button_release_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
         x11Seat.deliverButton(this.wlSeat,
@@ -77,7 +168,7 @@ public class X11InputEventListener {
                               false);
     }
 
-    public void handle(final xcb_motion_notify_event_t event) {
+    private void handle(final xcb_motion_notify_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
         x11Seat.deliverMotion(this.wlSeat,
@@ -85,7 +176,7 @@ public class X11InputEventListener {
                               event.event_y);
     }
 
-    public void handle(final xcb_keymap_notify_event_t event) {
+    private void handle(final xcb_keymap_notify_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
         final WlKeyboard     wlKeyboard     = this.wlSeat.getWlKeyboard();

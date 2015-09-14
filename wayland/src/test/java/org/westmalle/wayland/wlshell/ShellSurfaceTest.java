@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.wlshell;
 
-import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
@@ -781,8 +779,6 @@ public class ShellSurfaceTest {
                                   EnumSet.of(WlShellSurfaceTransient.INACTIVE));
 
         //then
-        final ArgumentCaptor<Object> listenerArgumentCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(surface).register(listenerArgumentCaptor.capture());
         verify(surface).setPosition(Point.create(globalX,
                                                  globalY));
         verify(wlKeyboardResource0).leave(anyInt(),
@@ -797,10 +793,8 @@ public class ShellSurfaceTest {
 
         keyboardFocuses.add(wlKeyboardResource2);
 
-        final Object listener = listenerArgumentCaptor.getValue();
-        final Bus    bus      = new Bus(ThreadEnforcer.ANY);
-        bus.register(listener);
-        bus.post(KeyboardFocusGained.create(Collections.singleton(wlKeyboardResource2)));
+        surface.getKeyboardFocusGainedSignal()
+               .emit(KeyboardFocusGained.create(Collections.singleton(wlKeyboardResource2)));
 
         //then
         assertThat(keyboardFocuses).isEmpty();

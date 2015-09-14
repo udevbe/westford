@@ -24,6 +24,10 @@ import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
+import org.westmalle.wayland.core.events.KeyboardFocusGained;
+import org.westmalle.wayland.core.events.KeyboardFocusLost;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlRegion;
 
@@ -40,13 +44,18 @@ import java.util.Set;
 public class Surface {
 
     @Nonnull
+    private final Signal<KeyboardFocusLost, Slot<KeyboardFocusLost>>     keyboardFocusLostSignal   = new Signal<>();
+    @Nonnull
+    private final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = new Signal<>();
+
+    @Nonnull
     private final FiniteRegionFactory  finiteRegionFactory;
     @Nonnull
     private final WlCompositorResource wlCompositorResource;
     @Nonnull
     private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
     @Nonnull
-    private final Set<WlKeyboardResource> keyboardFocuses = new HashSet<>();
+    private final Set<WlKeyboardResource>   keyboardFocuses              = new HashSet<>();
     @Nonnull
     private       Optional<Role>            surfaceRole                  = Optional.empty();
     @Nonnull
@@ -72,6 +81,14 @@ public class Surface {
             @Nonnull final WlCompositorResource wlCompositorResource) {
         this.finiteRegionFactory = finiteRegionFactory;
         this.wlCompositorResource = wlCompositorResource;
+    }
+
+    public Signal<KeyboardFocusLost, Slot<KeyboardFocusLost>> getKeyboardFocusLostSignal() {
+        return this.keyboardFocusLostSignal;
+    }
+
+    public Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> getKeyboardFocusGainedSignal() {
+        return this.keyboardFocusGainedSignal;
     }
 
     public boolean isDestroyed() {
@@ -203,7 +220,7 @@ public class Surface {
         if (buffer.isPresent()) {
             final WlBufferResource wlBufferResource = buffer.get();
             final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
-            if(shmBuffer == null){
+            if (shmBuffer == null) {
                 throw new RuntimeException("Got a buffer that is not an shm buffer!");
             }
             final int width = shmBuffer.getWidth() / scale;
