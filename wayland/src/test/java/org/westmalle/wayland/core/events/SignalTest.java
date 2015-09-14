@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -51,5 +52,19 @@ public class SignalTest {
         //and when
         this.signal.emit(event);
         verifyNoMoreInteractions(slot);
+    }
+
+    @Test
+    public void testIsConnected() throws Exception {
+        //given
+        final Object       event = new Object();
+        final Slot<Object> slot  = mock(Slot.class);
+        this.signal.connect(slot);
+
+        //when
+        final boolean connected = this.signal.isConnected(slot);
+
+        //then
+        assertThat(connected).isTrue();
     }
 }

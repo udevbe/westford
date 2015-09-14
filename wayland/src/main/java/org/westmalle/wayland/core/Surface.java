@@ -43,10 +43,17 @@ import java.util.Set;
 @AutoFactory(className = "SurfaceFactory")
 public class Surface {
 
+    /*
+     * Signals
+     */
     @Nonnull
     private final Signal<KeyboardFocusLost, Slot<KeyboardFocusLost>>     keyboardFocusLostSignal   = new Signal<>();
     @Nonnull
     private final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = new Signal<>();
+    @Nonnull
+    private final Signal<Point, Slot<Point>>                             positionSignal            = new Signal<>();
+    @Nonnull
+    private final Signal<SurfaceState, Slot<SurfaceState>>               commitSignal              = new Signal<>();
 
     @Nonnull
     private final FiniteRegionFactory  finiteRegionFactory;
@@ -60,15 +67,22 @@ public class Surface {
     private       Optional<Role>            surfaceRole                  = Optional.empty();
     @Nonnull
     private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
-    //pending state
+
+    /*
+     * pending state
+     */
     @Nonnull
-    private       SurfaceState              pendingState                 = SurfaceState.builder()
-                                                                                       .build();
-    //committed state
+    private SurfaceState pendingState = SurfaceState.builder()
+                                                    .build();
+    /*
+     * committed state
+     */
     @Nonnull
-    private       SurfaceState              state                        = SurfaceState.builder()
-                                                                                       .build();
-    //committed derived states
+    private SurfaceState state        = SurfaceState.builder()
+                                                    .build();
+    /*
+     * committed derived states
+     */
     private boolean destroyed;
     @Nonnull
     private Mat4      transform        = Transforms.NORMAL;
@@ -83,10 +97,12 @@ public class Surface {
         this.wlCompositorResource = wlCompositorResource;
     }
 
+    @Nonnull
     public Signal<KeyboardFocusLost, Slot<KeyboardFocusLost>> getKeyboardFocusLostSignal() {
         return this.keyboardFocusLostSignal;
     }
 
+    @Nonnull
     public Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> getKeyboardFocusGainedSignal() {
         return this.keyboardFocusGainedSignal;
     }
@@ -176,6 +192,10 @@ public class Surface {
         updateSize();
         //reset pending buffer state
         detachBuffer();
+
+        getCommitSignal().emit(getState());
+
+        //FIXME should we automatically request a render here?
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
@@ -309,9 +329,14 @@ public class Surface {
                                                .build();
         setState(currentState);
         updateTransform();
+
+        getPositionSignal().emit(global);
+
+        //FIXME don't automatically request a render when we update the position(?)
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
+
         return this;
     }
 
@@ -383,5 +408,15 @@ public class Surface {
     @Nonnull
     public Set<WlKeyboardResource> getKeyboardFocuses() {
         return this.keyboardFocuses;
+    }
+
+    @Nonnull
+    public Signal<Point, Slot<Point>> getPositionSignal() {
+        return this.positionSignal;
+    }
+
+    @Nonnull
+    public Signal<SurfaceState, Slot<SurfaceState>> getCommitSignal() {
+        return this.commitSignal;
     }
 }

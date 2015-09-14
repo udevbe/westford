@@ -13,12 +13,59 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import com.google.auto.factory.AutoFactory;
+import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.core.events.Slot;
+import org.westmalle.wayland.protocol.WlSurface;
 
-@AutoFactory(className = "SubsurfaceFactory")
+import javax.annotation.Nonnull;
+
 public class Subsurface implements Role {
 
-    Subsurface() {
+    @Nonnull
+    private final WlSurfaceResource  parentWlSurfaceResource;
+    @Nonnull
+    private final WlSurfaceResource  wlSurfaceResource;
+    @Nonnull
+    private final Slot<SurfaceState> parentCommitSlot;
+    @Nonnull
+    private       Point              position;
 
+    Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
+               @Nonnull final WlSurfaceResource wlSurfaceResource,
+               @Nonnull final Slot<SurfaceState> parentCommitSlot,
+               @Nonnull final Point position) {
+        this.parentWlSurfaceResource = parentWlSurfaceResource;
+        this.wlSurfaceResource = wlSurfaceResource;
+        this.parentCommitSlot = parentCommitSlot;
+        this.position = position;
+    }
+
+    public void setPosition(final int x,
+                            final int y) {
+        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
+        final Surface   parentSurface   = parentWlSurface.getSurface();
+        this.position = parentSurface.global(Point.create(x,
+                                                          y));
+    }
+
+    @Override
+    public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+        surface.setPosition(this.position);
+    }
+
+    public void setSync() {
+        final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
+        final Surface   parentSurface   = parentWlSurface.getSurface();
+        parentSurface.getCommitSignal()
+                     .connect(this.parentCommitSlot);
+    }
+
+    public void setDesync() {
+        final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
+        final Surface   parentSurface   = parentWlSurface.getSurface();
+        parentSurface.getCommitSignal()
+                     .disconnect(this.parentCommitSlot);
     }
 }

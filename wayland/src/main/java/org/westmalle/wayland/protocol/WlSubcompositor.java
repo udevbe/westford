@@ -64,21 +64,21 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
     public void getSubsurface(final WlSubcompositorResource requester,
                               final int id,
                               @Nonnull final WlSurfaceResource wlSurfaceResource,
-                              @Nonnull final WlSurfaceResource parent) {
+                              @Nonnull final WlSurfaceResource parentWlSurfaceResource) {
+
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
         final Role role = surface.getRole()
-                                 .orElseGet(this.subsurfaceFactory::create);
+                                 .orElseGet(() -> this.subsurfaceFactory.create(parentWlSurfaceResource,
+                                                                                wlSurfaceResource));
         if (role instanceof Subsurface &&
             !this.activeSubsurfaceRoles.contains(role)) {
 
             surface.setRole(role);
 
             final Subsurface subsurface = (Subsurface) role;
-            final WlSubsurface wlSubsurface = this.wlSubSurfaceFactory.create(subsurface,
-                                                                              wlSurfaceResource,
-                                                                              parent);
+            final WlSubsurface wlSubsurface = this.wlSubSurfaceFactory.create(subsurface);
             final WlSubsurfaceResource wlSubsurfaceResource = wlSubsurface.add(requester.getClient(),
                                                                                requester.getVersion(),
                                                                                id);

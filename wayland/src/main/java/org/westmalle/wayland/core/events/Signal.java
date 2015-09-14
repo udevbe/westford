@@ -32,4 +32,8 @@ public class Signal<U, T extends Slot<U>> {
     public void emit(@Nonnull final U event) {
         new HashSet<>(this.slots).forEach(slot -> slot.handle(event));
     }
+
+    public boolean isConnected(@Nonnull final T slot) {
+        return this.slots.contains(slot);
+    }
 }

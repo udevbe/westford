@@ -405,4 +405,9 @@ public class SurfaceTest {
                                                                       20,
                                                                       20));
     }
+
+    @Test
+    public void testSetPosition(){
+        throw new UnsupportedOperationException();
+    }
 }

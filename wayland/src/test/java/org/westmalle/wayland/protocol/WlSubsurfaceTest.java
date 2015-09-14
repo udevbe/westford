@@ -15,7 +15,6 @@ package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.junit.Before;
@@ -37,10 +36,6 @@ public class WlSubsurfaceTest {
 
     @Mock
     private Subsurface        subsurface;
-    @Mock
-    private WlSurfaceResource surface;
-    @Mock
-    private WlSurfaceResource parent;
 
     @Mock
     private WaylandServerLibraryMapping waylandServerLibraryMapping;
@@ -51,9 +46,7 @@ public class WlSubsurfaceTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerLibrary.class);
         when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
-        this.wlSubsurface = new WlSubsurface(this.subsurface,
-                                             this.surface,
-                                             this.parent);
+        this.wlSubsurface = new WlSubsurface(this.subsurface);
     }
 
     @Test
