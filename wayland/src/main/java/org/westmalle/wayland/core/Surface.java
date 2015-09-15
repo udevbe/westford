@@ -195,7 +195,7 @@ public class Surface {
 
         getCommitSignal().emit(getState());
 
-        //FIXME should we automatically request a render here?
+        //FIXME don't automatically request a render when we commit
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
@@ -321,18 +321,19 @@ public class Surface {
 
     @Nonnull
     public Surface setPosition(@Nonnull final Point global) {
-        final SurfaceState state = getState();
-        final int          scale = state.getScale();
-        final SurfaceState currentState = state.toBuilder()
-                                               .positionTransform(Transforms.TRANSLATE(global.getX() * scale,
-                                                                                       global.getY() * scale))
-                                               .build();
-        setState(currentState);
+        //TODO unit test positioning
+        setState(getState().toBuilder()
+                           .positionTransform(Transforms.TRANSLATE(global.getX(),
+                                                                   global.getY()))
+                           .build());
+        setPendingState(getPendingState().toBuilder()
+                                         .positionTransform(getState().getPositionTransform())
+                                         .build());
         updateTransform();
 
         getPositionSignal().emit(global);
 
-        //FIXME don't automatically request a render when we update the position(?)
+        //FIXME don't automatically request a render when we update the position
         final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();

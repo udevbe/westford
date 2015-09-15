@@ -14,70 +14,128 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class Subsurface implements Role {
 
     @Nonnull
-    private final WlSurfaceResource  parentWlSurfaceResource;
+    private final WlSurfaceResource parentWlSurfaceResource;
     @Nonnull
-    private final WlSurfaceResource  wlSurfaceResource;
+    private final WlSurfaceResource wlSurfaceResource;
+
+    private boolean sync     = true;
     @Nonnull
-    private final Slot<SurfaceState> parentCommitSlot;
+    private Point   position = Point.ZERO;
     @Nonnull
-    private       Point              position;
+    private SurfaceState surfaceState;
+    @Nonnull
+    private SurfaceState cachedSurfaceState;
 
     Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                @Nonnull final WlSurfaceResource wlSurfaceResource,
-               @Nonnull final Slot<SurfaceState> parentCommitSlot,
-               @Nonnull final Point position) {
+               @Nonnull final SurfaceState surfaceState) {
         this.parentWlSurfaceResource = parentWlSurfaceResource;
         this.wlSurfaceResource = wlSurfaceResource;
-        this.parentCommitSlot = parentCommitSlot;
-        this.position = position;
+        this.surfaceState = surfaceState;
+        this.cachedSurfaceState = surfaceState;
     }
 
     public void setPosition(final int x,
                             final int y) {
+        this.position = Point.create(x,
+                                     y);
+    }
+
+    public void applyPosition() {
         final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
-        final Surface   parentSurface   = parentWlSurface.getSurface();
-        this.position = parentSurface.global(Point.create(x,
-                                                          y));
+        final WlSurface wlSurface       = (WlSurface) this.wlSurfaceResource.getImplementation();
+
+        wlSurface.getSurface()
+                 .setPosition(parentWlSurface.getSurface()
+                                             .global(this.position));
     }
 
     @Override
     public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        if (useSync()) {
+            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final Surface surface = wlSurface.getSurface();
+
+            //set back cached state so surface can do eg. buffer release
+            surface.setState(this.cachedSurfaceState);
+        }
+    }
+
+    public void commit() {
+        final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
-        final Surface   parentSurface   = parentWlSurface.getSurface();
+        //update cached state with new state
+        this.cachedSurfaceState = surface.getState();
 
-        if (parentSurface.getCommitSignal()
-                         .isConnected(this.parentCommitSlot)) {
-            //TODO sync mode. cache surface states until parent commits.
-
+        if (useSync()) {
+            //replace new state with old state
+            surface.setState(this.surfaceState);
+            surface.updateTransform();
+            surface.updateSize();
         }
         else {
-            //desync mode. commit as usual but keep position relative to parent
-            surface.setPosition(this.position);
+            //desync mode, our 'old' state is always the newest state.
+            this.surfaceState = this.cachedSurfaceState;
         }
+    }
+
+    public void parentCommit() {
+        if (useSync()) {
+            final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
+            final Surface surface = wlSurface.getSurface();
+
+            //sync mode. update old state with cached state
+            this.surfaceState = this.cachedSurfaceState;
+            surface.getCommitSignal()
+                   .emit(this.surfaceState);
+        }
+
+        applyPosition();
     }
 
     public void setSync() {
-        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
-        final Surface   parentSurface   = parentWlSurface.getSurface();
-        parentSurface.getCommitSignal()
-                     .connect(this.parentCommitSlot);
+        this.sync = true;
     }
 
     public void setDesync() {
-        final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
-        final Surface   parentSurface   = parentWlSurface.getSurface();
-        parentSurface.getCommitSignal()
-                     .disconnect(this.parentCommitSlot);
+        this.sync = false;
+    }
+
+    /*
+     * We must use sync mode if at least one parent up in the hierarchy is in sync mode,
+     * even if we don't use sync mode.
+     */
+    private boolean useSync() {
+
+        if (this.sync) {
+            return true;
+        }
+        else {
+
+            final WlSurface parentWlSurface = (WlSurface) this.parentWlSurfaceResource.getImplementation();
+            final Surface parentSurface = parentWlSurface.getSurface();
+
+            boolean parentSync = false;
+
+            final Optional<Role> optionalParentRole = parentSurface.getRole();
+            if (optionalParentRole.isPresent()) {
+                final Role parentRole = optionalParentRole.get();
+                if (parentRole instanceof Subsurface) {
+                    final Subsurface parentSubsurface = (Subsurface) parentRole;
+                    parentSync = parentSubsurface.useSync();
+                }
+            }
+
+            return parentSync;
+        }
     }
 }
