@@ -30,6 +30,7 @@ import java.util.WeakHashMap;
 public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
 
     private final Set<WlSubsurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
+
     @Nonnull
     private final Subsurface subsurface;
 
@@ -70,13 +71,15 @@ public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
     @Override
     public void placeAbove(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
-
+        //TODO check if sibling argument is sibling or parent of this subsurface else raise protocol error
+        getSubsurface().above(sibling);
     }
 
     @Override
     public void placeBelow(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
-
+        //TODO check if sibling argument is sibling or parent of this subsurface else raise protocol error
+        getSubsurface().below(sibling);
     }
 
     @Override

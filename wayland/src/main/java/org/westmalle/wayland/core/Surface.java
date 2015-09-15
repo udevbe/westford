@@ -196,7 +196,7 @@ public class Surface {
         getCommitSignal().emit(getState());
 
         //FIXME don't automatically request a render when we commit
-        final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
+        final WlCompositor wlCompositor = (WlCompositor) getWlCompositorResource().getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
         return this;
@@ -334,7 +334,7 @@ public class Surface {
         getPositionSignal().emit(global);
 
         //FIXME don't automatically request a render when we update the position
-        final WlCompositor wlCompositor = (WlCompositor) this.wlCompositorResource.getImplementation();
+        final WlCompositor wlCompositor = (WlCompositor) getWlCompositorResource().getImplementation();
         wlCompositor.getCompositor()
                     .requestRender();
 
@@ -419,5 +419,10 @@ public class Surface {
     @Nonnull
     public Signal<SurfaceState, Slot<SurfaceState>> getCommitSignal() {
         return this.commitSignal;
+    }
+
+    @Nonnull
+    public WlCompositorResource getWlCompositorResource() {
+        return this.wlCompositorResource;
     }
 }

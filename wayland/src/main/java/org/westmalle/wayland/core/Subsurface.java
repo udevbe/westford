@@ -13,10 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedList;
 import java.util.Optional;
 
 public class Subsurface implements Role {
@@ -33,6 +36,9 @@ public class Subsurface implements Role {
     private SurfaceState surfaceState;
     @Nonnull
     private SurfaceState cachedSurfaceState;
+
+    private Optional<WlSurfaceResource> siblingPlacement = Optional.empty();
+    private boolean below;
 
     Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                @Nonnull final WlSurfaceResource wlSurfaceResource,
@@ -89,6 +95,8 @@ public class Subsurface implements Role {
     }
 
     public void parentCommit() {
+        //TODO visibility
+
         if (useSync()) {
             final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
             final Surface surface = wlSurface.getSurface();
@@ -100,6 +108,9 @@ public class Subsurface implements Role {
         }
 
         applyPosition();
+        this.siblingPlacement.ifPresent(sibling -> placement(this.below,
+                                                             sibling));
+        this.siblingPlacement = Optional.empty();
     }
 
     public void setSync() {
@@ -137,5 +148,35 @@ public class Subsurface implements Role {
 
             return parentSync;
         }
+    }
+
+    public void above(final WlSurfaceResource sibling) {
+        //TODO destroy listener for sibling;
+        this.siblingPlacement = Optional.of(sibling);
+        this.below = false;
+    }
+
+    public void below(final WlSurfaceResource sibling) {
+        //TODO destroy listener for sibling;
+        this.siblingPlacement = Optional.of(sibling);
+        this.below = true;
+    }
+
+    private void placement(final boolean below,
+                           final WlSurfaceResource sibling) {
+        //FIXME different placements (of the same parent surface) must be done in order as the requests from the protocol come in
+
+        final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+
+        final WlCompositorResource wlCompositorResource = surface.getWlCompositorResource();
+        final WlCompositor         wlCompositor         = (WlCompositor) wlCompositorResource.getImplementation();
+        final Compositor           compositor           = wlCompositor.getCompositor();
+
+        final LinkedList<WlSurfaceResource> surfacesStack   = compositor.getSurfacesStack();
+        final int                           siblingPosition = surfacesStack.indexOf(sibling);
+        surfacesStack.remove(this.wlSurfaceResource);
+        surfacesStack.add(below ? siblingPosition : siblingPosition + 1,
+                          this.wlSurfaceResource);
     }
 }

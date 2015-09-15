@@ -23,6 +23,9 @@ public class SubsurfaceFactory {
     public Subsurface create(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                              @Nonnull final WlSurfaceResource wlSurfaceResource) {
 
+        //TODO destroy listener for parent;
+        //TODO destroy listener for surface
+
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
