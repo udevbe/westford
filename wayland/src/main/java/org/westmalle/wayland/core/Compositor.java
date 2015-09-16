@@ -23,25 +23,32 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
-
     @Nonnull
     private final Display  display;
     @Nonnull
     private final Renderer renderer;
     @Nonnull
-    private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-    @Nonnull
-    private final LinkedList<WlOutput>          wlOutputs     = new LinkedList<>();
+    private final LinkedList<WlOutput> wlOutputs = new LinkedList<>();
     @Nonnull
     private final EventLoop.IdleHandler idleHandler;
     @Nonnull
     private Optional<EventSource> renderEvent = Optional.empty();
+
+    @Nonnull
+    private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
+
+    @Nonnull
+    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> subsurfaceStack        = new HashMap<>();
+    @Nonnull
+    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> pendingSubsurfaceStack = new HashMap<>();
 
     Compositor(@Nonnull @Provided final Display display,
                @Nonnull final Renderer renderer) {
@@ -54,19 +61,68 @@ public class Compositor {
         this.renderEvent.get()
                         .remove();
         this.renderEvent = Optional.empty();
+        //TODO unit test with subsurfaces render order
         this.wlOutputs.forEach(this::render);
         this.display.flushClients();
     }
 
     private void render(@Nonnull final WlOutput wlOutput) {
         this.renderer.beginRender(wlOutput);
-        getSurfacesStack().forEach(this.renderer::render);
+        getSurfacesStack().forEach(this::render);
         this.renderer.endRender(wlOutput);
+    }
+
+    private void render(final WlSurfaceResource surface) {
+        final LinkedList<WlSurfaceResource> subsurfaces = getSubsurfaceStack(surface);
+        subsurfaces.forEach((subsurface) -> {
+            this.renderer.render(surface);
+            if (subsurface != surface) {
+                render(subsurface);
+            }
+        });
     }
 
     @Nonnull
     public LinkedList<WlSurfaceResource> getSurfacesStack() {
         return this.surfacesStack;
+    }
+
+    @Nonnull
+    public LinkedList<WlSurfaceResource> getSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        //TODO unit tests
+
+        LinkedList<WlSurfaceResource> subsurfaces = this.subsurfaceStack.get(parentSurface);
+        if (subsurfaces == null) {
+            subsurfaces = new LinkedList<>();
+            subsurfaces.add(parentSurface);
+            this.subsurfaceStack.put(parentSurface,
+                                     subsurfaces);
+
+            parentSurface.register(() -> this.subsurfaceStack.remove(parentSurface));
+        }
+        return subsurfaces;
+    }
+
+    @Nonnull
+    public LinkedList<WlSurfaceResource> getPendingSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        //TODO unit tests
+
+        LinkedList<WlSurfaceResource> subsurfaces = this.pendingSubsurfaceStack.get(parentSurface);
+        if (subsurfaces == null) {
+            subsurfaces = new LinkedList<>(getSubsurfaceStack(parentSurface));
+            this.pendingSubsurfaceStack.put(parentSurface,
+                                            subsurfaces);
+
+            parentSurface.register(() -> this.pendingSubsurfaceStack.remove(parentSurface));
+        }
+        return subsurfaces;
+    }
+
+    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        //TODO unit tests
+
+        this.subsurfaceStack.put(parentSurface,
+                                 getPendingSubsurfaceStack(parentSurface));
     }
 
     public void requestRender() {
