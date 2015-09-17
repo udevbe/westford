@@ -31,7 +31,7 @@ import org.westmalle.wayland.core.Surface;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -42,8 +42,6 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
 
     private final WlSubsurfaceFactory wlSubSurfaceFactory;
     private final SubsurfaceFactory   subsurfaceFactory;
-
-    private final Set<Subsurface> activeSubsurfaceRoles = new HashSet<>();
 
     WlSubcompositor(@Provided final Display display,
                     @Provided final WlSubsurfaceFactory wlSubSurfaceFactory,
@@ -69,22 +67,25 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        final Role role = surface.getRole()
-                                 .orElseGet(() -> this.subsurfaceFactory.create(parentWlSurfaceResource,
-                                                                                wlSurfaceResource));
-        if (role instanceof Subsurface &&
-            !this.activeSubsurfaceRoles.contains(role)) {
+        final Optional<Role> role    = surface.getRole();
+        final boolean        hasRole = role.isPresent();
 
-            surface.setRole(role);
+        /*
+         * Check if the surface does not have a role or has an inactive subsurface role, both are ok. Otherwise we raise
+         * a protocol error.
+         */
+        if (!hasRole ||
+            role.get() instanceof Subsurface &&
+            ((Subsurface) role.get()).isInert()) {
 
-            final Subsurface subsurface = (Subsurface) role;
+            final Subsurface subsurface = this.subsurfaceFactory.create(parentWlSurfaceResource,
+                                                                        wlSurfaceResource);
+            surface.setRole(subsurface);
+
             final WlSubsurface wlSubsurface = this.wlSubSurfaceFactory.create(subsurface);
             final WlSubsurfaceResource wlSubsurfaceResource = wlSubsurface.add(requester.getClient(),
                                                                                requester.getVersion(),
                                                                                id);
-            this.activeSubsurfaceRoles.add(subsurface);
-
-            wlSubsurfaceResource.register(() -> this.activeSubsurfaceRoles.remove(subsurface));
             wlSurfaceResource.register(wlSubsurfaceResource::destroy);
         }
         else {
@@ -92,7 +93,8 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
                      .getObject(Display.OBJECT_ID)
                      .postError(WlSubcompositorError.BAD_SURFACE.getValue(),
                                 String.format("Desired sub surface already has another role (%s)",
-                                              role.getClass()
+                                              role.get()
+                                                  .getClass()
                                                   .getSimpleName()));
         }
     }

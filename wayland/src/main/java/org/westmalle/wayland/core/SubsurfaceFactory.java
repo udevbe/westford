@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -23,7 +24,6 @@ public class SubsurfaceFactory {
 
     public Subsurface create(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                              @Nonnull final WlSurfaceResource wlSurfaceResource) {
-        //TODO destroy listener for surface
 
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
@@ -50,11 +50,20 @@ public class SubsurfaceFactory {
         compositor.getSubsurfaceStack(parentWlSurfaceResource)
                   .addLast(wlSurfaceResource);
 
-        wlSurfaceResource.register(() -> {
+        final DestroyListener destroyListener = () -> {
             compositor.getSubsurfaceStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
             compositor.getPendingSubsurfaceStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
+        };
+        wlSurfaceResource.register(destroyListener);
+
+        parentWlSurfaceResource.register(() -> {
+            /*
+             * A destroyed parent will have it's stack of subsurfaces removed, so no need to remove the subsurface
+             * from that stack (which is done in the subsurface destroy listener).
+             */
+            wlSurfaceResource.unregister(destroyListener);
         });
 
         return subsurface;

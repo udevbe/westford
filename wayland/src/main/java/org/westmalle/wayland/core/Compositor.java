@@ -106,21 +106,23 @@ public class Compositor {
             subsurfaces.add(parentSurface);
             this.subsurfaceStack.put(parentSurface,
                                      subsurfaces);
-
-            //TODO unit test parent surface destroy & commit handlers
-            parentSurface.register(() -> {
-                this.subsurfaceStack.remove(parentSurface);
-                this.pendingSubsurfaceStack.remove(parentSurface);
-            });
-
-            final WlSurface parentWlSurface = (WlSurface) parentSurface.getImplementation();
-            parentWlSurface.getSurface()
-                           .getCommitSignal()
-                           .connect(event -> commitSubsurfaceStack(parentSurface));
         }
         return subsurfaces;
     }
 
+    public void removeSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface){
+        this.subsurfaceStack.remove(parentSurface);
+        this.pendingSubsurfaceStack.remove(parentSurface);
+    }
+
+    /**
+     * Get a pending z-ordered stack of subsurfaces grouped by their parent.
+     * The returned subsurface stack is only valid until {@link #commitSubsurfaceStack(WlSurfaceResource)} is called.
+     *
+     * @param parentSurface the parent of the subsurfaces.
+     *
+     * @return A list of subsurfaces, including the parent, in z-order.
+     */
     @Nonnull
     public LinkedList<WlSurfaceResource> getPendingSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
         LinkedList<WlSurfaceResource> subsurfaces = this.pendingSubsurfaceStack.get(parentSurface);
@@ -133,9 +135,10 @@ public class Compositor {
         return subsurfaces;
     }
 
-    private void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
         this.subsurfaceStack.put(parentSurface,
                                  getPendingSubsurfaceStack(parentSurface));
+        this.pendingSubsurfaceStack.remove(parentSurface);
     }
 
     public void requestRender() {

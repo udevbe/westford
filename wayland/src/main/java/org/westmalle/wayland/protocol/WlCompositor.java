@@ -74,18 +74,24 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         final Surface   surface   = this.surfaceFactory.create(compositorResource);
         final WlSurface wlSurface = this.wlSurfaceFactory.create(surface);
 
-        final WlSurfaceResource surfaceResource = wlSurface.add(compositorResource.getClient(),
-                                                                compositorResource.getVersion(),
-                                                                id);
-        surfaceResource.register(() -> {
-            WlCompositor.this.compositor.getSurfacesStack()
-                                        .remove(surfaceResource);
+        final WlSurfaceResource wlSurfaceResource = wlSurface.add(compositorResource.getClient(),
+                                                                  compositorResource.getVersion(),
+                                                                  id);
+        //TODO unit test destroy handler
+        wlSurfaceResource.register(() -> {
+            this.compositor.getSurfacesStack()
+                           .remove(wlSurfaceResource);
+            this.compositor.removeSubsurfaceStack(wlSurfaceResource);
             surface.markDestroyed();
-            WlCompositor.this.compositor.requestRender();
+            this.compositor.requestRender();
         });
 
         this.compositor.getSurfacesStack()
-                       .addLast(surfaceResource);
+                       .addLast(wlSurfaceResource);
+
+        //TODO unit test commit handler
+        surface.getCommitSignal()
+               .connect(event -> this.compositor.commitSubsurfaceStack(wlSurfaceResource));
     }
 
     @Override

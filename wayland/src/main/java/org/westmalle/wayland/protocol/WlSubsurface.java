@@ -83,7 +83,16 @@ public class WlSubsurface implements WlSubsurfaceRequests, ProtocolObject<WlSubs
     }
 
     private boolean isSibling(final WlSurfaceResource sibling) {
-        final WlSurfaceResource parentWlSurfaceResource = getSubsurface().getParentWlSurfaceResource();
+        final Subsurface subsurface = getSubsurface();
+        if (subsurface.isInert()) {
+            /*
+             * we return true here as a the docs say that a subsurface with a destroyed parent should become inert
+             * ie we don't care what the sibling argument is, as the request will be ignored anyway.
+             */
+            return true;
+        }
+
+        final WlSurfaceResource parentWlSurfaceResource = subsurface.getParentWlSurfaceResource();
 
         final WlSurface siblingWlSurfaceResource = (WlSurface) sibling.getImplementation();
         final WlCompositor wlCompositor = (WlCompositor) siblingWlSurfaceResource.getSurface()

@@ -48,11 +48,19 @@ public class Subsurface implements Role {
 
     public void setPosition(final int x,
                             final int y) {
+        if (isInert()) {
+            return;
+        }
+
         this.position = Point.create(x,
                                      y);
     }
 
     public void applyPosition() {
+        if (isInert()) {
+            return;
+        }
+
         final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
         final WlSurface wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
 
@@ -63,6 +71,10 @@ public class Subsurface implements Role {
 
     @Override
     public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
+        if (isInert()) {
+            return;
+        }
+
         if (useSync()) {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Surface surface = wlSurface.getSurface();
@@ -73,6 +85,10 @@ public class Subsurface implements Role {
     }
 
     public void commit() {
+        if (isInert()) {
+            return;
+        }
+
         final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
@@ -92,6 +108,10 @@ public class Subsurface implements Role {
     }
 
     public void parentCommit() {
+        if (isInert()) {
+            return;
+        }
+
         if (useSync()) {
             final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
             final Surface surface = wlSurface.getSurface();
@@ -106,23 +126,30 @@ public class Subsurface implements Role {
     }
 
     public void setSync() {
+        if (isInert()) {
+            return;
+        }
+
         this.sync = true;
     }
 
     public void setDesync() {
+        if (isInert()) {
+            return;
+        }
+
         this.sync = false;
     }
 
-    /*
-     * We must use sync mode if at least one parent up in the hierarchy is in sync mode,
-     * even if we don't use sync mode.
-     */
     private boolean useSync() {
-
         if (this.sync) {
             return true;
         }
         else {
+            /*
+             * We must use sync mode if at least one parent up in the hierarchy is in sync mode,
+             * even if we don't use sync mode.
+             */
             final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
             final Surface parentSurface = parentWlSurface.getSurface();
 
@@ -142,11 +169,19 @@ public class Subsurface implements Role {
     }
 
     public void above(@Nonnull final WlSurfaceResource sibling) {
+        if (isInert()) {
+            return;
+        }
+
         placement(false,
                   sibling);
     }
 
     public void below(@Nonnull final WlSurfaceResource sibling) {
+        if (isInert()) {
+            return;
+        }
+
         placement(true,
                   sibling);
     }
@@ -162,6 +197,7 @@ public class Subsurface implements Role {
 
         final LinkedList<WlSurfaceResource> subsurfaceStack = compositor.getPendingSubsurfaceStack(getParentWlSurfaceResource());
         final int                           siblingPosition = subsurfaceStack.indexOf(sibling);
+
         subsurfaceStack.remove(getWlSurfaceResource());
         subsurfaceStack.add(below ? siblingPosition : siblingPosition + 1,
                             getWlSurfaceResource());
@@ -175,5 +211,14 @@ public class Subsurface implements Role {
     @Nonnull
     public WlSurfaceResource getParentWlSurfaceResource() {
         return this.parentWlSurfaceResource;
+    }
+
+    public boolean isInert() {
+        /*
+         * Docs say a subsurface must become inert if it's parent is destroyed.
+         */
+        final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
+        return parentWlSurface.getSurface()
+                              .isDestroyed();
     }
 }
