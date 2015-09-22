@@ -15,12 +15,13 @@ package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
-import java.util.Optional;
 
 public class Subsurface implements Role {
 
@@ -28,6 +29,9 @@ public class Subsurface implements Role {
     private final WlSurfaceResource parentWlSurfaceResource;
     @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
+
+    private final Signal<Boolean, Slot<Boolean>> effectiveSyncSignal = new Signal<>();
+    private       boolean                        effectiveSync       = true;
 
     private boolean sync     = true;
     @Nonnull
@@ -80,7 +84,7 @@ public class Subsurface implements Role {
             return;
         }
 
-        if (useSync()) {
+        if (isEffectiveSync()) {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
             final Surface surface = wlSurface.getSurface();
 
@@ -89,18 +93,18 @@ public class Subsurface implements Role {
         }
     }
 
-    public void commit() {
+    public void commit(final SurfaceState surfaceState) {
         if (isInert()) {
             return;
         }
 
-        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
-
         //update cached state with new state
-        this.cachedSurfaceState = surface.getState();
+        this.cachedSurfaceState = surfaceState;
 
-        if (useSync()) {
+        if (isEffectiveSync()) {
+            final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+            final Surface surface = wlSurface.getSurface();
+
             //replace new state with old state
             surface.setState(this.surfaceState);
             surface.updateTransform();
@@ -117,56 +121,64 @@ public class Subsurface implements Role {
             return;
         }
 
-        if (useSync() &&
+        if (isEffectiveSync() &&
             !this.surfaceState.equals(this.cachedSurfaceState)) {
             //sync mode. update old state with cached state
             this.surfaceState = this.cachedSurfaceState;
-            commit();
+
+            final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+            wlSurface.getSurface()
+                     .getCommitSignal()
+                     .emit(this.surfaceState);
         }
 
         applyPosition();
     }
 
-    public void setSync() {
+    public void setSync(final boolean sync) {
         if (isInert()) {
             return;
         }
 
-        this.sync = true;
+        this.sync = sync;
+
+        final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
+        parentWlSurface.getSurface()
+                       .getRole()
+                       .ifPresent(role -> {
+                           if (role instanceof Subsurface) {
+                               //TODO unit test this
+                               final Subsurface parentSubsurface = (Subsurface) role;
+                               updateEffectiveSync(parentSubsurface.isEffectiveSync());
+                           }
+                       });
     }
 
-    public void setDesync() {
-        if (isInert()) {
-            return;
-        }
-
-        this.sync = false;
+    public boolean isEffectiveSync() {
+        return this.effectiveSync;
     }
 
-    private boolean useSync() {
-        if (this.sync) {
-            return true;
-        }
-        else {
+    public void updateEffectiveSync(final boolean parentEffectiveSync) {
+        final boolean oldEffectiveSync = this.effectiveSync;
+        this.effectiveSync = this.sync || parentEffectiveSync;
+
+        if (oldEffectiveSync != isEffectiveSync()) {
             /*
-             * We must use sync mode if at least one parent up in the hierarchy is in sync mode,
-             * even if we don't use sync mode.
+             * If we were in sync mode and now our effective mode is desync, we have to apply our cached state
+             * immediately
              */
-            final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
-            final Surface parentSurface = parentWlSurface.getSurface();
+            if (!isEffectiveSync()) {
+                final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+                final Surface surface = wlSurface.getSurface();
 
-            boolean parentSync = false;
+                surface.setState(this.cachedSurfaceState);
+                surface.updateTransform();
+                surface.updateSize();
 
-            final Optional<Role> optionalParentRole = parentSurface.getRole();
-            if (optionalParentRole.isPresent()) {
-                final Role parentRole = optionalParentRole.get();
-                if (parentRole instanceof Subsurface) {
-                    final Subsurface parentSubsurface = (Subsurface) parentRole;
-                    parentSync = parentSubsurface.useSync();
-                }
+                //TODO request render
             }
 
-            return parentSync;
+            getEffectiveSyncSignal().emit(isEffectiveSync());
         }
     }
 
@@ -197,12 +209,14 @@ public class Subsurface implements Role {
         final WlCompositor         wlCompositor         = (WlCompositor) wlCompositorResource.getImplementation();
         final Compositor           compositor           = wlCompositor.getCompositor();
 
-        final LinkedList<WlSurfaceResource> subsurfaceStack = compositor.getPendingSubsurfaceStack(getParentWlSurfaceResource());
-        final int                           siblingPosition = subsurfaceStack.indexOf(sibling);
+        final LinkedList<WlSurfaceResource> pendingSubsurfaceStack = compositor.getPendingSubsurfaceStack(getParentWlSurfaceResource());
+        final int                           siblingPosition        = pendingSubsurfaceStack.indexOf(sibling);
 
-        subsurfaceStack.remove(getWlSurfaceResource());
-        subsurfaceStack.add(below ? siblingPosition : siblingPosition + 1,
-                            getWlSurfaceResource());
+        pendingSubsurfaceStack.remove(getWlSurfaceResource());
+        pendingSubsurfaceStack.add(below ? siblingPosition : siblingPosition + 1,
+                                   getWlSurfaceResource());
+
+        //Note: committing the subsurface stack happens in WlCompositor.
     }
 
     @Nonnull
@@ -222,5 +236,9 @@ public class Subsurface implements Role {
         final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
         return parentWlSurface.getSurface()
                               .isDestroyed();
+    }
+
+    public Signal<Boolean, Slot<Boolean>> getEffectiveSyncSignal() {
+        return this.effectiveSyncSignal;
     }
 }

@@ -32,15 +32,24 @@ public class SubsurfaceFactory {
                                                      wlSurfaceResource,
                                                      surface.getState());
         surface.getCommitSignal()
-               .connect(event -> subsurface.commit());
+               .connect(subsurface::commit);
 
         final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
         parentSurface.getCommitSignal()
-                     .connect(event -> subsurface.parentCommit());
+                     .connect((parentSurfaceState) -> subsurface.parentCommit());
         parentSurface.getPositionSignal()
                      .connect(event -> subsurface.applyPosition());
+        parentSurface.getRole()
+                     .ifPresent(role -> {
+                         if (role instanceof Subsurface) {
+                             //TODO create unit test for this
+                             Subsurface parentSubsurface = (Subsurface) role;
+                             parentSubsurface.getEffectiveSyncSignal()
+                                             .connect(subsurface::updateEffectiveSync);
+                         }
+                     });
 
         final WlCompositor wlCompositor = (WlCompositor) surface.getWlCompositorResource()
                                                                 .getImplementation();
