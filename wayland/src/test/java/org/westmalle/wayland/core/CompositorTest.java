@@ -87,7 +87,7 @@ public class CompositorTest {
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
         final Signal<SurfaceState, Slot<SurfaceState>> commitSignal0 = mock(Signal.class);
-        when(surface0.getCommitSignal()).thenReturn(commitSignal0);
+        when(surface0.getApplySurfaceStateSignal()).thenReturn(commitSignal0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
         when(surface0.getState()).thenReturn(surfaceState0);
         final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
@@ -99,7 +99,7 @@ public class CompositorTest {
         final Surface surface1 = mock(Surface.class);
         when(wlSurface1.getSurface()).thenReturn(surface1);
         final Signal<SurfaceState, Slot<SurfaceState>> commitSignal1 = mock(Signal.class);
-        when(surface1.getCommitSignal()).thenReturn(commitSignal1);
+        when(surface1.getApplySurfaceStateSignal()).thenReturn(commitSignal1);
         final SurfaceState surfaceState1 = mock(SurfaceState.class);
         when(surface1.getState()).thenReturn(surfaceState1);
         final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
@@ -111,7 +111,7 @@ public class CompositorTest {
         final Surface surface2 = mock(Surface.class);
         when(wlSurface2.getSurface()).thenReturn(surface2);
         final Signal<SurfaceState, Slot<SurfaceState>> commitSignal2 = mock(Signal.class);
-        when(surface2.getCommitSignal()).thenReturn(commitSignal2);
+        when(surface2.getApplySurfaceStateSignal()).thenReturn(commitSignal2);
         final SurfaceState surfaceState2 = mock(SurfaceState.class);
         when(surface2.getState()).thenReturn(surfaceState2);
         final WlBufferResource wlBufferResource2 = mock(WlBufferResource.class);

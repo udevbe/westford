@@ -31,14 +31,14 @@ public class SubsurfaceFactory {
         final Subsurface subsurface = new Subsurface(parentWlSurfaceResource,
                                                      wlSurfaceResource,
                                                      surface.getState());
-        surface.getCommitSignal()
-               .connect(subsurface::commit);
+        surface.getApplySurfaceStateSignal()
+               .connect(subsurface::apply);
 
         final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
-        parentSurface.getCommitSignal()
-                     .connect((parentSurfaceState) -> subsurface.parentCommit());
+        parentSurface.getApplySurfaceStateSignal()
+                     .connect((surfaceState) -> subsurface.onParentApply());
         parentSurface.getPositionSignal()
                      .connect(event -> subsurface.applyPosition());
         parentSurface.getRole()

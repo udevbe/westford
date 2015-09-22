@@ -90,7 +90,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                        .addLast(wlSurfaceResource);
 
         //TODO unit test commit handler
-        surface.getCommitSignal()
+        surface.getApplySurfaceStateSignal()
                .connect(event -> this.compositor.commitSubsurfaceStack(wlSurfaceResource));
     }
 

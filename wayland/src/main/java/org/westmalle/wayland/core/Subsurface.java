@@ -93,7 +93,7 @@ public class Subsurface implements Role {
         }
     }
 
-    public void commit(final SurfaceState surfaceState) {
+    public void apply(final SurfaceState surfaceState) {
         if (isInert()) {
             return;
         }
@@ -103,12 +103,9 @@ public class Subsurface implements Role {
 
         if (isEffectiveSync()) {
             final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-            final Surface surface = wlSurface.getSurface();
-
             //replace new state with old state
-            surface.setState(this.surfaceState);
-            surface.updateTransform();
-            surface.updateSize();
+            wlSurface.getSurface()
+                     .apply(this.surfaceState);
         }
         else {
             //desync mode, our 'old' state is always the newest state.
@@ -116,7 +113,7 @@ public class Subsurface implements Role {
         }
     }
 
-    public void parentCommit() {
+    public void onParentApply() {
         if (isInert()) {
             return;
         }
@@ -125,11 +122,7 @@ public class Subsurface implements Role {
             !this.surfaceState.equals(this.cachedSurfaceState)) {
             //sync mode. update old state with cached state
             this.surfaceState = this.cachedSurfaceState;
-
-            final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-            wlSurface.getSurface()
-                     .getCommitSignal()
-                     .emit(this.surfaceState);
+            apply(this.cachedSurfaceState);
         }
 
         applyPosition();
@@ -167,15 +160,11 @@ public class Subsurface implements Role {
              * If we were in sync mode and now our effective mode is desync, we have to apply our cached state
              * immediately
              */
+            //TODO unit test this
             if (!isEffectiveSync()) {
                 final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-                final Surface surface = wlSurface.getSurface();
-
-                surface.setState(this.cachedSurfaceState);
-                surface.updateTransform();
-                surface.updateSize();
-
-                //TODO request render
+                wlSurface.getSurface()
+                         .apply(this.cachedSurfaceState);
             }
 
             getEffectiveSyncSignal().emit(isEffectiveSync());

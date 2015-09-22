@@ -53,7 +53,7 @@ public class Surface {
     @Nonnull
     private final Signal<Point, Slot<Point>>                             positionSignal            = new Signal<>();
     @Nonnull
-    private final Signal<SurfaceState, Slot<SurfaceState>>               commitSignal              = new Signal<>();
+    private final Signal<SurfaceState, Slot<SurfaceState>>               applySurfaceStateSignal   = new Signal<>();
 
     @Nonnull
     private final FiniteRegionFactory  finiteRegionFactory;
@@ -182,34 +182,24 @@ public class Surface {
             buffer.get()
                   .release();
         }
-        //check update transformation
-        final boolean needsTransformUpdate = needsTransformUpdate();
+
         //flush states
-        setState(getPendingState());
-        if (needsTransformUpdate) {
-            updateTransform();
-        }
-        updateSize();
+        apply(getPendingState());
+
         //reset pending buffer state
         detachBuffer();
-
-        getCommitSignal().emit(getState());
-
-        //FIXME don't automatically request a render when we commit
-        final WlCompositor wlCompositor = (WlCompositor) getWlCompositorResource().getImplementation();
-        wlCompositor.getCompositor()
-                    .requestRender();
         return this;
     }
 
-    public boolean needsTransformUpdate() {
-        final SurfaceState pendingState = getPendingState();
-        final SurfaceState state        = getState();
-        return pendingState.getScale() != state.getScale()
-               || !pendingState.getBufferTransform()
-                               .equals(state.getBufferTransform())
-               || !pendingState.getPositionTransform()
-                               .equals(state.getPositionTransform());
+    public void apply(final SurfaceState surfaceState) {
+        setState(surfaceState);
+        updateTransform();
+        updateSize();
+        final WlCompositor wlCompositor = (WlCompositor) getWlCompositorResource().getImplementation();
+        wlCompositor.getCompositor()
+                    .requestRender();
+
+        getApplySurfaceStateSignal().emit(getState());
     }
 
     @Nonnull
@@ -399,7 +389,6 @@ public class Surface {
     }
 
 
-
     /**
      * The keyboards that will be used to notify the client of any keyboard events on this surface. This collection is
      * updated each time the keyboard focus changes for this surface. To keep the client from receiving keyboard events,
@@ -419,8 +408,8 @@ public class Surface {
     }
 
     @Nonnull
-    public Signal<SurfaceState, Slot<SurfaceState>> getCommitSignal() {
-        return this.commitSignal;
+    public Signal<SurfaceState, Slot<SurfaceState>> getApplySurfaceStateSignal() {
+        return this.applySurfaceStateSignal;
     }
 
     @Nonnull
