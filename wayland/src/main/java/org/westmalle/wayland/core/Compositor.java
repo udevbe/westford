@@ -33,9 +33,9 @@ import java.util.concurrent.TimeUnit;
 @AutoFactory(className = "CompositorFactory")
 public class Compositor {
     @Nonnull
-    private final Display  display;
+    private final Display      display;
     @Nonnull
-    private final Renderer renderer;
+    private final RenderEngine renderEngine;
     @Nonnull
     private final LinkedList<WlOutput> wlOutputs = new LinkedList<>();
     @Nonnull
@@ -52,9 +52,9 @@ public class Compositor {
     private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> pendingSubsurfaceStack = new HashMap<>();
 
     Compositor(@Nonnull @Provided final Display display,
-               @Nonnull final Renderer renderer) {
+               @Nonnull final RenderEngine renderEngine) {
         this.display = display;
-        this.renderer = renderer;
+        this.renderEngine = renderEngine;
         this.idleHandler = this::handleIdle;
     }
 
@@ -69,9 +69,9 @@ public class Compositor {
     }
 
     private void render(@Nonnull final WlOutput wlOutput) {
-        this.renderer.beginRender(wlOutput);
+        this.renderEngine.begin(wlOutput);
         getSurfacesStack().forEach(this::render);
-        this.renderer.endRender(wlOutput);
+        this.renderEngine.end(wlOutput);
     }
 
     private void render(final WlSurfaceResource wlSurfaceResource) {
@@ -82,8 +82,8 @@ public class Compositor {
                  .getBuffer()
                  .ifPresent(wlBufferResource -> {
                      final LinkedList<WlSurfaceResource> subsurfaces = getSubsurfaceStack(wlSurfaceResource);
-                     this.renderer.render(wlSurfaceResource,
-                                          wlBufferResource);
+                     this.renderEngine.draw(wlSurfaceResource,
+                                            wlBufferResource);
                      subsurfaces.forEach((subsurface) -> {
                          if (subsurface != wlSurfaceResource) {
                              render(subsurface);

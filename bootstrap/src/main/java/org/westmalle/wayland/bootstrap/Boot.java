@@ -21,8 +21,6 @@ import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.CompositorFactory;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.RenderEngine;
-import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.core.RendererFactory;
 import org.westmalle.wayland.egl.EglRenderEngineFactory;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
@@ -54,7 +52,6 @@ class Boot {
 
     private void strap(final Application application) {
         //get all required factory instances
-        final RendererFactory            rendererFactory            = application.shmRendererFactory();
         final CompositorFactory          compositorFactory          = application.compositorFactory();
         final WlCompositorFactory        wlCompositorFactory        = application.wlCompositorFactory();
         final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = application.wlDataDeviceManagerFactory();
@@ -75,12 +72,10 @@ class Boot {
                                                        600);
         //setup our render engine
         final RenderEngine renderEngine = renderEngineFactory.create();
-        //create an shm renderer that passes on shm buffers to it's render implementation
-        final Renderer renderer = rendererFactory.create(renderEngine);
 
         //setup compositing for output support
         //create a compositor with shell and scene logic
-        final Compositor compositor = compositorFactory.create(renderer);
+        final Compositor compositor = compositorFactory.create(renderEngine);
 
         //add our output to the compositor
         //TODO add output hotplug functionality (eg monitor hotplug)
