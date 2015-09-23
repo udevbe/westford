@@ -35,7 +35,6 @@
         <auto.value.version>1.1</auto.value.version>
         <dagger.version>2.0.1</dagger.version>
         <findbugs.version>3.0.0</findbugs.version>
-        <slf4j.version>1.7.12</slf4j.version>
 
         <!-- test dep versions -->
         <junit.version>4.12</junit.version>
@@ -101,11 +100,6 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>${findbugs.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
 
         <!-- test deps -->

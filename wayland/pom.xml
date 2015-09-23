@@ -23,13 +23,6 @@
             <artifactId>wayland</artifactId>
             <version>${wayland-java-bindings.version}</version>
         </dependency>
-        <!-- logging implementation for test log output -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.2</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>
 

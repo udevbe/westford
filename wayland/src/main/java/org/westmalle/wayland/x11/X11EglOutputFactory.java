@@ -15,13 +15,13 @@ package org.westmalle.wayland.x11;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.logging.Logger;
 
+import static java.lang.String.format;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
@@ -49,7 +49,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 
 public class X11EglOutputFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(X11EglOutputFactory.class);
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
     private final LibEGL libEGL;
@@ -119,15 +119,15 @@ public class X11EglOutputFactory {
                                                              LibEGL.EGL_VERSION)
                                              .getString(0);
 
-        LOGGER.info("Creating X11 EGL output:\n"
-                    + "\tEGL client apis: {}\n"
-                    + "\tEGL vendor: {}\n"
-                    + "\tEGL version: {}\n"
-                    + "\tEGL extensions: {}",
-                    eglClientApis,
-                    eglVendor,
-                    eglVersion,
-                    eglQueryString.getString(0));
+        LOGGER.info(format("Creating X11 EGL output:\n"
+                           + "\tEGL client apis: %s\n"
+                           + "\tEGL vendor: %s\n"
+                           + "\tEGL version: %s\n"
+                           + "\tEGL extensions: %s",
+                           eglClientApis,
+                           eglVendor,
+                           eglVersion,
+                           eglQueryString.getString(0)));
 
         return eglDisplay;
     }

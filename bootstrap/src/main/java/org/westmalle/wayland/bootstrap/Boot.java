@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.westmalle.wayland.Application;
 import org.westmalle.wayland.DaggerApplication;
 import org.westmalle.wayland.core.Compositor;
@@ -33,19 +31,22 @@ import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 class Boot {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Boot.class);
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public static void main(final String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread,
-                                                   throwable) -> LOGGER.error("Got uncaught exception",
-                                                                              throwable));
+                                                   throwable) -> {
+            LOGGER.severe("Got uncaught exception " + throwable.getMessage());
+            throwable.printStackTrace();
+        });
 
-        LOGGER.info("Starting Westmalle:\n"
-                    + "\tArguments: {}",
-                    args.length == 0 ? "<none>" : Arrays.toString(args));
+        LOGGER.info(String.format("Starting Westmalle:\n"
+                                  + "\tArguments: %s",
+                                  args.length == 0 ? "<none>" : Arrays.toString(args)));
 
         new Boot().strap(DaggerApplication.create());
     }
