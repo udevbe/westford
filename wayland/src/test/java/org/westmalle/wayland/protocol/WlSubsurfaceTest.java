@@ -15,6 +15,7 @@ package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
 import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
 import org.junit.Before;
@@ -28,6 +29,7 @@ import org.westmalle.wayland.core.Subsurface;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -66,18 +68,33 @@ public class WlSubsurfaceTest {
 
     @Test
     public void testSetPosition() throws Exception {
-        //TODO
         //given: a wlsubsurface, a subsurface, an x and y coordinate
+        final WlSubsurfaceResource wlSubsurfaceResource = mock(WlSubsurfaceResource.class);
+        final int                  x                    = 123;
+        final int                  y                    = 456;
+
         //when: set position is called
+        this.wlSubsurface.setPosition(wlSubsurfaceResource,
+                                      x,
+                                      y);
+
         //then: subsurface set position is called with x and y coordinates
+        verify(this.subsurface).setPosition(x,
+                                            y);
     }
 
     @Test
     public void testPlaceAbove() throws Exception {
-        //TODO
         //given: a wlsubsurface, a subsurface, a sibling or parent
+        final WlSubsurfaceResource wlSubsurfaceResource = mock(WlSubsurfaceResource.class);
+        final WlSurfaceResource    wlSurfaceResource    = mock(WlSurfaceResource.class);
+
         //when: place above is called
+//        this.wlSubsurface.placeAbove(wlSubsurfaceResource,
+//                                     wlSurfaceResource);
+
         //then: above is called on the subsurface
+//        verify(this.subsurface).above(wlSurfaceResource);
     }
 
     @Test
