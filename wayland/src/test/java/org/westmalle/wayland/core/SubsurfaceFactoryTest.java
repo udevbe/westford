@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.junit.Test;
@@ -71,6 +72,7 @@ public class SubsurfaceFactoryTest {
         final Compositor                               compositor              = mock(Compositor.class);
         final LinkedList<WlSurfaceResource>            surfacesStack           = mock(LinkedList.class);
         final LinkedList<WlSurfaceResource>            subsurfacesStack        = mock(LinkedList.class);
+        final LinkedList<WlSurfaceResource>            pendingSubsurfacesStack = mock(LinkedList.class);
 
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -81,6 +83,7 @@ public class SubsurfaceFactoryTest {
         when(wlCompositor.getCompositor()).thenReturn(compositor);
         when(compositor.getSurfacesStack()).thenReturn(surfacesStack);
         when(compositor.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
+        when(compositor.getPendingSubsurfaceStack(parentWlSurfaceResource)).thenReturn(pendingSubsurfacesStack);
 
         final Subsurface subsurface = mock(Subsurface.class);
 
@@ -98,32 +101,51 @@ public class SubsurfaceFactoryTest {
         verify(surfacesStack).remove(wlSurfaceResource);
 
         //and when: the surface commit is called
-        ArgumentCaptor<Slot> applySurfaceStateSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
+        final ArgumentCaptor<Slot> applySurfaceStateSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
         verify(applySurfaceStateSignal).connect(applySurfaceStateSlotArgumentCaptor.capture());
-        Slot<SurfaceState> applySurfaceStateSlot = applySurfaceStateSlotArgumentCaptor.getValue();
+        final Slot<SurfaceState> applySurfaceStateSlot = applySurfaceStateSlotArgumentCaptor.getValue();
         applySurfaceStateSlot.handle(newSurfaceState);
 
         //then: the subsurface is notified of the commit
         verify(subsurface).apply(newSurfaceState);
 
         //and when: the parent is a subsurface's mode changes
-        ArgumentCaptor<Slot> updateEffectiveSyncSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
+        final ArgumentCaptor<Slot> updateEffectiveSyncSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
         verify(parentEffectiveSyncSignal).connect(updateEffectiveSyncSlotArgumentCaptor.capture());
-        Slot<Boolean> effectiveSyncSlot = updateEffectiveSyncSlotArgumentCaptor.getValue();
+        final Slot<Boolean> effectiveSyncSlot = updateEffectiveSyncSlotArgumentCaptor.getValue();
         effectiveSyncSlot.handle(false);
 
         //then: the subsurface is notified of this sync mode change
         verify(subsurface).updateEffectiveSync(false);
 
         //and when: the parent position is changed
-        //then: the subsurface position is applied
+        final ArgumentCaptor<Slot> positionSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
+        verify(parentPositionSignal).connect(positionSlotArgumentCaptor.capture());
+        final Slot<Point> positionSlot = positionSlotArgumentCaptor.getValue();
+        positionSlot.handle(mock(Point.class));
 
+        //then: the subsurface position is (re)applied
+        verify(subsurface).applyPosition();
 
         //and when: the parent commit is called
-        //then: the subsurface cached state is applied
+        final ArgumentCaptor<Slot> parentApplySurfaceStateSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
+        verify(parentApplySurfaceStateSignal).connect(parentApplySurfaceStateSlotArgumentCaptor.capture());
+        final Slot<SurfaceState> parentApplySurfaceStateSlot = parentApplySurfaceStateSlotArgumentCaptor.getValue();
+        parentApplySurfaceStateSlot.handle(mock(SurfaceState.class));
+
+        //then: the subsurface is notified
+        verify(subsurface).onParentApply();
 
         //and when: the surface is destroyed
+        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(wlSurfaceResource).register(destroyListenerArgumentCaptor.capture());
+        final DestroyListener destroyListener = destroyListenerArgumentCaptor.getValue();
+        destroyListener.handle();
+
         //then: the surface is removed from the subsurface stack
+        verify(subsurfacesStack).remove(wlSurfaceResource);
+
         // and the surface is removed from the pending subsurface stack
+        verify(pendingSubsurfacesStack).remove(wlSurfaceResource);
     }
 }
