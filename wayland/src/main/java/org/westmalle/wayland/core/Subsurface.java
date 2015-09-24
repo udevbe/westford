@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.events.Signal;
@@ -23,6 +24,8 @@ import org.westmalle.wayland.protocol.WlSurface;
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
 
+@AutoFactory(allowSubclasses = true,
+             className = "PrivateSubsurfaceFactory")
 public class Subsurface implements Role {
 
     @Nonnull

@@ -13,25 +13,115 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.WlCompositorResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
+import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlSurface;
 
-import static org.junit.Assert.*;
+import java.util.LinkedList;
+import java.util.Optional;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
 public class SubsurfaceFactoryTest {
+
+    @Mock
+    private PrivateSubsurfaceFactory privateSubsurfaceFactory;
+    @InjectMocks
+    private SubsurfaceFactory        subsurfaceFactory;
 
     @Test
     public void testCreate() throws Exception {
-        //TODO
-
         //given: subsurface factory, parent surface, surface
+        final WlSurfaceResource                        parentWlSurfaceResource       = mock(WlSurfaceResource.class);
+        final WlSurface                                parentWlSurface               = mock(WlSurface.class);
+        final Surface                                  parentSurface                 = mock(Surface.class);
+        final Signal<SurfaceState, Slot<SurfaceState>> parentApplySurfaceStateSignal = mock(Signal.class);
+        final Signal<Point, Slot<Point>>               parentPositionSignal          = mock(Signal.class);
+        final Subsurface                               parentRole                    = mock(Subsurface.class);
+        final Signal<Boolean, Slot<Boolean>>           parentEffectiveSyncSignal     = mock(Signal.class);
+
+        when(parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+        when(parentSurface.getApplySurfaceStateSignal()).thenReturn(parentApplySurfaceStateSignal);
+        when(parentSurface.getPositionSignal()).thenReturn(parentPositionSignal);
+        when(parentSurface.getRole()).thenReturn(Optional.of(parentRole));
+        when(parentRole.getEffectiveSyncSignal()).thenReturn(parentEffectiveSyncSignal);
+        when(parentRole.isEffectiveSync()).thenReturn(true);
+
+        final WlSurfaceResource                        wlSurfaceResource       = mock(WlSurfaceResource.class);
+        final WlSurface                                wlSurface               = mock(WlSurface.class);
+        final Surface                                  surface                 = mock(Surface.class);
+        final SurfaceState                             oldSurfaceState         = mock(SurfaceState.class);
+        final SurfaceState                             newSurfaceState         = mock(SurfaceState.class);
+        final Signal<SurfaceState, Slot<SurfaceState>> applySurfaceStateSignal = mock(Signal.class);
+        final WlCompositorResource                     wlCompositorResource    = mock(WlCompositorResource.class);
+        final WlCompositor                             wlCompositor            = mock(WlCompositor.class);
+        final Compositor                               compositor              = mock(Compositor.class);
+        final LinkedList<WlSurfaceResource>            surfacesStack           = mock(LinkedList.class);
+        final LinkedList<WlSurfaceResource>            subsurfacesStack        = mock(LinkedList.class);
+
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getState()).thenReturn(oldSurfaceState);
+        when(surface.getApplySurfaceStateSignal()).thenReturn(applySurfaceStateSignal);
+        when(surface.getWlCompositorResource()).thenReturn(wlCompositorResource);
+        when(wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
+        when(wlCompositor.getCompositor()).thenReturn(compositor);
+        when(compositor.getSurfacesStack()).thenReturn(surfacesStack);
+        when(compositor.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
+
+        final Subsurface subsurface = mock(Subsurface.class);
+
+        when(this.privateSubsurfaceFactory.create(parentWlSurfaceResource,
+                                                  wlSurfaceResource,
+                                                  oldSurfaceState)).thenReturn(subsurface);
+
         //when: create is called
-        //then: a subsurface is created
-        // and the subsurface has position 0,0
-        // and the subsurface is placed at the top of the subsurface stack
+        this.subsurfaceFactory.create(parentWlSurfaceResource,
+                                      wlSurfaceResource);
+
+        //the subsurface is placed at the top of the subsurface stack
+        verify(subsurfacesStack).addLast(wlSurfaceResource);
+        // and the subsurface is no longer part of the main surface stack
+        verify(surfacesStack).remove(wlSurfaceResource);
+
+        //and when: the surface commit is called
+        ArgumentCaptor<Slot> applySurfaceStateSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
+        verify(applySurfaceStateSignal).connect(applySurfaceStateSlotArgumentCaptor.capture());
+        Slot<SurfaceState> applySurfaceStateSlot = applySurfaceStateSlotArgumentCaptor.getValue();
+        applySurfaceStateSlot.handle(newSurfaceState);
+
+        //then: the subsurface is notified of the commit
+        verify(subsurface).apply(newSurfaceState);
+
+        //and when: the parent is a subsurface's mode changes
+        ArgumentCaptor<Slot> updateEffectiveSyncSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
+        verify(parentEffectiveSyncSignal).connect(updateEffectiveSyncSlotArgumentCaptor.capture());
+        Slot<Boolean> effectiveSyncSlot = updateEffectiveSyncSlotArgumentCaptor.getValue();
+        effectiveSyncSlot.handle(false);
+
+        //then: the subsurface is notified of this sync mode change
+        verify(subsurface).updateEffectiveSync(false);
+
         //and when: the parent position is changed
         //then: the subsurface position is applied
+
+
         //and when: the parent commit is called
-        //then: the subsurface parent commit hook is called
+        //then: the subsurface cached state is applied
+
         //and when: the surface is destroyed
         //then: the surface is removed from the subsurface stack
         // and the surface is removed from the pending subsurface stack

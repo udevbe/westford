@@ -165,6 +165,7 @@ public class Surface {
         this.state = state;
     }
 
+    @Nonnull
     public Optional<Role> getRole() {
         return this.surfaceRole;
     }

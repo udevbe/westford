@@ -19,8 +19,17 @@ import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 public class SubsurfaceFactory {
+
+    @Nonnull
+    private final PrivateSubsurfaceFactory privateSubsurfaceFactory;
+
+    @Inject
+    SubsurfaceFactory(@Nonnull final PrivateSubsurfaceFactory privateSubsurfaceFactory) {
+        this.privateSubsurfaceFactory = privateSubsurfaceFactory;
+    }
 
     public Subsurface create(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                              @Nonnull final WlSurfaceResource wlSurfaceResource) {
@@ -28,9 +37,9 @@ public class SubsurfaceFactory {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        final Subsurface subsurface = new Subsurface(parentWlSurfaceResource,
-                                                     wlSurfaceResource,
-                                                     surface.getState());
+        final Subsurface subsurface = this.privateSubsurfaceFactory.create(parentWlSurfaceResource,
+                                                                           wlSurfaceResource,
+                                                                           surface.getState());
         surface.getApplySurfaceStateSignal()
                .connect(subsurface::apply);
 
@@ -44,7 +53,6 @@ public class SubsurfaceFactory {
         parentSurface.getRole()
                      .ifPresent(role -> {
                          if (role instanceof Subsurface) {
-                             //TODO create unit test for this
                              Subsurface parentSubsurface = (Subsurface) role;
                              parentSubsurface.getEffectiveSyncSignal()
                                              .connect(subsurface::updateEffectiveSync);
