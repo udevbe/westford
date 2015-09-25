@@ -74,7 +74,7 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     public void placeAbove(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
         //TODO unit test
-        if (isSibling(sibling)) {
+        if (isValid(sibling)) {
             getSubsurface().above(sibling);
         }
         else {
@@ -83,7 +83,7 @@ public class WlSubsurface implements WlSubsurfaceRequests,
         }
     }
 
-    private boolean isSibling(final WlSurfaceResource sibling) {
+    private boolean isValid(final WlSurfaceResource sibling) {
         final Subsurface subsurface = getSubsurface();
         if (subsurface.isInert()) {
             /*
@@ -93,14 +93,12 @@ public class WlSubsurface implements WlSubsurfaceRequests,
             return true;
         }
 
-        final WlSurfaceResource parentWlSurfaceResource = subsurface.getParentWlSurfaceResource();
-
-        final WlSurface siblingWlSurfaceResource = (WlSurface) sibling.getImplementation();
-        final WlCompositor wlCompositor = (WlCompositor) siblingWlSurfaceResource.getSurface()
-                                                                                 .getWlCompositorResource()
-                                                                                 .getImplementation();
+        final WlSurface siblingWlSurface = (WlSurface) sibling.getImplementation();
+        final WlCompositor wlCompositor = (WlCompositor) siblingWlSurface.getSurface()
+                                                                         .getWlCompositorResource()
+                                                                         .getImplementation();
         return wlCompositor.getCompositor()
-                           .getSubsurfaceStack(parentWlSurfaceResource)
+                           .getSubsurfaceStack(subsurface.getParentWlSurfaceResource())
                            .contains(sibling);
     }
 
@@ -108,7 +106,7 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     public void placeBelow(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
         //TODO unit test
-        if (isSibling(sibling)) {
+        if (isValid(sibling)) {
             getSubsurface().below(sibling);
         }
         else {
