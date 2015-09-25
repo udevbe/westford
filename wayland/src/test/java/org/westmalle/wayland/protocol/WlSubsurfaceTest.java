@@ -28,6 +28,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.Subsurface;
 import org.westmalle.wayland.core.Surface;
 
@@ -87,8 +88,8 @@ public class WlSubsurfaceTest {
                                       y);
 
         //then: subsurface set position is called with x and y coordinates
-        verify(this.subsurface).setPosition(x,
-                                            y);
+        verify(this.subsurface).setPosition(eq(Point.create(x,
+                                                            y)));
     }
 
     private void setupSibling(final WlSubsurfaceResource wlSubsurfaceResource,

@@ -36,6 +36,7 @@ public class Subsurface implements Role {
     private final Signal<Boolean, Slot<Boolean>> effectiveSyncSignal = new Signal<>();
     private       boolean                        effectiveSync       = true;
 
+    private boolean inert    = false;
     private boolean sync     = true;
     @Nonnull
     private Point   position = Point.ZERO;
@@ -53,28 +54,12 @@ public class Subsurface implements Role {
         this.cachedSurfaceState = surfaceState;
     }
 
-    public void setPosition(final int x,
-                            final int y) {
+    public void setPosition(Point position) {
         if (isInert()) {
             return;
         }
 
-        this.position = Point.create(x,
-                                     y);
-    }
-
-    public boolean isInert() {
-        /*
-         * Docs say a subsurface must become inert if it's parent is destroyed.
-         */
-        final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
-        return parentWlSurface.getSurface()
-                              .isDestroyed();
-    }
-
-    @Nonnull
-    public WlSurfaceResource getParentWlSurfaceResource() {
-        return this.parentWlSurfaceResource;
+        this.position = position;
     }
 
     @Nonnull
@@ -90,9 +75,11 @@ public class Subsurface implements Role {
         final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
         final WlSurface wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
 
+        final Surface parentSurface = parentWlSurface.getSurface();
+        final Point global = parentSurface.global(getPosition());
+
         wlSurface.getSurface()
-                 .setPosition(parentWlSurface.getSurface()
-                                             .global(getPosition()));
+                 .setPosition(global);
     }
 
     @Override
@@ -108,10 +95,6 @@ public class Subsurface implements Role {
             //set back cached state so surface can do eg. buffer release
             surface.setState(this.cachedSurfaceState);
         }
-    }
-
-    public boolean isEffectiveSync() {
-        return this.effectiveSync;
     }
 
     public void apply(final SurfaceState surfaceState) {
@@ -168,6 +151,10 @@ public class Subsurface implements Role {
                        });
     }
 
+    public boolean isEffectiveSync() {
+        return this.effectiveSync;
+    }
+
     public void updateEffectiveSync(final boolean parentEffectiveSync) {
         final boolean oldEffectiveSync = this.effectiveSync;
         this.effectiveSync = this.sync || parentEffectiveSync;
@@ -188,21 +175,21 @@ public class Subsurface implements Role {
         }
     }
 
-    @Nonnull
-    public WlSurfaceResource getWlSurfaceResource() {
-        return this.wlSurfaceResource;
-    }
-
-    public Signal<Boolean, Slot<Boolean>> getEffectiveSyncSignal() {
-        return this.effectiveSyncSignal;
-    }
-
     public void above(@Nonnull final WlSurfaceResource sibling) {
         if (isInert()) {
             return;
         }
 
         placement(false,
+                  sibling);
+    }
+
+    public void below(@Nonnull final WlSurfaceResource sibling) {
+        if (isInert()) {
+            return;
+        }
+
+        placement(true,
                   sibling);
     }
 
@@ -225,12 +212,25 @@ public class Subsurface implements Role {
         //Note: committing the subsurface stack happens in WlCompositor.
     }
 
-    public void below(@Nonnull final WlSurfaceResource sibling) {
-        if (isInert()) {
-            return;
-        }
+    @Nonnull
+    public WlSurfaceResource getWlSurfaceResource() {
+        return this.wlSurfaceResource;
+    }
 
-        placement(true,
-                  sibling);
+    @Nonnull
+    public WlSurfaceResource getParentWlSurfaceResource() {
+        return this.parentWlSurfaceResource;
+    }
+
+    public boolean isInert() {
+        return this.inert;
+    }
+
+    public void setInert(final boolean inert) {
+        this.inert = inert;
+    }
+
+    public Signal<Boolean, Slot<Boolean>> getEffectiveSyncSignal() {
+        return this.effectiveSyncSignal;
     }
 }

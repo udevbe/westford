@@ -19,6 +19,7 @@ import org.freedesktop.wayland.server.WlSubsurfaceRequests;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlSubsurfaceError;
+import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.Subsurface;
 
 import javax.annotation.Nonnegative;
@@ -27,8 +28,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlSubsurfaceFactory",
-             allowSubclasses = true)
+@AutoFactory(className = "WlSubsurfaceFactory")
 public class WlSubsurface implements WlSubsurfaceRequests,
                                      ProtocolObject<WlSubsurfaceResource> {
 
@@ -67,13 +67,8 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     public void setPosition(final WlSubsurfaceResource wlSubsurfaceResource,
                             final int x,
                             final int y) {
-        getSubsurface().setPosition(x,
-                                    y);
-    }
-
-    @Nonnull
-    public Subsurface getSubsurface() {
-        return this.subsurface;
+        getSubsurface().setPosition(Point.create(x,
+                                                 y));
     }
 
     @Override
@@ -129,5 +124,10 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     @Override
     public void setDesync(final WlSubsurfaceResource requester) {
         getSubsurface().setSync(false);
+    }
+
+    @Nonnull
+    public Subsurface getSubsurface() {
+        return this.subsurface;
     }
 }

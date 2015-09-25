@@ -147,5 +147,14 @@ public class SubsurfaceFactoryTest {
 
         // and the surface is removed from the pending subsurface stack
         verify(pendingSubsurfacesStack).remove(wlSurfaceResource);
+
+        //and when: the parent is destroyed
+        final ArgumentCaptor<DestroyListener> parentDestroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
+        verify(parentWlSurfaceResource).register(parentDestroyListenerArgumentCaptor.capture());
+        final DestroyListener parentDestroyListener = parentDestroyListenerArgumentCaptor.getValue();
+        parentDestroyListener.handle();
+
+        //then: the subsurface must become inert
+        verify(subsurface).setInert(true);
     }
 }

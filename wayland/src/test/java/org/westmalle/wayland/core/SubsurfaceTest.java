@@ -13,36 +13,109 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.protocol.WlSurface;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SubsurfaceTest {
+
+    @Mock
+    private WlSurfaceResource parentWlSurfaceResource;
+    @Mock
+    private WlSurfaceResource wlSurfaceResource;
+    @Mock
+    private SurfaceState      surfaceState;
+
+    private Subsurface subsurface;
+
+    @Before
+    public void setUp() {
+        //mockito doesn't properly inject the member so we have to create our subsurface manually.
+        this.subsurface = new Subsurface(this.parentWlSurfaceResource,
+                                         this.wlSurfaceResource,
+                                         this.surfaceState);
+    }
 
     @Test
     public void testSetPosition() throws Exception {
-        //TODO
 
-        //given: a subsurface
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        final WlSurface parentWlSurface = mock(WlSurface.class);
+        final Surface   parentSurface   = mock(Surface.class);
+
+        when(this.parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+
+        final Point position = Point.create(123,
+                                            456);
         //when: a new position is set
+        this.subsurface.setPosition(position);
+
         //then: the position is stored but not applied.
+        assertThat(this.subsurface.getPosition()).isEqualTo(position);
+        verifyZeroInteractions(surface);
     }
 
     @Test
     public void testSetPositionInert() throws Exception {
-        //TODO
-
         //given: an inert subsurface
+
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        this.subsurface.setInert(true);
+        final Point position = Point.create(123,
+                                            456);
+
         //when: a new position is set
+        this.subsurface.setPosition(position);
+
         //then: nothing happens
+        assertThat(this.subsurface.getPosition()).isNotEqualTo(position);
     }
 
     @Test
     public void testApplyPosition() throws Exception {
-        //TODO
-
         //given: a subsurface, a parent surface
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        final WlSurface parentWlSurface = mock(WlSurface.class);
+        final Surface   parentSurface   = mock(Surface.class);
+
+        when(this.parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+
+        final Point globalSubsurfacePosition = mock(Point.class);
+        when(parentSurface.global(this.subsurface.getPosition())).thenReturn(globalSubsurfacePosition);
+
         //when: the subsurface position is applied
+        this.subsurface.applyPosition();
+
         //then: the subsurface position is applied based on the parent surface space.
+        verify(surface).setPosition(globalSubsurfacePosition);
     }
 
     @Test

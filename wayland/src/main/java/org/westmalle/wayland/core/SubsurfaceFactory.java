@@ -81,6 +81,10 @@ public class SubsurfaceFactory {
              * from that stack (which is done in the subsurface destroy listener).
              */
             wlSurfaceResource.unregister(destroyListener);
+            /*
+             * Docs says a subsurface with a destroyed parent must become inert.
+             */
+            subsurface.setInert(true);
         });
 
         return subsurface;
