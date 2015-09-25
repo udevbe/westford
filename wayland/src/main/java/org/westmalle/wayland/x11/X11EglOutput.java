@@ -13,6 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import com.sun.jna.Pointer;
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -31,6 +33,8 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BAD_SURFACE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_LOST;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NOT_INITIALIZED;
 
+@AutoFactory(className = "PrivateX11EglOutputFactory",
+             allowSubclasses = true)
 public class X11EglOutput implements EglOutput {
 
     @Nonnull
@@ -44,7 +48,7 @@ public class X11EglOutput implements EglOutput {
 
     private boolean eglMakeCurrentSuccess;
 
-    X11EglOutput(@Nonnull final LibEGL libEGL,
+    X11EglOutput(@Provided @Nonnull final LibEGL libEGL,
                  @Nonnull final Pointer eglDisplay,
                  @Nonnull final Pointer eglSurface,
                  @Nonnull final Pointer eglContext) {

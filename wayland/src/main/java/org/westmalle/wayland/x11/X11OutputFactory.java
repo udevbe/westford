@@ -64,23 +64,23 @@ public class X11OutputFactory {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
-    private final Display             display;
+    private final Display                 display;
     @Nonnull
-    private final Libc                libc;
+    private final Libc                    libc;
     @Nonnull
-    private final LibX11              libX11;
+    private final LibX11                  libX11;
     @Nonnull
-    private final Libxcb              libxcb;
+    private final Libxcb                  libxcb;
     @Nonnull
-    private final LibX11xcb           libX11xcb;
+    private final LibX11xcb               libX11xcb;
     @Nonnull
-    private final X11EglOutputFactory x11EglOutputFactory;
+    private final PrivateX11OutputFactory privateX11OutputFactory;
     @Nonnull
-    private final WlOutputFactory     wlOutputFactory;
+    private final WlOutputFactory         wlOutputFactory;
     @Nonnull
-    private final OutputFactory       outputFactory;
+    private final OutputFactory           outputFactory;
     @Nonnull
-    private final X11EventBusFactory  x11EventBusFactory;
+    private final X11EventBusFactory      x11EventBusFactory;
 
     @Inject
     X11OutputFactory(@Nonnull final Display display,
@@ -88,7 +88,7 @@ public class X11OutputFactory {
                      @Nonnull final LibX11 libX11,
                      @Nonnull final Libxcb libxcb,
                      @Nonnull final LibX11xcb libX11xcb,
-                     @Nonnull final X11EglOutputFactory x11EglOutputFactory,
+                     @Nonnull final PrivateX11OutputFactory privateX11OutputFactory,
                      @Nonnull final WlOutputFactory wlOutputFactory,
                      @Nonnull final OutputFactory outputFactory,
                      @Nonnull final X11EventBusFactory x11EventBusFactory) {
@@ -97,7 +97,7 @@ public class X11OutputFactory {
         this.libX11 = libX11;
         this.libxcb = libxcb;
         this.libX11xcb = libX11xcb;
-        this.x11EglOutputFactory = x11EglOutputFactory;
+        this.privateX11OutputFactory = privateX11OutputFactory;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.x11EventBusFactory = x11EventBusFactory;
@@ -232,12 +232,11 @@ public class X11OutputFactory {
                        }
                    });
 
-        return new X11Output(this.x11EglOutputFactory,
-                             x11EventBus,
-                             connection,
-                             xDisplay,
-                             window,
-                             x11Atoms);
+        return this.privateX11OutputFactory.create(x11EventBus,
+                                                   connection,
+                                                   xDisplay,
+                                                   window,
+                                                   x11Atoms);
     }
 
     private Output createOutput(final X11Output x11Output,

@@ -31,7 +31,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlCompositorFactory")
+@AutoFactory(className = "WlCompositorFactory",
+             allowSubclasses = true)
 public class WlCompositor extends Global<WlCompositorResource> implements WlCompositorRequestsV3, ProtocolObject<WlCompositorResource> {
 
     private final Set<WlCompositorResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

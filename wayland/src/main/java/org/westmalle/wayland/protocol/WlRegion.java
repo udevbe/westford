@@ -26,7 +26,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlRegionFactory")
+@AutoFactory(className = "WlRegionFactory",
+             allowSubclasses = true)
 public class WlRegion implements WlRegionRequests, ProtocolObject<WlRegionResource> {
 
     private final Set<WlRegionResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

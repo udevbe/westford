@@ -32,7 +32,6 @@ import org.westmalle.wayland.core.SeatFactory;
 import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
@@ -63,7 +62,7 @@ import static org.mockito.Mockito.when;
 public class X11SeatFactoryTest {
 
     @Mock
-    private Libxcb                       libxcb;
+    private PrivateX11SeatFactory        privateX11SeatFactory;
     @Mock
     private X11XkbFactory                x11XkbFactory;
     @Mock

@@ -21,7 +21,8 @@ import org.westmalle.wayland.protocol.WlSurface;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-@AutoFactory(className = "CursorFactory")
+@AutoFactory(className = "CursorFactory",
+             allowSubclasses = true)
 public class Cursor {
 
     @Nonnull

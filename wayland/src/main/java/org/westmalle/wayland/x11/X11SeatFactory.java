@@ -19,11 +19,8 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
 import org.westmalle.wayland.core.SeatFactory;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
@@ -34,9 +31,6 @@ import javax.inject.Inject;
 import java.util.EnumSet;
 
 public class X11SeatFactory {
-
-    @Nonnull
-    private final Libxcb libxcb;
 
     @Nonnull
     private final X11XkbFactory                x11XkbFactory;
@@ -57,9 +51,11 @@ public class X11SeatFactory {
     private final PointerDeviceFactory  pointerDeviceFactory;
     @Nonnull
     private final KeyboardDeviceFactory keyboardDeviceFactory;
+    @Nonnull
+    private final PrivateX11SeatFactory privateX11SeatFactory;
 
     @Inject
-    X11SeatFactory(@Nonnull final Libxcb libxcb,
+    X11SeatFactory(@Nonnull final PrivateX11SeatFactory privateX11SeatFactory,
                    @Nonnull final X11XkbFactory x11XkbFactory,
                    @Nonnull final X11InputEventListenerFactory x11InputEventListenerFactory,
                    @Nonnull final WlSeatFactory wlSeatFactory,
@@ -69,7 +65,7 @@ public class X11SeatFactory {
                    @Nonnull final WlTouchFactory wlTouchFactory,
                    @Nonnull final PointerDeviceFactory pointerDeviceFactory,
                    @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory) {
-        this.libxcb = libxcb;
+        this.privateX11SeatFactory = privateX11SeatFactory;
         this.x11XkbFactory = x11XkbFactory;
         this.x11InputEventListenerFactory = x11InputEventListenerFactory;
         this.wlSeatFactory = wlSeatFactory;
@@ -87,17 +83,14 @@ public class X11SeatFactory {
         final X11Output x11Output = (X11Output) wlOutput.getOutput()
                                                         .getPlatformImplementation();
 
-        final X11Seat x11Seat = new X11Seat(this.libxcb,
-                                            x11Output);
+        final X11Seat x11Seat = this.privateX11SeatFactory.create(x11Output);
 
-        final WlPointer wlPointer = this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor));
         final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(compositor,
                                                                                 this.x11XkbFactory.create(x11Output.getXcbConnection()));
         keyboardDevice.updateKeymap();
-        final WlKeyboard wlKeyboard = this.wlKeyboardFactory.create(keyboardDevice);
         final WlSeat wlSeat = this.wlSeatFactory.create(this.seatFactory.create(x11Seat),
-                                                        wlPointer,
-                                                        wlKeyboard,
+                                                        this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)),
+                                                        this.wlKeyboardFactory.create(keyboardDevice),
                                                         this.wlTouchFactory.create());
         x11Output.getX11EventBus()
                  .getXEventSignal()

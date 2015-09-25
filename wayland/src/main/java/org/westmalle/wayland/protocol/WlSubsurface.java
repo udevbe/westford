@@ -27,7 +27,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlSubsurfaceFactory")
+@AutoFactory(className = "WlSubsurfaceFactory",
+             allowSubclasses = true)
 public class WlSubsurface implements WlSubsurfaceRequests,
                                      ProtocolObject<WlSubsurfaceResource> {
 
@@ -68,6 +69,11 @@ public class WlSubsurface implements WlSubsurfaceRequests,
                             final int y) {
         getSubsurface().setPosition(x,
                                     y);
+    }
+
+    @Nonnull
+    public Subsurface getSubsurface() {
+        return this.subsurface;
     }
 
     @Override
@@ -123,10 +129,5 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     @Override
     public void setDesync(final WlSubsurfaceResource requester) {
         getSubsurface().setSync(false);
-    }
-
-    @Nonnull
-    public Subsurface getSubsurface() {
-        return this.subsurface;
     }
 }

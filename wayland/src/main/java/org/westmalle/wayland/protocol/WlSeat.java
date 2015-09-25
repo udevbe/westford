@@ -35,7 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlSeatFactory")
+@AutoFactory(className = "WlSeatFactory",
+             allowSubclasses = true)
 public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, ProtocolObject<WlSeatResource> {
 
     private final Set<WlSeatResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

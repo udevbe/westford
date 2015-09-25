@@ -48,7 +48,8 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_RELEASE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_LEAVE_NOTIFY;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
 
-@AutoFactory(className = "X11InputEventListenerFactory")
+@AutoFactory(className = "X11InputEventListenerFactory",
+             allowSubclasses = true)
 public class X11InputEventListener implements Slot<xcb_generic_event_t> {
 
     @Nonnull
@@ -134,12 +135,12 @@ public class X11InputEventListener implements Slot<xcb_generic_event_t> {
         }
     }
 
-    private void handle(final xcb_key_press_event_t event) {
+    private void handle(final xcb_motion_notify_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
-        x11Seat.deliverKey(this.wlSeat,
-                           event.detail,
-                           true);
+        x11Seat.deliverMotion(this.wlSeat,
+                              event.event_x,
+                              event.event_y);
     }
 
     private void handle(final xcb_button_press_event_t event) {
@@ -151,14 +152,6 @@ public class X11InputEventListener implements Slot<xcb_generic_event_t> {
                               true);
     }
 
-    private void handle(final xcb_key_release_event_t event) {
-        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                     .getPlatformImplementation();
-        x11Seat.deliverKey(this.wlSeat,
-                           event.detail,
-                           false);
-    }
-
     private void handle(final xcb_button_release_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
@@ -168,12 +161,20 @@ public class X11InputEventListener implements Slot<xcb_generic_event_t> {
                               false);
     }
 
-    private void handle(final xcb_motion_notify_event_t event) {
+    private void handle(final xcb_key_press_event_t event) {
         final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
                                                      .getPlatformImplementation();
-        x11Seat.deliverMotion(this.wlSeat,
-                              event.event_x,
-                              event.event_y);
+        x11Seat.deliverKey(this.wlSeat,
+                           event.detail,
+                           true);
+    }
+
+    private void handle(final xcb_key_release_event_t event) {
+        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
+                                                     .getPlatformImplementation();
+        x11Seat.deliverKey(this.wlSeat,
+                           event.detail,
+                           false);
     }
 
     private void handle(final xcb_keymap_notify_event_t event) {

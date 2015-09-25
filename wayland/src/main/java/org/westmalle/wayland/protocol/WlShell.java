@@ -34,7 +34,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlShellFactory")
+@AutoFactory(className = "WlShellFactory",
+             allowSubclasses = true)
 public class WlShell extends Global<WlShellResource> implements WlShellRequests, ProtocolObject<WlShellResource> {
 
     private final Set<WlShellResource> resources = Collections.newSetFromMap(new WeakHashMap<>());

@@ -56,7 +56,8 @@ import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MO
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LATCHED;
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LOCKED;
 
-@AutoFactory(className = "KeyboardDeviceFactory")
+@AutoFactory(className = "KeyboardDeviceFactory",
+             allowSubclasses = true)
 public class KeyboardDevice {
 
     @Nonnull
@@ -140,16 +141,6 @@ public class KeyboardDevice {
     }
 
     @Nonnull
-    public Signal<Key, Slot<Key>> getKeySignal() {
-        return this.keySignal;
-    }
-
-    @Nonnull
-    public Signal<KeyboardFocus, Slot<KeyboardFocus>> getKeyboardFocusSignal() {
-        return this.keyboardFocusSignal;
-    }
-
-    @Nonnull
     public Xkb getXkb() {
         return this.xkb;
     }
@@ -157,6 +148,11 @@ public class KeyboardDevice {
     @Nonnull
     public Set<Integer> getPressedKeys() {
         return this.pressedKeys;
+    }
+
+    @Nonnull
+    public Signal<Key, Slot<Key>> getKeySignal() {
+        return this.keySignal;
     }
 
     private void doKey(final Set<WlKeyboardResource> wlKeyboardResources,
@@ -219,6 +215,11 @@ public class KeyboardDevice {
     public void setXkb(@Nonnull final Xkb xkb) {
         //we're not updating the state when updating xkb as that would potentially introduce to much bugs
         this.xkb = xkb;
+    }
+
+    @Nonnull
+    public Signal<KeyboardFocus, Slot<KeyboardFocus>> getKeyboardFocusSignal() {
+        return this.keyboardFocusSignal;
     }
 
     public int getKeyboardSerial() {

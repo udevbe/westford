@@ -110,7 +110,7 @@ class Boot {
         //TODO implement xdg_shell protocol
 
         //start the thingamabah
-        application.shellService()
+        application.lifeCycle()
                    .start();
     }
 }

@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@AutoFactory(className = "FiniteRegionFactory")
+@AutoFactory(className = "FiniteRegionFactory",
+             allowSubclasses = true)
 public class FiniteRegion implements Region {
 
     private final Libpixman1 libpixman1;

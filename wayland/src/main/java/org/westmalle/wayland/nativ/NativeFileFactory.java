@@ -16,7 +16,6 @@ package org.westmalle.wayland.nativ;
 
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 import org.westmalle.wayland.nativ.libc.Libc;
 
 import javax.annotation.Nonnegative;
@@ -56,10 +55,10 @@ public class NativeFileFactory {
             throw new IllegalStateException("Cannot create temporary file: XDG_RUNTIME_DIR not set");
         }
 
-        final String name = path + TEMPLATE;
-        final NativeString m = new NativeString(name);
+        final String       name        = path + TEMPLATE;
+        final NativeString m           = new NativeString(name);
         final Memory       namePointer = m.getPointer();
-        final int fd = this.libc.mkstemp(namePointer);
+        final int          fd          = this.libc.mkstemp(namePointer);
 
         try {
             int flags = this.libc.fcntl(fd,

@@ -13,10 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
-import org.westmalle.wayland.core.KeyboardDevice;
-import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -35,6 +35,8 @@ import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 
+@AutoFactory(className = "PrivateX11SeatFactory",
+             allowSubclasses = true)
 public class X11Seat {
 
     @Nonnull
@@ -42,7 +44,7 @@ public class X11Seat {
     @Nonnull
     private final X11Output x11Output;
 
-    X11Seat(@Nonnull final Libxcb libxcb,
+    X11Seat(@Provided @Nonnull final Libxcb libxcb,
             @Nonnull final X11Output x11Output) {
         this.libxcb = libxcb;
         this.x11Output = x11Output;
