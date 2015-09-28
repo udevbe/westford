@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
@@ -24,14 +22,15 @@ import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-@AutoFactory(className = "CompositorFactory",
-             allowSubclasses = true)
+@Singleton
 public class Compositor {
     @Nonnull
     private final Display      display;
@@ -50,8 +49,9 @@ public class Compositor {
     @Nonnull
     private Optional<EventSource> renderEvent = Optional.empty();
 
-    Compositor(@Nonnull @Provided final Display display,
-               @Nonnull @Provided final RenderEngine renderEngine) {
+    @Inject
+    Compositor(@Nonnull final Display display,
+               @Nonnull final RenderEngine renderEngine) {
         this.display = display;
         this.renderEngine = renderEngine;
         this.idleHandler = this::handleIdle;

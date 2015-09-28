@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
@@ -29,14 +27,16 @@ import org.westmalle.wayland.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlShellFactory",
-             allowSubclasses = true)
-public class WlShell extends Global<WlShellResource> implements WlShellRequests, ProtocolObject<WlShellResource> {
+@Singleton
+public class WlShell extends Global<WlShellResource> implements WlShellRequests,
+                                                                ProtocolObject<WlShellResource> {
 
     private final Set<WlShellResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -47,9 +47,10 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
     private final Set<ShellSurface> activeShellSurfaceRoles = new HashSet<>();
 
-    WlShell(@Provided final Display display,
-            @Provided final WlShellSurfaceFactory wlShellSurfaceFactory,
-            @Provided final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory,
+    @Inject
+    WlShell(@Nonnull final Display display,
+            @Nonnull final WlShellSurfaceFactory wlShellSurfaceFactory,
+            @Nonnull final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory,
             @Nonnull final WlCompositor wlCompositor) {
         super(display,
               WlShellResource.class,

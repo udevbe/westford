@@ -100,7 +100,7 @@ public class PointerDevice implements Role {
                   @Provided @Nonnull final NullRegion nullRegion,
                   @Provided @Nonnull final CursorFactory cursorFactory,
                   @Provided @Nonnull final JobExecutor jobExecutor,
-                  @Nonnull final Compositor compositor) {
+                  @Provided @Nonnull final Compositor compositor) {
         this.display = display;
         this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;

@@ -95,7 +95,7 @@ public class KeyboardDevice {
                    @Provided @Nonnull final NativeFileFactory nativeFileFactory,
                    @Provided @Nonnull final Libc libc,
                    @Provided @Nonnull final Libxkbcommon libxkbcommon,
-                   @Nonnull final Compositor compositor,
+                   @Provided @Nonnull final Compositor compositor,
                    @Nonnull final Xkb xkb) {
         this.display = display;
         this.nativeFileFactory = nativeFileFactory;

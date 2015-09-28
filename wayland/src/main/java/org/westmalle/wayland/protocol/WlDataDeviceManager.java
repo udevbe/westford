@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
@@ -24,20 +22,22 @@ import org.freedesktop.wayland.server.WlSeatResource;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlDataDeviceManagerFactory",
-             allowSubclasses = true)
+@Singleton
 public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequestsV2, ProtocolObject<WlDataDeviceManagerResource> {
 
     private final Set<WlDataDeviceManagerResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
     private final WlDataSourceFactory wlDataSourceFactory;
 
-    WlDataDeviceManager(@Provided final Display display,
-                        @Provided final WlDataSourceFactory wlDataSourceFactory) {
+    @Inject
+    WlDataDeviceManager(final Display display,
+                        final WlDataSourceFactory wlDataSourceFactory) {
         super(display,
               WlDataDeviceManagerResource.class,
               VERSION);

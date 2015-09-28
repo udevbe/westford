@@ -21,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.Output;
@@ -98,7 +97,6 @@ public class X11SeatFactoryTest {
         final Pointer                                                xcbConnection         = mock(Pointer.class);
         final X11EventBus                                            x11EventBus           = mock(X11EventBus.class);
         final Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> xEventSignal          = mock(Signal.class);
-        final Compositor                                             compositor            = mock(Compositor.class);
         final Xkb                                                    xkb                   = mock(Xkb.class);
         final PointerDevice                                          pointerDevice         = mock(PointerDevice.class);
         final WlPointer                                              wlPointer             = mock(WlPointer.class);
@@ -127,15 +125,13 @@ public class X11SeatFactoryTest {
                                        wlTouch)).thenReturn(wlSeat);
         when(this.x11InputEventListenerFactory.create(wlSeat)).thenReturn(x11InputEventListener);
         when(this.x11XkbFactory.create(xcbConnection)).thenReturn(xkb);
-        when(this.pointerDeviceFactory.create(compositor)).thenReturn(pointerDevice);
+        when(this.pointerDeviceFactory.create()).thenReturn(pointerDevice);
         when(this.wlPointerFactory.create(pointerDevice)).thenReturn(wlPointer);
-        when(this.keyboardDeviceFactory.create(compositor,
-                                               xkb)).thenReturn(keyboardDevice);
+        when(this.keyboardDeviceFactory.create(xkb)).thenReturn(keyboardDevice);
         when(this.wlKeyboardFactory.create(keyboardDevice)).thenReturn(wlKeyboard);
 
         //when
-        this.x11SeatFactory.create(wlOutput,
-                                   compositor);
+        this.x11SeatFactory.create(wlOutput);
         //then
         verify(seat).setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
                                                 WlSeatCapability.POINTER));

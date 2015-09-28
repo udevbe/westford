@@ -14,7 +14,6 @@
 package org.westmalle.wayland.x11;
 
 import org.freedesktop.wayland.shared.WlSeatCapability;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.PointerDeviceFactory;
@@ -77,19 +76,17 @@ public class X11SeatFactory {
         this.keyboardDeviceFactory = keyboardDeviceFactory;
     }
 
-    public WlSeat create(@Nonnull final WlOutput wlOutput,
-                         @Nonnull final Compositor compositor) {
+    public WlSeat create(@Nonnull final WlOutput wlOutput) {
 
         final X11Output x11Output = (X11Output) wlOutput.getOutput()
                                                         .getPlatformImplementation();
 
         final X11Seat x11Seat = this.privateX11SeatFactory.create(x11Output);
 
-        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(compositor,
-                                                                                this.x11XkbFactory.create(x11Output.getXcbConnection()));
+        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(this.x11XkbFactory.create(x11Output.getXcbConnection()));
         keyboardDevice.updateKeymap();
         final WlSeat wlSeat = this.wlSeatFactory.create(this.seatFactory.create(x11Seat),
-                                                        this.wlPointerFactory.create(this.pointerDeviceFactory.create(compositor)),
+                                                        this.wlPointerFactory.create(this.pointerDeviceFactory.create()),
                                                         this.wlKeyboardFactory.create(keyboardDevice),
                                                         this.wlTouchFactory.create());
         x11Output.getX11EventBus()

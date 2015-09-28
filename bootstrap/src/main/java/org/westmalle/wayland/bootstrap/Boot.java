@@ -13,16 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.CompositorFactory;
 import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.protocol.WlCompositor;
-import org.westmalle.wayland.protocol.WlCompositorFactory;
-import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSeat;
-import org.westmalle.wayland.protocol.WlShellFactory;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
@@ -51,12 +45,6 @@ class Boot {
     }
 
     private void strap(final X11EglCompositor x11EglCompositor) {
-        //get all required factory instances
-        final CompositorFactory          compositorFactory          = x11EglCompositor.compositorFactory();
-        final WlCompositorFactory        wlCompositorFactory        = x11EglCompositor.wlCompositorFactory();
-        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = x11EglCompositor.wlDataDeviceManagerFactory();
-        final WlShellFactory             wlShellFactory             = x11EglCompositor.wlShellFactory();
-
         //setup X11 input/output back-end.
         final X11OutputFactory outputFactory = x11EglCompositor.x11()
                                                                .outputFactory();
@@ -68,26 +56,20 @@ class Boot {
                                                        800,
                                                        600);
 
-        //setup compositing for output support
-        //create a compositor with shell and scene logic
-        final Compositor compositor = compositorFactory.create();
-
         //add our output to the compositor
-        //TODO add output hotplug functionality (eg monitor hotplug)
-        compositor.getWlOutputs()
-                  .add(wlOutput);
-
-        //create a wayland compositor that delegates it's requests to a compositor implementation.
-        final WlCompositor wlCompositor = wlCompositorFactory.create(compositor);
+        //TODO automatically add the output in X11OutputFactory
+        x11EglCompositor.wlCompositor()
+                        .getCompositor()
+                        .getWlOutputs()
+                        .add(wlOutput);
 
         //create data device manager for drag and drop support
-        wlDataDeviceManagerFactory.create();
+        x11EglCompositor.wlDataDeviceManager();
 
         //setup seat for input support
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
-        //TODO add seat hotplug functionality (eg multiple mouses)
-        final WlSeat wlSeat = seatFactory.create(wlOutput,
-                                                 compositor);
+        final WlSeat wlSeat = seatFactory.create(wlOutput);
+
         //setup keyboard focus tracking to follow mouse pointer
         final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
         final PointerDevice pointerDevice = wlSeat.getWlPointer()
@@ -98,7 +80,7 @@ class Boot {
                                                            pointerDevice.getFocus()));
 
         //enable wl_shell protocol for minimal desktop-like features (move, resize, cursor changes ...)
-        wlShellFactory.create(wlCompositor);
+        x11EglCompositor.wlShell();
 
         //enable xdg_shell protocol for full desktop-like features
         //TODO implement xdg_shell protocol

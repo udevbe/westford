@@ -13,22 +13,21 @@
 //limitations under the License.
 package org.westmalle.wayland;
 
-import org.westmalle.wayland.core.CompositorFactory;
 import org.westmalle.wayland.core.LifeCycle;
-import org.westmalle.wayland.protocol.WlCompositorFactory;
-import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
-import org.westmalle.wayland.protocol.WlShellFactory;
+import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlDataDeviceManager;
+import org.westmalle.wayland.protocol.WlShell;
 
 public interface CoreCompositor {
-    //generic compositor output
-    CompositorFactory compositorFactory();
-
     //core protocol
-    WlCompositorFactory wlCompositorFactory();
+    //TODO remove wlCompositor as it is no longer needed to bootstrap
+    WlCompositor wlCompositor();
 
-    WlDataDeviceManagerFactory wlDataDeviceManagerFactory();
+    //TODO remove wlDataDeviceManager as it is no longer needed to bootstrap
+    WlDataDeviceManager wlDataDeviceManager();
 
-    WlShellFactory wlShellFactory();
+    //TODO remove wlShell as it is no longer needed to bootstrap
+    WlShell wlShell();
 
     //running
     LifeCycle lifeCycle();

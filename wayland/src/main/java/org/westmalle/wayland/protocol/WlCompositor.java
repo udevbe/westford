@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
@@ -27,12 +25,12 @@ import org.westmalle.wayland.core.Surface;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlCompositorFactory",
-             allowSubclasses = true)
+@Singleton
 public class WlCompositor extends Global<WlCompositorResource> implements WlCompositorRequestsV3, ProtocolObject<WlCompositorResource> {
 
     private final Set<WlCompositorResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
@@ -44,12 +42,12 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     private final Compositor                                     compositor;
 
     @Inject
-    WlCompositor(@Provided final Display display,
-                 @Provided final WlSurfaceFactory wlSurfaceFactory,
-                 @Provided final WlRegionFactory wlRegionFactory,
-                 @Provided final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory,
-                 @Provided final org.westmalle.wayland.core.SurfaceFactory surfaceFactory,
-                 final Compositor compositor) {
+    WlCompositor(@Nonnull final Display display,
+                 @Nonnull final WlSurfaceFactory wlSurfaceFactory,
+                 @Nonnull final WlRegionFactory wlRegionFactory,
+                 @Nonnull final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory,
+                 @Nonnull final org.westmalle.wayland.core.SurfaceFactory surfaceFactory,
+                 @Nonnull final Compositor compositor) {
         super(display,
               WlCompositorResource.class,
               VERSION);
