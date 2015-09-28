@@ -51,7 +51,7 @@ public class Compositor {
     private Optional<EventSource> renderEvent = Optional.empty();
 
     Compositor(@Nonnull @Provided final Display display,
-               @Nonnull final RenderEngine renderEngine) {
+               @Nonnull @Provided final RenderEngine renderEngine) {
         this.display = display;
         this.renderEngine = renderEngine;
         this.idleHandler = this::handleIdle;

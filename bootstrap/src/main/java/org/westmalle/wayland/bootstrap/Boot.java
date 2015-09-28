@@ -13,13 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import org.westmalle.wayland.Application;
-import org.westmalle.wayland.DaggerApplication;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.CompositorFactory;
 import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.core.RenderEngine;
-import org.westmalle.wayland.egl.EglRenderEngineFactory;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
 import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
@@ -48,35 +44,33 @@ class Boot {
                                   + "\tArguments: %s",
                                   args.length == 0 ? "<none>" : Arrays.toString(args)));
 
-        new Boot().strap(DaggerApplication.create());
+        final X11EglCompositor compositor = DaggerX11EglCompositor.create();
+        final Boot             boot       = new Boot();
+
+        boot.strap(compositor);
     }
 
-    private void strap(final Application application) {
+    private void strap(final X11EglCompositor x11EglCompositor) {
         //get all required factory instances
-        final CompositorFactory          compositorFactory          = application.compositorFactory();
-        final WlCompositorFactory        wlCompositorFactory        = application.wlCompositorFactory();
-        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = application.wlDataDeviceManagerFactory();
-        final WlShellFactory             wlShellFactory             = application.wlShellFactory();
+        final CompositorFactory          compositorFactory          = x11EglCompositor.compositorFactory();
+        final WlCompositorFactory        wlCompositorFactory        = x11EglCompositor.wlCompositorFactory();
+        final WlDataDeviceManagerFactory wlDataDeviceManagerFactory = x11EglCompositor.wlDataDeviceManagerFactory();
+        final WlShellFactory             wlShellFactory             = x11EglCompositor.wlShellFactory();
 
         //setup X11 input/output back-end.
-        final X11OutputFactory outputFactory = application.x11()
-                                                          .outputFactory();
-        final X11SeatFactory seatFactory = application.x11()
-                                                      .seatFactory();
-        //setup egl render engine
-        final EglRenderEngineFactory renderEngineFactory = application.egl()
-                                                                      .renderEngineFactory();
+        final X11OutputFactory outputFactory = x11EglCompositor.x11()
+                                                               .outputFactory();
+        final X11SeatFactory seatFactory = x11EglCompositor.x11()
+                                                           .seatFactory();
         //create an output
         //create an X opengl enabled x11 window
         final WlOutput wlOutput = outputFactory.create(System.getenv("DISPLAY"),
                                                        800,
                                                        600);
-        //setup our render engine
-        final RenderEngine renderEngine = renderEngineFactory.create();
 
         //setup compositing for output support
         //create a compositor with shell and scene logic
-        final Compositor compositor = compositorFactory.create(renderEngine);
+        final Compositor compositor = compositorFactory.create();
 
         //add our output to the compositor
         //TODO add output hotplug functionality (eg monitor hotplug)
@@ -110,7 +104,7 @@ class Boot {
         //TODO implement xdg_shell protocol
 
         //start the thingamabah
-        application.lifeCycle()
-                   .start();
+        x11EglCompositor.lifeCycle()
+                        .start();
     }
 }

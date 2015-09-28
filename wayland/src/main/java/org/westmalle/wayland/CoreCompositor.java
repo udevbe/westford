@@ -13,21 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland;
 
-import dagger.Component;
 import org.westmalle.wayland.core.CompositorFactory;
-import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
-import org.westmalle.wayland.egl.EglComponent;
 import org.westmalle.wayland.protocol.WlCompositorFactory;
 import org.westmalle.wayland.protocol.WlDataDeviceManagerFactory;
 import org.westmalle.wayland.protocol.WlShellFactory;
-import org.westmalle.wayland.x11.X11Component;
 
-import javax.inject.Singleton;
-
-@Singleton
-@Component(modules = CoreModule.class)
-public interface Application {
+public interface CoreCompositor {
     //generic compositor output
     CompositorFactory compositorFactory();
 
@@ -40,9 +32,4 @@ public interface Application {
 
     //running
     LifeCycle lifeCycle();
-
-    //render implementations
-    X11Component x11();
-
-    EglComponent egl();
 }

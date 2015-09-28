@@ -11,13 +11,17 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.x11;
+package org.westmalle.wayland.egl;
 
-import dagger.Subcomponent;
+import dagger.Module;
+import dagger.Provides;
+import org.westmalle.wayland.core.RenderEngine;
 
-@Subcomponent
-public interface X11Component {
-    X11OutputFactory outputFactory();
+@Module
+public class EglModule {
 
-    X11SeatFactory seatFactory();
+    @Provides
+    public RenderEngine createRenderEngine(final EglGles2RenderEngine eglGles2RenderEngine) {
+        return eglGles2RenderEngine;
+    }
 }

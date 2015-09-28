@@ -1,7 +1,5 @@
 package org.westmalle.wayland.egl;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
@@ -19,6 +17,8 @@ import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -36,8 +36,7 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_INT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
-@AutoFactory(className = "EglRenderEngineFactory",
-             allowSubclasses = true)
+@Singleton
 public class EglGles2RenderEngine implements RenderEngine {
 
     @Nonnull
@@ -85,7 +84,8 @@ public class EglGles2RenderEngine implements RenderEngine {
     private Memory vertexBuffer;
     private Mat4   projection;
 
-    EglGles2RenderEngine(@Provided @Nonnull final LibGLESv2 libGLESv2) {
+    @Inject
+    EglGles2RenderEngine(@Nonnull final LibGLESv2 libGLESv2) {
         this.libGLESv2 = libGLESv2;
     }
 
