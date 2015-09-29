@@ -28,9 +28,13 @@ public class LifeCycle {
     private final Display             display;
     @Nonnull
     private final JobExecutor         jobExecutor;
+    @Nonnull
     private final WlCompositor        wlCompositor;
+    @Nonnull
     private final WlDataDeviceManager wlDataDeviceManager;
+    @Nonnull
     private final WlShell             wlShell;
+    @Nonnull
     private final WlSubcompositor     wlSubcompositor;
 
     @Inject
@@ -61,7 +65,7 @@ public class LifeCycle {
         this.wlShell.destroy();
         this.wlSubcompositor.destroy();
 
-        this.display.terminate();
         this.jobExecutor.fireFinishedEvent();
+        this.display.terminate();
     }
 }
