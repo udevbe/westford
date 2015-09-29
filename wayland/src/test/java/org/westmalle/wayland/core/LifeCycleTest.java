@@ -20,6 +20,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlDataDeviceManager;
+import org.westmalle.wayland.protocol.WlShell;
+import org.westmalle.wayland.protocol.WlSubcompositor;
 
 import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.verify;
@@ -29,9 +33,18 @@ import static org.mockito.Mockito.when;
 public class LifeCycleTest {
 
     @Mock
-    private Display      display;
+    private Display             display;
     @Mock
-    private JobExecutor  jobExecutor;
+    private JobExecutor         jobExecutor;
+    @Mock
+    private WlCompositor        wlCompositor;
+    @Mock
+    private WlDataDeviceManager wlDataDeviceManager;
+    @Mock
+    private WlShell             wlShell;
+    @Mock
+    private WlSubcompositor     wlSubcompositor;
+
     @InjectMocks
     private LifeCycle lifeCycle;
 
