@@ -226,20 +226,49 @@ public class SubsurfaceTest {
 
     @Test
     public void testCommitDesync() throws Exception {
-        //TODO
-
         //given: a subsurface in desync mode
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        final WlSurface  parentWlSurface  = mock(WlSurface.class);
+        final Surface    parentSurface    = mock(Surface.class);
+        final Subsurface parentSubsurface = mock(Subsurface.class);
+
+        when(this.parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+        when(parentSurface.getRole()).thenReturn(Optional.of(parentSubsurface));
+        when(parentSubsurface.isEffectiveSync()).thenReturn(false);
+
+        this.subsurface.setSync(false);
+
         //when: the commit hook is called
+        final SurfaceState newSurfaceState = mock(SurfaceState.class);
+        this.subsurface.apply(newSurfaceState);
+
         //then: the cached state is updated to the current surface state
+        assertThat(this.subsurface.getCachedSurfaceState()).isEqualTo(newSurfaceState);
     }
 
     @Test
     public void testCommitInert() throws Exception {
-        //TODO
-
         //given: an inert subsurface
+        final WlSurface wlSurface = mock(WlSurface.class);
+        final Surface   surface   = mock(Surface.class);
+
+        when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        this.subsurface.setInert(true);
+
         //when: the commit hook is called
+        final SurfaceState newSurfaceState = mock(SurfaceState.class);
+        this.subsurface.apply(newSurfaceState);
+
         //then: nothing happens
+        verifyZeroInteractions(surface);
     }
 
     @Test

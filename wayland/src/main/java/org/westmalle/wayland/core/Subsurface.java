@@ -76,7 +76,7 @@ public class Subsurface implements Role {
         final WlSurface wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
 
         final Surface parentSurface = parentWlSurface.getSurface();
-        final Point global = parentSurface.global(getPosition());
+        final Point   global        = parentSurface.global(getPosition());
 
         wlSurface.getSurface()
                  .setPosition(global);
@@ -93,7 +93,7 @@ public class Subsurface implements Role {
             final Surface surface = wlSurface.getSurface();
 
             //set back cached state so surface can do eg. buffer release
-            surface.setState(this.cachedSurfaceState);
+            surface.setState(getCachedSurfaceState());
         }
     }
 
@@ -109,11 +109,11 @@ public class Subsurface implements Role {
             final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
             //replace new state with old state
             wlSurface.getSurface()
-                     .apply(this.surfaceState);
+                     .apply(getSurfaceState());
         }
         else {
             //desync mode, our 'old' state is always the newest state.
-            this.surfaceState = this.cachedSurfaceState;
+            this.surfaceState = getCachedSurfaceState();
         }
     }
 
@@ -122,11 +122,12 @@ public class Subsurface implements Role {
             return;
         }
 
+        final SurfaceState cachedSurfaceState = getCachedSurfaceState();
         if (isEffectiveSync() &&
-            !this.surfaceState.equals(this.cachedSurfaceState)) {
+            !getSurfaceState().equals(cachedSurfaceState)) {
             //sync mode. update old state with cached state
-            this.surfaceState = this.cachedSurfaceState;
-            apply(this.cachedSurfaceState);
+            this.surfaceState = cachedSurfaceState;
+            apply(cachedSurfaceState);
         }
 
         applyPosition();
@@ -168,7 +169,7 @@ public class Subsurface implements Role {
             if (!isEffectiveSync()) {
                 final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
                 wlSurface.getSurface()
-                         .apply(this.cachedSurfaceState);
+                         .apply(getCachedSurfaceState());
             }
 
             getEffectiveSyncSignal().emit(isEffectiveSync());
@@ -210,6 +211,16 @@ public class Subsurface implements Role {
                                    getWlSurfaceResource());
 
         //Note: committing the subsurface stack happens in WlCompositor.
+    }
+
+    @Nonnull
+    public SurfaceState getSurfaceState() {
+        return this.surfaceState;
+    }
+
+    @Nonnull
+    public SurfaceState getCachedSurfaceState() {
+        return this.cachedSurfaceState;
     }
 
     @Nonnull
