@@ -80,10 +80,6 @@ public class Subsurface implements Role {
 
         wlSurface.getSurface()
                  .setPosition(global);
-        this.cachedSurfaceState = getCachedSurfaceState().toBuilder()
-                                                         .positionTransform(Transforms.TRANSLATE(global.getX(),
-                                                                                                 global.getY()))
-                                                         .build();
     }
 
     @Override

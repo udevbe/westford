@@ -324,21 +324,15 @@ public class Surface {
     @Nonnull
     public Surface setPosition(@Nonnull final Point global) {
         //TODO unit test positioning
-        setState(getState().toBuilder()
-                           .positionTransform(Transforms.TRANSLATE(global.getX(),
-                                                                   global.getY()))
-                           .build());
+        apply(getState().toBuilder()
+                        .positionTransform(Transforms.TRANSLATE(global.getX(),
+                                                                global.getY()))
+                        .build());
         setPendingState(getPendingState().toBuilder()
                                          .positionTransform(getState().getPositionTransform())
                                          .build());
-        updateTransform();
 
         getPositionSignal().emit(global);
-
-        //FIXME don't automatically request a render when we update the position
-        final WlCompositor wlCompositor = (WlCompositor) getWlCompositorResource().getImplementation();
-        wlCompositor.getCompositor()
-                    .requestRender();
 
         return this;
     }
