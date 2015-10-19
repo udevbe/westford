@@ -54,7 +54,7 @@ public class Subsurface implements Role {
         this.cachedSurfaceState = surfaceState;
     }
 
-    public void setPosition(Point position) {
+    public void setPosition(@Nonnull final Point position) {
         if (isInert()) {
             return;
         }
