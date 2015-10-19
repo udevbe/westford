@@ -107,9 +107,14 @@ public class Subsurface implements Role {
 
         if (isEffectiveSync()) {
             final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-            //replace new state with old state
-            wlSurface.getSurface()
-                     .apply(getSurfaceState());
+            final Surface surface = wlSurface.getSurface();
+            final SurfaceState oldSurfaceState = getSurfaceState();
+            if (!surface.getState()
+                        .equals(oldSurfaceState)) {
+                //replace new state with old state
+                surface.apply(oldSurfaceState);
+            }
+
         }
         else {
             //desync mode, our 'old' state is always the newest state.
