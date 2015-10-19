@@ -80,6 +80,10 @@ public class Subsurface implements Role {
 
         wlSurface.getSurface()
                  .setPosition(global);
+        this.cachedSurfaceState = getCachedSurfaceState().toBuilder()
+                                                         .positionTransform(Transforms.TRANSLATE(global.getX(),
+                                                                                                 global.getY()))
+                                                         .build();
     }
 
     @Override
@@ -102,9 +106,6 @@ public class Subsurface implements Role {
             return;
         }
 
-        //update cached state with new state
-        this.cachedSurfaceState = surfaceState;
-
         if (isEffectiveSync()) {
             final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
             final Surface surface = wlSurface.getSurface();
@@ -113,12 +114,13 @@ public class Subsurface implements Role {
                         .equals(oldSurfaceState)) {
                 //replace new state with old state
                 surface.apply(oldSurfaceState);
+                this.cachedSurfaceState = surfaceState;
             }
-
         }
         else {
             //desync mode, our 'old' state is always the newest state.
-            this.surfaceState = getCachedSurfaceState();
+            this.cachedSurfaceState = surfaceState;
+            this.surfaceState = surfaceState;
         }
     }
 
