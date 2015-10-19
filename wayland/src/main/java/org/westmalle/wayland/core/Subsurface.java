@@ -154,6 +154,9 @@ public class Subsurface implements Role {
                                final Subsurface parentSubsurface = (Subsurface) role;
                                updateEffectiveSync(parentSubsurface.isEffectiveSync());
                            }
+                           else {
+                               updateEffectiveSync(false);
+                           }
                        });
     }
 
