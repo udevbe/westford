@@ -16,7 +16,7 @@ package org.westmalle.wayland.x11;
 import dagger.Subcomponent;
 
 @Subcomponent
-public interface X11Subcomponent {
+public interface X11 {
     X11OutputFactory outputFactory();
 
     X11SeatFactory seatFactory();
