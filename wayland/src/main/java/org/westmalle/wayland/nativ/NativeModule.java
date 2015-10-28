@@ -21,6 +21,7 @@ import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.nativ.libX11.LibX11;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
+import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
@@ -42,6 +43,14 @@ public class NativeModule {
             LOGGER.severe("Got uncaught exception " + throwable.getMessage());
             throwable.printStackTrace();
         });
+    }
+
+    @Singleton
+    @Provides
+    Libbcm_host provideLibbcm_host() {
+        Native.register(Libbcm_host.class,
+                        "bcm_host");
+        return new Libbcm_host();
     }
 
     @Singleton
