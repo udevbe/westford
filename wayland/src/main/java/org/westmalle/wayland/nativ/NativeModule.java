@@ -50,7 +50,9 @@ public class NativeModule {
     Libbcm_host provideLibbcm_host() {
         Native.register(Libbcm_host.class,
                         "bcm_host");
-        return new Libbcm_host();
+        final Libbcm_host libbcm_host = new Libbcm_host();
+        libbcm_host.bcm_host_init();
+        return libbcm_host;
     }
 
     @Singleton

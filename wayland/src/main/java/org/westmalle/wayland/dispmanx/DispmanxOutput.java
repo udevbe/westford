@@ -14,10 +14,13 @@
 package org.westmalle.wayland.dispmanx;
 
 
+import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
-public class DispmanxOutput implements HasEglOutput{
+@AutoFactory(className = "PrivateDispmanxOutputFactory",
+             allowSubclasses = true)
+public class DispmanxOutput implements HasEglOutput {
     @Override
     public EglOutput getEglOutput() {
         return null;
