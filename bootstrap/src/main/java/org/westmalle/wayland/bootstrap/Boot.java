@@ -13,8 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
+import com.beust.jcommander.JCommander;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.dispmanx.DispmanxOutputFactory;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -28,6 +30,7 @@ class Boot {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
+
     public static void main(final String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread,
                                                    throwable) -> {
@@ -39,10 +42,52 @@ class Boot {
                                   + "\tArguments: %s",
                                   args.length == 0 ? "<none>" : Arrays.toString(args)));
 
-        final X11EglCompositor compositor = DaggerX11EglCompositor.create();
-        final Boot             boot       = new Boot();
+        final Configuration configuration = parseArguments(args);
+        read(configuration);
+    }
 
-        boot.strap(compositor);
+    private static Configuration parseArguments(final String[] args) {
+        Configuration configuration = new Configuration();
+        //TODO also read from config file
+        new JCommander(configuration,
+                       args);
+        return configuration;
+    }
+
+    private static void read(final Configuration configuration) {
+        final Boot boot = new Boot();
+
+        switch (configuration.backend) {
+            case "X11Egl":
+                boot.strap(DaggerX11EglCompositor.create());
+                break;
+
+            case "DispmanxEgl":
+                boot.strap(DaggerDispmanxEglCompositor.create());
+                break;
+
+            default:
+                //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
+                boot.strap(DaggerX11EglCompositor.create());
+        }
+    }
+
+    private void strap(final DispmanxEglCompositor dispmanxEglCompositor) {
+        /*
+         * Keep this first as weston demo clients *really* like their globals
+         * to be initialized in a certain order, else they segfault...
+         */
+        final LifeCycle lifeCycle = dispmanxEglCompositor.lifeCycle();
+
+        //setup dispmanx output back-end.
+        final DispmanxOutputFactory outputFactory = dispmanxEglCompositor.dispmanx()
+                                                                         .outputFactory();
+        //create an output
+        //create an opengl enabled egl overlay
+        outputFactory.create(0);
+
+        //start the compositor
+        lifeCycle.start();
     }
 
     private void strap(final X11EglCompositor x11EglCompositor) {
