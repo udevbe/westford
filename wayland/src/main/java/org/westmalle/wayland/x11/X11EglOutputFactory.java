@@ -103,7 +103,7 @@ public class X11EglOutputFactory {
         final Pointer eglDisplay = this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                                         nativeDisplay,
                                                                         null);
-        if (eglDisplay == null || eglDisplay.equals(EGL_NO_DISPLAY)) {
+        if (eglDisplay == null) {
             throw new RuntimeException("eglGetDisplay() failed");
         }
         if (!this.libEGL.eglInitialize(eglDisplay,

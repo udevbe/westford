@@ -110,7 +110,7 @@ public class X11EglOutputFactoryTest {
                                         EGL_EXTENSIONS)).thenReturn(eglQueryString);
         when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
                                                   display,
-                                                  null)).thenReturn(Pointer.createConstant(0));
+                                                  null)).thenReturn(null);
         //when
         this.x11EglOutputFactory.create(display,
                                         window);
