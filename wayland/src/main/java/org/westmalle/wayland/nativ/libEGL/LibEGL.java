@@ -137,6 +137,13 @@ public class LibEGL {
                                            Pointer share_context,
                                            Pointer attrib_list);
 
+    public native Pointer eglGetDisplay(Pointer native_display);
+
+    public native Pointer eglCreateWindowSurface(Pointer display,
+                                                 Pointer config,
+                                                 Pointer native_window,
+                                                 Pointer attrib_list);
+
     public Pointer eglGetPlatformDisplayEXT(final int platform,
                                             final Pointer native_display,
                                             final Pointer attrib_list) {
