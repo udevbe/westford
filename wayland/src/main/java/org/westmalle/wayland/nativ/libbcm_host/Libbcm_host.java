@@ -20,6 +20,10 @@ import javax.inject.Singleton;
 @Singleton
 public class Libbcm_host {
 
+    public static final int DISPMANX_PROTECTION_MAX  = 0x0f;
+    public static final int DISPMANX_PROTECTION_NONE = 0;
+    public static final int DISPMANX_PROTECTION_HDCP = 11;
+
     public static final int DISPMANX_FLAGS_ALPHA_FROM_SOURCE       = 0;
     public static final int DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS  = 1;
     public static final int DISPMANX_FLAGS_ALPHA_FIXED_NON_ZERO    = 2;

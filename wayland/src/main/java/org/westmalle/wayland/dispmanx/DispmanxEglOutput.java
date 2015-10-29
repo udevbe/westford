@@ -13,5 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.dispmanx;
 
-public class DispmanxEglOutput {
+import com.google.auto.factory.AutoFactory;
+import org.westmalle.wayland.egl.EglOutput;
+
+@AutoFactory(className = "PrivateDispmanxEglOutputFactory",
+             allowSubclasses = true)
+public class DispmanxEglOutput implements EglOutput {
 }
