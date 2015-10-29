@@ -190,54 +190,57 @@ public class X11EglOutputFactory {
     }
 
     private Pointer createEglConfigAttribs() {
-        final int     size          = (12 * 2) + 1;
-        final Pointer configAttribs = new Memory(Integer.BYTES * size);
+        final int[] attributes = {
+                //@formatter:off
+                 EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
+                 EGL_BUFFER_SIZE,       32,
+                 EGL_RED_SIZE,          8,
+                 EGL_GREEN_SIZE,        8,
+                 EGL_BLUE_SIZE,         8,
+                 EGL_ALPHA_SIZE,        8,
+                 EGL_DEPTH_SIZE,        24,
+                 EGL_STENCIL_SIZE,      8,
+                 EGL_SAMPLE_BUFFERS,    0,
+                 EGL_SAMPLES,           0,
+                 EGL_SURFACE_TYPE,      EGL_WINDOW_BIT,
+                 EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
+                 EGL_NONE
+                //@formatter:on
+        };
+        final Pointer configAttribs = new Memory(Integer.BYTES * attributes.length);
         configAttribs.write(0,
-                            new int[]{
-                                    //@formatter:off
-                                         EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
-                                         EGL_BUFFER_SIZE,       32,
-                                         EGL_RED_SIZE,          8,
-                                         EGL_GREEN_SIZE,        8,
-                                         EGL_BLUE_SIZE,         8,
-                                         EGL_ALPHA_SIZE,        8,
-                                         EGL_DEPTH_SIZE,        24,
-                                         EGL_STENCIL_SIZE,      8,
-                                         EGL_SAMPLE_BUFFERS,    0,
-                                         EGL_SAMPLES,           0,
-                                         EGL_SURFACE_TYPE,      EGL_WINDOW_BIT,
-                                         EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
-                                         EGL_NONE
-                                         //@formatter:on
-                            },
+                            attributes,
                             0,
-                            size);
+                            attributes.length);
         return configAttribs;
     }
 
     private Pointer createEglContextAttribs() {
-        final Pointer eglContextAttribs = new Memory(Integer.BYTES * 3);
+        final int[] contextAttributes = {
+                //@formatter:off
+                EGL_CONTEXT_CLIENT_VERSION, 2,
+                EGL_NONE
+                //@formatter:on
+        };
+        final Pointer eglContextAttribs = new Memory(Integer.BYTES * contextAttributes.length);
         eglContextAttribs.write(0,
-                                new int[]{
-                                        EGL_CONTEXT_CLIENT_VERSION,
-                                        2,
-                                        EGL_NONE
-                                },
+                                contextAttributes,
                                 0,
-                                3);
+                                contextAttributes.length);
         return eglContextAttribs;
     }
 
     private Pointer createSurfaceAttribs() {
-        final Pointer eglSurfaceAttribs = new Memory(3 * Integer.BYTES);
+        final int[] surfaceAttributes = {
+                EGL_RENDER_BUFFER,
+                EGL_BACK_BUFFER,
+                EGL_NONE
+        };
+        final Pointer eglSurfaceAttribs = new Memory(surfaceAttributes.length * Integer.BYTES);
         eglSurfaceAttribs.write(0,
-                                new int[]{
-                                        EGL_RENDER_BUFFER,
-                                        EGL_BACK_BUFFER,
-                                        EGL_NONE
-                                },
+                                surfaceAttributes,
                                 0,
-                                3);
+                                surfaceAttributes.length);
         return eglSurfaceAttribs;
     }
 }

@@ -1,9 +1,26 @@
+//Copyright 2015 Erik De Rijcke
+//
+//Licensed under the Apache License,Version2.0(the"License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//
+//http://www.apache.org/licenses/LICENSE-2.0
+//
+//Unless required by applicable law or agreed to in writing,software
+//distributed under the License is distributed on an"AS IS"BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
 package org.westmalle.wayland.dispmanx;
 
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
+import org.westmalle.wayland.core.OutputGeometry;
+import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
 import org.westmalle.wayland.nativ.libbcm_host.VC_RECT_T;
@@ -16,6 +33,7 @@ import javax.inject.Inject;
 
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
 
+//TODO unit test
 public class DispmanxOutputFactory {
 
     @Nonnull
@@ -75,10 +93,38 @@ public class DispmanxOutputFactory {
                                                                           width,
                                                                           height);
 
-        createDispmanxOutput(dispmanxWindow);
+        final DispmanxOutput dispmanxOutput = createDispmanxOutput(dispmanxWindow);
 
+        final Output output = createOutput(dispmanxOutput,
+                                           width,
+                                           height);
 
-        return null;
+        return this.wlOutputFactory.create(output);
+    }
+
+    private Output createOutput(final DispmanxOutput dispmanxOutput,
+                                final int width,
+                                final int height) {
+        //TODO this is all guessing. Does dispmanx expose actual values?
+        final OutputGeometry outputGeometry = OutputGeometry.builder()
+                                                            .x(0)
+                                                            .y(0)
+                                                            .subpixel(0)
+                                                            .make("Westmalle bcm_host")
+                                                            .model("dispmanx")
+                                                            .physicalWidth(0)
+                                                            .physicalHeight(0)
+                                                            .transform(WlOutputTransform.NORMAL.getValue())
+                                                            .build();
+        final OutputMode outputMode = OutputMode.builder()
+                                                .flags(0)
+                                                .height(height)
+                                                .width(width)
+                                                .refresh(60)
+                                                .build();
+        return this.outputFactory.create(outputGeometry,
+                                         outputMode,
+                                         dispmanxOutput);
     }
 
     public DispmanxOutput createDispmanxOutput(final EGL_DISPMANX_WINDOW_T dispmanxWindow) {

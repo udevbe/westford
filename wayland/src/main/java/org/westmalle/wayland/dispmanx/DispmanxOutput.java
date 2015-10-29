@@ -22,6 +22,7 @@ import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 
 @AutoFactory(className = "PrivateDispmanxOutputFactory",
              allowSubclasses = true)
+//TODO unit test
 public class DispmanxOutput implements HasEglOutput {
 
     private final DispmanxEglOutputFactory dispmanxEglOutputFactory;
