@@ -29,7 +29,6 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_DEFAULT_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
@@ -87,13 +86,6 @@ public class DispmanxEglOutputFactory {
 
     private Pointer createEglDisplay() {
 
-        final Pointer eglQueryString = this.libEGL.eglQueryString(EGL_NO_DISPLAY,
-                                                                  EGL_EXTENSIONS);
-        if (eglQueryString == null) {
-            //TODO do we need any specific extensions on the rpi?
-            throw new RuntimeException("Required extensions not available.");
-        }
-
         Pointer eglDisplay = this.libEGL.eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
         if (eglDisplay == null || eglDisplay.equals(EGL_NO_DISPLAY)) {
@@ -118,12 +110,10 @@ public class DispmanxEglOutputFactory {
         LOGGER.info(format("Creating Dispmanx EGL output:\n"
                            + "\tEGL client apis: %s\n"
                            + "\tEGL vendor: %s\n"
-                           + "\tEGL version: %s\n"
-                           + "\tEGL extensions: %s",
+                           + "\tEGL version: %s\n",
                            eglClientApis,
                            eglVendor,
-                           eglVersion,
-                           eglQueryString.getString(0)));
+                           eglVersion));
 
         return eglDisplay;
     }
@@ -132,10 +122,10 @@ public class DispmanxEglOutputFactory {
                                      final Pointer config,
                                      final Pointer context,
                                      final EGL_DISPMANX_WINDOW_T nativeWindow) {
-        final Pointer eglSurface = this.libEGL.eglCreatePlatformWindowSurfaceEXT(eglDisplay,
-                                                                                 config,
-                                                                                 nativeWindow.getPointer(),
-                                                                                 null);
+        final Pointer eglSurface = libEGL.eglCreateWindowSurface(eglDisplay,
+                                                                 config,
+                                                                 nativeWindow.getPointer(),
+                                                                 null);
         if (eglSurface == null) {
             throw new RuntimeException("eglCreateWindowSurface() failed");
         }
