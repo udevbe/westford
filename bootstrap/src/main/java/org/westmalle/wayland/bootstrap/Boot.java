@@ -42,23 +42,21 @@ class Boot {
                                   + "\tArguments: %s",
                                   args.length == 0 ? "<none>" : Arrays.toString(args)));
 
-        final Configuration configuration = new Configuration();
-        configuration.backend="DispmanxEgl";
-        read(configuration);
+        final CommandBackend commandBackend = parseBackend(args);
+        read(commandBackend);
     }
 
-//    private static Configuration parseArguments(final String[] args) {
-//        Configuration configuration = new Configuration();
-//        //TODO also read from config file
-//        new JCommander(configuration,
-//                       args);
-//        return configuration;
-//    }
+    private static CommandBackend parseBackend(final String[] args) {
+        final CommandBackend commandBackend = new CommandBackend();
+        new JCommander(commandBackend,
+                       args);
+        return commandBackend;
+    }
 
-    private static void read(final Configuration configuration) {
+    private static void read(final CommandBackend commandBackend) {
         final Boot boot = new Boot();
 
-        switch (configuration.backend) {
+        switch (commandBackend.backend) {
             case "X11Egl":
                 boot.strap(DaggerX11EglCompositor.create());
                 break;
