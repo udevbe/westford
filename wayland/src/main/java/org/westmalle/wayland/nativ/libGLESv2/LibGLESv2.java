@@ -24,20 +24,29 @@ public class LibGLESv2 {
     public static final int GL_INFO_LOG_LENGTH      = 0x8B84;
     public static final int GL_ARRAY_BUFFER         = 0x8892;
     public static final int GL_DYNAMIC_DRAW         = 0x88E8;
-    public static final int GL_FLOAT                = 0x1406;
-    public static final int GL_UNSIGNED_INT         = 0x1405;
     public static final int GL_TRIANGLES            = 0x0004;
     public static final int GL_ELEMENT_ARRAY_BUFFER = 0x8893;
     public static final int GL_COLOR_BUFFER_BIT     = 0x00004000;
     public static final int GL_TEXTURE_2D           = 0x0DE1;
-    public static final int GL_UNSIGNED_BYTE        = 0x1401;
     public static final int GL_TEXTURE_WRAP_S       = 0x2802;
     public static final int GL_CLAMP_TO_EDGE        = 0x812F;
     public static final int GL_TEXTURE_WRAP_T       = 0x2803;
     public static final int GL_TEXTURE_MIN_FILTER   = 0x2801;
     public static final int GL_NEAREST              = 0x2600;
     public static final int GL_TEXTURE_MAG_FILTER   = 0x2800;
-    public static final int GL_RGBA                 = 0x1908;
+
+    public static final int GL_BYTE            = 0x1400;
+    public static final int GL_UNSIGNED_BYTE   = 0x1401;
+    public static final int GL_SHORT           = 0x1402;
+    public static final int GL_UNSIGNED_SHORT  = 0x1403;
+    public static final int GL_INT             = 0x1404;
+    public static final int GL_UNSIGNED_INT    = 0x1405;
+    public static final int GL_FLOAT           = 0x1406;
+    public static final int GL_FIXED           = 0x140C;
+    public static final int GL_DEPTH_COMPONENT = 0x1902;
+    public static final int GL_ALPHA           = 0x1906;
+    public static final int GL_RGB             = 0x1907;
+    public static final int GL_RGBA            = 0x1908;
 
     public native void glViewport(int x,
                                   int y,
@@ -143,4 +152,12 @@ public class LibGLESv2 {
                                         Pointer textures);
 
 
+    public native void glClearColor(final float v,
+                                    final float v1,
+                                    final float v2,
+                                    final float v3);
+
+    public native void glDrawArrays(int mode,
+                                    int first,
+                                    int count);
 }

@@ -33,7 +33,7 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_INT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_SHORT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
 @Singleton
@@ -81,7 +81,6 @@ public class EglGles2RenderEngine implements RenderEngine {
 
     private Memory bufferData;
     private Memory elementBuffer;
-    private Memory vertexBuffer;
     private Mat4   projection;
 
     @Inject
@@ -109,21 +108,21 @@ public class EglGles2RenderEngine implements RenderEngine {
                                   0,
                                   surfaceWidth,
                                   surfaceHeight);
+        this.libGLESv2.glClearColor(1.0f,
+                                    0.0f,
+                                    0.0f,
+                                    1.0f);
         this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
-        //define triangles to be drawn.
-        //make element buffer active
+
         this.libGLESv2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
                                     getElementBuffer().getInt(0));
-
         this.libGLESv2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                                     getBufferData().size(),
                                     getBufferData(),
                                     GL_DYNAMIC_DRAW);
-        //make vertexBuffer active
-        this.libGLESv2.glBindBuffer(GL_ARRAY_BUFFER,
-                                    getVertexBuffer().getInt(0));
     }
 
+    //TODO move this to init phase -> factory.create()
     @Nonnull
     private Memory getElementBuffer() {
         if (this.elementBuffer == null) {
@@ -135,30 +134,20 @@ public class EglGles2RenderEngine implements RenderEngine {
         return this.elementBuffer;
     }
 
+    //TODO move this to init phase -> factory.create()
     @Nonnull
     private Memory getBufferData() {
         if (this.bufferData == null) {
-            final int[] elements = new int[]{0, 1, 2,
-                                             2, 3, 0
+            final short[] elements = new short[]{0, 1, 2,
+                                                 2, 3, 0
             };
-            this.bufferData = new Memory(Integer.BYTES * elements.length);
+            this.bufferData = new Memory(Short.BYTES * elements.length);
             this.bufferData.write(0,
                                   elements,
                                   0,
                                   elements.length);
         }
         return this.bufferData;
-    }
-
-    @Nonnull
-    private Memory getVertexBuffer() {
-        if (this.vertexBuffer == null) {
-            final Memory vertexBuffer = new Memory(Integer.BYTES);
-            this.libGLESv2.glGenBuffers(1,
-                                        vertexBuffer);
-            this.vertexBuffer = vertexBuffer;
-        }
-        return this.vertexBuffer;
     }
 
     @Override
@@ -226,7 +215,7 @@ public class EglGles2RenderEngine implements RenderEngine {
         this.libGLESv2.glUseProgram(shaderProgram);
         this.libGLESv2.glDrawElements(GL_TRIANGLES,
                                       6,
-                                      GL_UNSIGNED_INT,
+                                      GL_UNSIGNED_SHORT,
                                       null);
     }
 
@@ -257,6 +246,7 @@ public class EglGles2RenderEngine implements RenderEngine {
         return surfaceData;
     }
 
+    //TODO move this to init phase -> factory.create() (for all types of buffers)
     private int queryShaderProgram(final Gles2BufferFormat bufferFormat) {
         Integer shaderProgram = this.shaderPrograms.get(bufferFormat);
         if (shaderProgram == null) {
