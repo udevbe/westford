@@ -43,11 +43,11 @@ public class EglGles2RenderEngine implements RenderEngine {
     private static final String SURFACE_V          =
             "uniform mat4 mu_projection;\n" +
             "\n" +
-            "attribute mediump vec2 va_position;\n" +
-            "attribute mediump vec2 va_texcoord;\n" +
+            "attribute vec2 va_position;\n" +
+            "attribute vec2 va_texcoord;\n" +
             "attribute mat4 va_transform;\n" +
             "\n" +
-            "varying mediump vec2 vv_texcoord;\n" +
+            "varying vec2 vv_texcoord;\n" +
             "\n" +
             "void main(){\n" +
             "    vv_texcoord = va_texcoord;\n" +
@@ -55,7 +55,8 @@ public class EglGles2RenderEngine implements RenderEngine {
             "}";
     @Nonnull
     private static final String SURFACE_ARGB8888_F =
-            "varying mediump vec2 vv_texcoord;\n" +
+            "precision medium float;\n" +
+            "varying vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
             "\n" +
             "void main(){\n" +
@@ -63,7 +64,8 @@ public class EglGles2RenderEngine implements RenderEngine {
             "}";
     @Nonnull
     private static final String SURFACE_XRGB8888_F =
-            "varying mediump vec2 vv_texcoord;\n" +
+            "precision medium float;\n" +
+            "varying vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
             "\n" +
             "void main() {\n" +
@@ -380,29 +382,29 @@ public class EglGles2RenderEngine implements RenderEngine {
         this.libGLESv2.glAttachShader(shaderProgram,
                                       fragmentShader);
         this.libGLESv2.glLinkProgram(shaderProgram);
+
+        //TODO check the link status
+
         return shaderProgram;
     }
 
     private void compileShader(final int shaderHandle,
                                final String shaderSource) {
-        final Pointer      lines              = new Memory(Pointer.SIZE);
-        final NativeString nativeShaderSource = new NativeString(shaderSource);
-        lines.setPointer(0,
-                         nativeShaderSource.getPointer());
-        final Pointer lengths = new Memory(Integer.BYTES);
-        lengths.setInt(0,
-                       nativeShaderSource.length());
+        final Pointer      shadersSourcePointer = new Memory(Pointer.SIZE);
+        final NativeString nativeShaderSource   = new NativeString(shaderSource);
+        shadersSourcePointer.setPointer(0,
+                                        nativeShaderSource.getPointer());
         this.libGLESv2.glShaderSource(shaderHandle,
                                       1,
-                                      lines,
-                                      lengths);
+                                      shadersSourcePointer,
+                                      null);
         this.libGLESv2.glCompileShader(shaderHandle);
 
         final Memory vstatus = new Memory(Integer.BYTES);
         this.libGLESv2.glGetShaderiv(shaderHandle,
                                      GL_COMPILE_STATUS,
                                      vstatus);
-        if (vstatus.getInt(0) != LibGLESv2.GL_TRUE) {
+        if (vstatus.getInt(0) == 0) {
             //failure!
             //get log length
             final Memory logLength = new Memory(Integer.BYTES);
