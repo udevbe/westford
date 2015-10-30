@@ -231,10 +231,10 @@ public class LibEGL {
 
     public native int eglGetError();
 
-    public native int eglSurfaceAttrib(Pointer display,
-                                       Pointer surface,
-                                       int attribute,
-                                       int value);
+    public native boolean eglSurfaceAttrib(Pointer display,
+                                           Pointer surface,
+                                           int attribute,
+                                           int value);
 
     public void throwError(final String failedFunction) throws RuntimeException {
         //looks like there was an error trying to make the egl context current.

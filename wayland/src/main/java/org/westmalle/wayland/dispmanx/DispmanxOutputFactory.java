@@ -120,6 +120,7 @@ public class DispmanxOutputFactory {
         final DISPMANX_MODEINFO_T modeinfo = new DISPMANX_MODEINFO_T();
         final int success = this.libbcm_host.vc_dispmanx_display_get_info(display,
                                                                           modeinfo.getPointer());
+        modeinfo.read();
         if (success < 0) {
             throw new RuntimeException("Failed get info for display=" + device);
         }
@@ -153,10 +154,10 @@ public class DispmanxOutputFactory {
             this.libEGL.throwError("eglCreateWindowSurface()");
         }
 
-        if (this.libEGL.eglSurfaceAttrib(eglDisplay,
-                                         eglSurface,
-                                         EGL_SWAP_BEHAVIOR,
-                                         EGL_BUFFER_PRESERVED) != 0) {
+        if (!this.libEGL.eglSurfaceAttrib(eglDisplay,
+                                          eglSurface,
+                                          EGL_SWAP_BEHAVIOR,
+                                          EGL_BUFFER_PRESERVED)) {
             this.libEGL.throwError("eglSurfaceAttrib()");
         }
 
@@ -191,7 +192,7 @@ public class DispmanxOutputFactory {
     private Pointer createEglContext(final Pointer eglDisplay,
                                      final Pointer config) {
 
-        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
+        if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
             this.libEGL.throwError("eglBindAPI()");
         }
 
@@ -324,6 +325,8 @@ public class DispmanxOutputFactory {
                                               0,
                                               modeinfo.width << 16,
                                               modeinfo.height << 16);
+        dst_rect.read();
+        src_rect.read();
 
         final int update = this.libbcm_host.vc_dispmanx_update_start(0);
 
@@ -331,6 +334,7 @@ public class DispmanxOutputFactory {
         alpharules.flags = Libbcm_host.DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS;
         alpharules.opacity = 255;
         alpharules.mask = 0;
+        alpharules.write();
 
         final int egl_element = this.libbcm_host.vc_dispmanx_element_add(update,
                                                                          display,
@@ -348,6 +352,7 @@ public class DispmanxOutputFactory {
         nativewindow.element = egl_element;
         nativewindow.width = modeinfo.width;
         nativewindow.height = modeinfo.height;
+        nativewindow.write();
 
         return nativewindow;
     }
