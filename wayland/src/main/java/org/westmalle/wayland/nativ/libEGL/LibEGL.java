@@ -54,7 +54,6 @@ public class LibEGL {
     public static final int EGL_SAMPLE_BUFFERS          = 0x3032;
     public static final int EGL_SAMPLES                 = 0x3031;
     public static final int EGL_SURFACE_TYPE            = 0x3033;
-    public static final int EGL_WINDOW_BIT              = 0x0004;
     public static final int EGL_RENDERABLE_TYPE         = 0x3040;
     public static final int EGL_OPENGL_ES2_BIT          = 0x0004;
     public static final int EGL_NONE                    = 0x3038;
@@ -82,6 +81,14 @@ public class LibEGL {
     public static final int EGL_BAD_PARAMETER       = 0x300C;
     public static final int EGL_BAD_SURFACE         = 0x300D;
     public static final int EGL_CONTEXT_LOST        = 0x300E;
+
+    public static final int EGL_PBUFFER_BIT                 = 0x0001	/* EGL_SURFACE_TYPE mask bits */;
+    public static final int EGL_PIXMAP_BIT                  = 0x0002	/* EGL_SURFACE_TYPE mask bits */;
+    public static final int EGL_WINDOW_BIT                  = 0x0004	/* EGL_SURFACE_TYPE mask bits */;
+    public static final int EGL_VG_COLORSPACE_LINEAR_BIT    = 0x0020	/* EGL_SURFACE_TYPE mask bits */;
+    public static final int EGL_VG_ALPHA_FORMAT_PRE_BIT     = 0x0040	/* EGL_SURFACE_TYPE mask bits */;
+    public static final int EGL_MULTISAMPLE_RESOLVE_BOX_BIT = 0x0200	/* EGL_SURFACE_TYPE mask bits */;
+    public static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400	/* EGL_SURFACE_TYPE mask bits */;
 
 
     private Optional<Function> eglCreatePlatformWindowSurfaceEXT = Optional.empty();

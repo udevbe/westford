@@ -15,32 +15,26 @@ package org.westmalle.wayland.dispmanx;
 
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
-import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
+
+import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PrivateDispmanxOutputFactory",
              allowSubclasses = true)
 //TODO unit test
 public class DispmanxOutput implements HasEglOutput {
 
-    private final DispmanxEglOutputFactory dispmanxEglOutputFactory;
-    private final EGL_DISPMANX_WINDOW_T    dispmanxWindow;
 
-    private DispmanxEglOutput eglOutput;
+    @Nonnull
+    private final DispmanxEglOutput dispmanxEglOutput;
 
-    DispmanxOutput(@Provided final DispmanxEglOutputFactory dispmanxEglOutputFactory,
-                   final EGL_DISPMANX_WINDOW_T dispmanxWindow) {
-        this.dispmanxEglOutputFactory = dispmanxEglOutputFactory;
-        this.dispmanxWindow = dispmanxWindow;
+    DispmanxOutput(@Nonnull final DispmanxEglOutput dispmanxEglOutput) {
+        this.dispmanxEglOutput = dispmanxEglOutput;
     }
 
     @Override
     public EglOutput getEglOutput() {
-        if (this.eglOutput == null) {
-            this.eglOutput = this.dispmanxEglOutputFactory.create(this.dispmanxWindow);
-        }
-        return this.eglOutput;
+        return this.dispmanxEglOutput;
     }
 }
