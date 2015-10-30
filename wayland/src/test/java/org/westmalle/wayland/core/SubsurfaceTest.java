@@ -141,11 +141,13 @@ public class SubsurfaceTest {
     @Test
     public void testBeforeCommitSync() throws Exception {
         //given: a subsurface in sync mode
-        final WlSurface wlSurface = mock(WlSurface.class);
-        final Surface   surface   = mock(Surface.class);
+        final WlSurface    wlSurface    = mock(WlSurface.class);
+        final Surface      surface      = mock(Surface.class);
+        final SurfaceState surfaceState = mock(SurfaceState.class);
 
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getState()).thenReturn(surfaceState);
 
         final SurfaceState newSurfaceState = mock(SurfaceState.class);
         this.subsurface.apply(newSurfaceState);
@@ -160,11 +162,14 @@ public class SubsurfaceTest {
     @Test
     public void testBeforeCommitDesync() throws Exception {
         //given: a subsurface in desync mode
-        final WlSurface wlSurface = mock(WlSurface.class);
-        final Surface   surface   = mock(Surface.class);
+        final WlSurface    wlSurface    = mock(WlSurface.class);
+        final Surface      surface      = mock(Surface.class);
+        final SurfaceState surfaceState = mock(SurfaceState.class);
+
 
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getState()).thenReturn(surfaceState);
 
         final WlSurface  parentWlSurface  = mock(WlSurface.class);
         final Surface    parentSurface    = mock(Surface.class);
@@ -211,9 +216,11 @@ public class SubsurfaceTest {
         //given: a subsurface in sync mode
         final WlSurface wlSurface = mock(WlSurface.class);
         final Surface   surface   = mock(Surface.class);
+        final SurfaceState surfaceState = mock(SurfaceState.class);
 
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getState()).thenReturn(surfaceState);
 
         final SurfaceState newSurfaceState = mock(SurfaceState.class);
 
