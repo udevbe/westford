@@ -14,13 +14,12 @@
 package org.westmalle.wayland.dispmanx;
 
 
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
 import org.westmalle.wayland.nativ.libbcm_host.VC_RECT_T;
@@ -75,18 +74,15 @@ public class DispmanxOutputFactory {
             throw new RuntimeException("Failed to open dispmanx display for device " + device);
         }
 
-        final Pointer widthP  = new Memory(Integer.SIZE);
-        final Pointer heightP = new Memory(Integer.SIZE);
-
-        final int success = this.libbcm_host.graphics_get_display_size((short) device,
-                                                                       widthP,
-                                                                       heightP);
-        if (success <= 0) {
-            throw new RuntimeException("Failed get size for display " + device);
+        DISPMANX_MODEINFO_T dispmanx_modeinfo = new DISPMANX_MODEINFO_T();
+        final int success = this.libbcm_host.vc_dispmanx_display_get_info(displayHandle,
+                                                                          dispmanx_modeinfo);
+        if (success < 0) {
+            throw new RuntimeException("Failed get info for display=" + device);
         }
 
-        final int width  = widthP.getInt(0);
-        final int height = heightP.getInt(0);
+        final int width  = dispmanx_modeinfo.width;
+        final int height = dispmanx_modeinfo.height;
 
         final EGL_DISPMANX_WINDOW_T dispmanxWindow = createDispmanxWindow(device,
                                                                           displayHandle,

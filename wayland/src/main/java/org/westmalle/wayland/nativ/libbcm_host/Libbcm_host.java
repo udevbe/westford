@@ -40,17 +40,36 @@ public class Libbcm_host {
     public static final int DISPMANX_FLIP_HRIZ = 1 << 16;
     public static final int DISPMANX_FLIP_VERT = 1 << 17;
 
+    /* invert left/right images */
+    public static final int DISPMANX_STEREOSCOPIC_INVERT = 1 << 19;
+    /* extra flags for controlling 3d duplication behaviour */
+    public static final int DISPMANX_STEREOSCOPIC_NONE   = 0 << 20;
+    public static final int DISPMANX_STEREOSCOPIC_MONO   = 1 << 20;
+    public static final int DISPMANX_STEREOSCOPIC_SBS    = 2 << 20;
+    public static final int DISPMANX_STEREOSCOPIC_TB     = 3 << 20;
+    public static final int DISPMANX_STEREOSCOPIC_MASK   = 15 << 20;
+
+    /* extra flags for controlling snapshot behaviour */
+    public static final int DISPMANX_SNAPSHOT_NO_YUV        = 1 << 24;
+    public static final int DISPMANX_SNAPSHOT_NO_RGB        = 1 << 25;
+    public static final int DISPMANX_SNAPSHOT_FILL          = 1 << 26;
+    public static final int DISPMANX_SNAPSHOT_SWAP_RED_BLUE = 1 << 27;
+    public static final int DISPMANX_SNAPSHOT_PACK          = 1 << 28;
+
+    public static final int VCOS_DISPLAY_INPUT_FORMAT_INVALID = 0;
+    public static final int VCOS_DISPLAY_INPUT_FORMAT_RGB888  = 1;
+    public static final int VCOS_DISPLAY_INPUT_FORMAT_RGB565  = 2;
+
     public native void bcm_host_init();
 
-    public native int graphics_get_display_size(short display_number,
-                                                Pointer display_width,
-                                                Pointer display_height);
+    public native int vc_dispmanx_display_get_info(int display,
+                                                   DISPMANX_MODEINFO_T pinfo);
 
     /**
      * Opens a display on the given device
      *
      * @param device
-     *
+     *c
      * @return
      */
     public native int vc_dispmanx_display_open(int device);
