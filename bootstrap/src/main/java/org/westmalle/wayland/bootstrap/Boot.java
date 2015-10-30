@@ -42,17 +42,18 @@ class Boot {
                                   + "\tArguments: %s",
                                   args.length == 0 ? "<none>" : Arrays.toString(args)));
 
-        final Configuration configuration = parseArguments(args);
+        final Configuration configuration = new Configuration();
+        configuration.backend="DispmanxEgl";
         read(configuration);
     }
 
-    private static Configuration parseArguments(final String[] args) {
-        Configuration configuration = new Configuration();
-        //TODO also read from config file
-        new JCommander(configuration,
-                       args);
-        return configuration;
-    }
+//    private static Configuration parseArguments(final String[] args) {
+//        Configuration configuration = new Configuration();
+//        //TODO also read from config file
+//        new JCommander(configuration,
+//                       args);
+//        return configuration;
+//    }
 
     private static void read(final Configuration configuration) {
         final Boot boot = new Boot();
