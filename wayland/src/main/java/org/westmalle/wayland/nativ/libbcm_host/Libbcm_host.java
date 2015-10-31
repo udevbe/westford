@@ -115,4 +115,8 @@ public class Libbcm_host {
                                            int y_offset,
                                            int width,
                                            int height);
+
+    public native int graphics_get_display_size(int display_number,
+                                                Pointer width,
+                                                Pointer height);
 }
