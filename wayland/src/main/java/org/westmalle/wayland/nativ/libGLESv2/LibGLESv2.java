@@ -17,6 +17,9 @@ import com.sun.jna.LastErrorException;
 import com.sun.jna.Pointer;
 
 public class LibGLESv2 {
+
+    public static final int GL_BGRA_EXT = 0x80E1;
+
     public static final int GL_DEPTH_BUFFER_BIT   = 0x00000100;
     public static final int GL_STENCIL_BUFFER_BIT = 0x00000400;
     public static final int GL_COLOR_BUFFER_BIT   = 0x00004000;
@@ -461,10 +464,23 @@ public class LibGLESv2 {
 
     public native int glGetError();
 
+    public native Pointer glGetString(int name);
+
+    public native void glBlendFunc(int sfactor,
+                                   int dfactor);
+
     public void check(String function) {
         final int error = glGetError();
         if (error != 0) {
-            throw new RuntimeException("Got gl error " + error);
+            throw new RuntimeException(function + " - Got gl error " + error);
         }
     }
+
+    public native void glFinish();
+
+    public native void glEnable(int cap);
+
+    public native void glDisable(int cap);
+
+    public native void glDisableVertexAttribArray(final int index);
 }
