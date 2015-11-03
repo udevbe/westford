@@ -25,6 +25,7 @@ import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
+import org.westmalle.wayland.nativ.libbcm_host.VC_DISPMANX_ALPHA_T;
 import org.westmalle.wayland.nativ.libbcm_host.VC_RECT_T;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -37,6 +38,7 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BUFFER_PRESERVED;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_DEFAULT_DISPLAY;
@@ -49,13 +51,16 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
+import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_NO_ROTATE;
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
 
 //TODO unit test
+//TODO refactor once we get all of this working
 public class DispmanxOutputFactory {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -104,70 +109,66 @@ public class DispmanxOutputFactory {
     private WlOutput createDispmanXPlatformOutput(final int device) {
 
         //setup egl display
-        final Pointer eglDisplay   = createEglDisplay();
-        final int     configs_size = 1;
-        final Pointer configs      = new Memory(configs_size * Pointer.SIZE);
-        chooseConfig(eglDisplay,
-                     configs,
-                     configs_size);
-        final Pointer config = configs.getPointer(0);
+        final Pointer eglDisplay = createEglDisplay();
+        final Pointer config     = chooseConfig(eglDisplay);
 
         //setup dispmanx
-        final int displayHandle = this.libbcm_host.vc_dispmanx_display_open(device);
-        if (displayHandle == 0) {
+        final int display = this.libbcm_host.vc_dispmanx_display_open(device);
+        if (display == 0) {
             throw new RuntimeException("Failed to open dispmanx display for device " + device);
         }
-        DISPMANX_MODEINFO_T dispmanx_modeinfo = new DISPMANX_MODEINFO_T();
-        final int success = this.libbcm_host.vc_dispmanx_display_get_info(displayHandle,
-                                                                          dispmanx_modeinfo);
+        final DISPMANX_MODEINFO_T modeinfo = new DISPMANX_MODEINFO_T();
+        final int success = this.libbcm_host.vc_dispmanx_display_get_info(display,
+                                                                          modeinfo.getPointer());
         if (success < 0) {
             throw new RuntimeException("Failed get info for display=" + device);
         }
-        final int width  = dispmanx_modeinfo.width;
-        final int height = dispmanx_modeinfo.height;
-        final EGL_DISPMANX_WINDOW_T dispmanxWindow = createDispmanxWindow(device,
-                                                                          displayHandle,
-                                                                          width,
-                                                                          height);
+
+        final EGL_DISPMANX_WINDOW_T dispmanxWindow = createDispmanxWindow(display,
+                                                                          modeinfo);
 
         //setup egl surface
-        final Pointer context = createEglContext(eglDisplay,
-                                                 config);
         final Pointer eglSurface = createEglSurface(eglDisplay,
                                                     config,
-                                                    context,
                                                     dispmanxWindow);
 
 
         final DispmanxEglOutput dispmanxEglOutput = this.privateDispmanxEglOutputFactory.create(eglDisplay,
-                                                                                                eglSurface,
-                                                                                                context);
+                                                                                                eglSurface);
         final DispmanxOutput dispmanxOutput = this.privateDispmanxOutputFactory.create(dispmanxEglOutput);
         final Output output = createOutput(dispmanxOutput,
-                                           width,
-                                           height);
+                                           modeinfo);
         return this.wlOutputFactory.create(output);
     }
 
     private Pointer createEglSurface(final Pointer eglDisplay,
                                      final Pointer config,
-                                     final Pointer context,
                                      final EGL_DISPMANX_WINDOW_T nativeWindow) {
-        final Pointer eglSurface = libEGL.eglCreateWindowSurface(eglDisplay,
-                                                                 config,
-                                                                 nativeWindow.getPointer(),
-                                                                 null);
+
+        final Pointer eglSurface = this.libEGL.eglCreateWindowSurface(eglDisplay,
+                                                                      config,
+                                                                      nativeWindow.getPointer(),
+                                                                      null);
         if (eglSurface == null) {
-            throw new RuntimeException("eglCreateWindowSurface() failed");
+            this.libEGL.throwError("eglCreateWindowSurface()");
         }
+
+        if (this.libEGL.eglSurfaceAttrib(eglDisplay,
+                                         eglSurface,
+                                         EGL_SWAP_BEHAVIOR,
+                                         EGL_BUFFER_PRESERVED) != 0) {
+            this.libEGL.throwError("eglSurfaceAttrib()");
+        }
+
+        final Pointer context = createEglContext(eglDisplay,
+                                                 config);
+
         if (!this.libEGL.eglMakeCurrent(eglDisplay,
                                         eglSurface,
                                         eglSurface,
                                         context)) {
-            throw new RuntimeException("eglMakeCurrent() failed");
+            this.libEGL.throwError("eglMakeCurrent()");
         }
-
-        this.libEGL.eglBindAPI(EGL_OPENGL_ES_API);
 
         return eglSurface;
     }
@@ -189,13 +190,18 @@ public class DispmanxOutputFactory {
 
     private Pointer createEglContext(final Pointer eglDisplay,
                                      final Pointer config) {
+
+        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
+            this.libEGL.throwError("eglBindAPI()");
+        }
+
         final Pointer eglContextAttribs = createEglContextAttribs();
         final Pointer context = this.libEGL.eglCreateContext(eglDisplay,
                                                              config,
                                                              EGL_NO_CONTEXT,
                                                              eglContextAttribs);
         if (context == null) {
-            throw new RuntimeException("eglCreateContext() failed");
+            this.libEGL.throwError("eglCreateContext()");
         }
         return context;
     }
@@ -220,9 +226,10 @@ public class DispmanxOutputFactory {
         return configAttribs;
     }
 
-    private void chooseConfig(final Pointer eglDisplay,
-                              final Pointer configs,
-                              final int configs_size) {
+    private Pointer chooseConfig(final Pointer eglDisplay) {
+        final int     configs_size = 1;
+        final Pointer configs      = new Memory(configs_size * Pointer.SIZE);
+
         final Pointer num_configs        = new Memory(Integer.BYTES);
         final Pointer egl_config_attribs = createEglConfigAttribs();
         if (!this.libEGL.eglChooseConfig(eglDisplay,
@@ -230,25 +237,28 @@ public class DispmanxOutputFactory {
                                          configs,
                                          configs_size,
                                          num_configs)) {
-            throw new RuntimeException("eglChooseConfig() failed");
+            this.libEGL.throwError("eglChooseConfig()");
         }
         if (num_configs.getInt(0) == 0) {
             throw new RuntimeException("failed to find suitable EGLConfig");
         }
+
+        return configs.getPointer(0);
     }
 
 
     private Pointer createEglDisplay() {
 
-        Pointer eglDisplay = this.libEGL.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        final Pointer eglDisplay = this.libEGL.eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
         if (eglDisplay == null || eglDisplay.equals(EGL_NO_DISPLAY)) {
-            throw new RuntimeException("eglGetDisplay() failed");
+            this.libEGL.throwError("eglGetDisplay()");
         }
+
         if (!this.libEGL.eglInitialize(eglDisplay,
                                        null,
                                        null)) {
-            throw new RuntimeException("eglInitialize() failed");
+            this.libEGL.throwError("eglInitialize()");
         }
 
         final String eglClientApis = this.libEGL.eglQueryString(eglDisplay,
@@ -273,9 +283,10 @@ public class DispmanxOutputFactory {
     }
 
     private Output createOutput(final DispmanxOutput dispmanxOutput,
-                                final int width,
-                                final int height) {
+                                final DISPMANX_MODEINFO_T modeinfo) {
         //TODO this is all guessing. Does dispmanx expose actual values?
+
+        //TODO assume 96dpi for physical width(?)
         final OutputGeometry outputGeometry = OutputGeometry.builder()
                                                             .x(0)
                                                             .y(0)
@@ -288,8 +299,8 @@ public class DispmanxOutputFactory {
                                                             .build();
         final OutputMode outputMode = OutputMode.builder()
                                                 .flags(0)
-                                                .height(height)
-                                                .width(width)
+                                                .height(modeinfo.height)
+                                                .width(modeinfo.width)
                                                 .refresh(60)
                                                 .build();
         return this.outputFactory.create(outputGeometry,
@@ -297,46 +308,46 @@ public class DispmanxOutputFactory {
                                          dispmanxOutput);
     }
 
-    private EGL_DISPMANX_WINDOW_T createDispmanxWindow(final int device,
-                                                       final int displayHandle,
-                                                       final int width,
-                                                       final int height) {
+    private EGL_DISPMANX_WINDOW_T createDispmanxWindow(final int display,
+                                                       final DISPMANX_MODEINFO_T modeinfo) {
 
         final VC_RECT_T dst_rect = new VC_RECT_T();
         final VC_RECT_T src_rect = new VC_RECT_T();
 
-        dst_rect.x = 0;
-        dst_rect.y = 0;
-        dst_rect.width = width;
-        dst_rect.height = height;
-        dst_rect.write();
+        this.libbcm_host.vc_dispmanx_rect_set(dst_rect.getPointer(),
+                                              0,
+                                              0,
+                                              modeinfo.width,
+                                              modeinfo.height);
+        this.libbcm_host.vc_dispmanx_rect_set(src_rect.getPointer(),
+                                              0,
+                                              0,
+                                              modeinfo.width << 16,
+                                              modeinfo.height << 16);
 
-        src_rect.x = 0;
-        src_rect.y = 0;
-        src_rect.width = width << 16;
-        src_rect.height = height << 16;
-        src_rect.write();
+        final int update = this.libbcm_host.vc_dispmanx_update_start(0);
 
-        final int dispman_update = this.libbcm_host.vc_dispmanx_update_start(device);
+        final VC_DISPMANX_ALPHA_T alpharules = new VC_DISPMANX_ALPHA_T();
+        alpharules.flags = Libbcm_host.DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS;
+        alpharules.opacity = 255;
+        alpharules.mask = 0;
 
-        final int dispman_element = this.libbcm_host.vc_dispmanx_element_add(dispman_update,
-                                                                             displayHandle,
-                                                                             0/*layer*/,
-                                                                             dst_rect.getPointer(),
-                                                                             0/*src*/,
-                                                                             src_rect.getPointer(),
-                                                                             DISPMANX_PROTECTION_NONE,
-                                                                             null /*alpha*/,
-                                                                             null/*clamp*/,
-                                                                             0/*transform*/);
+        final int egl_element = this.libbcm_host.vc_dispmanx_element_add(update,
+                                                                         display,
+                                                                         0 /* layer */,
+                                                                         dst_rect.getPointer(),
+                                                                         0 /* src resource */,
+                                                                         src_rect.getPointer(),
+                                                                         DISPMANX_PROTECTION_NONE,
+                                                                         alpharules.getPointer(),
+                                                                         null /* clamp */,
+                                                                         DISPMANX_NO_ROTATE);
+        this.libbcm_host.vc_dispmanx_update_submit_sync(update);
 
         final EGL_DISPMANX_WINDOW_T nativewindow = new EGL_DISPMANX_WINDOW_T();
-        nativewindow.element = dispman_element;
-        nativewindow.width = width;
-        nativewindow.height = height;
-        nativewindow.write();
-
-        this.libbcm_host.vc_dispmanx_update_submit_sync(dispman_update);
+        nativewindow.element = egl_element;
+        nativewindow.width = modeinfo.width;
+        nativewindow.height = modeinfo.height;
 
         return nativewindow;
     }

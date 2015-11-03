@@ -20,6 +20,14 @@ import javax.inject.Singleton;
 @Singleton
 public class Libbcm_host {
 
+    public static final int DISPMANX_ID_MAIN_LCD    = 0;
+    public static final int DISPMANX_ID_AUX_LCD     = 1;
+    public static final int DISPMANX_ID_HDMI        = 2;
+    public static final int DISPMANX_ID_SDTV        = 3;
+    public static final int DISPMANX_ID_FORCE_LCD   = 4;
+    public static final int DISPMANX_ID_FORCE_TV    = 5;
+    public static final int DISPMANX_ID_FORCE_OTHER = 6 /* non-default display */;
+
     public static final int DISPMANX_PROTECTION_MAX  = 0x0f;
     public static final int DISPMANX_PROTECTION_NONE = 0;
     public static final int DISPMANX_PROTECTION_HDCP = 11;
@@ -63,13 +71,13 @@ public class Libbcm_host {
     public native void bcm_host_init();
 
     public native int vc_dispmanx_display_get_info(int display,
-                                                   DISPMANX_MODEINFO_T pinfo);
+                                                   Pointer pinfo);
 
     /**
      * Opens a display on the given device
      *
-     * @param device
-     *c
+     * @param device c
+     *
      * @return
      */
     public native int vc_dispmanx_display_open(int device);
@@ -101,4 +109,10 @@ public class Libbcm_host {
      * End an update and wait for it to complete
      */
     public native int vc_dispmanx_update_submit_sync(int update);
+
+    public native int vc_dispmanx_rect_set(Pointer rect,
+                                           int x_offset,
+                                           int y_offset,
+                                           int width,
+                                           int height);
 }

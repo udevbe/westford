@@ -26,6 +26,8 @@ import org.westmalle.wayland.x11.X11SeatFactory;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
+
 class Boot {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -83,7 +85,7 @@ class Boot {
                                                                          .outputFactory();
         //create an output
         //create an opengl enabled egl overlay
-        outputFactory.create(0);
+        outputFactory.create(DISPMANX_ID_HDMI);
 
         //start the compositor
         lifeCycle.start();

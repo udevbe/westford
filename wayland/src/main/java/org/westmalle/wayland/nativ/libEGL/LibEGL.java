@@ -40,7 +40,6 @@ public class LibEGL {
     public static final int EGL_TEXTURE_Y_U_V_WL        = 0x31D7;
     public static final int EGL_TEXTURE_Y_UV_WL         = 0x31D8;
     public static final int EGL_TEXTURE_Y_XUXV_WL       = 0x31D9;
-    public static final int EGL_TEXTURE_FORMAT          = 0x3080;
     public static final int EGL_WAYLAND_Y_INVERTED_WL   = 0x31DB;
     public static final int EGL_COLOR_BUFFER_TYPE       = 0x303F;
     public static final int EGL_RGB_BUFFER              = 0x308E;
@@ -59,7 +58,6 @@ public class LibEGL {
     public static final int EGL_NONE                    = 0x3038;
     public static final int EGL_CONTEXT_CLIENT_VERSION  = 0x3098;
     public static final int EGL_BACK_BUFFER             = 0x3084;
-    public static final int EGL_RENDER_BUFFER           = 0x3086;
     public static final int EGL_SINGLE_BUFFER           = 0x3085;
     public static final int EGL_VENDOR                  = 0x3053;
     public static final int EGL_VERSION                 = 0x3054;
@@ -89,6 +87,26 @@ public class LibEGL {
     public static final int EGL_VG_ALPHA_FORMAT_PRE_BIT     = 0x0040	/* EGL_SURFACE_TYPE mask bits */;
     public static final int EGL_MULTISAMPLE_RESOLVE_BOX_BIT = 0x0200	/* EGL_SURFACE_TYPE mask bits */;
     public static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400	/* EGL_SURFACE_TYPE mask bits */;
+
+    /* QuerySurface / CreatePbufferSurface targets */
+    public static final int EGL_HEIGHT                = 0x3056;
+    public static final int EGL_WIDTH                 = 0x3057;
+    public static final int EGL_LARGEST_PBUFFER       = 0x3058;
+    public static final int EGL_TEXTURE_FORMAT        = 0x3080;
+    public static final int EGL_TEXTURE_TARGET        = 0x3081;
+    public static final int EGL_MIPMAP_TEXTURE        = 0x3082;
+    public static final int EGL_MIPMAP_LEVEL          = 0x3083;
+    public static final int EGL_RENDER_BUFFER         = 0x3086;
+    public static final int EGL_COLORSPACE            = 0x3087;
+    public static final int EGL_ALPHA_FORMAT          = 0x3088;
+    public static final int EGL_HORIZONTAL_RESOLUTION = 0x3090;
+    public static final int EGL_VERTICAL_RESOLUTION   = 0x3091;
+    public static final int EGL_PIXEL_ASPECT_RATIO    = 0x3092;
+    public static final int EGL_SWAP_BEHAVIOR         = 0x3093;
+
+    /* Back buffer swap behaviors */
+    public static final int EGL_BUFFER_PRESERVED = 0x3094	/* EGL_SWAP_BEHAVIOR value */;
+    public static final int EGL_BUFFER_DESTROYED = 0x3095	/* EGL_SWAP_BEHAVIOR value */;
 
 
     private Optional<Function> eglCreatePlatformWindowSurfaceEXT = Optional.empty();
@@ -212,4 +230,69 @@ public class LibEGL {
     }
 
     public native int eglGetError();
+
+    public native int eglSurfaceAttrib(Pointer display,
+                                       Pointer surface,
+                                       int attribute,
+                                       int value);
+
+    public void throwError(final String failedFunction) throws RuntimeException {
+        //looks like there was an error trying to make the egl context current.
+        final int eglError = eglGetError();
+        switch (eglError) {
+            case EGL_SUCCESS: {
+                System.err.println(failedFunction + " success.");
+                break;
+            }
+            case EGL_BAD_DISPLAY: {
+                throw new RuntimeException(failedFunction + " failed - display is not an EGL display connection.");
+            }
+            case EGL_NOT_INITIALIZED: {
+                throw new RuntimeException(failedFunction + " failed - display has not been initialized.");
+            }
+            case EGL_BAD_SURFACE: {
+                throw new RuntimeException(failedFunction + " failed - draw or read is not an EGL surface.");
+            }
+            case EGL_BAD_CONTEXT: {
+                throw new RuntimeException(failedFunction + " failed - context is not an EGL rendering context.");
+            }
+            case EGL_BAD_MATCH: {
+                throw new RuntimeException(failedFunction + " failed - draw or read are not compatible with context, or " +
+                                           "context is set to EGL_NO_CONTEXT and draw or read are not set to " +
+                                           "EGL_NO_SURFACE, or draw or read are set to EGL_NO_SURFACE and context is " +
+                                           "not set to EGL_NO_CONTEXT.");
+            }
+            case EGL_BAD_ACCESS: {
+                throw new RuntimeException(failedFunction + " failed - context is current to some other thread.");
+            }
+            case EGL_BAD_NATIVE_PIXMAP: {
+                throw new RuntimeException(failedFunction + " failed - a native pixmap underlying either draw or read is " +
+                                           "no longer valid.");
+            }
+            case EGL_BAD_NATIVE_WINDOW: {
+                throw new RuntimeException(failedFunction + " failed - a native window underlying either draw or read is " +
+                                           "no longer valid.");
+            }
+            case EGL_BAD_CURRENT_SURFACE: {
+                throw new RuntimeException(failedFunction + " failed - the previous context has unflushed commands and " +
+                                           "the previous surface is no longer valid.");
+            }
+            case EGL_BAD_ALLOC: {
+                throw new RuntimeException(failedFunction + " failed - allocation of ancillary buffers for draw or read " +
+                                           "were delayed until eglMakeCurrent is called, and there are not enough " +
+                                           "resources to allocate them.");
+            }
+            case EGL_CONTEXT_LOST: {
+                throw new RuntimeException(failedFunction + " failed - a power management event has occurred. The " +
+                                           "application must destroy all contexts and reinitialise OpenGL ES state and " +
+                                           "objects to continue rendering.");
+            }
+            case EGL_BAD_ATTRIBUTE: {
+                throw new RuntimeException(failedFunction + " failed - Bad attribute");
+            }
+            case EGL_BAD_CONFIG: {
+                throw new RuntimeException(failedFunction + " failed - Bad config");
+            }
+        }
+    }
 }
