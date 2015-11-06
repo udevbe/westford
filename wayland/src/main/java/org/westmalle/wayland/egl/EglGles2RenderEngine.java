@@ -84,6 +84,7 @@ public class EglGles2RenderEngine implements RenderEngine {
 
     private Memory bufferData;
     private Memory elementBuffer;
+    private Memory vertexBuffer;
     private Mat4   projection;
 
     @Inject
@@ -116,13 +117,18 @@ public class EglGles2RenderEngine implements RenderEngine {
                                     0.0f,
                                     1.0f);
         this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
-
+        //define triangles to be drawn.
+        //make element buffer active
         this.libGLESv2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
                                     getElementBuffer().getInt(0));
+
         this.libGLESv2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                                     getBufferData().size(),
                                     getBufferData(),
                                     GL_DYNAMIC_DRAW);
+        //make vertexBuffer active
+        this.libGLESv2.glBindBuffer(GL_ARRAY_BUFFER,
+                                    getVertexBuffer().getInt(0));
     }
 
     //TODO move this to init phase -> factory.create()
@@ -151,6 +157,18 @@ public class EglGles2RenderEngine implements RenderEngine {
                                   elements.length);
         }
         return this.bufferData;
+    }
+
+    //TODO move this to init phase -> factory.create()
+    @Nonnull
+    private Memory getVertexBuffer() {
+        if (this.vertexBuffer == null) {
+            final Memory vertexBuffer = new Memory(Integer.BYTES);
+            this.libGLESv2.glGenBuffers(1,
+                                        vertexBuffer);
+            this.vertexBuffer = vertexBuffer;
+        }
+        return this.vertexBuffer;
     }
 
     @Override
