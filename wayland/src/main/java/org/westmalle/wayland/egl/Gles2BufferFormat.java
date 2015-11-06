@@ -13,23 +13,30 @@
 //limitations under the License.
 package org.westmalle.wayland.egl;
 
+import org.freedesktop.wayland.shared.WlShmFormat;
+
 import javax.annotation.Nonnull;
 
 public enum Gles2BufferFormat {
-    SHM_ARGB8888("surface",
-                 "surface_argb8888"),
-    SHM_XRGB8888("surface",
-                 "surface_xrgb8888");
+    SHM_ARGB8888(EglGles2RenderEngine.SURFACE_V,
+                 EglGles2RenderEngine.SURFACE_ARGB8888_F,
+                 WlShmFormat.ARGB8888.getValue()),
+    SHM_XRGB8888(EglGles2RenderEngine.SURFACE_V,
+                 EglGles2RenderEngine.SURFACE_XRGB8888_F,
+                 WlShmFormat.XRGB8888.getValue());
 
     @Nonnull
     private final String vertexShader;
     @Nonnull
     private final String fragmentShader;
+    private final int    wlShmFormat;
 
     Gles2BufferFormat(@Nonnull final String vertexShader,
-                      @Nonnull final String fragmentShader) {
+                      @Nonnull final String fragmentShader,
+                      final int wlShmFormat) {
         this.vertexShader = vertexShader;
         this.fragmentShader = fragmentShader;
+        this.wlShmFormat = wlShmFormat;
     }
 
     @Nonnull
@@ -40,5 +47,9 @@ public enum Gles2BufferFormat {
     @Nonnull
     public String getVertexShader() {
         return this.vertexShader;
+    }
+
+    public int getWlShmFormat() {
+        return this.wlShmFormat;
     }
 }

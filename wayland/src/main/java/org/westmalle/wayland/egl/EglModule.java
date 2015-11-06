@@ -17,10 +17,13 @@ import dagger.Module;
 import dagger.Provides;
 import org.westmalle.wayland.core.RenderEngine;
 
+import javax.inject.Singleton;
+
 @Module
 public class EglModule {
 
     @Provides
+    @Singleton
     public RenderEngine createRenderEngine(final EglGles2RenderEngine eglGles2RenderEngine) {
         return eglGles2RenderEngine;
     }

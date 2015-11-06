@@ -5,7 +5,6 @@ import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.RenderEngine;
@@ -34,45 +33,42 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_SHORT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
 @Singleton
 public class EglGles2RenderEngine implements RenderEngine {
 
     @Nonnull
-    private static final String SURFACE_V          =
-            "uniform mat4 mu_projection;\n" +
-            "\n" +
-            "attribute vec2 va_position;\n" +
-            "attribute vec2 va_texcoord;\n" +
-            "attribute mat4 va_transform;\n" +
-            "\n" +
-            "varying vec2 vv_texcoord;\n" +
-            "\n" +
-            "void main(){\n" +
-            "    vv_texcoord = va_texcoord;\n" +
-            "    gl_Position = mu_projection * va_transform * vec4(va_position, 0.0, 1.0) ;\n" +
-            "}";
+    static final String SURFACE_V          = "uniform mat4 mu_projection;\n" +
+                                             "\n" +
+                                             "attribute vec2 va_position;\n" +
+                                             "attribute vec2 va_texcoord;\n" +
+                                             "attribute mat4 va_transform;\n" +
+                                             "\n" +
+                                             "varying vec2 vv_texcoord;\n" +
+                                             "\n" +
+                                             "void main(){\n" +
+                                             "    vv_texcoord = va_texcoord;\n" +
+                                             "    gl_Position = mu_projection * va_transform * vec4(va_position, 0.0, 1.0) ;\n" +
+                                             "}";
     @Nonnull
-    private static final String SURFACE_ARGB8888_F =
-            "precision mediump float;\n" +
-            "varying vec2 vv_texcoord;\n" +
-            "uniform sampler2D tex;\n" +
-            "\n" +
-            "void main(){\n" +
-            "    gl_FragColor = texture2D(tex, vv_texcoord);\n" +
-            "}";
+    static final String SURFACE_ARGB8888_F = "precision mediump float;\n" +
+                                             "varying vec2 vv_texcoord;\n" +
+                                             "uniform sampler2D tex;\n" +
+                                             "\n" +
+                                             "void main(){\n" +
+                                             "    gl_FragColor = texture2D(tex, vv_texcoord);\n" +
+                                             "}";
     @Nonnull
-    private static final String SURFACE_XRGB8888_F =
-            "precision mediump float;\n" +
-            "varying vec2 vv_texcoord;\n" +
-            "uniform sampler2D tex;\n" +
-            "\n" +
-            "void main() {\n" +
-            "    gl_FragColor.rgb = texture2D(tex, vv_texcoord).rgb;\n" +
-            "    gl_FragColor.a = 1.;\n" +
-            "}";
+    static final String SURFACE_XRGB8888_F = "precision mediump float;\n" +
+                                             "varying vec2 vv_texcoord;\n" +
+                                             "uniform sampler2D tex;\n" +
+                                             "\n" +
+                                             "void main() {\n" +
+                                             "    gl_FragColor.rgb = texture2D(tex, vv_texcoord).rgb;\n" +
+                                             "    gl_FragColor.a = 1.;\n" +
+                                             "}";
 
     @Nonnull
     private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
@@ -81,11 +77,20 @@ public class EglGles2RenderEngine implements RenderEngine {
 
     @Nonnull
     private final LibGLESv2 libGLESv2;
+    @Nonnull
+    private final Memory elementBuffer = new Memory(Integer.BYTES);
 
-    private Memory bufferData;
-    private Memory elementBuffer;
-    private Memory vertexBuffer;
-    private Mat4   projection;
+    @Nonnull
+    private final byte[] elements          = new byte[]{0, 1, 2,
+                                                        2, 3, 0};
+    @Nonnull
+    private final Memory elementBufferData = new Memory(Byte.BYTES * this.elements.length);
+    @Nonnull
+    private final Memory vertexBuffer      = new Memory(Integer.BYTES);
+
+    private boolean init = false;
+
+    private Mat4 projection;
 
     @Inject
     EglGles2RenderEngine(@Nonnull final LibGLESv2 libGLESv2) {
@@ -99,6 +104,11 @@ public class EglGles2RenderEngine implements RenderEngine {
         final HasEglOutput hasEglOutput = (HasEglOutput) output.getPlatformImplementation();
         final EglOutput    eglOutput    = hasEglOutput.getEglOutput();
         eglOutput.begin();
+
+        //TODO try to make this more eager and don't depend on an init flag
+        if (!this.init) {
+            init();
+        }
 
         final int surfaceWidth  = mode.getWidth();
         final int surfaceHeight = mode.getHeight();
@@ -120,55 +130,115 @@ public class EglGles2RenderEngine implements RenderEngine {
         //define triangles to be drawn.
         //make element buffer active
         this.libGLESv2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
-                                    getElementBuffer().getInt(0));
+                                    this.elementBuffer.getInt(0));
 
         this.libGLESv2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                                    getBufferData().size(),
-                                    getBufferData(),
+                                    this.elementBufferData.size(),
+                                    this.elementBufferData,
                                     GL_DYNAMIC_DRAW);
         //make vertexBuffer active
         this.libGLESv2.glBindBuffer(GL_ARRAY_BUFFER,
-                                    getVertexBuffer().getInt(0));
+                                    this.vertexBuffer.getInt(0));
     }
 
-    //TODO move this to init phase -> factory.create()
-    @Nonnull
-    private Memory getElementBuffer() {
-        if (this.elementBuffer == null) {
-            final Memory elementBuffer = new Memory(Integer.BYTES);
-            this.libGLESv2.glGenBuffers(1,
-                                        elementBuffer);
-            this.elementBuffer = elementBuffer;
+    private void init() {
+        this.libGLESv2.glGenBuffers(1,
+                                    this.elementBuffer);
+        this.elementBufferData.write(0,
+                                     this.elements,
+                                     0,
+                                     this.elements.length);
+        this.libGLESv2.glGenBuffers(1,
+                                    this.vertexBuffer);
+
+        for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
+            this.shaderPrograms.put(gles2BufferFormat,
+                                    createShaderProgram(gles2BufferFormat));
         }
-        return this.elementBuffer;
+
+        this.init = true;
     }
 
-    //TODO move this to init phase -> factory.create()
-    @Nonnull
-    private Memory getBufferData() {
-        if (this.bufferData == null) {
-            final short[] elements = new short[]{0, 1, 2,
-                                                 2, 3, 0
-            };
-            this.bufferData = new Memory(Short.BYTES * elements.length);
-            this.bufferData.write(0,
-                                  elements,
-                                  0,
-                                  elements.length);
+    private int createShaderProgram(final Gles2BufferFormat bufferFormat) {
+        final int vertexShader = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
+        compileShader(vertexShader,
+                      bufferFormat.getVertexShader());
+        final int fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
+        compileShader(fragmentShader,
+                      bufferFormat.getFragmentShader());
+
+        final int shaderProgram = this.libGLESv2.glCreateProgram();
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      vertexShader);
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      fragmentShader);
+        this.libGLESv2.glLinkProgram(shaderProgram);
+
+        //check the link status
+        final Pointer linked = new Memory(Integer.BYTES);
+        this.libGLESv2.glGetProgramiv(shaderProgram,
+                                      GL_LINK_STATUS,
+                                      linked);
+        if (linked.getInt(0) == 0) {
+            final Pointer infoLen = new Memory(Integer.BYTES);
+            this.libGLESv2.glGetProgramiv(shaderProgram,
+                                          GL_INFO_LOG_LENGTH,
+                                          infoLen);
+            int logSize = infoLen.getInt(0);
+            if (logSize <= 0) {
+                //some drivers report incorrect log size
+                logSize = 1024;
+            }
+            final Memory log = new Memory(logSize);
+            this.libGLESv2.glGetProgramInfoLog(shaderProgram,
+                                               logSize,
+                                               null,
+                                               log);
+            this.libGLESv2.glDeleteProgram(shaderProgram);
+            System.err.println("Error compiling the vertex shader: " + log.getString(0));
+            System.exit(1);
         }
-        return this.bufferData;
+
+        return shaderProgram;
     }
 
-    //TODO move this to init phase -> factory.create()
-    @Nonnull
-    private Memory getVertexBuffer() {
-        if (this.vertexBuffer == null) {
-            final Memory vertexBuffer = new Memory(Integer.BYTES);
-            this.libGLESv2.glGenBuffers(1,
-                                        vertexBuffer);
-            this.vertexBuffer = vertexBuffer;
+    private void compileShader(final int shaderHandle,
+                               final String shaderSource) {
+        final Pointer      shadersSourcePointer = new Memory(Pointer.SIZE);
+        final NativeString nativeShaderSource   = new NativeString(shaderSource);
+        shadersSourcePointer.setPointer(0,
+                                        nativeShaderSource.getPointer());
+        this.libGLESv2.glShaderSource(shaderHandle,
+                                      1,
+                                      shadersSourcePointer,
+                                      null);
+        this.libGLESv2.glCompileShader(shaderHandle);
+
+        final Memory vstatus = new Memory(Integer.BYTES);
+        this.libGLESv2.glGetShaderiv(shaderHandle,
+                                     GL_COMPILE_STATUS,
+                                     vstatus);
+        if (vstatus.getInt(0) == 0) {
+            //failure!
+            //get log length
+            final Memory logLength = new Memory(Integer.BYTES);
+            this.libGLESv2.glGetShaderiv(shaderHandle,
+                                         GL_INFO_LOG_LENGTH,
+                                         logLength);
+            //get log
+            int logSize = logLength.getInt(0);
+            if (logSize == 0) {
+                //some drivers report incorrect log size
+                logSize = 1024;
+            }
+            final Memory log = new Memory(logSize);
+            this.libGLESv2.glGetShaderInfoLog(shaderHandle,
+                                              logSize,
+                                              null,
+                                              log);
+            System.err.println("Error compiling the vertex shader: " + log.getString(0));
+            System.exit(1);
         }
-        return this.vertexBuffer;
     }
 
     @Override
@@ -220,7 +290,6 @@ public class EglGles2RenderEngine implements RenderEngine {
                 transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
         };
         //@formatter:on
-
         shmBuffer.beginAccess();
         querySurfaceData(wlSurfaceResource,
                          shmBuffer).makeActive(this.libGLESv2,
@@ -228,15 +297,15 @@ public class EglGles2RenderEngine implements RenderEngine {
         shmBuffer.endAccess();
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
 
-        final int shaderProgram = queryShaderProgram(queryBufferFormat(shmBuffer));
+        final int shaderProgram = this.shaderPrograms.get(queryBufferFormat(shmBuffer));
+        this.libGLESv2.glUseProgram(shaderProgram);
         //TODO move setting of uniform projection matrix to begin().
         configureShaders(shaderProgram,
                          this.projection,
                          vertices);
-        this.libGLESv2.glUseProgram(shaderProgram);
         this.libGLESv2.glDrawElements(GL_TRIANGLES,
                                       6,
-                                      GL_UNSIGNED_SHORT,
+                                      GL_UNSIGNED_BYTE,
                                       null);
     }
 
@@ -267,30 +336,16 @@ public class EglGles2RenderEngine implements RenderEngine {
         return surfaceData;
     }
 
-    //TODO move this to init phase -> factory.create() (for all types of buffers)
-    private int queryShaderProgram(final Gles2BufferFormat bufferFormat) {
-        Integer shaderProgram = this.shaderPrograms.get(bufferFormat);
-        if (shaderProgram == null) {
-            shaderProgram = createShaderProgram(bufferFormat);
-            this.shaderPrograms.put(bufferFormat,
-                                    shaderProgram);
-        }
-        return shaderProgram;
-    }
-
     private Gles2BufferFormat queryBufferFormat(final ShmBuffer buffer) {
-        final Gles2BufferFormat format;
-        final int               bufferFormat = buffer.getFormat();
-        if (bufferFormat == WlShmFormat.ARGB8888.getValue()) {
-            format = Gles2BufferFormat.SHM_ARGB8888;
+        final int bufferFormat = buffer.getFormat();
+
+        for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
+            if (gles2BufferFormat.getWlShmFormat() == bufferFormat) {
+                return gles2BufferFormat;
+            }
         }
-        else if (bufferFormat == WlShmFormat.XRGB8888.getValue()) {
-            format = Gles2BufferFormat.SHM_XRGB8888;
-        }
-        else {
-            throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
-        }
-        return format;
+
+        throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
     }
 
     private void configureShaders(final Integer program,
@@ -373,100 +428,6 @@ public class EglGles2RenderEngine implements RenderEngine {
                                              false,
                                              20 * Float.BYTES,
                                              new Pointer(16 * Float.BYTES));
-    }
-
-    private int createShaderProgram(final Gles2BufferFormat bufferFormat) {
-        final int vertexShader = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
-        compileShader(vertexShader,
-                      SURFACE_V);
-
-        final int fragmentShader;
-        if (bufferFormat == Gles2BufferFormat.SHM_ARGB8888) {
-            fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
-            compileShader(fragmentShader,
-                          SURFACE_ARGB8888_F);
-        }
-        else if (bufferFormat == Gles2BufferFormat.SHM_XRGB8888) {
-            fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
-            compileShader(fragmentShader,
-                          SURFACE_XRGB8888_F);
-        }
-        else {
-            throw new UnsupportedOperationException("Buffer format " + bufferFormat + " is not supported");
-        }
-
-        final int shaderProgram = this.libGLESv2.glCreateProgram();
-        this.libGLESv2.glAttachShader(shaderProgram,
-                                      vertexShader);
-        this.libGLESv2.glAttachShader(shaderProgram,
-                                      fragmentShader);
-        this.libGLESv2.glLinkProgram(shaderProgram);
-
-        //check the link status
-        final Pointer linked = new Memory(Integer.BYTES);
-        this.libGLESv2.glGetProgramiv(shaderProgram,
-                                      GL_LINK_STATUS,
-                                      linked);
-        if (linked.getInt(0) == 0) {
-            final Pointer infoLen = new Memory(Integer.BYTES);
-            this.libGLESv2.glGetProgramiv(shaderProgram,
-                                          GL_INFO_LOG_LENGTH,
-                                          infoLen);
-            int logSize = infoLen.getInt(0);
-            if (logSize == 0) {
-                //some drivers report incorrect log size
-                logSize = 1024;
-            }
-            final Memory log = new Memory(logSize);
-            this.libGLESv2.glGetProgramInfoLog(shaderProgram,
-                                               logSize,
-                                               null,
-                                               log);
-            this.libGLESv2.glDeleteProgram(shaderProgram);
-            System.err.println("Error compiling the vertex shader: " + log.getString(0));
-            System.exit(1);
-        }
-
-        return shaderProgram;
-    }
-
-    private void compileShader(final int shaderHandle,
-                               final String shaderSource) {
-        final Pointer      shadersSourcePointer = new Memory(Pointer.SIZE);
-        final NativeString nativeShaderSource   = new NativeString(shaderSource);
-        shadersSourcePointer.setPointer(0,
-                                        nativeShaderSource.getPointer());
-        this.libGLESv2.glShaderSource(shaderHandle,
-                                      1,
-                                      shadersSourcePointer,
-                                      null);
-        this.libGLESv2.glCompileShader(shaderHandle);
-
-        final Memory vstatus = new Memory(Integer.BYTES);
-        this.libGLESv2.glGetShaderiv(shaderHandle,
-                                     GL_COMPILE_STATUS,
-                                     vstatus);
-        if (vstatus.getInt(0) == 0) {
-            //failure!
-            //get log length
-            final Memory logLength = new Memory(Integer.BYTES);
-            this.libGLESv2.glGetShaderiv(shaderHandle,
-                                         GL_INFO_LOG_LENGTH,
-                                         logLength);
-            //get log
-            int logSize = logLength.getInt(0);
-            if (logSize == 0) {
-                //some drivers report incorrect log size
-                logSize = 1024;
-            }
-            final Memory log = new Memory(logSize);
-            this.libGLESv2.glGetShaderInfoLog(shaderHandle,
-                                              logSize,
-                                              null,
-                                              log);
-            System.err.println("Error compiling the vertex shader: " + log.getString(0));
-            System.exit(1);
-        }
     }
 
     @Override

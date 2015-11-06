@@ -153,7 +153,7 @@ public class EglGles2RenderEngineTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(Gles2SurfaceData.create(this.libGLESv2)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_XRGB8888,
+        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
@@ -221,7 +221,7 @@ public class EglGles2RenderEngineTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(Gles2SurfaceData.create(this.libGLESv2)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_XRGB8888,
+        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
@@ -281,7 +281,7 @@ public class EglGles2RenderEngineTest {
         when(shmBuffer.getWidth()).thenReturn(bufferWidth);
         when(shmBuffer.getHeight()).thenReturn(bufferHeight);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_XRGB8888,
+        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
