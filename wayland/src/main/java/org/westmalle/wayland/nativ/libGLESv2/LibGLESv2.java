@@ -17,8 +17,6 @@ import com.sun.jna.LastErrorException;
 import com.sun.jna.Pointer;
 
 public class LibGLESv2 {
-    public static final int GL_VERTEX_SHADER        = 0x8B31;
-    public static final int GL_FRAGMENT_SHADER      = 0x8B30;
     public static final int GL_COMPILE_STATUS       = 0x8B81;
     public static final int GL_TRUE                 = 1;
     public static final int GL_INFO_LOG_LENGTH      = 0x8B84;
@@ -34,6 +32,27 @@ public class LibGLESv2 {
     public static final int GL_TEXTURE_MIN_FILTER   = 0x2801;
     public static final int GL_NEAREST              = 0x2600;
     public static final int GL_TEXTURE_MAG_FILTER   = 0x2800;
+
+    public static final int GL_FRAGMENT_SHADER                  = 0x8B30;
+    public static final int GL_VERTEX_SHADER                    = 0x8B31;
+    public static final int GL_MAX_VERTEX_ATTRIBS               = 0x8869;
+    public static final int GL_MAX_VERTEX_UNIFORM_VECTORS       = 0x8DFB;
+    public static final int GL_MAX_VARYING_VECTORS              = 0x8DFC;
+    public static final int GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 0x8B4D;
+    public static final int GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS   = 0x8B4C;
+    public static final int GL_MAX_TEXTURE_IMAGE_UNITS          = 0x8872;
+    public static final int GL_MAX_FRAGMENT_UNIFORM_VECTORS     = 0x8DFD;
+    public static final int GL_SHADER_TYPE                      = 0x8B4F;
+    public static final int GL_DELETE_STATUS                    = 0x8B80;
+    public static final int GL_LINK_STATUS                      = 0x8B82;
+    public static final int GL_VALIDATE_STATUS                  = 0x8B83;
+    public static final int GL_ATTACHED_SHADERS                 = 0x8B85;
+    public static final int GL_ACTIVE_UNIFORMS                  = 0x8B86;
+    public static final int GL_ACTIVE_UNIFORM_MAX_LENGTH        = 0x8B87;
+    public static final int GL_ACTIVE_ATTRIBUTES                = 0x8B89;
+    public static final int GL_ACTIVE_ATTRIBUTE_MAX_LENGTH      = 0x8B8A;
+    public static final int GL_SHADING_LANGUAGE_VERSION         = 0x8B8C;
+    public static final int GL_CURRENT_PROGRAM                  = 0x8B8D;
 
     public static final int GL_BYTE            = 0x1400;
     public static final int GL_UNSIGNED_BYTE   = 0x1401;
@@ -152,12 +171,23 @@ public class LibGLESv2 {
                                         Pointer textures);
 
 
-    public native void glClearColor(final float v,
-                                    final float v1,
-                                    final float v2,
-                                    final float v3);
+    public native void glClearColor(final float r,
+                                    final float g,
+                                    final float b,
+                                    final float a);
 
     public native void glDrawArrays(int mode,
                                     int first,
                                     int count);
+
+    public native void glGetProgramiv(int program,
+                                      int pname,
+                                      Pointer params);
+
+    public native void glGetProgramInfoLog(int program,
+                                           int maxLength,
+                                           Pointer length,
+                                           Pointer infoLog);
+
+    public native void glDeleteProgram(int program);
 }

@@ -32,6 +32,7 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ELEMENT_ARRAY_B
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_SHORT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
@@ -55,7 +56,7 @@ public class EglGles2RenderEngine implements RenderEngine {
             "}";
     @Nonnull
     private static final String SURFACE_ARGB8888_F =
-            "precision medium float;\n" +
+            "precision mediump float;\n" +
             "varying vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
             "\n" +
@@ -64,7 +65,7 @@ public class EglGles2RenderEngine implements RenderEngine {
             "}";
     @Nonnull
     private static final String SURFACE_XRGB8888_F =
-            "precision medium float;\n" +
+            "precision mediump float;\n" +
             "varying vec2 vv_texcoord;\n" +
             "uniform sampler2D tex;\n" +
             "\n" +
@@ -383,7 +384,30 @@ public class EglGles2RenderEngine implements RenderEngine {
                                       fragmentShader);
         this.libGLESv2.glLinkProgram(shaderProgram);
 
-        //TODO check the link status
+        //check the link status
+        final Pointer linked = new Memory(Integer.BYTES);
+        this.libGLESv2.glGetProgramiv(shaderProgram,
+                                      GL_LINK_STATUS,
+                                      linked);
+        if (linked.getInt(0) == 0) {
+            final Pointer infoLen = new Memory(Integer.BYTES);
+            this.libGLESv2.glGetProgramiv(shaderProgram,
+                                          GL_INFO_LOG_LENGTH,
+                                          infoLen);
+            int logSize = infoLen.getInt(0);
+            if (logSize == 0) {
+                //some drivers report incorrect log size
+                logSize = 1024;
+            }
+            final Memory log = new Memory(logSize);
+            this.libGLESv2.glGetProgramInfoLog(shaderProgram,
+                                               logSize,
+                                               null,
+                                               log);
+            this.libGLESv2.glDeleteProgram(shaderProgram);
+            System.err.println("Error compiling the vertex shader: " + log.getString(0));
+            System.exit(1);
+        }
 
         return shaderProgram;
     }
@@ -414,6 +438,7 @@ public class EglGles2RenderEngine implements RenderEngine {
             //get log
             int logSize = logLength.getInt(0);
             if (logSize == 0) {
+                //some drivers report incorrect log size
                 logSize = 1024;
             }
             final Memory log = new Memory(logSize);
