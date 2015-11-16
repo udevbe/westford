@@ -58,15 +58,15 @@ public class DispmanxEglOutputFactory {
         nativewindow.write();
 
         final Pointer eglDisplay = createEglDisplay();
-        final Pointer eglContext = createEglContext(eglDisplay,
-                                                    createEglConfigAttribs());
+        final Pointer config     = chooseConfig(eglDisplay);
         final Pointer eglSurface = createEglSurface(eglDisplay,
-                                                    eglContext,
+                                                    config,
                                                     nativewindow);
 
         return this.privateDispmanxEglOutputFactory.create(eglDisplay,
                                                            eglSurface,
-                                                           eglContext);
+                                                           createEglContext(eglDisplay,
+                                                                            config));
     }
 
     private Pointer createEglSurface(final Pointer eglDisplay,
