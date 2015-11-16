@@ -15,93 +15,96 @@ package org.westmalle.wayland.egl;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
+import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
+import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
-import java.nio.ByteBuffer;
 
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_CLAMP_TO_EDGE;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BGRA_EXT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_RGBA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_S;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_T;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 
 public class Gles2SurfaceData {
 
-    private final Memory tex;
-    private       int    width;
-    private       int    height;
+    private final Pointer textureId;
+    private final int     width;
+    private final int     height;
 
-    private Gles2SurfaceData(final Memory tex) {
-        this.tex = tex;
+    private Gles2SurfaceData(final Pointer textureId,
+                             final int width,
+                             final int height) {
+        this.textureId = textureId;
+        this.width = width;
+        this.height = height;
     }
 
-    public static Gles2SurfaceData create(@Nonnull final LibGLESv2 libGLESv2) {
-        final Memory tex = new Memory(Integer.BYTES);
+    public static Gles2SurfaceData create(@Nonnull final LibGLESv2 libGLESv2,
+                                          @Nonnull final ShmBuffer shmBuffer) {
+
+        int bufferWidth  = shmBuffer.getStride() / Integer.BYTES;
+        int bufferHeight = shmBuffer.getHeight();
+
+        final Memory textureIdValue = new Memory(Integer.BYTES);
         libGLESv2.glGenTextures(1,
-                                tex);
-        return new Gles2SurfaceData(tex);
-    }
+                                textureIdValue);
 
-    public void init(@Nonnull final LibGLESv2 libGLESv2,
-                     final ShmBuffer buffer) {
-        this.width = buffer.getStride() / Integer.BYTES;
-        this.height = buffer.getHeight();
-        final ByteBuffer pixels = buffer.getData();
+        final int textureId = textureIdValue.getInt(0);
 
+        //upload buffer to gpu
         libGLESv2.glBindTexture(GL_TEXTURE_2D,
-                                getTexture().getInt(0));
-        libGLESv2.glTexImage2D(GL_TEXTURE_2D,
-                               0,
-                               GL_RGBA,
-                               this.width,
-                               this.height,
-                               0,
-                               GL_RGBA,
-                               GL_UNSIGNED_BYTE,
-                               Native.getDirectBufferPointer(pixels));
-
-        libGLESv2.glTexParameteri(GL_TEXTURE_2D,
-                                  GL_TEXTURE_WRAP_S,
-                                  GL_CLAMP_TO_EDGE);
-        libGLESv2.glTexParameteri(GL_TEXTURE_2D,
-                                  GL_TEXTURE_WRAP_T,
-                                  GL_CLAMP_TO_EDGE);
+                                textureId);
         libGLESv2.glTexParameteri(GL_TEXTURE_2D,
                                   GL_TEXTURE_MIN_FILTER,
                                   GL_NEAREST);
         libGLESv2.glTexParameteri(GL_TEXTURE_2D,
                                   GL_TEXTURE_MAG_FILTER,
                                   GL_NEAREST);
+        libGLESv2.glTexImage2D(GL_TEXTURE_2D,
+                               0,
+                               GL_BGRA_EXT /*glesv2 doesnt care what internal format we give it, it must however match the external format*/,
+                               bufferWidth,
+                               bufferHeight,
+                               0,
+                               GL_BGRA_EXT,
+                               GL_UNSIGNED_BYTE,
+                               null);
+
+        return new Gles2SurfaceData(textureIdValue,
+                                    bufferWidth,
+                                    bufferHeight);
     }
 
-    private Memory getTexture() {
-        return this.tex;
-    }
+    public void update(@Nonnull final LibGLESv2 libGLESv2,
+                       @Nonnull final WlSurfaceResource wlSurfaceResource,
+                       @Nonnull final ShmBuffer shmBuffer) {
 
-    public void makeActive(@Nonnull final LibGLESv2 libGLESv2,
-                           @Nonnull final ShmBuffer buffer) {
-
-        this.width = buffer.getStride() / 4;
-        this.height = buffer.getHeight();
-        final ByteBuffer pixels = buffer.getData();
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
 
         libGLESv2.glBindTexture(GL_TEXTURE_2D,
-                                getTexture().getInt(0));
-        libGLESv2.glTexSubImage2D(GL_TEXTURE_2D,
-                                  0,
-                                  0,
-                                  0,
-                                  this.width,
-                                  this.height,
-                                  GL_RGBA,
-                                  GL_UNSIGNED_BYTE,
-                                  Native.getDirectBufferPointer(pixels));
+                                textureId.getInt(0));
+
+        //FIXME use damage hints from surface?
+        shmBuffer.beginAccess();
+        libGLESv2.glTexImage2D(GL_TEXTURE_2D,
+                               0,
+                               GL_BGRA_EXT /*glesv2 doesnt care what internal format we give it, it must however match the external format*/,
+                               this.width,
+                               this.height,
+                               0,
+                               GL_BGRA_EXT,
+                               GL_UNSIGNED_BYTE,
+                               Native.getDirectBufferPointer(shmBuffer.getData()));
+        shmBuffer.endAccess();
+        surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
     }
 
     public int getWidth() {
@@ -112,8 +115,8 @@ public class Gles2SurfaceData {
         return this.height;
     }
 
-    public void destroy(@Nonnull final LibGLESv2 libGLESv2) {
+    public void delete(@Nonnull final LibGLESv2 libGLESv2) {
         libGLESv2.glDeleteTextures(1,
-                                   getTexture());
+                                   this.textureId);
     }
 }

@@ -40,7 +40,6 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -151,7 +150,8 @@ public class EglGles2RenderEngineTest {
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
-        when(Gles2SurfaceData.create(this.libGLESv2)).thenReturn(gles2SurfaceData);
+        when(Gles2SurfaceData.create(this.libGLESv2,
+                                     shmBuffer)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
         shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
@@ -169,11 +169,9 @@ public class EglGles2RenderEngineTest {
         verifyStatic();
         ShmBuffer.get(wlBufferResource);
         verify(shmBuffer).beginAccess();
-        verify(gles2SurfaceData,
-               never()).init(this.libGLESv2,
-                             shmBuffer);
-        verify(gles2SurfaceData).makeActive(this.libGLESv2,
-                                            shmBuffer);
+        verify(gles2SurfaceData).update(this.libGLESv2,
+                                        wlSurfaceResource,
+                                        shmBuffer);
         verify(shmBuffer).endAccess();
         verify(surface).firePaintCallbacks(anyInt());
     }
@@ -219,7 +217,8 @@ public class EglGles2RenderEngineTest {
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
-        when(Gles2SurfaceData.create(this.libGLESv2)).thenReturn(gles2SurfaceData);
+        when(Gles2SurfaceData.create(this.libGLESv2,
+                                     shmBuffer)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
         shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
@@ -235,10 +234,9 @@ public class EglGles2RenderEngineTest {
         verifyStatic();
         ShmBuffer.get(wlBufferResource);
         verify(shmBuffer).beginAccess();
-        verify(gles2SurfaceData).init(this.libGLESv2,
-                                      shmBuffer);
-        verify(gles2SurfaceData).makeActive(this.libGLESv2,
-                                            shmBuffer);
+        verify(gles2SurfaceData).update(this.libGLESv2,
+                                        wlSurfaceResource,
+                                        shmBuffer);
         verify(shmBuffer).endAccess();
         verify(surface).firePaintCallbacks(anyInt());
 
@@ -247,10 +245,9 @@ public class EglGles2RenderEngineTest {
                                        wlBufferResource);
         //then
         verify(gles2SurfaceData,
-               times(2)).makeActive(this.libGLESv2,
-                                    shmBuffer);
-        verify(gles2SurfaceData).init(this.libGLESv2,
-                                      shmBuffer);
+               times(2)).update(this.libGLESv2,
+                                wlSurfaceResource,
+                                shmBuffer);
     }
 
     @Test
@@ -277,8 +274,10 @@ public class EglGles2RenderEngineTest {
         when(ShmBuffer.get(wlBufferResource)).thenReturn(shmBuffer);
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
-        when(Gles2SurfaceData.create(this.libGLESv2)).thenReturn(gles2SurfaceData);
+        when(Gles2SurfaceData.create(this.libGLESv2,
+                                     shmBuffer)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getWidth()).thenReturn(bufferWidth);
+        when(shmBuffer.getHeight()).thenReturn(bufferHeight);
         when(shmBuffer.getHeight()).thenReturn(bufferHeight);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
         shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
@@ -293,11 +292,10 @@ public class EglGles2RenderEngineTest {
         this.eglGles2RenderEngine.draw(wlSurfaceResource,
                                        wlBufferResource);
         //then
-        verify(gles2SurfaceData).destroy(this.libGLESv2);
-        verify(gles2SurfaceData).init(this.libGLESv2,
-                                      shmBuffer);
-        verify(gles2SurfaceData).makeActive(this.libGLESv2,
-                                            shmBuffer);
+        verify(gles2SurfaceData).delete(this.libGLESv2);
+        verify(gles2SurfaceData).update(this.libGLESv2,
+                                        wlSurfaceResource,
+                                        shmBuffer);
     }
 
     @Test

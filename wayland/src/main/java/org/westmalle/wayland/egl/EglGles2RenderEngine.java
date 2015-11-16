@@ -21,54 +21,50 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Logger;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ARRAY_BUFFER;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_DYNAMIC_DRAW;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ELEMENT_ARRAY_BUFFER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE_MINUS_SRC_ALPHA;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE0;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
 @Singleton
 public class EglGles2RenderEngine implements RenderEngine {
 
-    @Nonnull
-    static final String SURFACE_V          = "uniform mat4 mu_projection;\n" +
-                                             "\n" +
-                                             "attribute vec2 va_position;\n" +
-                                             "attribute vec2 va_texcoord;\n" +
-                                             "attribute mat4 va_transform;\n" +
-                                             "\n" +
-                                             "varying vec2 vv_texcoord;\n" +
-                                             "\n" +
-                                             "void main(){\n" +
-                                             "    vv_texcoord = va_texcoord;\n" +
-                                             "    gl_Position = mu_projection * va_transform * vec4(va_position, 0.0, 1.0) ;\n" +
-                                             "}";
-    @Nonnull
-    static final String SURFACE_ARGB8888_F = "precision mediump float;\n" +
-                                             "varying vec2 vv_texcoord;\n" +
-                                             "uniform sampler2D tex;\n" +
-                                             "\n" +
-                                             "void main(){\n" +
-                                             "    gl_FragColor = texture2D(tex, vv_texcoord);\n" +
-                                             "}";
-    @Nonnull
-    static final String SURFACE_XRGB8888_F = "precision mediump float;\n" +
-                                             "varying vec2 vv_texcoord;\n" +
-                                             "uniform sampler2D tex;\n" +
-                                             "\n" +
-                                             "void main() {\n" +
-                                             "    gl_FragColor.rgb = texture2D(tex, vv_texcoord).rgb;\n" +
-                                             "    gl_FragColor.a = 1.;\n" +
-                                             "}";
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+    static final String VERTEX_SHADER =
+            "uniform mat4 u_projection;\n" +
+            "\n" +
+            "attribute vec2 a_position;\n" +
+            "attribute vec2 a_texCoord;\n" +
+            "attribute mat4 a_transform;\n" +
+            "\n" +
+            "varying vec2 v_texCoord;\n" +
+            "\n" +
+            "void main(){\n" +
+            "    v_texCoord = a_texCoord;\n" +
+            "    gl_Position = u_projection * a_transform * vec4(a_position, 0.0, 1.0) ;\n" +
+            "}";
+
+    static final String FRAGMENT_SHADER_ARGB8888 =
+            "precision mediump float;\n" +
+            "\n" +
+            "uniform sampler2D u_texture;\n" +
+            "\n" +
+            "varying vec2 v_texCoord;\n" +
+            "\n" +
+            "void main(){\n" +
+            "    gl_FragColor = texture2D(u_texture, v_texCoord);\n" +
+            "}";
 
     @Nonnull
     private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
@@ -77,20 +73,19 @@ public class EglGles2RenderEngine implements RenderEngine {
 
     @Nonnull
     private final LibGLESv2 libGLESv2;
-    @Nonnull
-    private final Memory elementBuffer = new Memory(Integer.BYTES);
-
-    @Nonnull
-    private final byte[] elements          = new byte[]{0, 1, 2,
-                                                        2, 3, 0};
-    @Nonnull
-    private final Memory elementBufferData = new Memory(Byte.BYTES * this.elements.length);
-    @Nonnull
-    private final Memory vertexBuffer      = new Memory(Integer.BYTES);
 
     private boolean init = false;
 
-    private Mat4 projection;
+    @Nonnull
+    private Mat4 projection = Mat4.IDENTITY;
+    private int projectionArg;
+    private int positionArg;
+    private int textureCoordinateArg;
+    private int transformCol0Arg;
+    private int transformCol1Arg;
+    private int transformCol2Arg;
+    private int transformCol3Arg;
+    private int textureArg;
 
     @Inject
     EglGles2RenderEngine(@Nonnull final LibGLESv2 libGLESv2) {
@@ -105,51 +100,41 @@ public class EglGles2RenderEngine implements RenderEngine {
         final EglOutput    eglOutput    = hasEglOutput.getEglOutput();
         eglOutput.begin();
 
-        //TODO try to make this more eager and don't depend on an init flag
-        if (!this.init) {
+        if (!init) {
             init();
         }
 
-        final int surfaceWidth  = mode.getWidth();
-        final int surfaceHeight = mode.getHeight();
-        //@formatter:off
-        this.projection = Mat4.create(2.0f / surfaceWidth, 0,                     0, -1,
-                                      0,                   2.0f / -surfaceHeight, 0,  1,
-                                      0,                   0,                     1,  0,
-                                      0,                   0,                     0,  1);
-        //@formatter:on
+        final int screenWidth  = mode.getWidth();
+        final int screenHeight = mode.getHeight();
+
         this.libGLESv2.glViewport(0,
                                   0,
-                                  surfaceWidth,
-                                  surfaceHeight);
-        this.libGLESv2.glClearColor(1.0f,
+                                  screenWidth,
+                                  screenHeight);
+        this.libGLESv2.glClearColor(0.0f,
                                     0.0f,
                                     0.0f,
                                     1.0f);
-        this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
-        //define triangles to be drawn.
-        //make element buffer active
-        this.libGLESv2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
-                                    this.elementBuffer.getInt(0));
+        this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
 
-        this.libGLESv2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                                    this.elementBufferData.size(),
-                                    this.elementBufferData,
-                                    GL_DYNAMIC_DRAW);
-        //make vertexBuffer active
-        this.libGLESv2.glBindBuffer(GL_ARRAY_BUFFER,
-                                    this.vertexBuffer.getInt(0));
+        //@formatter:off
+        projection = Mat4.create(2.0f / screenWidth, 0,                     0, -1,
+                                 0,                   2.0f / -screenHeight, 0,  1,
+                                 0,                   0,                     1,  0,
+                                 0,                   0,                     0,  1);
+        //@formatter:on
     }
 
     private void init() {
-        this.libGLESv2.glGenBuffers(1,
-                                    this.elementBuffer);
-        this.elementBufferData.write(0,
-                                     this.elements,
-                                     0,
-                                     this.elements.length);
-        this.libGLESv2.glGenBuffers(1,
-                                    this.vertexBuffer);
+        //check for required texture extensions
+        final String extensions = this.libGLESv2.glGetString(GL_EXTENSIONS)
+                                                .getString(0);
+
+        LOGGER.info("GLESv2 extensions: " + extensions);
+        if (!extensions.contains("GL_EXT_texture_format_BGRA8888")) {
+            LOGGER.severe("Required extension GL_EXT_texture_format_BGRA8888 not available");
+            System.exit(1);
+        }
 
         for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
             this.shaderPrograms.put(gles2BufferFormat,
@@ -160,18 +145,44 @@ public class EglGles2RenderEngine implements RenderEngine {
     }
 
     private int createShaderProgram(final Gles2BufferFormat bufferFormat) {
-        final int vertexShader = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
-        compileShader(vertexShader,
-                      bufferFormat.getVertexShader());
-        final int fragmentShader = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
-        compileShader(fragmentShader,
-                      bufferFormat.getFragmentShader());
+        //vertex shader
+        final String  vertexShaderCode   = bufferFormat.getVertexShaderSource();
+        final int     vertexShader       = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
+        final Pointer vertexShaderSource = new NativeString(vertexShaderCode).getPointer();
+        final Pointer vertexShaders      = new Memory(Pointer.SIZE);
+        vertexShaders.setPointer(0,
+                                 vertexShaderSource);
+        this.libGLESv2.glShaderSource(vertexShader,
+                                      1,
+                                      vertexShaders,
+                                      null);
+        this.libGLESv2.glCompileShader(vertexShader);
 
+        checkShader(vertexShader);
+
+        //fragment shader
+        final String  fragmentShaderCode   = bufferFormat.getFragmentShaderSource();
+        final int     fragmentShader       = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
+        final Pointer fragmentShaderSource = new NativeString(fragmentShaderCode).getPointer();
+        final Pointer fragmentShaders      = new Memory(Pointer.SIZE);
+        fragmentShaders.setPointer(0,
+                                   fragmentShaderSource);
+        this.libGLESv2.glShaderSource(fragmentShader,
+                                      1,
+                                      fragmentShaders,
+                                      null);
+        this.libGLESv2.glCompileShader(fragmentShader);
+
+        checkShader(fragmentShader);
+
+        //shader program
         final int shaderProgram = this.libGLESv2.glCreateProgram();
         this.libGLESv2.glAttachShader(shaderProgram,
                                       vertexShader);
+
         this.libGLESv2.glAttachShader(shaderProgram,
                                       fragmentShader);
+
         this.libGLESv2.glLinkProgram(shaderProgram);
 
         //check the link status
@@ -199,30 +210,44 @@ public class EglGles2RenderEngine implements RenderEngine {
             System.exit(1);
         }
 
+        //find shader arguments
+        final Memory u_projection = new NativeString("u_projection").getPointer();
+        this.projectionArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
+                                                                 u_projection);
+
+        final Memory a_position = new NativeString("a_position").getPointer();
+        this.positionArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                              a_position);
+
+        final Memory a_texCoord = new NativeString("a_texCoord").getPointer();
+        this.textureCoordinateArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                                       a_texCoord);
+
+        final Memory a_transform = new NativeString("a_transform").getPointer();
+        this.transformCol0Arg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                                   a_transform);
+
+        this.transformCol1Arg = this.transformCol0Arg + 1;
+        this.transformCol2Arg = this.transformCol1Arg + 1;
+        this.transformCol3Arg = this.transformCol2Arg + 1;
+
+        final Memory u_texture = new NativeString("u_texture").getPointer();
+        this.textureArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
+                                                              u_texture);
+
         return shaderProgram;
     }
 
-    private void compileShader(final int shaderHandle,
-                               final String shaderSource) {
-        final Pointer      shadersSourcePointer = new Memory(Pointer.SIZE);
-        final NativeString nativeShaderSource   = new NativeString(shaderSource);
-        shadersSourcePointer.setPointer(0,
-                                        nativeShaderSource.getPointer());
-        this.libGLESv2.glShaderSource(shaderHandle,
-                                      1,
-                                      shadersSourcePointer,
-                                      null);
-        this.libGLESv2.glCompileShader(shaderHandle);
-
+    private void checkShader(final int shader) {
         final Memory vstatus = new Memory(Integer.BYTES);
-        this.libGLESv2.glGetShaderiv(shaderHandle,
+        this.libGLESv2.glGetShaderiv(shader,
                                      GL_COMPILE_STATUS,
                                      vstatus);
         if (vstatus.getInt(0) == 0) {
             //failure!
             //get log length
             final Memory logLength = new Memory(Integer.BYTES);
-            this.libGLESv2.glGetShaderiv(shaderHandle,
+            this.libGLESv2.glGetShaderiv(shader,
                                          GL_INFO_LOG_LENGTH,
                                          logLength);
             //get log
@@ -232,7 +257,7 @@ public class EglGles2RenderEngine implements RenderEngine {
                 logSize = 1024;
             }
             final Memory log = new Memory(logSize);
-            this.libGLESv2.glGetShaderInfoLog(shaderHandle,
+            this.libGLESv2.glGetShaderInfoLog(shader,
                                               logSize,
                                               null,
                                               log);
@@ -252,70 +277,186 @@ public class EglGles2RenderEngine implements RenderEngine {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
         final Mat4      transform = surface.getTransform();
+
+        final int bufferWidth  = shmBuffer.getWidth();
+        final int bufferHeight = shmBuffer.getHeight();
+
+        //define vertex data
         //@formatter:off
-        final float[] vertices = {
+        final float[] vertexDataValues = {
                 //top left:
-                //vec2 va_position
-                0, 0,
-                //vec2 va_texcoord
+                //attribute vec2 a_position
                 0f, 0f,
-                //mat4 va_transform
+
+                //attribute vec2 a_texCoord
+                0f, 0f,
+                //attribute mat4 a_transform
                 transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
                 transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
                 transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23(),
                 transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
 
                 //top right:
-                shmBuffer.getWidth(), 0,
+                //attribute vec2 a_position
+                bufferWidth, 0f,
+                //attribute vec2 a_texCoord
                 1f, 0f,
+                //attribute mat4 a_transform
                 transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
                 transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
                 transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23(),
                 transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
 
                 //bottom right:
-                shmBuffer.getWidth(), shmBuffer.getHeight(),
+                //vec2 a_position
+                bufferWidth, bufferHeight,
+                //vec2 a_texCoord
                 1f, 1f,
+                //attribute mat4 a_transform
+                transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
+                transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
+                transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23(),
+                transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
+
+                //bottom right:
+                //vec2 a_position
+                bufferWidth, bufferHeight,
+                //vec2 a_texCoord
+                1f, 1f,
+                //attribute mat4 a_transform
                 transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
                 transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
                 transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23(),
                 transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
 
                 //bottom left:
-                0, shmBuffer.getHeight(),
+                //vec2 a_position
+                0f, bufferHeight,
+                //vec2 a_texCoord
                 0f, 1f,
+                //attribute mat4 a_transform
+                transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
+                transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
+                transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23(),
+                transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
+
+                //top left:
+                //attribute vec2 a_position
+                0f, 0f,
+
+                //attribute vec2 a_texCoord
+                0f, 0f,
+                //attribute mat4 a_transform
                 transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
                 transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
                 transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23(),
                 transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
         };
         //@formatter:on
-        shmBuffer.beginAccess();
-        querySurfaceData(wlSurfaceResource,
-                         shmBuffer).makeActive(this.libGLESv2,
-                                               shmBuffer);
-        shmBuffer.endAccess();
-        surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
+        final Memory vertexData = new Memory(Float.BYTES * vertexDataValues.length);
+        vertexData.write(0,
+                         vertexDataValues,
+                         0,
+                         vertexDataValues.length);
 
-        final int shaderProgram = this.shaderPrograms.get(queryBufferFormat(shmBuffer));
-        this.libGLESv2.glUseProgram(shaderProgram);
-        //TODO move setting of uniform projection matrix to begin().
-        configureShaders(shaderProgram,
-                         this.projection,
-                         vertices);
-        this.libGLESv2.glDrawElements(GL_TRIANGLES,
-                                      6,
-                                      GL_UNSIGNED_BYTE,
-                                      null);
+        this.libGLESv2.glUseProgram(this.shaderPrograms.get(queryBufferFormat(shmBuffer)));
+
+        //upload uniform data
+        final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
+        projectionBuffer.write(0,
+                               projection.toArray(),
+                               0,
+                               16);
+        this.libGLESv2.glUniformMatrix4fv(this.projectionArg,
+                                          1,
+                                          false,
+                                          projectionBuffer);
+
+        //set vertex data in shader
+        this.libGLESv2.glEnableVertexAttribArray(this.positionArg);
+        this.libGLESv2.glVertexAttribPointer(this.positionArg,
+                                             2,
+                                             GL_FLOAT,
+                                             false,
+                                             20 * Float.BYTES,
+                                             vertexData);
+
+        this.libGLESv2.glEnableVertexAttribArray(this.textureCoordinateArg);
+        this.libGLESv2.glVertexAttribPointer(this.textureCoordinateArg,
+                                             2,
+                                             GL_FLOAT,
+                                             false,
+                                             20 * Float.BYTES,
+                                             vertexData.share(2 * Float.BYTES));
+
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol0Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol0Arg,
+                                             4,
+                                             GL_FLOAT,
+                                             false,
+                                             20 * Float.BYTES,
+                                             vertexData.share(4 * Float.BYTES));
+
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol1Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol1Arg,
+                                             4,
+                                             GL_FLOAT,
+                                             false,
+                                             20 * Float.BYTES,
+                                             vertexData.share(8 * Float.BYTES));
+
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol2Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol2Arg,
+                                             4,
+                                             GL_FLOAT,
+                                             false,
+                                             20 * Float.BYTES,
+                                             vertexData.share(12 * Float.BYTES));
+
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol3Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol3Arg,
+                                             4,
+                                             GL_FLOAT,
+                                             false,
+                                             20 * Float.BYTES,
+                                             vertexData.share(16 * Float.BYTES));
+
+        //configure texture blending
+        this.libGLESv2.glBlendFunc(GL_ONE,
+                                   GL_ONE_MINUS_SRC_ALPHA);
+
+        querySurfaceData(wlSurfaceResource,
+                         shmBuffer).update(libGLESv2,
+                                           wlSurfaceResource,
+                                           shmBuffer);
+        //set the buffer in the shader
+        this.libGLESv2.glActiveTexture(GL_TEXTURE0);
+        this.libGLESv2.glUniform1i(this.textureArg,
+                                   0);
+
+        //draw
+        this.libGLESv2.glEnable(GL_BLEND);
+        this.libGLESv2.glDrawArrays(GL_TRIANGLES,
+                                    0,
+                                    6);
+
+        //cleanup
+        this.libGLESv2.glDisable(GL_BLEND);
+        this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
+        this.libGLESv2.glDisableVertexAttribArray(this.textureArg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol0Arg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol1Arg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol2Arg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol3Arg);
+        this.libGLESv2.glUseProgram(0);
     }
 
     private Gles2SurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
                                               final ShmBuffer shmBuffer) {
         Gles2SurfaceData surfaceData = this.cachedSurfaceData.get(surfaceResource);
         if (surfaceData == null) {
-            surfaceData = Gles2SurfaceData.create(this.libGLESv2);
-            surfaceData.init(this.libGLESv2,
-                             shmBuffer);
+            surfaceData = Gles2SurfaceData.create(this.libGLESv2,
+                                                  shmBuffer);
             this.cachedSurfaceData.put(surfaceResource,
                                        surfaceData);
         }
@@ -325,12 +466,10 @@ public class EglGles2RenderEngine implements RenderEngine {
             final int bufferWidth = shmBuffer.getWidth();
             final int bufferHeight = shmBuffer.getHeight();
             if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
-                surfaceData.destroy(this.libGLESv2);
-                surfaceData = Gles2SurfaceData.create(this.libGLESv2);
-                surfaceData.init(this.libGLESv2,
-                                 shmBuffer);
-                this.cachedSurfaceData.put(surfaceResource,
-                                           surfaceData);
+                this.cachedSurfaceData.remove(surfaceResource)
+                                      .delete(this.libGLESv2);
+                surfaceData = querySurfaceData(surfaceResource,
+                                               shmBuffer);
             }
         }
         return surfaceData;
@@ -346,88 +485,6 @@ public class EglGles2RenderEngine implements RenderEngine {
         }
 
         throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
-    }
-
-    private void configureShaders(final Integer program,
-                                  final Mat4 projection,
-                                  final float[] vertices) {
-        final int uniTrans = this.libGLESv2.glGetUniformLocation(program,
-                                                                 new NativeString("mu_projection").getPointer());
-        final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
-        projectionBuffer.write(0,
-                               projection.toArray(),
-                               0,
-                               16);
-        this.libGLESv2.glUniformMatrix4fv(uniTrans,
-                                          1,
-                                          false,
-                                          projectionBuffer);
-
-        final Memory verticesBuffer = new Memory(Float.BYTES * vertices.length);
-        verticesBuffer.write(0,
-                             vertices,
-                             0,
-                             vertices.length);
-        this.libGLESv2.glBufferData(GL_ARRAY_BUFFER,
-                                    vertices.length * Float.BYTES,
-                                    verticesBuffer,
-                                    GL_DYNAMIC_DRAW);
-
-        final int posAttrib = this.libGLESv2.glGetAttribLocation(program,
-                                                                 new NativeString("va_position").getPointer());
-        final int texAttrib = this.libGLESv2.glGetAttribLocation(program,
-                                                                 new NativeString("va_texcoord").getPointer());
-        final int transAttrib = this.libGLESv2.glGetAttribLocation(program,
-                                                                   new NativeString("va_transform").getPointer());
-
-        this.libGLESv2.glEnableVertexAttribArray(posAttrib);
-        this.libGLESv2.glVertexAttribPointer(posAttrib,
-                                             2,
-                                             GL_FLOAT,
-                                             false,
-                                             20 * Float.BYTES,
-                                             null);
-
-        this.libGLESv2.glEnableVertexAttribArray(texAttrib);
-        this.libGLESv2.glVertexAttribPointer(texAttrib,
-                                             2,
-                                             GL_FLOAT,
-                                             false,
-                                             20 * Float.BYTES,
-                                             new Pointer(2 * Float.BYTES));
-
-        //column 0
-        this.libGLESv2.glEnableVertexAttribArray(transAttrib);
-        this.libGLESv2.glVertexAttribPointer(transAttrib,
-                                             4,
-                                             GL_FLOAT,
-                                             false,
-                                             20 * Float.BYTES,
-                                             new Pointer(4 * Float.BYTES));
-        //column 1
-        this.libGLESv2.glEnableVertexAttribArray(transAttrib + 1);
-        this.libGLESv2.glVertexAttribPointer(transAttrib + 1,
-                                             4,
-                                             GL_FLOAT,
-                                             false,
-                                             20 * Float.BYTES,
-                                             new Pointer(8 * Float.BYTES));
-        //column 2
-        this.libGLESv2.glEnableVertexAttribArray(transAttrib + 2);
-        this.libGLESv2.glVertexAttribPointer(transAttrib + 2,
-                                             4,
-                                             GL_FLOAT,
-                                             false,
-                                             20 * Float.BYTES,
-                                             new Pointer(12 * Float.BYTES));
-        //column 3
-        this.libGLESv2.glEnableVertexAttribArray(transAttrib + 3);
-        this.libGLESv2.glVertexAttribPointer(transAttrib + 3,
-                                             4,
-                                             GL_FLOAT,
-                                             false,
-                                             20 * Float.BYTES,
-                                             new Pointer(16 * Float.BYTES));
     }
 
     @Override
