@@ -15,6 +15,7 @@ import org.westmalle.wayland.nativ.libbcm_host.VC_RECT_T;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -33,6 +34,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BGRA_EXT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
@@ -42,7 +44,6 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE_MINUS_SRC_ALPHA;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_RGBA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE0;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
@@ -147,17 +148,15 @@ public class Dispmanx {
         //perform 2 draws
 
         //setup green semi transparent buffer
-        final Mat4       greenTransform    = Mat4.IDENTITY;
-        final int        greenBufferWidth  = 100;
-        final int        greenBufferHeight = 100;
-        final ByteBuffer greenBuffer       = ByteBuffer.allocateDirect(greenBufferWidth * greenBufferHeight * Integer.BYTES);
-        greenBuffer.order(ByteOrder.nativeOrder());
+        final Mat4 greenTransform    = Mat4.IDENTITY;
+        final int  greenBufferWidth  = 100;
+        final int  greenBufferHeight = 100;
+        final IntBuffer greenBuffer = ByteBuffer.allocateDirect(greenBufferWidth * greenBufferHeight * Integer.BYTES)
+                                                .order(ByteOrder.LITTLE_ENDIAN)
+                                                .asIntBuffer();
         for (int i = 0; i < greenBufferWidth * greenBufferHeight; i++) {
-            //semi transparent green (RGBA)
-            greenBuffer.put((byte) 0x00);//R
-            greenBuffer.put((byte) 0xFF);//G
-            greenBuffer.put((byte) 0x00);//B
-            greenBuffer.put((byte) 0x88);//A
+            //semi transparent green (ARGB)
+            greenBuffer.put(0x8800FF00);
         }
         draw(program,
              projection,
@@ -169,15 +168,14 @@ public class Dispmanx {
         //setup red semi transparent buffer
         final Mat4 redTransform = Transforms.TRANSLATE(50,
                                                        50);
-        final int        redBufferWidth  = 100;
-        final int        redBufferHeight = 100;
-        final ByteBuffer redBuffer       = ByteBuffer.allocateDirect(redBufferWidth * redBufferHeight * Integer.BYTES);
+        final int redBufferWidth  = 100;
+        final int redBufferHeight = 100;
+        final IntBuffer redBuffer = ByteBuffer.allocateDirect(redBufferWidth * redBufferHeight * Integer.BYTES)
+                                              .order(ByteOrder.LITTLE_ENDIAN)
+                                              .asIntBuffer();
         for (int i = 0; i < redBufferWidth * redBufferHeight; i++) {
             //semi transparent red (ARGB)
-            redBuffer.put((byte) 0xFF);//R
-            redBuffer.put((byte) 0x00);//G
-            redBuffer.put((byte) 0x00);//B
-            redBuffer.put((byte) 0x88);//A
+            redBuffer.put(0x88FF0000);
         }
         draw(program,
              projection,
@@ -303,10 +301,10 @@ public class Dispmanx {
         final int[] attribute_list_values =
                 {
                         EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
-                        EGL_RED_SIZE, 1,
-                        EGL_GREEN_SIZE, 1,
-                        EGL_BLUE_SIZE, 1,
-                        EGL_ALPHA_SIZE, 0,
+                        EGL_RED_SIZE, 8,
+                        EGL_GREEN_SIZE, 8,
+                        EGL_BLUE_SIZE, 8,
+                        EGL_ALPHA_SIZE, 8,
                         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
                         EGL_NONE
 
@@ -555,7 +553,7 @@ public class Dispmanx {
                       final Mat4 transform,
                       final int bufferWidth,
                       final int bufferHeight,
-                      final ByteBuffer buffer) {
+                      final IntBuffer buffer) {
         //define vertex data
         final float[] vertexDataValues = {
                 //top left:
@@ -737,11 +735,11 @@ public class Dispmanx {
                                        GL_NEAREST);
         this.libGLESv2.glTexImage2D(GL_TEXTURE_2D,
                                     0,
-                                    GL_RGBA /*glesv2 doesnt care what internal format we give it, it must however match the external format*/,
+                                    GL_BGRA_EXT /*glesv2 doesnt care what internal format we give it, it must however match the external format*/,
                                     bufferWidth,
                                     bufferHeight,
                                     0,
-                                    GL_RGBA,
+                                    GL_BGRA_EXT,
                                     GL_UNSIGNED_BYTE,
                                     Native.getDirectBufferPointer(buffer));
         this.libGLESv2.check("glTexImage2D");
@@ -758,14 +756,14 @@ public class Dispmanx {
                                     6);
 
         //cleanup
-        this.libGLESv2.glUseProgram(0);
+        this.libGLESv2.glDisable(GL_BLEND);
         this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
         this.libGLESv2.glDisableVertexAttribArray(this.textureArg);
         this.libGLESv2.glDisableVertexAttribArray(this.transformCol0Arg);
         this.libGLESv2.glDisableVertexAttribArray(this.transformCol1Arg);
         this.libGLESv2.glDisableVertexAttribArray(this.transformCol2Arg);
         this.libGLESv2.glDisableVertexAttribArray(this.transformCol3Arg);
-
+        this.libGLESv2.glUseProgram(0);
     }
 
     private void end(final Pointer display,
