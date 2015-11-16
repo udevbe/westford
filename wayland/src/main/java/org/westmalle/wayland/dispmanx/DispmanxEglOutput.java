@@ -32,13 +32,17 @@ public class DispmanxEglOutput implements EglOutput {
     private final Pointer eglDisplay;
     @Nonnull
     private final Pointer eglSurface;
+    @Nonnull
+    private final Pointer eglContext;
 
     DispmanxEglOutput(@Provided @Nonnull final LibEGL libEGL,
                       @Nonnull final Pointer eglDisplay,
-                      @Nonnull final Pointer eglSurface) {
+                      @Nonnull final Pointer eglSurface,
+                      @Nonnull final Pointer eglContext) {
         this.libEGL = libEGL;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
+        this.eglContext = eglContext;
     }
 
     @Override

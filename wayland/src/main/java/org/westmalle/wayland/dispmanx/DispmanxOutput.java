@@ -22,9 +22,7 @@ import javax.annotation.Nonnull;
 
 @AutoFactory(className = "PrivateDispmanxOutputFactory",
              allowSubclasses = true)
-//TODO unit test
 public class DispmanxOutput implements HasEglOutput {
-
 
     @Nonnull
     private final DispmanxEglOutput dispmanxEglOutput;
