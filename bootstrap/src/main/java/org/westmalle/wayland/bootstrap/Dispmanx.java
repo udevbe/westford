@@ -8,14 +8,10 @@ import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
-import org.westmalle.wayland.nativ.libX11.LibX11;
-import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
 import org.westmalle.wayland.nativ.libbcm_host.VC_DISPMANX_ALPHA_T;
 import org.westmalle.wayland.nativ.libbcm_host.VC_RECT_T;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -24,10 +20,7 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BUFFER_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_COLOR_BUFFER_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_DEPTH_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
@@ -37,16 +30,13 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RGB_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SAMPLES;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SAMPLE_BUFFERS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_STENCIL_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
@@ -59,20 +49,8 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FIL
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
-import static org.westmalle.wayland.nativ.libX11xcb.LibX11xcb.XCBOwnsEventQueue;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_COPY_FROM_PARENT;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CW_EVENT_MASK;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_FOCUS_CHANGE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEYMAP_STATE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEY_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEY_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
 
 public class Dispmanx {
 
@@ -81,13 +59,6 @@ public class Dispmanx {
     static {
         Native.register(Libbcm_host.class,
                         "bcm_host");
-//        Native.register(Libxcb.class,
-//                        "xcb");
-//        Native.register(LibX11.class,
-//                        "X11");
-//        Native.register(LibX11xcb.class,
-//                        "X11-xcb");
-
         Native.register(LibEGL.class,
                         "EGL");
         Native.register(LibGLESv2.class,
@@ -95,14 +66,10 @@ public class Dispmanx {
     }
 
     //libs
-    private Libxcb    libxcb    = new Libxcb();
-    private LibX11    libX11    = new LibX11();
-    private LibX11xcb libX11xcb = new LibX11xcb();
+    private final Libbcm_host libbcm_host = new Libbcm_host();
 
-    private Libbcm_host libbcm_host = new Libbcm_host();
-
-    private LibGLESv2 libGLESv2 = new LibGLESv2();
-    private LibEGL    libEGL    = new LibEGL();
+    private final LibGLESv2 libGLESv2 = new LibGLESv2();
+    private final LibEGL    libEGL    = new LibEGL();
 
     //shaders
     private int projectionArg;
@@ -129,44 +96,35 @@ public class Dispmanx {
 
     private int textureArg;
 
-    private static final String fragment_shader_code = "precision mediump float;\n" +
-                                                       "\n" +
-                                                       "uniform sampler2D u_texture;\n" +
-                                                       "\n" +
-                                                       "varying vec2 v_texCoord;\n" +
-                                                       "\n" +
-                                                       "void main(){\n" +
-                                                       "    gl_FragColor = texture2D(u_texture, v_texCoord);\n" +
-                                                       "}";
+    private static final String fragment_shader_code =
+            "precision mediump float;\n" +
+            "\n" +
+            "uniform sampler2D u_texture;\n" +
+            "\n" +
+            "varying vec2 v_texCoord;\n" +
+            "\n" +
+            "void main(){\n" +
+            "    gl_FragColor = texture2D(u_texture, v_texCoord);\n" +
+            "}";
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(final String[] args) throws InterruptedException {
         new Dispmanx();
     }
 
     public Dispmanx() throws InterruptedException {
 
-        libbcm_host.bcm_host_init();
+        this.libbcm_host.bcm_host_init();
 
-        int screenWidth  = 1280;
-        int screenHeight = 800;
+        final int screenWidth  = 1280;
+        final int screenHeight = 800;
 
         //platform specific init
-
         final Pointer nativewindow  = createDispmanxWindow().getPointer();
         final Pointer nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
-
-//        final Pointer nativeDisplay = this.libX11.XOpenDisplay(":0");
-//        final int xwindow = createXWindow(xDisplay,
-//                                          screenWidth,
-//                                          screenHeight);
-//        final Memory nativewindow = new Memory(Integer.BYTES);
-//        nativewindow.setInt(0,
-//                            xwindow);
 
         final Pointer display = createEglDisplay(nativeDisplay);
 
         final Pointer config = createDispmanxConfig(display);
-        //final Pointer config = createXConfig(display);
 
         //init
         final Pointer surface = createEglSurface(nativewindow,
@@ -189,10 +147,10 @@ public class Dispmanx {
         //perform 2 draws
 
         //setup green semi transparent buffer
-        Mat4       greenTransform    = Mat4.IDENTITY;
-        int        greenBufferWidth  = 100;
-        int        greenBufferHeight = 100;
-        ByteBuffer greenBuffer       = ByteBuffer.allocateDirect(greenBufferWidth * greenBufferHeight * Integer.BYTES);
+        final Mat4       greenTransform    = Mat4.IDENTITY;
+        final int        greenBufferWidth  = 100;
+        final int        greenBufferHeight = 100;
+        final ByteBuffer greenBuffer       = ByteBuffer.allocateDirect(greenBufferWidth * greenBufferHeight * Integer.BYTES);
         greenBuffer.order(ByteOrder.nativeOrder());
         for (int i = 0; i < greenBufferWidth * greenBufferHeight; i++) {
             //semi transparent green (RGBA)
@@ -201,7 +159,6 @@ public class Dispmanx {
             greenBuffer.put((byte) 0x00);//B
             greenBuffer.put((byte) 0x88);//A
         }
-
         draw(program,
              projection,
              greenTransform,
@@ -209,14 +166,12 @@ public class Dispmanx {
              100,
              greenBuffer);
 
-
         //setup red semi transparent buffer
-        Mat4 redTransform = Transforms.TRANSLATE(50,
-                                                 50);
-
-        int        redBufferWidth  = 100;
-        int        redBufferHeight = 100;
-        ByteBuffer redBuffer       = ByteBuffer.allocateDirect(redBufferWidth * redBufferHeight * Integer.BYTES);
+        final Mat4 redTransform = Transforms.TRANSLATE(50,
+                                                       50);
+        final int        redBufferWidth  = 100;
+        final int        redBufferHeight = 100;
+        final ByteBuffer redBuffer       = ByteBuffer.allocateDirect(redBufferWidth * redBufferHeight * Integer.BYTES);
         for (int i = 0; i < redBufferWidth * redBufferHeight; i++) {
             //semi transparent red (ARGB)
             redBuffer.put((byte) 0xFF);//R
@@ -224,7 +179,6 @@ public class Dispmanx {
             redBuffer.put((byte) 0x00);//B
             redBuffer.put((byte) 0x88);//A
         }
-
         draw(program,
              projection,
              redTransform,
@@ -240,79 +194,19 @@ public class Dispmanx {
         Thread.sleep(50000);
     }
 
-    private int createXWindow(final Pointer xDisplay,
-                              final int width,
-                              final int height) {
-
-        if (xDisplay == null) {
-            throw new RuntimeException("XOpenDisplay() failed: " + ":0");
-        }
-
-        final Pointer xcbConnection = this.libX11xcb.XGetXCBConnection(xDisplay);
-        this.libX11xcb.XSetEventQueueOwner(xDisplay,
-                                           XCBOwnsEventQueue);
-        if (this.libxcb.xcb_connection_has_error(xcbConnection) != 0) {
-            throw new RuntimeException("error occurred while connecting to X server");
-        }
-
-        final Pointer      setup  = this.libxcb.xcb_get_setup(xcbConnection);
-        final xcb_screen_t screen = this.libxcb.xcb_setup_roots_iterator(setup).data;
-
-        final int window = this.libxcb.xcb_generate_id(xcbConnection);
-        if (window <= 0) {
-            throw new RuntimeException("failed to generate X window id");
-        }
-
-        final int     mask   = XCB_CW_EVENT_MASK;
-        final Pointer values = new Memory(Integer.BYTES);
-        values.write(0,
-                     new int[]{
-                             XCB_EVENT_MASK_KEY_PRESS |
-                             XCB_EVENT_MASK_KEY_RELEASE |
-                             XCB_EVENT_MASK_BUTTON_PRESS |
-                             XCB_EVENT_MASK_BUTTON_RELEASE |
-                             XCB_EVENT_MASK_ENTER_WINDOW |
-                             XCB_EVENT_MASK_LEAVE_WINDOW |
-                             XCB_EVENT_MASK_POINTER_MOTION |
-                             XCB_EVENT_MASK_KEYMAP_STATE |
-                             XCB_EVENT_MASK_FOCUS_CHANGE
-                     },
-                     0,
-                     1);
-        this.libxcb.xcb_create_window(xcbConnection,
-                                      (byte) XCB_COPY_FROM_PARENT,
-                                      window,
-                                      screen.root,
-                                      (short) 0,
-                                      (short) 0,
-                                      (short) width,
-                                      (short) height,
-                                      (short) 0,
-                                      (short) XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                                      screen.root_visual,
-                                      mask,
-                                      values);
-        this.libxcb.xcb_map_window(xcbConnection,
-                                   window);
-        this.libxcb.xcb_flush(xcbConnection);
-
-        return window;
-    }
-
-
     private EGL_DISPMANX_WINDOW_T createDispmanxWindow() {
-        int       dispman_element;
-        int       dispman_display;
-        int       dispman_update;
-        VC_RECT_T dst_rect = new VC_RECT_T();
-        VC_RECT_T src_rect = new VC_RECT_T();
+        final int       dispman_element;
+        final int       dispman_display;
+        final int       dispman_update;
+        final VC_RECT_T dst_rect = new VC_RECT_T();
+        final VC_RECT_T src_rect = new VC_RECT_T();
 
-        Pointer display_width  = new Memory(Integer.BYTES);
-        Pointer display_height = new Memory(Integer.BYTES);
+        final Pointer display_width  = new Memory(Integer.BYTES);
+        final Pointer display_height = new Memory(Integer.BYTES);
 
-        final int success = libbcm_host.graphics_get_display_size(Libbcm_host.DISPMANX_ID_HDMI,
-                                                                  display_width,
-                                                                  display_height);
+        final int success = this.libbcm_host.graphics_get_display_size(Libbcm_host.DISPMANX_ID_HDMI,
+                                                                       display_width,
+                                                                       display_height);
 
         if (success < 0) {
             throw new RuntimeException("couldn't get display size");
@@ -330,64 +224,56 @@ public class Dispmanx {
         src_rect.height = display_height.getInt(0) << 16;
         src_rect.write();
 
-        dispman_display = libbcm_host.vc_dispmanx_display_open(Libbcm_host.DISPMANX_ID_HDMI);
-        dispman_update = libbcm_host.vc_dispmanx_update_start(0);
+        dispman_display = this.libbcm_host.vc_dispmanx_display_open(Libbcm_host.DISPMANX_ID_HDMI);
+        dispman_update = this.libbcm_host.vc_dispmanx_update_start(0);
 
         // set alpha to prevent surfaces beneath GL context to show through when GL context uses alpha channel
-        VC_DISPMANX_ALPHA_T alpha = new VC_DISPMANX_ALPHA_T();
+        final VC_DISPMANX_ALPHA_T alpha = new VC_DISPMANX_ALPHA_T();
         alpha.flags = Libbcm_host.DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS;
         alpha.opacity = 255;
         alpha.mask = 0;
         alpha.write();
 
-        dispman_element = libbcm_host.vc_dispmanx_element_add(dispman_update,
-                                                              dispman_display,
-                                                              0/*layer*/,
-                                                              dst_rect.getPointer(),
-                                                              0/*src*/,
-                                                              src_rect.getPointer(),
-                                                              DISPMANX_PROTECTION_NONE,
-                                                              alpha.getPointer(),
-                                                              null/*clamp*/,
-                                                              0/*transform*/);
-        EGL_DISPMANX_WINDOW_T nativewindow = new EGL_DISPMANX_WINDOW_T();
+        dispman_element = this.libbcm_host.vc_dispmanx_element_add(dispman_update,
+                                                                   dispman_display,
+                                                                   0/*layer*/,
+                                                                   dst_rect.getPointer(),
+                                                                   0/*src*/,
+                                                                   src_rect.getPointer(),
+                                                                   DISPMANX_PROTECTION_NONE,
+                                                                   alpha.getPointer(),
+                                                                   null/*clamp*/,
+                                                                   0/*transform*/);
+        final EGL_DISPMANX_WINDOW_T nativewindow = new EGL_DISPMANX_WINDOW_T();
 
         nativewindow.element = dispman_element;
         nativewindow.width = display_width.getInt(0);
         nativewindow.height = display_height.getInt(0);
         nativewindow.write();
 
-        libbcm_host.vc_dispmanx_update_submit_sync(dispman_update);
+        this.libbcm_host.vc_dispmanx_update_submit_sync(dispman_update);
 
         return nativewindow;
     }
 
-    private Pointer createEglDisplay(Pointer nativeDisplay) {
-        boolean       result;
+    private Pointer createEglDisplay(final Pointer nativeDisplay) {
+        final boolean result;
         final Pointer display = this.libEGL.eglGetDisplay(nativeDisplay);
-//        this.libEGL.loadEglGetPlatformDisplayEXT();
-//        final Pointer display = this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
-//                                                                     nativeDisplay,
-//                                                                     null);
-        if (display == EGL_NO_DISPLAY)
-
-        {
-            libEGL.throwError("eglGetDisplay");
+        if (display == EGL_NO_DISPLAY) {
+            this.libEGL.throwError("eglGetDisplay");
         }
 
-        libGLESv2.check("eglGetDisplay");
+        this.libGLESv2.check("eglGetDisplay");
 
         // initialize the EGL display connection
-        result = libEGL.eglInitialize(display,
-                                      null,
-                                      null);
-        if (!result)
-
-        {
-            libEGL.throwError("eglInitialize");
+        result = this.libEGL.eglInitialize(display,
+                                           null,
+                                           null);
+        if (!result) {
+            this.libEGL.throwError("eglInitialize");
         }
 
-        libGLESv2.check("eglInitialize");
+        this.libGLESv2.check("eglInitialize");
 
         final String eglClientApis = this.libEGL.eglQueryString(display,
                                                                 LibEGL.EGL_CLIENT_APIS)
@@ -410,57 +296,11 @@ public class Dispmanx {
         return display;
     }
 
-    private Pointer createXConfig(Pointer display) {
-        boolean result;
-        Pointer num_config = new Memory(Integer.BYTES);
+    private Pointer createDispmanxConfig(final Pointer display) {
+        final boolean result;
+        final Pointer num_config = new Memory(Integer.BYTES);
 
-        int attribute_list_values[] =
-                {
-                        EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
-                        EGL_BUFFER_SIZE, 32,
-                        EGL_RED_SIZE, 8,
-                        EGL_GREEN_SIZE, 8,
-                        EGL_BLUE_SIZE, 8,
-                        EGL_ALPHA_SIZE, 8,
-                        EGL_DEPTH_SIZE, 24,
-                        EGL_STENCIL_SIZE, 8,
-                        EGL_SAMPLE_BUFFERS, 0,
-                        EGL_SAMPLES, 0,
-                        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-                        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-                        EGL_NONE
-                };
-        Pointer attribute_list = new Memory(Integer.BYTES * attribute_list_values.length);
-        attribute_list.write(0,
-                             attribute_list_values,
-                             0,
-                             attribute_list_values.length);
-
-        Pointer configs = new Memory(Pointer.SIZE);
-
-
-        // get an appropriate EGL frame buffer configuration
-        result = libEGL.eglChooseConfig(display,
-                                        attribute_list,
-                                        configs,
-                                        1,
-                                        num_config);
-        if (!result)
-
-        {
-            libEGL.throwError("eglChooseConfig");
-        }
-
-        libGLESv2.check("eglChooseConfig");
-
-        return configs.getPointer(0);
-    }
-
-    private Pointer createDispmanxConfig(Pointer display) {
-        boolean result;
-        Pointer num_config = new Memory(Integer.BYTES);
-
-        int attribute_list_values[] =
+        final int[] attribute_list_values =
                 {
                         EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
                         EGL_RED_SIZE, 1,
@@ -471,43 +311,41 @@ public class Dispmanx {
                         EGL_NONE
 
                 };
-        Pointer attribute_list = new Memory(Integer.BYTES * attribute_list_values.length);
+        final Pointer attribute_list = new Memory(Integer.BYTES * attribute_list_values.length);
         attribute_list.write(0,
                              attribute_list_values,
                              0,
                              attribute_list_values.length);
 
-        Pointer configs = new Memory(Pointer.SIZE);
-
-
+        final Pointer configs = new Memory(Pointer.SIZE);
         // get an appropriate EGL frame buffer configuration
-        result = libEGL.eglChooseConfig(display,
-                                        attribute_list,
-                                        configs,
-                                        1,
-                                        num_config);
+        result = this.libEGL.eglChooseConfig(display,
+                                             attribute_list,
+                                             configs,
+                                             1,
+                                             num_config);
         if (!result)
 
         {
-            libEGL.throwError("eglChooseConfig");
+            this.libEGL.throwError("eglChooseConfig");
         }
 
-        libGLESv2.check("eglChooseConfig");
+        this.libGLESv2.check("eglChooseConfig");
 
         return configs.getPointer(0);
     }
 
 
     private Pointer createEglSurface(final Pointer nativewindow,
-                                     Pointer display,
-                                     Pointer config) {
+                                     final Pointer display,
+                                     final Pointer config) {
         boolean result;
 
-        int context_attributes_values[] = {
+        final int[] context_attributes_values = {
                 EGL_CONTEXT_CLIENT_VERSION, 2,
                 EGL_NONE
         };
-        Pointer context_attributes = new Memory(Integer.BYTES * context_attributes_values.length);
+        final Pointer context_attributes = new Memory(Integer.BYTES * context_attributes_values.length);
         context_attributes.write(0,
                                  context_attributes_values,
                                  0,
@@ -515,52 +353,34 @@ public class Dispmanx {
 
 
         // get an appropriate EGL frame buffer configuration
-        result = libEGL.eglBindAPI(EGL_OPENGL_ES_API);
+        result = this.libEGL.eglBindAPI(EGL_OPENGL_ES_API);
         if (!result) {
-            libEGL.throwError("eglBindAPI");
+            this.libEGL.throwError("eglBindAPI");
         }
 
-        libGLESv2.check("eglBindAPI");
+        this.libGLESv2.check("eglBindAPI");
 
         // create an EGL window surface
-
-        libGLESv2.check("?");
-
-//        final int[] surfaceAttributes = {
-//                EGL_RENDER_BUFFER,
-//                EGL_BACK_BUFFER,
-//                EGL_NONE
-//        };
-//        final Pointer eglSurfaceAttribs = new Memory(surfaceAttributes.length * Integer.BYTES);
-//        eglSurfaceAttribs.write(0,
-//                                surfaceAttributes,
-//                                0,
-//                                surfaceAttributes.length);
         final Pointer surface = this.libEGL.eglCreateWindowSurface(display,
                                                                    config,
                                                                    nativewindow,
                                                                    null);
-        //this.libEGL.loadEglCreatePlatformWindowSurfaceEXT();
-//        final Pointer surface = this.libEGL.eglCreatePlatformWindowSurfaceEXT(display,
-//                                                                              config,
-//                                                                              nativewindow,
-//                                                                              eglSurfaceAttribs);
         if (surface == EGL_NO_SURFACE) {
-            libEGL.throwError("eglCreateWindowSurface");
+            this.libEGL.throwError("eglCreateWindowSurface");
         }
 
-        libGLESv2.check("eglCreateWindowSurface");
+        this.libGLESv2.check("eglCreateWindowSurface");
 
         // create an EGL rendering context
-        final Pointer context = libEGL.eglCreateContext(display,
-                                                        config,
-                                                        EGL_NO_CONTEXT,
-                                                        context_attributes);
+        final Pointer context = this.libEGL.eglCreateContext(display,
+                                                             config,
+                                                             EGL_NO_CONTEXT,
+                                                             context_attributes);
         if (context == EGL_NO_CONTEXT) {
-            libEGL.throwError("eglCreateContext");
+            this.libEGL.throwError("eglCreateContext");
         }
 
-        libGLESv2.check("eglCreateContext");
+        this.libGLESv2.check("eglCreateContext");
 
         // connect the context to the surface
         result = this.libEGL.eglMakeCurrent(display,
@@ -571,7 +391,7 @@ public class Dispmanx {
             this.libEGL.throwError("eglMakeCurrent");
         }
 
-        libGLESv2.check("eglMakeCurrent");
+        this.libGLESv2.check("eglMakeCurrent");
 
         return surface;
     }
@@ -583,45 +403,45 @@ public class Dispmanx {
 
     private int initShader() {
         //vertex shader
-        int           vertexShader       = libGLESv2.glCreateShader(LibGLESv2.GL_VERTEX_SHADER);
+        final int     vertexShader       = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
         final Pointer vertexShaderSource = new NativeString(vertex_shader_code).getPointer();
         final Pointer vertexShaders      = new Memory(Pointer.SIZE);
         vertexShaders.setPointer(0,
                                  vertexShaderSource);
-        libGLESv2.glShaderSource(vertexShader,
-                                 1,
-                                 vertexShaders,
-                                 null);
-        libGLESv2.glCompileShader(vertexShader);
+        this.libGLESv2.glShaderSource(vertexShader,
+                                      1,
+                                      vertexShaders,
+                                      null);
+        this.libGLESv2.glCompileShader(vertexShader);
 
         checkShader(vertexShader);
 
         //fragment shader
-        int           fragmentShader       = libGLESv2.glCreateShader(LibGLESv2.GL_FRAGMENT_SHADER);
+        final int     fragmentShader       = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
         final Pointer fragmentShaderSource = new NativeString(fragment_shader_code).getPointer();
         final Pointer fragmentShaders      = new Memory(Pointer.SIZE);
         fragmentShaders.setPointer(0,
                                    fragmentShaderSource);
-        libGLESv2.glShaderSource(fragmentShader,
-                                 1,
-                                 fragmentShaders,
-                                 null);
-        libGLESv2.glCompileShader(fragmentShader);
+        this.libGLESv2.glShaderSource(fragmentShader,
+                                      1,
+                                      fragmentShaders,
+                                      null);
+        this.libGLESv2.glCompileShader(fragmentShader);
 
         checkShader(fragmentShader);
 
         //shader program
-        int shaderProgram = libGLESv2.glCreateProgram();
-        libGLESv2.glAttachShader(shaderProgram,
-                                 vertexShader);
-        libGLESv2.check("glAttachShader");
+        final int shaderProgram = this.libGLESv2.glCreateProgram();
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      vertexShader);
+        this.libGLESv2.check("glAttachShader");
 
-        libGLESv2.glAttachShader(shaderProgram,
-                                 fragmentShader);
-        libGLESv2.check("glAttachShader");
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      fragmentShader);
+        this.libGLESv2.check("glAttachShader");
 
-        libGLESv2.glLinkProgram(shaderProgram);
-        libGLESv2.check("glLinkProgram");
+        this.libGLESv2.glLinkProgram(shaderProgram);
+        this.libGLESv2.check("glLinkProgram");
 
         //check the link status
         final Pointer linked = new Memory(Integer.BYTES);
@@ -650,33 +470,33 @@ public class Dispmanx {
 
         //find shader arguments
         final Memory u_projection = new NativeString("u_projection").getPointer();
-        projectionArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
-                                                            u_projection);
-        libGLESv2.check("glGetUniformLocation");
+        this.projectionArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
+                                                                 u_projection);
+        this.libGLESv2.check("glGetUniformLocation");
 
         final Memory a_position = new NativeString("a_position").getPointer();
-        positionArg = libGLESv2.glGetAttribLocation(shaderProgram,
-                                                    a_position);
-        libGLESv2.check("glGetAttribLocation");
+        this.positionArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                              a_position);
+        this.libGLESv2.check("glGetAttribLocation");
 
         final Memory a_texCoord = new NativeString("a_texCoord").getPointer();
-        textureCoordinateArg = libGLESv2.glGetAttribLocation(shaderProgram,
-                                                             a_texCoord);
-        libGLESv2.check("glGetAttribLocation");
+        this.textureCoordinateArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                                       a_texCoord);
+        this.libGLESv2.check("glGetAttribLocation");
 
         final Memory a_transform = new NativeString("a_transform").getPointer();
-        transformCol0Arg = libGLESv2.glGetAttribLocation(shaderProgram,
-                                                         a_transform);
-        libGLESv2.check("glGetAttribLocation");
+        this.transformCol0Arg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                                   a_transform);
+        this.libGLESv2.check("glGetAttribLocation");
 
-        transformCol1Arg = transformCol0Arg + 1;
-        transformCol2Arg = transformCol1Arg + 1;
-        transformCol3Arg = transformCol2Arg + 1;
+        this.transformCol1Arg = this.transformCol0Arg + 1;
+        this.transformCol2Arg = this.transformCol1Arg + 1;
+        this.transformCol3Arg = this.transformCol2Arg + 1;
 
         final Memory u_texture = new NativeString("u_texture").getPointer();
-        textureArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
-                                                         u_texture);
-        libGLESv2.check("glGetUniformLocation");
+        this.textureArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
+                                                              u_texture);
+        this.libGLESv2.check("glGetUniformLocation");
 
 
         return shaderProgram;
@@ -711,34 +531,33 @@ public class Dispmanx {
     }
 
 
-    private void begin(int width,
-                       int height) {
-        //begin
+    private void begin(final int width,
+                       final int height) {
         this.libGLESv2.glViewport(0,
                                   0,
                                   width,
                                   height);
-        libGLESv2.check("glViewport");
+        this.libGLESv2.check("glViewport");
 
-        libGLESv2.glClearColor(0.0f,
-                               0.0f,
-                               0.0f,
-                               1.0f);
-        libGLESv2.check("glClearColor");
+        this.libGLESv2.glClearColor(0.0f,
+                                    0.0f,
+                                    0.0f,
+                                    1.0f);
+        this.libGLESv2.check("glClearColor");
 
-        libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
-        libGLESv2.check("glClear");
+        this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
+        this.libGLESv2.check("glClear");
 
     }
 
-    private void draw(int program,
-                      Mat4 projection,
-                      Mat4 transform,
-                      int bufferWidth,
-                      int bufferHeight,
-                      ByteBuffer buffer) {
+    private void draw(final int program,
+                      final Mat4 projection,
+                      final Mat4 transform,
+                      final int bufferWidth,
+                      final int bufferHeight,
+                      final ByteBuffer buffer) {
         //define vertex data
-        float vertexDataValues[] = {
+        final float[] vertexDataValues = {
                 //top left:
                 //attribute vec2 a_position
                 0f, 0f,
@@ -807,15 +626,15 @@ public class Dispmanx {
                 transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23(),
                 transform.getM30(), transform.getM31(), transform.getM32(), transform.getM33(),
         };
-        Memory vertexData = new Memory(Float.BYTES * vertexDataValues.length);
+        final Memory vertexData = new Memory(Float.BYTES * vertexDataValues.length);
         vertexData.write(0,
                          vertexDataValues,
                          0,
                          vertexDataValues.length);
 
         //activate shader
-        libGLESv2.glUseProgram(program);
-        libGLESv2.check("glUseProgram");
+        this.libGLESv2.glUseProgram(program);
+        this.libGLESv2.check("glUseProgram");
 
         //upload uniform data
         final Pointer projectionBuffer = new Memory(Float.BYTES * 16);
@@ -823,71 +642,71 @@ public class Dispmanx {
                                projection.toArray(),
                                0,
                                16);
-        this.libGLESv2.glUniformMatrix4fv(projectionArg,
+        this.libGLESv2.glUniformMatrix4fv(this.projectionArg,
                                           1,
                                           false,
                                           projectionBuffer);
-        libGLESv2.check("glUniformMatrix4fv");
+        this.libGLESv2.check("glUniformMatrix4fv");
 
         //set vertex data in shader
-        this.libGLESv2.glEnableVertexAttribArray(positionArg);
-        this.libGLESv2.glVertexAttribPointer(positionArg,
+        this.libGLESv2.glEnableVertexAttribArray(this.positionArg);
+        this.libGLESv2.glVertexAttribPointer(this.positionArg,
                                              2,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              vertexData);
-        libGLESv2.check("glVertexAttribPointer");
+        this.libGLESv2.check("glVertexAttribPointer");
 
-        this.libGLESv2.glEnableVertexAttribArray(textureCoordinateArg);
-        this.libGLESv2.glVertexAttribPointer(textureCoordinateArg,
+        this.libGLESv2.glEnableVertexAttribArray(this.textureCoordinateArg);
+        this.libGLESv2.glVertexAttribPointer(this.textureCoordinateArg,
                                              2,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              vertexData.share(2 * Float.BYTES));
-        libGLESv2.check("glVertexAttribPointer");
+        this.libGLESv2.check("glVertexAttribPointer");
 
-        this.libGLESv2.glEnableVertexAttribArray(transformCol0Arg);
-        this.libGLESv2.glVertexAttribPointer(transformCol0Arg,
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol0Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol0Arg,
                                              4,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              vertexData.share(4 * Float.BYTES));
-        libGLESv2.check("glVertexAttribPointer");
+        this.libGLESv2.check("glVertexAttribPointer");
 
-        this.libGLESv2.glEnableVertexAttribArray(transformCol1Arg);
-        this.libGLESv2.glVertexAttribPointer(transformCol1Arg,
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol1Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol1Arg,
                                              4,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              vertexData.share(8 * Float.BYTES));
-        libGLESv2.check("glVertexAttribPointer");
+        this.libGLESv2.check("glVertexAttribPointer");
 
-        this.libGLESv2.glEnableVertexAttribArray(transformCol2Arg);
-        this.libGLESv2.glVertexAttribPointer(transformCol2Arg,
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol2Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol2Arg,
                                              4,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              vertexData.share(12 * Float.BYTES));
-        libGLESv2.check("glVertexAttribPointer");
+        this.libGLESv2.check("glVertexAttribPointer");
 
-        this.libGLESv2.glEnableVertexAttribArray(transformCol3Arg);
-        this.libGLESv2.glVertexAttribPointer(transformCol3Arg,
+        this.libGLESv2.glEnableVertexAttribArray(this.transformCol3Arg);
+        this.libGLESv2.glVertexAttribPointer(this.transformCol3Arg,
                                              4,
                                              GL_FLOAT,
                                              false,
                                              20 * Float.BYTES,
                                              vertexData.share(16 * Float.BYTES));
-        libGLESv2.check("glVertexAttribPointer");
+        this.libGLESv2.check("glVertexAttribPointer");
 
         //check for required texture extensions
         final String extensions = this.libGLESv2.glGetString(LibGLESv2.GL_EXTENSIONS)
                                                 .getString(0);
-        libGLESv2.check("glGetString");
+        this.libGLESv2.check("glGetString");
 
         LOGGER.info("GLESv2 extensions: " + extensions);
         if (!extensions.contains("GL_EXT_texture_format_BGRA8888")) {
@@ -897,14 +716,14 @@ public class Dispmanx {
         final Memory textureIdValue = new Memory(Integer.BYTES);
         this.libGLESv2.glGenTextures(1,
                                      textureIdValue);
-        libGLESv2.check("glGenTextures");
+        this.libGLESv2.check("glGenTextures");
 
-        int textureId = textureIdValue.getInt(0);
+        final int textureId = textureIdValue.getInt(0);
 
         //configure texture blending
-        libGLESv2.glBlendFunc(GL_ONE,
-                              GL_ONE_MINUS_SRC_ALPHA);
-        libGLESv2.check("glBlendFunc");
+        this.libGLESv2.glBlendFunc(GL_ONE,
+                                   GL_ONE_MINUS_SRC_ALPHA);
+        this.libGLESv2.check("glBlendFunc");
 
 
         //upload buffer to gpu
@@ -916,16 +735,16 @@ public class Dispmanx {
         this.libGLESv2.glTexParameteri(GL_TEXTURE_2D,
                                        GL_TEXTURE_MAG_FILTER,
                                        GL_NEAREST);
-        libGLESv2.glTexImage2D(GL_TEXTURE_2D,
-                               0,
-                               GL_RGBA /*glesv2 doesnt care what internal format we give it, it must however match the external format*/,
-                               bufferWidth,
-                               bufferHeight,
-                               0,
-                               GL_RGBA,
-                               GL_UNSIGNED_BYTE,
-                               Native.getDirectBufferPointer(buffer));
-        libGLESv2.check("glTexImage2D");
+        this.libGLESv2.glTexImage2D(GL_TEXTURE_2D,
+                                    0,
+                                    GL_RGBA /*glesv2 doesnt care what internal format we give it, it must however match the external format*/,
+                                    bufferWidth,
+                                    bufferHeight,
+                                    0,
+                                    GL_RGBA,
+                                    GL_UNSIGNED_BYTE,
+                                    Native.getDirectBufferPointer(buffer));
+        this.libGLESv2.check("glTexImage2D");
 
         //set the buffer in the shader
         this.libGLESv2.glActiveTexture(GL_TEXTURE0);
@@ -934,25 +753,24 @@ public class Dispmanx {
 
         //draw
         this.libGLESv2.glEnable(GL_BLEND);
-        libGLESv2.glDrawArrays(GL_TRIANGLES,
-                               0,
-                               6);
+        this.libGLESv2.glDrawArrays(GL_TRIANGLES,
+                                    0,
+                                    6);
 
         //cleanup
-        libGLESv2.glUseProgram(0);
-        libGLESv2.glDisableVertexAttribArray(positionArg);
-        libGLESv2.glDisableVertexAttribArray(textureArg);
-        libGLESv2.glDisableVertexAttribArray(transformCol0Arg);
-        libGLESv2.glDisableVertexAttribArray(transformCol1Arg);
-        libGLESv2.glDisableVertexAttribArray(transformCol2Arg);
-        libGLESv2.glDisableVertexAttribArray(transformCol3Arg);
+        this.libGLESv2.glUseProgram(0);
+        this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
+        this.libGLESv2.glDisableVertexAttribArray(this.textureArg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol0Arg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol1Arg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol2Arg);
+        this.libGLESv2.glDisableVertexAttribArray(this.transformCol3Arg);
 
     }
 
-    private void end(Pointer display,
-                     Pointer surface) {
-        //end
-        libEGL.eglSwapBuffers(display,
-                              surface);
+    private void end(final Pointer display,
+                     final Pointer surface) {
+        this.libEGL.eglSwapBuffers(display,
+                                   surface);
     }
 }
