@@ -293,7 +293,7 @@ public class EglGles2RendererTest {
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
         final int              bufferWidth      = 640;
         final int              bufferHeight     = 480;
-        final int              shmFormat        = WlShmFormat.XRGB8888.getValue();
+        final int              shmFormat        = WlShmFormat.ARGB8888.getValue();
         final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                          "shaderPrograms");
         final Integer shaderProgram    = 12346;
