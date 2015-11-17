@@ -27,8 +27,6 @@ import javax.annotation.Nonnull;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BGRA_EXT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE_MINUS_SRC_ALPHA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
@@ -54,23 +52,11 @@ public class Gles2SurfaceData {
         final int bufferWidth  = shmBuffer.getStride() / Integer.BYTES;
         final int bufferHeight = shmBuffer.getHeight();
 
-        //check for required texture extensions
-        final String extensions = libGLESv2.glGetString(LibGLESv2.GL_EXTENSIONS)
-                                           .getString(0);
-
-        if (!extensions.contains("GL_EXT_texture_format_BGRA8888")) {
-            throw new Error("Required extension GL_EXT_texture_format_BGRA8888 not available");
-        }
-
         final Memory textureIdValue = new Memory(Integer.BYTES);
         libGLESv2.glGenTextures(1,
                                 textureIdValue);
 
         final int textureId = textureIdValue.getInt(0);
-
-        //configure texture blending
-        libGLESv2.glBlendFunc(GL_ONE,
-                              GL_ONE_MINUS_SRC_ALPHA);
 
         //upload buffer to gpu
         libGLESv2.glBindTexture(GL_TEXTURE_2D,

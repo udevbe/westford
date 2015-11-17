@@ -30,6 +30,8 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE_MINUS_SRC_ALPHA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE0;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
@@ -318,7 +320,9 @@ public class EglGles2RenderEngine implements RenderEngine {
                          vertexDataValues.length);
 
         //activate shader
-        this.libGLESv2.glUseProgram(this.shaderPrograms.get(queryBufferFormat(shmBuffer)));
+        final Gles2BufferFormat gles2BufferFormat = queryBufferFormat(shmBuffer);
+        final Integer shader = this.shaderPrograms.get(gles2BufferFormat);
+        this.libGLESv2.glUseProgram(shader);
 
         //upload uniform data
         final int     projectionSize   = this.projection.length;
@@ -371,6 +375,9 @@ public class EglGles2RenderEngine implements RenderEngine {
                                    0);
 
         //draw
+        //configure texture blending
+        this.libGLESv2.glBlendFunc(GL_ONE,
+                                   GL_ONE_MINUS_SRC_ALPHA);
         this.libGLESv2.glEnable(GL_BLEND);
         this.libGLESv2.glDrawArrays(GL_TRIANGLES,
                                     0,
