@@ -13,23 +13,18 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BUFFER_PRESERVED;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_DEFAULT_DISPLAY;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_SURFACE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 
 public class DispmanxEglOutputFactory {
@@ -57,149 +52,130 @@ public class DispmanxEglOutputFactory {
         nativewindow.height = height;
         nativewindow.write();
 
-        final Pointer eglDisplay = createEglDisplay();
-        final Pointer config     = chooseConfig(eglDisplay);
-        final Pointer eglSurface = createEglSurface(eglDisplay,
-                                                    config,
-                                                    nativewindow);
+        final Pointer nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
+        final Pointer display       = createEglDisplay(nativeDisplay);
+        final Pointer config        = createDispmanxConfig(display);
+        // create an EGL rendering context
+        final Pointer context = getContext(display,
+                                           config);
+        final Pointer surface = createEglSurface(nativewindow.getPointer(),
+                                                 display,
+                                                 config,
+                                                 context);
 
-        return this.privateDispmanxEglOutputFactory.create(eglDisplay,
-                                                           eglSurface,
-                                                           createEglContext(eglDisplay,
-                                                                            config));
+        return this.privateDispmanxEglOutputFactory.create(display,
+                                                           surface,
+                                                           context);
     }
 
-    private Pointer createEglSurface(final Pointer eglDisplay,
+    private Pointer createEglSurface(final Pointer nativewindow,
+                                     final Pointer display,
                                      final Pointer config,
-                                     final EGL_DISPMANX_WINDOW_T nativeWindow) {
-
-        final Pointer eglSurface = this.libEGL.eglCreateWindowSurface(eglDisplay,
-                                                                      config,
-                                                                      nativeWindow.getPointer(),
-                                                                      null);
-        if (eglSurface == null) {
-            this.libEGL.throwError("eglCreateWindowSurface()");
+                                     final Pointer context) {
+        // get an appropriate EGL frame buffer configuration
+        if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
+            this.libEGL.throwError("eglBindAPI");
         }
 
-        if (!this.libEGL.eglSurfaceAttrib(eglDisplay,
-                                          eglSurface,
-                                          EGL_SWAP_BEHAVIOR,
-                                          EGL_BUFFER_PRESERVED)) {
-            this.libEGL.throwError("eglSurfaceAttrib()");
+        final Pointer surface = this.libEGL.eglCreateWindowSurface(display,
+                                                                   config,
+                                                                   nativewindow,
+                                                                   null);
+        if (surface == EGL_NO_SURFACE) {
+            this.libEGL.throwError("eglCreateWindowSurface");
         }
 
-        final Pointer context = createEglContext(eglDisplay,
-                                                 config);
-
-        if (!this.libEGL.eglMakeCurrent(eglDisplay,
-                                        eglSurface,
-                                        eglSurface,
+        // connect the context to the surface
+        if (!this.libEGL.eglMakeCurrent(display,
+                                        surface,
+                                        surface,
                                         context)) {
-            this.libEGL.throwError("eglMakeCurrent()");
+            this.libEGL.throwError("eglMakeCurrent");
         }
 
-        return eglSurface;
+        return surface;
     }
 
-    private Pointer createEglContextAttribs() {
-        final int[] contextAttributes = {
-                //@formatter:off
+    private Pointer getContext(final Pointer display,
+                               final Pointer config) {
+        final int[] context_attributes_values = {
                 EGL_CONTEXT_CLIENT_VERSION, 2,
                 EGL_NONE
-                //@formatter:on
         };
-        final Pointer eglContextAttribs = new Memory(Integer.BYTES * contextAttributes.length);
-        eglContextAttribs.write(0,
-                                contextAttributes,
-                                0,
-                                contextAttributes.length);
-        return eglContextAttribs;
-    }
-
-    private Pointer createEglContext(final Pointer eglDisplay,
-                                     final Pointer config) {
-
-        if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
-            this.libEGL.throwError("eglBindAPI()");
-        }
-
-        final Pointer eglContextAttribs = createEglContextAttribs();
-        final Pointer context = this.libEGL.eglCreateContext(eglDisplay,
+        final Pointer context_attributes = new Memory(Integer.BYTES * context_attributes_values.length);
+        context_attributes.write(0,
+                                 context_attributes_values,
+                                 0,
+                                 context_attributes_values.length);
+        final Pointer context = this.libEGL.eglCreateContext(display,
                                                              config,
                                                              EGL_NO_CONTEXT,
-                                                             eglContextAttribs);
-        if (context == null) {
-            this.libEGL.throwError("eglCreateContext()");
+                                                             context_attributes);
+        if (context == EGL_NO_CONTEXT) {
+            this.libEGL.throwError("eglCreateContext");
         }
         return context;
     }
 
-    private Pointer createEglConfigAttribs() {
-        final int[] attributes = {
-                //@formatter:off
-                EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
-		        EGL_RED_SIZE, 1,
-		        EGL_GREEN_SIZE, 1,
-		        EGL_BLUE_SIZE, 1,
-		        EGL_ALPHA_SIZE, 0,
-		        EGL_RENDERABLE_TYPE,  EGL_OPENGL_ES2_BIT,
-		        EGL_NONE
-                //@formatter:on
-        };
-        final Pointer configAttribs = new Memory(Integer.BYTES * attributes.length);
-        configAttribs.write(0,
-                            attributes,
-                            0,
-                            attributes.length);
-        return configAttribs;
-    }
+    private Pointer createDispmanxConfig(final Pointer display) {
+        final Pointer num_config = new Memory(Integer.BYTES);
 
-    private Pointer chooseConfig(final Pointer eglDisplay) {
-        final int     configs_size = 1;
-        final Pointer configs      = new Memory(configs_size * Pointer.SIZE);
+        final int[] attribute_list_values =
+                {
+                        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
+                        EGL_RED_SIZE, 8,
+                        EGL_GREEN_SIZE, 8,
+                        EGL_BLUE_SIZE, 8,
+                        EGL_ALPHA_SIZE, 8,
+                        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                        EGL_NONE
 
-        final Pointer num_configs        = new Memory(Integer.BYTES);
-        final Pointer egl_config_attribs = createEglConfigAttribs();
-        if (!this.libEGL.eglChooseConfig(eglDisplay,
-                                         egl_config_attribs,
+                };
+        final Pointer attribute_list = new Memory(Integer.BYTES * attribute_list_values.length);
+        attribute_list.write(0,
+                             attribute_list_values,
+                             0,
+                             attribute_list_values.length);
+
+        final Pointer configs = new Memory(Pointer.SIZE);
+        // get an appropriate EGL frame buffer configuration
+        if (!this.libEGL.eglChooseConfig(display,
+                                         attribute_list,
                                          configs,
-                                         configs_size,
-                                         num_configs)) {
-            this.libEGL.throwError("eglChooseConfig()");
-        }
-        if (num_configs.getInt(0) == 0) {
-            throw new RuntimeException("failed to find suitable EGLConfig");
+                                         1,
+                                         num_config)) {
+            this.libEGL.throwError("eglChooseConfig");
         }
 
         return configs.getPointer(0);
     }
 
+    private Pointer createEglDisplay(final Pointer nativeDisplay) {
+        final Pointer display = this.libEGL.eglGetDisplay(nativeDisplay);
+        if (display == EGL_NO_DISPLAY)
 
-    private Pointer createEglDisplay() {
-
-        final Pointer eglDisplay = this.libEGL.eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-        if (eglDisplay == null || eglDisplay.equals(EGL_NO_DISPLAY)) {
-            this.libEGL.throwError("eglGetDisplay()");
+        {
+            this.libEGL.throwError("eglGetDisplay");
         }
 
-        if (!this.libEGL.eglInitialize(eglDisplay,
+        // initialize the EGL display connection
+        if (!this.libEGL.eglInitialize(display,
                                        null,
                                        null)) {
-            this.libEGL.throwError("eglInitialize()");
+            this.libEGL.throwError("eglInitialize");
         }
 
-        final String eglClientApis = this.libEGL.eglQueryString(eglDisplay,
-                                                                EGL_CLIENT_APIS)
+        final String eglClientApis = this.libEGL.eglQueryString(display,
+                                                                LibEGL.EGL_CLIENT_APIS)
                                                 .getString(0);
-        final String eglVendor = this.libEGL.eglQueryString(eglDisplay,
-                                                            EGL_VENDOR)
+        final String eglVendor = this.libEGL.eglQueryString(display,
+                                                            LibEGL.EGL_VENDOR)
                                             .getString(0);
-        final String eglVersion = this.libEGL.eglQueryString(eglDisplay,
-                                                             EGL_VERSION)
+        final String eglVersion = this.libEGL.eglQueryString(display,
+                                                             LibEGL.EGL_VERSION)
                                              .getString(0);
 
-        LOGGER.info(format("Creating Dispmanx EGL output:\n"
+        LOGGER.info(format("Creating X11 EGL output:\n"
                            + "\tEGL client apis: %s\n"
                            + "\tEGL vendor: %s\n"
                            + "\tEGL version: %s\n",
@@ -207,6 +183,6 @@ public class DispmanxEglOutputFactory {
                            eglVendor,
                            eglVersion));
 
-        return eglDisplay;
+        return display;
     }
 }
