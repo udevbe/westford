@@ -46,8 +46,6 @@ public class DispmanxOutputFactory {
     @Nonnull
     private final PrivateDispmanxOutputFactory privateDispmanxOutputFactory;
     @Nonnull
-    private final DispmanxEglOutputFactory     dispmanxEglOutputFactory;
-    @Nonnull
     private final WlCompositor                 wlCompositor;
 
     @Inject
@@ -55,13 +53,11 @@ public class DispmanxOutputFactory {
                           @Nonnull final WlOutputFactory wlOutputFactory,
                           @Nonnull final OutputFactory outputFactory,
                           @Nonnull final PrivateDispmanxOutputFactory privateDispmanxOutputFactory,
-                          @Nonnull final DispmanxEglOutputFactory dispmanxEglOutputFactory,
                           @Nonnull final WlCompositor wlCompositor) {
         this.libbcm_host = libbcm_host;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.privateDispmanxOutputFactory = privateDispmanxOutputFactory;
-        this.dispmanxEglOutputFactory = dispmanxEglOutputFactory;
         this.wlCompositor = wlCompositor;
     }
 
@@ -90,12 +86,8 @@ public class DispmanxOutputFactory {
 
         final int dispmanxElement = createDispmanxWindow(display,
                                                          modeinfo);
-
-
-        final DispmanxEglOutput dispmanxEglOutput = this.dispmanxEglOutputFactory.create(dispmanxElement,
-                                                                                         modeinfo.width,
-                                                                                         modeinfo.height);
-        final DispmanxOutput dispmanxOutput = this.privateDispmanxOutputFactory.create(dispmanxEglOutput);
+        final DispmanxOutput dispmanxOutput = this.privateDispmanxOutputFactory.create(dispmanxElement,
+                                                                                       modeinfo);
         final Output output = createOutput(dispmanxOutput,
                                            modeinfo);
         return this.wlOutputFactory.create(output);

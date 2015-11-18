@@ -15,24 +15,42 @@ package org.westmalle.wayland.dispmanx;
 
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.westmalle.wayland.egl.EglOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
+import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @AutoFactory(className = "PrivateDispmanxOutputFactory",
              allowSubclasses = true)
 public class DispmanxOutput implements HasEglOutput {
 
     @Nonnull
-    private final DispmanxEglOutput dispmanxEglOutput;
+    private final DispmanxEglOutputFactory dispmanxEglOutputFactory;
+    private final int                      dispmanxElement;
+    @Nonnull
+    private final DISPMANX_MODEINFO_T      modeinfo;
 
-    DispmanxOutput(@Nonnull final DispmanxEglOutput dispmanxEglOutput) {
-        this.dispmanxEglOutput = dispmanxEglOutput;
+    @Nullable
+    private DispmanxEglOutput dispmanxEglOutput;
+
+    DispmanxOutput(@Nonnull @Provided final DispmanxEglOutputFactory dispmanxEglOutputFactory,
+                   final int dispmanxElement,
+                   @Nonnull final DISPMANX_MODEINFO_T modeinfo) {
+        this.dispmanxEglOutputFactory = dispmanxEglOutputFactory;
+        this.dispmanxElement = dispmanxElement;
+        this.modeinfo = modeinfo;
     }
 
     @Override
     public EglOutput getEglOutput() {
+        if (this.dispmanxEglOutput == null) {
+            this.dispmanxEglOutput = this.dispmanxEglOutputFactory.create(this.dispmanxElement,
+                                                                          this.modeinfo.width,
+                                                                          this.modeinfo.height);
+        }
         return this.dispmanxEglOutput;
     }
 }
