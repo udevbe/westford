@@ -7,7 +7,8 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.core.RenderEngine;
+import org.westmalle.wayland.core.RenderOutput;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.NativeString;
@@ -37,7 +38,7 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
 @Singleton
-public class EglGles2RenderEngine implements RenderEngine {
+public class EglGles2Renderer implements Renderer {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -86,7 +87,7 @@ public class EglGles2RenderEngine implements RenderEngine {
     private int textureArg;
 
     @Inject
-    EglGles2RenderEngine(@Nonnull final LibGLESv2 libGLESv2) {
+    EglGles2Renderer(@Nonnull final LibGLESv2 libGLESv2) {
         this.libGLESv2 = libGLESv2;
     }
 
@@ -94,9 +95,10 @@ public class EglGles2RenderEngine implements RenderEngine {
     public void begin(@Nonnull final WlOutput wlOutput) {
         final Output       output       = wlOutput.getOutput();
         final OutputMode   mode         = output.getMode();
+        //TODO handle (un)supported outputs more gracefully.
         final HasEglOutput hasEglOutput = (HasEglOutput) output.getPlatformImplementation();
-        final EglOutput    eglOutput    = hasEglOutput.getEglOutput();
-        eglOutput.begin();
+        final RenderOutput renderOutput = hasEglOutput.getEglOutput();
+        renderOutput.begin();
 
         if (!this.init) {
             init();
@@ -110,9 +112,9 @@ public class EglGles2RenderEngine implements RenderEngine {
                                   width,
                                   height);
 
-        this.libGLESv2.glClearColor(0.0f,
-                                    0.0f,
-                                    0.0f,
+        this.libGLESv2.glClearColor(1.0f,
+                                    1.0f,
+                                    1.0f,
                                     1.0f);
 
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
@@ -140,6 +142,10 @@ public class EglGles2RenderEngine implements RenderEngine {
             this.shaderPrograms.put(gles2BufferFormat,
                                     createShaderProgram(gles2BufferFormat));
         }
+
+        //configure texture blending
+        this.libGLESv2.glBlendFunc(GL_ONE,
+                                   GL_ONE_MINUS_SRC_ALPHA);
 
         this.init = true;
     }
@@ -321,7 +327,7 @@ public class EglGles2RenderEngine implements RenderEngine {
 
         //activate shader
         final Gles2BufferFormat gles2BufferFormat = queryBufferFormat(shmBuffer);
-        final Integer shader = this.shaderPrograms.get(gles2BufferFormat);
+        final Integer           shader            = this.shaderPrograms.get(gles2BufferFormat);
         this.libGLESv2.glUseProgram(shader);
 
         //upload uniform data
@@ -375,9 +381,7 @@ public class EglGles2RenderEngine implements RenderEngine {
                                    0);
 
         //draw
-        //configure texture blending
-        this.libGLESv2.glBlendFunc(GL_ONE,
-                                   GL_ONE_MINUS_SRC_ALPHA);
+        //enable texture blending
         this.libGLESv2.glEnable(GL_BLEND);
         this.libGLESv2.glDrawArrays(GL_TRIANGLES,
                                     0,

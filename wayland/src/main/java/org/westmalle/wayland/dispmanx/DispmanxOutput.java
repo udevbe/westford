@@ -15,7 +15,7 @@ package org.westmalle.wayland.dispmanx;
 
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.egl.EglOutput;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
 import javax.annotation.Nonnull;
@@ -32,7 +32,7 @@ public class DispmanxOutput implements HasEglOutput {
     }
 
     @Override
-    public EglOutput getEglOutput() {
+    public RenderOutput getEglOutput() {
         return this.dispmanxEglOutput;
     }
 }

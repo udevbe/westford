@@ -16,7 +16,7 @@ package org.westmalle.wayland.x11;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.sun.jna.Pointer;
-import org.westmalle.wayland.egl.EglOutput;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
 import javax.annotation.Nonnull;
@@ -55,7 +55,7 @@ public class X11Output implements HasEglOutput {
     }
 
     @Override
-    public EglOutput getEglOutput() {
+    public RenderOutput getEglOutput() {
         if (this.eglOutput == null) {
             this.eglOutput = this.x11EglOutputFactory.create(this.xDisplay,
                                                              this.xWindow);

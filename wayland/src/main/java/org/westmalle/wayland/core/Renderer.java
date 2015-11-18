@@ -11,11 +11,20 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.egl;
+package org.westmalle.wayland.core;
 
-public interface EglOutput {
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlOutput;
 
-    default void begin() {}
+import javax.annotation.Nonnull;
 
-    default void end() {}
+public interface Renderer {
+
+    void begin(@Nonnull final WlOutput wlOutput);
+
+    void draw(@Nonnull final WlSurfaceResource surfaceResource,
+              @Nonnull final WlBufferResource wlBufferResource);
+
+    void end(@Nonnull final WlOutput wlOutput);
 }
