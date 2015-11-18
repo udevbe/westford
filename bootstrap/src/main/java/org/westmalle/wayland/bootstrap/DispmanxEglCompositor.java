@@ -12,7 +12,7 @@ import javax.inject.Singleton;
 @Component(modules = {CoreModule.class,
                       /*
                        * CoreModule requires a module which provides a RenderEngine.
-                       * EglModule provides an Egl GlESv2 RenderEngine.
+                       * EglModule provides an Egl GlESv2 Renderer.
                        */
                       EglModule.class})
 public interface DispmanxEglCompositor {

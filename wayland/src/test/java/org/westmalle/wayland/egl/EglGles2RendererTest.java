@@ -30,6 +30,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.NativeString;
@@ -58,15 +59,15 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ShmBuffer.class,
                  Gles2SurfaceData.class})
-public class EglGles2RenderEngineTest {
+public class EglGles2RendererTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private LibGLESv2            libGLESv2;
+    private LibGLESv2        libGLESv2;
     @InjectMocks
-    private EglGles2RenderEngine eglGles2RenderEngine;
+    private EglGles2Renderer eglGles2RenderEngine;
 
     @Before
     public void setUp() {
@@ -101,7 +102,7 @@ public class EglGles2RenderEngineTest {
         final Output       output        = mock(Output.class);
         final OutputMode   mode          = mock(OutputMode.class);
         final HasEglOutput hasEglOutput  = mock(HasEglOutput.class);
-        final EglOutput    eglOutput     = mock(EglOutput.class);
+        final RenderOutput renderOutput = mock(RenderOutput.class);
         final int          width         = 640;
         final int          height        = 480;
         final Integer      shaderProgram = 12346;
@@ -109,7 +110,7 @@ public class EglGles2RenderEngineTest {
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getMode()).thenReturn(mode);
         when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
-        when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
+        when(hasEglOutput.getEglOutput()).thenReturn(renderOutput);
         when(mode.getWidth()).thenReturn(width);
         when(mode.getHeight()).thenReturn(height);
 
@@ -130,7 +131,7 @@ public class EglGles2RenderEngineTest {
         this.eglGles2RenderEngine.begin(wlOutput);
 
         //then
-        verify(eglOutput).begin();
+        verify(renderOutput).begin();
         verify(this.libGLESv2,
                times(0)).glUniformMatrix4fv(anyInt(),
                                             anyInt(),
@@ -145,14 +146,14 @@ public class EglGles2RenderEngineTest {
         final Output       output       = mock(Output.class);
         final OutputMode   mode         = mock(OutputMode.class);
         final HasEglOutput hasEglOutput = mock(HasEglOutput.class);
-        final EglOutput    eglOutput    = mock(EglOutput.class);
+        final RenderOutput renderOutput = mock(RenderOutput.class);
         final int          width        = 640;
         final int          height       = 480;
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getMode()).thenReturn(mode);
         when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
-        when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
+        when(hasEglOutput.getEglOutput()).thenReturn(renderOutput);
         when(mode.getWidth()).thenReturn(width);
         when(mode.getHeight()).thenReturn(height);
 
@@ -160,7 +161,7 @@ public class EglGles2RenderEngineTest {
         this.eglGles2RenderEngine.begin(wlOutput);
 
         //then
-        verify(eglOutput).begin();
+        verify(renderOutput).begin();
     }
 
     @Test
@@ -174,7 +175,7 @@ public class EglGles2RenderEngineTest {
         final Surface   surface   = mock(Surface.class);
         mockStatic(Gles2SurfaceData.class);
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
-        final int              shmFormat        = WlShmFormat.XRGB8888.getValue();
+        final int              shmFormat        = WlShmFormat.ARGB8888.getValue();
         final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                          "shaderPrograms");
         final Integer shaderProgram    = 12346;
@@ -188,7 +189,7 @@ public class EglGles2RenderEngineTest {
         when(Gles2SurfaceData.create(this.libGLESv2,
                                      shmBuffer)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_XRGB8888,
+        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
@@ -240,7 +241,7 @@ public class EglGles2RenderEngineTest {
         final Surface   surface   = mock(Surface.class);
         mockStatic(Gles2SurfaceData.class);
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
-        final int              shmFormat        = WlShmFormat.XRGB8888.getValue();
+        final int              shmFormat        = WlShmFormat.ARGB8888.getValue();
         final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
                                                                                          "shaderPrograms");
         final Integer shaderProgram    = 12346;
@@ -252,7 +253,7 @@ public class EglGles2RenderEngineTest {
         when(Gles2SurfaceData.create(this.libGLESv2,
                                      shmBuffer)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_XRGB8888,
+        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
@@ -309,7 +310,7 @@ public class EglGles2RenderEngineTest {
         when(shmBuffer.getHeight()).thenReturn(bufferHeight);
         when(shmBuffer.getHeight()).thenReturn(bufferHeight);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_XRGB8888,
+        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
@@ -333,14 +334,14 @@ public class EglGles2RenderEngineTest {
         final WlOutput     wlOutput     = mock(WlOutput.class);
         final Output       output       = mock(Output.class);
         final HasEglOutput hasEglOutput = mock(HasEglOutput.class);
-        final EglOutput    eglOutput    = mock(EglOutput.class);
+        final RenderOutput renderOutput = mock(RenderOutput.class);
 
         when(wlOutput.getOutput()).thenReturn(output);
         when(output.getPlatformImplementation()).thenReturn(hasEglOutput);
-        when(hasEglOutput.getEglOutput()).thenReturn(eglOutput);
+        when(hasEglOutput.getEglOutput()).thenReturn(renderOutput);
         //when
         this.eglGles2RenderEngine.end(wlOutput);
         //then
-        verify(eglOutput).end();
+        verify(renderOutput).end();
     }
 }

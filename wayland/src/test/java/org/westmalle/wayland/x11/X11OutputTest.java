@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.egl.EglOutput;
+import org.westmalle.wayland.core.RenderOutput;
 
 import java.util.Map;
 
@@ -53,9 +53,9 @@ public class X11OutputTest {
                                                   this.xWindow,
                                                   this.atoms);
         //when
-        final EglOutput eglOutput0 = x11Output.getEglOutput();
-        final EglOutput eglOutput1 = x11Output.getEglOutput();
+        final RenderOutput renderOutput0 = x11Output.getEglOutput();
+        final RenderOutput renderOutput1 = x11Output.getEglOutput();
         //then
-        assertThat(eglOutput0).isSameAs(eglOutput1);
+        assertThat(renderOutput0).isSameAs(renderOutput1);
     }
 }

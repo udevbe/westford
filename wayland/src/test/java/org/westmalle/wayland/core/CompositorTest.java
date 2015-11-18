@@ -46,7 +46,7 @@ public class CompositorTest {
     @Mock
     private Display  display;
     @Mock
-    private RenderEngine renderEngine;
+    private Renderer renderer;
 
     @InjectMocks
     private Compositor compositor;
@@ -129,36 +129,36 @@ public class CompositorTest {
         idleHandlers.get(0)
                     .handle();
         //then
-        final InOrder inOrder0 = inOrder(this.renderEngine,
+        final InOrder inOrder0 = inOrder(this.renderer,
                                          this.display);
-        inOrder0.verify(this.renderEngine)
+        inOrder0.verify(this.renderer)
                 .begin(wlOutput0);
-        inOrder0.verify(this.renderEngine)
+        inOrder0.verify(this.renderer)
                 .draw(wlSurfaceResource0,
                         wlBufferResource0);
-        inOrder0.verify(this.renderEngine)
+        inOrder0.verify(this.renderer)
                 .draw(wlSurfaceResource1,
                         wlBufferResource1);
-        inOrder0.verify(this.renderEngine)
+        inOrder0.verify(this.renderer)
                 .draw(wlSurfaceResource2,
                         wlBufferResource2);
-        inOrder0.verify(this.renderEngine)
+        inOrder0.verify(this.renderer)
                 .end(wlOutput0);
 
-        final InOrder inOrder1 = inOrder(this.renderEngine,
+        final InOrder inOrder1 = inOrder(this.renderer,
                                          this.display);
-        inOrder1.verify(this.renderEngine)
+        inOrder1.verify(this.renderer)
                 .begin(wlOutput1);
-        inOrder1.verify(this.renderEngine)
+        inOrder1.verify(this.renderer)
                 .draw(wlSurfaceResource0,
                         wlBufferResource0);
-        inOrder1.verify(this.renderEngine)
+        inOrder1.verify(this.renderer)
                 .draw(wlSurfaceResource1,
                         wlBufferResource1);
-        inOrder1.verify(this.renderEngine)
+        inOrder1.verify(this.renderer)
                 .draw(wlSurfaceResource2,
                         wlBufferResource2);
-        inOrder1.verify(this.renderEngine)
+        inOrder1.verify(this.renderer)
                 .end(wlOutput1);
 
         verify(this.display).flushClients();

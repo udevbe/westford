@@ -13,18 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.westmalle.wayland.protocol.WlOutput;
+public interface RenderOutput {
 
-import javax.annotation.Nonnull;
+    default void begin() {}
 
-public interface RenderEngine {
-
-    void begin(@Nonnull final WlOutput wlOutput);
-
-    void draw(@Nonnull final WlSurfaceResource surfaceResource,
-              @Nonnull final WlBufferResource wlBufferResource);
-
-    void end(@Nonnull final WlOutput wlOutput);
+    default void end() {}
 }

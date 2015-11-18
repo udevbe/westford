@@ -16,7 +16,7 @@ package org.westmalle.wayland.dispmanx;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import org.westmalle.wayland.egl.EglOutput;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 
@@ -45,7 +45,7 @@ public class DispmanxOutput implements HasEglOutput {
     }
 
     @Override
-    public EglOutput getEglOutput() {
+    public RenderOutput getEglOutput() {
         if (this.dispmanxEglOutput == null) {
             this.dispmanxEglOutput = this.dispmanxEglOutputFactory.create(this.dispmanxElement,
                                                                           this.modeinfo.width,

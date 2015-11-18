@@ -16,7 +16,7 @@ package org.westmalle.wayland.dispmanx;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import com.sun.jna.Pointer;
-import org.westmalle.wayland.egl.EglOutput;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 
 import javax.annotation.Nonnull;
@@ -24,7 +24,7 @@ import javax.annotation.Nonnull;
 @AutoFactory(className = "PrivateDispmanxEglOutputFactory",
              allowSubclasses = true)
 //TODO unit tests
-public class DispmanxEglOutput implements EglOutput {
+public class DispmanxEglOutput implements RenderOutput {
 
     @Nonnull
     private final LibEGL  libEGL;
@@ -43,6 +43,14 @@ public class DispmanxEglOutput implements EglOutput {
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
+    }
+
+    @Override
+    public void begin() {
+        this.libEGL.eglMakeCurrent(this.eglDisplay,
+                                   this.eglSurface,
+                                   this.eglSurface,
+                                   this.eglContext);
     }
 
     @Override

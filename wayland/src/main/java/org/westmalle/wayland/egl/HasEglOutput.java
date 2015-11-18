@@ -13,7 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.egl;
 
+import org.westmalle.wayland.core.RenderOutput;
+
 public interface HasEglOutput {
 
-    EglOutput getEglOutput();
+    RenderOutput getEglOutput();
 }
