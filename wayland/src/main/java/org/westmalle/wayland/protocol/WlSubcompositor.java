@@ -92,7 +92,7 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
         else {
             requester.getClient()
                      .getObject(Display.OBJECT_ID)
-                     .postError(WlSubcompositorError.BAD_SURFACE.getValue(),
+                     .postError(WlSubcompositorError.BAD_SURFACE.value,
                                 String.format("Desired sub surface already has another role (%s)",
                                               role.get()
                                                   .getClass()

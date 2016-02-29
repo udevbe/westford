@@ -48,8 +48,8 @@ public class DispmanxOutput implements HasEglOutput {
     public RenderOutput getEglOutput() {
         if (this.dispmanxEglOutput == null) {
             this.dispmanxEglOutput = this.dispmanxEglOutputFactory.create(this.dispmanxElement,
-                                                                          this.modeinfo.width,
-                                                                          this.modeinfo.height);
+                                                                          this.modeinfo.width(),
+                                                                          this.modeinfo.height());
         }
         return this.dispmanxEglOutput;
     }

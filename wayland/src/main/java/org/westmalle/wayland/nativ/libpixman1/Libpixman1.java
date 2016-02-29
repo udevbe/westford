@@ -22,8 +22,9 @@ import javax.inject.Singleton;
 @Lib("pixman-1")
 public class Libpixman1 {
 
-    public native pixman_box32 pixman_region32_rectangles(@Ptr long region,
-                                                          @Ptr long n_rects);
+    @Ptr
+    public native long pixman_region32_rectangles(@Ptr long region,
+                                                  @Ptr long n_rects);
 
     public native int pixman_region32_union_rect(@Ptr long dest,
                                                  @Ptr long source,
@@ -45,7 +46,7 @@ public class Libpixman1 {
     public native int pixman_region32_contains_point(@Ptr long region,
                                                      int x,
                                                      int y,
-                                                     pixman_box32 box);
+                                                     @Ptr long box);
 
     public native int pixman_region32_intersect_rect(@Ptr long dest,
                                                      @Ptr long source,

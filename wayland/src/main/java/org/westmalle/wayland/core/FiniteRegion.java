@@ -1,8 +1,8 @@
 package org.westmalle.wayland.core;
 
+import com.github.zubnix.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.sun.jna.ptr.IntByReference;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libpixman1.pixman_box32;
 import org.westmalle.wayland.nativ.libpixman1.pixman_region32;
@@ -12,12 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.zubnix.jaccall.Pointer.malloc;
+
 @AutoFactory(className = "FiniteRegionFactory",
              allowSubclasses = true)
 public class FiniteRegion implements Region {
 
     private final Libpixman1 libpixman1;
-    private final pixman_region32 pixman_region32 = new pixman_region32();
+    private final Pointer<pixman_region32> pixman_region32 = malloc(pixman_box32.SIZE,
+                                                                    pixman_region32.class);
 
     FiniteRegion(@Provided final Libpixman1 libpixman1) {
         this.libpixman1 = libpixman1;
@@ -32,20 +35,19 @@ public class FiniteRegion implements Region {
     @Override
     public List<Rectangle> asList() {
         //int pointer
-        final IntByReference n_rects = new IntByReference();
-        final pixman_box32 pixman_box32_array = this.libpixman1
-                .pixman_region32_rectangles(getPixmanRegion32(),
-                                            n_rects);
-        final int            size          = n_rects.getValue();
-        final pixman_box32[] pixman_box32s = (pixman_box32[]) pixman_box32_array.toArray(size);
-
+        final Pointer<Integer> n_rects = Pointer.nref(0);
+        final Pointer<pixman_box32> pixman_box32_array = Pointer.wrap(pixman_box32.class,
+                                                                      this.libpixman1.pixman_region32_rectangles(pixman_region32.address,
+                                                                                                                 n_rects.address));
+        final int             size  = n_rects.dref();
         final List<Rectangle> boxes = new ArrayList<>(size);
-        for (final pixman_box32 pixman_box32 : pixman_box32s) {
-            final int x = pixman_box32.x1;
-            final int y = pixman_box32.y1;
+        for (int i = 0; i < size; i++) {
+            final pixman_box32 pixman_box32 = pixman_box32_array.dref(i);
+            final int          x            = pixman_box32.x1();
+            final int          y            = pixman_box32.y1();
 
-            final int width = pixman_box32.x2 - x;
-            final int height = pixman_box32.y2 - y;
+            final int width  = pixman_box32.x2() - x;
+            final int height = pixman_box32.y2() - y;
             boxes.add(Rectangle.create(x,
                                        y,
                                        width,
@@ -55,7 +57,7 @@ public class FiniteRegion implements Region {
     }
 
     @Nonnull
-    public pixman_region32 getPixmanRegion32() {
+    public Pointer<pixman_region32> getPixmanRegion32() {
         return this.pixman_region32;
     }
 
@@ -78,8 +80,8 @@ public class FiniteRegion implements Region {
     @Nonnull
     @Override
     public Region add(@Nonnull final Rectangle rectangle) {
-        this.libpixman1.pixman_region32_union_rect(getPixmanRegion32(),
-                                                   getPixmanRegion32(),
+        this.libpixman1.pixman_region32_union_rect(this.pixman_region32.address,
+                                                   this.pixman_region32.address,
                                                    rectangle.getX(),
                                                    rectangle.getY(),
                                                    rectangle.getWidth(),
@@ -91,24 +93,24 @@ public class FiniteRegion implements Region {
     @Nonnull
     @Override
     public Region subtract(@Nonnull final Rectangle rectangle) {
-        final pixman_region32 delta_pixman_region32 = new pixman_region32();
-        this.libpixman1.pixman_region32_init_rect(delta_pixman_region32,
+        final Pointer<pixman_region32> delta_pixman_region32 = Pointer.ref(new pixman_region32());
+        this.libpixman1.pixman_region32_init_rect(delta_pixman_region32.address,
                                                   rectangle.getX(),
                                                   rectangle.getY(),
                                                   rectangle.getWidth(),
                                                   rectangle.getHeight());
-        this.libpixman1.pixman_region32_subtract(getPixmanRegion32(),
-                                                 getPixmanRegion32(),
-                                                 delta_pixman_region32);
+        this.libpixman1.pixman_region32_subtract(this.pixman_region32.address,
+                                                 this.pixman_region32.address,
+                                                 delta_pixman_region32.address);
         return this;
     }
 
     @Override
     public boolean contains(@Nonnull final Point point) {
-        return this.libpixman1.pixman_region32_contains_point(getPixmanRegion32(),
+        return this.libpixman1.pixman_region32_contains_point(this.pixman_region32.address,
                                                               point.getX(),
                                                               point.getY(),
-                                                              null) != 0;
+                                                              0L) != 0;
     }
 
     @Override
@@ -118,15 +120,21 @@ public class FiniteRegion implements Region {
         if (clipping.getWidth() == 0 && clipping.getHeight() == 0) {
             return false;
         }
-        this.libpixman1.pixman_region32_intersect_rect(getPixmanRegion32(),
-                                                       getPixmanRegion32(),
+        this.libpixman1.pixman_region32_intersect_rect(this.pixman_region32.address,
+                                                       this.pixman_region32.address,
                                                        clipping.getX(),
                                                        clipping.getY(),
                                                        clipping.getWidth(),
                                                        clipping.getHeight());
-        return this.libpixman1.pixman_region32_contains_point(getPixmanRegion32(),
+        return this.libpixman1.pixman_region32_contains_point(this.pixman_region32.address,
                                                               point.getX(),
                                                               point.getY(),
-                                                              null) != 0;
+                                                              0L) != 0;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        pixman_region32.close();
     }
 }

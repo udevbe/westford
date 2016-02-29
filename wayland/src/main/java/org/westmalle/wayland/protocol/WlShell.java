@@ -96,7 +96,7 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
         else {
             requester.getClient()
                      .getObject(Display.OBJECT_ID)
-                     .postError(WlShellError.ROLE.getValue(),
+                     .postError(WlShellError.ROLE.value,
                                 String.format("Desired shell surface already has another role (%s)",
                                               role.getClass()
                                                   .getSimpleName()));

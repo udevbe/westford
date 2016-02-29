@@ -159,9 +159,9 @@ public class ShellSurface implements Role {
                                                                        final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
                                                                                                                                 .toVec4());
                                                                        final Vec4 resize = transform.multiply(motionLocal);
-                                                                       final int width = (int) resize.getX();
-                                                                       final int height = (int) resize.getY();
-                                                                       wlShellSurfaceResource.configure(quadrant.getValue(),
+                                                                       final int  width  = (int) resize.getX();
+                                                                       final int  height = (int) resize.getY();
+                                                                       wlShellSurfaceResource.configure(quadrant.value,
                                                                                                         width < 1 ? 1 : width,
                                                                                                         height < 1 ? 1 : height);
                                                                    });
@@ -343,7 +343,7 @@ public class ShellSurface implements Role {
             //first time focus clearing, also send out leave events
             final Set<WlKeyboardResource> keyboardFocuses = surface.getKeyboardFocuses();
             keyboardFocuses.forEach(wlKeyboardResource -> {
-                final WlKeyboard wlKeyboard = (WlKeyboard) wlKeyboardResource.getImplementation();
+                final WlKeyboard     wlKeyboard     = (WlKeyboard) wlKeyboardResource.getImplementation();
                 final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
                 wlKeyboardResource.leave(keyboardDevice.nextKeyboardSerial(),
                                          wlSurfaceResource);

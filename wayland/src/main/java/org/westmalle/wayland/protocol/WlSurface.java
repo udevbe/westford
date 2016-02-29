@@ -160,32 +160,32 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
 
     private Mat4 getMatrix(final WlSurfaceResource resource,
                            final int transform) {
-        if (WlOutputTransform.NORMAL.getValue() == transform) {
+        if (WlOutputTransform.NORMAL.value == transform) {
             return Transforms.NORMAL;
         }
-        else if (WlOutputTransform._90.getValue() == transform) {
+        else if (WlOutputTransform._90.value == transform) {
             return Transforms._90;
         }
-        else if (WlOutputTransform._180.getValue() == transform) {
+        else if (WlOutputTransform._180.value == transform) {
             return Transforms._180;
         }
-        else if (WlOutputTransform._270.getValue() == transform) {
+        else if (WlOutputTransform._270.value == transform) {
             return Transforms._270;
         }
-        else if (WlOutputTransform.FLIPPED.getValue() == transform) {
+        else if (WlOutputTransform.FLIPPED.value == transform) {
             return Transforms.FLIPPED;
         }
-        else if (WlOutputTransform.FLIPPED_90.getValue() == transform) {
+        else if (WlOutputTransform.FLIPPED_90.value == transform) {
             return Transforms.FLIPPED_90;
         }
-        else if (WlOutputTransform.FLIPPED_180.getValue() == transform) {
+        else if (WlOutputTransform.FLIPPED_180.value == transform) {
             return Transforms.FLIPPED_180;
         }
-        else if (WlOutputTransform.FLIPPED_270.getValue() == transform) {
+        else if (WlOutputTransform.FLIPPED_270.value == transform) {
             return Transforms.FLIPPED_270;
         }
         else {
-            resource.postError(WlSurfaceError.INVALID_TRANSFORM.getValue(),
+            resource.postError(WlSurfaceError.INVALID_TRANSFORM.value,
                                String.format("Invalid transform %d. Supported values are %s.",
                                              transform,
                                              Arrays.asList(WlOutputTransform.values())));
@@ -200,7 +200,7 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
             getSurface().setScale(scale);
         }
         else {
-            resource.postError(WlSurfaceError.INVALID_SCALE.getValue(),
+            resource.postError(WlSurfaceError.INVALID_SCALE.value,
                                String.format("Invalid scale %d. Scale must be positive integer.",
                                              scale));
         }

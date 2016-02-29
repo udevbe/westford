@@ -100,7 +100,7 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
                              final int flags) {
         final EnumSet<WlShellSurfaceTransient> transientFlags = EnumSet.noneOf(WlShellSurfaceTransient.class);
         for (final WlShellSurfaceTransient wlShellSurfaceTransient : WlShellSurfaceTransient.values()) {
-            if ((wlShellSurfaceTransient.getValue() & flags) != 0) {
+            if ((wlShellSurfaceTransient.value & flags) != 0) {
                 transientFlags.add(wlShellSurfaceTransient);
             }
         }

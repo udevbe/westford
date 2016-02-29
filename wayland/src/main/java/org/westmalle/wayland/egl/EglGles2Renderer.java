@@ -1,7 +1,6 @@
 package org.westmalle.wayland.egl;
 
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -11,7 +10,6 @@ import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
-import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -93,8 +91,8 @@ public class EglGles2Renderer implements Renderer {
 
     @Override
     public void begin(@Nonnull final WlOutput wlOutput) {
-        final Output       output       = wlOutput.getOutput();
-        final OutputMode   mode         = output.getMode();
+        final Output     output = wlOutput.getOutput();
+        final OutputMode mode   = output.getMode();
         //TODO handle (un)supported outputs more gracefully.
         final HasEglOutput hasEglOutput = (HasEglOutput) output.getPlatformImplementation();
         final RenderOutput renderOutput = hasEglOutput.getEglOutput();
@@ -129,8 +127,9 @@ public class EglGles2Renderer implements Renderer {
 
     private void init() {
         //check for required texture extensions
-        final String extensions = this.libGLESv2.glGetString(GL_EXTENSIONS)
-                                                .getString(0);
+        final String extensions = Pointer.wrap(String.class,
+                                               this.libGLESv2.glGetString(GL_EXTENSIONS))
+                                         .dref();
 
         LOGGER.info("GLESv2 extensions: " + extensions);
         if (!extensions.contains("GL_EXT_texture_format_BGRA8888")) {
@@ -152,29 +151,23 @@ public class EglGles2Renderer implements Renderer {
 
     private int createShaderProgram(final Gles2BufferFormat bufferFormat) {
         //vertex shader
-        final int     vertexShader       = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
-        final Pointer vertexShaderSource = new NativeString(bufferFormat.getVertexShaderSource()).getPointer();
-        final Pointer vertexShaders      = new Memory(Pointer.SIZE);
-        vertexShaders.setPointer(0,
-                                 vertexShaderSource);
+        final int                      vertexShader  = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
+        final Pointer<Pointer<String>> vertexShaders = Pointer.nref(Pointer.nref(bufferFormat.getVertexShaderSource()));
         this.libGLESv2.glShaderSource(vertexShader,
                                       1,
-                                      vertexShaders,
-                                      null);
+                                      vertexShaders.address,
+                                      0L);
         this.libGLESv2.glCompileShader(vertexShader);
 
         checkShader(vertexShader);
 
         //fragment shader
-        final int     fragmentShader       = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
-        final Pointer fragmentShaderSource = new NativeString(bufferFormat.getFragmentShaderSource()).getPointer();
-        final Pointer fragmentShaders      = new Memory(Pointer.SIZE);
-        fragmentShaders.setPointer(0,
-                                   fragmentShaderSource);
+        final int                      fragmentShader  = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
+        final Pointer<Pointer<String>> fragmentShaders = Pointer.nref(Pointer.nref(bufferFormat.getFragmentShaderSource()));
         this.libGLESv2.glShaderSource(fragmentShader,
                                       1,
-                                      fragmentShaders,
-                                      null);
+                                      fragmentShaders.address,
+                                      0L);
         this.libGLESv2.glCompileShader(fragmentShader);
 
         checkShader(fragmentShader);
@@ -190,77 +183,69 @@ public class EglGles2Renderer implements Renderer {
         this.libGLESv2.glLinkProgram(shaderProgram);
 
         //check the link status
-        final Pointer linked = new Memory(Integer.BYTES);
+        final Pointer<Integer> linked = Pointer.nref(0);
         this.libGLESv2.glGetProgramiv(shaderProgram,
                                       GL_LINK_STATUS,
-                                      linked);
-        if (linked.getInt(0) == 0) {
-            final Pointer infoLen = new Memory(Integer.BYTES);
+                                      linked.address);
+        if (linked.dref() == 0) {
+            final Pointer<Integer> infoLen = Pointer.nref(0);
             this.libGLESv2.glGetProgramiv(shaderProgram,
                                           GL_INFO_LOG_LENGTH,
-                                          infoLen);
-            int logSize = infoLen.getInt(0);
+                                          infoLen.address);
+            int logSize = infoLen.dref();
             if (logSize <= 0) {
                 //some drivers report incorrect log size
                 logSize = 1024;
             }
-            final Memory log = new Memory(logSize);
+            final Pointer<String> log = Pointer.nref(new String(new char[logSize]));
             this.libGLESv2.glGetProgramInfoLog(shaderProgram,
                                                logSize,
-                                               null,
-                                               log);
+                                               0L,
+                                               log.address);
             this.libGLESv2.glDeleteProgram(shaderProgram);
-            System.err.println("Error compiling the vertex shader: " + log.getString(0));
+            System.err.println("Error compiling the vertex shader: " + log.dref());
             System.exit(1);
         }
 
         //find shader arguments
-        final Memory u_projection = new NativeString("u_projection").getPointer();
         this.projectionArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
-                                                                 u_projection);
-        final Memory u_transform = new NativeString("u_transform").getPointer();
+                                                                 Pointer.nref("u_projection").address);
         this.transformArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
-                                                                u_transform);
-
-        final Memory a_position = new NativeString("a_position").getPointer();
+                                                                Pointer.nref("u_transform").address);
         this.positionArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
-                                                              a_position);
-
-        final Memory a_texCoord = new NativeString("a_texCoord").getPointer();
+                                                              Pointer.nref("a_position").address);
         this.textureCoordinateArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
-                                                                       a_texCoord);
-
-        final Memory u_texture = new NativeString("u_texture").getPointer();
+                                                                       Pointer.nref("a_texCoord").address);
         this.textureArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
-                                                              u_texture);
+                                                              Pointer.nref("u_texture").address);
 
         return shaderProgram;
     }
 
     private void checkShader(final int shader) {
-        final Memory vstatus = new Memory(Integer.BYTES);
+        final Pointer<Integer> vstatus = Pointer.nref(0);
         this.libGLESv2.glGetShaderiv(shader,
                                      GL_COMPILE_STATUS,
-                                     vstatus);
-        if (vstatus.getInt(0) == 0) {
+                                     vstatus.address);
+        if (vstatus.dref() == 0) {
             //failure!
             //get log length
-            final Memory logLength = new Memory(Integer.BYTES);
+            final Pointer<Integer> logLength = Pointer.nref(0);
             this.libGLESv2.glGetShaderiv(shader,
                                          GL_INFO_LOG_LENGTH,
-                                         logLength);
+                                         logLength.address);
             //get log
-            int logSize = logLength.getInt(0);
+            int logSize = logLength.dref();
             if (logSize == 0) {
                 //some drivers report incorrect log size
                 logSize = 1024;
             }
-            final Memory log = new Memory(logSize);
+            final Pointer<String> log = Pointer.nref(new String(new char[logSize]));
             this.libGLESv2.glGetShaderInfoLog(shader,
                                               logSize,
-                                              null,
-                                              log);
-            System.err.println("Error compiling the vertex shader: " + log.getString(0));
+                                              0L,
+                                              log.address);
+            System.err.println("Error compiling the vertex shader: " + log.dref());
             System.exit(1);
         }
     }
@@ -278,52 +263,57 @@ public class EglGles2Renderer implements Renderer {
         final float[] transform = surface.getTransform()
                                          .toArray();
 
-        final int bufferWidth  = shmBuffer.getStride() / 4;
-        final int bufferHeight = shmBuffer.getHeight();
+        final float bufferWidth  = shmBuffer.getStride() / 4;
+        final float bufferHeight = shmBuffer.getHeight();
 
         //define vertex data
-        final float[] vertexDataValues = {
-                //top left:
-                //attribute vec2 a_position
-                0f, 0f,
-                //attribute vec2 a_texCoord
-                0f, 0f,
+        final Pointer<Float> vertexData = Pointer.nref(         //top left:
+                                                                //attribute vec2 a_position
+                                                                0f,
+                                                                0f,
+                                                                //attribute vec2 a_texCoord
+                                                                0f,
+                                                                0f,
 
-                //top right:
-                //attribute vec2 a_position
-                bufferWidth, 0f,
-                //attribute vec2 a_texCoord
-                1f, 0f,
+                                                                //top right:
+                                                                //attribute vec2 a_position
+                                                                bufferWidth,
+                                                                0f,
+                                                                //attribute vec2 a_texCoord
+                                                                1f,
+                                                                0f,
 
-                //bottom right:
-                //vec2 a_position
-                bufferWidth, bufferHeight,
-                //vec2 a_texCoord
-                1f, 1f,
+                                                                //bottom right:
+                                                                //vec2 a_position
+                                                                bufferWidth,
+                                                                bufferHeight,
+                                                                //vec2 a_texCoord
+                                                                1f,
+                                                                1f,
 
-                //bottom right:
-                //vec2 a_position
-                bufferWidth, bufferHeight,
-                //vec2 a_texCoord
-                1f, 1f,
+                                                                //bottom right:
+                                                                //vec2 a_position
+                                                                bufferWidth,
+                                                                bufferHeight,
+                                                                //vec2 a_texCoord
+                                                                1f,
+                                                                1f,
 
-                //bottom left:
-                //vec2 a_position
-                0f, bufferHeight,
-                //vec2 a_texCoord
-                0f, 1f,
+                                                                //bottom left:
+                                                                //vec2 a_position
+                                                                0f,
+                                                                bufferHeight,
+                                                                //vec2 a_texCoord
+                                                                0f,
+                                                                1f,
 
-                //top left:
-                //attribute vec2 a_position
-                0f, 0f,
-                //attribute vec2 a_texCoord
-                0f, 0f
-        };
-        final Memory vertexData = new Memory(Float.BYTES * vertexDataValues.length);
-        vertexData.write(0,
-                         vertexDataValues,
-                         0,
-                         vertexDataValues.length);
+                                                                //top left:
+                                                                //attribute vec2 a_position
+                                                                0f,
+                                                                0f,
+                                                                //attribute vec2 a_texCoord
+                                                                0f,
+                                                                0f);
 
         //activate shader
         final Gles2BufferFormat gles2BufferFormat = queryBufferFormat(shmBuffer);
@@ -331,28 +321,17 @@ public class EglGles2Renderer implements Renderer {
         this.libGLESv2.glUseProgram(shader);
 
         //upload uniform data
-        final int     projectionSize   = this.projection.length;
-        final Pointer projectionBuffer = new Memory(Float.BYTES * projectionSize);
-        projectionBuffer.write(0,
-                               this.projection,
-                               0,
-                               projectionSize);
+        final Pointer<Float> projectionBuffer = Pointer.nref(this.projection);
         this.libGLESv2.glUniformMatrix4fv(this.projectionArg,
                                           1,
                                           false,
-                                          projectionBuffer);
+                                          projectionBuffer.address);
 
-        final int     transformSize   = transform.length;
-        final Pointer transformBuffer = new Memory(Float.BYTES * transformSize);
-        transformBuffer.write(0,
-                              transform,
-                              0,
-                              transformSize);
+        final Pointer<Float> transformBuffer = Pointer.nref(transform);
         this.libGLESv2.glUniformMatrix4fv(this.transformArg,
                                           1,
                                           false,
-                                          transformBuffer);
-
+                                          transformBuffer.address);
         //set vertex data in shader
         this.libGLESv2.glEnableVertexAttribArray(this.positionArg);
         this.libGLESv2.glVertexAttribPointer(this.positionArg,
@@ -360,7 +339,7 @@ public class EglGles2Renderer implements Renderer {
                                              GL_FLOAT,
                                              false,
                                              4 * Float.BYTES,
-                                             vertexData);
+                                             vertexData.address);
 
         this.libGLESv2.glEnableVertexAttribArray(this.textureCoordinateArg);
         this.libGLESv2.glVertexAttribPointer(this.textureCoordinateArg,
@@ -368,7 +347,7 @@ public class EglGles2Renderer implements Renderer {
                                              GL_FLOAT,
                                              false,
                                              4 * Float.BYTES,
-                                             vertexData.share(2 * Float.BYTES));
+                                             vertexData.offset(2).address);
 
         querySurfaceData(wlSurfaceResource,
                          shmBuffer).update(this.libGLESv2,
@@ -404,10 +383,10 @@ public class EglGles2Renderer implements Renderer {
                                        surfaceData);
         }
         else {
-            final int surfaceDataWidth = surfaceData.getWidth();
+            final int surfaceDataWidth  = surfaceData.getWidth();
             final int surfaceDataHeight = surfaceData.getHeight();
-            final int bufferWidth = shmBuffer.getWidth();
-            final int bufferHeight = shmBuffer.getHeight();
+            final int bufferWidth       = shmBuffer.getWidth();
+            final int bufferHeight      = shmBuffer.getHeight();
             if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
                 this.cachedSurfaceData.remove(surfaceResource)
                                       .delete(this.libGLESv2);

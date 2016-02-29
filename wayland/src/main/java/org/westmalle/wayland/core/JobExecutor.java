@@ -149,7 +149,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         this.libc.read(this.pipeR,
                        this.eventReadBuffer.address,
                        1);
-        return this.eventReadBuffer.getByte(0);
+        return this.eventReadBuffer.dref();
     }
 
     private void clean() {

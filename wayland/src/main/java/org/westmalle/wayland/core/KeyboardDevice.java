@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import com.github.zubnix.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
@@ -29,7 +30,6 @@ import org.westmalle.wayland.core.events.KeyboardFocusLost;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.NativeFileFactory;
-import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -251,7 +251,7 @@ public class KeyboardDevice {
             this.focusDestroyListener = Optional.empty();
 
             final WlSurface wlSurface = (WlSurface) oldFocusResource.getImplementation();
-            final Surface surface = wlSurface.getSurface();
+            final Surface   surface   = wlSurface.getSurface();
 
             final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
                                                                            oldFocusResource.getClient());
@@ -272,7 +272,7 @@ public class KeyboardDevice {
             newFocusResource.register(this.focusDestroyListener.get());
 
             final WlSurface wlSurface = (WlSurface) newFocusResource.getImplementation();
-            final Surface surface = wlSurface.getSurface();
+            final Surface   surface   = wlSurface.getSurface();
 
             final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
                                                                            newFocusResource.getClient());
@@ -313,25 +313,24 @@ public class KeyboardDevice {
     }
 
     public void updateKeymap() {
-        final NativeString nativeKeyMapping = new NativeString(getXkb().getKeymapString());
+        final String nativeKeyMapping = getXkb().getKeymapString();
 
         //-1 to get rid of the null terminator
-        final int size = (int) nativeKeyMapping.getPointer()
-                                               .size() - 1;
-        final int fd = this.nativeFileFactory.createAnonymousFile(size);
-        final Pointer keymapArea = this.libc.mmap(null,
-                                                  size,
-                                                  PROT_READ | PROT_WRITE,
-                                                  MAP_SHARED,
-                                                  fd,
-                                                  0);
-        if (keymapArea.equals(MAP_FAILED)) {
+        final int size = (int) nativeKeyMapping.length() - 1;
+        final int fd   = this.nativeFileFactory.createAnonymousFile(size);
+        final long keymapArea = this.libc.mmap(0L,
+                                               size,
+                                               PROT_READ | PROT_WRITE,
+                                               MAP_SHARED,
+                                               fd,
+                                               0);
+        if (keymapArea == MAP_FAILED) {
             this.libc.close(fd);
-            throw new LastErrorException(Native.getLastError());
+            throw new Error("MAP_FAILED: " + this.libc.getErrno());
         }
 
         this.libc.strcpy(keymapArea,
-                         nativeKeyMapping.getPointer());
+                         Pointer.nref(nativeKeyMapping).address);
 
         if (this.keymapFd >= 0) {
             this.libc.close(this.keymapFd);

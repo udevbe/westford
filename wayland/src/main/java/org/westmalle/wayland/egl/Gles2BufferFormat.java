@@ -20,7 +20,8 @@ import javax.annotation.Nonnull;
 public enum Gles2BufferFormat {
     SHM_ARGB8888(EglGles2Renderer.VERTEX_SHADER,
                  EglGles2Renderer.FRAGMENT_SHADER_ARGB8888,
-                 WlShmFormat.ARGB8888.getValue());
+                 WlShmFormat.ARGB8888.value);
+    //TODO
 //    SHM_XRGB8888(EglGles2Renderer.VERTEX_SHADER,
 //                 EglGles2Renderer.FRAGMENT_SHADER_ARGB8888,
 //                 WlShmFormat.XRGB8888.getValue());

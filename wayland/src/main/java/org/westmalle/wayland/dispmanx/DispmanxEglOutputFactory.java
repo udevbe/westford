@@ -1,8 +1,6 @@
 package org.westmalle.wayland.dispmanx;
 
-
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Pointer;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 
@@ -47,40 +45,39 @@ public class DispmanxEglOutputFactory {
                                     final int width,
                                     final int height) {
         final EGL_DISPMANX_WINDOW_T nativewindow = new EGL_DISPMANX_WINDOW_T();
-        nativewindow.element = dispmanxElement;
-        nativewindow.width = width;
-        nativewindow.height = height;
-        nativewindow.write();
+        nativewindow.element(dispmanxElement);
+        nativewindow.width(width);
+        nativewindow.height(height);
 
-        final Pointer nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
-        final Pointer display       = createEglDisplay(nativeDisplay);
-        final Pointer config        = createDispmanxConfig(display);
+        final long nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
+        final long display       = createEglDisplay(nativeDisplay);
+        final long config        = createDispmanxConfig(display);
         // create an EGL rendering context
-        final Pointer context = getContext(display,
-                                           config);
-        final Pointer surface = createEglSurface(nativewindow.getPointer(),
-                                                 display,
-                                                 config,
-                                                 context);
+        final long context = getContext(display,
+                                        config);
+        final long surface = createEglSurface(Pointer.ref(nativewindow).address,
+                                              display,
+                                              config,
+                                              context);
 
         return this.privateDispmanxEglOutputFactory.create(display,
                                                            surface,
                                                            context);
     }
 
-    private Pointer createEglSurface(final Pointer nativewindow,
-                                     final Pointer display,
-                                     final Pointer config,
-                                     final Pointer context) {
+    private long createEglSurface(final long nativewindow,
+                                  final long display,
+                                  final long config,
+                                  final long context) {
         // get an appropriate EGL frame buffer configuration
         if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
             this.libEGL.throwError("eglBindAPI");
         }
 
-        final Pointer surface = this.libEGL.eglCreateWindowSurface(display,
-                                                                   config,
-                                                                   nativewindow,
-                                                                   null);
+        final long surface = this.libEGL.eglCreateWindowSurface(display,
+                                                                config,
+                                                                nativewindow,
+                                                                0L);
         if (surface == EGL_NO_SURFACE) {
             this.libEGL.throwError("eglCreateWindowSurface");
         }
@@ -96,85 +93,72 @@ public class DispmanxEglOutputFactory {
         return surface;
     }
 
-    private Pointer getContext(final Pointer display,
-                               final Pointer config) {
-        final int[] context_attributes_values = {
-                EGL_CONTEXT_CLIENT_VERSION, 2,
-                EGL_NONE
-        };
-        final Pointer context_attributes = new Memory(Integer.BYTES * context_attributes_values.length);
-        context_attributes.write(0,
-                                 context_attributes_values,
-                                 0,
-                                 context_attributes_values.length);
-        final Pointer context = this.libEGL.eglCreateContext(display,
-                                                             config,
-                                                             EGL_NO_CONTEXT,
-                                                             context_attributes);
+    private long getContext(final long display,
+                            final long config) {
+        final long context = this.libEGL.eglCreateContext(display,
+                                                          config,
+                                                          EGL_NO_CONTEXT,
+                                                          Pointer.nref(EGL_CONTEXT_CLIENT_VERSION,
+                                                                       2,
+                                                                       EGL_NONE).address);
         if (context == EGL_NO_CONTEXT) {
             this.libEGL.throwError("eglCreateContext");
         }
         return context;
     }
 
-    private Pointer createDispmanxConfig(final Pointer display) {
-        final Pointer num_config = new Memory(Integer.BYTES);
-
-        final int[] attribute_list_values =
-                {
-                        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
-                        EGL_RED_SIZE, 8,
-                        EGL_GREEN_SIZE, 8,
-                        EGL_BLUE_SIZE, 8,
-                        EGL_ALPHA_SIZE, 8,
-                        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-                        EGL_NONE
-
-                };
-        final Pointer attribute_list = new Memory(Integer.BYTES * attribute_list_values.length);
-        attribute_list.write(0,
-                             attribute_list_values,
-                             0,
-                             attribute_list_values.length);
-
-        final Pointer configs = new Memory(Pointer.SIZE);
+    private long createDispmanxConfig(final long display) {
+        final Pointer<Integer> num_config = Pointer.nref(0);
+        final Pointer<Pointer> configs    = Pointer.nref(Pointer.nref(0));
         // get an appropriate EGL frame buffer configuration
         if (!this.libEGL.eglChooseConfig(display,
-                                         attribute_list,
-                                         configs,
+                                         Pointer.nref(EGL_SURFACE_TYPE,
+                                                      EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
+                                                      EGL_RED_SIZE,
+                                                      8,
+                                                      EGL_GREEN_SIZE,
+                                                      8,
+                                                      EGL_BLUE_SIZE,
+                                                      8,
+                                                      EGL_ALPHA_SIZE,
+                                                      8,
+                                                      EGL_RENDERABLE_TYPE,
+                                                      EGL_OPENGL_ES2_BIT,
+                                                      EGL_NONE).address,
+                                         configs.address,
                                          1,
-                                         num_config)) {
+                                         num_config.address)) {
             this.libEGL.throwError("eglChooseConfig");
         }
 
-        return configs.getPointer(0);
+        return configs.dref().address;
     }
 
-    private Pointer createEglDisplay(final Pointer nativeDisplay) {
-        final Pointer display = this.libEGL.eglGetDisplay(nativeDisplay);
-        if (display == EGL_NO_DISPLAY)
-
-        {
+    private long createEglDisplay(final long nativeDisplay) {
+        final long display = this.libEGL.eglGetDisplay(nativeDisplay);
+        if (display == EGL_NO_DISPLAY) {
             this.libEGL.throwError("eglGetDisplay");
         }
 
         // initialize the EGL display connection
         if (!this.libEGL.eglInitialize(display,
-                                       null,
-                                       null)) {
+                                       0L,
+                                       0L)) {
             this.libEGL.throwError("eglInitialize");
         }
 
-        final String eglClientApis = this.libEGL.eglQueryString(display,
-                                                                LibEGL.EGL_CLIENT_APIS)
-                                                .getString(0);
-        final String eglVendor = this.libEGL.eglQueryString(display,
-                                                            LibEGL.EGL_VENDOR)
-                                            .getString(0);
-        final String eglVersion = this.libEGL.eglQueryString(display,
-                                                             LibEGL.EGL_VERSION)
-                                             .getString(0);
-
+        final String eglClientApis = Pointer.wrap(String.class,
+                                                  this.libEGL.eglQueryString(display,
+                                                                             LibEGL.EGL_CLIENT_APIS))
+                                            .dref();
+        final String eglVendor = Pointer.wrap(String.class,
+                                              this.libEGL.eglQueryString(display,
+                                                                         LibEGL.EGL_VENDOR))
+                                        .dref();
+        final String eglVersion = Pointer.wrap(String.class,
+                                               this.libEGL.eglQueryString(display,
+                                                                          LibEGL.EGL_VERSION))
+                                         .dref();
         LOGGER.info(format("Creating X11 EGL output:\n"
                            + "\tEGL client apis: %s\n"
                            + "\tEGL vendor: %s\n"

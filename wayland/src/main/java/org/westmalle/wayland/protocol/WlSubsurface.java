@@ -79,7 +79,7 @@ public class WlSubsurface implements WlSubsurfaceRequests,
             getSubsurface().above(sibling);
         }
         else {
-            requester.postError(WlSubsurfaceError.BAD_SURFACE.getValue(),
+            requester.postError(WlSubsurfaceError.BAD_SURFACE.value,
                                 "placeAbove request failed. wl_surface is not a sibling or the parent");
         }
     }
@@ -111,7 +111,7 @@ public class WlSubsurface implements WlSubsurfaceRequests,
             getSubsurface().below(sibling);
         }
         else {
-            requester.postError(WlSubsurfaceError.BAD_SURFACE.getValue(),
+            requester.postError(WlSubsurfaceError.BAD_SURFACE.value,
                                 "placeBelow request failed. wl_surface is not a sibling or the parent");
         }
     }

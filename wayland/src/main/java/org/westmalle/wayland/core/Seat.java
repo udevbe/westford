@@ -30,7 +30,7 @@ public class Seat {
     private int capabilitiesFlag() {
         int flag = 0;
         for (final WlSeatCapability capability : this.capabilities) {
-            flag |= capability.getValue();
+            flag |= capability.value;
         }
         return flag;
     }

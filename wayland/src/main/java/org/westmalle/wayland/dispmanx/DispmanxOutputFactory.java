@@ -14,6 +14,7 @@
 package org.westmalle.wayland.dispmanx;
 
 
+import com.github.zubnix.jaccall.Pointer;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
@@ -78,8 +79,7 @@ public class DispmanxOutputFactory {
         }
         final DISPMANX_MODEINFO_T modeinfo = new DISPMANX_MODEINFO_T();
         final int success = this.libbcm_host.vc_dispmanx_display_get_info(display,
-                                                                          modeinfo.getPointer());
-        modeinfo.read();
+                                                                          Pointer.ref(modeinfo).address);
         if (success < 0) {
             throw new RuntimeException("Failed get info for display=" + device);
         }
@@ -107,12 +107,12 @@ public class DispmanxOutputFactory {
                                                             .model("dispmanx")
                                                             .physicalWidth(0)
                                                             .physicalHeight(0)
-                                                            .transform(WlOutputTransform.NORMAL.getValue())
+                                                            .transform(WlOutputTransform.NORMAL.value)
                                                             .build();
         final OutputMode outputMode = OutputMode.builder()
                                                 .flags(0)
-                                                .height(modeinfo.height)
-                                                .width(modeinfo.width)
+                                                .height(modeinfo.height())
+                                                .width(modeinfo.width())
                                                 .refresh(60)
                                                 .build();
         return this.outputFactory.create(outputGeometry,
@@ -126,36 +126,33 @@ public class DispmanxOutputFactory {
         final VC_RECT_T dst_rect = new VC_RECT_T();
         final VC_RECT_T src_rect = new VC_RECT_T();
 
-        this.libbcm_host.vc_dispmanx_rect_set(dst_rect.getPointer(),
+        this.libbcm_host.vc_dispmanx_rect_set(Pointer.ref(dst_rect).address,
                                               0,
                                               0,
-                                              modeinfo.width,
-                                              modeinfo.height);
-        this.libbcm_host.vc_dispmanx_rect_set(src_rect.getPointer(),
+                                              modeinfo.width(),
+                                              modeinfo.height());
+        this.libbcm_host.vc_dispmanx_rect_set(Pointer.ref(src_rect).address,
                                               0,
                                               0,
-                                              modeinfo.width << 16,
-                                              modeinfo.height << 16);
-        dst_rect.read();
-        src_rect.read();
+                                              modeinfo.width() << 16,
+                                              modeinfo.height() << 16);
 
         final int update = this.libbcm_host.vc_dispmanx_update_start(0);
 
         final VC_DISPMANX_ALPHA_T alpharules = new VC_DISPMANX_ALPHA_T();
-        alpharules.flags = Libbcm_host.DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS;
-        alpharules.opacity = 255;
-        alpharules.mask = 0;
-        alpharules.write();
+        alpharules.flags(Libbcm_host.DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS);
+        alpharules.opacity(255);
+        alpharules.mask(0);
 
         final int dispmanxElement = this.libbcm_host.vc_dispmanx_element_add(update,
                                                                              display,
                                                                              0 /* layer */,
-                                                                             dst_rect.getPointer(),
+                                                                             Pointer.ref(dst_rect).address,
                                                                              0 /* src resource */,
-                                                                             src_rect.getPointer(),
+                                                                             Pointer.ref(src_rect).address,
                                                                              DISPMANX_PROTECTION_NONE,
-                                                                             alpharules.getPointer(),
-                                                                             null /* clamp */,
+                                                                             Pointer.ref(alpharules).address,
+                                                                             0L /* clamp */,
                                                                              DISPMANX_NO_ROTATE);
         this.libbcm_host.vc_dispmanx_update_submit_sync(update);
 

@@ -13,9 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.egl;
 
-import com.sun.jna.Memory;
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.JNI;
+import com.github.zubnix.jaccall.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.Surface;
@@ -34,11 +33,11 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 
 public class Gles2SurfaceData {
 
-    private final Pointer textureId;
-    private final int     width;
-    private final int     height;
+    private final Pointer<Integer> textureId;
+    private final int              width;
+    private final int              height;
 
-    private Gles2SurfaceData(final Pointer textureId,
+    private Gles2SurfaceData(final Pointer<Integer> textureId,
                              final int width,
                              final int height) {
         this.textureId = textureId;
@@ -52,11 +51,11 @@ public class Gles2SurfaceData {
         final int bufferWidth  = shmBuffer.getStride() / Integer.BYTES;
         final int bufferHeight = shmBuffer.getHeight();
 
-        final Memory textureIdValue = new Memory(Integer.BYTES);
+        final Pointer<Integer> textureIdValue = Pointer.nref(0);
         libGLESv2.glGenTextures(1,
-                                textureIdValue);
+                                textureIdValue.address);
 
-        final int textureId = textureIdValue.getInt(0);
+        final int textureId = textureIdValue.dref();
 
         //upload buffer to gpu
         libGLESv2.glBindTexture(GL_TEXTURE_2D,
@@ -75,7 +74,7 @@ public class Gles2SurfaceData {
                                0,
                                GL_BGRA_EXT,
                                GL_UNSIGNED_BYTE,
-                               null);
+                               0L);
 
         return new Gles2SurfaceData(textureIdValue,
                                     bufferWidth,
@@ -93,7 +92,7 @@ public class Gles2SurfaceData {
         final int bufferHeight = shmBuffer.getHeight();
 
         libGLESv2.glBindTexture(GL_TEXTURE_2D,
-                                this.textureId.getInt(0));
+                                this.textureId.dref());
 
         //TODO use damage hints from surface & glTexSubImage2D
         shmBuffer.beginAccess();
@@ -105,7 +104,7 @@ public class Gles2SurfaceData {
                                0,
                                GL_BGRA_EXT,
                                GL_UNSIGNED_BYTE,
-                               Native.getDirectBufferPointer(shmBuffer.getData()));
+                               JNI.unwrap(shmBuffer.getData()));
         shmBuffer.endAccess();
         surface.firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
     }
@@ -120,6 +119,6 @@ public class Gles2SurfaceData {
 
     public void delete(@Nonnull final LibGLESv2 libGLESv2) {
         libGLESv2.glDeleteTextures(1,
-                                   this.textureId);
+                                   this.textureId.address);
     }
 }

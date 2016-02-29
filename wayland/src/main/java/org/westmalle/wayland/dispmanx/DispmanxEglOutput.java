@@ -15,7 +15,6 @@ package org.westmalle.wayland.dispmanx;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.sun.jna.Pointer;
 import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 
@@ -27,18 +26,15 @@ import javax.annotation.Nonnull;
 public class DispmanxEglOutput implements RenderOutput {
 
     @Nonnull
-    private final LibEGL  libEGL;
-    @Nonnull
-    private final Pointer eglDisplay;
-    @Nonnull
-    private final Pointer eglSurface;
-    @Nonnull
-    private final Pointer eglContext;
+    private final LibEGL libEGL;
+    private final long   eglDisplay;
+    private final long   eglSurface;
+    private final long   eglContext;
 
     DispmanxEglOutput(@Provided @Nonnull final LibEGL libEGL,
-                      @Nonnull final Pointer eglDisplay,
-                      @Nonnull final Pointer eglSurface,
-                      @Nonnull final Pointer eglContext) {
+                      final long eglDisplay,
+                      final long eglSurface,
+                      final long eglContext) {
         this.libEGL = libEGL;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;

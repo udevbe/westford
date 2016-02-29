@@ -55,7 +55,7 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
         }
         else {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Surface surface = wlSurface.getSurface();
+            final Surface   surface   = wlSurface.getSurface();
 
             final Role role = surface.getRole()
                                      .orElseGet(this::getPointerDevice);
@@ -72,7 +72,7 @@ public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerR
             else {
                 wlPointerResource.getClient()
                                  .getObject(Display.OBJECT_ID)
-                                 .postError(WlPointerError.ROLE.getValue(),
+                                 .postError(WlPointerError.ROLE.value,
                                             String.format("Desired cursor surface already has another role (%s)",
                                                           role.getClass()
                                                               .getSimpleName()));

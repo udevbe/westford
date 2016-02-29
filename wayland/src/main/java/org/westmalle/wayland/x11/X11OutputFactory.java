@@ -65,8 +65,6 @@ public class X11OutputFactory {
     @Nonnull
     private final Display                 display;
     @Nonnull
-    private final Libc                    libc;
-    @Nonnull
     private final LibX11                  libX11;
     @Nonnull
     private final Libxcb                  libxcb;
@@ -85,7 +83,6 @@ public class X11OutputFactory {
 
     @Inject
     X11OutputFactory(@Nonnull final Display display,
-                     @Nonnull final Libc libc,
                      @Nonnull final LibX11 libX11,
                      @Nonnull final Libxcb libxcb,
                      @Nonnull final LibX11xcb libX11xcb,
@@ -95,7 +92,6 @@ public class X11OutputFactory {
                      @Nonnull final X11EventBusFactory x11EventBusFactory,
                      @Nonnull final WlCompositor wlCompositor) {
         this.display = display;
-        this.libc = libc;
         this.libX11 = libX11;
         this.libxcb = libxcb;
         this.libX11xcb = libX11xcb;
