@@ -15,9 +15,6 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.sun.jna.LastErrorException;
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
@@ -109,9 +106,9 @@ public class KeyboardDevice {
                     final int key,
                     @Nonnull final WlKeyboardKeyState wlKeyboardKeyState) {
 
-        int           stateComponentMask = 0;
-        final Pointer xkbState           = getXkb().getState();
-        final int     evdevKey           = key + 8;
+        int        stateComponentMask = 0;
+        final long xkbState           = getXkb().getState();
+        final int  evdevKey           = key + 8;
         if (wlKeyboardKeyState.equals(WlKeyboardKeyState.PRESSED)) {
             if (getPressedKeys().add(key)) {
                 stateComponentMask = this.libxkbcommon.xkb_state_update_key(xkbState,
@@ -165,7 +162,7 @@ public class KeyboardDevice {
                                                                               wlKeyboardResource.key(nextKeyboardSerial(),
                                                                                                      time,
                                                                                                      key,
-                                                                                                     wlKeyboardKeyState.getValue())));
+                                                                                                     wlKeyboardKeyState.value)));
     }
 
     private void handleStateComponentMask(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
@@ -309,7 +306,7 @@ public class KeyboardDevice {
     public void emitKeymap(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources) {
         if (this.keymapFd >= 0) {
             wlKeyboardResources.forEach(wlKeyboardResource ->
-                                                wlKeyboardResource.keymap(WlKeyboardKeymapFormat.XKB_V1.getValue(),
+                                                wlKeyboardResource.keymap(WlKeyboardKeymapFormat.XKB_V1.value,
                                                                           this.keymapFd,
                                                                           this.keymapSize));
         }

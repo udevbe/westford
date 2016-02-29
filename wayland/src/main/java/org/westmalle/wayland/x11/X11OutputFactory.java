@@ -13,22 +13,21 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.nativ.NativeString;
 import org.westmalle.wayland.nativ.libX11.LibX11;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_client_message_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -134,20 +133,28 @@ public class X11OutputFactory {
     private WlOutput createXPlatformOutput(final String xDisplayName,
                                            final int width,
                                            final int height) {
-        final Pointer xDisplay = this.libX11.XOpenDisplay(xDisplayName);
-        if (xDisplay == null) {
+        final long xDisplay = this.libX11.XOpenDisplay(Pointer.nref(xDisplayName).address);
+        if (xDisplay == 0L) {
             throw new RuntimeException("XOpenDisplay() failed: " + xDisplayName);
         }
 
-        final Pointer xcbConnection = this.libX11xcb.XGetXCBConnection(xDisplay);
+        final long xcbConnection = this.libX11xcb.XGetXCBConnection(xDisplay);
         this.libX11xcb.XSetEventQueueOwner(xDisplay,
                                            XCBOwnsEventQueue);
         if (this.libxcb.xcb_connection_has_error(xcbConnection) != 0) {
             throw new RuntimeException("error occurred while connecting to X server");
         }
 
-        final Pointer      setup  = this.libxcb.xcb_get_setup(xcbConnection);
-        final xcb_screen_t screen = this.libxcb.xcb_setup_roots_iterator(setup).data;
+        final long setup = this.libxcb.xcb_get_setup(xcbConnection);
+
+
+        final xcb_screen_t screen;
+        try (final Pointer<xcb_screen_iterator_t> xcb_screen_iterator = Pointer.wrap(xcb_screen_iterator_t.class,
+                                                                                     this.libxcb.xcb_setup_roots_iterator(setup))) {
+            screen = xcb_screen_iterator.dref()
+                                        .data()
+                                        .dref();
+        }
 
         final int window = createXWindow(xcbConnection,
                                          screen,
@@ -164,7 +171,7 @@ public class X11OutputFactory {
         return this.wlOutputFactory.create(output);
     }
 
-    private int createXWindow(final Pointer xcbConnection,
+    private int createXWindow(final long xcbConnection,
                               final xcb_screen_t screen,
                               final int width,
                               final int height) {
@@ -174,48 +181,42 @@ public class X11OutputFactory {
             throw new RuntimeException("failed to generate X window id");
         }
 
-        final int     mask   = XCB_CW_EVENT_MASK;
-        final Pointer values = new Memory(Integer.BYTES);
-        values.write(0,
-                     new int[]{
-                             XCB_EVENT_MASK_KEY_PRESS |
-                             XCB_EVENT_MASK_KEY_RELEASE |
-                             XCB_EVENT_MASK_BUTTON_PRESS |
-                             XCB_EVENT_MASK_BUTTON_RELEASE |
-                             XCB_EVENT_MASK_ENTER_WINDOW |
-                             XCB_EVENT_MASK_LEAVE_WINDOW |
-                             XCB_EVENT_MASK_POINTER_MOTION |
-                             XCB_EVENT_MASK_KEYMAP_STATE |
-                             XCB_EVENT_MASK_FOCUS_CHANGE
-                     },
-                     0,
-                     1);
+        final int mask = XCB_CW_EVENT_MASK;
+        final Pointer<Integer> values = Pointer.nref(XCB_EVENT_MASK_KEY_PRESS |
+                                                     XCB_EVENT_MASK_KEY_RELEASE |
+                                                     XCB_EVENT_MASK_BUTTON_PRESS |
+                                                     XCB_EVENT_MASK_BUTTON_RELEASE |
+                                                     XCB_EVENT_MASK_ENTER_WINDOW |
+                                                     XCB_EVENT_MASK_LEAVE_WINDOW |
+                                                     XCB_EVENT_MASK_POINTER_MOTION |
+                                                     XCB_EVENT_MASK_KEYMAP_STATE |
+                                                     XCB_EVENT_MASK_FOCUS_CHANGE);
         this.libxcb.xcb_create_window(xcbConnection,
                                       (byte) XCB_COPY_FROM_PARENT,
                                       window,
-                                      screen.root,
+                                      screen.root(),
                                       (short) 0,
                                       (short) 0,
                                       (short) width,
                                       (short) height,
                                       (short) 0,
                                       (short) XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                                      screen.root_visual,
+                                      screen.root_visual(),
                                       mask,
-                                      values);
+                                      values.address);
         this.libxcb.xcb_map_window(xcbConnection,
                                    window);
 
         return window;
     }
 
-    private X11Output createX11Output(final Pointer xDisplay,
-                                      final Pointer connection,
+    private X11Output createX11Output(final long xDisplay,
+                                      final long connection,
                                       final int window) {
         final X11EventBus x11EventBus = this.x11EventBusFactory.create(connection);
         this.display.getEventLoop()
                     .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(connection),
-                                       EventLoop.EVENT_READABLE,
+                                       WaylandServerCore.WL_EVENT_READABLE,
                                        x11EventBus)
                     .check();
         final Map<String, Integer> x11Atoms = internX11Atoms(connection);
@@ -228,12 +229,11 @@ public class X11OutputFactory {
                 x11Atoms);
         x11EventBus.getXEventSignal()
                    .connect(event -> {
-                       final int responseType = (event.response_type & ~0x80);
+                       final int responseType = (event.dref()
+                                                      .response_type() & ~0x80);
                        switch (responseType) {
                            case XCB_CLIENT_MESSAGE: {
-                               final xcb_client_message_event_t client_message_event = new xcb_client_message_event_t(event.getPointer());
-                               client_message_event.read();
-                               X11OutputFactory.this.handle(client_message_event,
+                               X11OutputFactory.this.handle(event.castp(xcb_client_message_event_t.class),
                                                             x11Atoms,
                                                             window);
                                break;
@@ -258,11 +258,11 @@ public class X11OutputFactory {
                                                             .subpixel(0)
                                                             .make("Westmalle xcb")
                                                             .model("X11")
-                                                            .physicalWidth((width / screen.width_in_pixels)
-                                                                           * screen.width_in_millimeters)
-                                                            .physicalHeight((height / screen.height_in_pixels)
-                                                                            * screen.height_in_millimeters)
-                                                            .transform(WlOutputTransform.NORMAL.getValue())
+                                                            .physicalWidth((width / screen.width_in_pixels())
+                                                                           * screen.width_in_millimeters())
+                                                            .physicalHeight((height / screen.height_in_pixels())
+                                                                            * screen.height_in_millimeters())
+                                                            .transform(WlOutputTransform.NORMAL.value)
                                                             .build();
         final OutputMode outputMode = OutputMode.builder()
                                                 .flags(0)
@@ -275,7 +275,7 @@ public class X11OutputFactory {
                                          x11Output);
     }
 
-    private Map<String, Integer> internX11Atoms(final Pointer connection) {
+    private Map<String, Integer> internX11Atoms(final long connection) {
 
         final String[] atomNames = {
                 "WM_PROTOCOLS",
@@ -295,34 +295,33 @@ public class X11OutputFactory {
                 "_XKB_RULES_NAMES"
         };
 
-        final xcb_intern_atom_cookie_t.ByValue cookies[] = new xcb_intern_atom_cookie_t.ByValue[atomNames.length];
+
+        final int[] cookies = new int[atomNames.length];
         for (int i = 0; i < atomNames.length; i++) {
-            final NativeString nativeAtomName = new NativeString(atomNames[i]);
             cookies[i] = this.libxcb.xcb_intern_atom(connection,
                                                      (byte) 0,
-                                                     (short) nativeAtomName.length(),
-                                                     nativeAtomName.getPointer());
+                                                     (short) atomNames[i].length(),
+                                                     Pointer.nref(atomNames[i]).address);
         }
 
         final Map<String, Integer> x11Atoms = new HashMap<>(atomNames.length);
         for (int i = 0; i < atomNames.length; i++) {
-            final xcb_intern_atom_reply_t reply = this.libxcb.xcb_intern_atom_reply(connection,
-                                                                                    cookies[i],
-                                                                                    null);
-            x11Atoms.put(atomNames[i],
-                         reply.atom);
-            this.libc.free(reply.getPointer());
+            try (final Pointer<xcb_intern_atom_reply_t> reply = Pointer.wrap(xcb_intern_atom_reply_t.class,
+                                                                             this.libxcb.xcb_intern_atom_reply(connection,
+                                                                                                               cookies[i],
+                                                                                                               0L))) {
+                x11Atoms.put(atomNames[i],
+                             reply.dref()
+                                  .atom());
+            }
         }
         return x11Atoms;
     }
 
-    private void setWmProtocol(final Pointer connection,
+    private void setWmProtocol(final long connection,
                                final int window,
                                final int wmProtocols,
                                final int wmDeleteWindow) {
-        final Pointer list = new Memory(Integer.BYTES);
-        list.setInt(0,
-                    wmDeleteWindow);
         this.libxcb.xcb_change_property(connection,
                                         (byte) XCB_PROP_MODE_REPLACE,
                                         window,
@@ -330,36 +329,43 @@ public class X11OutputFactory {
                                         XCB_ATOM_ATOM,
                                         (byte) 32,
                                         1,
-                                        list);
+                                        Pointer.nref(wmDeleteWindow).address);
     }
 
-    private void setName(final Pointer connection,
+    private void setName(final long connection,
                          final int window,
                          final Map<String, Integer> x11Atoms) {
-        final NativeString titleNativeString = new NativeString("Westmalle");
+        final String name       = "Westmalle";
+        final int    nameLength = name.length();
+        final long   nameNative = Pointer.nref(name).address;
+
         this.libxcb.xcb_change_property(connection,
                                         (byte) XCB_PROP_MODE_REPLACE,
                                         window,
                                         x11Atoms.get("_NET_WM_NAME"),
                                         x11Atoms.get("UTF8_STRING"),
                                         (byte) 8,
-                                        titleNativeString.length(),
-                                        titleNativeString.getPointer());
+                                        nameLength,
+                                        nameNative);
         this.libxcb.xcb_change_property(connection,
                                         (byte) XCB_PROP_MODE_REPLACE,
                                         window,
                                         x11Atoms.get("WM_CLASS"),
                                         x11Atoms.get("STRING"),
                                         (byte) 8,
-                                        titleNativeString.length(),
-                                        titleNativeString.getPointer());
+                                        nameLength,
+                                        nameNative);
     }
 
-    private void handle(final xcb_client_message_event_t event,
+    private void handle(final Pointer<xcb_client_message_event_t> event,
                         final Map<String, Integer> x11Atoms,
                         final int window) {
-        final int atom         = event.data.data32[0];
-        final int sourceWindow = event.window;
+        final int atom = event.dref()
+                              .data()
+                              .data32()
+                              .dref();
+        final int sourceWindow = event.dref()
+                                      .window();
         if (atom == x11Atoms.get("WM_DELETE_WINDOW") &&
             window == sourceWindow) {
             System.exit(0);

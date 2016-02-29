@@ -13,10 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import com.github.zubnix.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.sun.jna.Pointer;
-import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 
 import javax.annotation.Nonnull;
@@ -28,23 +27,16 @@ import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_F
 public class Xkb {
 
     @Nonnull
-    private final Libc         libc;
-    @Nonnull
     private final Libxkbcommon libxkbcommon;
 
-    @Nonnull
-    private final Pointer xkbContext;
-    @Nonnull
-    private final Pointer xkbState;
-    @Nonnull
-    private final Pointer xkbKeymap;
+    private final long xkbContext;
+    private final long xkbState;
+    private final long xkbKeymap;
 
-    Xkb(@Provided @Nonnull final Libc libc,
-        @Provided @Nonnull final Libxkbcommon libxkbcommon,
-        @Nonnull final Pointer xkbContext,
-        @Nonnull final Pointer xkbState,
-        @Nonnull final Pointer xkbKeymap) {
-        this.libc = libc;
+    Xkb(@Provided @Nonnull final Libxkbcommon libxkbcommon,
+        final long xkbContext,
+        final long xkbState,
+        final long xkbKeymap) {
         this.libxkbcommon = libxkbcommon;
         this.xkbContext = xkbContext;
         this.xkbState = xkbState;
@@ -52,18 +44,16 @@ public class Xkb {
     }
 
     public String getKeymapString() {
-        final Pointer keymapStringPointer = this.libxkbcommon.xkb_keymap_get_as_string(this.xkbKeymap,
-                                                                                       XKB_KEYMAP_FORMAT_TEXT_V1);
-        if (keymapStringPointer == null) {
-            throw new RuntimeException("Got an error while trying to get keymap as string. " +
-                                       "Unfortunately the docs of the xkb library do not specify how we to get more information " +
-                                       "about the error, so you'll have to do it with this lousy exception.");
+        try (final Pointer<String> keymapStringPointer = Pointer.wrap(String.class,
+                                                                      this.libxkbcommon.xkb_keymap_get_as_string(this.xkbKeymap,
+                                                                                                                 XKB_KEYMAP_FORMAT_TEXT_V1))) {
+            if (keymapStringPointer.address == 0L) {
+                throw new RuntimeException("Got an error while trying to get keymap as string. " +
+                                           "Unfortunately the docs of the xkb library do not specify how we to get more information " +
+                                           "about the error, so you'll have to do it with this lousy exception.");
+            }
+            return keymapStringPointer.dref();
         }
-
-        final String keymapString = keymapStringPointer.getString(0);
-        this.libc.free(keymapStringPointer);
-
-        return keymapString;
     }
 
     @Override
@@ -74,18 +64,15 @@ public class Xkb {
         super.finalize();
     }
 
-    @Nonnull
-    public Pointer getContext() {
+    public long getContext() {
         return this.xkbContext;
     }
 
-    @Nonnull
-    public Pointer getKeymap() {
+    public long getKeymap() {
         return this.xkbKeymap;
     }
 
-    @Nonnull
-    public Pointer getState() {
+    public long getState() {
         return this.xkbState;
     }
 }

@@ -15,7 +15,6 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.sun.jna.Pointer;
 import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.egl.HasEglOutput;
 
@@ -30,11 +29,9 @@ public class X11Output implements HasEglOutput {
     private final X11EglOutputFactory  x11EglOutputFactory;
     @Nonnull
     private final X11EventBus          x11EventBus;
-    @Nonnull
-    private final Pointer              xcbConnection;
+    private final long                 xcbConnection;
     private final int                  xWindow;
-    @Nonnull
-    private final Pointer              xDisplay;
+    private final long                 xDisplay;
     @Nonnull
     private final Map<String, Integer> atoms;
 
@@ -42,8 +39,8 @@ public class X11Output implements HasEglOutput {
 
     X11Output(@Provided @Nonnull final X11EglOutputFactory x11EglOutputFactory,
               @Nonnull final X11EventBus x11EventBus,
-              @Nonnull final Pointer xcbConnection,
-              @Nonnull final Pointer xDisplay,
+              final long xcbConnection,
+              final long xDisplay,
               final int xWindow,
               @Nonnull final Map<String, Integer> x11Atoms) {
         this.x11EglOutputFactory = x11EglOutputFactory;
@@ -67,13 +64,11 @@ public class X11Output implements HasEglOutput {
         return this.xWindow;
     }
 
-    @Nonnull
-    public Pointer getxDisplay() {
+    public long getxDisplay() {
         return this.xDisplay;
     }
 
-    @Nonnull
-    public Pointer getXcbConnection() {
+    public long getXcbConnection() {
         return this.xcbConnection;
     }
 

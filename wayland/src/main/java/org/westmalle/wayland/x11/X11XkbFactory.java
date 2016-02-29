@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.sun.jna.Pointer;
 import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.core.XkbFactory;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
@@ -43,10 +42,10 @@ public class X11XkbFactory {
         this.libxkbcommonx11 = libxkbcommonx11;
     }
 
-    public Xkb create(final Pointer xcbConnection) {
+    public Xkb create(final long xcbConnection) {
 
-        final Pointer xkbContext = this.libxkbcommon.xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-        if (xkbContext == null) {
+        final long xkbContext = this.libxkbcommon.xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+        if (xkbContext == 0L) {
             throw new RuntimeException("Got an error while trying to create xkb context. " +
                                        "Unfortunately the docs of the xkb library do not specify how we to get more information " +
                                        "about the error, so you'll have to do it with this lousy exception.");
@@ -59,19 +58,19 @@ public class X11XkbFactory {
                                        "about the error, so you'll have to do it with this lousy exception.");
         }
 
-        final Pointer keymap = this.libxkbcommonx11.xkb_x11_keymap_new_from_device(xkbContext,
-                                                                                   xcbConnection,
-                                                                                   device_id,
-                                                                                   XKB_KEYMAP_COMPILE_NO_FLAGS);
-        if (keymap == null) {
+        final long keymap = this.libxkbcommonx11.xkb_x11_keymap_new_from_device(xkbContext,
+                                                                                xcbConnection,
+                                                                                device_id,
+                                                                                XKB_KEYMAP_COMPILE_NO_FLAGS);
+        if (keymap == 0L) {
             throw new RuntimeException("Got an error while trying to get x11 keymap. " +
                                        "Unfortunately the docs of the xkb library do not specify how we to get more information " +
                                        "about the error, so you'll have to do it with this lousy exception.");
         }
 
-        final Pointer state = this.libxkbcommonx11.xkb_x11_state_new_from_device(keymap,
-                                                                                 xcbConnection,
-                                                                                 device_id);
+        final long state = this.libxkbcommonx11.xkb_x11_state_new_from_device(keymap,
+                                                                              xcbConnection,
+                                                                              device_id);
 
         return this.xkbFactory.create(xkbContext,
                                       state,

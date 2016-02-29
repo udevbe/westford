@@ -13,14 +13,17 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Pointer;
+import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
+import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.logging.Logger;
 
+import static com.github.zubnix.jaccall.Pointer.malloc;
+import static com.github.zubnix.jaccall.Size.sizeof;
 import static java.lang.String.format;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
@@ -64,21 +67,22 @@ public class X11EglOutputFactory {
     }
 
     @Nonnull
-    public X11EglOutput create(@Nonnull final Pointer display,
+    public X11EglOutput create(final long display,
                                final int window) {
         if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
             throw new RuntimeException("eglBindAPI failed");
         }
-        final Pointer eglDisplay = createEglDisplay(display);
+        final long eglDisplay = createEglDisplay(display);
 
-        final int     configs_size = 256 * Pointer.SIZE;
-        final Pointer configs      = new Memory(configs_size);
+        final int configs_size = 256 * sizeof((Pointer<?>) null);
+        final Pointer<Pointer> configs = malloc(configs_size,
+                                                Pointer.class);
         chooseConfig(eglDisplay,
                      configs,
                      configs_size);
-        final Pointer config = configs.getPointer(0);
-        final Pointer context = createEglContext(eglDisplay,
-                                                 config);
+        final long config = configs.dref().address;
+        final long context = createEglContext(eglDisplay,
+                                              config);
 
         return this.privateX11EglOutputFactory.create(eglDisplay,
                                                       createEglSurface(eglDisplay,
@@ -88,39 +92,45 @@ public class X11EglOutputFactory {
                                                       context);
     }
 
-    private Pointer createEglDisplay(final Pointer nativeDisplay) {
-        final Pointer eglQueryString = this.libEGL.eglQueryString(EGL_NO_DISPLAY,
-                                                                  EGL_EXTENSIONS);
-        if (eglQueryString != null && eglQueryString.getString(0)
-                                                    .contains("EGL_EXT_platform_x11")) {
-            this.libEGL.loadEglCreatePlatformWindowSurfaceEXT();
-            this.libEGL.loadEglGetPlatformDisplayEXT();
-        }
-        else {
+    private long createEglDisplay(final long nativeDisplay) {
+        final Pointer<String> eglQueryString = Pointer.wrap(String.class,
+                                                            this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                                                                       EGL_EXTENSIONS));
+
+
+        if (eglQueryString.address == 0L || !eglQueryString.dref()
+                                                           .contains("EGL_EXT_platform_x11")) {
             throw new RuntimeException("Required extension EGL_EXT_platform_x11 not available.");
         }
 
-        final Pointer eglDisplay = this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
-                                                                        nativeDisplay,
-                                                                        null);
-        if (eglDisplay == null) {
+        final Pointer<EglGetPlatformDisplayEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglGetPlatformDisplayEXT.class,
+                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("EglGetPlatformDisplayEXT").address));
+
+        final long eglDisplay = eglGetPlatformDisplayEXT.dref()
+                                                        .$(EGL_PLATFORM_X11_KHR,
+                                                           nativeDisplay,
+                                                           0L);
+        if (eglDisplay == 0L) {
             throw new RuntimeException("eglGetDisplay() failed");
         }
         if (!this.libEGL.eglInitialize(eglDisplay,
-                                       null,
-                                       null)) {
+                                       0L,
+                                       0L)) {
             throw new RuntimeException("eglInitialize() failed");
         }
 
-        final String eglClientApis = this.libEGL.eglQueryString(eglDisplay,
-                                                                LibEGL.EGL_CLIENT_APIS)
-                                                .getString(0);
-        final String eglVendor = this.libEGL.eglQueryString(eglDisplay,
-                                                            LibEGL.EGL_VENDOR)
-                                            .getString(0);
-        final String eglVersion = this.libEGL.eglQueryString(eglDisplay,
-                                                             LibEGL.EGL_VERSION)
-                                             .getString(0);
+        final String eglClientApis = Pointer.wrap(String.class,
+                                                  this.libEGL.eglQueryString(eglDisplay,
+                                                                             LibEGL.EGL_CLIENT_APIS))
+                                            .dref();
+        final String eglVendor = Pointer.wrap(String.class,
+                                              this.libEGL.eglQueryString(eglDisplay,
+                                                                         LibEGL.EGL_VENDOR))
+                                        .dref();
+        final String eglVersion = Pointer.wrap(String.class,
+                                               this.libEGL.eglQueryString(eglDisplay,
+                                                                          LibEGL.EGL_VERSION))
+                                         .dref();
 
         LOGGER.info(format("Creating X11 EGL output:\n"
                            + "\tEGL client apis: %s\n"
@@ -130,67 +140,16 @@ public class X11EglOutputFactory {
                            eglClientApis,
                            eglVendor,
                            eglVersion,
-                           eglQueryString.getString(0)));
+                           eglQueryString.dref()));
 
         return eglDisplay;
     }
 
-    private void chooseConfig(final Pointer eglDisplay,
-                              final Pointer configs,
+    private void chooseConfig(final long eglDisplay,
+                              final Pointer<Pointer> configs,
                               final int configs_size) {
-        final Pointer num_configs        = new Memory(Integer.BYTES);
-        final Pointer egl_config_attribs = createEglConfigAttribs();
-        if (!this.libEGL.eglChooseConfig(eglDisplay,
-                                         egl_config_attribs,
-                                         configs,
-                                         configs_size,
-                                         num_configs)) {
-            throw new RuntimeException("eglChooseConfig() failed");
-        }
-        if (num_configs.getInt(0) == 0) {
-            throw new RuntimeException("failed to find suitable EGLConfig");
-        }
-    }
-
-    private Pointer createEglContext(final Pointer eglDisplay,
-                                     final Pointer config) {
-        final Pointer eglContextAttribs = createEglContextAttribs();
-        final Pointer context = this.libEGL.eglCreateContext(eglDisplay,
-                                                             config,
-                                                             EGL_NO_CONTEXT,
-                                                             eglContextAttribs);
-        if (context == null) {
-            throw new RuntimeException("eglCreateContext() failed");
-        }
-        return context;
-    }
-
-    private Pointer createEglSurface(final Pointer eglDisplay,
-                                     final Pointer config,
-                                     final Pointer context,
-                                     final int nativeWindow) {
-        final Pointer eglSurfaceAttribs = createSurfaceAttribs();
-        final Memory  surfaceId         = new Memory(Integer.BYTES);
-        surfaceId.setInt(0,
-                         nativeWindow);
-        final Pointer eglSurface = this.libEGL.eglCreatePlatformWindowSurfaceEXT(eglDisplay,
-                                                                                 config,
-                                                                                 surfaceId,
-                                                                                 eglSurfaceAttribs);
-        if (eglSurface == null) {
-            throw new RuntimeException("eglCreateWindowSurface() failed");
-        }
-        if (!this.libEGL.eglMakeCurrent(eglDisplay,
-                                        eglSurface,
-                                        eglSurface,
-                                        context)) {
-            throw new RuntimeException("eglMakeCurrent() failed");
-        }
-        return eglSurface;
-    }
-
-    private Pointer createEglConfigAttribs() {
-        final int[] attributes = {
+        final Pointer<Integer> num_configs = Pointer.nref(0);
+        final Pointer<Integer> egl_config_attribs = Pointer.nref(
                 //@formatter:off
                  EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
                  EGL_BUFFER_SIZE,       32,
@@ -206,41 +165,61 @@ public class X11EglOutputFactory {
                  EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
                  EGL_NONE
                 //@formatter:on
-        };
-        final Pointer configAttribs = new Memory(Integer.BYTES * attributes.length);
-        configAttribs.write(0,
-                            attributes,
-                            0,
-                            attributes.length);
-        return configAttribs;
+                                                                );
+        if (!this.libEGL.eglChooseConfig(eglDisplay,
+                                         egl_config_attribs.address,
+                                         configs.address,
+                                         configs_size,
+                                         num_configs.address)) {
+            throw new RuntimeException("eglChooseConfig() failed");
+        }
+        if (num_configs.dref() == 0) {
+            throw new RuntimeException("failed to find suitable EGLConfig");
+        }
     }
 
-    private Pointer createEglContextAttribs() {
-        final int[] contextAttributes = {
+    private long createEglContext(final long eglDisplay,
+                                  final long config) {
+        final Pointer<?> eglContextAttribs = Pointer.nref(
                 //@formatter:off
                 EGL_CONTEXT_CLIENT_VERSION, 2,
                 EGL_NONE
                 //@formatter:on
-        };
-        final Pointer eglContextAttribs = new Memory(Integer.BYTES * contextAttributes.length);
-        eglContextAttribs.write(0,
-                                contextAttributes,
-                                0,
-                                contextAttributes.length);
-        return eglContextAttribs;
+                                                         );
+        final long context = this.libEGL.eglCreateContext(eglDisplay,
+                                                          config,
+                                                          EGL_NO_CONTEXT,
+                                                          eglContextAttribs.address);
+        if (context == 0L) {
+            throw new RuntimeException("eglCreateContext() failed");
+        }
+        return context;
     }
 
-    private Pointer createSurfaceAttribs() {
-        final int[] surfaceAttributes = {
-                EGL_RENDER_BUFFER,
-                EGL_BACK_BUFFER,
-                EGL_NONE
-        };
-        final Pointer eglSurfaceAttribs = new Memory(surfaceAttributes.length * Integer.BYTES);
-        eglSurfaceAttribs.write(0,
-                                surfaceAttributes,
-                                0,
-                                surfaceAttributes.length);
-        return eglSurfaceAttribs;
+    private long createEglSurface(final long eglDisplay,
+                                  final long config,
+                                  final long context,
+                                  final int nativeWindow) {
+        final Pointer<Integer> eglSurfaceAttribs = Pointer.nref(EGL_RENDER_BUFFER,
+                                                                EGL_BACK_BUFFER,
+                                                                EGL_NONE);
+
+        final Pointer<EglCreatePlatformWindowSurfaceEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglCreatePlatformWindowSurfaceEXT.class,
+                                                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("EglCreatePlatformWindowSurfaceEXT").address));
+        final long eglSurface = eglGetPlatformDisplayEXT.dref()
+                                                        .$(eglDisplay,
+                                                           config,
+                                                           Pointer.nref(nativeWindow).address,
+                                                           eglSurfaceAttribs.address);
+        if (eglSurface == 0L) {
+            throw new RuntimeException("eglCreateWindowSurface() failed");
+        }
+        if (!this.libEGL.eglMakeCurrent(eglDisplay,
+                                        eglSurface,
+                                        eglSurface,
+                                        context)) {
+            throw new RuntimeException("eglMakeCurrent() failed");
+        }
+        return eglSurface;
     }
 }

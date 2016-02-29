@@ -30,7 +30,7 @@ import com.github.zubnix.jaccall.Struct;
                        type = CType.INT),
                 @Field(name = "width_in_pixels",
                        type = CType.SHORT),
-                @Field(name = "hight_in_pixels",
+                @Field(name = "height_in_pixels",
                        type = CType.SHORT),
                 @Field(name = "width_in_millimeters",
                        type = CType.SHORT),

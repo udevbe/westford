@@ -13,13 +13,12 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
+import com.github.zubnix.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.sun.jna.Pointer;
 import org.freedesktop.wayland.server.EventLoop;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 
@@ -29,34 +28,31 @@ import javax.annotation.Nonnull;
              allowSubclasses = true)
 public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
 
-    private final Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> xEventSignal = new Signal<>();
+    private final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal = new Signal<>();
     @Nonnull
-    private final Libxcb  libxcb;
-    @Nonnull
-    private final Libc    libc;
-    @Nonnull
-    private final Pointer xcbConnection;
+    private final Libxcb libxcb;
+    private final long   xcbConnection;
 
     X11EventBus(@Provided @Nonnull final Libxcb libxcb,
-                @Provided @Nonnull final Libc libc,
-                @Nonnull final Pointer xcbConnection) {
+                final long xcbConnection) {
         this.libxcb = libxcb;
-        this.libc = libc;
         this.xcbConnection = xcbConnection;
     }
 
     @Override
     public int handle(final int fd,
                       final int mask) {
-        xcb_generic_event_t event;
-        while ((event = this.libxcb.xcb_poll_for_event(this.xcbConnection)) != null) {
-            getXEventSignal().emit(event);
-            this.libc.free(event.getPointer());
+        long event;
+        while ((event = this.libxcb.xcb_poll_for_event(this.xcbConnection)) != 0L) {
+            try (final Pointer<xcb_generic_event_t> generic_event = Pointer.wrap(xcb_generic_event_t.class,
+                                                                                 event)) {
+                getXEventSignal().emit(generic_event);
+            }
         }
         return 0;
     }
 
-    public Signal<xcb_generic_event_t, Slot<xcb_generic_event_t>> getXEventSignal() {
+    public Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> getXEventSignal() {
         return this.xEventSignal;
     }
 }

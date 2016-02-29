@@ -81,7 +81,8 @@ public class Libxcb {
     public native int xcb_map_window(@Ptr long c,
                                      int wid);
 
-    public native xcb_generic_event_t xcb_poll_for_event(@Ptr long c);
+    @Ptr
+    public native long xcb_poll_for_event(@Ptr long c);
 
     public native int xcb_get_file_descriptor(@Ptr long c);
 
@@ -103,9 +104,10 @@ public class Libxcb {
                                       short name_len,
                                       @Ptr long name);
 
-    public native xcb_intern_atom_reply_t xcb_intern_atom_reply(@Ptr long c,
-                                                                int cookie,
-                                                                @Ptr long e);
+    @Ptr
+    public native long xcb_intern_atom_reply(@Ptr long c,
+                                             int cookie,
+                                             @Ptr long e);
 
     public native int xcb_change_property(@Ptr long c,
                                           byte mode,
