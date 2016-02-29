@@ -13,23 +13,19 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libbcm_host;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class VC_RECT_T extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("x",
-                                                             "y",
-                                                             "width",
-                                                             "height");
-
-    public int x;
-    public int y;
-    public int width;
-    public int height;
-
-    @Override
-    protected List<?> getFieldOrder() { return FIELD_ORDER; }
+@Struct({
+                @Field(name = "x",
+                       type = CType.INT),
+                @Field(name = "y",
+                       type = CType.INT),
+                @Field(name = "width",
+                       type = CType.INT),
+                @Field(name = "height",
+                       type = CType.INT)
+        })
+public final class VC_RECT_T extends VC_RECT_T_Jaccall_StructType {
 }

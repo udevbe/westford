@@ -13,18 +13,15 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libbcm_host;
 
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import com.sun.jna.Structure;
+@Struct({
+                @Field(name = "dummy",
+                       type = CType.INT)
+        })
+public final class DISPMANX_CLAMP_T extends DISPMANX_CLAMP_T_Jaccall_StructType {
 
-import java.util.Collections;
-import java.util.List;
 
-public class DISPMANX_CLAMP_T extends Structure {
-
-    private static final List<?> FIELD_ORDER = Collections.singletonList("dummy");
-
-    public int dummy;
-
-    @Override
-    protected List<?> getFieldOrder() { return FIELD_ORDER; }
 }

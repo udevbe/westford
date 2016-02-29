@@ -13,30 +13,18 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libpixman1;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
+@Struct({
+                @Field(name = "extents",
+                       type = CType.STRUCT,
+                       dataType = pixman_box32.class),
+                @Field(name = "data",
+                       type = CType.POINTER,
+                       dataType = pixman_region32_data.class)
+        })
+public final class pixman_region32 extends pixman_region32_Jaccall_StructType {
 
-public class pixman_region32 extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("extents",
-                                                             "data");
-
-    /**
-     * C type : pixman_box32_t
-     */
-    public pixman_box32                     extents;
-    /**
-     * C type : pixman_region32_data_t*
-     */
-    public pixman_region32_data.ByReference data;
-
-    public pixman_region32() {
-        super();
-    }
-
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
 }

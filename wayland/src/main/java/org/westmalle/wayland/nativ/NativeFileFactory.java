@@ -14,8 +14,7 @@
 package org.westmalle.wayland.nativ;
 
 
-import com.sun.jna.LastErrorException;
-import com.sun.jna.Memory;
+import com.github.zubnix.jaccall.Pointer;
 import org.westmalle.wayland.nativ.libc.Libc;
 
 import javax.annotation.Nonnegative;
@@ -39,43 +38,41 @@ public class NativeFileFactory {
     /**
      * Create a new, unique, anonymous file of the given size, and return the file descriptor for it. The file
      * descriptor is set CLOEXEC. The file is immediately suitable for mmap()'ing the given size at offset zero.
-     * <p>
+     * <p/>
      * The file should not have a permanent backing store like a disk, but may have if XDG_RUNTIME_DIR is not properly
      * implemented in OS.
-     * <p>
+     * <p/>
      * The file name is deleted from the file system.
-     * <p>
+     * <p/>
      * The file is suitable for buffer sharing between processes by transmitting the file descriptor over Unix sockets
      * using the SCM_RIGHTS methods.
      */
-    public int createAnonymousFile(@Nonnegative final int size) throws LastErrorException {
+    public int createAnonymousFile(@Nonnegative final int size) {
 
         final String path = System.getenv("XDG_RUNTIME_DIR");
         if (path == null) {
             throw new IllegalStateException("Cannot create temporary file: XDG_RUNTIME_DIR not set");
         }
 
-        final String       name        = path + TEMPLATE;
-        final NativeString m           = new NativeString(name);
-        final Memory       namePointer = m.getPointer();
-        final int          fd          = this.libc.mkstemp(namePointer);
+        final long name = Pointer.nref(path + TEMPLATE).address;
+        final int  fd   = this.libc.mkstemp(name);
 
-        try {
-            int flags = this.libc.fcntl(fd,
-                                        Libc.F_GETFD,
-                                        0);
-            flags |= Libc.FD_CLOEXEC;
-            this.libc.fcntl(fd,
-                            Libc.F_SETFD,
-                            flags);
-            this.libc.ftruncate(fd,
-                                size);
-            this.libc.unlink(namePointer);
-        }
-        catch (LastErrorException e) {
-            this.libc.close(fd);
-            throw e;
-        }
+        //TODO check errno
+        int flags = this.libc.fcntl(fd,
+                                    Libc.F_GETFD,
+                                    0);
+
+        flags |= Libc.FD_CLOEXEC;
+        //TODO check errno
+        this.libc.fcntl(fd,
+                        Libc.F_SETFD,
+                        flags);
+        //TODO check errno
+        this.libc.ftruncate(fd,
+                            size);
+        //TODO check errno
+        this.libc.unlink(name);
+
         return fd;
     }
 }

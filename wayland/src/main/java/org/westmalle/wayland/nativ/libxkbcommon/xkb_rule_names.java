@@ -14,72 +14,75 @@
 package org.westmalle.wayland.nativ.libxkbcommon;
 
 
-import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xkb_rule_names extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("rules",
-                                                             "model",
-                                                             "layout",
-                                                             "variant",
-                                                             "options");
+@Struct({
+                @Field(name = "rules",
+                       type = CType.POINTER,
+                       dataType = String.class),
+                @Field(name = "model",
+                       type = CType.POINTER,
+                       dataType = String.class),
+                @Field(name = "layout",
+                       type = CType.POINTER,
+                       dataType = String.class),
+                @Field(name = "variant",
+                       type = CType.POINTER,
+                       dataType = String.class),
+                @Field(name = "options",
+                       type = CType.POINTER,
+                       dataType = String.class)
+        })
+public final class xkb_rule_names extends xkb_rule_names_Jaccall_StructType {
 
     /**
      * The rules file to use. The rules file describes how to interpret
      * the values of the model, layout, variant and options fields.
-     * <p>
+     * <p/>
      * If NULL or the empty string "", a default value is used.
      * If the XKB_DEFAULT_RULES environment variable is set, it is used
      * as the default.  Otherwise the system default is used.
      */
-    Pointer rules;
+    //Pointer rules;
     /**
      * The keyboard model by which to interpret keycodes and LEDs.
-     * <p>
+     * <p/>
      * If NULL or the empty string "", a default value is used.
      * If the XKB_DEFAULT_MODEL environment variable is set, it is used
      * as the default.  Otherwise the system default is used.
      */
-    Pointer model;
+    //Pointer model;
     /**
      * A comma separated list of layouts (languages) to include in the
      * keymap.
-     * <p>
+     * <p/>
      * If NULL or the empty string "", a default value is used.
      * If the XKB_DEFAULT_LAYOUT environment variable is set, it is used
      * as the default.  Otherwise the system default is used.
      */
-    Pointer layout;
+    //Pointer layout;
     /**
      * A comma separated list of variants, one per layout, which may
      * modify or augment the respective layout in various ways.
-     * <p>
+     * <p/>
      * If NULL or the empty string "", and a default value is also used
      * for the layout, a default value is used.  Otherwise no variant is
      * used.
      * If the XKB_DEFAULT_VARIANT environment variable is set, it is used
      * as the default.  Otherwise the system default is used.
      */
-    Pointer variant;
+    //Pointer variant;
     /**
      * A comma separated list of options, through which the user specifies
      * non-layout related preferences, like which key combinations are used
      * for switching layouts, or which key is the Compose key.
-     * <p>
+     * <p/>
      * If NULL, a default value is used.  If the empty string "", no
      * options are used.
      * If the XKB_DEFAULT_OPTIONS environment variable is set, it is used
      * as the default.  Otherwise the system default is used.
      */
-    Pointer options;
-
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
+    //Pointer options;
 }

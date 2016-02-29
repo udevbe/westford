@@ -13,39 +13,28 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_expose_event_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
-                                                             "pad0",
-                                                             "sequence",
-                                                             "window",
-                                                             "x",
-                                                             "y",
-                                                             "width",
-                                                             "height",
-                                                             "count");
-    public byte  response_type;
-    public byte  pad0;
-    public short sequence;
-    public int   window;
-    public short x;
-    public short y;
-    public short width;
-    public short height;
-    public short count;
-
-    public xcb_expose_event_t(final Pointer p) {
-        super(p);
-    }
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-}
+@Struct({
+                @Field(name = "response_type",
+                       type = CType.CHAR),
+                @Field(name = "pad0",
+                       type = CType.CHAR),
+                @Field(name = "sequence",
+                       type = CType.SHORT),
+                @Field(name = "window",
+                       type = CType.INT),
+                @Field(name = "x",
+                       type = CType.SHORT),
+                @Field(name = "y",
+                       type = CType.SHORT),
+                @Field(name = "width",
+                       type = CType.SHORT),
+                @Field(name = "height",
+                       type = CType.SHORT),
+                @Field(name = "count",
+                       type = CType.SHORT),
+        })
+public final class xcb_expose_event_t extends xcb_expose_event_t_Jaccall_StructType {}

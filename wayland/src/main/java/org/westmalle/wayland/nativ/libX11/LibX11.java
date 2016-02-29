@@ -14,12 +14,15 @@
 package org.westmalle.wayland.nativ.libX11;
 
 
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
 import javax.inject.Singleton;
 
 @Singleton
+@Lib("X11")
 public class LibX11 {
 
-    public native Pointer XOpenDisplay(String display_name);
+    @Ptr
+    public native long XOpenDisplay(@Ptr long display_name);
 }

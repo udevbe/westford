@@ -13,34 +13,23 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_focus_in_event_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
-                                                             "detail",
-                                                             "sequence",
-                                                             "event",
-                                                             "mode",
-                                                             "pad0");
-
-    public byte  response_type;
-    public byte  detail;
-    public short sequence;
-    public int   event;
-    public byte  mode;
-    public byte[] pad0 = new byte[3];
-
-    public xcb_focus_in_event_t(final Pointer p) {
-        super(p);
-    }
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-}
+@Struct({
+                @Field(name = "response_type",
+                       type = CType.CHAR),
+                @Field(name = "detail",
+                       type = CType.CHAR),
+                @Field(name = "sequence",
+                       type = CType.SHORT),
+                @Field(name = "event",
+                       type = CType.INT),
+                @Field(name = "mode",
+                       type = CType.CHAR),
+                @Field(name = "pad0",
+                       type = CType.CHAR,
+                       cardinality = 3),
+        })
+public final class xcb_focus_in_event_t extends xcb_focus_in_event_t_Jaccall_StructType {}

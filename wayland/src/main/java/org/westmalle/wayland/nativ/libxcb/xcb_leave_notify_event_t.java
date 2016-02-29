@@ -13,49 +13,38 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_leave_notify_event_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
-                                                             "detail",
-                                                             "sequence",
-                                                             "time",
-                                                             "root",
-                                                             "event",
-                                                             "child",
-                                                             "root_x",
-                                                             "root_y",
-                                                             "event_x",
-                                                             "event_y",
-                                                             "state",
-                                                             "mode",
-                                                             "same_screen_focus");
-    public byte  response_type;
-    public byte  detail;
-    public short sequence;
-    public int   time;
-    public int   root;
-    public int   event;
-    public int   child;
-    public short root_x;
-    public short root_y;
-    public short event_x;
-    public short event_y;
-    public short state;
-    public byte  mode;
-    public byte  same_screen_focus;
-
-    public xcb_leave_notify_event_t(final Pointer p) {
-        super(p);
-    }
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-}
+@Struct({
+                @Field(name = "response_type",
+                       type = CType.CHAR),
+                @Field(name = "detail",
+                       type = CType.CHAR),
+                @Field(name = "sequence",
+                       type = CType.SHORT),
+                @Field(name = "time",
+                       type = CType.INT),
+                @Field(name = "root",
+                       type = CType.INT),
+                @Field(name = "event",
+                       type = CType.INT),
+                @Field(name = "child",
+                       type = CType.INT),
+                @Field(name = "root_x",
+                       type = CType.SHORT),
+                @Field(name = "root_y",
+                       type = CType.SHORT),
+                @Field(name = "event_x",
+                       type = CType.SHORT),
+                @Field(name = "event_y",
+                       type = CType.SHORT),
+                @Field(name = "state",
+                       type = CType.SHORT),
+                @Field(name = "mode",
+                       type = CType.CHAR),
+                @Field(name = "same_screen_focus",
+                       type = CType.CHAR),
+        })
+public final class xcb_leave_notify_event_t extends xcb_leave_notify_event_t_Jaccall_StructType {}

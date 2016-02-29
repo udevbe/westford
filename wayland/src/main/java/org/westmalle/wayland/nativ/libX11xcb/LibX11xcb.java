@@ -13,13 +13,19 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libX11xcb;
 
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
+import javax.inject.Singleton;
+
+@Singleton
+@Lib("X11-xcb")
 public class LibX11xcb {
     public static final int XCBOwnsEventQueue = 1;
 
-    public native Pointer XGetXCBConnection(Pointer dpy);
+    @Ptr
+    public native long XGetXCBConnection(@Ptr long dpy);
 
-    public native void XSetEventQueueOwner(Pointer dpy,
+    public native void XSetEventQueueOwner(@Ptr long dpy,
                                            int owner);
 }

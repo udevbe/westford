@@ -13,12 +13,15 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libc;
 
-import com.sun.jna.LastErrorException;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Pointer;
+import com.github.zubnix.jaccall.Ptr;
+import com.github.zubnix.jaccall.Symbol;
 
 import javax.inject.Singleton;
 
 @Singleton
+@Lib("c")
 public class Libc {
 
     /**
@@ -236,76 +239,89 @@ public class Libc {
     /**
      * Page can be read.
      */
-    public static final int     PROT_READ      = 0x1;
+    public static final int  PROT_READ      = 0x1;
     /**
      * Page can be written.
      */
-    public static final int     PROT_WRITE     = 0x2;
+    public static final int  PROT_WRITE     = 0x2;
     /**
      * Page can be executed.
      */
-    public static final int     PROT_EXEC      = 0x4;
+    public static final int  PROT_EXEC      = 0x4;
     /**
      * Page can not be accessed.
      */
-    public static final int     PROT_NONE      = 0x0;
+    public static final int  PROT_NONE      = 0x0;
     /**
      * Extend change to start of  growsdown vma (mprotect only).
      */
-    public static final int     PROT_GROWSDOWN = 0x01000000;
+    public static final int  PROT_GROWSDOWN = 0x01000000;
     /**
      * Extend change to start of  growsup vma (mprotect only).
      */
-    public static final int     PROT_GROWSUP   = 0x02000000;
+    public static final int  PROT_GROWSUP   = 0x02000000;
     /**
      * Share changes.
      */
-    public static final int     MAP_SHARED     = 0x01;
+    public static final int  MAP_SHARED     = 0x01;
     /**
      * Changes are private.
      */
-    public static final int     MAP_PRIVATE    = 0x02;
+    public static final int  MAP_PRIVATE    = 0x02;
     //-1
-    public static final Pointer MAP_FAILED     = Pointer.createConstant(0xFFFFFFFF);
+    public static final long MAP_FAILED     = 0xFFFFFFFF;
+
+    @Symbol
+    @Ptr
+    public native long errno();
+
+    private final Pointer<Integer> errno_p = Pointer.wrap(int.class,
+                                                          errno());
+
+    public int getErrno() {
+        return this.errno_p.dref();
+    }
 
     public native int open(String pathname,
                            int flags);
 
     public native int write(int fd,
-                            Pointer buffer,
-                            int n_byte) throws LastErrorException;
+                            @Ptr long buffer,
+                            int n_byte);
 
-    public native int close(int fd) throws LastErrorException;
+    public native int close(int fd);
 
     public native void read(int fd,
-                            Pointer buffer,
-                            int n_byte) throws LastErrorException;
+                            @Ptr long buffer,
+                            int n_byte);
 
     public native int fcntl(int fd,
                             int operation,
-                            int args) throws LastErrorException;
+                            int args);
 
-    public native int pipe(int[] pipeFds) throws LastErrorException;
+    public native int pipe(int[] pipeFds);
 
-    public native void free(Pointer p);
+    public native void free(@Ptr long p);
 
-    public native int unlink(final Pointer pathname) throws LastErrorException;
+    public native int unlink(final @Ptr long pathname);
 
-    public native int mkstemp(final Pointer template) throws LastErrorException;
+    public native int mkstemp(final @Ptr long template);
 
     public native int ftruncate(int fd,
-                                int length) throws LastErrorException;
+                                int length);
 
-    public native Pointer mmap(Pointer addr,
-                               int len,
-                               int prot,
-                               int flags,
-                               int fildes,
-                               int off);
+    @Ptr
+    public native long mmap(@Ptr long addr,
+                            int len,
+                            int prot,
+                            int flags,
+                            int fildes,
+                            int off);
 
-    public native int munmap(Pointer addr,
-                             int length) throws LastErrorException;
+    public native int munmap(@Ptr long addr,
+                             int length);
 
-    public native Pointer strcpy(Pointer dest,
-                                 Pointer src);
+    @Ptr
+    public native long strcpy(@Ptr long dest,
+                              @Ptr long src);
 }

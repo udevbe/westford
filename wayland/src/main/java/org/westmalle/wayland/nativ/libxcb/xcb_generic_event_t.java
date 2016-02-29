@@ -1,26 +1,21 @@
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
+@Struct({
+                @Field(name = "response_type",
+                       type = CType.CHAR),
+                @Field(name = "pad0",
+                       type = CType.CHAR),
+                @Field(name = "sequence",
+                       type = CType.SHORT),
+                @Field(name = "pad",
+                       type = CType.INT,
+                       cardinality = 7),
+                @Field(name = "full_sequence",
+                       type = CType.INT),
 
-public class xcb_generic_event_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
-                                                             "pad0",
-                                                             "sequence",
-                                                             "pad",
-                                                             "full_sequence");
-
-    public byte  response_type;
-    public byte  pad0;
-    public short sequence;
-    public int[] pad = new int[7];
-    public int full_sequence;
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-}
+        })
+public final class xcb_generic_event_t extends xcb_generic_event_t_Jaccall_StructType {}

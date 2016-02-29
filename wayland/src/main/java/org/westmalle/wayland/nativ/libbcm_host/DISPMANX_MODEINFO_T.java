@@ -1,26 +1,21 @@
 package org.westmalle.wayland.nativ.libbcm_host;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
+@Struct({
+                @Field(name = "width",
+                       type = CType.INT),
+                @Field(name = "height",
+                       type = CType.INT),
+                @Field(name = "transform",
+                       type = CType.INT),
+                @Field(name = "input_format",
+                       type = CType.INT),
+                @Field(name = "display_num",
+                       type = CType.INT),
+        })
+public final class DISPMANX_MODEINFO_T extends DISPMANX_MODEINFO_T_Jaccall_StructType {
 
-public class DISPMANX_MODEINFO_T extends Structure {
-
-    private static final List<String> FIELD_ORDER = Arrays.asList("width",
-                                                                  "height",
-                                                                  "transform",
-                                                                  "input_format",
-                                                                  "display_num");
-
-    public int width;
-    public int height;
-    public int transform;
-    public int input_format;
-    public int display_num;
-
-    @Override
-    protected List getFieldOrder() {
-        return FIELD_ORDER;
-    }
 }

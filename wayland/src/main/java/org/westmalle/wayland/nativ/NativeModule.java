@@ -13,8 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ;
 
-import com.sun.jna.Native;
-import com.sun.jna.Platform;
+import com.github.zubnix.jaccall.Linker;
 import dagger.Module;
 import dagger.Provides;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -29,27 +28,14 @@ import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
 
 import javax.inject.Singleton;
-import java.util.logging.Logger;
 
 @Module
 public class NativeModule {
 
-    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-
-
-    public NativeModule() {
-        Native.setCallbackExceptionHandler((thread,
-                                            throwable) -> {
-            LOGGER.severe("Got uncaught exception " + throwable.getMessage());
-            throwable.printStackTrace();
-        });
-    }
-
     @Singleton
     @Provides
     Libbcm_host provideLibbcm_host() {
-        Native.register(Libbcm_host.class,
-                        "bcm_host");
+        Linker.link(Libbcm_host.class);
         final Libbcm_host libbcm_host = new Libbcm_host();
         libbcm_host.bcm_host_init();
         return libbcm_host;
@@ -58,72 +44,63 @@ public class NativeModule {
     @Singleton
     @Provides
     Libpixman1 provideLibpixman1() {
-        Native.register(Libpixman1.class,
-                        "pixman-1");
+        Linker.link(Libpixman1.class);
         return new Libpixman1();
     }
 
     @Singleton
     @Provides
     Libc provideLibc() {
-        Native.register(Libc.class,
-                        Platform.C_LIBRARY_NAME);
+        Linker.link(Libc.class);
         return new Libc();
     }
 
     @Singleton
     @Provides
     LibEGL provideLibegl() {
-        Native.register(LibEGL.class,
-                        "EGL");
+        Linker.link(LibEGL.class);
         return new LibEGL();
     }
 
     @Singleton
     @Provides
     LibGLESv2 provideLibgles2() {
-        Native.register(LibGLESv2.class,
-                        "GLESv2");
+        Linker.link(LibGLESv2.class);
         return new LibGLESv2();
     }
 
     @Singleton
     @Provides
     LibX11 provideLibX11() {
-        Native.register(LibX11.class,
-                        "X11");
+        Linker.link(LibX11.class);
         return new LibX11();
     }
 
     @Singleton
     @Provides
     Libxcb provideLibxcb() {
-        Native.register(Libxcb.class,
-                        "xcb");
+        Linker.link(Libxcb.class);
         return new Libxcb();
     }
 
     @Singleton
     @Provides
     LibX11xcb provideLibX11xcb() {
-        Native.register(LibX11xcb.class,
-                        "X11-xcb");
+        Linker.link(LibX11xcb.class);
         return new LibX11xcb();
     }
 
     @Singleton
     @Provides
     Libxkbcommon provideLibxkbcommon() {
-        Native.register(Libxkbcommon.class,
-                        "xkbcommon");
+        Linker.link(Libxkbcommon.class);
         return new Libxkbcommon();
     }
 
     @Singleton
     @Provides
     Libxkbcommonx11 provideLibxkbcommonx11() {
-        Native.register(Libxkbcommonx11.class,
-                        "xkbcommon-x11");
+        Linker.link(Libxkbcommonx11.class);
         return new Libxkbcommonx11();
     }
 

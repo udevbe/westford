@@ -13,11 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libbcm_host;
 
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
 import javax.inject.Singleton;
 
 @Singleton
+@Lib("bcm_host")
 public class Libbcm_host {
 
     public static final int DISPMANX_ID_MAIN_LCD    = 0;
@@ -71,7 +73,7 @@ public class Libbcm_host {
     public native void bcm_host_init();
 
     public native int vc_dispmanx_display_get_info(int display,
-                                                   Pointer pinfo);
+                                                   @Ptr long pinfo);
 
     /**
      * Opens a display on the given device
@@ -97,12 +99,12 @@ public class Libbcm_host {
     public native int vc_dispmanx_element_add(int update,
                                               int display,
                                               int layer,
-                                              Pointer dest_rect,
+                                              @Ptr long dest_rect,
                                               int src,
-                                              Pointer src_rect,
+                                              @Ptr long src_rect,
                                               int protection,
-                                              Pointer alpha,
-                                              Pointer clamp,
+                                              @Ptr long alpha,
+                                              @Ptr long clamp,
                                               int transform);
 
     /**
@@ -110,13 +112,13 @@ public class Libbcm_host {
      */
     public native int vc_dispmanx_update_submit_sync(int update);
 
-    public native int vc_dispmanx_rect_set(Pointer rect,
+    public native int vc_dispmanx_rect_set(@Ptr long rect,
                                            int x_offset,
                                            int y_offset,
                                            int width,
                                            int height);
 
     public native int graphics_get_display_size(int display_number,
-                                                Pointer width,
-                                                Pointer height);
+                                                @Ptr long width,
+                                                @Ptr long height);
 }

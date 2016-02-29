@@ -13,53 +13,43 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_screen_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("root",
-                                                             "default_colormap",
-                                                             "white_pixel",
-                                                             "black_pixel",
-                                                             "current_input_masks",
-                                                             "width_in_pixels",
-                                                             "height_in_pixels",
-                                                             "width_in_millimeters",
-                                                             "height_in_millimeters",
-                                                             "min_installed_maps",
-                                                             "max_installed_maps",
-                                                             "root_visual",
-                                                             "backing_stores",
-                                                             "save_unders",
-                                                             "root_depth",
-                                                             "allowed_depths_len");
-
-    public int   root;
-    public int   default_colormap;
-    public int   white_pixel;
-    public int   black_pixel;
-    public int   current_input_masks;
-    public short width_in_pixels;
-    public short height_in_pixels;
-    public short width_in_millimeters;
-    public short height_in_millimeters;
-    public short min_installed_maps;
-    public short max_installed_maps;
-    public int   root_visual;
-    public byte  backing_stores;
-    public byte  save_unders;
-    public byte  root_depth;
-    public byte  allowed_depths_len;
-
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-
-    public static class ByReference extends xcb_screen_t implements Structure.ByReference {
-
-    }
-}
+@Struct({
+                @Field(name = "root",
+                       type = CType.INT),
+                @Field(name = "default_colormap",
+                       type = CType.INT),
+                @Field(name = "white_pixel",
+                       type = CType.INT),
+                @Field(name = "black_pixel",
+                       type = CType.INT),
+                @Field(name = "current_input_masks",
+                       type = CType.INT),
+                @Field(name = "width_in_pixels",
+                       type = CType.SHORT),
+                @Field(name = "hight_in_pixels",
+                       type = CType.SHORT),
+                @Field(name = "width_in_millimeters",
+                       type = CType.SHORT),
+                @Field(name = "height_in_millimeters",
+                       type = CType.SHORT),
+                @Field(name = "min_installed_maps",
+                       type = CType.SHORT),
+                @Field(name = "max_installed_maps",
+                       type = CType.SHORT),
+                @Field(name = "root_visual",
+                       type = CType.INT),
+                @Field(name = "backing_stores",
+                       type = CType.CHAR),
+                @Field(name = "save_unders",
+                       type = CType.CHAR),
+                @Field(name = "root_depth",
+                       type = CType.CHAR),
+                @Field(name = "allowed_depths_len",
+                       type = CType.CHAR),
+        })
+public final class xcb_screen_t extends xcb_screen_t_Jaccall_StructType {}
 

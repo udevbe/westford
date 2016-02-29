@@ -13,13 +13,14 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxkbcommonx11;
 
-
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
 import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import javax.inject.Singleton;
 
+@Singleton
+@Lib("xkbcommon-x11")
 public class Libxkbcommonx11 {
 
     /**
@@ -29,11 +30,11 @@ public class Libxkbcommonx11 {
      *
      * @return A device ID which may be used with other xkb_x11_* functions, or -1 on failure.
      */
-    public native int xkb_x11_get_core_keyboard_device_id(@Nonnull Pointer connection);
+    public native int xkb_x11_get_core_keyboard_device_id(@Ptr long connection);
 
     /**
      * Create a keymap from an X11 keyboard device.
-     * <p>
+     * <p/>
      * This function queries the X server with various requests, fetches the details of the active keymap on a keyboard
      * device, and creates an xkb_keymap from these details.
      *
@@ -45,15 +46,15 @@ public class Libxkbcommonx11 {
      *
      * @return A keymap retrieved from the X server, or NULL on failure.
      */
-    @Nullable
-    public native Pointer xkb_x11_keymap_new_from_device(@Nonnull Pointer context,
-                                                         @Nonnull Pointer connection,
-                                                         @Nonnegative int device_id,
-                                                         int flags);
+    @Ptr
+    public native long xkb_x11_keymap_new_from_device(@Ptr long context,
+                                                      @Ptr long connection,
+                                                      @Nonnegative int device_id,
+                                                      int flags);
 
     /**
      * Create a new keyboard state object from an X11 keyboard device.
-     * <p>
+     * <p/>
      * This function is the same as xkb_state_new(), only pre-initialized with the state of the device at the time this
      * function is called.
      *
@@ -64,8 +65,8 @@ public class Libxkbcommonx11 {
      *
      * @return A new keyboard state object, or NULL on failure.
      */
-    @Nullable
-    public native Pointer xkb_x11_state_new_from_device(@Nonnull Pointer keymap,
-                                                        @Nonnull Pointer connection,
-                                                        @Nonnegative int device_id);
+    @Ptr
+    public native long xkb_x11_state_new_from_device(@Ptr long keymap,
+                                                     @Ptr long connection,
+                                                     @Nonnegative int device_id);
 }

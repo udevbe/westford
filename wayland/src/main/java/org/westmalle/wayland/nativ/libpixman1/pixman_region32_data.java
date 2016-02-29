@@ -13,28 +13,16 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libpixman1;
 
-import com.sun.jna.NativeLong;
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
+@Struct({
+                @Field(name = "size",
+                       type = CType.LONG),
+                @Field(name = "numRects",
+                       type = CType.LONG)
+        })
+public final class pixman_region32_data extends pixman_region32_data_Jaccall_StructType {
 
-public class pixman_region32_data extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("size",
-                                                             "numRects");
-
-    public NativeLong size;
-    public NativeLong numRects;
-
-    public pixman_region32_data() {
-        super();
-    }
-
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-
-    public static class ByReference extends pixman_region32_data implements Structure.ByReference {
-    }
 }

@@ -13,27 +13,17 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_screen_iterator_t extends Structure {
-    private static final List<?> FIELD_ORDER = Arrays.asList("data",
-                                                             "rem",
-                                                             "index");
-
-    public xcb_screen_t.ByReference data;
-    public int                      rem;
-    public int                      index;
-
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-
-    public static class ByValue extends xcb_screen_iterator_t implements Structure.ByValue {
-
-    }
-}
-
-
+@Struct({
+                @Field(name = "data",
+                       type = CType.POINTER,
+                       dataType = xcb_screen_t.class),
+                @Field(name = "rem",
+                       type = CType.INT),
+                @Field(name = "index",
+                       type = CType.INT)
+        })
+public final class xcb_screen_iterator_t extends xcb_screen_iterator_t_Jaccall_StructType {}

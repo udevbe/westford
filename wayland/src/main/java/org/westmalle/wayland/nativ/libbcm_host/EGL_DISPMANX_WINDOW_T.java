@@ -13,21 +13,18 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libbcm_host;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
+@Struct({
+                @Field(name = "element",
+                       type = CType.INT),
+                @Field(name = "width",
+                       type = CType.INT),
+                @Field(name = "height",
+                       type = CType.INT),
+        })
+public final class EGL_DISPMANX_WINDOW_T extends EGL_DISPMANX_WINDOW_T_Jaccall_StructType {
 
-public class EGL_DISPMANX_WINDOW_T extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("element",
-                                                             "width",
-                                                             "height");
-
-    public int element;
-    public int width;
-    public int height;
-
-    @Override
-    protected List<?> getFieldOrder() { return FIELD_ORDER; }
 }

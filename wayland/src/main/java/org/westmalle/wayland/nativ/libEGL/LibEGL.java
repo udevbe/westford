@@ -13,13 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libEGL;
 
-import com.sun.jna.Function;
-import com.sun.jna.LastErrorException;
-import com.sun.jna.Pointer;
-import org.westmalle.wayland.nativ.NativeString;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
-import java.util.Optional;
+import javax.inject.Singleton;
 
+@Singleton
+@Lib("EGL")
 public class LibEGL {
 
     public static final int EGL_PLATFORM_WAYLAND_KHR    = 0x31D8;
@@ -27,65 +27,65 @@ public class LibEGL {
     public static final int EGL_PLATFORM_X11_KHR        = 0x31D5;
     public static final int EGL_PLATFORM_X11_SCREEN_KHR = 0x31D6;
 
-    public static final int     EGL_ALPHA_SIZE              = 0x3021;
-    public static final int     EGL_BAD_ACCESS              = 0x3002;
-    public static final int     EGL_BAD_ALLOC               = 0x3003;
-    public static final int     EGL_BAD_ATTRIBUTE           = 0x3004;
-    public static final int     EGL_BAD_CONFIG              = 0x3005;
-    public static final int     EGL_BAD_CONTEXT             = 0x3006;
-    public static final int     EGL_BAD_CURRENT_SURFACE     = 0x3007;
-    public static final int     EGL_BAD_DISPLAY             = 0x3008;
-    public static final int     EGL_BAD_MATCH               = 0x3009;
-    public static final int     EGL_BAD_NATIVE_PIXMAP       = 0x300A;
-    public static final int     EGL_BAD_NATIVE_WINDOW       = 0x300B;
-    public static final int     EGL_BAD_PARAMETER           = 0x300C;
-    public static final int     EGL_BAD_SURFACE             = 0x300D;
-    public static final int     EGL_BLUE_SIZE               = 0x3022;
-    public static final int     EGL_BUFFER_SIZE             = 0x3020;
-    public static final int     EGL_CONFIG_CAVEAT           = 0x3027;
-    public static final int     EGL_CONFIG_ID               = 0x3028;
-    public static final int     EGL_CORE_NATIVE_ENGINE      = 0x305B;
-    public static final int     EGL_DEPTH_SIZE              = 0x3025;
-    public static final int     EGL_DONT_CARE               = -1;
-    public static final int     EGL_DRAW                    = 0x3059;
-    public static final int     EGL_EXTENSIONS              = 0x3055;
-    public static final int     EGL_FALSE                   = 0;
-    public static final int     EGL_GREEN_SIZE              = 0x3023;
-    public static final int     EGL_HEIGHT                  = 0x3056;
-    public static final int     EGL_LARGEST_PBUFFER         = 0x3058;
-    public static final int     EGL_LEVEL                   = 0x3029;
-    public static final int     EGL_MAX_PBUFFER_HEIGHT      = 0x302A;
-    public static final int     EGL_MAX_PBUFFER_PIXELS      = 0x302B;
-    public static final int     EGL_MAX_PBUFFER_WIDTH       = 0x302C;
-    public static final int     EGL_NATIVE_RENDERABLE       = 0x302D;
-    public static final int     EGL_NATIVE_VISUAL_ID        = 0x302E;
-    public static final int     EGL_NATIVE_VISUAL_TYPE      = 0x302F;
-    public static final int     EGL_NONE                    = 0x3038;
-    public static final int     EGL_NON_CONFORMANT_CONFIG   = 0x3051;
-    public static final int     EGL_NOT_INITIALIZED         = 0x3001;
-    public static       Pointer EGL_NO_CONTEXT              = null;
-    public static       Pointer EGL_NO_DISPLAY              = null;
-    public static       Pointer EGL_NO_SURFACE              = null;
-    public static final int     EGL_PBUFFER_BIT             = 0x0001;
-    public static final int     EGL_PIXMAP_BIT              = 0x0002;
-    public static final int     EGL_READ                    = 0x305A;
-    public static final int     EGL_RED_SIZE                = 0x3024;
-    public static final int     EGL_SAMPLES                 = 0x3031;
-    public static final int     EGL_SAMPLE_BUFFERS          = 0x3032;
-    public static final int     EGL_SLOW_CONFIG             = 0x3050;
-    public static final int     EGL_STENCIL_SIZE            = 0x3026;
-    public static final int     EGL_SUCCESS                 = 0x3000;
-    public static final int     EGL_SURFACE_TYPE            = 0x3033;
-    public static final int     EGL_TRANSPARENT_BLUE_VALUE  = 0x3035;
-    public static final int     EGL_TRANSPARENT_GREEN_VALUE = 0x3036;
-    public static final int     EGL_TRANSPARENT_RED_VALUE   = 0x3037;
-    public static final int     EGL_TRANSPARENT_RGB         = 0x3052;
-    public static final int     EGL_TRANSPARENT_TYPE        = 0x3034;
-    public static final int     EGL_TRUE                    = 1;
-    public static final int     EGL_VENDOR                  = 0x3053;
-    public static final int     EGL_VERSION                 = 0x3054;
-    public static final int     EGL_WIDTH                   = 0x3057;
-    public static final int     EGL_WINDOW_BIT              = 0x0004;
+    public static final int  EGL_ALPHA_SIZE              = 0x3021;
+    public static final int  EGL_BAD_ACCESS              = 0x3002;
+    public static final int  EGL_BAD_ALLOC               = 0x3003;
+    public static final int  EGL_BAD_ATTRIBUTE           = 0x3004;
+    public static final int  EGL_BAD_CONFIG              = 0x3005;
+    public static final int  EGL_BAD_CONTEXT             = 0x3006;
+    public static final int  EGL_BAD_CURRENT_SURFACE     = 0x3007;
+    public static final int  EGL_BAD_DISPLAY             = 0x3008;
+    public static final int  EGL_BAD_MATCH               = 0x3009;
+    public static final int  EGL_BAD_NATIVE_PIXMAP       = 0x300A;
+    public static final int  EGL_BAD_NATIVE_WINDOW       = 0x300B;
+    public static final int  EGL_BAD_PARAMETER           = 0x300C;
+    public static final int  EGL_BAD_SURFACE             = 0x300D;
+    public static final int  EGL_BLUE_SIZE               = 0x3022;
+    public static final int  EGL_BUFFER_SIZE             = 0x3020;
+    public static final int  EGL_CONFIG_CAVEAT           = 0x3027;
+    public static final int  EGL_CONFIG_ID               = 0x3028;
+    public static final int  EGL_CORE_NATIVE_ENGINE      = 0x305B;
+    public static final int  EGL_DEPTH_SIZE              = 0x3025;
+    public static final int  EGL_DONT_CARE               = -1;
+    public static final int  EGL_DRAW                    = 0x3059;
+    public static final int  EGL_EXTENSIONS              = 0x3055;
+    public static final int  EGL_FALSE                   = 0;
+    public static final int  EGL_GREEN_SIZE              = 0x3023;
+    public static final int  EGL_HEIGHT                  = 0x3056;
+    public static final int  EGL_LARGEST_PBUFFER         = 0x3058;
+    public static final int  EGL_LEVEL                   = 0x3029;
+    public static final int  EGL_MAX_PBUFFER_HEIGHT      = 0x302A;
+    public static final int  EGL_MAX_PBUFFER_PIXELS      = 0x302B;
+    public static final int  EGL_MAX_PBUFFER_WIDTH       = 0x302C;
+    public static final int  EGL_NATIVE_RENDERABLE       = 0x302D;
+    public static final int  EGL_NATIVE_VISUAL_ID        = 0x302E;
+    public static final int  EGL_NATIVE_VISUAL_TYPE      = 0x302F;
+    public static final int  EGL_NONE                    = 0x3038;
+    public static final int  EGL_NON_CONFORMANT_CONFIG   = 0x3051;
+    public static final int  EGL_NOT_INITIALIZED         = 0x3001;
+    public static final long EGL_NO_CONTEXT              = 0L;
+    public static final long EGL_NO_DISPLAY              = 0L;
+    public static final long EGL_NO_SURFACE              = 0L;
+    public static final int  EGL_PBUFFER_BIT             = 0x0001;
+    public static final int  EGL_PIXMAP_BIT              = 0x0002;
+    public static final int  EGL_READ                    = 0x305A;
+    public static final int  EGL_RED_SIZE                = 0x3024;
+    public static final int  EGL_SAMPLES                 = 0x3031;
+    public static final int  EGL_SAMPLE_BUFFERS          = 0x3032;
+    public static final int  EGL_SLOW_CONFIG             = 0x3050;
+    public static final int  EGL_STENCIL_SIZE            = 0x3026;
+    public static final int  EGL_SUCCESS                 = 0x3000;
+    public static final int  EGL_SURFACE_TYPE            = 0x3033;
+    public static final int  EGL_TRANSPARENT_BLUE_VALUE  = 0x3035;
+    public static final int  EGL_TRANSPARENT_GREEN_VALUE = 0x3036;
+    public static final int  EGL_TRANSPARENT_RED_VALUE   = 0x3037;
+    public static final int  EGL_TRANSPARENT_RGB         = 0x3052;
+    public static final int  EGL_TRANSPARENT_TYPE        = 0x3034;
+    public static final int  EGL_TRUE                    = 1;
+    public static final int  EGL_VENDOR                  = 0x3053;
+    public static final int  EGL_VERSION                 = 0x3054;
+    public static final int  EGL_WIDTH                   = 0x3057;
+    public static final int  EGL_WINDOW_BIT              = 0x0004;
 
     public static final int EGL_BACK_BUFFER          = 0x3084;
     public static final int EGL_BIND_TO_TEXTURE_RGB  = 0x3039;
@@ -146,189 +146,117 @@ public class LibEGL {
     public static final int EGL_VG_COLORSPACE_LINEAR     = 0x308A;
     public static final int EGL_VG_COLORSPACE_LINEAR_BIT = 0x0020;
 
-    public static       Pointer EGL_DEFAULT_DISPLAY             = null;
-    public static final int     EGL_MULTISAMPLE_RESOLVE_BOX_BIT = 0x0200;
-    public static final int     EGL_MULTISAMPLE_RESOLVE         = 0x3099;
-    public static final int     EGL_MULTISAMPLE_RESOLVE_DEFAULT = 0x309A;
-    public static final int     EGL_MULTISAMPLE_RESOLVE_BOX     = 0x309B;
-    public static final int     EGL_OPENGL_API                  = 0x30A2;
-    public static final int     EGL_OPENGL_BIT                  = 0x0008;
-    public static final int     EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
+    public static final long EGL_DEFAULT_DISPLAY             = 0L;
+    public static final int  EGL_MULTISAMPLE_RESOLVE_BOX_BIT = 0x0200;
+    public static final int  EGL_MULTISAMPLE_RESOLVE         = 0x3099;
+    public static final int  EGL_MULTISAMPLE_RESOLVE_DEFAULT = 0x309A;
+    public static final int  EGL_MULTISAMPLE_RESOLVE_BOX     = 0x309B;
+    public static final int  EGL_OPENGL_API                  = 0x30A2;
+    public static final int  EGL_OPENGL_BIT                  = 0x0008;
+    public static final int  EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
 
-    public static final int     EGL_CONTEXT_MAJOR_VERSION                      = 0x3098;
-    public static final int     EGL_CONTEXT_MINOR_VERSION                      = 0x30FB;
-    public static final int     EGL_CONTEXT_OPENGL_PROFILE_MASK                = 0x30FD;
-    public static final int     EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY = 0x31BD;
-    public static final int     EGL_NO_RESET_NOTIFICATION                      = 0x31BE;
-    public static final int     EGL_LOSE_CONTEXT_ON_RESET                      = 0x31BF;
-    public static final int     EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT            = 0x00000001;
-    public static final int     EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT   = 0x00000002;
-    public static final int     EGL_CONTEXT_OPENGL_DEBUG                       = 0x31B0;
-    public static final int     EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE          = 0x31B1;
-    public static final int     EGL_CONTEXT_OPENGL_ROBUST_ACCESS               = 0x31B2;
-    public static final int     EGL_OPENGL_ES3_BIT                             = 0x00000040;
-    public static final int     EGL_CL_EVENT_HANDLE                            = 0x309C;
-    public static final int     EGL_SYNC_CL_EVENT                              = 0x30FE;
-    public static final int     EGL_SYNC_CL_EVENT_COMPLETE                     = 0x30FF;
-    public static final int     EGL_SYNC_PRIOR_COMMANDS_COMPLETE               = 0x30F0;
-    public static final int     EGL_SYNC_TYPE                                  = 0x30F7;
-    public static final int     EGL_SYNC_STATUS                                = 0x30F1;
-    public static final int     EGL_SYNC_CONDITION                             = 0x30F8;
-    public static final int     EGL_SIGNALED                                   = 0x30F2;
-    public static final int     EGL_UNSIGNALED                                 = 0x30F3;
-    public static final int     EGL_SYNC_FLUSH_COMMANDS_BIT                    = 0x0001;
-    public static       long    EGL_FOREVER                                    = 0xFFFFFFFFFFFFFFFFL;
-    public static final int     EGL_TIMEOUT_EXPIRED                            = 0x30F5;
-    public static final int     EGL_CONDITION_SATISFIED                        = 0x30F6;
-    public static       Pointer EGL_NO_SYNC                                    = null;
-    public static final int     EGL_SYNC_FENCE                                 = 0x30F9;
-    public static final int     EGL_GL_COLORSPACE                              = 0x309D;
-    public static final int     EGL_GL_COLORSPACE_SRGB                         = 0x3089;
-    public static final int     EGL_GL_COLORSPACE_LINEAR                       = 0x308A;
-    public static final int     EGL_GL_RENDERBUFFER                            = 0x30B9;
-    public static final int     EGL_GL_TEXTURE_2D                              = 0x30B1;
-    public static final int     EGL_GL_TEXTURE_LEVEL                           = 0x30BC;
-    public static final int     EGL_GL_TEXTURE_3D                              = 0x30B2;
-    public static final int     EGL_GL_TEXTURE_ZOFFSET                         = 0x30BD;
-    public static final int     EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_X             = 0x30B3;
-    public static final int     EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_X             = 0x30B4;
-    public static final int     EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Y             = 0x30B5;
-    public static final int     EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y             = 0x30B6;
-    public static final int     EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Z             = 0x30B7;
-    public static final int     EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z             = 0x30B8;
-    public static final int     EGL_IMAGE_PRESERVED                            = 0x30D2;
-    public static       Pointer EGL_NO_IMAGE                                   = null;
+    public static final int  EGL_CONTEXT_MAJOR_VERSION                      = 0x3098;
+    public static final int  EGL_CONTEXT_MINOR_VERSION                      = 0x30FB;
+    public static final int  EGL_CONTEXT_OPENGL_PROFILE_MASK                = 0x30FD;
+    public static final int  EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY = 0x31BD;
+    public static final int  EGL_NO_RESET_NOTIFICATION                      = 0x31BE;
+    public static final int  EGL_LOSE_CONTEXT_ON_RESET                      = 0x31BF;
+    public static final int  EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT            = 0x00000001;
+    public static final int  EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT   = 0x00000002;
+    public static final int  EGL_CONTEXT_OPENGL_DEBUG                       = 0x31B0;
+    public static final int  EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE          = 0x31B1;
+    public static final int  EGL_CONTEXT_OPENGL_ROBUST_ACCESS               = 0x31B2;
+    public static final int  EGL_OPENGL_ES3_BIT                             = 0x00000040;
+    public static final int  EGL_CL_EVENT_HANDLE                            = 0x309C;
+    public static final int  EGL_SYNC_CL_EVENT                              = 0x30FE;
+    public static final int  EGL_SYNC_CL_EVENT_COMPLETE                     = 0x30FF;
+    public static final int  EGL_SYNC_PRIOR_COMMANDS_COMPLETE               = 0x30F0;
+    public static final int  EGL_SYNC_TYPE                                  = 0x30F7;
+    public static final int  EGL_SYNC_STATUS                                = 0x30F1;
+    public static final int  EGL_SYNC_CONDITION                             = 0x30F8;
+    public static final int  EGL_SIGNALED                                   = 0x30F2;
+    public static final int  EGL_UNSIGNALED                                 = 0x30F3;
+    public static final int  EGL_SYNC_FLUSH_COMMANDS_BIT                    = 0x0001;
+    public static final long EGL_FOREVER                                    = 0xFFFFFFFFFFFFFFFFL;
+    public static final int  EGL_TIMEOUT_EXPIRED                            = 0x30F5;
+    public static final int  EGL_CONDITION_SATISFIED                        = 0x30F6;
+    public static final long EGL_NO_SYNC                                    = 0L;
+    public static final int  EGL_SYNC_FENCE                                 = 0x30F9;
+    public static final int  EGL_GL_COLORSPACE                              = 0x309D;
+    public static final int  EGL_GL_COLORSPACE_SRGB                         = 0x3089;
+    public static final int  EGL_GL_COLORSPACE_LINEAR                       = 0x308A;
+    public static final int  EGL_GL_RENDERBUFFER                            = 0x30B9;
+    public static final int  EGL_GL_TEXTURE_2D                              = 0x30B1;
+    public static final int  EGL_GL_TEXTURE_LEVEL                           = 0x30BC;
+    public static final int  EGL_GL_TEXTURE_3D                              = 0x30B2;
+    public static final int  EGL_GL_TEXTURE_ZOFFSET                         = 0x30BD;
+    public static final int  EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_X             = 0x30B3;
+    public static final int  EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_X             = 0x30B4;
+    public static final int  EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Y             = 0x30B5;
+    public static final int  EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y             = 0x30B6;
+    public static final int  EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Z             = 0x30B7;
+    public static final int  EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z             = 0x30B8;
+    public static final int  EGL_IMAGE_PRESERVED                            = 0x30D2;
+    public static final long EGL_NO_IMAGE                                   = 0L;
 
+    public native boolean eglInitialize(@Ptr long dpy,
+                                        @Ptr long major,
+                                        @Ptr long minor);
 
-    private Optional<Function> eglCreatePlatformWindowSurfaceEXT = Optional.empty();
-    private Optional<Function> eglGetPlatformDisplayEXT          = Optional.empty();
-
-//    public boolean eglBindWaylandDisplayWL(Pointer dpy,
-//                                           Pointer display) {
-//        final Function function = getFunction("eglBindWaylandDisplayWL");
-//        return (boolean) function.invoke(boolean.class,
-//                                         new Object[]{
-//                                                 dpy,
-//                                                 display
-//                                         });
-//    }
-
-//    public boolean eglUnbindWaylandDisplayWL(Pointer dpy,
-//                                             Pointer display) {
-//        final Function function = getFunction("eglUnbindWaylandDisplayWL");
-//        return (boolean) function.invoke(boolean.class, new Object[]{
-//                dpy,
-//                display
-//        });
-//    }
-
-//    public boolean eglQueryWaylandBufferWL(Pointer dpy,
-//                                           Pointer buffer,
-//                                           int attribute,
-//                                           Pointer value) {
-//        final Function function = getFunction("eglQueryWaylandBufferWL");
-//        return (boolean) function.invoke(boolean.class, new Object[]{
-//                dpy,
-//                buffer,
-//                attribute,
-//                value
-//        });
-//    }
-
-    public native boolean eglInitialize(Pointer dpy,
-                                        Pointer major,
-                                        Pointer minor);
-
-    public native boolean eglTerminate(Pointer dpy);
+    public native boolean eglTerminate(@Ptr long dpy);
 
     public native boolean eglBindAPI(int api);
 
-    public native boolean eglSwapBuffers(Pointer dpy,
-                                         Pointer surface);
+    public native boolean eglSwapBuffers(@Ptr long dpy,
+                                         @Ptr long surface);
 
-    public native boolean eglMakeCurrent(Pointer dpy,
-                                         Pointer draw,
-                                         Pointer read,
-                                         Pointer context);
+    public native boolean eglMakeCurrent(@Ptr long dpy,
+                                         @Ptr long draw,
+                                         @Ptr long read,
+                                         @Ptr long context);
 
-    public native Pointer eglCreateContext(Pointer dpy,
-                                           Pointer config,
-                                           Pointer share_context,
-                                           Pointer attrib_list);
+    @Ptr
+    public native long eglCreateContext(@Ptr long dpy,
+                                        @Ptr long config,
+                                        @Ptr long share_context,
+                                        @Ptr long attrib_list);
 
-    public native Pointer eglGetDisplay(Pointer native_display);
+    @Ptr
+    public native long eglGetDisplay(@Ptr long native_display);
 
-    public native Pointer eglCreateWindowSurface(Pointer display,
-                                                 Pointer config,
-                                                 Pointer native_window,
-                                                 Pointer attrib_list);
+    @Ptr
+    public native long eglCreateWindowSurface(@Ptr long display,
+                                              @Ptr long config,
+                                              @Ptr long native_window,
+                                              @Ptr long attrib_list);
 
-    public Pointer eglGetPlatformDisplayEXT(final int platform,
-                                            final Pointer native_display,
-                                            final Pointer attrib_list) {
-        return (Pointer) this.eglGetPlatformDisplayEXT.orElseThrow(UnsupportedOperationException::new)
-                                                      .invoke(Pointer.class,
-                                                              new Object[]{
-                                                                      platform,
-                                                                      native_display,
-                                                                      attrib_list
-                                                              });
-    }
+    @Ptr
+    public native long eglQueryString(@Ptr long dpy,
+                                      int name);
 
-    public native Pointer eglQueryString(Pointer dpy,
-                                         int name) throws LastErrorException;
-
-    public Pointer eglCreatePlatformWindowSurfaceEXT(final Pointer dpy,
-                                                     final Pointer config,
-                                                     final Pointer native_window,
-                                                     final Pointer attrib_list) {
-        return (Pointer) this.eglCreatePlatformWindowSurfaceEXT.orElseThrow(UnsupportedOperationException::new)
-                                                               .invoke(
-                                                                       Pointer.class,
-                                                                       new Object[]{
-                                                                               dpy,
-                                                                               config,
-                                                                               native_window,
-                                                                               attrib_list
-                                                                       });
-    }
-
-    public native boolean eglChooseConfig(Pointer dpy,
-                                          Pointer attrib_list,
-                                          Pointer configs,
+    public native boolean eglChooseConfig(@Ptr long dpy,
+                                          @Ptr long attrib_list,
+                                          @Ptr long configs,
                                           int config_size,
-                                          Pointer num_config);
+                                          @Ptr long num_config);
 
-    public native boolean eglQueryContext(Pointer dpy,
-                                          Pointer ctx,
+    public native boolean eglQueryContext(@Ptr long dpy,
+                                          @Ptr long ctx,
                                           int attribute,
-                                          Pointer value);
+                                          @Ptr long value);
 
-    public void loadEglCreatePlatformWindowSurfaceEXT() {
-        this.eglCreatePlatformWindowSurfaceEXT = Optional.of(loadFunction("eglCreatePlatformWindowSurfaceEXT"));
-    }
-
-    private Function loadFunction(final String name) {
-        final NativeString procname        = new NativeString(name);
-        final Pointer      functionPointer = eglGetProcAddress(procname.getPointer());
-        return Function.getFunction(functionPointer);
-    }
-
-    public native Pointer eglGetProcAddress(Pointer procname);
-
-    public void loadEglGetPlatformDisplayEXT() {
-        this.eglGetPlatformDisplayEXT = Optional.of(loadFunction("eglGetPlatformDisplayEXT"));
-    }
+    @Ptr
+    public native long eglGetProcAddress(@Ptr long procname);
 
     public native int eglGetError();
 
-    public native boolean eglGetConfigs(Pointer display,
-                                        Pointer configs,
+    public native boolean eglGetConfigs(@Ptr long display,
+                                        @Ptr long configs,
                                         int config_size,
-                                        Pointer num_config);
+                                        @Ptr long num_config);
 
-    public native boolean eglSurfaceAttrib(Pointer display,
-                                           Pointer surface,
+    public native boolean eglSurfaceAttrib(@Ptr long display,
+                                           @Ptr long surface,
                                            int attribute,
                                            int value);
 

@@ -13,34 +13,23 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_client_message_event_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
-                                                             "format",
-                                                             "sequence",
-                                                             "window",
-                                                             "type",
-                                                             "data");
-
-    public byte                              response_type;
-    public byte                              format;
-    public short                             sequence;
-    public int                               window;
-    public int                               type;
-    public xcb_client_message_data_t.ByValue data;
-
-    public xcb_client_message_event_t(final Pointer p) {
-        super(p);
-    }
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-}
+@Struct({
+                @Field(name = "response_type",
+                       type = CType.CHAR),
+                @Field(name = "format",
+                       type = CType.CHAR),
+                @Field(name = "sequence",
+                       type = CType.SHORT),
+                @Field(name = "window",
+                       type = CType.INT),
+                @Field(name = "type",
+                       type = CType.INT),
+                @Field(name = "data",
+                       type = CType.STRUCT,
+                       dataType = xcb_client_message_data_t.class),
+        })
+public final class xcb_client_message_event_t extends xcb_client_message_event_t_Jaccall_StructType {}

@@ -13,12 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxkbcommon;
 
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
-import com.sun.jna.Pointer;
+import javax.inject.Singleton;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+@Singleton
+@Lib("xkbcommon")
 public class Libxkbcommon {
 
     /**
@@ -99,12 +100,12 @@ public class Libxkbcommon {
      *
      * @return A new context, or null on failure.
      */
-    @Nullable
-    public native Pointer xkb_context_new(int flags);
+    @Ptr
+    public native long xkb_context_new(int flags);
 
     /**
      * Create a keymap from RMLVO names.
-     * <p>
+     * <p/>
      * The primary keymap entry point: creates a new XKB keymap from a set of RMLVO (Rules + Model + Layouts + Variants + Options) names.
      *
      * @param context The context in which to create the keymap.
@@ -113,10 +114,10 @@ public class Libxkbcommon {
      *
      * @return A keymap compiled according to the RMLVO names, or null if the compilation failed.
      */
-    @Nullable
-    public native Pointer xkb_keymap_new_from_names(@Nonnull Pointer context,
-                                                    Pointer names,
-                                                    int flags);
+    @Ptr
+    public native long xkb_keymap_new_from_names(@Ptr long context,
+                                                 @Ptr long names,
+                                                 int flags);
 
     /**
      * Create a new keyboard state object.
@@ -125,21 +126,21 @@ public class Libxkbcommon {
      *
      * @return A new keyboard state object, or null on failure.
      */
-    @Nullable
-    public native Pointer xkb_state_new(@Nonnull Pointer keymap);
+    @Ptr
+    public native long xkb_state_new(@Ptr long keymap);
 
     /**
      * Update the keyboard state to reflect a given key being pressed or released.
-     * <p>
+     * <p/>
      * This entry point is intended for programs which track the keyboard state explictly (like an evdev client).
      * If the state is serialized to you by a master process (like a Wayland compositor) using functions like
      * xkb_state_serialize_mods(), you should use xkb_state_update_mask() instead. The two functins should not
      * generally be used together.
-     * <p>
+     * <p/>
      * A series of calls to this function should be consistent; that is, a call with XKB_KEY_DOWN for a key should be
      * matched by an XKB_KEY_UP; if a key is pressed twice, it should be released twice; etc. Otherwise (e.g. due to
      * missed input events), situations like "stuck modifiers" may occur.
-     * <p>
+     * <p/>
      * This function is often used in conjunction with the function xkb_state_key_get_syms() (or
      * xkb_state_key_get_one_sym()), for example, when handling a key event. In this case, you should prefer to get
      * the keysyms before updating the key, such that the keysyms reported for the key event are not affected by the
@@ -152,7 +153,7 @@ public class Libxkbcommon {
      * @return A mask of state components that have changed as a result of the update. If nothing in the state has
      * changed, returns 0.
      */
-    public native int xkb_state_update_key(@Nonnull Pointer state,
+    public native int xkb_state_update_key(@Ptr long state,
                                            int key,
                                            int direction);
 
@@ -167,7 +168,7 @@ public class Libxkbcommon {
      *
      * @return A layout index representing the given components of the layout state.
      */
-    public native int xkb_state_serialize_layout(@Nonnull Pointer state,
+    public native int xkb_state_serialize_layout(@Ptr long state,
                                                  int components);
 
     /**
@@ -180,7 +181,7 @@ public class Libxkbcommon {
      *
      * @return A xkb_mod_mask_t representing the given components of the modifier state.
      */
-    public native int xkb_state_serialize_mods(@Nonnull Pointer state,
+    public native int xkb_state_serialize_mods(@Ptr long state,
                                                int components);
 
     /**
@@ -188,21 +189,21 @@ public class Libxkbcommon {
      *
      * @param state The state. If it is null, this function does nothing.
      */
-    public native void xkb_state_unref(@Nullable Pointer state);
+    public native void xkb_state_unref(@Ptr long state);
 
     /**
      * Release a reference on a keymap, and possibly free it.
      *
      * @param keymap The keymap. If it is null, this function does nothing.
      */
-    public native void xkb_keymap_unref(@Nullable Pointer keymap);
+    public native void xkb_keymap_unref(@Ptr long keymap);
 
     /**
      * Release a reference on a context, and possibly free it.
      *
      * @param context The context. If it is null, this function does nothing.
      */
-    public native void xkb_context_unref(@Nullable Pointer context);
+    public native void xkb_context_unref(@Ptr long context);
 
     /**
      * Get the compiled keymap as a string.
@@ -214,7 +215,7 @@ public class Libxkbcommon {
      * @return The keymap as a NUL-terminated string, or NULL if unsuccessful. The returned string is dynamically
      * allocated and should be freed by the caller.
      */
-    @Nullable
-    public native Pointer xkb_keymap_get_as_string(@Nonnull Pointer keymap,
-                                                   int format);
+    @Ptr
+    public native long xkb_keymap_get_as_string(@Ptr long keymap,
+                                                int format);
 }

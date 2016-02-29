@@ -13,28 +13,20 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Pointer;
-import com.sun.jna.Union;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-public class xcb_client_message_data_t extends Union {
-    public byte[]  data8  = new byte[20];
-    public short[] data16 = new short[10];
-    public int[]   data32 = new int[5];
-
-    public xcb_client_message_data_t(final Pointer p) {
-        super(p);
-    }
-
-    public xcb_client_message_data_t() {
-    }
-
-    public static class ByValue extends xcb_client_message_data_t implements Union.ByValue {
-
-        public ByValue(final Pointer p) {
-            super(p);
-        }
-
-        public ByValue() {
-        }
-    }
-}
+@Struct(union = true,
+        value = {
+                @Field(name = "data8",
+                       type = CType.CHAR,
+                       cardinality = 20),
+                @Field(name = "data16",
+                       type = CType.SHORT,
+                       cardinality = 10),
+                @Field(name = "data32",
+                       type = CType.INT,
+                       cardinality = 5),
+        })
+public final class xcb_client_message_data_t extends xcb_client_message_data_t_Jaccall_StructType {}

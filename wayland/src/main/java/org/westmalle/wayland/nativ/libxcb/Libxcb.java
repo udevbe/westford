@@ -13,11 +13,14 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.ByVal;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
 import javax.inject.Singleton;
 
 @Singleton
+@Lib("xcb")
 public class Libxcb {
 
     public static final int  XCB_ATOM_ATOM                 = 4;
@@ -49,65 +52,67 @@ public class Libxcb {
     public static final int  XCB_EXPOSE                    = 12;
     public static final int  XCB_CLIENT_MESSAGE            = 33;
 
-    public native int xcb_flush(Pointer c);
+    public native int xcb_flush(@Ptr long c);
 
-    public native Pointer xcb_get_setup(Pointer c);
+    @Ptr
+    public native long xcb_get_setup(@Ptr long c);
 
-    public native xcb_screen_iterator_t.ByValue xcb_setup_roots_iterator(Pointer setup);
+    @ByVal(xcb_screen_iterator_t.class)
+    public native long xcb_setup_roots_iterator(@Ptr long setup);
 
-    public native int xcb_connection_has_error(Pointer c);
+    public native int xcb_connection_has_error(@Ptr long c);
 
-    public native int xcb_generate_id(Pointer c);
+    public native int xcb_generate_id(@Ptr long c);
 
-    public native xcb_void_cookie_t.ByValue xcb_create_window(Pointer c,
-                                                              byte depth,
-                                                              int wid,
-                                                              int parent,
-                                                              short x,
-                                                              short y,
-                                                              short width,
-                                                              short height,
-                                                              short border_width,
-                                                              short _class,
-                                                              int visual,
-                                                              int value_mask,
-                                                              Pointer value_list);
+    public native int xcb_create_window(@Ptr long c,
+                                        byte depth,
+                                        int wid,
+                                        int parent,
+                                        short x,
+                                        short y,
+                                        short width,
+                                        short height,
+                                        short border_width,
+                                        short _class,
+                                        int visual,
+                                        int value_mask,
+                                        @Ptr long value_list);
 
-    public native xcb_void_cookie_t.ByValue xcb_map_window(Pointer c,
-                                                           int wid);
+    public native int xcb_map_window(@Ptr long c,
+                                     int wid);
 
-    public native xcb_generic_event_t xcb_poll_for_event(Pointer c);
+    public native xcb_generic_event_t xcb_poll_for_event(@Ptr long c);
 
-    public native int xcb_get_file_descriptor(Pointer c);
+    public native int xcb_get_file_descriptor(@Ptr long c);
 
-    public native xcb_grab_pointer_cookie_t.ByValue xcb_grab_pointer(Pointer c,
-                                                                     byte owner_events,
-                                                                     int grab_window,
-                                                                     short event_mask,
-                                                                     byte pointer_mode,
-                                                                     byte keyboard_mode,
-                                                                     int confine_to,
-                                                                     int cursor,
-                                                                     int time);
+    public native int xcb_grab_pointer(@Ptr long c,
+                                       byte owner_events,
+                                       int grab_window,
+                                       short event_mask,
+                                       byte pointer_mode,
+                                       byte keyboard_mode,
+                                       int confine_to,
+                                       int cursor,
+                                       int time);
 
-    public native xcb_void_cookie_t.ByValue xcb_ungrab_pointer(Pointer c,
-                                                               int time);
+    public native int xcb_ungrab_pointer(@Ptr long c,
+                                         int time);
 
-    public native xcb_intern_atom_cookie_t.ByValue xcb_intern_atom(Pointer c,
-                                                                   byte only_if_exists,
-                                                                   short name_len,
-                                                                   Pointer name);
+    public native int xcb_intern_atom(@Ptr long c,
+                                      byte only_if_exists,
+                                      short name_len,
+                                      @Ptr long name);
 
-    public native xcb_intern_atom_reply_t xcb_intern_atom_reply(Pointer c,
-                                                                xcb_intern_atom_cookie_t.ByValue cookie,
-                                                                Pointer e);
+    public native xcb_intern_atom_reply_t xcb_intern_atom_reply(@Ptr long c,
+                                                                int cookie,
+                                                                @Ptr long e);
 
-    public native xcb_void_cookie_t.ByValue xcb_change_property(Pointer c,
-                                                                byte mode,
-                                                                int window,
-                                                                int property,
-                                                                int type,
-                                                                byte format,
-                                                                int data_len,
-                                                                Pointer data);
+    public native int xcb_change_property(@Ptr long c,
+                                          byte mode,
+                                          int window,
+                                          int property,
+                                          int type,
+                                          byte format,
+                                          int data_len,
+                                          @Ptr long data);
 }

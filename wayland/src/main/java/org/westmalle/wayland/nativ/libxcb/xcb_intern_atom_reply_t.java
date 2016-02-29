@@ -13,26 +13,20 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_intern_atom_reply_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
-                                                             "pad0",
-                                                             "sequence",
-                                                             "length",
-                                                             "atom");
-    public byte response_type;
-    public byte pad0;
-    public byte sequence;
-    public int  length;
-    public int  atom;
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-}
+@Struct({
+                @Field(name = "response_type",
+                       type = CType.CHAR),
+                @Field(name = "pad0",
+                       type = CType.CHAR),
+                @Field(name = "sequence",
+                       type = CType.CHAR),
+                @Field(name = "length",
+                       type = CType.INT),
+                @Field(name = "atom",
+                       type = CType.INT)
+        })
+public final class xcb_intern_atom_reply_t extends xcb_intern_atom_reply_t_Jaccall_StructType {}

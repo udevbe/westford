@@ -13,11 +13,11 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.westmalle.wayland.nativ.libc.Libc;
 
 import javax.annotation.Nonnull;
@@ -36,21 +36,11 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
     private static final LinkedList<Runnable> NO_JOBS        = new LinkedList<>();
 
     @Nonnull
-    private final Pointer eventNewJobBuffer   = new Memory(1) {
-        {
-            setByte(0,
-                    EVENT_NEW_JOB);
-        }
-    };
+    private final Pointer<Byte> eventNewJobBuffer   = Pointer.nref(EVENT_NEW_JOB);
     @Nonnull
-    private final Pointer eventFinishedBuffer = new Memory(1) {
-        {
-            setByte(0,
-                    EVENT_FINISHED);
-        }
-    };
+    private final Pointer<Byte> eventFinishedBuffer = Pointer.nref(EVENT_FINISHED);
     @Nonnull
-    private final Pointer eventReadBuffer     = new Memory(1);
+    private final Pointer<Byte> eventReadBuffer     = Pointer.nref((byte) 0);
 
     @Nonnull
     private final ReentrantLock        jobsLock    = new ReentrantLock();
@@ -79,7 +69,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
         if (!this.eventSource.isPresent()) {
             this.eventSource = Optional.of(this.display.getEventLoop()
                                                        .addFileDescriptor(this.pipeR,
-                                                                          EventLoop.EVENT_READABLE,
+                                                                          WaylandServerCore.WL_EVENT_READABLE,
                                                                           this));
         }
         else {
@@ -89,7 +79,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
 
     public void fireFinishedEvent() {
         this.libc.write(this.pipeWR,
-                        this.eventFinishedBuffer,
+                        this.eventFinishedBuffer.address,
                         1);
     }
 
@@ -107,7 +97,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
 
     private void fireNewJobEvent() {
         this.libc.write(this.pipeWR,
-                        this.eventNewJobBuffer,
+                        this.eventNewJobBuffer.address,
                         1);
     }
 
@@ -157,7 +147,7 @@ public class JobExecutor implements EventLoop.FileDescriptorEventHandler {
 
     private byte read() {
         this.libc.read(this.pipeR,
-                       this.eventReadBuffer,
+                       this.eventReadBuffer.address,
                        1);
         return this.eventReadBuffer.getByte(0);
     }

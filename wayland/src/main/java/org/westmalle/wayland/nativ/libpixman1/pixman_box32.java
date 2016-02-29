@@ -13,29 +13,19 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libpixman1;
 
-import com.sun.jna.Structure;
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import java.util.Arrays;
-import java.util.List;
-
-
-public class pixman_box32 extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("x1",
-                                                             "y1",
-                                                             "x2",
-                                                             "y2");
-
-    public int x1;
-    public int y1;
-    public int x2;
-    public int y2;
-
-    public pixman_box32() {
-        super();
-    }
-
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
+@Struct({
+                @Field(name = "x1",
+                       type = CType.INT),
+                @Field(name = "y1",
+                       type = CType.INT),
+                @Field(name = "x2",
+                       type = CType.INT),
+                @Field(name = "y2",
+                       type = CType.INT)
+        })
+public final class pixman_box32 extends pixman_box32_Jaccall_StructType {
 }

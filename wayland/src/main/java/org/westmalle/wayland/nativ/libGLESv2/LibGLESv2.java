@@ -13,9 +13,13 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libGLESv2;
 
-import com.sun.jna.LastErrorException;
-import com.sun.jna.Pointer;
+import com.github.zubnix.jaccall.Lib;
+import com.github.zubnix.jaccall.Ptr;
 
+import javax.inject.Singleton;
+
+@Singleton
+@Lib("GLESv2")
 public class LibGLESv2 {
 
     public static final int GL_BGRA_EXT = 0x80E1;
@@ -336,7 +340,7 @@ public class LibGLESv2 {
 
     public native void glBufferData(int target,
                                     long size,
-                                    Pointer data,
+                                    @Ptr long data,
                                     int usage);
 
     public native void glUseProgram(int program);
@@ -344,7 +348,7 @@ public class LibGLESv2 {
     public native void glDrawElements(int mode,
                                       int count,
                                       int type,
-                                      Pointer indices);
+                                      @Ptr long indices);
 
     public native int glCreateShader(int type);
 
@@ -357,30 +361,30 @@ public class LibGLESv2 {
 
     public native void glShaderSource(int shader,
                                       int count,
-                                      Pointer string,
-                                      Pointer length);
+                                      @Ptr long string,
+                                      @Ptr long length);
 
     public native void glCompileShader(int shader);
 
     public native void glGetShaderiv(int shader,
                                      int pname,
-                                     Pointer params);
+                                     @Ptr long params);
 
     public native void glGetShaderInfoLog(int shader,
                                           int bufSize,
-                                          Pointer length,
-                                          Pointer infoLog);
+                                          @Ptr long length,
+                                          @Ptr long infoLog);
 
     public native int glGetUniformLocation(int program,
-                                           Pointer name);
+                                           @Ptr long name);
 
     public native void glUniformMatrix4fv(int location,
                                           int count,
                                           boolean transpose,
-                                          Pointer value);
+                                          @Ptr long value);
 
     public native int glGetAttribLocation(int program,
-                                          Pointer name);
+                                          @Ptr long name);
 
     public native void glEnableVertexAttribArray(int index);
 
@@ -389,13 +393,13 @@ public class LibGLESv2 {
                                              int type,
                                              boolean normalized,
                                              int stride,
-                                             Pointer pointer) throws LastErrorException;
+                                             @Ptr long pointer);
 
     public native void glGenBuffers(int n,
-                                    Pointer buffers);
+                                    @Ptr long buffers);
 
     public native void glGenTextures(int n,
-                                     Pointer textures);
+                                     @Ptr long textures);
 
     public native void glBindTexture(int target,
                                      int texture);
@@ -408,7 +412,7 @@ public class LibGLESv2 {
                                     int border,
                                     int format,
                                     int type,
-                                    Pointer pixels);
+                                    @Ptr long pixels);
 
     public native void glTexParameteri(int target,
                                        int pname,
@@ -422,10 +426,10 @@ public class LibGLESv2 {
                                        int height,
                                        int format,
                                        int type,
-                                       Pointer pixels);
+                                       @Ptr long pixels);
 
     public native void glDeleteTextures(int n,
-                                        Pointer textures);
+                                        @Ptr long textures);
 
 
     public native void glClearColor(final float r,
@@ -439,12 +443,12 @@ public class LibGLESv2 {
 
     public native void glGetProgramiv(int program,
                                       int pname,
-                                      Pointer params);
+                                      @Ptr long params);
 
     public native void glGetProgramInfoLog(int program,
                                            int maxLength,
-                                           Pointer length,
-                                           Pointer infoLog);
+                                           @Ptr long length,
+                                           @Ptr long infoLog);
 
     public native void glDeleteProgram(int program);
 
@@ -460,11 +464,12 @@ public class LibGLESv2 {
 
     public native void glBindAttribLocation(final int program,
                                             final int location,
-                                            final Pointer attribute);
+                                            final @Ptr long attribute);
 
     public native int glGetError();
 
-    public native Pointer glGetString(int name);
+    @Ptr
+    public native long glGetString(int name);
 
     public native void glBlendFunc(int sfactor,
                                    int dfactor);

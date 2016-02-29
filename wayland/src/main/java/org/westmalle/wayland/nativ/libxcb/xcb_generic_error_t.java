@@ -13,36 +13,29 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
+import com.github.zubnix.jaccall.CType;
+import com.github.zubnix.jaccall.Field;
+import com.github.zubnix.jaccall.Struct;
 
-import com.sun.jna.Structure;
-
-import java.util.Arrays;
-import java.util.List;
-
-public class xcb_generic_error_t extends Structure {
-
-    private static final List<?> FIELD_ORDER = Arrays.asList("response_type",
-                                                             "error_code",
-                                                             "sequence",
-                                                             "resource_id",
-                                                             "minor_code",
-                                                             "major_code",
-                                                             "pad0",
-                                                             "pad",
-                                                             "full_sequence");
-
-    public byte  response_type;
-    public byte  error_code;
-    public short sequence;
-    public int   resource_id;
-    public short minor_code;
-    public byte  major_code;
-    public byte  pad0;
-    public int[] pad = new int[5];
-    public int full_sequence;
-
-    @Override
-    protected List<?> getFieldOrder() {
-        return FIELD_ORDER;
-    }
-}
+@Struct({
+                @Field(name = "response_type",
+                       type = CType.CHAR),
+                @Field(name = "error_code",
+                       type = CType.CHAR),
+                @Field(name = "sequence",
+                       type = CType.SHORT),
+                @Field(name = "resource_id",
+                       type = CType.INT),
+                @Field(name = "minor_code",
+                       type = CType.SHORT),
+                @Field(name = "major_code",
+                       type = CType.CHAR),
+                @Field(name = "pad0",
+                       type = CType.CHAR),
+                @Field(name = "pad",
+                       type = CType.INT,
+                       cardinality = 5),
+                @Field(name = "full_sequence",
+                       type = CType.INT),
+        })
+public final class xcb_generic_error_t extends xcb_generic_error_t_Jaccall_StructType {}

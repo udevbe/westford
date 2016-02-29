@@ -34,7 +34,6 @@ import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_cookie_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
