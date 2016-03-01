@@ -69,7 +69,7 @@ public class X11EglOutputFactory {
     @Nonnull
     public X11EglOutput create(final long display,
                                final int window) {
-        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) != 0) {
+        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) == 0L) {
             throw new RuntimeException("eglBindAPI failed");
         }
         final long eglDisplay = createEglDisplay(display);
@@ -104,7 +104,7 @@ public class X11EglOutputFactory {
         }
 
         final Pointer<EglGetPlatformDisplayEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglGetPlatformDisplayEXT.class,
-                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("EglGetPlatformDisplayEXT").address));
+                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("eglGetPlatformDisplayEXT").address));
 
         final long eglDisplay = eglGetPlatformDisplayEXT.dref()
                                                         .$(EGL_PLATFORM_X11_KHR,
@@ -115,7 +115,7 @@ public class X11EglOutputFactory {
         }
         if (this.libEGL.eglInitialize(eglDisplay,
                                       0L,
-                                      0L) != 0) {
+                                      0L) == 0) {
             throw new RuntimeException("eglInitialize() failed");
         }
 
@@ -170,7 +170,7 @@ public class X11EglOutputFactory {
                                         egl_config_attribs.address,
                                         configs.address,
                                         configs_size,
-                                        num_configs.address) != 0) {
+                                        num_configs.address) == 0) {
             throw new RuntimeException("eglChooseConfig() failed");
         }
         if (num_configs.dref() == 0) {
@@ -205,7 +205,7 @@ public class X11EglOutputFactory {
                                                                 EGL_NONE);
 
         final Pointer<EglCreatePlatformWindowSurfaceEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglCreatePlatformWindowSurfaceEXT.class,
-                                                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("EglCreatePlatformWindowSurfaceEXT").address));
+                                                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("eglCreatePlatformWindowSurfaceEXT").address));
         final long eglSurface = eglGetPlatformDisplayEXT.dref()
                                                         .$(eglDisplay,
                                                            config,
@@ -217,7 +217,7 @@ public class X11EglOutputFactory {
         if (this.libEGL.eglMakeCurrent(eglDisplay,
                                        eglSurface,
                                        eglSurface,
-                                       context) != 0) {
+                                       context) == 0L) {
             throw new RuntimeException("eglMakeCurrent() failed");
         }
         return eglSurface;
