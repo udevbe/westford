@@ -15,8 +15,7 @@ package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlKeyboardResource;
-import org.freedesktop.wayland.server.jna.WaylandServerLibrary;
-import org.freedesktop.wayland.server.jna.WaylandServerLibraryMapping;
+import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,20 +31,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(WaylandServerLibrary.class)
+@PrepareForTest(WaylandServerCore.class)
 public class WlKeyboardTest {
 
     @Mock
     private KeyboardDevice keyboardDevice;
 
     @Mock
-    private WaylandServerLibraryMapping waylandServerLibraryMapping;
-    private WlKeyboard                  wlKeyboard;
+    private WaylandServerCore waylandServerLibraryMapping;
+    private WlKeyboard        wlKeyboard;
 
     @Before
     public void setUp() throws Exception {
-        PowerMockito.mockStatic(WaylandServerLibrary.class);
-        when(WaylandServerLibrary.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        PowerMockito.mockStatic(WaylandServerCore.class);
+        when(WaylandServerCore.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
         this.wlKeyboard = new WlKeyboard(this.keyboardDevice);
     }
 
