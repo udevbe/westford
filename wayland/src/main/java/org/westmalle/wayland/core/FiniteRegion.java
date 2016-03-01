@@ -18,12 +18,14 @@ import static com.github.zubnix.jaccall.Pointer.malloc;
              allowSubclasses = true)
 public class FiniteRegion implements Region {
 
-    private final Libpixman1 libpixman1;
-    private final Pointer<pixman_region32> pixman_region32Pointer = malloc(pixman_region32.SIZE,
-                                                                           pixman_region32.class);
+    private final Libpixman1               libpixman1;
+    private final Pointer<pixman_region32> pixman_region32Pointer;
 
     FiniteRegion(@Provided final Libpixman1 libpixman1) {
         this.libpixman1 = libpixman1;
+        pixman_region32Pointer = malloc(pixman_region32.SIZE,
+                                        pixman_region32.class);
+        this.libpixman1.pixman_region32_init(pixman_region32Pointer.address);
     }
 
     @Override

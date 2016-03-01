@@ -33,6 +33,7 @@ public class Libpixman1 {
                                                  int width,
                                                  int height);
 
+
     public native void pixman_region32_init_rect(@Ptr long region,
                                                  int x,
                                                  int y,
@@ -55,4 +56,5 @@ public class Libpixman1 {
                                                      int width,
                                                      int height);
 
+    public native void pixman_region32_init(@Ptr long region);
 }
