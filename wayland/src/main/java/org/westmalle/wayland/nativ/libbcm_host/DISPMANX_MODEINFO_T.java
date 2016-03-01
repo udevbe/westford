@@ -16,6 +16,4 @@ import com.github.zubnix.jaccall.Struct;
                 @Field(name = "display_num",
                        type = CType.INT),
         })
-public final class DISPMANX_MODEINFO_T extends DISPMANX_MODEINFO_T_Jaccall_StructType {
-
-}
+public final class DISPMANX_MODEINFO_T extends DISPMANX_MODEINFO_T_Jaccall_StructType {}

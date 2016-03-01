@@ -23,6 +23,4 @@ import com.github.zubnix.jaccall.Struct;
                 @Field(name = "numRects",
                        type = CType.LONG)
         })
-public final class pixman_region32_data extends pixman_region32_data_Jaccall_StructType {
-
-}
+public final class pixman_region32_data extends pixman_region32_data_Jaccall_StructType {}

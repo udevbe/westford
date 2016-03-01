@@ -25,6 +25,4 @@ import com.github.zubnix.jaccall.Struct;
                        type = CType.POINTER,
                        dataType = pixman_region32_data.class)
         })
-public final class pixman_region32 extends pixman_region32_Jaccall_StructType {
-
-}
+public final class pixman_region32 extends pixman_region32_Jaccall_StructType {}

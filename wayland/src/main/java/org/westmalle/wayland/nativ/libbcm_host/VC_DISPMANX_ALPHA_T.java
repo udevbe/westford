@@ -25,6 +25,4 @@ import com.github.zubnix.jaccall.Struct;
                 @Field(name = "mask",
                        type = CType.INT),
         })
-public final class VC_DISPMANX_ALPHA_T extends VC_DISPMANX_ALPHA_T_Jaccall_StructType {
-
-}
+public final class VC_DISPMANX_ALPHA_T extends VC_DISPMANX_ALPHA_T_Jaccall_StructType {}

@@ -27,5 +27,4 @@ import com.github.zubnix.jaccall.Struct;
                 @Field(name = "y2",
                        type = CType.INT)
         })
-public final class pixman_box32 extends pixman_box32_Jaccall_StructType {
-}
+public final class pixman_box32 extends pixman_box32_Jaccall_StructType {}

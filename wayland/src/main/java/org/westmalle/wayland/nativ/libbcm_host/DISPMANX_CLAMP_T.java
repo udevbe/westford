@@ -21,7 +21,4 @@ import com.github.zubnix.jaccall.Struct;
                 @Field(name = "dummy",
                        type = CType.INT)
         })
-public final class DISPMANX_CLAMP_T extends DISPMANX_CLAMP_T_Jaccall_StructType {
-
-
-}
+public final class DISPMANX_CLAMP_T extends DISPMANX_CLAMP_T_Jaccall_StructType {}

@@ -27,5 +27,4 @@ import com.github.zubnix.jaccall.Struct;
                 @Field(name = "height",
                        type = CType.INT)
         })
-public final class VC_RECT_T extends VC_RECT_T_Jaccall_StructType {
-}
+public final class VC_RECT_T extends VC_RECT_T_Jaccall_StructType {}
