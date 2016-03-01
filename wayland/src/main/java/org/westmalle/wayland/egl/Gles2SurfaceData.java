@@ -51,15 +51,13 @@ public class Gles2SurfaceData {
         final int bufferWidth  = shmBuffer.getStride() / Integer.BYTES;
         final int bufferHeight = shmBuffer.getHeight();
 
-        final Pointer<Integer> textureIdValue = Pointer.nref(0);
+        final Pointer<Integer> textureId = Pointer.nref(0);
         libGLESv2.glGenTextures(1,
-                                textureIdValue.address);
-
-        final int textureId = textureIdValue.dref();
+                                textureId.address);
 
         //upload buffer to gpu
         libGLESv2.glBindTexture(GL_TEXTURE_2D,
-                                textureId);
+                                textureId.dref());
         libGLESv2.glTexParameteri(GL_TEXTURE_2D,
                                   GL_TEXTURE_MIN_FILTER,
                                   GL_NEAREST);
@@ -76,7 +74,7 @@ public class Gles2SurfaceData {
                                GL_UNSIGNED_BYTE,
                                0L);
 
-        return new Gles2SurfaceData(textureIdValue,
+        return new Gles2SurfaceData(textureId,
                                     bufferWidth,
                                     bufferHeight);
     }
