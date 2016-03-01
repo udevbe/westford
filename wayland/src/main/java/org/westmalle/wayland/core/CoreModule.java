@@ -13,6 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import com.github.zubnix.jaccall.Pointer;
 import dagger.Module;
 import dagger.Provides;
 import org.freedesktop.wayland.server.Display;
@@ -46,23 +47,26 @@ public class CoreModule {
     @Provides
     JobExecutor provideJobExecutor(final Display display,
                                    final Libc libc) {
-        final int[] pipeFds = new int[2];
-        libc.pipe(pipeFds);
-        final int[] pipe = configure(pipeFds,
-                                     libc);
-        final int pipeR  = pipe[0];
-        final int pipeWR = pipe[1];
+        final Pointer<Integer> pipeFds = Pointer.nref(0,
+                                                      0);
+        libc.pipe(pipeFds.address);
+
+        final int readFd  = pipeFds.dref(0);
+        final int writeFd = pipeFds.dref(1);
+
+        configure(readFd,
+                  writeFd,
+                  libc);
 
         return new JobExecutor(display,
-                               pipeR,
-                               pipeWR,
+                               readFd,
+                               writeFd,
                                libc);
     }
 
-    private int[] configure(final int[] pipeFds,
-                            final Libc libc) {
-        final int readFd  = pipeFds[0];
-        final int writeFd = pipeFds[1];
+    private void configure(final int readFd,
+                           final int writeFd,
+                           final Libc libc) {
 
         final int readFlags = libc.fcntl(readFd,
                                          Libc.F_GETFD,
@@ -77,7 +81,5 @@ public class CoreModule {
         libc.fcntl(writeFd,
                    Libc.F_SETFD,
                    writeFlags | Libc.FD_CLOEXEC);
-
-        return pipeFds;
     }
 }

@@ -37,16 +37,16 @@ public class FiniteRegion implements Region {
         //int pointer
         final Pointer<Integer> n_rects = Pointer.nref(0);
         final Pointer<pixman_box32> pixman_box32_array = Pointer.wrap(pixman_box32.class,
-                                                                      this.libpixman1.pixman_region32_rectangles(pixman_region32.address,
+                                                                      this.libpixman1.pixman_region32_rectangles(this.pixman_region32.address,
                                                                                                                  n_rects.address));
         final int             size  = n_rects.dref();
         final List<Rectangle> boxes = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             final pixman_box32 pixman_box32 = pixman_box32_array.dref(i);
-            final int          x            = pixman_box32.x1();
-            final int          y            = pixman_box32.y1();
+            final int x = pixman_box32.x1();
+            final int y = pixman_box32.y1();
 
-            final int width  = pixman_box32.x2() - x;
+            final int width = pixman_box32.x2() - x;
             final int height = pixman_box32.y2() - y;
             boxes.add(Rectangle.create(x,
                                        y,
@@ -135,6 +135,6 @@ public class FiniteRegion implements Region {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        pixman_region32.close();
+        this.pixman_region32.close();
     }
 }

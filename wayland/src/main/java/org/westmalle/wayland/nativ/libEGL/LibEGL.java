@@ -199,21 +199,21 @@ public class LibEGL {
     public static final int  EGL_IMAGE_PRESERVED                            = 0x30D2;
     public static final long EGL_NO_IMAGE                                   = 0L;
 
-    public native boolean eglInitialize(@Ptr long dpy,
-                                        @Ptr long major,
-                                        @Ptr long minor);
+    public native int eglInitialize(@Ptr long dpy,
+                                    @Ptr long major,
+                                    @Ptr long minor);
 
-    public native boolean eglTerminate(@Ptr long dpy);
+    public native int eglTerminate(@Ptr long dpy);
 
-    public native boolean eglBindAPI(int api);
+    public native int eglBindAPI(int api);
 
-    public native boolean eglSwapBuffers(@Ptr long dpy,
-                                         @Ptr long surface);
+    public native int eglSwapBuffers(@Ptr long dpy,
+                                     @Ptr long surface);
 
-    public native boolean eglMakeCurrent(@Ptr long dpy,
-                                         @Ptr long draw,
-                                         @Ptr long read,
-                                         @Ptr long context);
+    public native int eglMakeCurrent(@Ptr long dpy,
+                                     @Ptr long draw,
+                                     @Ptr long read,
+                                     @Ptr long context);
 
     @Ptr
     public native long eglCreateContext(@Ptr long dpy,
@@ -234,31 +234,31 @@ public class LibEGL {
     public native long eglQueryString(@Ptr long dpy,
                                       int name);
 
-    public native boolean eglChooseConfig(@Ptr long dpy,
-                                          @Ptr long attrib_list,
-                                          @Ptr long configs,
-                                          int config_size,
-                                          @Ptr long num_config);
+    public native int eglChooseConfig(@Ptr long dpy,
+                                      @Ptr long attrib_list,
+                                      @Ptr long configs,
+                                      int config_size,
+                                      @Ptr long num_config);
 
-    public native boolean eglQueryContext(@Ptr long dpy,
-                                          @Ptr long ctx,
-                                          int attribute,
-                                          @Ptr long value);
+    public native int eglQueryContext(@Ptr long dpy,
+                                      @Ptr long ctx,
+                                      int attribute,
+                                      @Ptr long value);
 
     @Ptr
     public native long eglGetProcAddress(@Ptr long procname);
 
     public native int eglGetError();
 
-    public native boolean eglGetConfigs(@Ptr long display,
-                                        @Ptr long configs,
-                                        int config_size,
-                                        @Ptr long num_config);
+    public native int eglGetConfigs(@Ptr long display,
+                                    @Ptr long configs,
+                                    int config_size,
+                                    @Ptr long num_config);
 
-    public native boolean eglSurfaceAttrib(@Ptr long display,
-                                           @Ptr long surface,
-                                           int attribute,
-                                           int value);
+    public native int eglSurfaceAttrib(@Ptr long display,
+                                       @Ptr long surface,
+                                       int attribute,
+                                       int value);
 
     public void throwError(final String failedFunction) throws RuntimeException {
         //looks like there was an error trying to make the egl context current.

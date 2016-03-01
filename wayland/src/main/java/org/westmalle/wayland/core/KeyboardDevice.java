@@ -251,7 +251,7 @@ public class KeyboardDevice {
             this.focusDestroyListener = Optional.empty();
 
             final WlSurface wlSurface = (WlSurface) oldFocusResource.getImplementation();
-            final Surface   surface   = wlSurface.getSurface();
+            final Surface surface = wlSurface.getSurface();
 
             final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
                                                                            oldFocusResource.getClient());
@@ -272,7 +272,7 @@ public class KeyboardDevice {
             newFocusResource.register(this.focusDestroyListener.get());
 
             final WlSurface wlSurface = (WlSurface) newFocusResource.getImplementation();
-            final Surface   surface   = wlSurface.getSurface();
+            final Surface surface = wlSurface.getSurface();
 
             final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
                                                                            newFocusResource.getClient());
@@ -316,7 +316,7 @@ public class KeyboardDevice {
         final String nativeKeyMapping = getXkb().getKeymapString();
 
         //-1 to get rid of the null terminator
-        final int size = (int) nativeKeyMapping.length() - 1;
+        final int size = nativeKeyMapping.length() - 1;
         final int fd   = this.nativeFileFactory.createAnonymousFile(size);
         final long keymapArea = this.libc.mmap(0L,
                                                size,

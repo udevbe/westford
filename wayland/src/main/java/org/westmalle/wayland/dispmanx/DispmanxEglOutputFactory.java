@@ -70,7 +70,7 @@ public class DispmanxEglOutputFactory {
                                   final long config,
                                   final long context) {
         // get an appropriate EGL frame buffer configuration
-        if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
+        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) != 0) {
             this.libEGL.throwError("eglBindAPI");
         }
 
@@ -83,10 +83,10 @@ public class DispmanxEglOutputFactory {
         }
 
         // connect the context to the surface
-        if (!this.libEGL.eglMakeCurrent(display,
-                                        surface,
-                                        surface,
-                                        context)) {
+        if (this.libEGL.eglMakeCurrent(display,
+                                       surface,
+                                       surface,
+                                       context) != 0) {
             this.libEGL.throwError("eglMakeCurrent");
         }
 
@@ -111,23 +111,23 @@ public class DispmanxEglOutputFactory {
         final Pointer<Integer> num_config = Pointer.nref(0);
         final Pointer<Pointer> configs    = Pointer.nref(Pointer.nref(0));
         // get an appropriate EGL frame buffer configuration
-        if (!this.libEGL.eglChooseConfig(display,
-                                         Pointer.nref(EGL_SURFACE_TYPE,
-                                                      EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
-                                                      EGL_RED_SIZE,
-                                                      8,
-                                                      EGL_GREEN_SIZE,
-                                                      8,
-                                                      EGL_BLUE_SIZE,
-                                                      8,
-                                                      EGL_ALPHA_SIZE,
-                                                      8,
-                                                      EGL_RENDERABLE_TYPE,
-                                                      EGL_OPENGL_ES2_BIT,
-                                                      EGL_NONE).address,
-                                         configs.address,
-                                         1,
-                                         num_config.address)) {
+        if (this.libEGL.eglChooseConfig(display,
+                                        Pointer.nref(EGL_SURFACE_TYPE,
+                                                     EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
+                                                     EGL_RED_SIZE,
+                                                     8,
+                                                     EGL_GREEN_SIZE,
+                                                     8,
+                                                     EGL_BLUE_SIZE,
+                                                     8,
+                                                     EGL_ALPHA_SIZE,
+                                                     8,
+                                                     EGL_RENDERABLE_TYPE,
+                                                     EGL_OPENGL_ES2_BIT,
+                                                     EGL_NONE).address,
+                                        configs.address,
+                                        1,
+                                        num_config.address) != 0) {
             this.libEGL.throwError("eglChooseConfig");
         }
 
@@ -141,9 +141,9 @@ public class DispmanxEglOutputFactory {
         }
 
         // initialize the EGL display connection
-        if (!this.libEGL.eglInitialize(display,
-                                       0L,
-                                       0L)) {
+        if (this.libEGL.eglInitialize(display,
+                                      0L,
+                                      0L) != 0) {
             this.libEGL.throwError("eglInitialize");
         }
 

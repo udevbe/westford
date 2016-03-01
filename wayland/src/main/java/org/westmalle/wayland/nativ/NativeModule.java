@@ -22,6 +22,7 @@ import org.westmalle.wayland.nativ.libX11.LibX11;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
 import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libc.Libc_Jaccall_LinkSymbols;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
@@ -51,7 +52,9 @@ public class NativeModule {
     @Singleton
     @Provides
     Libc provideLibc() {
-        Linker.link(Libc.class);
+        Linker.link("/lib/libc.so.6",
+                    Libc.class,
+                    new Libc_Jaccall_LinkSymbols());
         return new Libc();
     }
 

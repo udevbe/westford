@@ -324,20 +324,20 @@ public class EglGles2Renderer implements Renderer {
         final Pointer<Float> projectionBuffer = Pointer.nref(this.projection);
         this.libGLESv2.glUniformMatrix4fv(this.projectionArg,
                                           1,
-                                          false,
+                                          0,
                                           projectionBuffer.address);
 
         final Pointer<Float> transformBuffer = Pointer.nref(transform);
         this.libGLESv2.glUniformMatrix4fv(this.transformArg,
                                           1,
-                                          false,
+                                          0,
                                           transformBuffer.address);
         //set vertex data in shader
         this.libGLESv2.glEnableVertexAttribArray(this.positionArg);
         this.libGLESv2.glVertexAttribPointer(this.positionArg,
                                              2,
                                              GL_FLOAT,
-                                             false,
+                                             0,
                                              4 * Float.BYTES,
                                              vertexData.address);
 
@@ -345,7 +345,7 @@ public class EglGles2Renderer implements Renderer {
         this.libGLESv2.glVertexAttribPointer(this.textureCoordinateArg,
                                              2,
                                              GL_FLOAT,
-                                             false,
+                                             0,
                                              4 * Float.BYTES,
                                              vertexData.offset(2).address);
 
@@ -383,10 +383,10 @@ public class EglGles2Renderer implements Renderer {
                                        surfaceData);
         }
         else {
-            final int surfaceDataWidth  = surfaceData.getWidth();
+            final int surfaceDataWidth = surfaceData.getWidth();
             final int surfaceDataHeight = surfaceData.getHeight();
-            final int bufferWidth       = shmBuffer.getWidth();
-            final int bufferHeight      = shmBuffer.getHeight();
+            final int bufferWidth = shmBuffer.getWidth();
+            final int bufferHeight = shmBuffer.getHeight();
             if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
                 this.cachedSurfaceData.remove(surfaceResource)
                                       .delete(this.libGLESv2);

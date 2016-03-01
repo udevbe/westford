@@ -380,7 +380,7 @@ public class LibGLESv2 {
 
     public native void glUniformMatrix4fv(int location,
                                           int count,
-                                          boolean transpose,
+                                          int transpose,
                                           @Ptr long value);
 
     public native int glGetAttribLocation(int program,
@@ -391,7 +391,7 @@ public class LibGLESv2 {
     public native void glVertexAttribPointer(int index,
                                              int size,
                                              int type,
-                                             boolean normalized,
+                                             int normalized,
                                              int stride,
                                              @Ptr long pointer);
 

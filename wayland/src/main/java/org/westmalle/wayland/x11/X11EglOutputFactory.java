@@ -69,7 +69,7 @@ public class X11EglOutputFactory {
     @Nonnull
     public X11EglOutput create(final long display,
                                final int window) {
-        if (!this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)) {
+        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) != 0) {
             throw new RuntimeException("eglBindAPI failed");
         }
         final long eglDisplay = createEglDisplay(display);
@@ -113,9 +113,9 @@ public class X11EglOutputFactory {
         if (eglDisplay == 0L) {
             throw new RuntimeException("eglGetDisplay() failed");
         }
-        if (!this.libEGL.eglInitialize(eglDisplay,
-                                       0L,
-                                       0L)) {
+        if (this.libEGL.eglInitialize(eglDisplay,
+                                      0L,
+                                      0L) != 0) {
             throw new RuntimeException("eglInitialize() failed");
         }
 
@@ -166,11 +166,11 @@ public class X11EglOutputFactory {
                  EGL_NONE
                 //@formatter:on
                                                                 );
-        if (!this.libEGL.eglChooseConfig(eglDisplay,
-                                         egl_config_attribs.address,
-                                         configs.address,
-                                         configs_size,
-                                         num_configs.address)) {
+        if (this.libEGL.eglChooseConfig(eglDisplay,
+                                        egl_config_attribs.address,
+                                        configs.address,
+                                        configs_size,
+                                        num_configs.address) != 0) {
             throw new RuntimeException("eglChooseConfig() failed");
         }
         if (num_configs.dref() == 0) {
@@ -214,10 +214,10 @@ public class X11EglOutputFactory {
         if (eglSurface == 0L) {
             throw new RuntimeException("eglCreateWindowSurface() failed");
         }
-        if (!this.libEGL.eglMakeCurrent(eglDisplay,
-                                        eglSurface,
-                                        eglSurface,
-                                        context)) {
+        if (this.libEGL.eglMakeCurrent(eglDisplay,
+                                       eglSurface,
+                                       eglSurface,
+                                       context) != 0) {
             throw new RuntimeException("eglMakeCurrent() failed");
         }
         return eglSurface;

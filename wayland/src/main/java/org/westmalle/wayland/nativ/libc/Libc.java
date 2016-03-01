@@ -282,9 +282,6 @@ public class Libc {
         return this.errno_p.dref();
     }
 
-    public native int open(String pathname,
-                           int flags);
-
     public native int write(int fd,
                             @Ptr long buffer,
                             int n_byte);
@@ -299,9 +296,7 @@ public class Libc {
                             int operation,
                             int args);
 
-    public native int pipe(int[] pipeFds);
-
-    public native void free(@Ptr long p);
+    public native int pipe(@Ptr long pipeFds);
 
     public native int unlink(final @Ptr long pathname);
 
@@ -317,9 +312,6 @@ public class Libc {
                             int flags,
                             int fildes,
                             int off);
-
-    public native int munmap(@Ptr long addr,
-                             int length);
 
     @Ptr
     public native long strcpy(@Ptr long dest,
