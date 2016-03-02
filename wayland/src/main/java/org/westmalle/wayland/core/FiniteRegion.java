@@ -23,9 +23,9 @@ public class FiniteRegion implements Region {
 
     FiniteRegion(@Provided final Libpixman1 libpixman1) {
         this.libpixman1 = libpixman1;
-        pixman_region32Pointer = malloc(pixman_region32.SIZE,
-                                        pixman_region32.class);
-        this.libpixman1.pixman_region32_init(pixman_region32Pointer.address);
+        this.pixman_region32Pointer = malloc(pixman_region32.SIZE,
+                                             pixman_region32.class);
+        this.libpixman1.pixman_region32_init(this.pixman_region32Pointer.address);
     }
 
     @Override
