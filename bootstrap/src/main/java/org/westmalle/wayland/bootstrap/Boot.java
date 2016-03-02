@@ -24,6 +24,9 @@ import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
 import java.util.Arrays;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
@@ -34,6 +37,14 @@ class Boot {
 
 
     public static void main(final String[] args) {
+
+        //jaccall debug output
+        final Handler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.FINE);
+        final Logger jaccallLogger = Logger.getLogger("jaccall");
+        jaccallLogger.setLevel(Level.FINE);
+        jaccallLogger.addHandler(consoleHandler);
+
         Thread.setDefaultUncaughtExceptionHandler((thread,
                                                    throwable) -> {
             LOGGER.severe("Got uncaught exception " + throwable.getMessage());
