@@ -22,15 +22,10 @@ import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_enter_notify_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_expose_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_focus_in_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_focus_out_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_keymap_notify_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_leave_notify_event_t;
+import org.westmalle.wayland.nativ.libxcb.xcb_mapping_notify_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -47,6 +42,8 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEYMAP_NOTIFY;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_PRESS;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_RELEASE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_LEAVE_NOTIFY;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MAPPING_KEYBOARD;
+import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MAPPING_NOTIFY;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
 
 @AutoFactory(className = "X11InputEventListenerFactory",
@@ -94,33 +91,38 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
                 break;
             }
             case XCB_EXPOSE: {
-                final Pointer<xcb_expose_event_t> expose_event = event.castp(xcb_expose_event_t.class);
+//                final Pointer<xcb_expose_event_t> expose_event = event.castp(xcb_expose_event_t.class);
                 //handle(expose_event);
                 break;
             }
             case XCB_ENTER_NOTIFY: {
-                final Pointer<xcb_enter_notify_event_t> enter_notify_event = event.castp(xcb_enter_notify_event_t.class);
+                //               final Pointer<xcb_enter_notify_event_t> enter_notify_event = event.castp(xcb_enter_notify_event_t.class);
                 //handle(enter_notify_event);
                 break;
             }
             case XCB_LEAVE_NOTIFY: {
-                final Pointer<xcb_leave_notify_event_t> leave_notify_event = event.castp(xcb_leave_notify_event_t.class);
+//                final Pointer<xcb_leave_notify_event_t> leave_notify_event = event.castp(xcb_leave_notify_event_t.class);
                 //handle(leave_notify_event);
                 break;
             }
             case XCB_FOCUS_IN: {
-                final Pointer<xcb_focus_in_event_t> focus_in_event = event.castp(xcb_focus_in_event_t.class);
+//                final Pointer<xcb_focus_in_event_t> focus_in_event = event.castp(xcb_focus_in_event_t.class);
                 //handle(focus_in_event);
                 break;
             }
             case XCB_FOCUS_OUT: {
-                final Pointer<xcb_focus_out_event_t> focus_out_event = event.castp(xcb_focus_out_event_t.class);
+//                final Pointer<xcb_focus_out_event_t> focus_out_event = event.castp(xcb_focus_out_event_t.class);
                 //handle(focus_out_event);
                 break;
             }
             case XCB_KEYMAP_NOTIFY: {
-                final Pointer<xcb_keymap_notify_event_t> keymap_notify_event = event.castp(xcb_keymap_notify_event_t.class);
-                handle(keymap_notify_event.dref());
+//                final Pointer<xcb_keymap_notify_event_t> keymap_notify_event = event.castp(xcb_keymap_notify_event_t.class);
+//                handle(keymap_notify_event.dref());
+                break;
+            }
+            case XCB_MAPPING_NOTIFY: {
+                final Pointer<xcb_mapping_notify_event_t> mapping_notify_event = event.castp(xcb_mapping_notify_event_t.class);
+                handle(mapping_notify_event.dref());
                 break;
             }
         }
@@ -168,15 +170,17 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
                            false);
     }
 
-    private void handle(final xcb_keymap_notify_event_t event) {
-        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                     .getPlatformImplementation();
-        final WlKeyboard     wlKeyboard     = this.wlSeat.getWlKeyboard();
-        final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
-        final Xkb xkb = this.x11XkbFactory.create(x11Seat.getX11Output()
-                                                         .getXcbConnection());
-        keyboardDevice.setXkb(xkb);
-        keyboardDevice.updateKeymap();
-        keyboardDevice.emitKeymap(wlKeyboard.getResources());
+    private void handle(final xcb_mapping_notify_event_t event) {
+        if (event.request() == XCB_MAPPING_KEYBOARD) {
+            final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
+                                                         .getPlatformImplementation();
+            final WlKeyboard wlKeyboard = this.wlSeat.getWlKeyboard();
+            final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
+            final Xkb xkb = this.x11XkbFactory.create(x11Seat.getX11Output()
+                                                             .getXcbConnection());
+            keyboardDevice.setXkb(xkb);
+            keyboardDevice.updateKeymap();
+            keyboardDevice.emitKeymap(wlKeyboard.getResources());
+        }
     }
 }

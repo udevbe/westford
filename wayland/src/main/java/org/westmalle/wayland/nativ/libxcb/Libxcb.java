@@ -51,6 +51,11 @@ public class Libxcb {
     public static final int  XCB_KEYMAP_NOTIFY             = 11;
     public static final int  XCB_EXPOSE                    = 12;
     public static final int  XCB_CLIENT_MESSAGE            = 33;
+    public static final int  XCB_MAPPING_NOTIFY            = 34;
+    public static final int  XCB_MAPPING_MODIFIER          = 0;
+    public static final int  XCB_MAPPING_KEYBOARD          = 1;
+    public static final int  XCB_MAPPING_POINTER           = 2;
+
 
     public native int xcb_flush(@Ptr long c);
 
