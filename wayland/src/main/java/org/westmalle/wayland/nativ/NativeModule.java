@@ -13,20 +13,28 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ;
 
-import com.github.zubnix.jaccall.Linker;
 import dagger.Module;
 import dagger.Provides;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
+import org.westmalle.wayland.nativ.libEGL.LibEGL_Symbols;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2_Symbols;
 import org.westmalle.wayland.nativ.libX11.LibX11;
+import org.westmalle.wayland.nativ.libX11.LibX11_Symbols;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
+import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb_Symbols;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
+import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host_Symbols;
 import org.westmalle.wayland.nativ.libc.Libc;
-import org.westmalle.wayland.nativ.libc.Libc_Jaccall_LinkSymbols;
+import org.westmalle.wayland.nativ.libc.Libc_Symbols;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
+import org.westmalle.wayland.nativ.libpixman1.Libpixman1_Symbols;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.nativ.libxcb.Libxcb_Symbols;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
+import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon_Symbols;
 import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11;
+import org.westmalle.wayland.nativ.libxkbcommonx11.Libxkbcommonx11_Symbols;
 
 import javax.inject.Singleton;
 
@@ -36,7 +44,7 @@ public class NativeModule {
     @Singleton
     @Provides
     Libbcm_host provideLibbcm_host() {
-        Linker.link(Libbcm_host.class);
+        new Libbcm_host_Symbols().link();
         final Libbcm_host libbcm_host = new Libbcm_host();
         libbcm_host.bcm_host_init();
         return libbcm_host;
@@ -45,65 +53,63 @@ public class NativeModule {
     @Singleton
     @Provides
     Libpixman1 provideLibpixman1() {
-        Linker.link(Libpixman1.class);
+        new Libpixman1_Symbols().link();
         return new Libpixman1();
     }
 
     @Singleton
     @Provides
     Libc provideLibc() {
-        Linker.link("/lib/libc.so.6",
-                    Libc.class,
-                    new Libc_Jaccall_LinkSymbols());
+        new Libc_Symbols().link("/lib/libc.so.6");
         return new Libc();
     }
 
     @Singleton
     @Provides
     LibEGL provideLibegl() {
-        Linker.link(LibEGL.class);
+        new LibEGL_Symbols().link();
         return new LibEGL();
     }
 
     @Singleton
     @Provides
     LibGLESv2 provideLibgles2() {
-        Linker.link(LibGLESv2.class);
+        new LibGLESv2_Symbols().link();
         return new LibGLESv2();
     }
 
     @Singleton
     @Provides
     LibX11 provideLibX11() {
-        Linker.link(LibX11.class);
+        new LibX11_Symbols().link();
         return new LibX11();
     }
 
     @Singleton
     @Provides
     Libxcb provideLibxcb() {
-        Linker.link(Libxcb.class);
+        new Libxcb_Symbols().link();
         return new Libxcb();
     }
 
     @Singleton
     @Provides
     LibX11xcb provideLibX11xcb() {
-        Linker.link(LibX11xcb.class);
+        new LibX11xcb_Symbols().link();
         return new LibX11xcb();
     }
 
     @Singleton
     @Provides
     Libxkbcommon provideLibxkbcommon() {
-        Linker.link(Libxkbcommon.class);
+        new Libxkbcommon_Symbols().link();
         return new Libxkbcommon();
     }
 
     @Singleton
     @Provides
     Libxkbcommonx11 provideLibxkbcommonx11() {
-        Linker.link(Libxkbcommonx11.class);
+        new Libxkbcommonx11_Symbols().link();
         return new Libxkbcommonx11();
     }
 
