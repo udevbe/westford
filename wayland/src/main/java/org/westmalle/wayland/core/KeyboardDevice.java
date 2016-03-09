@@ -315,8 +315,7 @@ public class KeyboardDevice {
     public void updateKeymap() {
         final String nativeKeyMapping = getXkb().getKeymapString();
 
-        //-1 to get rid of the null terminator
-        final int size = nativeKeyMapping.length() - 1;
+        final int size = nativeKeyMapping.length();
         final int fd   = this.nativeFileFactory.createAnonymousFile(size);
         final long keymapArea = this.libc.mmap(0L,
                                                size,

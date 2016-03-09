@@ -13,6 +13,7 @@
 ////limitations under the License.
 //package org.westmalle.wayland.x11;
 //
+//import com.github.zubnix.jaccall.Pointer;
 //import org.junit.Rule;
 //import org.junit.Test;
 //import org.junit.rules.ExpectedException;
@@ -79,10 +80,9 @@
 //        final long display = 12346;
 //        final int  window  = 12345;
 //        when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(1);
-//        final long eglQueryString = 654321;
-//        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_foobar");
+//        final Pointer<String> eglQueryString = Pointer.nref("EGL_EXT_platform_foobar");
 //        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
-//                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
+//                                        EGL_EXTENSIONS)).thenReturn(eglQueryString.address);
 //        //when
 //        this.x11EglOutputFactory.create(display,
 //                                        window);
@@ -101,11 +101,10 @@
 //
 //        final Pointer display = mock(Pointer.class);
 //        final int     window  = 12345;
-//        when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
-//        final Pointer eglQueryString = mock(Pointer.class);
-//        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
+//        when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(1);
+//        final Pointer<String> eglQueryString = Pointer.nref("EGL_EXT_platform_x11");
 //        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
-//                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
+//                                        EGL_EXTENSIONS)).thenReturn(eglQueryString.address);
 //        when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
 //                                                  display,
 //                                                  null)).thenReturn(null);

@@ -16,6 +16,7 @@ package org.westmalle.wayland.protocol;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
+import org.freedesktop.wayland.util.ObjectCache;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,9 +24,12 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.westmalle.wayland.core.KeyboardDevice;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,13 +42,18 @@ public class WlKeyboardTest {
     private KeyboardDevice keyboardDevice;
 
     @Mock
-    private WaylandServerCore waylandServerLibraryMapping;
+    private WaylandServerCore waylandServerCore;
     private WlKeyboard        wlKeyboard;
 
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(WaylandServerCore.class);
-        when(WaylandServerCore.INSTANCE()).thenReturn(this.waylandServerLibraryMapping);
+        when(WaylandServerCore.INSTANCE()).thenReturn(this.waylandServerCore);
+        ObjectCache.remove(112358L);
+        when(this.waylandServerCore.wl_resource_create(anyLong(),
+                                                       anyLong(),
+                                                       anyInt(),
+                                                       anyInt())).thenReturn(112358L);
         this.wlKeyboard = new WlKeyboard(this.keyboardDevice);
     }
 
@@ -61,9 +70,12 @@ public class WlKeyboardTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Client client  = mock(Client.class);
-        final int    version = 4;
-        final int    id      = 4;
+        final Client client = mock(Client.class);
+        Whitebox.setInternalState(client,
+                                  "pointer",
+                                  2468L);
+        final int version = 4;
+        final int id      = 4;
         //when
         final WlKeyboardResource wlKeyboardResource = this.wlKeyboard.create(client,
                                                                              version,
