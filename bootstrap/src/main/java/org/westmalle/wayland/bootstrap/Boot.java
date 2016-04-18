@@ -13,7 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import com.beust.jcommander.JCommander;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.dispmanx.DispmanxOutputFactory;
@@ -52,34 +51,36 @@ class Boot {
                                   + "\tArguments: %s",
                                   args.length == 0 ? "<none>" : Arrays.toString(args)));
 
-        final CommandBackend commandBackend = parseBackend(args);
-        read(commandBackend);
+//        final CommandBackend commandBackend = parseBackend(args);
+//        read(commandBackend);
+
+        new Boot().strap(DaggerX11EglCompositor.create());
     }
 
-    private static CommandBackend parseBackend(final String[] args) {
-        final CommandBackend commandBackend = new CommandBackend();
-        new JCommander(commandBackend,
-                       args);
-        return commandBackend;
-    }
+//    private static CommandBackend parseBackend(final String[] args) {
+//        final CommandBackend commandBackend = new CommandBackend();
+//        new JCommander(commandBackend,
+//                       args);
+//        return commandBackend;
+//    }
 
-    private static void read(final CommandBackend commandBackend) {
-        final Boot boot = new Boot();
-
-        switch (commandBackend.backend) {
-            case "X11Egl":
-                boot.strap(DaggerX11EglCompositor.create());
-                break;
-
-            case "DispmanxEgl":
-                boot.strap(DaggerDispmanxEglCompositor.create());
-                break;
-
-            default:
-                //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
-                boot.strap(DaggerX11EglCompositor.create());
-        }
-    }
+//    private static void read(final CommandBackend commandBackend) {
+//        final Boot boot = new Boot();
+//
+//        switch (commandBackend.backend) {
+//            case "X11Egl":
+//                boot.strap(DaggerX11EglCompositor.create());
+//                break;
+//
+//            case "DispmanxEgl":
+//                boot.strap(DaggerDispmanxEglCompositor.create());
+//                break;
+//
+//            default:
+//                //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
+//                boot.strap(DaggerX11EglCompositor.create());
+//        }
+//    }
 
     private void strap(final DispmanxEglCompositor dispmanxEglCompositor) {
         /*
