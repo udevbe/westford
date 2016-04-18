@@ -22,24 +22,17 @@ import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.X11OutputFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
 
-class Boot {
+public class Boot {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    private static final String BACK_END = "BACK_END";
 
 
     public static void main(final String[] args) {
-
-        //jaccall debug output
-//        final Handler consoleHandler = new ConsoleHandler();
-//        consoleHandler.setLevel(Level.FINE);
-//        final Logger jaccallLogger = Logger.getLogger("jaccall");
-//        jaccallLogger.setLevel(Level.FINE);
-//        jaccallLogger.addHandler(consoleHandler);
 
         Thread.setDefaultUncaughtExceptionHandler((thread,
                                                    throwable) -> {
@@ -47,40 +40,33 @@ class Boot {
             throwable.printStackTrace();
         });
 
-        LOGGER.info(String.format("Starting Westmalle:\n"
-                                  + "\tArguments: %s",
-                                  args.length == 0 ? "<none>" : Arrays.toString(args)));
+        LOGGER.info("Starting Westmalle");
 
-//        final CommandBackend commandBackend = parseBackend(args);
-//        read(commandBackend);
-
-        new Boot().strap(DaggerX11EglCompositor.create());
+        initBackEnd();
     }
 
-//    private static CommandBackend parseBackend(final String[] args) {
-//        final CommandBackend commandBackend = new CommandBackend();
-//        new JCommander(commandBackend,
-//                       args);
-//        return commandBackend;
-//    }
+    private static void initBackEnd() {
+        final Boot boot = new Boot();
 
-//    private static void read(final CommandBackend commandBackend) {
-//        final Boot boot = new Boot();
-//
-//        switch (commandBackend.backend) {
-//            case "X11Egl":
-//                boot.strap(DaggerX11EglCompositor.create());
-//                break;
-//
-//            case "DispmanxEgl":
-//                boot.strap(DaggerDispmanxEglCompositor.create());
-//                break;
-//
-//            default:
-//                //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
-//                boot.strap(DaggerX11EglCompositor.create());
-//        }
-//    }
+        String backEnd = System.getProperty(BACK_END);
+        if(backEnd == null){
+            backEnd = "";
+        }
+
+        switch (backEnd) {
+            case "X11Egl":
+                boot.strap(DaggerX11EglCompositor.create());
+                break;
+
+            case "DispmanxEgl":
+                boot.strap(DaggerDispmanxEglCompositor.create());
+                break;
+
+            default:
+                //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
+                boot.strap(DaggerX11EglCompositor.create());
+        }
+    }
 
     private void strap(final DispmanxEglCompositor dispmanxEglCompositor) {
         /*
