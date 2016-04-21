@@ -47,7 +47,7 @@ Native:
 
 State
 =====
-[![Build Status](https://travis-ci.org/Zubnix/westmalle.svg?branch=master)](https://travis-ci.org/Zubnix/westmalle)
+[![Build Status](https://travis-ci.org/udevbe/westmalle.svg?branch=master)](https://travis-ci.org/udevbe/westmalle)
 
 | Functionality               | Implemented        |
 | :-------------------------: | :----------------: |
