@@ -13,9 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.github.zubnix.jaccall.ByVal;
-import com.github.zubnix.jaccall.Lib;
-import com.github.zubnix.jaccall.Ptr;
+import org.freedesktop.jaccall.ByVal;
+import org.freedesktop.jaccall.Lib;
+import org.freedesktop.jaccall.Ptr;
 
 import javax.inject.Singleton;
 

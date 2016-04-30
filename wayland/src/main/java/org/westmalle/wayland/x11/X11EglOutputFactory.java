@@ -13,7 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -22,8 +22,8 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.logging.Logger;
 
-import static com.github.zubnix.jaccall.Pointer.malloc;
-import static com.github.zubnix.jaccall.Size.sizeof;
+import static org.freedesktop.jaccall.Pointer.malloc;
+import static org.freedesktop.jaccall.Size.sizeof;
 import static java.lang.String.format;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;

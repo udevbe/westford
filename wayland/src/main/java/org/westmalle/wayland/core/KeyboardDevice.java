@@ -13,7 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;

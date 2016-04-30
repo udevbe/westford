@@ -13,7 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import dagger.Module;
 import dagger.Provides;
 import org.freedesktop.wayland.server.Display;

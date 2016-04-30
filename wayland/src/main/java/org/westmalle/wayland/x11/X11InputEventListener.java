@@ -14,7 +14,7 @@
 package org.westmalle.wayland.x11;
 
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.KeyboardDevice;

@@ -13,7 +13,7 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlOutputTransform;
