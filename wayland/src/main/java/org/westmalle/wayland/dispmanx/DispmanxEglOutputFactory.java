@@ -1,6 +1,6 @@
 package org.westmalle.wayland.dispmanx;
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 

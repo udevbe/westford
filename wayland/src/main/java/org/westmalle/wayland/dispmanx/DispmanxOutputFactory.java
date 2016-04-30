@@ -14,7 +14,7 @@
 package org.westmalle.wayland.dispmanx;
 
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;

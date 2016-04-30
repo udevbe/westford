@@ -13,9 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxcb;
 
-import com.github.zubnix.jaccall.CType;
-import com.github.zubnix.jaccall.Field;
-import com.github.zubnix.jaccall.Struct;
+import org.freedesktop.jaccall.CType;
+import org.freedesktop.jaccall.Field;
+import org.freedesktop.jaccall.Struct;
 
 @Struct({
                 @Field(name = "response_type",

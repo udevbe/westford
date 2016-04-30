@@ -13,8 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.egl;
 
-import com.github.zubnix.jaccall.JNI;
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.JNI;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.Surface;

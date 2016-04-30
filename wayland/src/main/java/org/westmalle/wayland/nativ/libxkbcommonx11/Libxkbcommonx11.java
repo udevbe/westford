@@ -13,8 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libxkbcommonx11;
 
-import com.github.zubnix.jaccall.Lib;
-import com.github.zubnix.jaccall.Ptr;
+import org.freedesktop.jaccall.Lib;
+import org.freedesktop.jaccall.Ptr;
 
 import javax.annotation.Nonnegative;
 import javax.inject.Singleton;

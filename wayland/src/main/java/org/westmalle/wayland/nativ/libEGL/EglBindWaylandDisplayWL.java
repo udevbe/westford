@@ -1,8 +1,8 @@
 package org.westmalle.wayland.nativ.libEGL;
 
 
-import com.github.zubnix.jaccall.Functor;
-import com.github.zubnix.jaccall.Ptr;
+import org.freedesktop.jaccall.Functor;
+import org.freedesktop.jaccall.Ptr;
 
 @FunctionalInterface
 @Functor

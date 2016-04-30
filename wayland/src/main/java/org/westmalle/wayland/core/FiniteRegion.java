@@ -1,6 +1,6 @@
 package org.westmalle.wayland.core;
 
-import com.github.zubnix.jaccall.Pointer;
+import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.github.zubnix.jaccall.Pointer.malloc;
+import static org.freedesktop.jaccall.Pointer.malloc;
 
 @AutoFactory(className = "FiniteRegionFactory",
              allowSubclasses = true)

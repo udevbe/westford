@@ -13,10 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libc;
 
-import com.github.zubnix.jaccall.Lib;
-import com.github.zubnix.jaccall.Pointer;
-import com.github.zubnix.jaccall.Ptr;
-import com.github.zubnix.jaccall.Symbol;
+import org.freedesktop.jaccall.Lib;
+import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Symbol;
 
 import javax.inject.Singleton;
 

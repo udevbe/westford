@@ -13,8 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.nativ.libpixman1;
 
-import com.github.zubnix.jaccall.Lib;
-import com.github.zubnix.jaccall.Ptr;
+import org.freedesktop.jaccall.Lib;
+import org.freedesktop.jaccall.Ptr;
 
 import javax.inject.Singleton;
 

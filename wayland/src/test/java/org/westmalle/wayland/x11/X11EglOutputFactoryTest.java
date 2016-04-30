@@ -13,8 +13,8 @@
 //limitations under the License.
 package org.westmalle.wayland.x11;
 
-import com.github.zubnix.jaccall.Pointer;
-import com.github.zubnix.jaccall.Size;
+import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Size;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
