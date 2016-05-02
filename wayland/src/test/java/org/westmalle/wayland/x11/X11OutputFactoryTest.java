@@ -1,146 +1,136 @@
-////Copyright 2015 Erik De Rijcke
-////
-////Licensed under the Apache License,Version2.0(the"License");
-////you may not use this file except in compliance with the License.
-////You may obtain a copy of the License at
-////
-////http://www.apache.org/licenses/LICENSE-2.0
-////
-////Unless required by applicable law or agreed to in writing,software
-////distributed under the License is distributed on an"AS IS"BASIS,
-////WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
-////See the License for the specific language governing permissions and
-////limitations under the License.
-//package org.westmalle.wayland.x11;
+//Copyright 2015 Erik De Rijcke
 //
-//import com.sun.jna.Pointer;
-//import org.freedesktop.wayland.server.Display;
-//import org.freedesktop.wayland.server.EventLoop;
-//import org.freedesktop.wayland.server.EventSource;
-//import org.junit.Rule;
-//import org.junit.Test;
-//import org.junit.rules.ExpectedException;
-//import org.junit.runner.RunWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.powermock.core.classloader.annotations.PrepareForTest;
-//import org.powermock.modules.junit4.PowerMockRunner;
-//import org.westmalle.wayland.core.Compositor;
-//import org.westmalle.wayland.core.OutputFactory;
-//import org.westmalle.wayland.core.events.Signal;
-//import org.westmalle.wayland.core.events.Slot;
-//import org.westmalle.wayland.nativ.libX11.LibX11;
-//import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
-//import org.westmalle.wayland.nativ.libc.Libc;
-//import org.westmalle.wayland.nativ.libxcb.Libxcb;
-//import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
-//import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
-//import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
-//import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
-//import org.westmalle.wayland.protocol.WlCompositor;
-//import org.westmalle.wayland.protocol.WlOutput;
-//import org.westmalle.wayland.protocol.WlOutputFactory;
+//Licensed under the Apache License,Version2.0(the"License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
 //
-//import java.util.LinkedList;
+//http://www.apache.org/licenses/LICENSE-2.0
 //
-//import static org.mockito.Mockito.any;
-//import static org.mockito.Mockito.anyByte;
-//import static org.mockito.Mockito.anyInt;
-//import static org.mockito.Mockito.anyShort;
-//import static org.mockito.Mockito.atLeastOnce;
-//import static org.mockito.Mockito.eq;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.verifyNoMoreInteractions;
-//import static org.mockito.Mockito.when;
-//import static org.westmalle.wayland.nativ.libX11xcb.LibX11xcb.XCBOwnsEventQueue;
-//import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
-//
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest({WlOutputFactory.class,
-//                 OutputFactory.class,
-//                 X11EventBusFactory.class})
-//public class X11OutputFactoryTest {
-//
-//    @Rule
-//    public ExpectedException exception = ExpectedException.none();
-//
-//    @Mock
-//    private Display                 display;
-//    @Mock
-//    private Libc                    libc;
-//    @Mock
-//    private LibX11                  libX11;
-//    @Mock
-//    private Libxcb                  libxcb;
-//    @Mock
-//    private PrivateX11OutputFactory privateX11OutputFactory;
-//    @Mock
-//    private LibX11xcb               libX11xcb;
-//    @Mock
-//    private X11EglOutputFactory     x11EglOutputFactory;
-//    @Mock
-//    private WlOutputFactory         wlOutputFactory;
-//    @Mock
-//    private OutputFactory           outputFactory;
-//    @Mock
-//    private X11EventBusFactory      x11EventBusFactory;
-//    @Mock
-//    private WlCompositor            wlCompositor;
-//    @InjectMocks
-//    private X11OutputFactory        x11OutputFactory;
-//
-//    @Test
-//    public void testCreateOpenDisplayFailed() throws Exception {
-//        //given
-//        this.exception.expect(RuntimeException.class);
-//        this.exception.expectMessage("XOpenDisplay() failed: :0");
-//
-//        final String xDisplayName = ":0";
-//        final int    width        = 640;
-//        final int    height       = 480;
-//
-//        when(this.libX11.XOpenDisplay(xDisplayName)).thenReturn(null);
-//
-//        //when
-//        this.x11OutputFactory.create(xDisplayName,
-//                                     width,
-//                                     height);
-//        //then
-//        verify(this.libX11).XOpenDisplay(xDisplayName);
-//        //an exception is thrown
-//        verifyNoMoreInteractions(this.libX11);
-//    }
-//
-//    @Test
-//    public void testCreateConnectionHasError() throws Exception {
-//        //given
-//        this.exception.expect(RuntimeException.class);
-//        this.exception.expectMessage("error occurred while connecting to X server");
-//
-//        final String  xDisplayName  = ":0";
-//        final int     width         = 640;
-//        final int     height        = 480;
-//        final Pointer xDisplay      = mock(Pointer.class);
-//        final Pointer xcbConnection = mock(Pointer.class);
-//
-//        when(this.libX11.XOpenDisplay(xDisplayName)).thenReturn(xDisplay);
-//        when(this.libX11xcb.XGetXCBConnection(xDisplay)).thenReturn(xcbConnection);
-//        when(this.libxcb.xcb_connection_has_error(xcbConnection)).thenReturn(1);
-//
-//        //when
-//        this.x11OutputFactory.create(xDisplayName,
-//                                     width,
-//                                     height);
-//        //then
-//        verify(this.libX11).XOpenDisplay(xDisplayName);
-//        verify(this.libX11xcb).XGetXCBConnection(xDisplay);
-//        verify(this.libxcb).xcb_connection_has_error(xcbConnection);
-//        //an exception is thrown
-//        verifyNoMoreInteractions(this.libX11);
-//        verifyNoMoreInteractions(this.libX11xcb);
-//        verifyNoMoreInteractions(this.libxcb);
-//    }
+//Unless required by applicable law or agreed to in writing,software
+//distributed under the License is distributed on an"AS IS"BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+package org.westmalle.wayland.x11;
+
+import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.wayland.server.Display;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.core.OutputFactory;
+import org.westmalle.wayland.nativ.libX11.LibX11;
+import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
+import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libxcb.Libxcb;
+import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.wayland.protocol.WlOutputFactory;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({WlOutputFactory.class,
+                 OutputFactory.class,
+                 X11EventBusFactory.class})
+public class X11OutputFactoryTest {
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+    @Mock
+    private Display                 display;
+    @Mock
+    private Libc                    libc;
+    @Mock
+    private LibX11                  libX11;
+    @Mock
+    private Libxcb                  libxcb;
+    @Mock
+    private PrivateX11OutputFactory privateX11OutputFactory;
+    @Mock
+    private LibX11xcb               libX11xcb;
+    @Mock
+    private X11EglOutputFactory     x11EglOutputFactory;
+    @Mock
+    private WlOutputFactory         wlOutputFactory;
+    @Mock
+    private OutputFactory           outputFactory;
+    @Mock
+    private X11EventBusFactory      x11EventBusFactory;
+    @Mock
+    private WlCompositor            wlCompositor;
+    @InjectMocks
+    private X11OutputFactory        x11OutputFactory;
+
+    @Test
+    public void testCreateOpenDisplayFailed() throws Exception {
+        //given
+        this.exception.expect(RuntimeException.class);
+        this.exception.expectMessage("XOpenDisplay() failed: :0");
+
+        final String xDisplayName = ":0";
+        final int    width        = 640;
+        final int    height       = 480;
+
+        when(this.libX11.XOpenDisplay(anyLong())).thenReturn(0L);
+
+        //when
+        this.x11OutputFactory.create(xDisplayName,
+                                     width,
+                                     height);
+        //then
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(this.libX11).XOpenDisplay(longArgumentCaptor.capture());
+        assertThat(Pointer.wrap(String.class,
+                                longArgumentCaptor.getValue())
+                          .dref()).isEqualTo(xDisplayName);
+        //an exception is thrown
+        verifyNoMoreInteractions(this.libX11);
+    }
+
+    @Test
+    public void testCreateConnectionHasError() throws Exception {
+        //given
+        this.exception.expect(RuntimeException.class);
+        this.exception.expectMessage("error occurred while connecting to X server");
+
+        final String xDisplayName  = ":0";
+        final int    width         = 640;
+        final int    height        = 480;
+        final long   xDisplay      = 1234567;
+        final long   xcbConnection = 112358;
+
+        when(this.libX11.XOpenDisplay(anyLong())).thenReturn(xDisplay);
+        when(this.libX11xcb.XGetXCBConnection(xDisplay)).thenReturn(xcbConnection);
+        when(this.libxcb.xcb_connection_has_error(xcbConnection)).thenReturn(1);
+
+        //when
+        this.x11OutputFactory.create(xDisplayName,
+                                     width,
+                                     height);
+        //then
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(this.libX11).XOpenDisplay(longArgumentCaptor.capture());
+        assertThat(Pointer.wrap(String.class,
+                                longArgumentCaptor.getValue())
+                          .dref()).isEqualTo(xDisplayName);
+        verify(this.libX11xcb).XGetXCBConnection(xDisplay);
+        verify(this.libxcb).xcb_connection_has_error(xcbConnection);
+        //an exception is thrown
+        verifyNoMoreInteractions(this.libX11);
+        verifyNoMoreInteractions(this.libX11xcb);
+        verifyNoMoreInteractions(this.libxcb);
+    }
 //
 //    @Test
 //    public void testCreateWindowIdCreationError() throws Exception {
@@ -283,4 +273,4 @@
 //        verifyNoMoreInteractions(this.libX11xcb);
 //        verifyNoMoreInteractions(this.libxcb);
 //    }
-//}
+}
