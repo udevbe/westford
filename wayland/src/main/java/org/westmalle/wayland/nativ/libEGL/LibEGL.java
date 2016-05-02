@@ -261,7 +261,6 @@ public class LibEGL {
                                        int value);
 
     public void throwError(final String failedFunction) throws RuntimeException {
-        //looks like there was an error trying to make the egl context current.
         final int eglError = eglGetError();
         switch (eglError) {
             case EGL_SUCCESS: {
