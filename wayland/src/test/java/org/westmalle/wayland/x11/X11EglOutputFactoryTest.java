@@ -575,98 +575,106 @@ public class X11EglOutputFactoryTest {
         //runtime exception is thrown
         verifyNoMoreInteractions(this.libEGL);
     }
-//
-//    @Test
-//    public void testCreate() throws Exception {
-//        //given
-//        final Pointer display       = mock(Pointer.class);
-//        final int     window        = 12345;
-//        final Pointer eglDisplay    = mock(Pointer.class);
-//        final Pointer eglClientApis = mock(Pointer.class);
-//        final Pointer eglVendor     = mock(Pointer.class);
-//        final Pointer eglVersion    = mock(Pointer.class);
-//        final Pointer config        = new Memory(Pointer.SIZE);
-//        final Pointer context       = mock(Pointer.class);
-//        final Pointer eglSurface    = mock(Pointer.class);
-//
-//        when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(true);
-//        final Pointer eglQueryString = mock(Pointer.class);
-//        when(eglQueryString.getString(0)).thenReturn("EGL_EXT_platform_x11");
-//        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
-//                                        EGL_EXTENSIONS)).thenReturn(eglQueryString);
-//        when(this.libEGL.eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
-//                                                  display,
-//                                                  null)).thenReturn(eglDisplay);
-//        when(this.libEGL.eglInitialize(eglDisplay,
-//                                       null,
-//                                       null)).thenReturn(true);
-//        when(this.libEGL.eglQueryString(eglDisplay,
-//                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
-//        when(eglClientApis.getString(0)).thenReturn("mock egl client apis");
-//        when(this.libEGL.eglQueryString(eglDisplay,
-//                                        EGL_VENDOR)).thenReturn(eglVendor);
-//        when(eglVendor.getString(0)).thenReturn("mock egl vendor");
-//        when(this.libEGL.eglQueryString(eglDisplay,
-//                                        EGL_VERSION)).thenReturn(eglVersion);
-//        when(eglVersion.getString(0)).thenReturn("mock egl version");
-//        when(this.libEGL.eglChooseConfig(eq(eglDisplay),
-//                                         any(),
-//                                         any(),
-//                                         anyInt(),
-//                                         any())).thenAnswer(invocation -> {
-//            final Object arg2 = invocation.getArguments()[2];
-//            final Memory configs = (Memory) arg2;
-//            configs.setPointer(0,
-//                               config);
-//
-//            final Object arg4 = invocation.getArguments()[4];
-//            final Memory num_configs = (Memory) arg4;
-//            num_configs.setInt(0,
-//                               16);
-//            return true;
-//        });
-//        when(this.libEGL.eglCreateContext(eq(eglDisplay),
-//                                          eq(config),
-//                                          eq(EGL_NO_CONTEXT),
-//                                          any())).thenReturn(context);
-//        when(this.libEGL.eglCreatePlatformWindowSurfaceEXT(eq(eglDisplay),
-//                                                           eq(config),
-//                                                           any(),
-//                                                           any())).thenReturn(eglSurface);
-//        when(this.libEGL.eglMakeCurrent(eglDisplay,
-//                                        eglSurface,
-//                                        eglSurface,
-//                                        context)).thenReturn(true);
-//
-//        //when
-//        this.x11EglOutputFactory.create(display,
-//                                        window);
-//        //then
-//        verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
-//        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
-//                                           EGL_EXTENSIONS);
-//        verify(this.libEGL).eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_KHR,
-//                                                     display,
-//                                                     null);
-//        verify(this.libEGL).eglInitialize(eglDisplay,
-//                                          null,
-//                                          null);
-//        verify(this.libEGL).eglChooseConfig(eq(eglDisplay),
-//                                            any(),
-//                                            any(),
-//                                            anyInt(),
-//                                            any());
-//        verify(this.libEGL).eglCreateContext(eq(eglDisplay),
-//                                             eq(config),
-//                                             eq(EGL_NO_CONTEXT),
-//                                             any());
-//        verify(this.libEGL).eglCreatePlatformWindowSurfaceEXT(eq(eglDisplay),
-//                                                              eq(config),
-//                                                              any(),
-//                                                              any());
-//        verify(this.libEGL).eglMakeCurrent(eglDisplay,
-//                                           eglSurface,
-//                                           eglSurface,
-//                                           context);
-//    }
+
+    @Test
+    public void testCreate() throws Exception {
+        //given
+        final long display       = 76437;
+        final int  window        = 12345;
+        final long eglDisplay    = 9768426;
+        final long eglClientApis = Pointer.nref("mock egl client apis").address;
+        final long eglVendor     = Pointer.nref("mock egl vendor").address;
+        final long eglVersion    = Pointer.nref("mock egl version").address;
+        final long config        = 2486;
+        final long context       = 6842;
+        final long eglSurface    = 847453;
+
+        when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(1);
+        final Pointer<String> eglQueryString = Pointer.nref("EGL_EXT_platform_x11");
+        when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                        EGL_EXTENSIONS)).thenReturn(eglQueryString.address);
+
+        EglCreatePlatformWindowSurfaceEXT eglCreatePlatformWindowSurfaceEXT = mock(EglCreatePlatformWindowSurfaceEXT.class);
+        when(eglCreatePlatformWindowSurfaceEXT.$(eq(eglDisplay),
+                                                 eq(config),
+                                                 anyLong(),
+                                                 anyLong())).thenReturn(eglSurface);
+
+        when(this.libEGL.eglGetProcAddress(anyLong())).thenAnswer(invocation -> {
+            final long func_name = (Long) invocation.getArguments()[0];
+            final String funcName = Pointer.wrap(String.class,
+                                                 func_name)
+                                           .dref();
+            if (funcName.equals("eglGetPlatformDisplayEXT")) {
+                return PointerEglGetPlatformDisplayEXT.nref((platform, native_display, attrib_list) -> eglDisplay).address;
+            }
+            else if (funcName.equals("eglCreatePlatformWindowSurfaceEXT")) {
+                return PointerEglCreatePlatformWindowSurfaceEXT.nref(eglCreatePlatformWindowSurfaceEXT).address;
+            }
+            return 0L;
+        });
+
+        when(this.libEGL.eglInitialize(eglDisplay,
+                                       0,
+                                       0)).thenReturn(1);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_CLIENT_APIS)).thenReturn(eglClientApis);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VENDOR)).thenReturn(eglVendor);
+        when(this.libEGL.eglQueryString(eglDisplay,
+                                        EGL_VERSION)).thenReturn(eglVersion);
+        when(this.libEGL.eglChooseConfig(eq(eglDisplay),
+                                         anyLong(),
+                                         anyLong(),
+                                         anyInt(),
+                                         anyLong())).thenAnswer(invocation -> {
+            final long configs = (Long) invocation.getArguments()[2];
+            Pointer.wrap(Pointer.class,
+                         configs)
+                   .write(Pointer.wrap(config));
+
+            final long num_configs = (Long) invocation.getArguments()[4];
+            Pointer.wrap(Integer.class,
+                         num_configs)
+                   .write(1);
+            return 1;
+        });
+        when(this.libEGL.eglCreateContext(eq(eglDisplay),
+                                          eq(config),
+                                          eq(EGL_NO_CONTEXT),
+                                          anyLong())).thenReturn(context);
+
+        when(this.libEGL.eglMakeCurrent(eglDisplay,
+                                        eglSurface,
+                                        eglSurface,
+                                        context)).thenReturn(1);
+
+        //when
+        this.x11EglOutputFactory.create(display,
+                                        window);
+        //then
+        verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
+        verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
+                                           EGL_EXTENSIONS);
+        verify(this.libEGL).eglInitialize(eglDisplay,
+                                          0L,
+                                          0L);
+        verify(this.libEGL).eglChooseConfig(eq(eglDisplay),
+                                            anyLong(),
+                                            anyLong(),
+                                            anyInt(),
+                                            anyLong());
+        verify(this.libEGL).eglCreateContext(eq(eglDisplay),
+                                             eq(config),
+                                             eq(EGL_NO_CONTEXT),
+                                             anyLong());
+        verify(eglCreatePlatformWindowSurfaceEXT).$(eq(eglDisplay),
+                                                    eq(config),
+                                                    anyLong(),
+                                                    anyLong());
+        verify(this.libEGL).eglMakeCurrent(eglDisplay,
+                                           eglSurface,
+                                           eglSurface,
+                                           context);
+    }
 }
