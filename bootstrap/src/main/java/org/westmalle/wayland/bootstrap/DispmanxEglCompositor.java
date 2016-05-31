@@ -24,6 +24,6 @@ public interface DispmanxEglCompositor {
     Dispmanx dispmanx();
 
     /*
-     * Sorry no input yet. Need a libinput seat implementation for that.
+     * Sorry no input yet. Need a Libinput seat implementation for that.
      */
 }
