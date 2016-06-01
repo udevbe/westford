@@ -90,7 +90,7 @@ public class X11OutputFactoryTest {
     @Mock
     private X11EventBusFactory      x11EventBusFactory;
     @Mock
-    private WlCompositor            wlCompositor;
+    private Compositor              compositor;
     @InjectMocks
     private X11OutputFactory        x11OutputFactory;
 
@@ -189,7 +189,6 @@ public class X11OutputFactoryTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final Compositor                                                               compositor    = mock(Compositor.class);
         final LinkedList<WlOutput>                                                     wlOutputs     = mock(LinkedList.class);
         final EventLoop                                                                eventLoop     = mock(EventLoop.class);
         final EventSource                                                              eventSource   = mock(EventSource.class);
@@ -213,7 +212,6 @@ public class X11OutputFactoryTest {
                                                          xcb_screen_iterator_t.class).dref();
         screen_iter.data(ref(screen));
 
-        when(this.wlCompositor.getCompositor()).thenReturn(compositor);
         when(compositor.getWlOutputs()).thenReturn(wlOutputs);
         when(this.libX11.XOpenDisplay(anyLong())).thenReturn(xDisplay);
         when(this.libX11xcb.XGetXCBConnection(xDisplay)).thenReturn(xcbConnection);

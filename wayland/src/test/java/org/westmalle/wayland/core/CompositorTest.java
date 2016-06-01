@@ -56,75 +56,21 @@ public class CompositorTest {
     @Test
     public void testRequestRender() throws Exception {
         //given
-        final Object outputImpl0 = mock(Object.class);
-        final Object outputImpl1 = mock(Object.class);
-
         final WlOutput wlOutput0 = mock(WlOutput.class);
-        final Output   output0   = mock(Output.class);
-        when(wlOutput0.getOutput()).thenReturn(output0);
-        when(output0.getPlatformImplementation()).thenReturn(outputImpl0);
-        this.compositor.getWlOutputs()
-                       .add(wlOutput0);
-
         final WlOutput wlOutput1 = mock(WlOutput.class);
-        final Output   output1   = mock(Output.class);
-        when(wlOutput1.getOutput()).thenReturn(output1);
-        when(output1.getPlatformImplementation()).thenReturn(outputImpl1);
-        this.compositor.getWlOutputs()
-                       .add(wlOutput1);
+
+        this.compositor.getWlOutputs().add(wlOutput0);
+        this.compositor.getWlOutputs().add(wlOutput1);
 
         final EventLoop eventLoop = mock(EventLoop.class);
         when(this.display.getEventLoop()).thenReturn(eventLoop);
         final List<EventLoop.IdleHandler> idleHandlers = new LinkedList<>();
         when(eventLoop.addIdle(any())).thenAnswer(invocation -> {
-            final Object arg0 = invocation.getArguments()[0];
+            final Object                arg0        = invocation.getArguments()[0];
             final EventLoop.IdleHandler idleHandler = (EventLoop.IdleHandler) arg0;
             idleHandlers.add(idleHandler);
             return mock(EventSource.class);
         });
-
-        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        final WlSurface         wlSurface0         = mock(WlSurface.class);
-        when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
-        final Surface surface0 = mock(Surface.class);
-        when(wlSurface0.getSurface()).thenReturn(surface0);
-        final Signal<SurfaceState, Slot<SurfaceState>> commitSignal0 = mock(Signal.class);
-        when(surface0.getApplySurfaceStateSignal()).thenReturn(commitSignal0);
-        final SurfaceState surfaceState0 = mock(SurfaceState.class);
-        when(surface0.getState()).thenReturn(surfaceState0);
-        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
-        when(surfaceState0.getBuffer()).thenReturn(Optional.of(wlBufferResource0));
-
-        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-        final WlSurface         wlSurface1         = mock(WlSurface.class);
-        when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
-        final Surface surface1 = mock(Surface.class);
-        when(wlSurface1.getSurface()).thenReturn(surface1);
-        final Signal<SurfaceState, Slot<SurfaceState>> commitSignal1 = mock(Signal.class);
-        when(surface1.getApplySurfaceStateSignal()).thenReturn(commitSignal1);
-        final SurfaceState surfaceState1 = mock(SurfaceState.class);
-        when(surface1.getState()).thenReturn(surfaceState1);
-        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
-        when(surfaceState1.getBuffer()).thenReturn(Optional.of(wlBufferResource1));
-
-        final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
-        final WlSurface         wlSurface2         = mock(WlSurface.class);
-        when(wlSurfaceResource2.getImplementation()).thenReturn(wlSurface2);
-        final Surface surface2 = mock(Surface.class);
-        when(wlSurface2.getSurface()).thenReturn(surface2);
-        final Signal<SurfaceState, Slot<SurfaceState>> commitSignal2 = mock(Signal.class);
-        when(surface2.getApplySurfaceStateSignal()).thenReturn(commitSignal2);
-        final SurfaceState surfaceState2 = mock(SurfaceState.class);
-        when(surface2.getState()).thenReturn(surfaceState2);
-        final WlBufferResource wlBufferResource2 = mock(WlBufferResource.class);
-        when(surfaceState2.getBuffer()).thenReturn(Optional.of(wlBufferResource2));
-
-        this.compositor.getSurfacesStack()
-                       .add(wlSurfaceResource0);
-        this.compositor.getSurfacesStack()
-                       .add(wlSurfaceResource1);
-        this.compositor.getSurfacesStack()
-                       .add(wlSurfaceResource2);
 
         //when
         this.compositor.requestRender();
@@ -136,14 +82,7 @@ public class CompositorTest {
         inOrder0.verify(this.renderer)
                 .begin(wlOutput0);
         inOrder0.verify(this.renderer)
-                .draw(wlSurfaceResource0,
-                        wlBufferResource0);
-        inOrder0.verify(this.renderer)
-                .draw(wlSurfaceResource1,
-                        wlBufferResource1);
-        inOrder0.verify(this.renderer)
-                .draw(wlSurfaceResource2,
-                        wlBufferResource2);
+                .render();
         inOrder0.verify(this.renderer)
                 .end(wlOutput0);
 
@@ -152,14 +91,7 @@ public class CompositorTest {
         inOrder1.verify(this.renderer)
                 .begin(wlOutput1);
         inOrder1.verify(this.renderer)
-                .draw(wlSurfaceResource0,
-                        wlBufferResource0);
-        inOrder1.verify(this.renderer)
-                .draw(wlSurfaceResource1,
-                        wlBufferResource1);
-        inOrder1.verify(this.renderer)
-                .draw(wlSurfaceResource2,
-                        wlBufferResource2);
+                .render();
         inOrder1.verify(this.renderer)
                 .end(wlOutput1);
 
@@ -174,33 +106,23 @@ public class CompositorTest {
 
         final List<EventLoop.IdleHandler> idleHandlers = new LinkedList<>();
         when(eventLoop.addIdle(any())).thenAnswer(invocation -> {
-            final Object arg0 = invocation.getArguments()[0];
+            final Object                arg0        = invocation.getArguments()[0];
             final EventLoop.IdleHandler idleHandler = (EventLoop.IdleHandler) arg0;
             idleHandlers.add(idleHandler);
             return mock(EventSource.class);
         });
 
-        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-        final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
-        this.compositor.getSurfacesStack()
-                       .add(wlSurfaceResource0);
-        this.compositor.getSurfacesStack()
-                       .add(wlSurfaceResource1);
-        this.compositor.getSurfacesStack()
-                       .add(wlSurfaceResource2);
-
         //when
         this.compositor.requestRender();
         this.compositor.requestRender();
         //then
-        assertThat((Iterable<EventLoop.IdleHandler>) idleHandlers).hasSize(1);
+        assertThat(idleHandlers).hasSize(1);
         //and when
         idleHandlers.get(0)
                     .handle();
         this.compositor.requestRender();
         //then
-        assertThat((Iterable<EventLoop.IdleHandler>) idleHandlers).hasSize(2);
+        assertThat(idleHandlers).hasSize(2);
     }
 
     @Test

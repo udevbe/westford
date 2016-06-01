@@ -24,14 +24,7 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.freedesktop.wayland.util.Fixed;
-import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.KeyboardDevice;
-import org.westmalle.wayland.core.Point;
-import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.core.Rectangle;
-import org.westmalle.wayland.core.Role;
-import org.westmalle.wayland.core.Surface;
-import org.westmalle.wayland.core.Transforms;
+import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
@@ -53,7 +46,9 @@ import java.util.Set;
 public class ShellSurface implements Role {
 
     @Nonnull
-    private final WlCompositor wlCompositor;
+    private final Compositor compositor;
+    @Nonnull
+    private final Scene scene;
     private final int          pingSerial;
     @Nonnull
     private final EventSource  timerEventSource;
@@ -67,9 +62,11 @@ public class ShellSurface implements Role {
     private Optional<String> title = Optional.empty();
 
     ShellSurface(@Provided @Nonnull final Display display,
-                 @Nonnull final WlCompositor wlCompositor,
+                 @Provided @Nonnull final Compositor compositor,
+                 @Provided @Nonnull final Scene scene,
                  final int pingSerial) {
-        this.wlCompositor = wlCompositor;
+        this.compositor = compositor;
+        this.scene = scene;
         this.pingSerial = pingSerial;
         this.timerEventSource = display.getEventLoop()
                                        .addTimer(() -> {
@@ -85,8 +82,7 @@ public class ShellSurface implements Role {
 
     public void setClazz(@Nonnull final Optional<String> clazz) {
         this.clazz = clazz;
-        this.wlCompositor.getCompositor()
-                         .requestRender();
+        this.compositor.requestRender();
     }
 
     @Nonnull
@@ -96,8 +92,7 @@ public class ShellSurface implements Role {
 
     public void setTitle(@Nonnull final Optional<String> title) {
         this.title = title;
-        this.wlCompositor.getCompositor()
-                         .requestRender();
+        this.compositor.requestRender();
     }
 
     public void pong(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
@@ -312,8 +307,7 @@ public class ShellSurface implements Role {
     }
 
     public void toFront(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        final Compositor                    compositor    = this.wlCompositor.getCompositor();
-        final LinkedList<WlSurfaceResource> surfacesStack = compositor.getSurfacesStack();
+        final LinkedList<WlSurfaceResource> surfacesStack = this.scene.getSurfacesStack();
         if (surfacesStack.remove(wlSurfaceResource)) {
             surfacesStack.addLast(wlSurfaceResource);
             compositor.requestRender();

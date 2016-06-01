@@ -23,8 +23,7 @@ public interface Renderer {
 
     void begin(@Nonnull final WlOutput wlOutput);
 
-    void draw(@Nonnull final WlSurfaceResource surfaceResource,
-              @Nonnull final WlBufferResource wlBufferResource);
+    void render();
 
     void end(@Nonnull final WlOutput wlOutput);
 }

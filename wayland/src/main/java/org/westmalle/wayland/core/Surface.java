@@ -57,9 +57,9 @@ public class Surface {
     private final Signal<SurfaceState, Slot<SurfaceState>>               applySurfaceStateSignal   = new Signal<>();
 
     @Nonnull
-    private final FiniteRegionFactory  finiteRegionFactory;
+    private final FiniteRegionFactory finiteRegionFactory;
     @Nonnull
-    private final WlCompositorResource wlCompositorResource;
+    private final Compositor          compositor;
     @Nonnull
     private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
     @Nonnull
@@ -93,9 +93,9 @@ public class Surface {
     private Rectangle size             = Rectangle.ZERO;
 
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
-            @Nonnull final WlCompositorResource wlCompositorResource) {
+            @Nonnull @Provided final Compositor compositor) {
         this.finiteRegionFactory = finiteRegionFactory;
-        this.wlCompositorResource = wlCompositorResource;
+        this.compositor = compositor;
     }
 
     @Nonnull
@@ -197,9 +197,7 @@ public class Surface {
         setState(surfaceState);
         updateTransform();
         updateSize();
-        final WlCompositor wlCompositor = (WlCompositor) getWlCompositorResource().getImplementation();
-        wlCompositor.getCompositor()
-                    .requestRender();
+        this.compositor.requestRender();
 
         getApplySurfaceStateSignal().emit(getState());
     }
@@ -244,11 +242,11 @@ public class Surface {
         final int                        scale  = state.getScale();
         if (buffer.isPresent()) {
             final WlBufferResource wlBufferResource = buffer.get();
-            final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
+            final ShmBuffer        shmBuffer        = ShmBuffer.get(wlBufferResource);
             if (shmBuffer == null) {
                 throw new RuntimeException("Got a buffer that is not an shm buffer!");
             }
-            final int width = shmBuffer.getWidth() / scale;
+            final int width  = shmBuffer.getWidth() / scale;
             final int height = shmBuffer.getHeight() / scale;
             this.size = Rectangle.builder()
                                  .width(width)
@@ -258,11 +256,6 @@ public class Surface {
         else {
             this.size = Rectangle.ZERO;
         }
-    }
-
-    @Nonnull
-    public WlCompositorResource getWlCompositorResource() {
-        return this.wlCompositorResource;
     }
 
     @Nonnull

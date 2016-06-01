@@ -75,8 +75,6 @@ public class WlShellTest {
     private InterfaceMeta       interfaceMeta;
     @Mock
     private ShellSurfaceFactory shellSurfaceFactory;
-    @Mock
-    private WlCompositor        wlCompositor;
 
     private WlShell wlShell;
 
@@ -104,8 +102,7 @@ public class WlShellTest {
                                   987654321L);
         this.wlShell = new WlShell(this.display,
                                    this.wlShellSurfaceFactory,
-                                   this.shellSurfaceFactory,
-                                   this.wlCompositor);
+                                   this.shellSurfaceFactory);
     }
 
     @Test
@@ -174,8 +171,7 @@ public class WlShellTest {
         when(wlShellSurface.add(any(),
                                 anyInt(),
                                 anyInt())).thenReturn(wlShellSurfaceResource);
-        when(this.shellSurfaceFactory.create(eq(this.wlCompositor),
-                                             anyInt())).thenReturn(shellSurface);
+        when(this.shellSurfaceFactory.create(anyInt())).thenReturn(shellSurface);
         //when
         this.wlShell.getShellSurface(wlShellResource,
                                      id,

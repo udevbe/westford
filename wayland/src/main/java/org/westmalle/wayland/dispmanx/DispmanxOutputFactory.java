@@ -16,6 +16,7 @@ package org.westmalle.wayland.dispmanx;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
@@ -47,26 +48,25 @@ public class DispmanxOutputFactory {
     @Nonnull
     private final PrivateDispmanxOutputFactory privateDispmanxOutputFactory;
     @Nonnull
-    private final WlCompositor                 wlCompositor;
+    private final Compositor                   compositor;
 
     @Inject
     DispmanxOutputFactory(@Nonnull final Libbcm_host libbcm_host,
                           @Nonnull final WlOutputFactory wlOutputFactory,
                           @Nonnull final OutputFactory outputFactory,
                           @Nonnull final PrivateDispmanxOutputFactory privateDispmanxOutputFactory,
-                          @Nonnull final WlCompositor wlCompositor) {
+                          @Nonnull final Compositor compositor) {
         this.libbcm_host = libbcm_host;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.privateDispmanxOutputFactory = privateDispmanxOutputFactory;
-        this.wlCompositor = wlCompositor;
+        this.compositor = compositor;
     }
 
     public WlOutput create(final int device) {
         final WlOutput wlOutput = createDispmanXPlatformOutput(device);
-        this.wlCompositor.getCompositor()
-                         .getWlOutputs()
-                         .addLast(wlOutput);
+        this.compositor.getWlOutputs()
+                       .addLast(wlOutput);
 
         return wlOutput;
     }

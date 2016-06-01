@@ -43,22 +43,19 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
     private final Display                                           display;
     private final WlShellSurfaceFactory                             wlShellSurfaceFactory;
     private final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory;
-    private final WlCompositor                                      wlCompositor;
 
     private final Set<ShellSurface> activeShellSurfaceRoles = new HashSet<>();
 
     @Inject
     WlShell(@Nonnull final Display display,
             @Nonnull final WlShellSurfaceFactory wlShellSurfaceFactory,
-            @Nonnull final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory,
-            @Nonnull final WlCompositor wlCompositor) {
+            @Nonnull final org.westmalle.wayland.wlshell.ShellSurfaceFactory shellSurfaceFactory) {
         super(display,
               WlShellResource.class,
               VERSION);
         this.display = display;
         this.wlShellSurfaceFactory = wlShellSurfaceFactory;
         this.shellSurfaceFactory = shellSurfaceFactory;
-        this.wlCompositor = wlCompositor;
     }
 
     @Override
@@ -71,8 +68,7 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
 
         final int pingSerial = this.display.nextSerial();
         final Role role = surface.getRole()
-                                 .orElseGet(() -> this.shellSurfaceFactory.create(this.wlCompositor,
-                                                                                  pingSerial));
+                                 .orElseGet(() -> this.shellSurfaceFactory.create(pingSerial));
 
         if (role instanceof ShellSurface &&
             !this.activeShellSurfaceRoles.contains(role)) {

@@ -14,6 +14,7 @@
 package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.events.Signal;
@@ -28,6 +29,8 @@ import java.util.LinkedList;
              className = "PrivateSubsurfaceFactory")
 public class Subsurface implements Role {
 
+    @Nonnull
+    private final Scene scene;
     @Nonnull
     private final WlSurfaceResource parentWlSurfaceResource;
     @Nonnull
@@ -45,9 +48,11 @@ public class Subsurface implements Role {
     @Nonnull
     private SurfaceState cachedSurfaceState;
 
-    Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
+    Subsurface(@Nonnull @Provided final Scene scene,
+               @Nonnull final WlSurfaceResource parentWlSurfaceResource,
                @Nonnull final WlSurfaceResource wlSurfaceResource,
                @Nonnull final SurfaceState surfaceState) {
+        this.scene = scene;
         this.parentWlSurfaceResource = parentWlSurfaceResource;
         this.wlSurfaceResource = wlSurfaceResource;
         this.surfaceState = surfaceState;
@@ -202,14 +207,7 @@ public class Subsurface implements Role {
 
     private void placement(final boolean below,
                            final WlSurfaceResource sibling) {
-        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
-
-        final WlCompositorResource wlCompositorResource = surface.getWlCompositorResource();
-        final WlCompositor         wlCompositor         = (WlCompositor) wlCompositorResource.getImplementation();
-        final Compositor           compositor           = wlCompositor.getCompositor();
-
-        final LinkedList<WlSurfaceResource> pendingSubsurfaceStack = compositor.getPendingSubsurfaceStack(getParentWlSurfaceResource());
+        final LinkedList<WlSurfaceResource> pendingSubsurfaceStack = this.scene.getPendingSubsurfaceStack(getParentWlSurfaceResource());
         final int                           siblingPosition        = pendingSubsurfaceStack.indexOf(sibling);
 
         pendingSubsurfaceStack.remove(getWlSurfaceResource());

@@ -20,6 +20,7 @@ import org.freedesktop.wayland.server.WlCompositorRequestsV3;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Surface;
 
 import javax.annotation.Nonnegative;
@@ -35,11 +36,18 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
 
     private final Set<WlCompositorResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
+    @Nonnull
     private final WlSurfaceFactory                               wlSurfaceFactory;
+    @Nonnull
     private final WlRegionFactory                                wlRegionFactory;
+    @Nonnull
     private final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory;
+    @Nonnull
     private final org.westmalle.wayland.core.SurfaceFactory      surfaceFactory;
+    @Nonnull
     private final Compositor                                     compositor;
+    @Nonnull
+    private final Scene                                          scene;
 
     @Inject
     WlCompositor(@Nonnull final Display display,
@@ -47,7 +55,8 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                  @Nonnull final WlRegionFactory wlRegionFactory,
                  @Nonnull final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory,
                  @Nonnull final org.westmalle.wayland.core.SurfaceFactory surfaceFactory,
-                 @Nonnull final Compositor compositor) {
+                 @Nonnull Compositor compositor,
+                 @Nonnull final Scene scene) {
         super(display,
               WlCompositorResource.class,
               VERSION);
@@ -56,6 +65,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         this.finiteRegionFactory = finiteRegionFactory;
         this.surfaceFactory = surfaceFactory;
         this.compositor = compositor;
+        this.scene = scene;
     }
 
     @Override
@@ -70,7 +80,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     @Override
     public void createSurface(final WlCompositorResource compositorResource,
                               final int id) {
-        final Surface   surface   = this.surfaceFactory.create(compositorResource);
+        final Surface   surface   = this.surfaceFactory.create();
         final WlSurface wlSurface = this.wlSurfaceFactory.create(surface);
 
         final WlSurfaceResource wlSurfaceResource = wlSurface.add(compositorResource.getClient(),
@@ -78,19 +88,19 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                                                                   id);
         //TODO unit test destroy handler
         wlSurfaceResource.register(() -> {
-            this.compositor.getSurfacesStack()
-                           .remove(wlSurfaceResource);
-            this.compositor.removeSubsurfaceStack(wlSurfaceResource);
+            this.scene.getSurfacesStack()
+                      .remove(wlSurfaceResource);
+            this.scene.removeSubsurfaceStack(wlSurfaceResource);
             surface.markDestroyed();
             this.compositor.requestRender();
         });
 
-        this.compositor.getSurfacesStack()
-                       .addLast(wlSurfaceResource);
+        this.scene.getSurfacesStack()
+                  .addLast(wlSurfaceResource);
 
         //TODO unit test commit handler
         surface.getApplySurfaceStateSignal()
-               .connect(event -> this.compositor.commitSubsurfaceStack(wlSurfaceResource));
+               .connect(event -> this.scene.commitSubsurfaceStack(wlSurfaceResource));
     }
 
     @Override
@@ -117,9 +127,5 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     @Override
     public Set<WlCompositorResource> getResources() {
         return this.resources;
-    }
-
-    public Compositor getCompositor() {
-        return this.compositor;
     }
 }

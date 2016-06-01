@@ -29,13 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.KeyboardDevice;
-import org.westmalle.wayland.core.Point;
-import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.core.PointerGrabMotion;
-import org.westmalle.wayland.core.Rectangle;
-import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
@@ -66,13 +60,15 @@ import static org.mockito.Mockito.when;
 public class ShellSurfaceTest {
 
     @Mock
-    private EventSource  eventSource;
+    private EventSource eventSource;
     @Mock
-    private EventLoop    eventLoop;
+    private EventLoop   eventLoop;
     @Mock
-    private Display      display;
+    private Display     display;
     @Mock
-    private WlCompositor wlCompositor;
+    private Compositor  compositor;
+    @Mock
+    private Scene       scene;
 
     @Before
     public void setUp() {
@@ -106,7 +102,8 @@ public class ShellSurfaceTest {
                                             0)))).thenReturn(surfacePosition);
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
         //when
         shellSurface.move(wlSurfaceResource,
@@ -165,7 +162,8 @@ public class ShellSurfaceTest {
                                                             100));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -225,9 +223,9 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
-
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -289,7 +287,8 @@ public class ShellSurfaceTest {
                                                             100));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -351,7 +350,8 @@ public class ShellSurfaceTest {
                                                             100));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -413,7 +413,8 @@ public class ShellSurfaceTest {
                                                             100));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -475,7 +476,8 @@ public class ShellSurfaceTest {
                                                             100));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -537,7 +539,8 @@ public class ShellSurfaceTest {
                                                             100));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -599,7 +602,8 @@ public class ShellSurfaceTest {
                                                             100));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            0);
 
         //when
@@ -630,7 +634,8 @@ public class ShellSurfaceTest {
         final int                    pingSerial             = 12345;
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            12345);
 
         //when
@@ -646,7 +651,8 @@ public class ShellSurfaceTest {
     public void testPongTimeout() {
         //given
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            12345);
         final ArgumentCaptor<EventLoop.TimerEventHandler> timerEventHandlerArgumentCaptor = ArgumentCaptor.forClass(EventLoop.TimerEventHandler.class);
         verify(this.eventLoop).addTimer(timerEventHandlerArgumentCaptor.capture());
@@ -668,13 +674,12 @@ public class ShellSurfaceTest {
     public void testToFront() throws Exception {
         //given
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            12345);
 
-        final Compositor compositor = mock(Compositor.class);
-        when(this.wlCompositor.getCompositor()).thenReturn(compositor);
         final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-        when(compositor.getSurfacesStack()).thenReturn(surfacesStack);
+        when(scene.getSurfacesStack()).thenReturn(surfacesStack);
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
@@ -717,7 +722,8 @@ public class ShellSurfaceTest {
                                                                                  globalY));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            12345);
 
         //when
@@ -774,7 +780,8 @@ public class ShellSurfaceTest {
                                                                                  globalY));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.wlCompositor,
+                                                           this.compositor,
+                                                           this.scene,
                                                            12345);
 
         //when

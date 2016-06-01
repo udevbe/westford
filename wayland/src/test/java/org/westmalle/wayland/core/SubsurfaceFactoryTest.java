@@ -27,6 +27,7 @@ import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -39,6 +40,8 @@ public class SubsurfaceFactoryTest {
 
     @Mock
     private PrivateSubsurfaceFactory privateSubsurfaceFactory;
+    @Mock
+    private Scene                    scene;
     @InjectMocks
     private SubsurfaceFactory        subsurfaceFactory;
 
@@ -69,21 +72,19 @@ public class SubsurfaceFactoryTest {
         final Signal<SurfaceState, Slot<SurfaceState>> applySurfaceStateSignal = mock(Signal.class);
         final WlCompositorResource                     wlCompositorResource    = mock(WlCompositorResource.class);
         final WlCompositor                             wlCompositor            = mock(WlCompositor.class);
-        final Compositor                               compositor              = mock(Compositor.class);
-        final LinkedList<WlSurfaceResource>            surfacesStack           = mock(LinkedList.class);
-        final LinkedList<WlSurfaceResource>            subsurfacesStack        = mock(LinkedList.class);
-        final LinkedList<WlSurfaceResource>            pendingSubsurfacesStack = mock(LinkedList.class);
+
+        final LinkedList<WlSurfaceResource> surfacesStack           = mock(LinkedList.class);
+        final LinkedList<WlSurfaceResource> subsurfacesStack        = mock(LinkedList.class);
+        final LinkedList<WlSurfaceResource> pendingSubsurfacesStack = mock(LinkedList.class);
 
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getState()).thenReturn(oldSurfaceState);
         when(surface.getApplySurfaceStateSignal()).thenReturn(applySurfaceStateSignal);
-        when(surface.getWlCompositorResource()).thenReturn(wlCompositorResource);
         when(wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-        when(compositor.getSurfacesStack()).thenReturn(surfacesStack);
-        when(compositor.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
-        when(compositor.getPendingSubsurfaceStack(parentWlSurfaceResource)).thenReturn(pendingSubsurfacesStack);
+        when(scene.getSurfacesStack()).thenReturn(surfacesStack);
+        when(scene.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
+        when(scene.getPendingSubsurfaceStack(parentWlSurfaceResource)).thenReturn(pendingSubsurfacesStack);
 
         final Subsurface subsurface = mock(Subsurface.class);
 
