@@ -69,6 +69,7 @@ public class PointerDevice implements Role {
     private final JobExecutor    jobExecutor;
     @Nonnull
     private final Compositor     compositor;
+    private Scene scene;
     @Nonnull
     private final Display        display;
 
@@ -100,13 +101,15 @@ public class PointerDevice implements Role {
                   @Provided @Nonnull final NullRegion nullRegion,
                   @Provided @Nonnull final CursorFactory cursorFactory,
                   @Provided @Nonnull final JobExecutor jobExecutor,
-                  @Provided @Nonnull final Compositor compositor) {
+                  @Provided @Nonnull final Compositor compositor,
+                  @Provided @Nonnull final Scene scene) {
         this.display = display;
         this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;
         this.cursorFactory = cursorFactory;
         this.jobExecutor = jobExecutor;
         this.compositor = compositor;
+        this.scene = scene;
     }
 
     public void motion(@Nonnull final Set<WlPointerResource> wlPointerResources,
@@ -160,8 +163,8 @@ public class PointerDevice implements Role {
 
     @Nonnull
     public Optional<WlSurfaceResource> over() {
-        final Iterator<WlSurfaceResource> surfaceIterator = this.compositor.getSurfacesStack()
-                                                                           .descendingIterator();
+        final Iterator<WlSurfaceResource> surfaceIterator = this.scene.getSurfacesStack()
+                                                                      .descendingIterator();
         Optional<WlSurfaceResource> pointerOver = Optional.empty();
         while (surfaceIterator.hasNext()) {
             final WlSurfaceResource surfaceResource = surfaceIterator.next();
@@ -534,10 +537,10 @@ public class PointerDevice implements Role {
                 //set back the buffer we cleared.
                 surfaceStateBuilder.buffer(surfaceState.getBuffer());
                 //move visible cursor to top of surface stack
-                this.compositor.getSurfacesStack()
-                               .remove(wlSurfaceResource);
-                this.compositor.getSurfacesStack()
-                               .addLast(wlSurfaceResource);
+                this.scene.getSurfacesStack()
+                          .remove(wlSurfaceResource);
+                this.scene.getSurfacesStack()
+                          .addLast(wlSurfaceResource);
             }
         });
 

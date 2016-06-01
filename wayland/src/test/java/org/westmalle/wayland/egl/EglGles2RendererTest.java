@@ -31,13 +31,17 @@ import org.powermock.reflect.Whitebox;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.RenderOutput;
+import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.SurfaceState;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
@@ -63,6 +67,8 @@ public class EglGles2RendererTest {
 
     @Mock
     private LibGLESv2        libGLESv2;
+    @Mock
+    private Scene            scene;
     @InjectMocks
     private EglGles2Renderer eglGles2RenderEngine;
 
@@ -72,7 +78,7 @@ public class EglGles2RendererTest {
                                                                            .address);
         doAnswer(invocation -> {
             final Object[] arguments = invocation.getArguments();
-            final long status = (Long) arguments[2];
+            final long     status    = (Long) arguments[2];
             Pointer.wrap(Integer.class,
                          status)
                    .write(1);
@@ -83,7 +89,7 @@ public class EglGles2RendererTest {
                           anyLong());
         doAnswer(invocation -> {
             final Object[] arguments = invocation.getArguments();
-            final long status = (Long) arguments[2];
+            final long     status    = (Long) arguments[2];
             Pointer.wrap(Integer.class,
                          status)
                    .write(1);
@@ -198,9 +204,18 @@ public class EglGles2RendererTest {
         cachedSurfaceData.put(wlSurfaceResource,
                               gles2SurfaceData);
 
+        SurfaceState surfaceState = mock(SurfaceState.class);
+        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
+
+        when(surface.getState()).thenReturn(surfaceState);
+
+        LinkedList<WlSurfaceResource> surfaceStack = new LinkedList<>();
+        surfaceStack.add(wlSurfaceResource);
+        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
+
         //when
-        this.eglGles2RenderEngine.draw(wlSurfaceResource,
-                                       wlBufferResource);
+        this.eglGles2RenderEngine.render();
+
         //then
         verifyStatic();
         ShmBuffer.get(wlBufferResource);
@@ -216,14 +231,26 @@ public class EglGles2RendererTest {
         this.exception.expectMessage("Buffer resource is not an ShmBuffer.");
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         wlSurface         = mock(WlSurface.class);
+        final Surface           surface           = mock(Surface.class);
         final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
         mockStatic(ShmBuffer.class);
 
         when(ShmBuffer.get(wlBufferResource)).thenReturn(null);
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+
+        SurfaceState surfaceState = mock(SurfaceState.class);
+        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
+
+        when(surface.getState()).thenReturn(surfaceState);
+
+        LinkedList<WlSurfaceResource> surfaceStack = new LinkedList<>();
+        surfaceStack.add(wlSurfaceResource);
+        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
 
         //when
-        this.eglGles2RenderEngine.draw(wlSurfaceResource,
-                                       wlBufferResource);
+        this.eglGles2RenderEngine.render();
         //then
         verifyStatic();
         ShmBuffer.get(wlBufferResource);
@@ -260,9 +287,19 @@ public class EglGles2RendererTest {
                                   Mat4.IDENTITY.toArray());
         when(surface.getTransform()).thenReturn(surfaceTransform);
 
+        SurfaceState surfaceState = mock(SurfaceState.class);
+        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
+
+        when(surface.getState()).thenReturn(surfaceState);
+
+        LinkedList<WlSurfaceResource> surfaceStack = new LinkedList<>();
+        surfaceStack.add(wlSurfaceResource);
+        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
+
+
         //when
-        this.eglGles2RenderEngine.draw(wlSurfaceResource,
-                                       wlBufferResource);
+        this.eglGles2RenderEngine.render();
+
         //then
         verifyStatic();
         ShmBuffer.get(wlBufferResource);
@@ -271,8 +308,7 @@ public class EglGles2RendererTest {
                                         shmBuffer);
 
         //and when
-        this.eglGles2RenderEngine.draw(wlSurfaceResource,
-                                       wlBufferResource);
+        this.eglGles2RenderEngine.render();
         //then
         verify(gles2SurfaceData,
                times(2)).update(this.libGLESv2,
@@ -318,9 +354,19 @@ public class EglGles2RendererTest {
         when(surface.getTransform()).thenReturn(surfaceTransform);
         cachedSurfaceData.put(wlSurfaceResource,
                               gles2SurfaceData);
+
+        SurfaceState surfaceState = mock(SurfaceState.class);
+        when(surfaceState.getBuffer()).thenReturn(Optional.of(wlBufferResource));
+
+        when(surface.getState()).thenReturn(surfaceState);
+
+        LinkedList<WlSurfaceResource> surfaceStack = new LinkedList<>();
+        surfaceStack.add(wlSurfaceResource);
+        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
+
         //when
-        this.eglGles2RenderEngine.draw(wlSurfaceResource,
-                                       wlBufferResource);
+        this.eglGles2RenderEngine.render();
+
         //then
         verify(gles2SurfaceData).delete(this.libGLESv2);
         verify(gles2SurfaceData).update(this.libGLESv2,

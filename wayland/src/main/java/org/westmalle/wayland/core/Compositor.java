@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class Compositor {
+
     @Nonnull
     private final Display  display;
     @Nonnull
@@ -40,14 +41,9 @@ public class Compositor {
     private final LinkedList<WlOutput> wlOutputs = new LinkedList<>();
     @Nonnull
     private final EventLoop.IdleHandler idleHandler;
+
     @Nonnull
-    private final LinkedList<WlSurfaceResource>                         surfacesStack          = new LinkedList<>();
-    @Nonnull
-    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> subsurfaceStack        = new HashMap<>();
-    @Nonnull
-    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> pendingSubsurfaceStack = new HashMap<>();
-    @Nonnull
-    private       Optional<EventSource>                                 renderEvent            = Optional.empty();
+    private Optional<EventSource> renderEvent = Optional.empty();
 
     @Inject
     Compositor(@Nonnull final Display display,
@@ -69,75 +65,8 @@ public class Compositor {
 
     private void render(@Nonnull final WlOutput wlOutput) {
         this.renderer.begin(wlOutput);
-        getSurfacesStack().forEach(this::render);
+        this.renderer.render();
         this.renderer.end(wlOutput);
-    }
-
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getSurfacesStack() {
-        return this.surfacesStack;
-    }
-
-    private void render(final WlSurfaceResource wlSurfaceResource) {
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        //don't bother rendering subsurfaces if the parent doesn't have a buffer.
-        wlSurface.getSurface()
-                 .getState()
-                 .getBuffer()
-                 .ifPresent(wlBufferResource -> {
-                     final LinkedList<WlSurfaceResource> subsurfaces = getSubsurfaceStack(wlSurfaceResource);
-                     this.renderer.draw(wlSurfaceResource,
-                                        wlBufferResource);
-                     subsurfaces.forEach((subsurface) -> {
-                         if (subsurface != wlSurfaceResource) {
-                             render(subsurface);
-                         }
-                     });
-                 });
-    }
-
-    public void removeSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        this.subsurfaceStack.remove(parentSurface);
-        this.pendingSubsurfaceStack.remove(parentSurface);
-    }
-
-    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        this.subsurfaceStack.put(parentSurface,
-                                 getPendingSubsurfaceStack(parentSurface));
-        this.pendingSubsurfaceStack.remove(parentSurface);
-    }
-
-    /**
-     * Get a pending z-ordered stack of subsurfaces grouped by their parent.
-     * The returned subsurface stack is only valid until {@link #commitSubsurfaceStack(WlSurfaceResource)} is called.
-     *
-     * @param parentSurface the parent of the subsurfaces.
-     *
-     * @return A list of subsurfaces, including the parent, in z-order.
-     */
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getPendingSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        LinkedList<WlSurfaceResource> subsurfaces = this.pendingSubsurfaceStack.get(parentSurface);
-        if (subsurfaces == null) {
-            //TODO unit test pending subsurface stack initialization
-            subsurfaces = new LinkedList<>(getSubsurfaceStack(parentSurface));
-            this.pendingSubsurfaceStack.put(parentSurface,
-                                            subsurfaces);
-        }
-        return subsurfaces;
-    }
-
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        LinkedList<WlSurfaceResource> subsurfaces = this.subsurfaceStack.get(parentSurface);
-        if (subsurfaces == null) {
-            //TODO unit test subsurface stack initialization
-            subsurfaces = new LinkedList<>();
-            subsurfaces.add(parentSurface);
-            this.subsurfaceStack.put(parentSurface,
-                                     subsurfaces);
-        }
-        return subsurfaces;
     }
 
     public void requestRender() {

@@ -4,11 +4,7 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.westmalle.wayland.core.Output;
-import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.core.RenderOutput;
-import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -18,6 +14,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.logging.Logger;
@@ -72,6 +69,8 @@ public class EglGles2Renderer implements Renderer {
 
     @Nonnull
     private final LibGLESv2 libGLESv2;
+    @Nonnull
+    private final Scene     scene;
 
     private boolean init = false;
 
@@ -85,8 +84,10 @@ public class EglGles2Renderer implements Renderer {
     private int textureArg;
 
     @Inject
-    EglGles2Renderer(@Nonnull final LibGLESv2 libGLESv2) {
+    EglGles2Renderer(@Nonnull final LibGLESv2 libGLESv2,
+                     @Nonnull Scene scene) {
         this.libGLESv2 = libGLESv2;
+        this.scene = scene;
     }
 
     @Override
@@ -250,9 +251,34 @@ public class EglGles2Renderer implements Renderer {
         }
     }
 
+
     @Override
-    public void draw(@Nonnull final WlSurfaceResource wlSurfaceResource,
-                     @Nonnull final WlBufferResource wlBufferResource) {
+    public void render() {
+        //naive bottom to top overdraw rendering.
+        scene.getSurfacesStack()
+             .forEach(this::render);
+    }
+
+    private void render(final WlSurfaceResource wlSurfaceResource) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        //don't bother rendering subsurfaces if the parent doesn't have a buffer.
+        wlSurface.getSurface()
+                 .getState()
+                 .getBuffer()
+                 .ifPresent(wlBufferResource -> {
+                     final LinkedList<WlSurfaceResource> subsurfaces = this.scene.getSubsurfaceStack(wlSurfaceResource);
+                     draw(wlSurfaceResource,
+                          wlBufferResource);
+                     subsurfaces.forEach((subsurface) -> {
+                         if (subsurface != wlSurfaceResource) {
+                             render(subsurface);
+                         }
+                     });
+                 });
+    }
+
+    private void draw(@Nonnull final WlSurfaceResource wlSurfaceResource,
+                      @Nonnull final WlBufferResource wlBufferResource) {
         final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
         if (shmBuffer == null) {
             throw new IllegalArgumentException("Buffer resource is not an ShmBuffer.");
@@ -383,10 +409,10 @@ public class EglGles2Renderer implements Renderer {
                                        surfaceData);
         }
         else {
-            final int surfaceDataWidth = surfaceData.getWidth();
+            final int surfaceDataWidth  = surfaceData.getWidth();
             final int surfaceDataHeight = surfaceData.getHeight();
-            final int bufferWidth = shmBuffer.getWidth();
-            final int bufferHeight = shmBuffer.getHeight();
+            final int bufferWidth       = shmBuffer.getWidth();
+            final int bufferHeight      = shmBuffer.getHeight();
             if (surfaceDataWidth != bufferWidth || surfaceDataHeight != bufferHeight) {
                 this.cachedSurfaceData.remove(surfaceResource)
                                       .delete(this.libGLESv2);

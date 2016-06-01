@@ -44,11 +44,11 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class SurfaceTest {
 
     @Mock
-    private FiniteRegionFactory  finiteRegionFactory;
+    private FiniteRegionFactory finiteRegionFactory;
     @Mock
-    private WlCompositorResource wlCompositorResource;
+    private Compositor          compositor;
     @InjectMocks
-    private Surface              surface;
+    private Surface             surface;
 
     @Before
     public void setUp() {
@@ -83,12 +83,6 @@ public class SurfaceTest {
     @Test
     public void testAttachCommit() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         final WlBufferResource buffer = mock(WlBufferResource.class);
         final Integer          relX   = -10;
         final Integer          relY   = 200;
@@ -120,12 +114,6 @@ public class SurfaceTest {
     @Test
     public void testAttachCommitAttachCommit() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         final WlBufferResource buffer = mock(WlBufferResource.class);
         final Integer          relX   = -10;
         final Integer          relY   = 200;
@@ -158,12 +146,6 @@ public class SurfaceTest {
     @Test
     public void testAttachAttachCommit() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         final WlBufferResource buffer0 = mock(WlBufferResource.class);
         final Integer          relX0   = -10;
         final Integer          relY0   = 200;
@@ -231,12 +213,6 @@ public class SurfaceTest {
     @Test
     public void testAttachDetachCommit() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         final WlBufferResource buffer = mock(WlBufferResource.class);
         final Integer          relX   = -10;
         final Integer          relY   = 200;
@@ -317,12 +293,6 @@ public class SurfaceTest {
     @Test
     public void testLocal() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         final Point absoluteCoordinate = Point.create(150,
                                                       150);
         final Point surfaceCoordinate = Point.create(100,
@@ -338,11 +308,6 @@ public class SurfaceTest {
     @Test
     public void testUpdateSizeNoScaling() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(shmBuffer.getWidth()).thenReturn(100);
         when(shmBuffer.getHeight()).thenReturn(100);
@@ -365,11 +330,6 @@ public class SurfaceTest {
     @Test
     public void testUpdateSizeBufferAbsent() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         //when
         this.surface.commit();
 
@@ -380,11 +340,6 @@ public class SurfaceTest {
     @Test
     public void testUpdateSizeScaling() throws Exception {
         //given
-        final WlCompositor wlCompositor = mock(WlCompositor.class);
-        when(this.wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-        final Compositor compositor = mock(Compositor.class);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
-
         final ShmBuffer shmBuffer = mock(ShmBuffer.class);
         when(shmBuffer.getWidth()).thenReturn(100);
         when(shmBuffer.getHeight()).thenReturn(100);

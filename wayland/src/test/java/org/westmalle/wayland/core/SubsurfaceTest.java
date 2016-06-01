@@ -34,6 +34,8 @@ import static org.mockito.Mockito.when;
 public class SubsurfaceTest {
 
     @Mock
+    private Scene             scene;
+    @Mock
     private WlSurfaceResource parentWlSurfaceResource;
     @Mock
     private WlSurfaceResource wlSurfaceResource;
@@ -45,7 +47,8 @@ public class SubsurfaceTest {
     @Before
     public void setUp() {
         //mockito doesn't properly inject the member so we have to create our subsurface manually.
-        this.subsurface = new Subsurface(this.parentWlSurfaceResource,
+        this.subsurface = new Subsurface(this.scene,
+                                         this.parentWlSurfaceResource,
                                          this.wlSurfaceResource,
                                          this.surfaceState);
     }
@@ -214,8 +217,8 @@ public class SubsurfaceTest {
     @Test
     public void testCommitSync() throws Exception {
         //given: a subsurface in sync mode
-        final WlSurface wlSurface = mock(WlSurface.class);
-        final Surface   surface   = mock(Surface.class);
+        final WlSurface    wlSurface    = mock(WlSurface.class);
+        final Surface      surface      = mock(Surface.class);
         final SurfaceState surfaceState = mock(SurfaceState.class);
 
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);

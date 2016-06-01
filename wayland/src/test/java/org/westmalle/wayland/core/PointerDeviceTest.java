@@ -75,6 +75,8 @@ public class PointerDeviceTest {
     @Mock
     private JobExecutor    jobExecutor;
     @Mock
+    private Scene          scene;
+    @Mock
     private Compositor     compositor;
     @InjectMocks
     private PointerDevice  pointerDevice;
@@ -112,7 +114,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1,
                                                    time2);
@@ -283,7 +285,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1);
 
@@ -442,7 +444,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1);
 
@@ -546,7 +548,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1);
 
@@ -650,7 +652,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1,
                                                    time2,
@@ -772,7 +774,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1,
                                                    time2);
@@ -887,7 +889,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1);
 
@@ -1011,7 +1013,7 @@ public class PointerDeviceTest {
         when(region1.contains(size1,
                               localPointerPosition1)).thenReturn(false);
 
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         //when
         final Optional<WlSurfaceResource> over = this.pointerDevice.over();
@@ -1092,7 +1094,7 @@ public class PointerDeviceTest {
         when(region1.contains(size1,
                               localPointerPosition1)).thenReturn(true);
 
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         final WlSurfaceResource wlSurfaceResourceCursor0 = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor0.getClient()).thenReturn(client0);
@@ -1189,7 +1191,7 @@ public class PointerDeviceTest {
         when(region.contains(size,
                              localPointerPosition1)).thenReturn(true);
 
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         final WlSurfaceResource wlSurfaceResourceCursor0 = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor0.getClient()).thenReturn(client0);
@@ -1251,7 +1253,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
         when(this.compositor.getTime()).thenReturn(time0,
                                                    time1,
                                                    time2,
@@ -1562,7 +1564,7 @@ public class PointerDeviceTest {
         when(region.contains(size,
                              localPointerPosition0)).thenReturn(true);
 
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
@@ -1677,7 +1679,7 @@ public class PointerDeviceTest {
         when(region1.contains(size1,
                               localPointerPosition1)).thenReturn(true);
 
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         final WlSurfaceResource wlSurfaceResourceCursor0 = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor0.getClient()).thenReturn(client0);
@@ -1793,7 +1795,7 @@ public class PointerDeviceTest {
         when(region.contains(size,
                              localPointerPosition0)).thenReturn(true);
 
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
@@ -1881,7 +1883,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -1950,7 +1952,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         final Set<WlPointerResource> pointerResources = new HashSet<>();
 
@@ -2028,8 +2030,8 @@ public class PointerDeviceTest {
         final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource1,
                atLeastOnce()).register(destroyListenerArgumentCaptor.capture());
-        this.compositor.getSurfacesStack()
-                       .remove(wlSurfaceResource1);
+        this.scene.getSurfacesStack()
+                  .remove(wlSurfaceResource1);
         destroyListenerArgumentCaptor.getAllValues()
                                      .forEach(DestroyListener::handle);
 
@@ -2051,7 +2053,7 @@ public class PointerDeviceTest {
 
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(wlSurfaceResources);
+        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -2095,8 +2097,8 @@ public class PointerDeviceTest {
         final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource0,
                atLeastOnce()).register(destroyListenerArgumentCaptor.capture());
-        this.compositor.getSurfacesStack()
-                       .remove(wlSurfaceResource0);
+        this.scene.getSurfacesStack()
+                  .remove(wlSurfaceResource0);
         destroyListenerArgumentCaptor.getAllValues()
                                      .forEach(DestroyListener::handle);
         // then: no surface has the focus

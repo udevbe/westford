@@ -17,19 +17,18 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.nativ.libX11.LibX11;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
-import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_client_message_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
-import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
@@ -79,7 +78,7 @@ public class X11OutputFactory {
     @Nonnull
     private final X11EventBusFactory      x11EventBusFactory;
     @Nonnull
-    private final WlCompositor            wlCompositor;
+    private final Compositor              compositor;
 
     @Inject
     X11OutputFactory(@Nonnull final Display display,
@@ -90,7 +89,7 @@ public class X11OutputFactory {
                      @Nonnull final WlOutputFactory wlOutputFactory,
                      @Nonnull final OutputFactory outputFactory,
                      @Nonnull final X11EventBusFactory x11EventBusFactory,
-                     @Nonnull final WlCompositor wlCompositor) {
+                     @Nonnull final Compositor compositor) {
         this.display = display;
         this.libX11 = libX11;
         this.libxcb = libxcb;
@@ -99,7 +98,7 @@ public class X11OutputFactory {
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.x11EventBusFactory = x11EventBusFactory;
-        this.wlCompositor = wlCompositor;
+        this.compositor = compositor;
     }
 
     public WlOutput create(@Nonnull final String xDisplay,
@@ -118,9 +117,8 @@ public class X11OutputFactory {
         final WlOutput wlOutput = createXPlatformOutput(xDisplay,
                                                         width,
                                                         height);
-        this.wlCompositor.getCompositor()
-                         .getWlOutputs()
-                         .addLast(wlOutput);
+        this.compositor.getWlOutputs()
+                       .addLast(wlOutput);
 
         return wlOutput;
     }

@@ -25,10 +25,14 @@ public class SubsurfaceFactory {
 
     @Nonnull
     private final PrivateSubsurfaceFactory privateSubsurfaceFactory;
+    @Nonnull
+    private final Scene scene;
 
     @Inject
-    SubsurfaceFactory(@Nonnull final PrivateSubsurfaceFactory privateSubsurfaceFactory) {
+    SubsurfaceFactory(@Nonnull final PrivateSubsurfaceFactory privateSubsurfaceFactory,
+                      @Nonnull final Scene scene) {
         this.privateSubsurfaceFactory = privateSubsurfaceFactory;
+        this.scene = scene;
     }
 
     public Subsurface create(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
@@ -59,18 +63,15 @@ public class SubsurfaceFactory {
                          }
                      });
 
-        final WlCompositor wlCompositor = (WlCompositor) surface.getWlCompositorResource()
-                                                                .getImplementation();
-        final Compositor compositor = wlCompositor.getCompositor();
-        compositor.getSurfacesStack()
+        this.scene.getSurfacesStack()
                   .remove(wlSurfaceResource);
-        compositor.getSubsurfaceStack(parentWlSurfaceResource)
+        this.scene.getSubsurfaceStack(parentWlSurfaceResource)
                   .addLast(wlSurfaceResource);
 
         final DestroyListener destroyListener = () -> {
-            compositor.getSubsurfaceStack(parentWlSurfaceResource)
+            this.scene.getSubsurfaceStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
-            compositor.getPendingSubsurfaceStack(parentWlSurfaceResource)
+            this.scene.getPendingSubsurfaceStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
         };
         wlSurfaceResource.register(destroyListener);

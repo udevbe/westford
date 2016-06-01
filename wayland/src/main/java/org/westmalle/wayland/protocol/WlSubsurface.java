@@ -14,12 +14,14 @@
 package org.westmalle.wayland.protocol;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlSubsurfaceRequests;
 import org.freedesktop.wayland.server.WlSubsurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlSubsurfaceError;
 import org.westmalle.wayland.core.Point;
+import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Subsurface;
 
 import javax.annotation.Nonnegative;
@@ -36,9 +38,13 @@ public class WlSubsurface implements WlSubsurfaceRequests,
 
     @Nonnull
     private final Subsurface subsurface;
+    @Nonnull
+    private final Scene scene;
 
-    WlSubsurface(@Nonnull final Subsurface subsurface) {
+    WlSubsurface(@Nonnull @Provided final Scene scene,
+                 @Nonnull final Subsurface subsurface) {
         this.subsurface = subsurface;
+        this.scene = scene;
     }
 
     @Nonnull
@@ -94,13 +100,8 @@ public class WlSubsurface implements WlSubsurfaceRequests,
             return true;
         }
 
-        final WlSurface siblingWlSurface = (WlSurface) sibling.getImplementation();
-        final WlCompositor wlCompositor = (WlCompositor) siblingWlSurface.getSurface()
-                                                                         .getWlCompositorResource()
-                                                                         .getImplementation();
-        return wlCompositor.getCompositor()
-                           .getSubsurfaceStack(subsurface.getParentWlSurfaceResource())
-                           .contains(sibling);
+        return this.scene.getSubsurfaceStack(subsurface.getParentWlSurfaceResource())
+                         .contains(sibling);
     }
 
     @Override

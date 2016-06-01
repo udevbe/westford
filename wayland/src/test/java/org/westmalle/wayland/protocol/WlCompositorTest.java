@@ -34,6 +34,7 @@ import org.powermock.reflect.Whitebox;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.FiniteRegion;
 import org.westmalle.wayland.core.FiniteRegionFactory;
+import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.SurfaceFactory;
 import org.westmalle.wayland.core.SurfaceState;
@@ -75,6 +76,8 @@ public class WlCompositorTest {
     private SurfaceFactory      surfaceFactory;
     @Mock
     private Compositor          compositor;
+    @Mock
+    private Scene               scene;
 
     @Mock
     private WaylandServerCore waylandServerCore;
@@ -110,7 +113,8 @@ public class WlCompositorTest {
                                              this.wlRegionFactory,
                                              this.finiteRegionFactory,
                                              this.surfaceFactory,
-                                             this.compositor);
+                                             this.compositor,
+                                             this.scene);
     }
 
     @Test
@@ -134,7 +138,7 @@ public class WlCompositorTest {
     public void testCreateSurface() throws Exception {
         //given
         final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-        when(this.compositor.getSurfacesStack()).thenReturn(surfacesStack);
+        when(this.scene.getSurfacesStack()).thenReturn(surfacesStack);
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface0         = mock(WlSurface.class);
@@ -164,8 +168,8 @@ public class WlCompositorTest {
         final int version = 3;
         when(wlCompositorResource.getVersion()).thenReturn(version);
 
-        when(this.surfaceFactory.create(wlCompositorResource)).thenReturn(surface0,
-                                                                          surface1);
+        when(this.surfaceFactory.create()).thenReturn(surface0,
+                                                      surface1);
 
         when(this.wlSurfaceFactory.create(any())).thenReturn(wlSurface0,
                                                              wlSurface1);
@@ -184,9 +188,9 @@ public class WlCompositorTest {
         verify(wlSurface1).add(client,
                                version,
                                id1);
-        assertThat((Iterable<WlSurfaceResource>) surfacesStack).containsExactly(wlSurfaceResource0,
-                                                                                wlSurfaceResource1)
-                                                               .inOrder();
+        assertThat(surfacesStack).containsExactly(wlSurfaceResource0,
+                                                  wlSurfaceResource1)
+                                 .inOrder();
 
         final ArgumentCaptor<DestroyListener> destroyListenerCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource1).register(destroyListenerCaptor.capture());
@@ -197,7 +201,7 @@ public class WlCompositorTest {
 
         //then
         //TODO check subsurface stacks
-        assertThat((Iterable<WlSurfaceResource>) surfacesStack).doesNotContain(wlSurfaceResource1);
+        assertThat(surfacesStack).doesNotContain(wlSurfaceResource1);
         verify(this.compositor).requestRender();
     }
 

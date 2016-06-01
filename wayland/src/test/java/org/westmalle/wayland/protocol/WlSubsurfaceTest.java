@@ -30,6 +30,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Point;
+import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Subsurface;
 import org.westmalle.wayland.core.Surface;
 
@@ -50,6 +51,8 @@ public class WlSubsurfaceTest {
 
     @Mock
     private Subsurface subsurface;
+    @Mock
+    private Scene      scene;
 
     @Mock
     private WaylandServerCore waylandServerCore;
@@ -65,7 +68,8 @@ public class WlSubsurfaceTest {
                                                        anyLong(),
                                                        anyInt(),
                                                        anyInt())).thenReturn(112358L);
-        this.wlSubsurface = new WlSubsurface(this.subsurface);
+        this.wlSubsurface = new WlSubsurface(this.scene,
+                                             this.subsurface);
     }
 
     @Test
@@ -115,19 +119,13 @@ public class WlSubsurfaceTest {
 
         final WlSurface            siblingWlSurface     = mock(WlSurface.class);
         final Surface              siblingSurface       = mock(Surface.class);
-        final WlCompositorResource wlCompositorResource = mock(WlCompositorResource.class);
-        final WlCompositor         wlCompositor         = mock(WlCompositor.class);
-        final Compositor           compositor           = mock(Compositor.class);
 
         when(siblingWlSurfaceResource.getImplementation()).thenReturn(siblingWlSurface);
         when(siblingWlSurface.getSurface()).thenReturn(siblingSurface);
-        when(siblingSurface.getWlCompositorResource()).thenReturn(wlCompositorResource);
-        when(wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-        when(wlCompositor.getCompositor()).thenReturn(compositor);
 
         final LinkedList<WlSurfaceResource> subsurfaceStack = mock(LinkedList.class);
 
-        when(compositor.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfaceStack);
+        when(this.scene.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfaceStack);
         when(subsurfaceStack.contains(siblingWlSurfaceResource)).thenReturn(siblingValid);
     }
 
