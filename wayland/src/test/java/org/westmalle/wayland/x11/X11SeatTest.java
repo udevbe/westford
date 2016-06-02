@@ -40,15 +40,14 @@ import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 public class X11SeatTest {
 
     @Mock
-    private Libxcb     libxcb;
+    private Libxcb    libxcb;
     @Mock
-    private X11Output  x11Output;
+    private X11Output x11Output;
     @Mock
-    private Compositor compositor;
-    @Mock
-    private WlSeat     wlSeat;
+    private WlSeat    wlSeat;
+
     @InjectMocks
-    private X11Seat    x11Seat;
+    private X11Seat x11Seat;
 
 
     @Test
@@ -67,11 +66,8 @@ public class X11SeatTest {
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
-        final int compositorTime = 9876;
-        when(this.compositor.getTime()).thenReturn(compositorTime);
         //when
-        this.x11Seat.deliverButton(this.wlSeat,
-                                   123,
+        this.x11Seat.deliverButton(123,
                                    xEventDetail,
                                    true);
         //then
@@ -109,10 +105,8 @@ public class X11SeatTest {
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int compositorTime = 9876;
-        when(this.compositor.getTime()).thenReturn(compositorTime);
         //when
-        this.x11Seat.deliverButton(this.wlSeat,
-                                   123,
+        this.x11Seat.deliverButton(123,
                                    xEventDetail,
                                    false);
         //then
@@ -143,13 +137,10 @@ public class X11SeatTest {
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
-        final int compositorTime = 9876;
-        when(this.compositor.getTime()).thenReturn(compositorTime);
         final int x = 80;
         final int y = -120;
         //when
-        this.x11Seat.deliverMotion(this.wlSeat,
-                                   x,
+        this.x11Seat.deliverMotion(x,
                                    y);
         //then
         verify(pointerDevice).motion(wlPointerResources,

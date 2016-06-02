@@ -43,19 +43,22 @@ public class X11Seat {
     private final Libxcb    libxcb;
     @Nonnull
     private final X11Output x11Output;
+    @Nonnull
+    private final WlSeat    wlSeat;
 
     X11Seat(@Provided @Nonnull final Libxcb libxcb,
-            @Nonnull final X11Output x11Output) {
+            @Nonnull final X11Output x11Output,
+            @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
         this.x11Output = x11Output;
+        this.wlSeat = wlSeat;
     }
 
-    public void deliverKey(@Nonnull final WlSeat wlSeat,
-                           final short eventDetail,
+    public void deliverKey(final short eventDetail,
                            final boolean pressed) {
         final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
         final int                key                = toLinuxKey(eventDetail);
-        final WlKeyboard         wlKeyboard         = wlSeat.getWlKeyboard();
+        final WlKeyboard         wlKeyboard         = this.wlSeat.getWlKeyboard();
 
         wlKeyboard.getKeyboardDevice()
                   .key(wlKeyboard.getResources(),
@@ -79,8 +82,7 @@ public class X11Seat {
         return eventDetail - 8;
     }
 
-    public void deliverButton(@Nonnull final WlSeat wlSeat,
-                              final int buttonTime,
+    public void deliverButton(final int buttonTime,
                               final short eventDetail,
                               final boolean pressed) {
 
@@ -88,7 +90,7 @@ public class X11Seat {
                                                                                pressed);
         final int button = toLinuxButton(eventDetail);
 
-        final WlPointer wlPointer = wlSeat.getWlPointer();
+        final WlPointer wlPointer = this.wlSeat.getWlPointer();
         wlPointer.getPointerDevice()
                  .button(wlPointer.getResources(),
                          button,
@@ -140,10 +142,9 @@ public class X11Seat {
         return button;
     }
 
-    public void deliverMotion(final WlSeat wlSeat,
-                              final int x,
+    public void deliverMotion(final int x,
                               final int y) {
-        final WlPointer wlPointer = wlSeat.getWlPointer();
+        final WlPointer wlPointer = this.wlSeat.getWlPointer();
         wlPointer.getPointerDevice()
                  .motion(wlPointer.getResources(),
                          x,
@@ -153,5 +154,10 @@ public class X11Seat {
     @Nonnull
     public X11Output getX11Output() {
         return this.x11Output;
+    }
+
+    @Nonnull
+    public WlSeat getWlSeat() {
+        return this.wlSeat;
     }
 }
