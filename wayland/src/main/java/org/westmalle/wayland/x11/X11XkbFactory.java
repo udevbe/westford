@@ -47,14 +47,14 @@ public class X11XkbFactory {
         final long xkbContext = this.libxkbcommon.xkb_context_new(XKB_CONTEXT_NO_FLAGS);
         if (xkbContext == 0L) {
             throw new RuntimeException("Got an error while trying to create xkb context. " +
-                                       "Unfortunately the docs of the xkb library do not specify how we to get more information " +
+                                       "Unfortunately the docs of the xkb library do not specify how to get more information " +
                                        "about the error, so you'll have to do it with this lousy exception.");
         }
 
         final int device_id = this.libxkbcommonx11.xkb_x11_get_core_keyboard_device_id(xcbConnection);
         if (device_id == -1) {
             throw new RuntimeException("Got an error while trying to fetch keyboard device id from X11 backend. " +
-                                       "Unfortunately the docs of the xkb library do not specify how we to get more information " +
+                                       "Unfortunately the docs of the xkb library do not specify how to get more information " +
                                        "about the error, so you'll have to do it with this lousy exception.");
         }
 
@@ -64,7 +64,7 @@ public class X11XkbFactory {
                                                                                 XKB_KEYMAP_COMPILE_NO_FLAGS);
         if (keymap == 0L) {
             throw new RuntimeException("Got an error while trying to get x11 keymap. " +
-                                       "Unfortunately the docs of the xkb library do not specify how we to get more information " +
+                                       "Unfortunately the docs of the xkb library do not specify how to get more information " +
                                        "about the error, so you'll have to do it with this lousy exception.");
         }
 
