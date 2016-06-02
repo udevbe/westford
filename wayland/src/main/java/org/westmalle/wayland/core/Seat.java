@@ -14,13 +14,9 @@ import java.util.Set;
 public class Seat {
 
     @Nonnull
-    private final Object platformImplementation;
-    @Nonnull
     private EnumSet<WlSeatCapability> capabilities = EnumSet.noneOf(WlSeatCapability.class);
 
-    Seat(@Nonnull final Object platformImplementation) {
-        this.platformImplementation = platformImplementation;
-    }
+    Seat() {}
 
     public void emitCapabilities(@Nonnull final Set<WlSeatResource> wlSeatResources) {
         final int capabilitiesFlag = capabilitiesFlag();
@@ -37,10 +33,5 @@ public class Seat {
 
     public void setCapabilities(@Nonnull final EnumSet<WlSeatCapability> capability) {
         this.capabilities = capability;
-    }
-
-    @Nonnull
-    public Object getPlatformImplementation() {
-        return this.platformImplementation;
     }
 }

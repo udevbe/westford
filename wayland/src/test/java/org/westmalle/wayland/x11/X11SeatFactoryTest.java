@@ -93,6 +93,7 @@ public class X11SeatFactoryTest {
         final X11InputEventListener                                                    x11InputEventListener = mock(X11InputEventListener.class);
         final Seat                                                                     seat                  = mock(Seat.class);
         final WlSeat                                                                   wlSeat                = mock(WlSeat.class);
+        final X11Seat                                                                  x11Seat               = mock(X11Seat.class);
         final X11Output                                                                x11Output             = mock(X11Output.class);
         final long                                                                     xcbConnection         = 8433272;
         final X11EventBus                                                              x11EventBus           = mock(X11EventBus.class);
@@ -113,7 +114,7 @@ public class X11SeatFactoryTest {
         when(xkb.getKeymapString()).thenReturn(keymapString);
         when(keyboardDevice.getXkb()).thenReturn(xkb);
         when(this.wlTouchFactory.create()).thenReturn(wlTouch);
-        when(this.seatFactory.create(any())).thenReturn(seat);
+        when(this.seatFactory.create()).thenReturn(seat);
         when(wlSeat.getSeat()).thenReturn(seat);
         when(wlSeat.getWlPointer()).thenReturn(wlPointer);
         when(wlSeat.getWlKeyboard()).thenReturn(wlKeyboard);
@@ -123,7 +124,9 @@ public class X11SeatFactoryTest {
                                        wlPointer,
                                        wlKeyboard,
                                        wlTouch)).thenReturn(wlSeat);
-        when(this.x11InputEventListenerFactory.create(wlSeat)).thenReturn(x11InputEventListener);
+        when(this.privateX11SeatFactory.create(x11Output,
+                                               wlSeat)).thenReturn(x11Seat);
+        when(this.x11InputEventListenerFactory.create(x11Seat)).thenReturn(x11InputEventListener);
         when(this.x11XkbFactory.create(xcbConnection)).thenReturn(xkb);
         when(this.pointerDeviceFactory.create()).thenReturn(pointerDevice);
         when(this.wlPointerFactory.create(pointerDevice)).thenReturn(wlPointer);

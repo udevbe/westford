@@ -53,12 +53,12 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
     @Nonnull
     private final X11XkbFactory x11XkbFactory;
     @Nonnull
-    private final WlSeat        wlSeat;
+    private final X11Seat       x11Seat;
 
     X11InputEventListener(@Provided @Nonnull final X11XkbFactory x11XkbFactory,
-                          @Nonnull final WlSeat wlSeat) {
+                          @Nonnull final X11Seat x11Seat) {
         this.x11XkbFactory = x11XkbFactory;
-        this.wlSeat = wlSeat;
+        this.x11Seat = x11Seat;
     }
 
     public void handle(@Nonnull final Pointer<xcb_generic_event_t> event) {
@@ -129,55 +129,39 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
     }
 
     private void handle(final xcb_motion_notify_event_t event) {
-        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                     .getPlatformImplementation();
-        x11Seat.deliverMotion(this.wlSeat,
-                              event.event_x(),
-                              event.event_y());
+        this.x11Seat.deliverMotion(event.event_x(),
+                                   event.event_y());
     }
 
     private void handle(final xcb_button_press_event_t event) {
-        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                     .getPlatformImplementation();
-        x11Seat.deliverButton(this.wlSeat,
-                              event.time(),
-                              event.detail(),
-                              true);
+        this.x11Seat.deliverButton(event.time(),
+                                   event.detail(),
+                                   true);
     }
 
     private void handle(final xcb_button_release_event_t event) {
-        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                     .getPlatformImplementation();
-        x11Seat.deliverButton(this.wlSeat,
-                              event.time(),
-                              event.detail(),
-                              false);
+        this.x11Seat.deliverButton(event.time(),
+                                   event.detail(),
+                                   false);
     }
 
     private void handle(final xcb_key_press_event_t event) {
-        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                     .getPlatformImplementation();
-        x11Seat.deliverKey(this.wlSeat,
-                           event.detail(),
-                           true);
+        this.x11Seat.deliverKey(event.detail(),
+                                true);
     }
 
     private void handle(final xcb_key_release_event_t event) {
-        final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                     .getPlatformImplementation();
-        x11Seat.deliverKey(this.wlSeat,
-                           event.detail(),
-                           false);
+        this.x11Seat.deliverKey(event.detail(),
+                                false);
     }
 
     private void handle(final xcb_mapping_notify_event_t event) {
         if (event.request() == XCB_MAPPING_KEYBOARD) {
-            final X11Seat x11Seat = (X11Seat) this.wlSeat.getSeat()
-                                                         .getPlatformImplementation();
-            final WlKeyboard wlKeyboard = this.wlSeat.getWlKeyboard();
+            final WlKeyboard     wlKeyboard     = this.x11Seat.getWlSeat()
+                                                              .getWlKeyboard();
             final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
-            final Xkb xkb = this.x11XkbFactory.create(x11Seat.getX11Output()
-                                                             .getXcbConnection());
+            final Xkb xkb = this.x11XkbFactory.create(this.x11Seat.getX11Output()
+                                                                  .getXcbConnection());
             keyboardDevice.setXkb(xkb);
             keyboardDevice.updateKeymap();
             keyboardDevice.emitKeymap(wlKeyboard.getResources());
