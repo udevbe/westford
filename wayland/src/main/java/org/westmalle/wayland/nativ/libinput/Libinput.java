@@ -217,6 +217,10 @@ public class Libinput {
     @Ptr
     public native long libinput_event_get_touch_event(@Ptr long event);
 
+    @Unsigned
+    public native int libinput_event_keyboard_get_time(@Ptr long event);
+
+
     public native int libinput_event_keyboard_get_key_state(@Ptr long event);
 
     @Unsigned
@@ -225,4 +229,24 @@ public class Libinput {
     @Unsigned
     public native int libinput_event_keyboard_get_key(@Ptr long event);
 
+    public native double libinput_event_pointer_get_dx(@Ptr long event);
+
+    public native double libinput_event_pointer_get_dy(@Ptr long event);
+
+    public native double libinput_event_pointer_get_absolute_x_transformed(@Ptr long event,
+                                                                           @Unsigned int width);
+
+    public native double libinput_event_pointer_get_absolute_y_transformed(@Ptr long event,
+                                                                           @Unsigned int height);
+
+    @Unsigned
+    public native int libinput_event_pointer_get_button(@Ptr long event);
+
+    public native int libinput_event_pointer_get_button_state(@Ptr long event);
+
+    @Unsigned
+    public native int libinput_event_pointer_get_seat_button_count(@Ptr long event);
+
+    @Unsigned
+    public native int libinput_event_pointer_get_time(@Ptr long event);
 }
