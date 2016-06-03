@@ -7,11 +7,17 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.OutputGeometry;
+import org.westmalle.wayland.core.Point;
+import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.nativ.libinput.libinput_interface;
 import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.protocol.WlKeyboard;
+import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
@@ -39,26 +45,30 @@ import static org.westmalle.wayland.nativ.libinput.Pointeropen_restricted.nref;
 public class LibinputSeat {
 
     @Nonnull
-    private final Display  display;
+    private final Display    display;
     @Nonnull
-    private final Libudev  libudev;
+    private final Libudev    libudev;
     @Nonnull
-    private final Libinput libinput;
+    private final Libinput   libinput;
     @Nonnull
-    private final Libc     libc;
+    private final Libc       libc;
     @Nonnull
-    private final WlSeat   wlSeat;
+    private final WlSeat     wlSeat;
+    @Nonnull
+    private final Compositor compositor;
 
     LibinputSeat(@Provided @Nonnull final Display display,
                  @Provided @Nonnull final Libudev libudev,
                  @Provided @Nonnull final Libinput libinput,
                  @Provided @Nonnull final Libc libc,
+                 @Provided @Nonnull final Compositor compositor,
                  @Nonnull final WlSeat wlSeat) {
         this.display = display;
         this.libudev = libudev;
         this.libinput = libinput;
         this.libc = libc;
         this.wlSeat = wlSeat;
+        this.compositor = compositor;
     }
 
     public void open(final String seat) {
@@ -139,6 +149,7 @@ public class LibinputSeat {
     private void processEvent(final long event) {
         switch (this.libinput.libinput_event_get_type(event)) {
             case LIBINPUT_EVENT_NONE:
+                //no more events
                 break;
             case LIBINPUT_EVENT_DEVICE_ADDED:
                 //TODO add seat capability
@@ -181,6 +192,7 @@ public class LibinputSeat {
 
     private void handleKeyboardKey(final long keyboardEvent) {
 
+        final int time         = this.libinput.libinput_event_keyboard_get_time(keyboardEvent);
         final int key          = this.libinput.libinput_event_keyboard_get_key(keyboardEvent);
         final int keyState     = this.libinput.libinput_event_keyboard_get_key_state(keyboardEvent);
         final int seatKeyCount = this.libinput.libinput_event_keyboard_get_seat_key_count(keyboardEvent);
@@ -196,6 +208,7 @@ public class LibinputSeat {
         final WlKeyboard wlKeyboard = this.wlSeat.getWlKeyboard();
         wlKeyboard.getKeyboardDevice()
                   .key(wlKeyboard.getResources(),
+                       time,
                        key,
                        wlKeyboardKeyState(keyState));
     }
@@ -213,10 +226,42 @@ public class LibinputSeat {
 
     private void handlePointerMotion(final long pointerEvent) {
 
+        final int    time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
+        final double dx   = this.libinput.libinput_event_pointer_get_dx(pointerEvent);
+        final double dy   = this.libinput.libinput_event_pointer_get_dy(pointerEvent);
+
+        final WlPointer     wlPointer             = this.wlSeat.getWlPointer();
+        final PointerDevice pointerDevice         = wlPointer.getPointerDevice();
+        final Point         pointerDevicePosition = pointerDevice.getPosition();
+
+        pointerDevice.motion(wlPointer.getResources(),
+                             time,
+                             pointerDevicePosition.getX() + (int) dx,
+                             pointerDevicePosition.getY() + (int) dy);
     }
 
     private void handlePointerMotionAbsolute(final long pointerEvent) {
+        final WlOutput wlOutput = this.compositor.getWlOutputs()
+                                                 .getFirst();
+        if (wlOutput != null) {
+            final OutputGeometry geometry = wlOutput.getOutput()
+                                                    .getGeometry();
+            final int physicalWidth  = geometry.getPhysicalWidth();
+            final int physicalHeight = geometry.getPhysicalHeight();
 
+            final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
+            final double x = this.libinput.libinput_event_pointer_get_absolute_x_transformed(pointerEvent,
+                                                                                             physicalWidth);
+            final double y = this.libinput.libinput_event_pointer_get_absolute_y_transformed(pointerEvent,
+                                                                                             physicalHeight);
+
+            final WlPointer wlPointer = this.wlSeat.getWlPointer();
+            wlPointer.getPointerDevice()
+                     .motion(wlPointer.getResources(),
+                             time,
+                             (int) x,
+                             (int) y);
+        }//else ignore event
     }
 
     private void handleTouchFrame(final long touchEvent) {
