@@ -2,12 +2,32 @@ package org.westmalle.wayland.nativ.libinput;
 
 import org.freedesktop.jaccall.Lib;
 import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Unsigned;
 
 import javax.inject.Singleton;
 
 @Singleton
 @Lib("input")
 public class Libinput {
+
+
+    /**
+     * @ingroup device
+     * <p>
+     * Logical state of a key. Note that the logical state may not represent
+     * the physical state of the key.
+     */
+    public static final int LIBINPUT_KEY_STATE_RELEASED = 0;
+    public static final int LIBINPUT_KEY_STATE_PRESSED  = 1;
+
+
+    /**
+     * Logical state of a physical button. Note that the logical state may not
+     * represent the physical state of the button.
+     */
+    public static final int LIBINPUT_BUTTON_STATE_RELEASED = 0;
+    public static final int LIBINPUT_BUTTON_STATE_PRESSED  = 1;
+
 
     /**
      * This is not a real event type, and is only used to tell the user that
@@ -195,5 +215,14 @@ public class Libinput {
     public native long libinput_event_get_pointer_event(@Ptr long event);
 
     @Ptr
-    public native long libinput_event_get_touch_event (@Ptr long event);
+    public native long libinput_event_get_touch_event(@Ptr long event);
+
+    public native int libinput_event_keyboard_get_key_state(@Ptr long event);
+
+    @Unsigned
+    public native int libinput_event_keyboard_get_seat_key_count(@Ptr long event);
+
+    @Unsigned
+    public native int libinput_event_keyboard_get_key(@Ptr long event);
+
 }

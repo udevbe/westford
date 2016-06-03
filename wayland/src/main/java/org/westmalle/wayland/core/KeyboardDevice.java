@@ -102,6 +102,13 @@ public class KeyboardDevice {
         this.xkb = xkb;
     }
 
+    /**
+     * Find the keyboard focused surface and deliver a key event.
+     *
+     * @param wlKeyboardResources A set of all keyboard resources that will be used to find a matching surface resource.
+     * @param key                 the key to deliver
+     * @param wlKeyboardKeyState  the state of the key.
+     */
     public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
                     final int key,
                     @Nonnull final WlKeyboardKeyState wlKeyboardKeyState) {
@@ -251,7 +258,7 @@ public class KeyboardDevice {
             this.focusDestroyListener = Optional.empty();
 
             final WlSurface wlSurface = (WlSurface) oldFocusResource.getImplementation();
-            final Surface surface = wlSurface.getSurface();
+            final Surface   surface   = wlSurface.getSurface();
 
             final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
                                                                            oldFocusResource.getClient());
@@ -272,7 +279,7 @@ public class KeyboardDevice {
             newFocusResource.register(this.focusDestroyListener.get());
 
             final WlSurface wlSurface = (WlSurface) newFocusResource.getImplementation();
-            final Surface surface = wlSurface.getSurface();
+            final Surface   surface   = wlSurface.getSurface();
 
             final Set<WlKeyboardResource> clientKeyboardResources = filter(wlKeyboardResources,
                                                                            newFocusResource.getClient());
