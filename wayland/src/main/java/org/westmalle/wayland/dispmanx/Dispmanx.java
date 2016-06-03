@@ -14,9 +14,12 @@
 package org.westmalle.wayland.dispmanx;
 
 import dagger.Subcomponent;
+import org.westmalle.wayland.input.LibinputSeatFactory;
 
 @Subcomponent
 public interface Dispmanx {
 
     DispmanxOutputFactory outputFactory();
+
+    LibinputSeatFactory seatFactory();
 }
