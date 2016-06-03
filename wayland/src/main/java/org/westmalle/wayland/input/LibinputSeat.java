@@ -6,10 +6,12 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
+import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.nativ.libinput.libinput_interface;
 import org.westmalle.wayland.nativ.libudev.Libudev;
+import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
@@ -27,6 +29,8 @@ import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_FRAME;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_MOTION;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_UP;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_PRESSED;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_RELEASED;
 import static org.westmalle.wayland.nativ.libinput.Pointerclose_restricted.nref;
 import static org.westmalle.wayland.nativ.libinput.Pointeropen_restricted.nref;
 
@@ -175,39 +179,69 @@ public class LibinputSeat {
         }
     }
 
-    private void handleTouchFrame(final long event) {
+    private void handleKeyboardKey(final long keyboardEvent) {
+
+        final int key          = this.libinput.libinput_event_keyboard_get_key(keyboardEvent);
+        final int keyState     = this.libinput.libinput_event_keyboard_get_key_state(keyboardEvent);
+        final int seatKeyCount = this.libinput.libinput_event_keyboard_get_seat_key_count(keyboardEvent);
+
+        if ((keyState == LIBINPUT_KEY_STATE_PRESSED &&
+             seatKeyCount != 1) ||
+            (keyState == LIBINPUT_KEY_STATE_RELEASED &&
+             seatKeyCount != 0)) {
+            //don't send key events when we have an additional press or release of the same key on the same seat from a different device.
+            return;
+        }
+
+        final WlKeyboard wlKeyboard = this.wlSeat.getWlKeyboard();
+        wlKeyboard.getKeyboardDevice()
+                  .key(wlKeyboard.getResources(),
+                       key,
+                       wlKeyboardKeyState(keyState));
+    }
+
+    private WlKeyboardKeyState wlKeyboardKeyState(final int keyState) {
+        final WlKeyboardKeyState wlKeyboardKeyState;
+        if (keyState == LIBINPUT_KEY_STATE_PRESSED) {
+            wlKeyboardKeyState = WlKeyboardKeyState.PRESSED;
+        }
+        else {
+            wlKeyboardKeyState = WlKeyboardKeyState.RELEASED;
+        }
+        return wlKeyboardKeyState;
+    }
+
+    private void handlePointerMotion(final long pointerEvent) {
 
     }
 
-    private void handleTouchUp(final long event) {
+    private void handlePointerMotionAbsolute(final long pointerEvent) {
 
     }
 
-    private void handleTouchMotion(final long event) {
+    private void handleTouchFrame(final long touchEvent) {
 
     }
 
-    private void handleTouchDown(final long event) {
+    private void handleTouchUp(final long touchEvent) {
 
     }
 
-    private void handlePointerAxis(final long event) {
+    private void handleTouchMotion(final long touchEvent) {
 
     }
 
-    private void handlePointerButton(final long event) {
+    private void handleTouchDown(final long touchEvent) {
 
     }
 
-    private void handlePointerMotionAbsolute(final long event) {
+    private void handlePointerAxis(final long pointerEvent) {
 
     }
 
-    private void handlePointerMotion(final long event) {
+    private void handlePointerButton(final long pointerEvent) {
 
     }
 
-    private void handleKeyboardKey(final long event) {
 
-    }
 }
