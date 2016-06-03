@@ -4,6 +4,7 @@ import org.freedesktop.jaccall.Lib;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
@@ -178,6 +179,10 @@ public class Libinput {
     public static final int LIBINPUT_EVENT_GESTURE_PINCH_BEGIN  = 803;
     public static final int LIBINPUT_EVENT_GESTURE_PINCH_UPDATE = 804;
     public static final int LIBINPUT_EVENT_GESTURE_PINCH_END    = 805;
+
+    @Inject
+    Libinput() {
+    }
 
     @Ptr
     public native long libinput_udev_create_context(@Ptr(libinput_interface.class) long interface_,
