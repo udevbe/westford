@@ -47,7 +47,8 @@ public class X11InputEventListenerTest {
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverKey(anyShort(),
+        verify(this.x11Seat).deliverKey(anyInt(),
+                                        anyShort(),
                                         eq(true));
     }
 
@@ -84,7 +85,8 @@ public class X11InputEventListenerTest {
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverKey(anyShort(),
+        verify(this.x11Seat).deliverKey(anyInt(),
+                                        anyShort(),
                                         eq(false));
     }
 
@@ -122,6 +124,7 @@ public class X11InputEventListenerTest {
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
         this.x11Seat.deliverMotion(anyInt(),
+                                   anyInt(),
                                    anyInt());
     }
 

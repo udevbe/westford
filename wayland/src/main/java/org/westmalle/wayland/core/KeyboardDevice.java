@@ -72,8 +72,6 @@ public class KeyboardDevice {
     @Nonnull
     private final Libxkbcommon libxkbcommon;
     @Nonnull
-    private final Compositor   compositor;
-    @Nonnull
     private final Set<Integer> pressedKeys = new HashSet<>();
     @Nonnull
     private Xkb xkb;
@@ -92,24 +90,23 @@ public class KeyboardDevice {
                    @Provided @Nonnull final NativeFileFactory nativeFileFactory,
                    @Provided @Nonnull final Libc libc,
                    @Provided @Nonnull final Libxkbcommon libxkbcommon,
-                   @Provided @Nonnull final Compositor compositor,
                    @Nonnull final Xkb xkb) {
         this.display = display;
         this.nativeFileFactory = nativeFileFactory;
         this.libc = libc;
         this.libxkbcommon = libxkbcommon;
-        this.compositor = compositor;
         this.xkb = xkb;
     }
 
     /**
-     * Find the keyboard focused surface and deliver a key event.
+     * Find the keyboard focused surface and deliver a key event to the client of the focused surface.
      *
-     * @param wlKeyboardResources A set of all keyboard resources that will be used to find a matching surface resource.
+     * @param wlKeyboardResources A set of all keyboard resources that will be used to find the client.
      * @param key                 the key to deliver
      * @param wlKeyboardKeyState  the state of the key.
      */
     public void key(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources,
+                    final int time,
                     final int key,
                     @Nonnull final WlKeyboardKeyState wlKeyboardKeyState) {
 
@@ -131,7 +128,6 @@ public class KeyboardDevice {
             }
         }
 
-        final int time = this.compositor.getTime();
         getKeySignal().emit(Key.create(time,
                                        key,
                                        wlKeyboardKeyState));

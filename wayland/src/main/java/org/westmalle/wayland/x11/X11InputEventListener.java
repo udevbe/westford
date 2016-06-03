@@ -129,7 +129,8 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
     }
 
     private void handle(final xcb_motion_notify_event_t event) {
-        this.x11Seat.deliverMotion(event.event_x(),
+        this.x11Seat.deliverMotion(event.time(),
+                                   event.event_x(),
                                    event.event_y());
     }
 
@@ -146,19 +147,21 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
     }
 
     private void handle(final xcb_key_press_event_t event) {
-        this.x11Seat.deliverKey(event.detail(),
+        this.x11Seat.deliverKey(event.time(),
+                                event.detail(),
                                 true);
     }
 
     private void handle(final xcb_key_release_event_t event) {
-        this.x11Seat.deliverKey(event.detail(),
+        this.x11Seat.deliverKey(event.time(),
+                                event.detail(),
                                 false);
     }
 
     private void handle(final xcb_mapping_notify_event_t event) {
         if (event.request() == XCB_MAPPING_KEYBOARD) {
-            final WlKeyboard     wlKeyboard     = this.x11Seat.getWlSeat()
-                                                              .getWlKeyboard();
+            final WlKeyboard wlKeyboard = this.x11Seat.getWlSeat()
+                                                      .getWlKeyboard();
             final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
             final Xkb xkb = this.x11XkbFactory.create(this.x11Seat.getX11Output()
                                                                   .getXcbConnection());
