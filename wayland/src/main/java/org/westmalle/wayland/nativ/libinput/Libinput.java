@@ -129,7 +129,6 @@ public class Libinput {
      * <p>
      * This event is not to be confused with the button events emitted
      * by the tablet pad. See @ref LIBINPUT_EVENT_TABLET_PAD_BUTTON.
-     *
      */
     public static final int LIBINPUT_EVENT_TABLET_TOOL_BUTTON    = 603;
 
@@ -189,4 +188,12 @@ public class Libinput {
 
     public native int libinput_event_get_type(@Ptr long event);
 
+    @Ptr
+    public native long libinput_event_get_keyboard_event(@Ptr long event);
+
+    @Ptr
+    public native long libinput_event_get_pointer_event(@Ptr long event);
+
+    @Ptr
+    public native long libinput_event_get_touch_event (@Ptr long event);
 }
