@@ -76,8 +76,6 @@ public class PointerDeviceTest {
     private JobExecutor    jobExecutor;
     @Mock
     private Scene          scene;
-    @Mock
-    private Compositor     compositor;
     @InjectMocks
     private PointerDevice  pointerDevice;
 
@@ -115,9 +113,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1,
-                                                   time2);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -218,12 +213,15 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.motion(pointerResources,
+                                  time2,
                                   x1,
                                   y1);
         //then
@@ -286,8 +284,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -391,9 +387,11 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
+                                  time1,
                                   x1,
                                   y1);
         //then
@@ -445,8 +443,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -504,9 +500,11 @@ public class PointerDeviceTest {
                                                    serial2);
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
+                                  time1,
                                   x1,
                                   y1);
         //then
@@ -549,8 +547,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -609,9 +605,11 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.motion(pointerResources,
+                                  time1,
                                   x1,
                                   y1);
         //then
@@ -653,10 +651,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1,
-                                                   time2,
-                                                   time3);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -718,15 +712,19 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.motion(pointerResources,
+                                  time2,
                                   x1,
                                   y1);
         this.pointerDevice.button(pointerResources,
+                                  time3,
                                   button0,
                                   WlPointerButtonState.RELEASED);
         //then
@@ -775,9 +773,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1,
-                                                   time2);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -838,12 +833,15 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.button(pointerResources,
+                                  time2,
                                   button0,
                                   WlPointerButtonState.RELEASED);
         //then
@@ -890,8 +888,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -952,9 +948,11 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         //then
@@ -1117,6 +1115,7 @@ public class PointerDeviceTest {
 
         // when: cursor moves outside of old surface to new surface
         this.pointerDevice.motion(wlPointerResources,
+                                  1234,
                                   x,
                                   y);
 
@@ -1208,6 +1207,7 @@ public class PointerDeviceTest {
         when(cursor0.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor0);
 
         this.pointerDevice.motion(wlPointerResources,
+                                  1234,
                                   0,
                                   0);
 
@@ -1219,6 +1219,7 @@ public class PointerDeviceTest {
 
         //when: cursor moves inside of client area
         this.pointerDevice.motion(wlPointerResources,
+                                  1235,
                                   x,
                                   y);
 
@@ -1238,6 +1239,7 @@ public class PointerDeviceTest {
         final int time1 = 112459;
         final int time2 = 112712;
         final int time3 = 113209;
+        final int time4 = 113319;
 
         //pointer position 0
         final int x0 = 20;
@@ -1254,10 +1256,6 @@ public class PointerDeviceTest {
         //mock compositor
         final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1,
-                                                   time2,
-                                                   time3);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
@@ -1324,18 +1322,22 @@ public class PointerDeviceTest {
 
         //when
         this.pointerDevice.motion(pointerResources,
+                                  time0,
                                   x0,
                                   y0);
         this.pointerDevice.button(pointerResources,
+                                  time1,
                                   button0,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.button(pointerResources,
+                                  time2,
                                   button1,
                                   WlPointerButtonState.PRESSED);
         this.pointerDevice.grabMotion(wlSurfaceResource0,
                                       serial2,
                                       pointerGrabMotion);
         this.pointerDevice.motion(pointerResources,
+                                  time3,
                                   x1,
                                   y1);
 
@@ -1350,6 +1352,7 @@ public class PointerDeviceTest {
         final List<DestroyListener> listeners = listenerArgumentCaptor.getAllValues();
         listeners.forEach(DestroyListener::handle);
         this.pointerDevice.motion(pointerResources,
+                                  time4,
                                   x1,
                                   y1);
         //then
@@ -1588,6 +1591,7 @@ public class PointerDeviceTest {
         when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
 
         this.pointerDevice.motion(wlPointerResources,
+                                  1234,
                                   0,
                                   0);
 
@@ -1731,6 +1735,7 @@ public class PointerDeviceTest {
                                      0,
                                      0);
         this.pointerDevice.motion(wlPointerResources,
+                                  1,
                                   x,
                                   y);
         this.pointerDevice.setCursor(wlPointerResource1,
@@ -1739,6 +1744,7 @@ public class PointerDeviceTest {
                                      0,
                                      0);
         this.pointerDevice.motion(wlPointerResources,
+                                  2,
                                   0,
                                   0);
         this.pointerDevice.setCursor(wlPointerResource0,
@@ -1820,6 +1826,7 @@ public class PointerDeviceTest {
         when(cursor.isHidden()).thenReturn(true);
 
         this.pointerDevice.motion(wlPointerResources,
+                                  1,
                                   0,
                                   0);
 
@@ -1920,10 +1927,12 @@ public class PointerDeviceTest {
         pointerResources.add(wlPointerResource0);
 
         this.pointerDevice.motion(pointerResources,
+                                  1,
                                   0,
                                   0);
 
         this.pointerDevice.button(pointerResources,
+                                  2,
                                   1,
                                   WlPointerButtonState.PRESSED);
 
@@ -2023,6 +2032,7 @@ public class PointerDeviceTest {
         pointerResources.add(wlPointerResource1);
 
         this.pointerDevice.motion(pointerResources,
+                                  1,
                                   0,
                                   0);
 
@@ -2090,6 +2100,7 @@ public class PointerDeviceTest {
         pointerResources.add(wlPointerResource0);
 
         this.pointerDevice.motion(pointerResources,
+                                  1,
                                   0,
                                   0);
 

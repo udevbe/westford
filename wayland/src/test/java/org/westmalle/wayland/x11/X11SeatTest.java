@@ -66,12 +66,15 @@ public class X11SeatTest {
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
+        final int time = 2134;
+
         //when
-        this.x11Seat.deliverButton(123,
+        this.x11Seat.deliverButton(time,
                                    xEventDetail,
                                    true);
         //then
         verify(pointerDevice).button(wlPointerResources,
+                                     time,
                                      waylandEventDetail,
                                      WlPointerButtonState.PRESSED);
     }
@@ -104,13 +107,14 @@ public class X11SeatTest {
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
-        final int compositorTime = 9876;
+        final int time = 9876;
         //when
-        this.x11Seat.deliverButton(123,
+        this.x11Seat.deliverButton(time,
                                    xEventDetail,
                                    false);
         //then
         verify(pointerDevice).button(wlPointerResources,
+                                     time,
                                      waylandEventDetail,
                                      WlPointerButtonState.RELEASED);
     }
@@ -137,13 +141,16 @@ public class X11SeatTest {
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
-        final int x = 80;
-        final int y = -120;
+        final int time = 2134;
+        final int x    = 80;
+        final int y    = -120;
         //when
-        this.x11Seat.deliverMotion(x,
+        this.x11Seat.deliverMotion(time,
+                                   x,
                                    y);
         //then
         verify(pointerDevice).motion(wlPointerResources,
+                                     time,
                                      x,
                                      y);
     }

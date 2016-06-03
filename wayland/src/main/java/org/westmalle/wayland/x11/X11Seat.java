@@ -54,7 +54,8 @@ public class X11Seat {
         this.wlSeat = wlSeat;
     }
 
-    public void deliverKey(final short eventDetail,
+    public void deliverKey(final int time,
+                           final short eventDetail,
                            final boolean pressed) {
         final WlKeyboardKeyState wlKeyboardKeyState = wlKeyboardKeyState(pressed);
         final int                key                = toLinuxKey(eventDetail);
@@ -62,6 +63,7 @@ public class X11Seat {
 
         wlKeyboard.getKeyboardDevice()
                   .key(wlKeyboard.getResources(),
+                       time,
                        key,
                        wlKeyboardKeyState);
     }
@@ -93,6 +95,7 @@ public class X11Seat {
         final WlPointer wlPointer = this.wlSeat.getWlPointer();
         wlPointer.getPointerDevice()
                  .button(wlPointer.getResources(),
+                         buttonTime,
                          button,
                          wlPointerButtonState);
     }
@@ -142,11 +145,13 @@ public class X11Seat {
         return button;
     }
 
-    public void deliverMotion(final int x,
+    public void deliverMotion(final int time,
+                              final int x,
                               final int y) {
         final WlPointer wlPointer = this.wlSeat.getWlPointer();
         wlPointer.getPointerDevice()
                  .motion(wlPointer.getResources(),
+                         time,
                          x,
                          y);
     }

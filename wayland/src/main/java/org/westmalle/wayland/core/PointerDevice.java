@@ -68,8 +68,7 @@ public class PointerDevice implements Role {
     @Nonnull
     private final JobExecutor    jobExecutor;
     @Nonnull
-    private final Compositor     compositor;
-    private Scene scene;
+    private final Scene          scene;
     @Nonnull
     private final Display        display;
 
@@ -101,21 +100,26 @@ public class PointerDevice implements Role {
                   @Provided @Nonnull final NullRegion nullRegion,
                   @Provided @Nonnull final CursorFactory cursorFactory,
                   @Provided @Nonnull final JobExecutor jobExecutor,
-                  @Provided @Nonnull final Compositor compositor,
                   @Provided @Nonnull final Scene scene) {
         this.display = display;
         this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;
         this.cursorFactory = cursorFactory;
         this.jobExecutor = jobExecutor;
-        this.compositor = compositor;
         this.scene = scene;
     }
 
+    /**
+     * Move this pointer to a new absolute position and deliver a motion event to the client of the focused surface.
+     *
+     * @param wlPointerResources a set of pointer resources that will be used to find the client.
+     * @param x                  new absolute X
+     * @param y                  new absolute Y
+     */
     public void motion(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                       final int time,
                        final int x,
                        final int y) {
-        final int time = this.compositor.getTime();
         this.position = Point.create(x,
                                      y);
 
@@ -168,8 +172,8 @@ public class PointerDevice implements Role {
         Optional<WlSurfaceResource> pointerOver = Optional.empty();
         while (surfaceIterator.hasNext()) {
             final WlSurfaceResource surfaceResource = surfaceIterator.next();
-            final WlSurfaceRequests implementation = surfaceResource.getImplementation();
-            final Surface surface = ((WlSurface) implementation).getSurface();
+            final WlSurfaceRequests implementation  = surfaceResource.getImplementation();
+            final Surface           surface         = ((WlSurface) implementation).getSurface();
 
             //surface can be invisible (null buffer), in which case we should ignore it.
             if (!surface.getState()
@@ -226,9 +230,9 @@ public class PointerDevice implements Role {
     }
 
     public void button(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                       final int time,
                        @Nonnegative final int button,
                        @Nonnull final WlPointerButtonState wlPointerButtonState) {
-        final int time = this.compositor.getTime();
         if (wlPointerButtonState == WlPointerButtonState.PRESSED) {
             this.pressedButtons.add(button);
         }

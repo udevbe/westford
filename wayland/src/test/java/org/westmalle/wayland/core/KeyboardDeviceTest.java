@@ -64,8 +64,6 @@ public class KeyboardDeviceTest {
     @Mock
     private Libxkbcommon      libxkbcommon;
     @Mock
-    private Compositor        compositor;
-    @Mock
     private Xkb               xkb;
     @InjectMocks
     private KeyboardDevice    keyboardDevice;
@@ -103,12 +101,7 @@ public class KeyboardDeviceTest {
         when(this.display.nextSerial()).thenReturn(serial0,
                                                    serial1,
                                                    serial2);
-        final int time0 = 27646;
-        final int time1 = 29253;
-        final int time2 = 30898;
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1,
-                                                   time2);
+        final int  time0    = 27646;
         final long xkbState = 58746;
         when(this.xkb.getState()).thenReturn(xkbState);
         when(this.libxkbcommon.xkb_state_update_key(xkbState,
@@ -131,6 +124,7 @@ public class KeyboardDeviceTest {
 
         //when
         this.keyboardDevice.key(wlKeyboardResources,
+                                time0,
                                 key,
                                 wlKeyboardKeyStatePressed);
 
@@ -189,11 +183,9 @@ public class KeyboardDeviceTest {
         final int time0 = 27646;
         final int time1 = 29253;
         final int time2 = 30898;
-        when(this.compositor.getTime()).thenReturn(time0,
-                                                   time1,
-                                                   time2);
         //when
         this.keyboardDevice.key(wlKeyboardResources,
+                                time0,
                                 key,
                                 wlKeyboardKeyStatePressed);
 
@@ -207,11 +199,12 @@ public class KeyboardDeviceTest {
 
         //and when
         this.keyboardDevice.key(wlKeyboardResources,
+                                time1,
                                 key,
                                 wlKeyboardKeyStateReleased);
 
         //then
-        assertThat((Iterable<Integer>) this.keyboardDevice.getPressedKeys()).doesNotContain(key);
+        assertThat(this.keyboardDevice.getPressedKeys()).doesNotContain(key);
         verify(wlKeyboardResource0).key(serial1,
                                         time1,
                                         key,
