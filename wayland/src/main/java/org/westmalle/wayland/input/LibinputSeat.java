@@ -7,6 +7,7 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
@@ -23,6 +24,8 @@ import org.westmalle.wayland.protocol.WlSeat;
 import javax.annotation.Nonnull;
 
 import static org.freedesktop.jaccall.Pointer.malloc;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_PRESSED;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_RELEASED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_ADDED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_REMOVED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_KEYBOARD_KEY;
@@ -264,6 +267,38 @@ public class LibinputSeat {
         }//else ignore event
     }
 
+    private void handlePointerButton(final long pointerEvent) {
+
+        final int time            = this.libinput.libinput_event_pointer_get_time(pointerEvent);
+        int       buttonState     = this.libinput.libinput_event_pointer_get_button_state(pointerEvent);
+        int       seatButtonCount = this.libinput.libinput_event_pointer_get_seat_button_count(pointerEvent);
+        int       button          = this.libinput.libinput_event_pointer_get_button(pointerEvent);
+
+        if ((buttonState == LIBINPUT_BUTTON_STATE_PRESSED &&
+             seatButtonCount != 1) ||
+            (buttonState == LIBINPUT_BUTTON_STATE_RELEASED &&
+             seatButtonCount != 0)) {
+            //don't send button events when we have an additional press or release of the same key on the same seat from a different device.
+            return;
+        }
+
+        final WlPointer wlPointer = this.wlSeat.getWlPointer();
+        wlPointer.getPointerDevice()
+                 .button(wlPointer.getResources(),
+                         time,
+                         button,
+                         wlPointerButtonState(buttonState));
+    }
+
+    private WlPointerButtonState wlPointerButtonState(int buttonState) {
+        if (buttonState == LIBINPUT_BUTTON_STATE_PRESSED) {
+            return WlPointerButtonState.PRESSED;
+        }
+        else {
+            return WlPointerButtonState.RELEASED;
+        }
+    }
+
     private void handleTouchFrame(final long touchEvent) {
 
     }
@@ -283,10 +318,4 @@ public class LibinputSeat {
     private void handlePointerAxis(final long pointerEvent) {
 
     }
-
-    private void handlePointerButton(final long pointerEvent) {
-
-    }
-
-
 }
