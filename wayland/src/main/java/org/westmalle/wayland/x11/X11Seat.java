@@ -16,7 +16,9 @@ package org.westmalle.wayland.x11;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
+import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -34,6 +36,7 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_SIDE;
 
 @AutoFactory(className = "PrivateX11SeatFactory",
              allowSubclasses = true)
@@ -91,13 +94,48 @@ public class X11Seat {
         final WlPointerButtonState wlPointerButtonState = wlPointerButtonState(buttonTime,
                                                                                pressed);
         final int button = toLinuxButton(eventDetail);
+        if (button == 0 && pressed) {
+            handleScroll(buttonTime,
+                         eventDetail);
+        }
+        else if (button != 0) {
+            final WlPointer wlPointer = this.wlSeat.getWlPointer();
+            wlPointer.getPointerDevice()
+                     .button(wlPointer.getResources(),
+                             buttonTime,
+                             button,
+                             wlPointerButtonState);
+        }
+    }
 
-        final WlPointer wlPointer = this.wlSeat.getWlPointer();
-        wlPointer.getPointerDevice()
-                 .button(wlPointer.getResources(),
-                         buttonTime,
-                         button,
-                         wlPointerButtonState);
+    private void handleScroll(final int buttonTime,
+                              final short eventDetail) {
+
+        final WlPointerAxis wlPointerAxis;
+        final float         value;
+        final int           discreteValue;
+
+        if (eventDetail == 4 || eventDetail == 5) {
+            //vertical
+            wlPointerAxis = WlPointerAxis.VERTICAL_SCROLL;
+            value = eventDetail == 4 ? -1.0f : 1.0f;
+            discreteValue = eventDetail == 4 ? -1 : 1;
+        }
+        else {
+            //horizontal
+            wlPointerAxis = WlPointerAxis.HORIZONTAL_SCROLL;
+            value = eventDetail == 6 ? -1.0f : 1.0f;
+            discreteValue = eventDetail == 6 ? -1 : 1;
+        }
+
+        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+        pointerDevice.axisDiscrete(wlPointer.getResources(),
+                                   wlPointerAxis,
+                                   buttonTime,
+                                   discreteValue,
+                                   value);
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -139,8 +177,15 @@ public class X11Seat {
             case 3:
                 button = BTN_RIGHT;
                 break;
-            default:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+                //scroll
                 button = 0;
+                break;
+            default:
+                button = eventDetail + BTN_SIDE - 8;
         }
         return button;
     }

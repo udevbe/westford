@@ -22,6 +22,7 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.events.Button;
@@ -107,6 +108,85 @@ public class PointerDevice implements Role {
         this.cursorFactory = cursorFactory;
         this.jobExecutor = jobExecutor;
         this.scene = scene;
+    }
+
+    //TODO unit test
+    public void axisStop(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                         final WlPointerAxis wlPointerAxis,
+                         final int time) {
+        getFocus().ifPresent(wlSurfaceResource -> reportAxisStop(wlPointerResources,
+                                                                 wlSurfaceResource,
+                                                                 wlPointerAxis,
+                                                                 time));
+
+        //TODO emit event?
+    }
+
+    private void reportAxisStop(final Set<WlPointerResource> surfaceResource,
+                                final WlSurfaceResource wlSurfaceResource,
+                                final WlPointerAxis wlPointerAxis,
+                                final int time) {
+        filter(surfaceResource,
+               wlSurfaceResource.getClient()).forEach(wlPointerResource -> wlPointerResource.axisStop(time,
+                                                                                                      wlPointerAxis.value));
+    }
+
+    //TODO unit test
+    public void axisDiscrete(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                             final WlPointerAxis wlPointerAxis,
+                             final int time,
+                             final int discrete,
+                             final float value) {
+        getFocus().ifPresent(wlSurfaceResource -> reportAxisDiscrete(wlSurfaceResource,
+                                                                     wlPointerResources,
+                                                                     wlPointerAxis,
+                                                                     time,
+                                                                     discrete,
+                                                                     value));
+        //TODO emit event?
+
+    }
+
+    private void reportAxisDiscrete(final WlSurfaceResource wlSurfaceResource,
+                                    final Set<WlPointerResource> wlPointerResources,
+                                    final WlPointerAxis wlPointerAxis,
+                                    final int time,
+                                    final int discrete,
+                                    final float value) {
+        filter(wlPointerResources,
+               wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
+
+            //FIXME check if version supports discrete axis reporting
+            wlPointerResource.axisDiscrete(wlPointerAxis.value,
+                                           discrete);
+            wlPointerResource.axis(time,
+                                   wlPointerAxis.value,
+                                   Fixed.create(value));
+        });
+    }
+
+    //TODO unit test
+    public void axisContinuous(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                               final int time,
+                               final WlPointerAxis wlPointerAxis,
+                               final float value) {
+        getFocus().ifPresent(wlSurfaceResource -> reportAxisContinuous(wlSurfaceResource,
+                                                                       wlPointerResources,
+                                                                       time,
+                                                                       wlPointerAxis,
+                                                                       value));
+        //TODO emit event?
+    }
+
+    private void reportAxisContinuous(final WlSurfaceResource wlSurfaceResource,
+                                      final Set<WlPointerResource> wlPointerResources,
+                                      final int time,
+                                      final WlPointerAxis wlPointerAxis,
+                                      final float value) {
+        filter(wlPointerResources,
+               wlSurfaceResource.getClient()).forEach(wlPointerResource -> wlPointerResource.axis(time,
+                                                                                                  wlPointerAxis.value,
+                                                                                                  Fixed.create(value)));
     }
 
     /**
