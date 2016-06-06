@@ -20,4 +20,5 @@ public final class Input {
     public static final int BTN_LEFT   = 0x110;
     public static final int BTN_RIGHT  = 0x111;
     public static final int BTN_MIDDLE = 0x112;
+    public static final int BTN_SIDE   = 0x113;
 }
