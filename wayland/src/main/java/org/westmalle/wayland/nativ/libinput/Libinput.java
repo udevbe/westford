@@ -11,10 +11,34 @@ import javax.inject.Singleton;
 @Lib("input")
 public class Libinput {
 
+    /**
+     * The event is caused by the rotation of a wheel.
+     */
+    public static final int LIBINPUT_POINTER_AXIS_SOURCE_WHEEL      = 1;
+    /**
+     * The event is caused by the movement of one or more fingers on a
+     * device.
+     */
+    public static final int LIBINPUT_POINTER_AXIS_SOURCE_FINGER     = 2;
+    /**
+     * The event is caused by the motion of some device.
+     */
+    public static final int LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS = 3;
 
     /**
-     * @ingroup device
+     * Axes on a device with the capability @ref LIBINPUT_DEVICE_CAP_POINTER
+     * that are not x or y coordinates.
      * <p>
+     * The two scroll axes LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL and
+     * LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL are engaged separately,
+     * depending on the device. libinput provides some scroll direction locking
+     * but it is up to the caller to determine which axis is needed and
+     * appropriate in the current interaction
+     */
+    public static final int LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL   = 0;
+    public static final int LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL = 1;
+
+    /**
      * Logical state of a key. Note that the logical state may not represent
      * the physical state of the key.
      */
@@ -254,4 +278,17 @@ public class Libinput {
 
     @Unsigned
     public native int libinput_event_pointer_get_time(@Ptr long event);
+
+
+    public native int libinput_event_pointer_has_axis(@Ptr long event,
+                                                      int axis);
+
+    public native int libinput_event_pointer_get_axis_source(@Ptr long event);
+
+    public native double libinput_event_pointer_get_axis_value_discrete(@Ptr long event,
+                                                                        int axis);
+
+    public native double libinput_event_pointer_get_axis_value(@Ptr long event,
+                                                               int axis);
+
 }

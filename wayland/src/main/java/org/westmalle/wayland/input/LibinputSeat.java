@@ -7,6 +7,7 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.OutputGeometry;
@@ -40,6 +41,11 @@ import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_UP;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_PRESSED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_RELEASED;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_FINGER;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_WHEEL;
 import static org.westmalle.wayland.nativ.libinput.Pointerclose_restricted.nref;
 import static org.westmalle.wayland.nativ.libinput.Pointeropen_restricted.nref;
 
@@ -270,9 +276,9 @@ public class LibinputSeat {
     private void handlePointerButton(final long pointerEvent) {
 
         final int time            = this.libinput.libinput_event_pointer_get_time(pointerEvent);
-        int       buttonState     = this.libinput.libinput_event_pointer_get_button_state(pointerEvent);
-        int       seatButtonCount = this.libinput.libinput_event_pointer_get_seat_button_count(pointerEvent);
-        int       button          = this.libinput.libinput_event_pointer_get_button(pointerEvent);
+        final int buttonState     = this.libinput.libinput_event_pointer_get_button_state(pointerEvent);
+        final int seatButtonCount = this.libinput.libinput_event_pointer_get_seat_button_count(pointerEvent);
+        final int button          = this.libinput.libinput_event_pointer_get_button(pointerEvent);
 
         if ((buttonState == LIBINPUT_BUTTON_STATE_PRESSED &&
              seatButtonCount != 1) ||
@@ -290,13 +296,100 @@ public class LibinputSeat {
                          wlPointerButtonState(buttonState));
     }
 
-    private WlPointerButtonState wlPointerButtonState(int buttonState) {
+    private WlPointerButtonState wlPointerButtonState(final int buttonState) {
         if (buttonState == LIBINPUT_BUTTON_STATE_PRESSED) {
             return WlPointerButtonState.PRESSED;
         }
         else {
             return WlPointerButtonState.RELEASED;
         }
+    }
+
+    private void handlePointerAxis(final long pointerEvent) {
+
+        final WlPointerAxisSource wlPointerAxisSource;
+
+        final int hasVertical = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
+                                                                              LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
+        final int hasHorizontal = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
+                                                                                LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
+
+        if (hasVertical == 0 && hasHorizontal == 0) { return; }
+
+        final int source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
+        switch (source) {
+            case LIBINPUT_POINTER_AXIS_SOURCE_WHEEL:
+                wlPointerAxisSource = WlPointerAxisSource.WHEEL;
+                break;
+            case LIBINPUT_POINTER_AXIS_SOURCE_FINGER:
+                wlPointerAxisSource = WlPointerAxisSource.FINGER;
+                break;
+            case LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS:
+                wlPointerAxisSource = WlPointerAxisSource.CONTINUOUS;
+                break;
+            default:
+                //unknown scroll source
+                return;
+        }
+
+        //TODO send notify axis source
+
+        if (hasVertical != 0) {
+            final double vertDiscrete = getAxisDiscrete(pointerEvent,
+                                                        LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
+            final double vert = normalizeScroll(pointerEvent,
+                                                LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
+
+            //TODO send notify axis
+            final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
+
+        }
+
+        if (hasHorizontal != 0) {
+            final double horizDiscrete = getAxisDiscrete(pointerEvent,
+                                                         LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
+            final double horiz = normalizeScroll(pointerEvent,
+                                                 LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
+
+            //TODO send notify axis
+            final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
+
+        }
+    }
+
+    private double getAxisDiscrete(final long pointerEvent,
+                                   final int axis) {
+        final int source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
+
+        if (source != LIBINPUT_POINTER_AXIS_SOURCE_WHEEL) { return 0; }
+
+        return this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
+                                                                            axis);
+    }
+
+    private double normalizeScroll(final long pointerEvent,
+                                   final int axis) {
+        double value = 0.0;
+
+        final int source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
+    /* libinput < 0.8 sent wheel click events with value 10. Since 0.8
+       the value is the angle of the click in degrees. To keep
+	   backwards-compat with existing clients, we just send multiples of
+	   the click count.
+	 */
+        switch (source) {
+            case LIBINPUT_POINTER_AXIS_SOURCE_WHEEL:
+                value = 10 * this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
+                                                                                          axis);
+                break;
+            case LIBINPUT_POINTER_AXIS_SOURCE_FINGER:
+            case LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS:
+                value = this.libinput.libinput_event_pointer_get_axis_value(pointerEvent,
+                                                                            axis);
+                break;
+        }
+
+        return value;
     }
 
     private void handleTouchFrame(final long touchEvent) {
@@ -313,9 +406,6 @@ public class LibinputSeat {
 
     private void handleTouchDown(final long touchEvent) {
 
-    }
-
-    private void handlePointerAxis(final long pointerEvent) {
 
     }
 }
