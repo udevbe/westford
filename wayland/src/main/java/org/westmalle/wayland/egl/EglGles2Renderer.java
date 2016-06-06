@@ -85,7 +85,7 @@ public class EglGles2Renderer implements Renderer {
 
     @Inject
     EglGles2Renderer(@Nonnull final LibGLESv2 libGLESv2,
-                     @Nonnull Scene scene) {
+                     @Nonnull final Scene scene) {
         this.libGLESv2 = libGLESv2;
         this.scene = scene;
     }
@@ -255,8 +255,8 @@ public class EglGles2Renderer implements Renderer {
     @Override
     public void render() {
         //naive bottom to top overdraw rendering.
-        scene.getSurfacesStack()
-             .forEach(this::render);
+        this.scene.getSurfacesStack()
+                  .forEach(this::render);
     }
 
     private void render(final WlSurfaceResource wlSurfaceResource) {
