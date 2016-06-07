@@ -23,6 +23,7 @@ import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlPointerAxis;
+import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.events.Button;
@@ -108,6 +109,16 @@ public class PointerDevice implements Role {
         this.cursorFactory = cursorFactory;
         this.jobExecutor = jobExecutor;
         this.scene = scene;
+    }
+
+    public void axisSource(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                           final WlPointerAxisSource wlPointerAxisSource) {
+        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
+                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
+            if (wlPointerResource.getVersion() > 4) {
+                wlPointerResource.axisSource(wlPointerAxisSource.value);
+            }
+        }));
     }
 
     //TODO unit test
