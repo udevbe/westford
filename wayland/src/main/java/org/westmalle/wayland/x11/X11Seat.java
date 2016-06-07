@@ -26,6 +26,8 @@ import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 
+import static org.freedesktop.wayland.shared.WlPointerAxis.HORIZONTAL_SCROLL;
+import static org.freedesktop.wayland.shared.WlPointerAxis.VERTICAL_SCROLL;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CURSOR_NONE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
@@ -41,6 +43,8 @@ import static org.westmalle.wayland.nativ.linux.Input.BTN_SIDE;
 @AutoFactory(className = "PrivateX11SeatFactory",
              allowSubclasses = true)
 public class X11Seat {
+
+    private static final float DEFAULT_AXIS_STEP_DISTANCE = 10.0f;
 
     @Nonnull
     private final Libxcb    libxcb;
@@ -99,12 +103,14 @@ public class X11Seat {
                          eventDetail);
         }
         else if (button != 0) {
-            final WlPointer wlPointer = this.wlSeat.getWlPointer();
-            wlPointer.getPointerDevice()
-                     .button(wlPointer.getResources(),
-                             buttonTime,
-                             button,
-                             wlPointerButtonState);
+            final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+            final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+            pointerDevice.button(wlPointer.getResources(),
+                                 buttonTime,
+                                 button,
+                                 wlPointerButtonState);
+            pointerDevice.frame(wlPointer.getResources());
         }
     }
 
@@ -116,15 +122,13 @@ public class X11Seat {
         final int           discreteValue;
 
         if (eventDetail == 4 || eventDetail == 5) {
-            //vertical
-            wlPointerAxis = WlPointerAxis.VERTICAL_SCROLL;
-            value = eventDetail == 4 ? -1.0f : 1.0f;
+            wlPointerAxis = VERTICAL_SCROLL;
+            value = eventDetail == 4 ? -DEFAULT_AXIS_STEP_DISTANCE : DEFAULT_AXIS_STEP_DISTANCE;
             discreteValue = eventDetail == 4 ? -1 : 1;
         }
         else {
-            //horizontal
-            wlPointerAxis = WlPointerAxis.HORIZONTAL_SCROLL;
-            value = eventDetail == 6 ? -1.0f : 1.0f;
+            wlPointerAxis = HORIZONTAL_SCROLL;
+            value = eventDetail == 6 ? -DEFAULT_AXIS_STEP_DISTANCE : DEFAULT_AXIS_STEP_DISTANCE;
             discreteValue = eventDetail == 6 ? -1 : 1;
         }
 
@@ -136,6 +140,7 @@ public class X11Seat {
                                    buttonTime,
                                    discreteValue,
                                    value);
+        pointerDevice.frame(wlPointer.getResources());
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonTime,
@@ -193,12 +198,14 @@ public class X11Seat {
     public void deliverMotion(final int time,
                               final int x,
                               final int y) {
-        final WlPointer wlPointer = this.wlSeat.getWlPointer();
-        wlPointer.getPointerDevice()
-                 .motion(wlPointer.getResources(),
-                         time,
-                         x,
-                         y);
+        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+        pointerDevice.motion(wlPointer.getResources(),
+                             time,
+                             x,
+                             y);
+        pointerDevice.frame(wlPointer.getResources());
     }
 
     @Nonnull
