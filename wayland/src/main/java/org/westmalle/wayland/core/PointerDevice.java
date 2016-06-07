@@ -111,6 +111,17 @@ public class PointerDevice implements Role {
     }
 
     //TODO unit test
+    public void frame(@Nonnull final Set<WlPointerResource> wlPointerResources) {
+        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
+                                                         wlSurfaceResource.getClient()).forEach((wlPointerResource) -> {
+            if (wlPointerResource.getVersion() > 4) {
+                wlPointerResource.frame();
+            }
+        }));
+        //TODO emit event?
+    }
+
+    //TODO unit test
     public void axisStop(@Nonnull final Set<WlPointerResource> wlPointerResources,
                          final WlPointerAxis wlPointerAxis,
                          final int time) {
@@ -118,7 +129,6 @@ public class PointerDevice implements Role {
                                                                  wlSurfaceResource,
                                                                  wlPointerAxis,
                                                                  time));
-
         //TODO emit event?
     }
 
@@ -127,8 +137,12 @@ public class PointerDevice implements Role {
                                 final WlPointerAxis wlPointerAxis,
                                 final int time) {
         filter(surfaceResource,
-               wlSurfaceResource.getClient()).forEach(wlPointerResource -> wlPointerResource.axisStop(time,
-                                                                                                      wlPointerAxis.value));
+               wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
+            if (wlPointerResource.getVersion() > 4) {
+                wlPointerResource.axisStop(time,
+                                           wlPointerAxis.value);
+            }
+        });
     }
 
     //TODO unit test
@@ -156,9 +170,10 @@ public class PointerDevice implements Role {
         filter(wlPointerResources,
                wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
 
-            //FIXME check if version supports discrete axis reporting
-            wlPointerResource.axisDiscrete(wlPointerAxis.value,
-                                           discrete);
+            if (wlPointerResource.getVersion() > 4) {
+                wlPointerResource.axisDiscrete(wlPointerAxis.value,
+                                               discrete);
+            }
             wlPointerResource.axis(time,
                                    wlPointerAxis.value,
                                    Fixed.create(value));
