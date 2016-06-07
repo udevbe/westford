@@ -1,21 +1,19 @@
 package org.westmalle.wayland.core;
 
-
-import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import java.util.EnumSet;
 import java.util.Set;
 
-@AutoFactory(className = "SeatFactory",
-             allowSubclasses = true)
 public class Seat {
 
     @Nonnull
     private EnumSet<WlSeatCapability> capabilities = EnumSet.noneOf(WlSeatCapability.class);
 
+    @Inject
     Seat() {}
 
     public void emitCapabilities(@Nonnull final Set<WlSeatResource> wlSeatResources) {

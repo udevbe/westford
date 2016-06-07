@@ -25,6 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.westmalle.wayland.core.TouchDevice;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
@@ -39,6 +40,8 @@ public class WlTouchTest {
 
     @Mock
     private WaylandServerCore waylandServerCore;
+    @Mock
+    private TouchDevice touchDevice;
 
     private WlTouch wlTouch;
 
@@ -51,7 +54,7 @@ public class WlTouchTest {
                                                        anyLong(),
                                                        anyInt(),
                                                        anyInt())).thenReturn(112358L);
-        this.wlTouch = new WlTouch();
+        this.wlTouch = new WlTouch(this.touchDevice);
     }
 
     @Test
