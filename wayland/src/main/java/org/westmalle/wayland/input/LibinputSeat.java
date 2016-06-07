@@ -7,6 +7,7 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.core.Compositor;
@@ -247,6 +248,7 @@ public class LibinputSeat {
                              time,
                              pointerDevicePosition.getX() + (int) dx,
                              pointerDevicePosition.getY() + (int) dy);
+        pointerDevice.frame(wlPointer.getResources());
     }
 
     private void handlePointerMotionAbsolute(final long pointerEvent) {
@@ -264,12 +266,14 @@ public class LibinputSeat {
             final double y = this.libinput.libinput_event_pointer_get_absolute_y_transformed(pointerEvent,
                                                                                              physicalHeight);
 
-            final WlPointer wlPointer = this.wlSeat.getWlPointer();
-            wlPointer.getPointerDevice()
-                     .motion(wlPointer.getResources(),
-                             time,
-                             (int) x,
-                             (int) y);
+            final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+            final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+            pointerDevice.motion(wlPointer.getResources(),
+                                 time,
+                                 (int) x,
+                                 (int) y);
+            pointerDevice.frame(wlPointer.getResources());
         }//else ignore event
     }
 
@@ -288,12 +292,14 @@ public class LibinputSeat {
             return;
         }
 
-        final WlPointer wlPointer = this.wlSeat.getWlPointer();
-        wlPointer.getPointerDevice()
-                 .button(wlPointer.getResources(),
-                         time,
-                         button,
-                         wlPointerButtonState(buttonState));
+        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+        pointerDevice.button(wlPointer.getResources(),
+                             time,
+                             button,
+                             wlPointerButtonState(buttonState));
+        pointerDevice.frame(wlPointer.getResources());
     }
 
     private WlPointerButtonState wlPointerButtonState(final int buttonState) {
@@ -307,8 +313,6 @@ public class LibinputSeat {
 
     private void handlePointerAxis(final long pointerEvent) {
 
-        final WlPointerAxisSource wlPointerAxisSource;
-
         final int hasVertical = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
                                                                               LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
         final int hasHorizontal = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
@@ -316,7 +320,9 @@ public class LibinputSeat {
 
         if (hasVertical == 0 && hasHorizontal == 0) { return; }
 
-        final int source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
+        final int                 source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
+        final WlPointerAxisSource wlPointerAxisSource;
+
         switch (source) {
             case LIBINPUT_POINTER_AXIS_SOURCE_WHEEL:
                 wlPointerAxisSource = WlPointerAxisSource.WHEEL;
@@ -332,39 +338,69 @@ public class LibinputSeat {
                 return;
         }
 
-        //TODO send notify axis source
+        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+        pointerDevice.axisSource(wlPointer.getResources(),
+                                 wlPointerAxisSource);
 
         if (hasVertical != 0) {
-            final double vertDiscrete = getAxisDiscrete(pointerEvent,
-                                                        LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
+            final int vertDiscrete = getAxisDiscrete(pointerEvent,
+                                                     LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
             final double vert = normalizeScroll(pointerEvent,
                                                 LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
 
-            //TODO send notify axis
             final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
 
+            if (vertDiscrete == 0) {
+                pointerDevice.axisContinuous(wlPointer.getResources(),
+                                             time,
+                                             WlPointerAxis.VERTICAL_SCROLL,
+                                             (float) vert);
+            }
+            else {
+                pointerDevice.axisDiscrete(wlPointer.getResources(),
+                                           WlPointerAxis.VERTICAL_SCROLL,
+                                           time,
+                                           vertDiscrete,
+                                           (float) vert);
+            }
         }
 
         if (hasHorizontal != 0) {
-            final double horizDiscrete = getAxisDiscrete(pointerEvent,
-                                                         LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
+            final int horizDiscrete = getAxisDiscrete(pointerEvent,
+                                                      LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
             final double horiz = normalizeScroll(pointerEvent,
                                                  LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
 
-            //TODO send notify axis
             final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
 
+            if (horizDiscrete == 0) {
+                pointerDevice.axisContinuous(wlPointer.getResources(),
+                                             time,
+                                             WlPointerAxis.HORIZONTAL_SCROLL,
+                                             (float) horiz);
+            }
+            else {
+                pointerDevice.axisDiscrete(wlPointer.getResources(),
+                                           WlPointerAxis.HORIZONTAL_SCROLL,
+                                           time,
+                                           horizDiscrete,
+                                           (float) horiz);
+            }
         }
+
+        pointerDevice.frame(wlPointer.getResources());
     }
 
-    private double getAxisDiscrete(final long pointerEvent,
-                                   final int axis) {
+    private int getAxisDiscrete(final long pointerEvent,
+                                final int axis) {
         final int source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
 
         if (source != LIBINPUT_POINTER_AXIS_SOURCE_WHEEL) { return 0; }
 
-        return this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
-                                                                            axis);
+        return (int) this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
+                                                                                  axis);
     }
 
     private double normalizeScroll(final long pointerEvent,
@@ -392,6 +428,11 @@ public class LibinputSeat {
         return value;
     }
 
+    private void handleTouchDown(final long touchEvent) {
+
+
+    }
+
     private void handleTouchFrame(final long touchEvent) {
 
     }
@@ -401,11 +442,6 @@ public class LibinputSeat {
     }
 
     private void handleTouchMotion(final long touchEvent) {
-
-    }
-
-    private void handleTouchDown(final long touchEvent) {
-
 
     }
 }
