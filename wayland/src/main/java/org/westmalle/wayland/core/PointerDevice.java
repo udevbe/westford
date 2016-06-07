@@ -13,8 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
@@ -36,6 +34,7 @@ import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,8 +43,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AutoFactory(className = "PointerDeviceFactory",
-             allowSubclasses = true)
 public class PointerDevice implements Role {
 
     @Nonnull
@@ -97,12 +94,13 @@ public class PointerDevice implements Role {
     @Nonnegative
     private int buttonsPressed;
 
-    PointerDevice(@Provided @Nonnull final Display display,
-                  @Provided @Nonnull final InfiniteRegion infiniteRegion,
-                  @Provided @Nonnull final NullRegion nullRegion,
-                  @Provided @Nonnull final CursorFactory cursorFactory,
-                  @Provided @Nonnull final JobExecutor jobExecutor,
-                  @Provided @Nonnull final Scene scene) {
+    @Inject
+    PointerDevice(@Nonnull final Display display,
+                  @Nonnull final InfiniteRegion infiniteRegion,
+                  @Nonnull final NullRegion nullRegion,
+                  @Nonnull final CursorFactory cursorFactory,
+                  @Nonnull final JobExecutor jobExecutor,
+                  @Nonnull final Scene scene) {
         this.display = display;
         this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;

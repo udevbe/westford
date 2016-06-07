@@ -13,10 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.protocol;
 
-import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlTouchRequestsV3;
 import org.freedesktop.wayland.server.WlTouchResource;
+import org.westmalle.wayland.core.TouchDevice;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -25,14 +25,14 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@AutoFactory(className = "WlTouchFactory",
-             allowSubclasses = true)
 public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResource> {
 
     private final Set<WlTouchResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
+    private final TouchDevice touchDevice;
 
     @Inject
-    WlTouch() {
+    WlTouch(final TouchDevice touchDevice) {
+        this.touchDevice = touchDevice;
     }
 
     @Override
@@ -55,5 +55,9 @@ public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResourc
     @Override
     public Set<WlTouchResource> getResources() {
         return this.resources;
+    }
+
+    public TouchDevice getTouchDevice() {
+        return this.touchDevice;
     }
 }
