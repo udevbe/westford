@@ -159,33 +159,20 @@ public class PointerDevice implements Role {
                              final int time,
                              final int discrete,
                              final float value) {
-        getFocus().ifPresent(wlSurfaceResource -> reportAxisDiscrete(wlSurfaceResource,
-                                                                     wlPointerResources,
-                                                                     wlPointerAxis,
-                                                                     time,
-                                                                     discrete,
-                                                                     value));
-        //TODO emit event?
-
-    }
-
-    private void reportAxisDiscrete(final WlSurfaceResource wlSurfaceResource,
-                                    final Set<WlPointerResource> wlPointerResources,
-                                    final WlPointerAxis wlPointerAxis,
-                                    final int time,
-                                    final int discrete,
-                                    final float value) {
-        filter(wlPointerResources,
-               wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
+        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
+                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
 
             if (wlPointerResource.getVersion() > 4) {
                 wlPointerResource.axisDiscrete(wlPointerAxis.value,
                                                discrete);
             }
-            wlPointerResource.axis(time,
-                                   wlPointerAxis.value,
-                                   Fixed.create(value));
-        });
+
+            axisOrStop(wlPointerResource,
+                       time,
+                       wlPointerAxis,
+                       value);
+        }));
+        //TODO emit event?
     }
 
     //TODO unit test
@@ -193,23 +180,27 @@ public class PointerDevice implements Role {
                                final int time,
                                final WlPointerAxis wlPointerAxis,
                                final float value) {
-        getFocus().ifPresent(wlSurfaceResource -> reportAxisContinuous(wlSurfaceResource,
-                                                                       wlPointerResources,
-                                                                       time,
-                                                                       wlPointerAxis,
-                                                                       value));
+        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
+                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> axisOrStop(wlPointerResource,
+                                                                                                                                time,
+                                                                                                                                wlPointerAxis,
+                                                                                                                                value)));
         //TODO emit event?
     }
 
-    private void reportAxisContinuous(final WlSurfaceResource wlSurfaceResource,
-                                      final Set<WlPointerResource> wlPointerResources,
-                                      final int time,
-                                      final WlPointerAxis wlPointerAxis,
-                                      final float value) {
-        filter(wlPointerResources,
-               wlSurfaceResource.getClient()).forEach(wlPointerResource -> wlPointerResource.axis(time,
-                                                                                                  wlPointerAxis.value,
-                                                                                                  Fixed.create(value)));
+    private void axisOrStop(final WlPointerResource wlPointerResource,
+                            final int time,
+                            final WlPointerAxis wlPointerAxis,
+                            final float value) {
+        if (value != 0) {
+            wlPointerResource.axis(time,
+                                   wlPointerAxis.value,
+                                   Fixed.create(value));
+        }
+        else if (wlPointerResource.getVersion() > 4) {
+            wlPointerResource.axisStop(time,
+                                       wlPointerAxis.value);
+        }
     }
 
     /**

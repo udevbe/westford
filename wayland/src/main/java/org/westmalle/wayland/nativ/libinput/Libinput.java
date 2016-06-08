@@ -291,4 +291,15 @@ public class Libinput {
     public native double libinput_event_pointer_get_axis_value(@Ptr long event,
                                                                int axis);
 
+
+    public native int libinput_event_touch_get_seat_slot(@Ptr long event);
+
+    @Unsigned
+    public native int libinput_event_touch_get_time(@Ptr long event);
+
+    public native double libinput_event_touch_get_x_transformed(@Ptr long event,
+                                                                @Unsigned int width);
+
+    public native double libinput_event_touch_get_y_transformed(@Ptr long event,
+                                                                @Unsigned int height);
 }

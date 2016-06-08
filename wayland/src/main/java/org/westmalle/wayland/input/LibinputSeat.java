@@ -22,6 +22,7 @@ import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
+import org.westmalle.wayland.protocol.WlTouch;
 
 import javax.annotation.Nonnull;
 
@@ -81,6 +82,7 @@ public class LibinputSeat {
         this.compositor = compositor;
     }
 
+    //TODO unit test all possible events that can occur after call to open
     public void open(final String seat) {
         final long libinput = createUdevContext(seat);
         loop(libinput);
@@ -255,6 +257,8 @@ public class LibinputSeat {
         final WlOutput wlOutput = this.compositor.getWlOutputs()
                                                  .getFirst();
         if (wlOutput != null) {
+            //FIXME we should to take into account that output pixel size is not always the same as compositor coordinates but for now it is.
+
             final OutputGeometry geometry = wlOutput.getOutput()
                                                     .getGeometry();
             final int physicalWidth  = geometry.getPhysicalWidth();
@@ -430,18 +434,75 @@ public class LibinputSeat {
 
     private void handleTouchDown(final long touchEvent) {
 
+        final WlOutput wlOutput = this.compositor.getWlOutputs()
+                                                 .getFirst();
+        if (wlOutput != null) {
+            //FIXME we should to take into account that output pixel size != compositor coordinates
 
-    }
+            final OutputGeometry outputGeometry = wlOutput.getOutput()
+                                                          .getGeometry();
+            final int physicalWidth  = outputGeometry.getPhysicalWidth();
+            final int physicalHeight = outputGeometry.getPhysicalHeight();
 
-    private void handleTouchFrame(final long touchEvent) {
+            final int time = this.libinput.libinput_event_touch_get_time(touchEvent);
+            final int slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent);
+            final int x = (int) this.libinput.libinput_event_touch_get_x_transformed(touchEvent,
+                                                                                     physicalWidth);
+            final int y = (int) this.libinput.libinput_event_touch_get_y_transformed(touchEvent,
+                                                                                     physicalHeight);
 
-    }
-
-    private void handleTouchUp(final long touchEvent) {
-
+            final WlTouch wlTouch = this.wlSeat.getWlTouch();
+            wlTouch.getTouchDevice()
+                   .down(wlTouch.getResources(),
+                         slot,
+                         time,
+                         x,
+                         y);
+        }
     }
 
     private void handleTouchMotion(final long touchEvent) {
+        final WlOutput wlOutput = this.compositor.getWlOutputs()
+                                                 .getFirst();
+        if (wlOutput != null) {
+            //FIXME we should to take into account that output pixel size is not always the same as compositor coordinates but for now it is.
 
+            final OutputGeometry outputGeometry = wlOutput.getOutput()
+                                                          .getGeometry();
+            final int physicalWidth  = outputGeometry.getPhysicalWidth();
+            final int physicalHeight = outputGeometry.getPhysicalHeight();
+
+            final int time = this.libinput.libinput_event_touch_get_time(touchEvent);
+            final int slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent);
+            final int x = (int) this.libinput.libinput_event_touch_get_x_transformed(touchEvent,
+                                                                                     physicalWidth);
+            final int y = (int) this.libinput.libinput_event_touch_get_y_transformed(touchEvent,
+                                                                                     physicalHeight);
+
+            final WlTouch wlTouch = this.wlSeat.getWlTouch();
+            wlTouch.getTouchDevice()
+                   .motion(wlTouch.getResources(),
+                           slot,
+                           time,
+                           x,
+                           y);
+        }
+    }
+
+    private void handleTouchUp(final long touchEvent) {
+        final int time = this.libinput.libinput_event_touch_get_time(touchEvent);
+        final int slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent);
+
+        final WlTouch wlTouch = this.wlSeat.getWlTouch();
+        wlTouch.getTouchDevice()
+               .up(wlTouch.getResources(),
+                   slot,
+                   time);
+    }
+
+    private void handleTouchFrame(final long touchEvent) {
+        final WlTouch wlTouch = this.wlSeat.getWlTouch();
+        wlTouch.getTouchDevice()
+               .frame(wlTouch.getResources());
     }
 }
