@@ -1,25 +1,32 @@
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 
 @Singleton
 public class Scene {
     @Nonnull
-    private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
+    private final LinkedList<WlSurfaceResource>                         surfacesStack          = new LinkedList<>();
     @Nonnull
-    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> subsurfaceStack = new HashMap<>();
+    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> subsurfaceStack        = new HashMap<>();
     @Nonnull
     private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> pendingSubsurfaceStack = new HashMap<>();
+    @Nonnull
+    private final InfiniteRegion infiniteRegion;
 
     @Inject
-    Scene() {
+    Scene(@Nonnull final InfiniteRegion infiniteRegion) {
+        this.infiniteRegion = infiniteRegion;
     }
 
     @Nonnull
@@ -37,6 +44,7 @@ public class Scene {
      * The returned subsurface stack is only valid until {@link #commitSubsurfaceStack(WlSurfaceResource)} is called.
      *
      * @param parentSurface the parent of the subsurfaces.
+     *
      * @return A list of subsurfaces, including the parent, in z-order.
      */
     @Nonnull
@@ -68,5 +76,37 @@ public class Scene {
         this.subsurfaceStack.put(parentSurface,
                                  getPendingSubsurfaceStack(parentSurface));
         this.pendingSubsurfaceStack.remove(parentSurface);
+    }
+
+    @Nonnull
+    public Optional<WlSurfaceResource> pickSurface(final Point global) {
+        final Iterator<WlSurfaceResource> surfaceIterator = getSurfacesStack().descendingIterator();
+        Optional<WlSurfaceResource>       pointerOver     = Optional.empty();
+        while (surfaceIterator.hasNext()) {
+            final WlSurfaceResource surfaceResource = surfaceIterator.next();
+            final WlSurfaceRequests implementation  = surfaceResource.getImplementation();
+            final Surface           surface         = ((WlSurface) implementation).getSurface();
+
+            //surface can be invisible (null buffer), in which case we should ignore it.
+            if (!surface.getState()
+                        .getBuffer()
+                        .isPresent()) {
+                continue;
+            }
+
+            final Optional<Region> inputRegion = surface.getState()
+                                                        .getInputRegion();
+            final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
+
+            final Rectangle size  = surface.getSize();
+            final Point     local = surface.local(global);
+            if (region.contains(size,
+                                local)) {
+                pointerOver = Optional.of(surfaceResource);
+                break;
+            }
+        }
+
+        return pointerOver;
     }
 }
