@@ -59,17 +59,15 @@ public class PointerDevice implements Role {
     @Nonnull
     private final Map<WlPointerResource, Cursor> cursors        = new HashMap<>();
     @Nonnull
-    private final CursorFactory  cursorFactory;
+    private final CursorFactory cursorFactory;
     @Nonnull
-    private final InfiniteRegion infiniteRegion;
+    private final NullRegion    nullRegion;
     @Nonnull
-    private final NullRegion     nullRegion;
+    private final JobExecutor   jobExecutor;
     @Nonnull
-    private final JobExecutor    jobExecutor;
+    private final Scene         scene;
     @Nonnull
-    private final Scene          scene;
-    @Nonnull
-    private final Display        display;
+    private final Display       display;
 
     @Nonnull
     private Point            position     = Point.ZERO;
@@ -102,13 +100,13 @@ public class PointerDevice implements Role {
                   @Nonnull final JobExecutor jobExecutor,
                   @Nonnull final Scene scene) {
         this.display = display;
-        this.infiniteRegion = infiniteRegion;
         this.nullRegion = nullRegion;
         this.cursorFactory = cursorFactory;
         this.jobExecutor = jobExecutor;
         this.scene = scene;
     }
 
+    //TODO unit test
     public void axisSource(@Nonnull final Set<WlPointerResource> wlPointerResources,
                            final WlPointerAxisSource wlPointerAxisSource) {
         getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
@@ -117,6 +115,7 @@ public class PointerDevice implements Role {
                 wlPointerResource.axisSource(wlPointerAxisSource.value);
             }
         }));
+        //TODO emit event?
     }
 
     //TODO unit test
@@ -241,7 +240,7 @@ public class PointerDevice implements Role {
 
     public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources) {
         final Optional<WlSurfaceResource> oldFocus = getFocus();
-        final Optional<WlSurfaceResource> newFocus = over();
+        final Optional<WlSurfaceResource> newFocus = this.scene.pickSurface(getPosition());
 
         if (!oldFocus.equals(newFocus)) {
             updateFocus(wlPointerResources,
@@ -267,37 +266,6 @@ public class PointerDevice implements Role {
         });
 
         this.activeCursor.ifPresent(cursor -> cursor.updatePosition(pointerPosition));
-    }
-
-    @Nonnull
-    public Optional<WlSurfaceResource> over() {
-        final Iterator<WlSurfaceResource> surfaceIterator = this.scene.getSurfacesStack()
-                                                                      .descendingIterator();
-        Optional<WlSurfaceResource> pointerOver = Optional.empty();
-        while (surfaceIterator.hasNext()) {
-            final WlSurfaceResource surfaceResource = surfaceIterator.next();
-            final WlSurfaceRequests implementation  = surfaceResource.getImplementation();
-            final Surface           surface         = ((WlSurface) implementation).getSurface();
-
-            //surface can be invisible (null buffer), in which case we should ignore it.
-            if (!surface.getState()
-                        .getBuffer()
-                        .isPresent()) {
-                continue;
-            }
-
-            final Optional<Region> inputRegion = surface.getState()
-                                                        .getInputRegion();
-            final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
-
-            if (region.contains(surface.getSize(),
-                                surface.local(getPosition()))) {
-                pointerOver = Optional.of(surfaceResource);
-                break;
-            }
-        }
-
-        return pointerOver;
     }
 
     private void reportLeave(final Set<WlPointerResource> wlPointerResources,
