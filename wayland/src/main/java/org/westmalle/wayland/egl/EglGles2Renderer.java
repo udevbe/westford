@@ -90,7 +90,6 @@ public class EglGles2Renderer implements Renderer {
         this.scene = scene;
     }
 
-    @Override
     public void begin(@Nonnull final WlOutput wlOutput) {
         final Output     output = wlOutput.getOutput();
         final OutputMode mode   = output.getMode();
@@ -253,6 +252,12 @@ public class EglGles2Renderer implements Renderer {
 
 
     @Override
+    public void render(@Nonnull final WlOutput wlOutput) {
+        begin(wlOutput);
+        render();
+        end(wlOutput);
+    }
+
     public void render() {
         //naive bottom to top overdraw rendering.
         this.scene.getSurfacesStack()
@@ -435,7 +440,6 @@ public class EglGles2Renderer implements Renderer {
         throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
     }
 
-    @Override
     public void end(@Nonnull final WlOutput wlOutput) {
         final HasEglOutput hasEglOutput = (HasEglOutput) wlOutput.getOutput()
                                                                  .getPlatformImplementation();

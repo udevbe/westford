@@ -16,17 +16,13 @@ package org.westmalle.wayland.core;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -59,14 +55,8 @@ public class Compositor {
         this.renderEvent = Optional.empty();
         //TODO unit test with subsurfaces render order
         //TODO unit test with parent surface without buffer while clients have a buffer.
-        this.wlOutputs.forEach(this::render);
+        this.wlOutputs.forEach(this.renderer::render);
         this.display.flushClients();
-    }
-
-    private void render(@Nonnull final WlOutput wlOutput) {
-        this.renderer.begin(wlOutput);
-        this.renderer.render();
-        this.renderer.end(wlOutput);
     }
 
     public void requestRender() {

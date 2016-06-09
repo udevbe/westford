@@ -2,11 +2,13 @@ package org.westmalle.wayland.input;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.shared.WlSeatCapability;
+import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
@@ -36,26 +38,51 @@ import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXI
 public class LibinputDevice {
     @Nonnull
     private final Libinput                  libinput;
+    @Nonnull
+    private final Compositor                compositor;
+    private final long                      device;
+    @Nonnull
     private final WlSeat                    wlSeat;
+    @Nonnull
     private final EnumSet<WlSeatCapability> deviceCapabilities;
-    private final Optional<WlOutput>        boundOutput;
 
     public LibinputDevice(@Provided @Nonnull final Libinput libinput,
-                          final WlSeat wlSeat,
-                          final EnumSet<WlSeatCapability> deviceCapabilities,
-                          final Optional<WlOutput> boundOutput) {
+                          @Provided @Nonnull final Compositor compositor,
+                          @Nonnull final WlSeat wlSeat,
+                          final long device,
+                          @Nonnull final EnumSet<WlSeatCapability> deviceCapabilities) {
         this.libinput = libinput;
+        this.compositor = compositor;
         this.wlSeat = wlSeat;
+        this.device = device;
         this.deviceCapabilities = deviceCapabilities;
-        this.boundOutput = boundOutput;
     }
 
+    @Nonnull
     public EnumSet<WlSeatCapability> getDeviceCapabilities() {
         return this.deviceCapabilities;
     }
 
-    public Optional<WlOutput> getBoundOutput() {
-        return this.boundOutput;
+    public Optional<WlOutput> findBoundOutput() {
+        //TODO we can cache the output that is mapped to this device and listen for output detsruction/addition so we save a few nanoseconds
+
+        final long outputNamePointer = this.libinput.libinput_device_get_output_name(this.device);
+        if (outputNamePointer == 0L) {
+            return Optional.empty();
+        }
+
+        final String deviceOutputName = Pointer.wrap(String.class,
+                                                     outputNamePointer)
+                                               .dref();
+        for (final WlOutput wlOutput : this.compositor.getWlOutputs()) {
+            //TODO give outputs a name
+//            if (deviceOutputName.equals(wlOutput.getOutput()
+//                                                .getName())) {
+            return Optional.of(wlOutput);
+//            }
+        }
+
+        return Optional.empty();
     }
 
     public void handleKeyboardKey(final long keyboardEvent) {
@@ -110,7 +137,7 @@ public class LibinputDevice {
     }
 
     public void handlePointerMotionAbsolute(final long pointerEvent) {
-        getBoundOutput().ifPresent(wlOutput -> {
+        findBoundOutput().ifPresent(wlOutput -> {
             //FIXME we should to take into account that boundOutput pixel size is not always the same as compositor coordinates but for now it is.
 
             final OutputGeometry geometry = wlOutput.getOutput()
@@ -287,7 +314,7 @@ public class LibinputDevice {
     }
 
     public void handleTouchDown(final long touchEvent) {
-        getBoundOutput().ifPresent(wlOutput -> {
+        findBoundOutput().ifPresent(wlOutput -> {
             //FIXME we should to take into account that boundOutput pixel size != compositor coordinates
 
             final OutputGeometry outputGeometry = wlOutput.getOutput()
@@ -313,7 +340,7 @@ public class LibinputDevice {
     }
 
     public void handleTouchMotion(final long touchEvent) {
-        getBoundOutput().ifPresent(wlOutput -> {
+        findBoundOutput().ifPresent(wlOutput -> {
             //FIXME we should to take into account that boundOutput pixel size is not always the same as compositor coordinates but for now it is.
 
             final OutputGeometry outputGeometry = wlOutput.getOutput()
