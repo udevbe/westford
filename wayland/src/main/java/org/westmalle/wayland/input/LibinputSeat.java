@@ -249,34 +249,14 @@ public class LibinputSeat {
         //TODO configure device
 
         final LibinputDevice libinputDevice = this.libinputDeviceFactory.create(this.wlSeat,
-                                                                                deviceCapabilities,
-                                                                                findBoundOutput(device));
+                                                                                device,
+                                                                                deviceCapabilities);
         this.libinput.libinput_device_set_user_data(device,
                                                     Pointer.from(libinputDevice).address);
         this.libinput.libinput_device_ref(device);
         this.libinputDevices.add(libinputDevice);
 
         emitSeatCapabilities();
-    }
-
-    private Optional<WlOutput> findBoundOutput(final long device) {
-        final long outputNamePointer = this.libinput.libinput_device_get_output_name(device);
-        if (outputNamePointer == 0L) {
-            return Optional.empty();
-        }
-
-        final String deviceOutputName = Pointer.wrap(String.class,
-                                                     outputNamePointer)
-                                               .dref();
-        for (final WlOutput wlOutput : this.compositor.getWlOutputs()) {
-            //TODO give outputs a name
-//            if (deviceOutputName.equals(wlOutput.getOutput()
-//                                                .getName())) {
-            return Optional.of(wlOutput);
-//            }
-        }
-
-        return Optional.empty();
     }
 
     private void handleDeviceRemoved(final long device) {

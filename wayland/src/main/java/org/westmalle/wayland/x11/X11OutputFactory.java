@@ -117,6 +117,7 @@ public class X11OutputFactory {
         final WlOutput wlOutput = createXPlatformOutput(xDisplay,
                                                         width,
                                                         height);
+
         this.compositor.getWlOutputs()
                        .addLast(wlOutput);
 

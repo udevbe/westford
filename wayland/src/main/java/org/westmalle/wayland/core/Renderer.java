@@ -13,17 +13,11 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 
+@FunctionalInterface
 public interface Renderer {
-
-    void begin(@Nonnull final WlOutput wlOutput);
-
-    void render();
-
-    void end(@Nonnull final WlOutput wlOutput);
+    void render(@Nonnull final WlOutput wlOutput);
 }

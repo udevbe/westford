@@ -80,20 +80,12 @@ public class CompositorTest {
         final InOrder inOrder0 = inOrder(this.renderer,
                                          this.display);
         inOrder0.verify(this.renderer)
-                .begin(wlOutput0);
-        inOrder0.verify(this.renderer)
-                .render();
-        inOrder0.verify(this.renderer)
-                .end(wlOutput0);
+                .render(wlOutput0);
 
         final InOrder inOrder1 = inOrder(this.renderer,
                                          this.display);
         inOrder1.verify(this.renderer)
-                .begin(wlOutput1);
-        inOrder1.verify(this.renderer)
-                .render();
-        inOrder1.verify(this.renderer)
-                .end(wlOutput1);
+                .render(wlOutput1);
 
         verify(this.display).flushClients();
     }
