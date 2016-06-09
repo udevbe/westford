@@ -204,6 +204,14 @@ public class Libinput {
     public static final int LIBINPUT_EVENT_GESTURE_PINCH_UPDATE = 804;
     public static final int LIBINPUT_EVENT_GESTURE_PINCH_END    = 805;
 
+    public static final int LIBINPUT_DEVICE_CAP_KEYBOARD    = 0;
+    public static final int LIBINPUT_DEVICE_CAP_POINTER     = 1;
+    public static final int LIBINPUT_DEVICE_CAP_TOUCH       = 2;
+    public static final int LIBINPUT_DEVICE_CAP_TABLET_TOOL = 3;
+    public static final int LIBINPUT_DEVICE_CAP_TABLET_PAD  = 4;
+    public static final int LIBINPUT_DEVICE_CAP_GESTURE     = 5;
+
+
     @Inject
     Libinput() {
     }
@@ -302,4 +310,28 @@ public class Libinput {
 
     public native double libinput_event_touch_get_y_transformed(@Ptr long event,
                                                                 @Unsigned int height);
+
+    @Ptr
+    public native long libinput_event_get_device(@Ptr long event);
+
+
+    public native int libinput_device_has_capability(@Ptr long device,
+                                                     int capability);
+
+    public native void libinput_device_set_user_data(@Ptr long device,
+                                                     @Ptr(Void.class) long user_data);
+
+    @Ptr(Void.class)
+    public native long libinput_device_get_user_data(@Ptr long device);
+
+
+    @Ptr(String.class)
+    public native long libinput_device_get_output_name(@Ptr long device);
+
+    @Ptr
+    public native long libinput_device_ref(@Ptr long device);
+
+    @Ptr
+    public native long libinput_device_unref(@Ptr long device);
+
 }

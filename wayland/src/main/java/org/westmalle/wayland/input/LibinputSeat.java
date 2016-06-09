@@ -6,29 +6,31 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
-import org.freedesktop.wayland.shared.WlKeyboardKeyState;
-import org.freedesktop.wayland.shared.WlPointerAxis;
-import org.freedesktop.wayland.shared.WlPointerAxisSource;
-import org.freedesktop.wayland.shared.WlPointerButtonState;
+import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.OutputGeometry;
-import org.westmalle.wayland.core.Point;
-import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.Seat;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.nativ.libinput.libinput_interface;
 import org.westmalle.wayland.nativ.libudev.Libudev;
-import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
-import org.westmalle.wayland.protocol.WlTouch;
 
 import javax.annotation.Nonnull;
 
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import static org.freedesktop.jaccall.Pointer.malloc;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_PRESSED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_RELEASED;
+import static org.freedesktop.jaccall.Pointer.wrap;
+import static org.freedesktop.wayland.shared.WlSeatCapability.KEYBOARD;
+import static org.freedesktop.wayland.shared.WlSeatCapability.POINTER;
+import static org.freedesktop.wayland.shared.WlSeatCapability.TOUCH;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_KEYBOARD;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_POINTER;
+import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_TOUCH;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_ADDED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_REMOVED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_KEYBOARD_KEY;
@@ -41,13 +43,6 @@ import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_FRAME;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_MOTION;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_UP;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_PRESSED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_RELEASED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_FINGER;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_WHEEL;
 import static org.westmalle.wayland.nativ.libinput.Pointerclose_restricted.nref;
 import static org.westmalle.wayland.nativ.libinput.Pointeropen_restricted.nref;
 
@@ -56,30 +51,36 @@ import static org.westmalle.wayland.nativ.libinput.Pointeropen_restricted.nref;
 public class LibinputSeat {
 
     @Nonnull
-    private final Display    display;
+    private final Display               display;
     @Nonnull
-    private final Libudev    libudev;
+    private final Libudev               libudev;
     @Nonnull
-    private final Libinput   libinput;
+    private final Libinput              libinput;
     @Nonnull
-    private final Libc       libc;
+    private final Libc                  libc;
     @Nonnull
-    private final WlSeat     wlSeat;
+    private final LibinputDeviceFactory libinputDeviceFactory;
     @Nonnull
-    private final Compositor compositor;
+    private final Compositor            compositor;
+    @Nonnull
+    private final WlSeat                wlSeat;
+
+    private final Set<LibinputDevice> libinputDevices = new HashSet<>();
 
     LibinputSeat(@Provided @Nonnull final Display display,
                  @Provided @Nonnull final Libudev libudev,
                  @Provided @Nonnull final Libinput libinput,
                  @Provided @Nonnull final Libc libc,
+                 @Provided @Nonnull final LibinputDeviceFactory libinputDeviceFactory,
                  @Provided @Nonnull final Compositor compositor,
                  @Nonnull final WlSeat wlSeat) {
         this.display = display;
         this.libudev = libudev;
         this.libinput = libinput;
         this.libc = libc;
-        this.wlSeat = wlSeat;
+        this.libinputDeviceFactory = libinputDeviceFactory;
         this.compositor = compositor;
+        this.wlSeat = wlSeat;
     }
 
     //TODO unit test all possible events that can occur after call to open
@@ -159,42 +160,64 @@ public class LibinputSeat {
     }
 
     private void processEvent(final long event) {
-        switch (this.libinput.libinput_event_get_type(event)) {
+        final int  eventType = this.libinput.libinput_event_get_type(event);
+        final long device    = this.libinput.libinput_event_get_device(event);
+        switch (eventType) {
             case LIBINPUT_EVENT_NONE:
                 //no more events
                 break;
             case LIBINPUT_EVENT_DEVICE_ADDED:
-                //TODO add seat capability
+                handleDeviceAdded(device);
                 break;
             case LIBINPUT_EVENT_DEVICE_REMOVED:
-                //TODO remove seat capability
+                handleDeviceRemoved(device);
                 break;
+            default:
+                processDeviceEvent(event,
+                                   eventType,
+                                   device);
+                break;
+        }
+    }
+
+    private void processDeviceEvent(final long event,
+                                    final int eventType,
+                                    final long device) {
+        final long deviceData = this.libinput.libinput_device_get_user_data(device);
+        if (deviceData == 0L) {
+            //device was not mapped to a device we can handle
+            return;
+        }
+        final LibinputDevice libinputDevice = wrap(LibinputDevice.class,
+                                                   deviceData).dref();
+
+        switch (eventType) {
             case LIBINPUT_EVENT_KEYBOARD_KEY:
-                handleKeyboardKey(this.libinput.libinput_event_get_keyboard_event(event));
+                libinputDevice.handleKeyboardKey(this.libinput.libinput_event_get_keyboard_event(event));
                 break;
             case LIBINPUT_EVENT_POINTER_MOTION:
-                handlePointerMotion(this.libinput.libinput_event_get_pointer_event(event));
+                libinputDevice.handlePointerMotion(this.libinput.libinput_event_get_pointer_event(event));
                 break;
             case LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE:
-                handlePointerMotionAbsolute(this.libinput.libinput_event_get_pointer_event(event));
+                libinputDevice.handlePointerMotionAbsolute(this.libinput.libinput_event_get_pointer_event(event));
                 break;
             case LIBINPUT_EVENT_POINTER_BUTTON:
-                handlePointerButton(this.libinput.libinput_event_get_pointer_event(event));
+                libinputDevice.handlePointerButton(this.libinput.libinput_event_get_pointer_event(event));
                 break;
             case LIBINPUT_EVENT_POINTER_AXIS:
-                handlePointerAxis(this.libinput.libinput_event_get_pointer_event(event));
+                libinputDevice.handlePointerAxis(this.libinput.libinput_event_get_pointer_event(event));
                 break;
             case LIBINPUT_EVENT_TOUCH_DOWN:
-                handleTouchDown(this.libinput.libinput_event_get_touch_event(event));
+                libinputDevice.handleTouchDown(this.libinput.libinput_event_get_touch_event(event));
                 break;
             case LIBINPUT_EVENT_TOUCH_MOTION:
-                handleTouchMotion(this.libinput.libinput_event_get_touch_event(event));
+                libinputDevice.handleTouchMotion(this.libinput.libinput_event_get_touch_event(event));
                 break;
             case LIBINPUT_EVENT_TOUCH_UP:
-                handleTouchUp(this.libinput.libinput_event_get_touch_event(event));
+                libinputDevice.handleTouchUp(this.libinput.libinput_event_get_touch_event(event));
                 break;
             case LIBINPUT_EVENT_TOUCH_FRAME:
-                handleTouchFrame(this.libinput.libinput_event_get_touch_event(event));
+                libinputDevice.handleTouchFrame(this.libinput.libinput_event_get_touch_event(event));
                 break;
             default:
                 //unsupported libinput event
@@ -202,307 +225,87 @@ public class LibinputSeat {
         }
     }
 
-    private void handleKeyboardKey(final long keyboardEvent) {
+    private void handleDeviceAdded(final long device) {
+        //check device capabilities, if it's not a touch, pointer or keyboard, we're not interested.
+        final EnumSet<WlSeatCapability> deviceCapabilities = EnumSet.noneOf(WlSeatCapability.class);
 
-        final int time         = this.libinput.libinput_event_keyboard_get_time(keyboardEvent);
-        final int key          = this.libinput.libinput_event_keyboard_get_key(keyboardEvent);
-        final int keyState     = this.libinput.libinput_event_keyboard_get_key_state(keyboardEvent);
-        final int seatKeyCount = this.libinput.libinput_event_keyboard_get_seat_key_count(keyboardEvent);
+        if (this.libinput.libinput_device_has_capability(device,
+                                                         LIBINPUT_DEVICE_CAP_KEYBOARD) != 0) {
+            deviceCapabilities.add(KEYBOARD);
+        }
+        if (this.libinput.libinput_device_has_capability(device,
+                                                         LIBINPUT_DEVICE_CAP_POINTER) != 0) {
+            deviceCapabilities.add(POINTER);
+        }
+        if (this.libinput.libinput_device_has_capability(device,
+                                                         LIBINPUT_DEVICE_CAP_TOUCH) != 0) {
+            deviceCapabilities.add(TOUCH);
+        }
 
-        if ((keyState == LIBINPUT_KEY_STATE_PRESSED &&
-             seatKeyCount != 1) ||
-            (keyState == LIBINPUT_KEY_STATE_RELEASED &&
-             seatKeyCount != 0)) {
-            //don't send key events when we have an additional press or release of the same key on the same seat from a different device.
+        if (deviceCapabilities.isEmpty()) {
             return;
         }
 
-        final WlKeyboard wlKeyboard = this.wlSeat.getWlKeyboard();
-        wlKeyboard.getKeyboardDevice()
-                  .key(wlKeyboard.getResources(),
-                       time,
-                       key,
-                       wlKeyboardKeyState(keyState));
+        //TODO configure device
+
+        final LibinputDevice libinputDevice = this.libinputDeviceFactory.create(this.wlSeat,
+                                                                                deviceCapabilities,
+                                                                                findBoundOutput(device));
+        this.libinput.libinput_device_set_user_data(device,
+                                                    Pointer.from(libinputDevice).address);
+        this.libinput.libinput_device_ref(device);
+        this.libinputDevices.add(libinputDevice);
+
+        emitSeatCapabilities();
     }
 
-    private WlKeyboardKeyState wlKeyboardKeyState(final int keyState) {
-        final WlKeyboardKeyState wlKeyboardKeyState;
-        if (keyState == LIBINPUT_KEY_STATE_PRESSED) {
-            wlKeyboardKeyState = WlKeyboardKeyState.PRESSED;
+    private Optional<WlOutput> findBoundOutput(final long device) {
+        final long outputNamePointer = this.libinput.libinput_device_get_output_name(device);
+        if (outputNamePointer == 0L) {
+            return Optional.empty();
         }
-        else {
-            wlKeyboardKeyState = WlKeyboardKeyState.RELEASED;
+
+        final String deviceOutputName = Pointer.wrap(String.class,
+                                                     outputNamePointer)
+                                               .dref();
+        for (final WlOutput wlOutput : this.compositor.getWlOutputs()) {
+            //TODO give outputs a name
+//            if (deviceOutputName.equals(wlOutput.getOutput()
+//                                                .getName())) {
+            return Optional.of(wlOutput);
+//            }
         }
-        return wlKeyboardKeyState;
+
+        return Optional.empty();
     }
 
-    private void handlePointerMotion(final long pointerEvent) {
-
-        final int    time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
-        final double dx   = this.libinput.libinput_event_pointer_get_dx(pointerEvent);
-        final double dy   = this.libinput.libinput_event_pointer_get_dy(pointerEvent);
-
-        final WlPointer     wlPointer             = this.wlSeat.getWlPointer();
-        final PointerDevice pointerDevice         = wlPointer.getPointerDevice();
-        final Point         pointerDevicePosition = pointerDevice.getPosition();
-
-        pointerDevice.motion(wlPointer.getResources(),
-                             time,
-                             pointerDevicePosition.getX() + (int) dx,
-                             pointerDevicePosition.getY() + (int) dy);
-        pointerDevice.frame(wlPointer.getResources());
-    }
-
-    private void handlePointerMotionAbsolute(final long pointerEvent) {
-        final WlOutput wlOutput = this.compositor.getWlOutputs()
-                                                 .getFirst();
-        if (wlOutput != null) {
-            //FIXME we should to take into account that output pixel size is not always the same as compositor coordinates but for now it is.
-
-            final OutputGeometry geometry = wlOutput.getOutput()
-                                                    .getGeometry();
-            final int physicalWidth  = geometry.getPhysicalWidth();
-            final int physicalHeight = geometry.getPhysicalHeight();
-
-            final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
-            final double x = this.libinput.libinput_event_pointer_get_absolute_x_transformed(pointerEvent,
-                                                                                             physicalWidth);
-            final double y = this.libinput.libinput_event_pointer_get_absolute_y_transformed(pointerEvent,
-                                                                                             physicalHeight);
-
-            final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
-            final PointerDevice pointerDevice = wlPointer.getPointerDevice();
-
-            pointerDevice.motion(wlPointer.getResources(),
-                                 time,
-                                 (int) x,
-                                 (int) y);
-            pointerDevice.frame(wlPointer.getResources());
-        }//else ignore event
-    }
-
-    private void handlePointerButton(final long pointerEvent) {
-
-        final int time            = this.libinput.libinput_event_pointer_get_time(pointerEvent);
-        final int buttonState     = this.libinput.libinput_event_pointer_get_button_state(pointerEvent);
-        final int seatButtonCount = this.libinput.libinput_event_pointer_get_seat_button_count(pointerEvent);
-        final int button          = this.libinput.libinput_event_pointer_get_button(pointerEvent);
-
-        if ((buttonState == LIBINPUT_BUTTON_STATE_PRESSED &&
-             seatButtonCount != 1) ||
-            (buttonState == LIBINPUT_BUTTON_STATE_RELEASED &&
-             seatButtonCount != 0)) {
-            //don't send button events when we have an additional press or release of the same key on the same seat from a different device.
+    private void handleDeviceRemoved(final long device) {
+        final long deviceData = this.libinput.libinput_device_get_user_data(device);
+        if (deviceData == 0L) {
+            //device is not handled by us
             return;
         }
 
-        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
-        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+        final Pointer<LibinputDevice> devicePointer = Pointer.wrap(LibinputDevice.class,
+                                                                   deviceData);
+        final LibinputDevice libinputDevice = devicePointer.dref();
+        this.libinputDevices.remove(libinputDevice);
+        devicePointer.close();
+        this.libinput.libinput_device_unref(device);
 
-        pointerDevice.button(wlPointer.getResources(),
-                             time,
-                             button,
-                             wlPointerButtonState(buttonState));
-        pointerDevice.frame(wlPointer.getResources());
+        emitSeatCapabilities();
     }
 
-    private WlPointerButtonState wlPointerButtonState(final int buttonState) {
-        if (buttonState == LIBINPUT_BUTTON_STATE_PRESSED) {
-            return WlPointerButtonState.PRESSED;
-        }
-        else {
-            return WlPointerButtonState.RELEASED;
-        }
-    }
+    private void emitSeatCapabilities() {
 
-    private void handlePointerAxis(final long pointerEvent) {
+        final EnumSet<WlSeatCapability> seatCapabilities = EnumSet.noneOf(WlSeatCapability.class);
 
-        final int hasVertical = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
-                                                                              LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
-        final int hasHorizontal = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
-                                                                                LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
-
-        if (hasVertical == 0 && hasHorizontal == 0) { return; }
-
-        final int                 source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
-        final WlPointerAxisSource wlPointerAxisSource;
-
-        switch (source) {
-            case LIBINPUT_POINTER_AXIS_SOURCE_WHEEL:
-                wlPointerAxisSource = WlPointerAxisSource.WHEEL;
-                break;
-            case LIBINPUT_POINTER_AXIS_SOURCE_FINGER:
-                wlPointerAxisSource = WlPointerAxisSource.FINGER;
-                break;
-            case LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS:
-                wlPointerAxisSource = WlPointerAxisSource.CONTINUOUS;
-                break;
-            default:
-                //unknown scroll source
-                return;
+        for (final LibinputDevice libinputDevice : this.libinputDevices) {
+            seatCapabilities.addAll(libinputDevice.getDeviceCapabilities());
         }
 
-        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
-        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
-
-        pointerDevice.axisSource(wlPointer.getResources(),
-                                 wlPointerAxisSource);
-
-        if (hasVertical != 0) {
-            final int vertDiscrete = getAxisDiscrete(pointerEvent,
-                                                     LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
-            final double vert = normalizeScroll(pointerEvent,
-                                                LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
-
-            final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
-
-            if (vertDiscrete == 0) {
-                pointerDevice.axisContinuous(wlPointer.getResources(),
-                                             time,
-                                             WlPointerAxis.VERTICAL_SCROLL,
-                                             (float) vert);
-            }
-            else {
-                pointerDevice.axisDiscrete(wlPointer.getResources(),
-                                           WlPointerAxis.VERTICAL_SCROLL,
-                                           time,
-                                           vertDiscrete,
-                                           (float) vert);
-            }
-        }
-
-        if (hasHorizontal != 0) {
-            final int horizDiscrete = getAxisDiscrete(pointerEvent,
-                                                      LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
-            final double horiz = normalizeScroll(pointerEvent,
-                                                 LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
-
-            final int time = this.libinput.libinput_event_pointer_get_time(pointerEvent);
-
-            if (horizDiscrete == 0) {
-                pointerDevice.axisContinuous(wlPointer.getResources(),
-                                             time,
-                                             WlPointerAxis.HORIZONTAL_SCROLL,
-                                             (float) horiz);
-            }
-            else {
-                pointerDevice.axisDiscrete(wlPointer.getResources(),
-                                           WlPointerAxis.HORIZONTAL_SCROLL,
-                                           time,
-                                           horizDiscrete,
-                                           (float) horiz);
-            }
-        }
-
-        pointerDevice.frame(wlPointer.getResources());
-    }
-
-    private int getAxisDiscrete(final long pointerEvent,
-                                final int axis) {
-        final int source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
-
-        if (source != LIBINPUT_POINTER_AXIS_SOURCE_WHEEL) { return 0; }
-
-        return (int) this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
-                                                                                  axis);
-    }
-
-    private double normalizeScroll(final long pointerEvent,
-                                   final int axis) {
-        double value = 0.0;
-
-        final int source = this.libinput.libinput_event_pointer_get_axis_source(pointerEvent);
-    /* libinput < 0.8 sent wheel click events with value 10. Since 0.8
-       the value is the angle of the click in degrees. To keep
-	   backwards-compat with existing clients, we just send multiples of
-	   the click count.
-	 */
-        switch (source) {
-            case LIBINPUT_POINTER_AXIS_SOURCE_WHEEL:
-                value = 10 * this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
-                                                                                          axis);
-                break;
-            case LIBINPUT_POINTER_AXIS_SOURCE_FINGER:
-            case LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS:
-                value = this.libinput.libinput_event_pointer_get_axis_value(pointerEvent,
-                                                                            axis);
-                break;
-        }
-
-        return value;
-    }
-
-    private void handleTouchDown(final long touchEvent) {
-
-        final WlOutput wlOutput = this.compositor.getWlOutputs()
-                                                 .getFirst();
-        if (wlOutput != null) {
-            //FIXME we should to take into account that output pixel size != compositor coordinates
-
-            final OutputGeometry outputGeometry = wlOutput.getOutput()
-                                                          .getGeometry();
-            final int physicalWidth  = outputGeometry.getPhysicalWidth();
-            final int physicalHeight = outputGeometry.getPhysicalHeight();
-
-            final int time = this.libinput.libinput_event_touch_get_time(touchEvent);
-            final int slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent);
-            final int x = (int) this.libinput.libinput_event_touch_get_x_transformed(touchEvent,
-                                                                                     physicalWidth);
-            final int y = (int) this.libinput.libinput_event_touch_get_y_transformed(touchEvent,
-                                                                                     physicalHeight);
-
-            final WlTouch wlTouch = this.wlSeat.getWlTouch();
-            wlTouch.getTouchDevice()
-                   .down(wlTouch.getResources(),
-                         slot,
-                         time,
-                         x,
-                         y);
-        }
-    }
-
-    private void handleTouchMotion(final long touchEvent) {
-        final WlOutput wlOutput = this.compositor.getWlOutputs()
-                                                 .getFirst();
-        if (wlOutput != null) {
-            //FIXME we should to take into account that output pixel size is not always the same as compositor coordinates but for now it is.
-
-            final OutputGeometry outputGeometry = wlOutput.getOutput()
-                                                          .getGeometry();
-            final int physicalWidth  = outputGeometry.getPhysicalWidth();
-            final int physicalHeight = outputGeometry.getPhysicalHeight();
-
-            final int time = this.libinput.libinput_event_touch_get_time(touchEvent);
-            final int slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent);
-            final int x = (int) this.libinput.libinput_event_touch_get_x_transformed(touchEvent,
-                                                                                     physicalWidth);
-            final int y = (int) this.libinput.libinput_event_touch_get_y_transformed(touchEvent,
-                                                                                     physicalHeight);
-
-            final WlTouch wlTouch = this.wlSeat.getWlTouch();
-            wlTouch.getTouchDevice()
-                   .motion(wlTouch.getResources(),
-                           slot,
-                           time,
-                           x,
-                           y);
-        }
-    }
-
-    private void handleTouchUp(final long touchEvent) {
-        final int time = this.libinput.libinput_event_touch_get_time(touchEvent);
-        final int slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent);
-
-        final WlTouch wlTouch = this.wlSeat.getWlTouch();
-        wlTouch.getTouchDevice()
-               .up(wlTouch.getResources(),
-                   slot,
-                   time);
-    }
-
-    private void handleTouchFrame(final long touchEvent) {
-        final WlTouch wlTouch = this.wlSeat.getWlTouch();
-        wlTouch.getTouchDevice()
-               .frame(wlTouch.getResources());
+        final Seat seat = this.wlSeat.getSeat();
+        seat.setCapabilities(seatCapabilities);
+        seat.emitCapabilities(this.wlSeat.getResources());
     }
 }
