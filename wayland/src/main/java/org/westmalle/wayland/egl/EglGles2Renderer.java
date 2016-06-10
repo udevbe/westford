@@ -62,6 +62,17 @@ public class EglGles2Renderer implements Renderer {
             "    gl_FragColor = texture2D(u_texture, v_texCoord);\n" +
             "}";
 
+    static final String FRAGMENT_SHADER_XRGB8888 =
+            "precision mediump float;\n" +
+            "\n" +
+            "uniform sampler2D u_texture;\n" +
+            "\n" +
+            "varying vec2 v_texCoord;\n" +
+            "\n" +
+            "void main(){\n" +
+            "    gl_FragColor = vec4(texture2D(u_texture, v_texCoord).bgr, 1.0);\n" +
+            "}";
+
     @Nonnull
     private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
     @Nonnull
