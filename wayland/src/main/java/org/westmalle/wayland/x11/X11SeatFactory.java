@@ -17,7 +17,6 @@ import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
-import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
 
@@ -56,20 +55,16 @@ public class X11SeatFactory {
         this.keyboardDeviceFactory = keyboardDeviceFactory;
     }
 
-    public WlSeat create(@Nonnull final WlOutput wlOutput) {
+    public WlSeat create(@Nonnull final X11Platform x11Platform) {
 
-        final X11Output x11Output = (X11Output) wlOutput.getOutput()
-                                                        .getPlatformImplementation();
-
-
-        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(this.x11XkbFactory.create(x11Output.getXcbConnection()));
+        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(this.x11XkbFactory.create(x11Platform.getXcbConnection()));
         keyboardDevice.updateKeymap();
         final WlSeat wlSeat = this.wlSeatFactory.create(this.wlKeyboardFactory.create(keyboardDevice));
 
-        x11Output.getX11EventBus()
-                 .getXEventSignal()
-                 .connect(this.x11InputEventListenerFactory.create(this.privateX11SeatFactory.create(x11Output,
-                                                                                                     wlSeat)));
+        x11Platform.getX11EventBus()
+                   .getXEventSignal()
+                   .connect(this.x11InputEventListenerFactory.create(this.privateX11SeatFactory.create(x11Platform,
+                                                                                                       wlSeat)));
         //enable pointer and keyboard for wlseat as an X11 seat always has these.
         wlSeat.getSeat()
               .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,

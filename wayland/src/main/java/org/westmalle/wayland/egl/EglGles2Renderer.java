@@ -104,13 +104,13 @@ public class EglGles2Renderer implements Renderer {
         this.scene = scene;
     }
 
-    public void begin(@Nonnull final WlOutput wlOutput) {
-        final Output     output = wlOutput.getOutput();
-        final OutputMode mode   = output.getMode();
-        //TODO handle (un)supported outputs more gracefully.
-        final HasEglOutput hasEglOutput = (HasEglOutput) output.getPlatformImplementation();
-        final RenderOutput renderOutput = hasEglOutput.getEglOutput();
-        renderOutput.begin();
+    public void begin(@Nonnull final EglPlatform eglPlatform) {
+
+        eglPlatform.begin();
+
+        final WlOutput   wlOutput = eglPlatform.getWlOutput();
+        final Output     output   = wlOutput.getOutput();
+        final OutputMode mode     = output.getMode();
 
         if (!this.init) {
             init();
@@ -271,21 +271,13 @@ public class EglGles2Renderer implements Renderer {
         }
     }
 
-
-    @Override
-    public void render(@Nonnull final WlOutput wlOutput) {
-        begin(wlOutput);
-        render();
-        end(wlOutput);
-    }
-
-    public void render() {
+    public void render(@Nonnull final EglPlatform eglPlatform) {
         //naive bottom to top overdraw rendering.
         this.scene.getSurfacesStack()
-                  .forEach(this::render);
+                  .forEach(this::draw);
     }
 
-    private void render(final WlSurfaceResource wlSurfaceResource) {
+    private void draw(final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         //don't bother rendering subsurfaces if the parent doesn't have a buffer.
         wlSurface.getSurface()
@@ -297,7 +289,7 @@ public class EglGles2Renderer implements Renderer {
                           wlBufferResource);
                      subsurfaces.forEach((subsurface) -> {
                          if (subsurface != wlSurfaceResource) {
-                             render(subsurface);
+                             draw(subsurface);
                          }
                      });
                  });
@@ -467,10 +459,21 @@ public class EglGles2Renderer implements Renderer {
         throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
     }
 
-    public void end(@Nonnull final WlOutput wlOutput) {
-        final HasEglOutput hasEglOutput = (HasEglOutput) wlOutput.getOutput()
-                                                                 .getPlatformImplementation();
-        hasEglOutput.getEglOutput()
-                    .end();
+    @Override
+    public void visit(final Platform platform) {
+        throw new UnsupportedOperationException(String.format("Need an egl capable platform. Got %s",
+                                                              platform));
+    }
+
+    @Override
+    public void visit(final EglPlatform eglPlatform) {
+        begin(eglPlatform);
+        render(eglPlatform);
+        end(eglPlatform);
+
+    }
+
+    public void end(final EglPlatform renderOutput) {
+        renderOutput.end();
     }
 }

@@ -16,7 +16,6 @@ package org.westmalle.wayland.core;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -34,7 +33,7 @@ public class Compositor {
     @Nonnull
     private final Renderer renderer;
     @Nonnull
-    private final LinkedList<WlOutput> wlOutputs = new LinkedList<>();
+    private final LinkedList<Platform> platforms = new LinkedList<>();
     @Nonnull
     private final EventLoop.IdleHandler idleHandler;
 
@@ -55,7 +54,7 @@ public class Compositor {
         this.renderEvent = Optional.empty();
         //TODO unit test with subsurfaces render order
         //TODO unit test with parent surface without buffer while clients have a buffer.
-        this.wlOutputs.forEach(this.renderer::render);
+        this.platforms.forEach(renderOutput -> renderOutput.accept(this.renderer));
         this.display.flushClients();
     }
 
@@ -76,7 +75,7 @@ public class Compositor {
     }
 
     @Nonnull
-    public LinkedList<WlOutput> getWlOutputs() {
-        return this.wlOutputs;
+    public LinkedList<Platform> getPlatforms() {
+        return this.platforms;
     }
 }

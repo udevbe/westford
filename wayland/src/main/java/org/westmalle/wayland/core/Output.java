@@ -24,18 +24,14 @@ import java.util.Set;
 public class Output {
 
     @Nonnull
-    private final Object         platformImplementation;
+    private OutputGeometry outputGeometry;
     @Nonnull
-    private       OutputGeometry outputGeometry;
-    @Nonnull
-    private       OutputMode     outputMode;
+    private OutputMode     outputMode;
 
     Output(@Nonnull final OutputGeometry outputGeometry,
-           @Nonnull final OutputMode outputMode,
-           @Nonnull final Object platformImplementation) {
+           @Nonnull final OutputMode outputMode) {
         this.outputGeometry = outputGeometry;
         this.outputMode = outputMode;
-        this.platformImplementation = platformImplementation;
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
@@ -80,15 +76,5 @@ public class Output {
     @Nonnull
     public OutputGeometry getGeometry() {
         return this.outputGeometry;
-    }
-
-    /**
-     * Exposes platform specific functionality for eg. X11, GBM/KSM, ...
-     *
-     * @return A platform specific output implementation.
-     */
-    @Nonnull
-    public Object getPlatformImplementation() {
-        return this.platformImplementation;
     }
 }

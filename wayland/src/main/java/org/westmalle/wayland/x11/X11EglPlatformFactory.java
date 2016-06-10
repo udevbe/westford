@@ -14,6 +14,7 @@
 package org.westmalle.wayland.x11;
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -50,29 +51,32 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_STENCIL_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 
-public class X11EglOutputFactory {
+public class X11EglPlatformFactory {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
     private final LibEGL                     libEGL;
     @Nonnull
-    private final PrivateX11EglOutputFactory privateX11EglOutputFactory;
+    private final PrivateX11EglPlatformFactory privateX11EglOutputFactory;
+    @Nonnull
+    private final Compositor                 compositor;
 
     @Inject
-    X11EglOutputFactory(@Nonnull final LibEGL libEGL,
-                        @Nonnull final PrivateX11EglOutputFactory privateX11EglOutputFactory) {
+    X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
+                          @Nonnull final PrivateX11EglPlatformFactory privateX11EglOutputFactory,
+                          @Nonnull final Compositor compositor) {
         this.libEGL = libEGL;
         this.privateX11EglOutputFactory = privateX11EglOutputFactory;
+        this.compositor = compositor;
     }
 
     @Nonnull
-    public X11EglOutput create(final long display,
-                               final int window) {
+    public X11EglPlatform create(final X11Platform x11Platform) {
         if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) == 0L) {
             throw new RuntimeException("eglBindAPI failed");
         }
-        final long eglDisplay = createEglDisplay(display);
+        final long eglDisplay = createEglDisplay(x11Platform.getxDisplay());
 
         final int configs_size = 256 * sizeof((Pointer<?>) null);
         final Pointer<Pointer> configs = malloc(configs_size,
@@ -84,12 +88,16 @@ public class X11EglOutputFactory {
         final long context = createEglContext(eglDisplay,
                                               config);
 
-        return this.privateX11EglOutputFactory.create(eglDisplay,
-                                                      createEglSurface(eglDisplay,
-                                                                       config,
-                                                                       context,
-                                                                       window),
-                                                      context);
+        final X11EglPlatform x11EglPlatform = this.privateX11EglOutputFactory.create(x11Platform.getWlOutput(),
+                                                                                     eglDisplay,
+                                                                                     createEglSurface(eglDisplay,
+                                                                                                      config,
+                                                                                                      context,
+                                                                                                      x11Platform.getxWindow()),
+                                                                                     context);
+        this.compositor.getPlatforms()
+                       .addLast(x11EglPlatform);
+        return x11EglPlatform;
     }
 
     private long createEglDisplay(final long nativeDisplay) {

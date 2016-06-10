@@ -47,17 +47,17 @@ public class X11Seat {
     private static final float DEFAULT_AXIS_STEP_DISTANCE = 10.0f;
 
     @Nonnull
-    private final Libxcb    libxcb;
+    private final Libxcb      libxcb;
     @Nonnull
-    private final X11Output x11Output;
+    private final X11Platform x11Platform;
     @Nonnull
-    private final WlSeat    wlSeat;
+    private final WlSeat      wlSeat;
 
     X11Seat(@Provided @Nonnull final Libxcb libxcb,
-            @Nonnull final X11Output x11Output,
+            @Nonnull final X11Platform x11Platform,
             @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
-        this.x11Output = x11Output;
+        this.x11Platform = x11Platform;
         this.wlSeat = wlSeat;
     }
 
@@ -148,9 +148,9 @@ public class X11Seat {
         final WlPointerButtonState wlPointerButtonState;
         if (pressed) {
             wlPointerButtonState = WlPointerButtonState.PRESSED;
-            this.libxcb.xcb_grab_pointer(this.x11Output.getXcbConnection(),
+            this.libxcb.xcb_grab_pointer(this.x11Platform.getXcbConnection(),
                                          (byte) 0,
-                                         this.x11Output.getxWindow(),
+                                         this.x11Platform.getxWindow(),
                                          (short) (XCB_EVENT_MASK_BUTTON_PRESS |
                                                   XCB_EVENT_MASK_BUTTON_RELEASE |
                                                   XCB_EVENT_MASK_POINTER_MOTION |
@@ -158,12 +158,12 @@ public class X11Seat {
                                                   XCB_EVENT_MASK_LEAVE_WINDOW),
                                          (byte) XCB_GRAB_MODE_ASYNC,
                                          (byte) XCB_GRAB_MODE_ASYNC,
-                                         this.x11Output.getxWindow(),
+                                         this.x11Platform.getxWindow(),
                                          XCB_CURSOR_NONE,
                                          buttonTime);
         }
         else {
-            this.libxcb.xcb_ungrab_pointer(this.x11Output.getXcbConnection(),
+            this.libxcb.xcb_ungrab_pointer(this.x11Platform.getXcbConnection(),
                                            buttonTime);
             wlPointerButtonState = WlPointerButtonState.RELEASED;
         }
@@ -209,8 +209,8 @@ public class X11Seat {
     }
 
     @Nonnull
-    public X11Output getX11Output() {
-        return this.x11Output;
+    public X11Platform getX11Platform() {
+        return this.x11Platform;
     }
 
     @Nonnull

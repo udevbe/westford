@@ -5,6 +5,7 @@ import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.dispmanx.Dispmanx;
 import org.westmalle.wayland.egl.EglModule;
+import org.westmalle.wayland.input.LibinputSeatFactory;
 
 import javax.inject.Singleton;
 
@@ -26,4 +27,5 @@ public interface DispmanxEglCompositor {
     /*
      * Sorry no input yet. Need a Libinput seat implementation for that.
      */
+    LibinputSeatFactory seatFactory();
 }

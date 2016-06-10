@@ -13,11 +13,10 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import org.westmalle.wayland.protocol.WlOutput;
-
-import javax.annotation.Nonnull;
-
-@FunctionalInterface
 public interface Renderer {
-    void render(@Nonnull final WlOutput wlOutput);
+    void visit(Platform platform);
+
+    void visit(EglPlatform eglPlatform);
+
+    //void visit(PixmanRenderOutput renderOutput);
 }

@@ -11,11 +11,13 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.egl;
+package org.westmalle.wayland.core;
 
-import org.westmalle.wayland.core.RenderOutput;
+import org.westmalle.wayland.protocol.WlOutput;
 
-public interface HasEglOutput {
+public interface Platform {
 
-    RenderOutput getEglOutput();
+    WlOutput getWlOutput();
+
+    void accept(Renderer renderer);
 }

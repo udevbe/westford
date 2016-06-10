@@ -19,7 +19,7 @@ import org.westmalle.wayland.input.LibinputSeatFactory;
 @Subcomponent
 public interface Dispmanx {
 
-    DispmanxOutputFactory outputFactory();
+    DispmanxPlatformFactory platformFactory();
 
-    LibinputSeatFactory seatFactory();
+    DispmanxEglPlatformFactory eglPlatformFactory();
 }
