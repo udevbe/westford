@@ -24,7 +24,6 @@ public enum Gles2BufferFormat {
     SHM_XRGB8888(EglGles2Renderer.VERTEX_SHADER,
                  EglGles2Renderer.FRAGMENT_SHADER_XRGB8888,
                  WlShmFormat.XRGB8888.value);
-
     @Nonnull
     private final String vertexShader;
     @Nonnull
