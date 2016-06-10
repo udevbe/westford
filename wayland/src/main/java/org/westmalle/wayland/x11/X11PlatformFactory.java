@@ -34,6 +34,7 @@ import org.westmalle.wayland.protocol.WlOutputFactory;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -230,7 +231,7 @@ public class X11PlatformFactory {
                        }
                    });
 
-        return this.privateX11OutputFactory.create(wlOutput,
+        return this.privateX11OutputFactory.create(Collections.singletonList(wlOutput),
                                                    x11EventBus,
                                                    connection,
                                                    xDisplay,

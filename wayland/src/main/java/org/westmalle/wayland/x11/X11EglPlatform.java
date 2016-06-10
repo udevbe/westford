@@ -21,36 +21,31 @@ import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 @AutoFactory(className = "PrivateX11EglPlatformFactory",
              allowSubclasses = true)
 public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final LibEGL   libEGL;
-    private final WlOutput wlOutput;
-    private final long     eglDisplay;
-    private final long     eglSurface;
-    private final long     eglContext;
+    private final LibEGL      libEGL;
+    @Nonnull
+    private final X11Platform x11Platform;
+    private final long        eglDisplay;
+    private final long        eglSurface;
+    private final long        eglContext;
 
     X11EglPlatform(@Provided @Nonnull final LibEGL libEGL,
-                   final WlOutput wlOutput,
+                   @Nonnull
+                   final X11Platform x11Platform,
                    final long eglDisplay,
                    final long eglSurface,
                    final long eglContext) {
         this.libEGL = libEGL;
-        this.wlOutput = wlOutput;
+        this.x11Platform = x11Platform;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
-    }
-
-    @Override
-    public void begin() {
-        this.libEGL.eglMakeCurrent(this.eglDisplay,
-                                   this.eglSurface,
-                                   this.eglSurface,
-                                   this.eglContext);
     }
 
     @Override
@@ -65,12 +60,27 @@ public class X11EglPlatform implements EglPlatform {
     }
 
     @Override
-    public WlOutput getWlOutput() {
-        return this.wlOutput;
+    public long getEglSurface() {
+        return this.eglSurface;
+    }
+
+    @Override
+    public long getEglContext() {
+        return this.eglContext;
+    }
+
+    @Override
+    public List<WlOutput> getWlOutputs() {
+        return this.x11Platform.getWlOutputs();
     }
 
     @Override
     public void accept(final Renderer renderer) {
         renderer.visit(this);
+    }
+
+    @Nonnull
+    public X11Platform getX11Platform() {
+        return x11Platform;
     }
 }

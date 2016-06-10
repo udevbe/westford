@@ -11,15 +11,20 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.dispmanx;
+package org.westmalle.wayland.egl;
 
-import dagger.Subcomponent;
-import org.westmalle.wayland.input.LibinputSeatFactory;
+import dagger.Module;
+import dagger.Provides;
+import org.westmalle.wayland.core.Renderer;
 
-@Subcomponent
-public interface Dispmanx {
+import javax.inject.Singleton;
 
-    DispmanxPlatformFactory platformFactory();
+@Module
+public class EglGles2RendererModule {
 
-    DispmanxEglPlatformFactory eglPlatformFactory();
+    @Provides
+    @Singleton
+    Renderer createRenderer(final EglGles2Renderer eglGles2RenderEngine) {
+        return eglGles2RenderEngine;
+    }
 }

@@ -18,5 +18,5 @@ public interface Renderer {
 
     void visit(EglPlatform eglPlatform);
 
-    //void visit(PixmanRenderOutput renderOutput);
+    //void visit(PixmanPlatform pixmanPlatform);
 }

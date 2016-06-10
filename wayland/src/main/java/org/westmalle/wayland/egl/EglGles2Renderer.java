@@ -108,7 +108,9 @@ public class EglGles2Renderer implements Renderer {
 
         eglPlatform.begin();
 
-        final WlOutput   wlOutput = eglPlatform.getWlOutput();
+        //FIXME how to render to multiple outputs?
+        final WlOutput   wlOutput = eglPlatform.getWlOutputs()
+                                               .get(0);
         final Output     output   = wlOutput.getOutput();
         final OutputMode mode     = output.getMode();
 

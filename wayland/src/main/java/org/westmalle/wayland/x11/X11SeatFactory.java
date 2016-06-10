@@ -27,6 +27,8 @@ import java.util.EnumSet;
 public class X11SeatFactory {
 
     @Nonnull
+    private final X11Platform                  x11Platform;
+    @Nonnull
     private final X11XkbFactory                x11XkbFactory;
     @Nonnull
     private final X11InputEventListenerFactory x11InputEventListenerFactory;
@@ -42,12 +44,14 @@ public class X11SeatFactory {
 
     @Inject
     X11SeatFactory(@Nonnull final PrivateX11SeatFactory privateX11SeatFactory,
+                   @Nonnull final X11Platform x11Platform,
                    @Nonnull final X11XkbFactory x11XkbFactory,
                    @Nonnull final X11InputEventListenerFactory x11InputEventListenerFactory,
                    @Nonnull final WlSeatFactory wlSeatFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory) {
         this.privateX11SeatFactory = privateX11SeatFactory;
+        this.x11Platform = x11Platform;
         this.x11XkbFactory = x11XkbFactory;
         this.x11InputEventListenerFactory = x11InputEventListenerFactory;
         this.wlSeatFactory = wlSeatFactory;
@@ -55,7 +59,7 @@ public class X11SeatFactory {
         this.keyboardDeviceFactory = keyboardDeviceFactory;
     }
 
-    public WlSeat create(@Nonnull final X11Platform x11Platform) {
+    public WlSeat create() {
 
         final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(this.x11XkbFactory.create(x11Platform.getXcbConnection()));
         keyboardDevice.updateKeymap();

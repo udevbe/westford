@@ -26,28 +26,30 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
+import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
 
 public class DispmanxEglPlatformFactory {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
-    private final LibEGL                          libEGL;
+    private final LibEGL                            libEGL;
     @Nonnull
     private final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory;
     @Nonnull
-    private final Compositor                      compositor;
+    private final DispmanxPlatform                  dispmanxPlatform;
 
     @Inject
     DispmanxEglPlatformFactory(@Nonnull final LibEGL libEGL,
                                @Nonnull final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory,
-                               @Nonnull final Compositor compositor) {
+                               @Nonnull final DispmanxPlatform dispmanxPlatform) {
         this.libEGL = libEGL;
         this.privateDispmanxEglOutputFactory = privateDispmanxEglOutputFactory;
-        this.compositor = compositor;
+        this.dispmanxPlatform = dispmanxPlatform;
     }
 
-    public DispmanxEglPlatform create(final DispmanxPlatform dispmanxPlatform) {
+    public DispmanxEglPlatform create() {
+
         final DISPMANX_MODEINFO_T modeinfo        = dispmanxPlatform.getModeinfo();
         final int                 dispmanxElement = dispmanxPlatform.getDispmanxElement();
 
@@ -57,24 +59,25 @@ public class DispmanxEglPlatformFactory {
         nativewindow.height(modeinfo.height());
 
         final long nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
-        final long display       = createEglDisplay(nativeDisplay);
-        final long config        = createDispmanxConfig(display);
-        // create an EGL rendering context
-        final long context = getContext(display,
-                                        config);
-        final long surface = createEglSurface(Pointer.ref(nativewindow).address,
-                                              display,
-                                              config,
-                                              context);
+        final long eglDisplay    = createEglDisplay(nativeDisplay);
+        final long config        = createDispmanxConfig(eglDisplay);
+        // create an EGL rendering eglContext
+        final long eglContext = getContext(eglDisplay,
+                                           config);
+        final long eglSurface = createEglSurface(Pointer.ref(nativewindow).address,
+                                                 eglDisplay,
+                                                 config,
+                                                 eglContext);
 
-        final DispmanxEglPlatform dispmanxEglPlatform = this.privateDispmanxEglOutputFactory.create(dispmanxPlatform.getWlOutput(),
-                                                                                                    display,
-                                                                                                    surface,
-                                                                                                    context);
-        this.compositor.getPlatforms()
-                       .add(dispmanxEglPlatform);
+        this.libEGL.eglMakeCurrent(eglDisplay,
+                                   eglSurface,
+                                   eglSurface,
+                                   eglContext);
 
-        return dispmanxEglPlatform;
+        return this.privateDispmanxEglOutputFactory.create(dispmanxPlatform,
+                                                           eglDisplay,
+                                                           eglSurface,
+                                                           eglContext);
     }
 
     private long createEglSurface(final long nativewindow,

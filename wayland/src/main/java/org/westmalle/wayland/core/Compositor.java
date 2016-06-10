@@ -29,11 +29,11 @@ import java.util.concurrent.TimeUnit;
 public class Compositor {
 
     @Nonnull
-    private final Display  display;
+    private final Display               display;
     @Nonnull
-    private final Renderer renderer;
+    private final Renderer              renderer;
     @Nonnull
-    private final LinkedList<Platform> platforms = new LinkedList<>();
+    private final Platform              platform;
     @Nonnull
     private final EventLoop.IdleHandler idleHandler;
 
@@ -42,8 +42,10 @@ public class Compositor {
 
     @Inject
     Compositor(@Nonnull final Display display,
+               @Nonnull final Platform platform,
                @Nonnull final Renderer renderer) {
         this.display = display;
+        this.platform = platform;
         this.renderer = renderer;
         this.idleHandler = this::handleIdle;
     }
@@ -54,7 +56,7 @@ public class Compositor {
         this.renderEvent = Optional.empty();
         //TODO unit test with subsurfaces render order
         //TODO unit test with parent surface without buffer while clients have a buffer.
-        this.platforms.forEach(renderOutput -> renderOutput.accept(this.renderer));
+        this.platform.accept(this.renderer);
         this.display.flushClients();
     }
 
@@ -72,10 +74,5 @@ public class Compositor {
     @Nonnegative
     public int getTime() {
         return (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-    }
-
-    @Nonnull
-    public LinkedList<Platform> getPlatforms() {
-        return this.platforms;
     }
 }

@@ -39,21 +39,21 @@ import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXI
 public class LibinputDevice {
     @Nonnull
     private final Libinput                  libinput;
-    @Nonnull
-    private final Compositor                compositor;
     private final long                      device;
+    @Nonnull
+    private final Platform                  platform;
     @Nonnull
     private final WlSeat                    wlSeat;
     @Nonnull
     private final EnumSet<WlSeatCapability> deviceCapabilities;
 
     public LibinputDevice(@Provided @Nonnull final Libinput libinput,
-                          @Provided @Nonnull final Compositor compositor,
+                          @Provided @Nonnull final Platform platform,
                           @Nonnull final WlSeat wlSeat,
                           final long device,
                           @Nonnull final EnumSet<WlSeatCapability> deviceCapabilities) {
         this.libinput = libinput;
-        this.compositor = compositor;
+        this.platform = platform;
         this.wlSeat = wlSeat;
         this.device = device;
         this.deviceCapabilities = deviceCapabilities;
@@ -75,11 +75,11 @@ public class LibinputDevice {
         final String deviceOutputName = Pointer.wrap(String.class,
                                                      outputNamePointer)
                                                .dref();
-        for (final Platform platform : this.compositor.getPlatforms()) {
+        for (final WlOutput wlOutput : this.platform.getWlOutputs()) {
             //TODO give outputs a name
 //            if (deviceOutputName.equals(platform.getOutput()
 //                                                .getName())) {
-            return Optional.of(platform.getWlOutput());
+            return Optional.of(wlOutput);
 //            }
         }
 
