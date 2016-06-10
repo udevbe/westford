@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
@@ -40,12 +41,9 @@ public class EglGles2Renderer implements Renderer {
     static final String VERTEX_SHADER =
             "uniform mat4 u_projection;\n" +
             "uniform mat4 u_transform;\n" +
-            "\n" +
             "attribute vec2 a_position;\n" +
             "attribute vec2 a_texCoord;\n" +
-            "\n" +
             "varying vec2 v_texCoord;\n" +
-            "\n" +
             "void main(){\n" +
             "    v_texCoord = a_texCoord;\n" +
             "    gl_Position = u_projection * u_transform * vec4(a_position, 0.0, 1.0) ;\n" +
@@ -53,30 +51,35 @@ public class EglGles2Renderer implements Renderer {
 
     static final String FRAGMENT_SHADER_ARGB8888 =
             "precision mediump float;\n" +
-            "\n" +
             "uniform sampler2D u_texture;\n" +
-            "\n" +
             "varying vec2 v_texCoord;\n" +
-            "\n" +
             "void main(){\n" +
             "    gl_FragColor = texture2D(u_texture, v_texCoord);\n" +
             "}";
 
     static final String FRAGMENT_SHADER_XRGB8888 =
             "precision mediump float;\n" +
-            "\n" +
             "uniform sampler2D u_texture;\n" +
-            "\n" +
             "varying vec2 v_texCoord;\n" +
-            "\n" +
             "void main(){\n" +
             "    gl_FragColor = vec4(texture2D(u_texture, v_texCoord).bgr, 1.0);\n" +
             "}";
 
+    static final String FRAGMENT_SHADER_EGL_EXTERNAL =
+            "#extension GL_OES_EGL_image_external : require\n" +
+            "precision mediump float;\n" +
+            "uniform samplerExternalOES u_texture;\n" +
+            "varying vec2 v_texCoord;\n" +
+            "void main(){\n" +
+            "   gl_FragColor = texture2D(u_texture, v_texCoord)\n;" +
+            "}";
+
     @Nonnull
-    private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
+    private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData             = new WeakHashMap<>();
     @Nonnull
-    private final Map<Gles2BufferFormat, Integer>          shaderPrograms    = new HashMap<>();
+    private final Map<Gles2BufferFormat, Integer>          shmShaderPrograms             = new HashMap<>();
+    @Nonnull
+    private       Optional<Integer>                        eglExternalImageShaderProgram = Optional.empty();
 
     @Nonnull
     private final LibGLESv2 libGLESv2;
@@ -143,45 +146,38 @@ public class EglGles2Renderer implements Renderer {
                                          .dref();
 
         LOGGER.info("GLESv2 extensions: " + extensions);
-        if (!extensions.contains("GL_EXT_texture_format_BGRA8888")) {
+        if (extensions.contains("GL_EXT_texture_format_BGRA8888")) {
+            for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
+                this.shmShaderPrograms.put(gles2BufferFormat,
+                                           createShaderProgram(gles2BufferFormat.getVertexShaderSource(),
+                                                               gles2BufferFormat.getFragmentShaderSource()));
+            }
+        }
+        else {
             LOGGER.severe("Required extension GL_EXT_texture_format_BGRA8888 not available");
             System.exit(1);
         }
 
-        for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
-            this.shaderPrograms.put(gles2BufferFormat,
-                                    createShaderProgram(gles2BufferFormat));
+        if (extensions.contains("GL_OES_EGL_image_external")) {
+            this.eglExternalImageShaderProgram = Optional.of(createShaderProgram(VERTEX_SHADER,
+                                                                                 FRAGMENT_SHADER_EGL_EXTERNAL));
+        }
+        else {
+            LOGGER.warning("Extension GL_OES_EGL_image_external not available");
         }
 
         //configure texture blending
         this.libGLESv2.glBlendFunc(GL_ONE,
                                    GL_ONE_MINUS_SRC_ALPHA);
-
         this.init = true;
     }
 
-    private int createShaderProgram(final Gles2BufferFormat bufferFormat) {
-        //vertex shader
-        final int                      vertexShader  = this.libGLESv2.glCreateShader(GL_VERTEX_SHADER);
-        final Pointer<Pointer<String>> vertexShaders = Pointer.nref(Pointer.nref(bufferFormat.getVertexShaderSource()));
-        this.libGLESv2.glShaderSource(vertexShader,
-                                      1,
-                                      vertexShaders.address,
-                                      0L);
-        this.libGLESv2.glCompileShader(vertexShader);
-
-        checkShader(vertexShader);
-
-        //fragment shader
-        final int                      fragmentShader  = this.libGLESv2.glCreateShader(GL_FRAGMENT_SHADER);
-        final Pointer<Pointer<String>> fragmentShaders = Pointer.nref(Pointer.nref(bufferFormat.getFragmentShaderSource()));
-        this.libGLESv2.glShaderSource(fragmentShader,
-                                      1,
-                                      fragmentShaders.address,
-                                      0L);
-        this.libGLESv2.glCompileShader(fragmentShader);
-
-        checkShader(fragmentShader);
+    private int createShaderProgram(final String vertexShaderSource,
+                                    final String fragmentShaderSource) {
+        final int vertexShader = createShader(vertexShaderSource,
+                                              GL_VERTEX_SHADER);
+        final int fragmentShader = createShader(fragmentShaderSource,
+                                                GL_FRAGMENT_SHADER);
 
         //shader program
         final int shaderProgram = this.libGLESv2.glCreateProgram();
@@ -231,6 +227,20 @@ public class EglGles2Renderer implements Renderer {
                                                               Pointer.nref("u_texture").address);
 
         return shaderProgram;
+    }
+
+    private int createShader(final String shaderSource,
+                             final int shaderType) {
+        final int                      shader  = this.libGLESv2.glCreateShader(shaderType);
+        final Pointer<Pointer<String>> shaders = Pointer.nref(Pointer.nref(shaderSource));
+        this.libGLESv2.glShaderSource(shader,
+                                      1,
+                                      shaders.address,
+                                      0L);
+        this.libGLESv2.glCompileShader(shader);
+
+        checkShader(shader);
+        return shader;
     }
 
     private void checkShader(final int shader) {
@@ -296,10 +306,16 @@ public class EglGles2Renderer implements Renderer {
     private void draw(@Nonnull final WlSurfaceResource wlSurfaceResource,
                       @Nonnull final WlBufferResource wlBufferResource) {
         final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
-        if (shmBuffer == null) {
-            throw new IllegalArgumentException("Buffer resource is not an ShmBuffer.");
+        if (shmBuffer != null) {
+            drawShm(wlSurfaceResource,
+                    shmBuffer);
         }
+        //TODO drawEglExternalImage
 
+    }
+
+    private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,
+                         final ShmBuffer shmBuffer) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
         final float[] transform = surface.getTransform()
@@ -359,7 +375,7 @@ public class EglGles2Renderer implements Renderer {
 
         //activate shader
         final Gles2BufferFormat gles2BufferFormat = queryBufferFormat(shmBuffer);
-        final Integer           shader            = this.shaderPrograms.get(gles2BufferFormat);
+        final Integer           shader            = this.shmShaderPrograms.get(gles2BufferFormat);
         this.libGLESv2.glUseProgram(shader);
 
         //upload uniform data
