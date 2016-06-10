@@ -56,23 +56,24 @@ public class X11EglPlatformFactory {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
-    private final LibEGL                     libEGL;
+    private final LibEGL                       libEGL;
     @Nonnull
     private final PrivateX11EglPlatformFactory privateX11EglOutputFactory;
     @Nonnull
-    private final Compositor                 compositor;
+    private final X11Platform                  x11Platform;
 
     @Inject
     X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
                           @Nonnull final PrivateX11EglPlatformFactory privateX11EglOutputFactory,
-                          @Nonnull final Compositor compositor) {
+                          @Nonnull final X11Platform x11Platform) {
         this.libEGL = libEGL;
         this.privateX11EglOutputFactory = privateX11EglOutputFactory;
-        this.compositor = compositor;
+        this.x11Platform = x11Platform;
     }
 
     @Nonnull
-    public X11EglPlatform create(final X11Platform x11Platform) {
+    public X11EglPlatform create() {
+
         if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) == 0L) {
             throw new RuntimeException("eglBindAPI failed");
         }
@@ -85,19 +86,21 @@ public class X11EglPlatformFactory {
                      configs,
                      configs_size);
         final long config = configs.dref().address;
-        final long context = createEglContext(eglDisplay,
-                                              config);
+        final long eglContext = createEglContext(eglDisplay,
+                                                 config);
+        final long eglSurface = createEglSurface(eglDisplay,
+                                                 config,
+                                                 eglContext,
+                                                 x11Platform.getxWindow());
+        this.libEGL.eglMakeCurrent(eglDisplay,
+                                   eglSurface,
+                                   eglSurface,
+                                   eglContext);
 
-        final X11EglPlatform x11EglPlatform = this.privateX11EglOutputFactory.create(x11Platform.getWlOutput(),
-                                                                                     eglDisplay,
-                                                                                     createEglSurface(eglDisplay,
-                                                                                                      config,
-                                                                                                      context,
-                                                                                                      x11Platform.getxWindow()),
-                                                                                     context);
-        this.compositor.getPlatforms()
-                       .addLast(x11EglPlatform);
-        return x11EglPlatform;
+        return this.privateX11EglOutputFactory.create(x11Platform,
+                                                      eglDisplay,
+                                                      eglSurface,
+                                                      eglContext);
     }
 
     private long createEglDisplay(final long nativeDisplay) {

@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Map;
 
 @AutoFactory(className = "PrivateX11PlatformFactory",
@@ -24,7 +25,7 @@ import java.util.Map;
 public class X11Platform {
 
     @Nonnull
-    private final WlOutput             wlOutput;
+    private final List<WlOutput>       wlOutputs;
     @Nonnull
     private final X11EventBus          x11EventBus;
     private final long                 xcbConnection;
@@ -33,13 +34,13 @@ public class X11Platform {
     @Nonnull
     private final Map<String, Integer> atoms;
 
-    X11Platform(@Nonnull final WlOutput wlOutput,
+    X11Platform(@Nonnull final List<WlOutput> wlOutputs,
                 @Nonnull final X11EventBus x11EventBus,
                 final long xcbConnection,
                 final long xDisplay,
                 final int xWindow,
                 @Nonnull final Map<String, Integer> x11Atoms) {
-        this.wlOutput = wlOutput;
+        this.wlOutputs = wlOutputs;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xWindow = xWindow;
@@ -70,7 +71,7 @@ public class X11Platform {
     }
 
     @Nonnull
-    public WlOutput getWlOutput() {
-        return this.wlOutput;
+    public List<WlOutput> getWlOutputs() {
+        return this.wlOutputs;
     }
 }

@@ -15,19 +15,11 @@ package org.westmalle.wayland.bootstrap;
 
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.dispmanx.DispmanxEglPlatformFactory;
-import org.westmalle.wayland.dispmanx.DispmanxPlatform;
-import org.westmalle.wayland.dispmanx.DispmanxPlatformFactory;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
-import org.westmalle.wayland.x11.X11EglPlatformFactory;
-import org.westmalle.wayland.x11.X11Platform;
-import org.westmalle.wayland.x11.X11PlatformFactory;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
 import java.util.logging.Logger;
-
-import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
 
 public class Boot {
 
@@ -78,16 +70,8 @@ public class Boot {
          */
         final LifeCycle lifeCycle = dispmanxEglCompositor.lifeCycle();
 
-        //setup dispmanx output back-end.
-        final DispmanxPlatformFactory platformFactory = dispmanxEglCompositor.dispmanx()
-                                                                             .platformFactory();
-        final DispmanxEglPlatformFactory dispmanxEglPlatformFactory = dispmanxEglCompositor.dispmanx()
-                                                                                           .eglPlatformFactory();
-        //create an output
-        //create a dispmanx overlay
-        final DispmanxPlatform dispmanxPlatform = platformFactory.create(DISPMANX_ID_HDMI);
-        //enable egl
-        dispmanxEglPlatformFactory.create(dispmanxPlatform);
+        //TODO setup seat
+        //dispmanxEglCompositor.seatFactory().create("seat0",...);
 
         //start the compositor
         lifeCycle.start();
@@ -100,24 +84,11 @@ public class Boot {
          */
         final LifeCycle lifeCycle = x11EglCompositor.lifeCycle();
 
-        //setup X11 input/output back-end.
-        final X11PlatformFactory platformFactory = x11EglCompositor.x11()
-                                                                   .platformFactory();
-        final X11EglPlatformFactory x11EglPlatformFactory = x11EglCompositor.x11()
-                                                                            .eglPlatformFactory();
-        final X11SeatFactory seatFactory = x11EglCompositor.x11()
-                                                           .seatFactory();
-        //create an output
-        //create an x11 window
-        final X11Platform x11Platform = platformFactory.create(System.getenv("DISPLAY"),
-                                                               800,
-                                                               600);
-        //X egl enabled
-        x11EglPlatformFactory.create(x11Platform);
+        final X11SeatFactory seatFactory = x11EglCompositor.seatFactory();
 
         //setup seat for input support
         //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
-        final WlSeat wlSeat = seatFactory.create(x11Platform);
+        final WlSeat wlSeat = seatFactory.create();
 
         //setup keyboard focus tracking to follow mouse pointer
         final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();

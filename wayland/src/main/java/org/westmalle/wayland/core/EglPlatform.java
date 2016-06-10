@@ -6,4 +6,8 @@ public interface EglPlatform extends Platform {
     default void end() {}
 
     long getEglDisplay();
+
+    long getEglSurface();
+
+    long getEglContext();
 }

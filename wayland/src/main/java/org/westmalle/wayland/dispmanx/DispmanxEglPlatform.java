@@ -21,6 +21,7 @@ import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 @AutoFactory(className = "PrivateDispmanxEglPlatformFactory",
              allowSubclasses = true)
@@ -28,30 +29,23 @@ import javax.annotation.Nonnull;
 public class DispmanxEglPlatform implements EglPlatform {
 
     @Nonnull
-    private final LibEGL   libEGL;
-    private final WlOutput wlOutput;
-    private final long     eglDisplay;
-    private final long     eglSurface;
-    private final long     eglContext;
+    private final LibEGL           libEGL;
+    @Nonnull
+    private final DispmanxPlatform dispmanxPlatform;
+    private final long             eglDisplay;
+    private final long             eglSurface;
+    private final long             eglContext;
 
     DispmanxEglPlatform(@Provided @Nonnull final LibEGL libEGL,
-                        final WlOutput wlOutput,
+                        @Nonnull final DispmanxPlatform dispmanxPlatform,
                         final long eglDisplay,
                         final long eglSurface,
                         final long eglContext) {
         this.libEGL = libEGL;
-        this.wlOutput = wlOutput;
+        this.dispmanxPlatform = dispmanxPlatform;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
-    }
-
-    @Override
-    public void begin() {
-        this.libEGL.eglMakeCurrent(this.eglDisplay,
-                                   this.eglSurface,
-                                   this.eglSurface,
-                                   this.eglContext);
     }
 
     @Override
@@ -66,12 +60,27 @@ public class DispmanxEglPlatform implements EglPlatform {
     }
 
     @Override
-    public WlOutput getWlOutput() {
-        return this.wlOutput;
+    public long getEglSurface() {
+        return this.eglSurface;
+    }
+
+    @Override
+    public long getEglContext() {
+        return this.eglContext;
+    }
+
+    @Override
+    public List<WlOutput> getWlOutputs() {
+        return this.dispmanxPlatform.getWlOutputs();
     }
 
     @Override
     public void accept(final Renderer renderer) {
         renderer.visit(this);
+    }
+
+    @Nonnull
+    public DispmanxPlatform getDispmanxPlatform() {
+        return this.dispmanxPlatform;
     }
 }

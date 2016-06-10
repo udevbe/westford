@@ -3,18 +3,16 @@ package org.westmalle.wayland.bootstrap;
 import dagger.Component;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
-import org.westmalle.wayland.egl.EglModule;
-import org.westmalle.wayland.x11.X11;
+import org.westmalle.wayland.egl.EglGles2RendererModule;
+import org.westmalle.wayland.x11.X11EglPlatformModule;
+import org.westmalle.wayland.x11.X11SeatFactory;
 
 import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = {CoreModule.class,
-                      /*
-                       * CoreModule requires a module which provides a RenderEngine.
-                       * EglModule provides an Egl GlESv2 RenderEngine.
-                       */
-                      EglModule.class})
+                      EglGles2RendererModule.class,
+                      X11EglPlatformModule.class})
 public interface X11EglCompositor {
 
     LifeCycle lifeCycle();
@@ -22,5 +20,5 @@ public interface X11EglCompositor {
     /*
      * Define a platform to output pixels & handle user input.
      */
-    X11 x11();
+    X11SeatFactory seatFactory();
 }

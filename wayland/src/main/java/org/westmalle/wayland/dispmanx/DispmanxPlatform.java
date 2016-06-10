@@ -20,24 +20,22 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 @AutoFactory(className = "PrivateDispmanxOutputFactory",
              allowSubclasses = true)
 public class DispmanxPlatform {
 
     @Nonnull
-    private final WlOutput            wlOutput;
+    private final List<WlOutput>      wlOutputs;
     private final int                 dispmanxElement;
     @Nonnull
     private final DISPMANX_MODEINFO_T modeinfo;
 
-    @Nullable
-    private DispmanxEglPlatform dispmanxEglPlatform;
-
-    DispmanxPlatform(@Nonnull final WlOutput wlOutput,
+    DispmanxPlatform(@Nonnull final List<WlOutput> wlOutputs,
                      final int dispmanxElement,
                      @Nonnull final DISPMANX_MODEINFO_T modeinfo) {
-        this.wlOutput = wlOutput;
+        this.wlOutputs = wlOutputs;
         this.dispmanxElement = dispmanxElement;
         this.modeinfo = modeinfo;
     }
@@ -52,7 +50,7 @@ public class DispmanxPlatform {
     }
 
     @Nonnull
-    public WlOutput getWlOutput() {
-        return this.wlOutput;
+    public List<WlOutput> getWlOutputs() {
+        return this.wlOutputs;
     }
 }
