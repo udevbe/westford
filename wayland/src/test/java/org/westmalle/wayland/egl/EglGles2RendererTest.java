@@ -390,4 +390,12 @@ public class EglGles2RendererTest {
         //then
         verify(renderOutput).end();
     }
+
+    @Test
+    public void testRequestRenderWithSubsurfaces() throws Exception {
+        //TODO
+        //given: a compositor, a surface, several stacks of nested subsurfaces
+        //when: request render is called
+        //then: the tree of subsurfaces is rendered in pre-order.
+    }
 }

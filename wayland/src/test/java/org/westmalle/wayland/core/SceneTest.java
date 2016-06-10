@@ -87,4 +87,36 @@ public class SceneTest {
         //then
         assertThat(pickSurface.get()).isEqualTo(wlSurfaceResource0);
     }
+
+    @Test
+    public void testGetSubsurfaceStack() throws Exception {
+        //TODO
+        //given: a compositor, a surface
+        //when: the subsurface stack is queried
+        //then: the surface's surface stack is returned consistently, including the surface itself.
+    }
+
+    @Test
+    public void testRemoveSubsurfaceStack() throws Exception {
+        //TODO
+        //given: a compositor, a surface, a surfacestack
+        //when: the surfacestack is deleted
+        //then: the surfacestack and pending surfacestack only includes the (parent) surface.
+    }
+
+    @Test
+    public void testGetPendingSubsurfaceStack() throws Exception {
+        //TODO
+        //given: a compositor, a surface
+        //when: the pending subsurface stack is queried
+        //then: the pending surface's surface stack is returned consistently, including the surface itself.
+    }
+
+    @Test
+    public void testCommitSubsurfaceStack() throws Exception {
+        //TODO
+        //given: a compositor, a surface, a pending surfacestack
+        //when: the pending surfacestack is commited
+        //then: the surface stack now reflects the (previously) pending surfacestack.
+    }
 }
