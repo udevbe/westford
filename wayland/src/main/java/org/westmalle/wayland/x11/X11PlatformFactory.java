@@ -17,7 +17,6 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlOutputTransform;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
@@ -57,39 +56,36 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_M
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_PROP_MODE_REPLACE;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
 
-public class X11OutputFactory {
+public class X11PlatformFactory {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
-    private final Display                 display;
+    private final Display                   display;
     @Nonnull
-    private final LibX11                  libX11;
+    private final LibX11                    libX11;
     @Nonnull
-    private final Libxcb                  libxcb;
+    private final Libxcb                    libxcb;
     @Nonnull
-    private final LibX11xcb               libX11xcb;
+    private final LibX11xcb                 libX11xcb;
     @Nonnull
-    private final PrivateX11OutputFactory privateX11OutputFactory;
+    private final PrivateX11PlatformFactory privateX11OutputFactory;
     @Nonnull
-    private final WlOutputFactory         wlOutputFactory;
+    private final WlOutputFactory           wlOutputFactory;
     @Nonnull
-    private final OutputFactory           outputFactory;
+    private final OutputFactory             outputFactory;
     @Nonnull
-    private final X11EventBusFactory      x11EventBusFactory;
-    @Nonnull
-    private final Compositor              compositor;
+    private final X11EventBusFactory        x11EventBusFactory;
 
     @Inject
-    X11OutputFactory(@Nonnull final Display display,
-                     @Nonnull final LibX11 libX11,
-                     @Nonnull final Libxcb libxcb,
-                     @Nonnull final LibX11xcb libX11xcb,
-                     @Nonnull final PrivateX11OutputFactory privateX11OutputFactory,
-                     @Nonnull final WlOutputFactory wlOutputFactory,
-                     @Nonnull final OutputFactory outputFactory,
-                     @Nonnull final X11EventBusFactory x11EventBusFactory,
-                     @Nonnull final Compositor compositor) {
+    X11PlatformFactory(@Nonnull final Display display,
+                       @Nonnull final LibX11 libX11,
+                       @Nonnull final Libxcb libxcb,
+                       @Nonnull final LibX11xcb libX11xcb,
+                       @Nonnull final PrivateX11PlatformFactory privateX11OutputFactory,
+                       @Nonnull final WlOutputFactory wlOutputFactory,
+                       @Nonnull final OutputFactory outputFactory,
+                       @Nonnull final X11EventBusFactory x11EventBusFactory) {
         this.display = display;
         this.libX11 = libX11;
         this.libxcb = libxcb;
@@ -98,12 +94,11 @@ public class X11OutputFactory {
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.x11EventBusFactory = x11EventBusFactory;
-        this.compositor = compositor;
     }
 
-    public WlOutput create(@Nonnull final String xDisplay,
-                           @Nonnegative final int width,
-                           @Nonnegative final int height) {
+    public X11Platform create(@Nonnull final String xDisplay,
+                              @Nonnegative final int width,
+                              @Nonnegative final int height) {
         LOGGER.info(format("Creating X11 output:\n"
                            + "\tDisplay: %s\n"
                            + "\tWindow geometry: %dx%d",
@@ -114,20 +109,15 @@ public class X11OutputFactory {
             throw new IllegalArgumentException("Got negative width or height");
         }
 
-        final WlOutput wlOutput = createXPlatformOutput(xDisplay,
-                                                        width,
-                                                        height);
-
-        this.compositor.getWlOutputs()
-                       .addLast(wlOutput);
-
-        return wlOutput;
+        return createXPlatformOutput(xDisplay,
+                                     width,
+                                     height);
     }
 
 
-    private WlOutput createXPlatformOutput(final String xDisplayName,
-                                           final int width,
-                                           final int height) {
+    private X11Platform createXPlatformOutput(final String xDisplayName,
+                                              final int width,
+                                              final int height) {
         final long xDisplay = this.libX11.XOpenDisplay(Pointer.nref(xDisplayName).address);
         if (xDisplay == 0L) {
             throw new RuntimeException("XOpenDisplay() failed: " + xDisplayName);
@@ -151,19 +141,22 @@ public class X11OutputFactory {
                                         .dref();
         }
 
+        final Output output = createOutput(width,
+                                           height,
+                                           screen);
+        final WlOutput wlOutput = this.wlOutputFactory.create(output);
+
         final int window = createXWindow(xcbConnection,
                                          screen,
                                          width,
                                          height);
-        final X11Output x11Output = createX11Output(xDisplay,
-                                                    xcbConnection,
-                                                    window);
-        final Output output = createOutput(x11Output,
-                                           width,
-                                           height,
-                                           screen);
+        final X11Platform x11Platform = createX11Output(wlOutput,
+                                                        xDisplay,
+                                                        xcbConnection,
+                                                        window);
+
         this.libxcb.xcb_flush(xcbConnection);
-        return this.wlOutputFactory.create(output);
+        return x11Platform;
     }
 
     private int createXWindow(final long xcbConnection,
@@ -205,9 +198,10 @@ public class X11OutputFactory {
         return window;
     }
 
-    private X11Output createX11Output(final long xDisplay,
-                                      final long connection,
-                                      final int window) {
+    private X11Platform createX11Output(final WlOutput wlOutput,
+                                        final long xDisplay,
+                                        final long connection,
+                                        final int window) {
         final X11EventBus x11EventBus = this.x11EventBusFactory.create(connection);
         this.display.getEventLoop()
                     .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(connection),
@@ -228,23 +222,23 @@ public class X11OutputFactory {
                                                       .response_type() & ~0x80);
                        switch (responseType) {
                            case XCB_CLIENT_MESSAGE: {
-                               X11OutputFactory.this.handle(event.castp(xcb_client_message_event_t.class),
-                                                            x11Atoms,
-                                                            window);
+                               X11PlatformFactory.this.handle(event.castp(xcb_client_message_event_t.class),
+                                                              x11Atoms,
+                                                              window);
                                break;
                            }
                        }
                    });
 
-        return this.privateX11OutputFactory.create(x11EventBus,
+        return this.privateX11OutputFactory.create(wlOutput,
+                                                   x11EventBus,
                                                    connection,
                                                    xDisplay,
                                                    window,
                                                    x11Atoms);
     }
 
-    private Output createOutput(final X11Output x11Output,
-                                final int width,
+    private Output createOutput(final int width,
                                 final int height,
                                 final xcb_screen_t screen) {
         final OutputGeometry outputGeometry = OutputGeometry.builder()
@@ -266,8 +260,7 @@ public class X11OutputFactory {
                                                 .refresh(60)
                                                 .build();
         return this.outputFactory.create(outputGeometry,
-                                         outputMode,
-                                         x11Output);
+                                         outputMode);
     }
 
     private Map<String, Integer> internX11Atoms(final long connection) {

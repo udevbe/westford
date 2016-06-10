@@ -28,7 +28,6 @@ import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_mapping_notify_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
-import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 
@@ -163,7 +162,7 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
             final WlKeyboard wlKeyboard = this.x11Seat.getWlSeat()
                                                       .getWlKeyboard();
             final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
-            final Xkb xkb = this.x11XkbFactory.create(this.x11Seat.getX11Output()
+            final Xkb xkb = this.x11XkbFactory.create(this.x11Seat.getX11Platform()
                                                                   .getXcbConnection());
             keyboardDevice.setXkb(xkb);
             keyboardDevice.updateKeymap();

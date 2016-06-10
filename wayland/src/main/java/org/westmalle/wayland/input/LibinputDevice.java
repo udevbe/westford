@@ -12,6 +12,7 @@ import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -74,11 +75,11 @@ public class LibinputDevice {
         final String deviceOutputName = Pointer.wrap(String.class,
                                                      outputNamePointer)
                                                .dref();
-        for (final WlOutput wlOutput : this.compositor.getWlOutputs()) {
+        for (final Platform platform : this.compositor.getPlatforms()) {
             //TODO give outputs a name
-//            if (deviceOutputName.equals(wlOutput.getOutput()
+//            if (deviceOutputName.equals(platform.getOutput()
 //                                                .getName())) {
-            return Optional.of(wlOutput);
+            return Optional.of(platform.getWlOutput());
 //            }
         }
 

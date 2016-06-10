@@ -14,19 +14,17 @@
 package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
-import org.westmalle.wayland.core.RenderOutput;
-import org.westmalle.wayland.egl.HasEglOutput;
+import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
 
-@AutoFactory(className = "PrivateX11OutputFactory",
+@AutoFactory(className = "PrivateX11PlatformFactory",
              allowSubclasses = true)
-public class X11Output implements HasEglOutput {
+public class X11Platform {
 
     @Nonnull
-    private final X11EglOutputFactory  x11EglOutputFactory;
+    private final WlOutput             wlOutput;
     @Nonnull
     private final X11EventBus          x11EventBus;
     private final long                 xcbConnection;
@@ -35,29 +33,18 @@ public class X11Output implements HasEglOutput {
     @Nonnull
     private final Map<String, Integer> atoms;
 
-    private X11EglOutput eglOutput;
-
-    X11Output(@Provided @Nonnull final X11EglOutputFactory x11EglOutputFactory,
-              @Nonnull final X11EventBus x11EventBus,
-              final long xcbConnection,
-              final long xDisplay,
-              final int xWindow,
-              @Nonnull final Map<String, Integer> x11Atoms) {
-        this.x11EglOutputFactory = x11EglOutputFactory;
+    X11Platform(@Nonnull final WlOutput wlOutput,
+                @Nonnull final X11EventBus x11EventBus,
+                final long xcbConnection,
+                final long xDisplay,
+                final int xWindow,
+                @Nonnull final Map<String, Integer> x11Atoms) {
+        this.wlOutput = wlOutput;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xWindow = xWindow;
         this.xDisplay = xDisplay;
         this.atoms = x11Atoms;
-    }
-
-    @Override
-    public RenderOutput getEglOutput() {
-        if (this.eglOutput == null) {
-            this.eglOutput = this.x11EglOutputFactory.create(this.xDisplay,
-                                                             this.xWindow);
-        }
-        return this.eglOutput;
     }
 
     public int getxWindow() {
@@ -80,5 +67,10 @@ public class X11Output implements HasEglOutput {
     @Nonnull
     public Map<String, Integer> getX11Atoms() {
         return this.atoms;
+    }
+
+    @Nonnull
+    public WlOutput getWlOutput() {
+        return this.wlOutput;
     }
 }

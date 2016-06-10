@@ -16,7 +16,6 @@ package org.westmalle.wayland.dispmanx;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.shared.WlOutputTransform;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
@@ -25,7 +24,6 @@ import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
 import org.westmalle.wayland.nativ.libbcm_host.VC_DISPMANX_ALPHA_T;
 import org.westmalle.wayland.nativ.libbcm_host.VC_RECT_T;
-import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
@@ -37,7 +35,7 @@ import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTE
 
 //TODO unit test
 //TODO refactor once we get all of this working
-public class DispmanxOutputFactory {
+public class DispmanxPlatformFactory {
 
     @Nonnull
     private final Libbcm_host                  libbcm_host;
@@ -47,31 +45,23 @@ public class DispmanxOutputFactory {
     private final OutputFactory                outputFactory;
     @Nonnull
     private final PrivateDispmanxOutputFactory privateDispmanxOutputFactory;
-    @Nonnull
-    private final Compositor                   compositor;
 
     @Inject
-    DispmanxOutputFactory(@Nonnull final Libbcm_host libbcm_host,
-                          @Nonnull final WlOutputFactory wlOutputFactory,
-                          @Nonnull final OutputFactory outputFactory,
-                          @Nonnull final PrivateDispmanxOutputFactory privateDispmanxOutputFactory,
-                          @Nonnull final Compositor compositor) {
+    DispmanxPlatformFactory(@Nonnull final Libbcm_host libbcm_host,
+                            @Nonnull final WlOutputFactory wlOutputFactory,
+                            @Nonnull final OutputFactory outputFactory,
+                            @Nonnull final PrivateDispmanxOutputFactory privateDispmanxOutputFactory) {
         this.libbcm_host = libbcm_host;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.privateDispmanxOutputFactory = privateDispmanxOutputFactory;
-        this.compositor = compositor;
     }
 
-    public WlOutput create(final int device) {
-        final WlOutput wlOutput = createDispmanXPlatformOutput(device);
-        this.compositor.getWlOutputs()
-                       .addLast(wlOutput);
-
-        return wlOutput;
+    public DispmanxPlatform create(final int device) {
+        return createDispmanXPlatformOutput(device);
     }
 
-    private WlOutput createDispmanXPlatformOutput(final int device) {
+    private DispmanxPlatform createDispmanXPlatformOutput(final int device) {
 
         final int display = this.libbcm_host.vc_dispmanx_display_open(device);
         if (display == 0) {
@@ -86,16 +76,18 @@ public class DispmanxOutputFactory {
 
         final int dispmanxElement = createDispmanxWindow(display,
                                                          modeinfo);
-        final DispmanxOutput dispmanxOutput = this.privateDispmanxOutputFactory.create(dispmanxElement,
-                                                                                       modeinfo);
-        final Output output = createOutput(dispmanxOutput,
-                                           modeinfo);
-        return this.wlOutputFactory.create(output);
+        final Output   output   = createOutput(modeinfo);
+        final WlOutput wlOutput = this.wlOutputFactory.create(output);
+
+        final DispmanxPlatform dispmanxPlatform = this.privateDispmanxOutputFactory.create(wlOutput,
+                                                                                           dispmanxElement,
+                                                                                           modeinfo);
+
+        return dispmanxPlatform;
     }
 
 
-    private Output createOutput(final DispmanxOutput dispmanxOutput,
-                                final DISPMANX_MODEINFO_T modeinfo) {
+    private Output createOutput(final DISPMANX_MODEINFO_T modeinfo) {
         //TODO this is all guessing. Does dispmanx expose actual values?
 
         //TODO assume 96dpi for physical width(?)
@@ -116,8 +108,7 @@ public class DispmanxOutputFactory {
                                                 .refresh(60)
                                                 .build();
         return this.outputFactory.create(outputGeometry,
-                                         outputMode,
-                                         dispmanxOutput);
+                                         outputMode);
     }
 
     private int createDispmanxWindow(final int display,

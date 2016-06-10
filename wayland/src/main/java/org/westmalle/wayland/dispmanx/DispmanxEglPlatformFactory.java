@@ -1,7 +1,9 @@
 package org.westmalle.wayland.dispmanx;
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
+import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 
 import javax.annotation.Nonnull;
@@ -25,29 +27,34 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 
-public class DispmanxEglOutputFactory {
+public class DispmanxEglPlatformFactory {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
     private final LibEGL                          libEGL;
     @Nonnull
-    private final PrivateDispmanxEglOutputFactory privateDispmanxEglOutputFactory;
+    private final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory;
+    @Nonnull
+    private final Compositor                      compositor;
 
     @Inject
-    DispmanxEglOutputFactory(@Nonnull final LibEGL libEGL,
-                             @Nonnull final PrivateDispmanxEglOutputFactory privateDispmanxEglOutputFactory) {
+    DispmanxEglPlatformFactory(@Nonnull final LibEGL libEGL,
+                               @Nonnull final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory,
+                               @Nonnull final Compositor compositor) {
         this.libEGL = libEGL;
         this.privateDispmanxEglOutputFactory = privateDispmanxEglOutputFactory;
+        this.compositor = compositor;
     }
 
-    public DispmanxEglOutput create(final int dispmanxElement,
-                                    final int width,
-                                    final int height) {
+    public DispmanxEglPlatform create(final DispmanxPlatform dispmanxPlatform) {
+        final DISPMANX_MODEINFO_T modeinfo        = dispmanxPlatform.getModeinfo();
+        final int                 dispmanxElement = dispmanxPlatform.getDispmanxElement();
+
         final EGL_DISPMANX_WINDOW_T nativewindow = new EGL_DISPMANX_WINDOW_T();
         nativewindow.element(dispmanxElement);
-        nativewindow.width(width);
-        nativewindow.height(height);
+        nativewindow.width(modeinfo.width());
+        nativewindow.height(modeinfo.height());
 
         final long nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
         final long display       = createEglDisplay(nativeDisplay);
@@ -60,9 +67,14 @@ public class DispmanxEglOutputFactory {
                                               config,
                                               context);
 
-        return this.privateDispmanxEglOutputFactory.create(display,
-                                                           surface,
-                                                           context);
+        final DispmanxEglPlatform dispmanxEglPlatform = this.privateDispmanxEglOutputFactory.create(dispmanxPlatform.getWlOutput(),
+                                                                                                    display,
+                                                                                                    surface,
+                                                                                                    context);
+        this.compositor.getPlatforms()
+                       .add(dispmanxEglPlatform);
+
+        return dispmanxEglPlatform;
     }
 
     private long createEglSurface(final long nativewindow,

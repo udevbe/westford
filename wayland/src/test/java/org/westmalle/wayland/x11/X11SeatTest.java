@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -40,11 +39,11 @@ import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 public class X11SeatTest {
 
     @Mock
-    private Libxcb    libxcb;
+    private Libxcb      libxcb;
     @Mock
-    private X11Output x11Output;
+    private X11Platform x11Platform;
     @Mock
-    private WlSeat    wlSeat;
+    private WlSeat      wlSeat;
 
     @InjectMocks
     private X11Seat x11Seat;

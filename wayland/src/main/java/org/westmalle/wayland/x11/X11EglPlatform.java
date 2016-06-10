@@ -15,26 +15,31 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import org.westmalle.wayland.core.RenderOutput;
+import org.westmalle.wayland.core.EglPlatform;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
+import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 
-@AutoFactory(className = "PrivateX11EglOutputFactory",
+@AutoFactory(className = "PrivateX11EglPlatformFactory",
              allowSubclasses = true)
-public class X11EglOutput implements RenderOutput {
+public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final LibEGL libEGL;
-    private final long   eglDisplay;
-    private final long   eglSurface;
-    private final long   eglContext;
+    private final LibEGL   libEGL;
+    private final WlOutput wlOutput;
+    private final long     eglDisplay;
+    private final long     eglSurface;
+    private final long     eglContext;
 
-    X11EglOutput(@Provided @Nonnull final LibEGL libEGL,
-                 final long eglDisplay,
-                 final long eglSurface,
-                 final long eglContext) {
+    X11EglPlatform(@Provided @Nonnull final LibEGL libEGL,
+                   final WlOutput wlOutput,
+                   final long eglDisplay,
+                   final long eglSurface,
+                   final long eglContext) {
         this.libEGL = libEGL;
+        this.wlOutput = wlOutput;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
@@ -52,5 +57,20 @@ public class X11EglOutput implements RenderOutput {
     public void end() {
         this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    this.eglSurface);
+    }
+
+    @Override
+    public long getEglDisplay() {
+        return this.eglDisplay;
+    }
+
+    @Override
+    public WlOutput getWlOutput() {
+        return this.wlOutput;
+    }
+
+    @Override
+    public void accept(final Renderer renderer) {
+        renderer.visit(this);
     }
 }
