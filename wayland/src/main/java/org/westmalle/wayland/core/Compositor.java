@@ -56,8 +56,14 @@ public class Compositor {
         this.renderEvent = Optional.empty();
         //TODO unit test with subsurfaces render order
         //TODO unit test with parent surface without buffer while clients have a buffer.
-        this.platform.accept(this.renderer);
+        renderOutput(this.platform);
+
         this.display.flushClients();
+    }
+
+    private void renderOutput(Platform platform){
+        platform.accept(this.renderer);
+        platform.nextOutput().ifPresent(this::renderOutput);
     }
 
     public void requestRender() {

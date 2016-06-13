@@ -16,12 +16,14 @@ package org.westmalle.wayland.x11;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.EglPlatform;
+import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 
 @AutoFactory(className = "PrivateX11EglPlatformFactory",
              allowSubclasses = true)
@@ -36,8 +38,7 @@ public class X11EglPlatform implements EglPlatform {
     private final long        eglContext;
 
     X11EglPlatform(@Provided @Nonnull final LibEGL libEGL,
-                   @Nonnull
-                   final X11Platform x11Platform,
+                   @Nonnull final X11Platform x11Platform,
                    final long eglDisplay,
                    final long eglSurface,
                    final long eglContext) {
@@ -46,6 +47,14 @@ public class X11EglPlatform implements EglPlatform {
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
+    }
+
+    @Override
+    public void begin() {
+        this.libEGL.eglMakeCurrent(this.eglDisplay,
+                                   this.eglSurface,
+                                   this.eglSurface,
+                                   this.eglContext);
     }
 
     @Override
@@ -69,18 +78,26 @@ public class X11EglPlatform implements EglPlatform {
         return this.eglContext;
     }
 
+    @Nonnull
     @Override
-    public List<WlOutput> getWlOutputs() {
-        return this.x11Platform.getWlOutputs();
+    public WlOutput getWlOutput() {
+        return this.x11Platform.getWlOutput();
     }
 
     @Override
-    public void accept(final Renderer renderer) {
+    public void accept(@Nonnull final Renderer renderer) {
         renderer.visit(this);
     }
 
     @Nonnull
     public X11Platform getX11Platform() {
         return x11Platform;
+    }
+
+    @Nonnull
+    @Override
+    public Optional<Platform> nextOutput() {
+        //TODO read out config & init next output
+        return Optional.empty();
     }
 }

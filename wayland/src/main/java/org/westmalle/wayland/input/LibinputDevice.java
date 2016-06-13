@@ -75,15 +75,15 @@ public class LibinputDevice {
         final String deviceOutputName = Pointer.wrap(String.class,
                                                      outputNamePointer)
                                                .dref();
-        for (final WlOutput wlOutput : this.platform.getWlOutputs()) {
-            //TODO give outputs a name
+//        for (final WlOutput wlOutput : this.platform.getWlOutput()) {
+        //TODO give outputs a name
 //            if (deviceOutputName.equals(platform.getOutput()
 //                                                .getName())) {
-            return Optional.of(wlOutput);
+        return Optional.of(platform.getWlOutput());
 //            }
-        }
+        //     }
 
-        return Optional.empty();
+        //      return Optional.empty();
     }
 
     public void handleKeyboardKey(final long keyboardEvent) {

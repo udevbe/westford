@@ -81,7 +81,7 @@ public class DispmanxPlatformFactory {
         final Output   output   = createOutput(modeinfo);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
-        return this.privateDispmanxOutputFactory.create(Collections.singletonList(wlOutput),
+        return this.privateDispmanxOutputFactory.create(wlOutput,
                                                         dispmanxElement,
                                                         modeinfo);
     }
