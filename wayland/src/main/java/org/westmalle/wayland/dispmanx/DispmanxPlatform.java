@@ -27,15 +27,15 @@ import java.util.List;
 public class DispmanxPlatform {
 
     @Nonnull
-    private final List<WlOutput>      wlOutputs;
+    private final WlOutput            wlOutput;
     private final int                 dispmanxElement;
     @Nonnull
     private final DISPMANX_MODEINFO_T modeinfo;
 
-    DispmanxPlatform(@Nonnull final List<WlOutput> wlOutputs,
+    DispmanxPlatform(@Nonnull final WlOutput wlOutput,
                      final int dispmanxElement,
                      @Nonnull final DISPMANX_MODEINFO_T modeinfo) {
-        this.wlOutputs = wlOutputs;
+        this.wlOutput = wlOutput;
         this.dispmanxElement = dispmanxElement;
         this.modeinfo = modeinfo;
     }
@@ -50,7 +50,7 @@ public class DispmanxPlatform {
     }
 
     @Nonnull
-    public List<WlOutput> getWlOutputs() {
-        return this.wlOutputs;
+    public WlOutput getWlOutput() {
+        return this.wlOutput;
     }
 }

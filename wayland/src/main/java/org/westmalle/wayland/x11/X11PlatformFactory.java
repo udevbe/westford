@@ -231,7 +231,7 @@ public class X11PlatformFactory {
                        }
                    });
 
-        return this.privateX11OutputFactory.create(Collections.singletonList(wlOutput),
+        return this.privateX11OutputFactory.create(wlOutput,
                                                    x11EventBus,
                                                    connection,
                                                    xDisplay,

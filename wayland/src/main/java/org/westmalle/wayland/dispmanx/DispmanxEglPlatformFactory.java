@@ -69,11 +69,6 @@ public class DispmanxEglPlatformFactory {
                                                  config,
                                                  eglContext);
 
-        this.libEGL.eglMakeCurrent(eglDisplay,
-                                   eglSurface,
-                                   eglSurface,
-                                   eglContext);
-
         return this.privateDispmanxEglOutputFactory.create(dispmanxPlatform,
                                                            eglDisplay,
                                                            eglSurface,

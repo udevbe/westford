@@ -25,7 +25,7 @@ import java.util.Map;
 public class X11Platform {
 
     @Nonnull
-    private final List<WlOutput>       wlOutputs;
+    private final WlOutput             wlOutput;
     @Nonnull
     private final X11EventBus          x11EventBus;
     private final long                 xcbConnection;
@@ -34,13 +34,13 @@ public class X11Platform {
     @Nonnull
     private final Map<String, Integer> atoms;
 
-    X11Platform(@Nonnull final List<WlOutput> wlOutputs,
+    X11Platform(@Nonnull final WlOutput wlOutput,
                 @Nonnull final X11EventBus x11EventBus,
                 final long xcbConnection,
                 final long xDisplay,
                 final int xWindow,
                 @Nonnull final Map<String, Integer> x11Atoms) {
-        this.wlOutputs = wlOutputs;
+        this.wlOutput = wlOutput;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xWindow = xWindow;
@@ -71,7 +71,7 @@ public class X11Platform {
     }
 
     @Nonnull
-    public List<WlOutput> getWlOutputs() {
-        return this.wlOutputs;
+    public WlOutput getWlOutput() {
+        return this.wlOutput;
     }
 }

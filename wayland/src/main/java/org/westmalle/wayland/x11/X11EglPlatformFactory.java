@@ -92,10 +92,6 @@ public class X11EglPlatformFactory {
                                                  config,
                                                  eglContext,
                                                  x11Platform.getxWindow());
-        this.libEGL.eglMakeCurrent(eglDisplay,
-                                   eglSurface,
-                                   eglSurface,
-                                   eglContext);
 
         return this.privateX11EglOutputFactory.create(x11Platform,
                                                       eglDisplay,

@@ -16,12 +16,14 @@ package org.westmalle.wayland.dispmanx;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.EglPlatform;
+import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 
 @AutoFactory(className = "PrivateDispmanxEglPlatformFactory",
              allowSubclasses = true)
@@ -49,6 +51,14 @@ public class DispmanxEglPlatform implements EglPlatform {
     }
 
     @Override
+    public void begin() {
+        this.libEGL.eglMakeCurrent(this.eglDisplay,
+                                   this.eglSurface,
+                                   this.eglSurface,
+                                   this.eglContext);
+    }
+
+    @Override
     public void end() {
         this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    this.eglSurface);
@@ -69,18 +79,26 @@ public class DispmanxEglPlatform implements EglPlatform {
         return this.eglContext;
     }
 
+    @Nonnull
     @Override
-    public List<WlOutput> getWlOutputs() {
-        return this.dispmanxPlatform.getWlOutputs();
+    public WlOutput getWlOutput() {
+        return this.dispmanxPlatform.getWlOutput();
     }
 
     @Override
-    public void accept(final Renderer renderer) {
+    public void accept(@Nonnull final Renderer renderer) {
         renderer.visit(this);
     }
 
     @Nonnull
     public DispmanxPlatform getDispmanxPlatform() {
         return this.dispmanxPlatform;
+    }
+
+    @Nonnull
+    @Override
+    public Optional<Platform> nextOutput() {
+        //TODO read out config & init next output
+        return Optional.empty();
     }
 }
