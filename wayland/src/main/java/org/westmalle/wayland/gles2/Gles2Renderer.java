@@ -1,4 +1,4 @@
-package org.westmalle.wayland.egl;
+package org.westmalle.wayland.gles2;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.ShmBuffer;
