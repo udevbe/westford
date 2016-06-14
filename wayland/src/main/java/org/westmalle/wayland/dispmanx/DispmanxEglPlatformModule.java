@@ -2,8 +2,10 @@ package org.westmalle.wayland.dispmanx;
 
 import dagger.Module;
 import dagger.Provides;
+import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.core.Platform;
 
+import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
@@ -20,7 +22,7 @@ public class DispmanxEglPlatformModule {
 
     @Provides
     @Singleton
-    Platform createPlatform(DispmanxEglPlatformFactory dispmanxEglPlatformFactory) {
+    Platform createPlatform(@Nonnull DispmanxEglPlatformFactory dispmanxEglPlatformFactory) {
         return dispmanxEglPlatformFactory.create();
     }
 }
