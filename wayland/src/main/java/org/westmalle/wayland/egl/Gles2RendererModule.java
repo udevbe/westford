@@ -15,16 +15,23 @@ package org.westmalle.wayland.egl;
 
 import dagger.Module;
 import dagger.Provides;
+import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.core.Renderer;
 
 import javax.inject.Singleton;
 
 @Module
-public class EglGles2RendererModule {
+public class Gles2RendererModule {
 
     @Provides
     @Singleton
-    Renderer createRenderer(final EglGles2Renderer eglGles2RenderEngine) {
-        return eglGles2RenderEngine;
+    GlRenderer createGlRenderer(final Gles2Renderer gles2Renderer) {
+        return gles2Renderer;
+    }
+
+    @Provides
+    @Singleton
+    Renderer createRenderer(final GlRenderer glRenderer) {
+        return glRenderer;
     }
 }

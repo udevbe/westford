@@ -15,6 +15,7 @@ package org.westmalle.wayland.x11;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -61,14 +62,18 @@ public class X11EglPlatformFactory {
     private final PrivateX11EglPlatformFactory privateX11EglOutputFactory;
     @Nonnull
     private final X11Platform                  x11Platform;
+    @Nonnull
+    private final GlRenderer glRenderer;
 
     @Inject
     X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
                           @Nonnull final PrivateX11EglPlatformFactory privateX11EglOutputFactory,
-                          @Nonnull final X11Platform x11Platform) {
+                          @Nonnull final X11Platform x11Platform,
+                          @Nonnull final GlRenderer glRenderer) {
         this.libEGL = libEGL;
         this.privateX11EglOutputFactory = privateX11EglOutputFactory;
         this.x11Platform = x11Platform;
+        this.glRenderer = glRenderer;
     }
 
     @Nonnull
@@ -79,13 +84,7 @@ public class X11EglPlatformFactory {
         }
         final long eglDisplay = createEglDisplay(x11Platform.getxDisplay());
 
-        final int configs_size = 256 * sizeof((Pointer<?>) null);
-        final Pointer<Pointer> configs = malloc(configs_size,
-                                                Pointer.class);
-        chooseConfig(eglDisplay,
-                     configs,
-                     configs_size);
-        final long config = configs.dref().address;
+        final long config = this.glRenderer.eglConfig(eglDisplay);
         final long eglContext = createEglContext(eglDisplay,
                                                  config);
         final long eglSurface = createEglSurface(eglDisplay,
@@ -150,39 +149,6 @@ public class X11EglPlatformFactory {
                            eglQueryString.dref()));
 
         return eglDisplay;
-    }
-
-    private void chooseConfig(final long eglDisplay,
-                              final Pointer<Pointer> configs,
-                              final int configs_size) {
-        final Pointer<Integer> num_configs = Pointer.nref(0);
-        final Pointer<Integer> egl_config_attribs = Pointer.nref(
-                //@formatter:off
-                 EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
-                 EGL_BUFFER_SIZE,       32,
-                 EGL_RED_SIZE,          8,
-                 EGL_GREEN_SIZE,        8,
-                 EGL_BLUE_SIZE,         8,
-                 EGL_ALPHA_SIZE,        8,
-                 EGL_DEPTH_SIZE,        24,
-                 EGL_STENCIL_SIZE,      8,
-                 EGL_SAMPLE_BUFFERS,    0,
-                 EGL_SAMPLES,           0,
-                 EGL_SURFACE_TYPE,      EGL_WINDOW_BIT,
-                 EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
-                 EGL_NONE
-                //@formatter:on
-                                                                );
-        if (this.libEGL.eglChooseConfig(eglDisplay,
-                                        egl_config_attribs.address,
-                                        configs.address,
-                                        configs_size,
-                                        num_configs.address) == 0) {
-            throw new RuntimeException("eglChooseConfig() failed");
-        }
-        if (num_configs.dref() == 0) {
-            throw new RuntimeException("failed to find suitable EGLConfig");
-        }
     }
 
     private long createEglContext(final long eglDisplay,

@@ -2,6 +2,7 @@ package org.westmalle.wayland.dispmanx;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
@@ -38,14 +39,18 @@ public class DispmanxEglPlatformFactory {
     private final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory;
     @Nonnull
     private final DispmanxPlatform                  dispmanxPlatform;
+    @Nonnull
+    private final GlRenderer                        glRenderer;
 
     @Inject
     DispmanxEglPlatformFactory(@Nonnull final LibEGL libEGL,
                                @Nonnull final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory,
-                               @Nonnull final DispmanxPlatform dispmanxPlatform) {
+                               @Nonnull final DispmanxPlatform dispmanxPlatform,
+                               @Nonnull final GlRenderer glRenderer) {
         this.libEGL = libEGL;
         this.privateDispmanxEglOutputFactory = privateDispmanxEglOutputFactory;
         this.dispmanxPlatform = dispmanxPlatform;
+        this.glRenderer = glRenderer;
     }
 
     public DispmanxEglPlatform create() {
@@ -60,7 +65,7 @@ public class DispmanxEglPlatformFactory {
 
         final long nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
         final long eglDisplay    = createEglDisplay(nativeDisplay);
-        final long config        = createDispmanxConfig(eglDisplay);
+        final long config        = this.glRenderer.eglConfig(eglDisplay);
         // create an EGL rendering eglContext
         final long eglContext = getContext(eglDisplay,
                                            config);
@@ -115,33 +120,6 @@ public class DispmanxEglPlatformFactory {
             this.libEGL.throwError("eglCreateContext");
         }
         return context;
-    }
-
-    private long createDispmanxConfig(final long display) {
-        final Pointer<Integer> num_config = Pointer.nref(0);
-        final Pointer<Pointer> configs    = Pointer.nref(Pointer.nref(0));
-        // get an appropriate EGL frame buffer configuration
-        if (this.libEGL.eglChooseConfig(display,
-                                        Pointer.nref(EGL_SURFACE_TYPE,
-                                                     EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
-                                                     EGL_RED_SIZE,
-                                                     8,
-                                                     EGL_GREEN_SIZE,
-                                                     8,
-                                                     EGL_BLUE_SIZE,
-                                                     8,
-                                                     EGL_ALPHA_SIZE,
-                                                     8,
-                                                     EGL_RENDERABLE_TYPE,
-                                                     EGL_OPENGL_ES2_BIT,
-                                                     EGL_NONE).address,
-                                        configs.address,
-                                        1,
-                                        num_config.address) != 0) {
-            this.libEGL.throwError("eglChooseConfig");
-        }
-
-        return configs.dref().address;
     }
 
     private long createEglDisplay(final long nativeDisplay) {

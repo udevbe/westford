@@ -31,7 +31,6 @@ import org.powermock.reflect.Whitebox;
 import org.westmalle.wayland.core.EglPlatform;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.SurfaceState;
@@ -61,17 +60,17 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ShmBuffer.class,
                  Gles2SurfaceData.class})
-public class EglGles2RendererTest {
+public class Gles2RendererTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private LibGLESv2        libGLESv2;
+    private LibGLESv2     libGLESv2;
     @Mock
-    private Scene            scene;
+    private Scene         scene;
     @InjectMocks
-    private EglGles2Renderer eglGles2RenderEngine;
+    private Gles2Renderer eglGles2RenderEngine;
 
     @Before
     public void setUp() {

@@ -6,6 +6,7 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
+import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -20,6 +21,25 @@ import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
+import static org.freedesktop.jaccall.Pointer.malloc;
+import static org.freedesktop.jaccall.Size.sizeof;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BUFFER_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_COLOR_BUFFER_TYPE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_DEPTH_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RGB_BUFFER;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SAMPLES;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SAMPLE_BUFFERS;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_STENCIL_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
@@ -34,7 +54,7 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
 @Singleton
-public class EglGles2Renderer implements Renderer {
+public class Gles2Renderer implements GlRenderer {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -80,7 +100,8 @@ public class EglGles2Renderer implements Renderer {
     private final Map<Gles2BufferFormat, Integer>          shmShaderPrograms             = new HashMap<>();
     @Nonnull
     private       Optional<Integer>                        eglExternalImageShaderProgram = Optional.empty();
-
+    @Nonnull
+    private final LibEGL libEGL;
     @Nonnull
     private final LibGLESv2 libGLESv2;
     @Nonnull
@@ -98,8 +119,10 @@ public class EglGles2Renderer implements Renderer {
     private int textureArg;
 
     @Inject
-    EglGles2Renderer(@Nonnull final LibGLESv2 libGLESv2,
-                     @Nonnull final Scene scene) {
+    Gles2Renderer(@Nonnull final LibEGL libEGL,
+                  @Nonnull final LibGLESv2 libGLESv2,
+                  @Nonnull final Scene scene) {
+        this.libEGL = libEGL;
         this.libGLESv2 = libGLESv2;
         this.scene = scene;
     }
@@ -475,5 +498,41 @@ public class EglGles2Renderer implements Renderer {
 
     public void end(final EglPlatform renderOutput) {
         renderOutput.end();
+    }
+
+    @Override
+    public long eglConfig(final long eglDisplay) {
+        final int configs_size = 256 * sizeof((Pointer<?>) null);
+        final Pointer<Pointer> configs = malloc(configs_size,
+                                                Pointer.class);
+        final Pointer<Integer> num_configs = Pointer.nref(0);
+        final Pointer<Integer> egl_config_attribs = Pointer.nref(
+                //@formatter:off
+                 EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
+                 EGL_BUFFER_SIZE,       32,
+                 EGL_RED_SIZE,          8,
+                 EGL_GREEN_SIZE,        8,
+                 EGL_BLUE_SIZE,         8,
+                 EGL_ALPHA_SIZE,        8,
+                 EGL_DEPTH_SIZE,        24,
+                 EGL_STENCIL_SIZE,      8,
+                 EGL_SAMPLE_BUFFERS,    0,
+                 EGL_SAMPLES,           0,
+                 EGL_SURFACE_TYPE,      EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
+                 EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
+                 EGL_NONE
+                //@formatter:on
+                                                                );
+        if (this.libEGL.eglChooseConfig(eglDisplay,
+                                        egl_config_attribs.address,
+                                        configs.address,
+                                        configs_size,
+                                        num_configs.address) == 0) {
+            throw new RuntimeException("eglChooseConfig() failed");
+        }
+        if (num_configs.dref() == 0) {
+            throw new RuntimeException("failed to find suitable EGLConfig");
+        }
+        return configs.dref().address;
     }
 }
