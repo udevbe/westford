@@ -37,17 +37,20 @@ public class DispmanxEglPlatform implements EglPlatform {
     private final long             eglDisplay;
     private final long             eglSurface;
     private final long             eglContext;
+    private final boolean          bindDisplay;
 
     DispmanxEglPlatform(@Provided @Nonnull final LibEGL libEGL,
                         @Nonnull final DispmanxPlatform dispmanxPlatform,
                         final long eglDisplay,
                         final long eglSurface,
-                        final long eglContext) {
+                        final long eglContext,
+                        final boolean bindDisplay) {
         this.libEGL = libEGL;
         this.dispmanxPlatform = dispmanxPlatform;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
+        this.bindDisplay = bindDisplay;
     }
 
     @Override
@@ -93,6 +96,11 @@ public class DispmanxEglPlatform implements EglPlatform {
     @Nonnull
     public DispmanxPlatform getDispmanxPlatform() {
         return this.dispmanxPlatform;
+    }
+
+    @Override
+    public boolean hasBindDisplay() {
+        return this.bindDisplay;
     }
 
     @Nonnull

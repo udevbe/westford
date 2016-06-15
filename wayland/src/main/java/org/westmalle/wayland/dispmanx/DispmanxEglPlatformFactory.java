@@ -77,7 +77,8 @@ public class DispmanxEglPlatformFactory {
         return this.privateDispmanxEglOutputFactory.create(dispmanxPlatform,
                                                            eglDisplay,
                                                            eglSurface,
-                                                           eglContext);
+                                                           eglContext,
+                                                           false);
     }
 
     private long createEglSurface(final long nativewindow,
