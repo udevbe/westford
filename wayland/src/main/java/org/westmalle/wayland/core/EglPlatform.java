@@ -10,4 +10,6 @@ public interface EglPlatform extends Platform {
     long getEglSurface();
 
     long getEglContext();
+
+    boolean hasBindDisplay();
 }

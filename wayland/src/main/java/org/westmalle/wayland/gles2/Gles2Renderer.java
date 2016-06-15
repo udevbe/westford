@@ -1,6 +1,7 @@
 package org.westmalle.wayland.gles2;
 
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -101,7 +102,7 @@ public class Gles2Renderer implements GlRenderer {
     @Nonnull
     private       Optional<Integer>                        eglExternalImageShaderProgram = Optional.empty();
     @Nonnull
-    private final LibEGL libEGL;
+    private final LibEGL    libEGL;
     @Nonnull
     private final LibGLESv2 libGLESv2;
     @Nonnull
@@ -137,7 +138,7 @@ public class Gles2Renderer implements GlRenderer {
         final OutputMode mode     = output.getMode();
 
         if (!this.init) {
-            init();
+            init(eglPlatform);
         }
 
         final int width  = mode.getWidth();
@@ -163,7 +164,7 @@ public class Gles2Renderer implements GlRenderer {
         //@formatter:on
     }
 
-    private void init() {
+    private void init(final EglPlatform eglPlatform) {
         //check for required texture extensions
         final String extensions = Pointer.wrap(String.class,
                                                this.libGLESv2.glGetString(GL_EXTENSIONS))
@@ -182,7 +183,7 @@ public class Gles2Renderer implements GlRenderer {
             System.exit(1);
         }
 
-        if (extensions.contains("GL_OES_EGL_image_external")) {
+        if (extensions.contains("GL_OES_EGL_image_external") && eglPlatform.hasBindDisplay()) {
             this.eglExternalImageShaderProgram = Optional.of(createShaderProgram(VERTEX_SHADER,
                                                                                  FRAGMENT_SHADER_EGL_EXTERNAL));
         }
