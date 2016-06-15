@@ -1,5 +1,6 @@
 package org.westmalle.wayland.gles2;
 
+import org.freedesktop.jaccall.Lib;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.ShmBuffer;
@@ -7,6 +8,7 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
+import org.westmalle.wayland.nativ.libEGL.EglQueryWaylandBufferWL;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -40,6 +42,12 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SAMPLE_BUFFERS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_STENCIL_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_EXTERNAL_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGB;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGBA;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_UV_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_U_V_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_XUXV_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
@@ -95,12 +103,63 @@ public class Gles2Renderer implements GlRenderer {
             "   gl_FragColor = texture2D(u_texture, v_texCoord)\n;" +
             "}";
 
+    private static final String FRAGMENT_CONVERT_YUV =
+            "  y *= alpha;\n" +
+            "  u *= alpha;\n" +
+            "  v *= alpha;\n" +
+            "  gl_FragColor.r = y + 1.59602678 * v;\n" +
+            "  gl_FragColor.g = y - 0.39176229 * u - 0.81296764 * v;\n" +
+            "  gl_FragColor.b = y + 2.01723214 * u;\n" +
+            "  gl_FragColor.a = alpha;\n" +
+            "}";
+
+    static final String FRAGMENT_SHADER_EGL_Y_UV =
+            "precision mediump float;\n" +
+            "uniform sampler2D tex;\n" +
+            "uniform sampler2D tex1;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "uniform float alpha;\n" +
+            "void main() {\n" +
+            "  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n" +
+            "  float u = texture2D(tex1, v_texcoord).r - 0.5;\n" +
+            "  float v = texture2D(tex1, v_texcoord).g - 0.5;\n" +
+            FRAGMENT_CONVERT_YUV;
+
+    static final String FRAGMENT_SHADER_EGL_Y_U_V =
+            "precision mediump float;\n" +
+            "uniform sampler2D tex;\n" +
+            "uniform sampler2D tex1;\n" +
+            "uniform sampler2D tex2;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "uniform float alpha;\n" +
+            "void main() {\n" +
+            "  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n" +
+            "  float u = texture2D(tex1, v_texcoord).x - 0.5;\n" +
+            "  float v = texture2D(tex2, v_texcoord).x - 0.5;\n" +
+            FRAGMENT_CONVERT_YUV;
+
+    static final String FRAGMENT_SHADER_EGL_Y_XUXV =
+            "precision mediump float;\n" +
+            "uniform sampler2D tex;\n" +
+            "uniform sampler2D tex1;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "uniform float alpha;\n" +
+            "void main() {\n" +
+            "  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n" +
+            "  float u = texture2D(tex1, v_texcoord).g - 0.5;\n" +
+            "  float v = texture2D(tex1, v_texcoord).a - 0.5;\n" +
+            FRAGMENT_CONVERT_YUV;
+
     @Nonnull
-    private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData             = new WeakHashMap<>();
+    private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
     @Nonnull
-    private final Map<Gles2BufferFormat, Integer>          shmShaderPrograms             = new HashMap<>();
+    private final Map<Gles2BufferFormat, Integer>          shmShaderPrograms = new HashMap<>();
+
     @Nonnull
-    private       Optional<Integer>                        eglExternalImageShaderProgram = Optional.empty();
+    private Optional<Integer>                 eglExternalImageShaderProgram = Optional.empty();
+    @Nonnull
+    private Optional<EglQueryWaylandBufferWL> eglQueryWaylandBufferWL       = Optional.empty();
+
     @Nonnull
     private final LibEGL    libEGL;
     @Nonnull
@@ -137,6 +196,7 @@ public class Gles2Renderer implements GlRenderer {
         final Output     output   = wlOutput.getOutput();
         final OutputMode mode     = output.getMode();
 
+        //FIXME move init to factory create method
         if (!this.init) {
             init(eglPlatform);
         }
@@ -186,6 +246,9 @@ public class Gles2Renderer implements GlRenderer {
         if (extensions.contains("GL_OES_EGL_image_external") && eglPlatform.hasBindDisplay()) {
             this.eglExternalImageShaderProgram = Optional.of(createShaderProgram(VERTEX_SHADER,
                                                                                  FRAGMENT_SHADER_EGL_EXTERNAL));
+            this.eglQueryWaylandBufferWL = Optional.of(Pointer.wrap(EglQueryWaylandBufferWL.class,
+                                                                    this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address))
+                                                              .dref());
         }
         else {
             LOGGER.warning("Extension GL_OES_EGL_image_external not available");
@@ -299,10 +362,12 @@ public class Gles2Renderer implements GlRenderer {
     public void render(@Nonnull final EglPlatform eglPlatform) {
         //naive bottom to top overdraw rendering.
         this.scene.getSurfacesStack()
-                  .forEach(this::draw);
+                  .forEach((wlSurfaceResource) -> draw(eglPlatform,
+                                                       wlSurfaceResource));
     }
 
-    private void draw(final WlSurfaceResource wlSurfaceResource) {
+    private void draw(final EglPlatform eglPlatform,
+                      final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         //don't bother rendering subsurfaces if the parent doesn't have a buffer.
         wlSurface.getSurface()
@@ -310,25 +375,106 @@ public class Gles2Renderer implements GlRenderer {
                  .getBuffer()
                  .ifPresent(wlBufferResource -> {
                      final LinkedList<WlSurfaceResource> subsurfaces = this.scene.getSubsurfaceStack(wlSurfaceResource);
-                     draw(wlSurfaceResource,
+                     draw(eglPlatform,
+                          wlSurfaceResource,
                           wlBufferResource);
                      subsurfaces.forEach((subsurface) -> {
                          if (subsurface != wlSurfaceResource) {
-                             draw(subsurface);
+                             draw(eglPlatform,
+                                  subsurface);
                          }
                      });
                  });
     }
 
-    private void draw(@Nonnull final WlSurfaceResource wlSurfaceResource,
-                      @Nonnull final WlBufferResource wlBufferResource) {
+    private void draw(final EglPlatform eglPlatform,
+                      final WlSurfaceResource wlSurfaceResource,
+                      final WlBufferResource wlBufferResource) {
         final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
         if (shmBuffer != null) {
             drawShm(wlSurfaceResource,
                     shmBuffer);
         }
-        //TODO drawEglExternalImage
+        else if (eglPlatform.hasBindDisplay()) {
+            final int textureFormat = this.eglQueryWaylandBufferWL.get()
+                                                                  .$(eglPlatform.getEglDisplay(),
+                                                                     wlBufferResource.pointer,
+                                                                     LibEGL.EGL_TEXTURE_FORMAT,
+                                                                     0L);
+            if (textureFormat != 0) {
+                drawEgl(eglPlatform,
+                        wlSurfaceResource,
+                        wlBufferResource,
+                        textureFormat);
+            }
+        }
 
+        //TODO dma buffer.
+    }
+
+    private void drawEgl(final EglPlatform eglPlatform,
+                         final WlSurfaceResource wlSurfaceResource,
+                         final WlBufferResource wlBufferResource,
+                         final int textureFormat) {
+
+        final long eglDisplay = eglPlatform.getEglDisplay();
+        final long buffer     = wlBufferResource.pointer;
+
+        final EglQueryWaylandBufferWL queryWaylandBuffer = this.eglQueryWaylandBufferWL.get();
+
+        Pointer<Integer> widthP  = Pointer.nref(0);
+        Pointer<Integer> heightP = Pointer.nref(0);
+        queryWaylandBuffer.$(eglDisplay,
+                             buffer,
+                             LibEGL.EGL_WIDTH,
+                             widthP.address);
+        queryWaylandBuffer.$(eglDisplay,
+                             buffer,
+                             LibEGL.EGL_HEIGHT,
+                             heightP.address);
+        int bufferWidth  = widthP.dref();
+        int bufferHeight = heightP.dref();
+
+        Pointer<Integer> yInvertedP = Pointer.nref(0);
+        final boolean    yInverted;
+        if (queryWaylandBuffer.$(eglDisplay,
+                                 buffer,
+                                 LibEGL.EGL_WAYLAND_Y_INVERTED_WL,
+                                 yInvertedP.address) != 0) {
+            yInverted = yInvertedP.dref() != 0;
+        }
+        else {
+            yInverted = true;
+        }
+
+        final String fragmentShader;
+        switch (textureFormat) {
+            case EGL_TEXTURE_RGB:
+            case EGL_TEXTURE_RGBA:
+            default:
+//                num_planes = 1;
+                fragmentShader = FRAGMENT_SHADER_ARGB8888;
+                break;
+            case EGL_TEXTURE_EXTERNAL_WL:
+//                num_planes = 1;
+//                gs->target = GL_TEXTURE_EXTERNAL_OES;
+                fragmentShader = FRAGMENT_SHADER_EGL_EXTERNAL;
+                break;
+            case EGL_TEXTURE_Y_UV_WL:
+//                num_planes = 2;
+                fragmentShader = FRAGMENT_SHADER_EGL_Y_UV;
+                break;
+            case EGL_TEXTURE_Y_U_V_WL:
+//                num_planes = 3;
+                fragmentShader = FRAGMENT_SHADER_EGL_Y_U_V;
+                break;
+            case EGL_TEXTURE_Y_XUXV_WL:
+                //               num_planes = 2;
+                fragmentShader = FRAGMENT_SHADER_EGL_Y_XUXV;
+                break;
+        }
+
+        //TODO more
     }
 
     private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,

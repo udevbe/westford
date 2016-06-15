@@ -22,6 +22,17 @@ import javax.inject.Singleton;
 @Lib("EGL")
 public class LibEGL {
 
+    public static final int EGL_WAYLAND_BUFFER_WL = 0x31D5;
+    public static final int EGL_WAYLAND_PLANE_WL  = 0x31D6;
+
+    public static final int EGL_TEXTURE_Y_U_V_WL    = 0x31D7;
+    public static final int EGL_TEXTURE_Y_UV_WL     = 0x31D8;
+    public static final int EGL_TEXTURE_Y_XUXV_WL   = 0x31D9;
+    public static final int EGL_TEXTURE_EXTERNAL_WL = 0x31DA;
+
+
+    public static final int EGL_WAYLAND_Y_INVERTED_WL = 0x31DB;
+
     public static final int EGL_PLATFORM_WAYLAND_KHR    = 0x31D8;
     public static final int EGL_PLATFORM_GBM_KHR        = 0x31D7;
     public static final int EGL_PLATFORM_X11_KHR        = 0x31D5;
