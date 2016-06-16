@@ -6,10 +6,12 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.libEGL.EglQueryWaylandBufferWL;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
+import org.westmalle.wayland.nativ.libGLESv2.GlEGLImageTargetTexture2DOES;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -25,7 +27,10 @@ import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
 import static org.freedesktop.jaccall.Pointer.malloc;
+import static org.freedesktop.jaccall.Pointer.wrap;
 import static org.freedesktop.jaccall.Size.sizeof;
+import static org.freedesktop.wayland.shared.WlShmFormat.ARGB8888;
+import static org.freedesktop.wayland.shared.WlShmFormat.XRGB8888;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BUFFER_SIZE;
@@ -104,46 +109,40 @@ public class Gles2Renderer implements GlRenderer {
             "}";
 
     private static final String FRAGMENT_CONVERT_YUV =
-            "  y *= alpha;\n" +
-            "  u *= alpha;\n" +
-            "  v *= alpha;\n" +
             "  gl_FragColor.r = y + 1.59602678 * v;\n" +
             "  gl_FragColor.g = y - 0.39176229 * u - 0.81296764 * v;\n" +
             "  gl_FragColor.b = y + 2.01723214 * u;\n" +
-            "  gl_FragColor.a = alpha;\n" +
+            "  gl_FragColor.a = 1.0;\n" +
             "}";
 
     static final String FRAGMENT_SHADER_EGL_Y_UV =
             "precision mediump float;\n" +
-            "uniform sampler2D tex;\n" +
-            "uniform sampler2D tex1;\n" +
-            "varying vec2 v_texcoord;\n" +
-            "uniform float alpha;\n" +
+            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture1;\n" +
+            "varying vec2 v_texCoord;\n" +
             "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n" +
-            "  float u = texture2D(tex1, v_texcoord).r - 0.5;\n" +
-            "  float v = texture2D(tex1, v_texcoord).g - 0.5;\n" +
+            "  float y = 1.16438356 * (texture2D(u_texture, v_texCoord).x - 0.0625);\n" +
+            "  float u = texture2D(u_texture1, v_texCoord).r - 0.5;\n" +
+            "  float v = texture2D(u_texture1, v_texCoord).g - 0.5;\n" +
             FRAGMENT_CONVERT_YUV;
 
     static final String FRAGMENT_SHADER_EGL_Y_U_V =
             "precision mediump float;\n" +
-            "uniform sampler2D tex;\n" +
-            "uniform sampler2D tex1;\n" +
-            "uniform sampler2D tex2;\n" +
-            "varying vec2 v_texcoord;\n" +
-            "uniform float alpha;\n" +
+            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture1;\n" +
+            "uniform sampler2D u_texture2;\n" +
+            "varying vec2 v_texCoord;\n" +
             "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n" +
-            "  float u = texture2D(tex1, v_texcoord).x - 0.5;\n" +
-            "  float v = texture2D(tex2, v_texcoord).x - 0.5;\n" +
+            "  float y = 1.16438356 * (texture2D(tex, v_texCoord).x - 0.0625);\n" +
+            "  float u = texture2D(tex1, v_texCoord).x - 0.5;\n" +
+            "  float v = texture2D(tex2, v_texCoord).x - 0.5;\n" +
             FRAGMENT_CONVERT_YUV;
 
     static final String FRAGMENT_SHADER_EGL_Y_XUXV =
             "precision mediump float;\n" +
-            "uniform sampler2D tex;\n" +
-            "uniform sampler2D tex1;\n" +
+            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture1;\n" +
             "varying vec2 v_texcoord;\n" +
-            "uniform float alpha;\n" +
             "void main() {\n" +
             "  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n" +
             "  float u = texture2D(tex1, v_texcoord).g - 0.5;\n" +
@@ -153,12 +152,14 @@ public class Gles2Renderer implements GlRenderer {
     @Nonnull
     private final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = new WeakHashMap<>();
     @Nonnull
-    private final Map<Gles2BufferFormat, Integer>          shmShaderPrograms = new HashMap<>();
+    private final Map<Integer, Integer>                    shmShaderPrograms = new HashMap<>();
+    @Nonnull
+    private final Map<Integer, Integer>                    eglShaderPrograms = new HashMap<>();
 
     @Nonnull
-    private Optional<Integer>                 eglExternalImageShaderProgram = Optional.empty();
+    private Optional<EglQueryWaylandBufferWL>      eglQueryWaylandBufferWL      = Optional.empty();
     @Nonnull
-    private Optional<EglQueryWaylandBufferWL> eglQueryWaylandBufferWL       = Optional.empty();
+    private Optional<GlEGLImageTargetTexture2DOES> glEGLImageTargetTexture2DOES = Optional.empty();
 
     @Nonnull
     private final LibEGL    libEGL;
@@ -196,7 +197,7 @@ public class Gles2Renderer implements GlRenderer {
         final Output     output   = wlOutput.getOutput();
         final OutputMode mode     = output.getMode();
 
-        //FIXME move init to factory create method
+        //FIXME move init to factory create method?
         if (!this.init) {
             init(eglPlatform);
         }
@@ -226,32 +227,58 @@ public class Gles2Renderer implements GlRenderer {
 
     private void init(final EglPlatform eglPlatform) {
         //check for required texture extensions
-        final String extensions = Pointer.wrap(String.class,
-                                               this.libGLESv2.glGetString(GL_EXTENSIONS))
-                                         .dref();
+        final String extensions = wrap(String.class,
+                                       this.libGLESv2.glGetString(GL_EXTENSIONS))
+                .dref();
 
+        //init shm shaders
         LOGGER.info("GLESv2 extensions: " + extensions);
-        if (extensions.contains("GL_EXT_texture_format_BGRA8888")) {
-            for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
-                this.shmShaderPrograms.put(gles2BufferFormat,
-                                           createShaderProgram(gles2BufferFormat.getVertexShaderSource(),
-                                                               gles2BufferFormat.getFragmentShaderSource()));
-            }
-        }
-        else {
+        if (!extensions.contains("GL_EXT_texture_format_BGRA8888")) {
             LOGGER.severe("Required extension GL_EXT_texture_format_BGRA8888 not available");
             System.exit(1);
         }
+        //this shader is reused in wl egl
+        final int argbShaderProgram = createShaderProgram(VERTEX_SHADER,
+                                                          FRAGMENT_SHADER_ARGB8888);
+        this.shmShaderPrograms.put(ARGB8888.value,
+                                   argbShaderProgram);
+        this.shmShaderPrograms.put(XRGB8888.value,
+                                   createShaderProgram(VERTEX_SHADER,
+                                                       FRAGMENT_SHADER_XRGB8888));
 
-        if (extensions.contains("GL_OES_EGL_image_external") && eglPlatform.hasBindDisplay()) {
-            this.eglExternalImageShaderProgram = Optional.of(createShaderProgram(VERTEX_SHADER,
-                                                                                 FRAGMENT_SHADER_EGL_EXTERNAL));
-            this.eglQueryWaylandBufferWL = Optional.of(Pointer.wrap(EglQueryWaylandBufferWL.class,
-                                                                    this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address))
-                                                              .dref());
-        }
-        else {
-            LOGGER.warning("Extension GL_OES_EGL_image_external not available");
+
+        //init wl egl functionality
+        if (eglPlatform.hasBindDisplay()) {
+            this.eglQueryWaylandBufferWL = Optional.of(wrap(EglQueryWaylandBufferWL.class,
+                                                            this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address))
+                                                               .dref());
+
+            this.eglShaderPrograms.put(EGL_TEXTURE_RGBA,
+                                       argbShaderProgram);
+            this.eglShaderPrograms.put(EGL_TEXTURE_RGB,
+                                       argbShaderProgram);
+            this.eglShaderPrograms.put(EGL_TEXTURE_Y_U_V_WL,
+                                       createShaderProgram(VERTEX_SHADER,
+                                                           FRAGMENT_SHADER_EGL_Y_U_V));
+            this.eglShaderPrograms.put(EGL_TEXTURE_Y_UV_WL,
+                                       createShaderProgram(VERTEX_SHADER,
+                                                           FRAGMENT_SHADER_EGL_Y_UV));
+            this.eglShaderPrograms.put(EGL_TEXTURE_Y_XUXV_WL,
+                                       createShaderProgram(VERTEX_SHADER,
+                                                           FRAGMENT_SHADER_EGL_Y_XUXV));
+
+            this.glEGLImageTargetTexture2DOES = Optional.of(wrap(GlEGLImageTargetTexture2DOES.class,
+                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("glEGLImageTargetTexture2DOES").address))
+                                                                    .dref());
+
+            if (extensions.contains("GL_OES_EGL_image_external")) {
+                this.eglShaderPrograms.put(EGL_TEXTURE_EXTERNAL_WL,
+                                           createShaderProgram(VERTEX_SHADER,
+                                                               FRAGMENT_SHADER_EGL_EXTERNAL));
+            }
+            else {
+                LOGGER.warning("Extension GL_OES_EGL_image_external not available");
+            }
         }
 
         //configure texture blending
@@ -417,6 +444,12 @@ public class Gles2Renderer implements GlRenderer {
                          final WlBufferResource wlBufferResource,
                          final int textureFormat) {
 
+        final Integer shadeProgram = this.eglShaderPrograms.get(textureFormat);
+        if (shadeProgram == null) {
+            throw new RuntimeException(String.format("Egl texture format not supported: %d",
+                                                     textureFormat));
+        }
+
         final long eglDisplay = eglPlatform.getEglDisplay();
         final long buffer     = wlBufferResource.pointer;
 
@@ -447,101 +480,69 @@ public class Gles2Renderer implements GlRenderer {
             yInverted = true;
         }
 
-        final String fragmentShader;
-        switch (textureFormat) {
-            case EGL_TEXTURE_RGB:
-            case EGL_TEXTURE_RGBA:
-            default:
-//                num_planes = 1;
-                fragmentShader = FRAGMENT_SHADER_ARGB8888;
-                break;
-            case EGL_TEXTURE_EXTERNAL_WL:
-//                num_planes = 1;
-//                gs->target = GL_TEXTURE_EXTERNAL_OES;
-                fragmentShader = FRAGMENT_SHADER_EGL_EXTERNAL;
-                break;
-            case EGL_TEXTURE_Y_UV_WL:
-//                num_planes = 2;
-                fragmentShader = FRAGMENT_SHADER_EGL_Y_UV;
-                break;
-            case EGL_TEXTURE_Y_U_V_WL:
-//                num_planes = 3;
-                fragmentShader = FRAGMENT_SHADER_EGL_Y_U_V;
-                break;
-            case EGL_TEXTURE_Y_XUXV_WL:
-                //               num_planes = 2;
-                fragmentShader = FRAGMENT_SHADER_EGL_Y_XUXV;
-                break;
-        }
-
-        //TODO more
+        setupVertexParams(wlSurfaceResource,
+                          shadeProgram,
+                          bufferWidth,
+                          bufferHeight);
     }
 
     private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,
                          final ShmBuffer shmBuffer) {
+        //activate shader
+        final Integer shaderProgram = this.shmShaderPrograms.get(shmBuffer.getFormat());
+        if (shaderProgram == null) {
+            throw new RuntimeException(String.format("Shm buffer format not supported %d",
+                                                     shmBuffer.getFormat()));
+        }
+
+        final float bufferWidth  = shmBuffer.getStride() / 4;
+        final float bufferHeight = shmBuffer.getHeight();
+
+        setupVertexParams(wlSurfaceResource,
+                          shaderProgram,
+                          bufferWidth,
+                          bufferHeight);
+
+        querySurfaceData(wlSurfaceResource,
+                         shmBuffer).update(this.libGLESv2,
+                                           wlSurfaceResource,
+                                           shmBuffer);
+
+        //set the buffer in the shader
+        this.libGLESv2.glActiveTexture(GL_TEXTURE0);
+        this.libGLESv2.glUniform1i(this.textureArg,
+                                   0);
+
+        //draw
+        //enable texture blending
+        this.libGLESv2.glEnable(GL_BLEND);
+        this.libGLESv2.glDrawArrays(GL_TRIANGLES,
+                                    0,
+                                    6);
+
+        //cleanup
+        this.libGLESv2.glDisable(GL_BLEND);
+        this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
+        this.libGLESv2.glDisableVertexAttribArray(this.textureArg);
+        this.libGLESv2.glUseProgram(0);
+    }
+
+    private void setupVertexParams(final @Nonnull WlSurfaceResource wlSurfaceResource,
+                                   final Integer shaderProgram,
+                                   final float bufferWidth,
+                                   final float bufferHeight) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
         final float[] transform = surface.getTransform()
                                          .toArray();
 
-        final float bufferWidth  = shmBuffer.getStride() / 4;
-        final float bufferHeight = shmBuffer.getHeight();
-
         //define vertex data
-        final Pointer<Float> vertexData = Pointer.nref(         //top left:
-                                                                //attribute vec2 a_position
-                                                                0f,
-                                                                0f,
-                                                                //attribute vec2 a_texCoord
-                                                                0f,
-                                                                0f,
+        final Pointer<Float> vertexData = vertexData(bufferWidth,
+                                                     bufferHeight);
 
-                                                                //top right:
-                                                                //attribute vec2 a_position
-                                                                bufferWidth,
-                                                                0f,
-                                                                //attribute vec2 a_texCoord
-                                                                1f,
-                                                                0f,
+        this.libGLESv2.glUseProgram(shaderProgram);
 
-                                                                //bottom right:
-                                                                //vec2 a_position
-                                                                bufferWidth,
-                                                                bufferHeight,
-                                                                //vec2 a_texCoord
-                                                                1f,
-                                                                1f,
-
-                                                                //bottom right:
-                                                                //vec2 a_position
-                                                                bufferWidth,
-                                                                bufferHeight,
-                                                                //vec2 a_texCoord
-                                                                1f,
-                                                                1f,
-
-                                                                //bottom left:
-                                                                //vec2 a_position
-                                                                0f,
-                                                                bufferHeight,
-                                                                //vec2 a_texCoord
-                                                                0f,
-                                                                1f,
-
-                                                                //top left:
-                                                                //attribute vec2 a_position
-                                                                0f,
-                                                                0f,
-                                                                //attribute vec2 a_texCoord
-                                                                0f,
-                                                                0f);
-
-        //activate shader
-        final Gles2BufferFormat gles2BufferFormat = queryBufferFormat(shmBuffer);
-        final Integer           shader            = this.shmShaderPrograms.get(gles2BufferFormat);
-        this.libGLESv2.glUseProgram(shader);
-
-        //upload uniform data
+        //upload uniform vertex data
         final Pointer<Float> projectionBuffer = Pointer.nref(this.projection);
         this.libGLESv2.glUniformMatrix4fv(this.projectionArg,
                                           1,
@@ -569,29 +570,57 @@ public class Gles2Renderer implements GlRenderer {
                                              0,
                                              4 * Float.BYTES,
                                              vertexData.offset(2).address);
+    }
 
-        querySurfaceData(wlSurfaceResource,
-                         shmBuffer).update(this.libGLESv2,
-                                           wlSurfaceResource,
-                                           shmBuffer);
+    private Pointer<Float> vertexData(final float bufferWidth,
+                                      final float bufferHeight) {
+        return Pointer.nref(         //top left:
+                                     //attribute vec2 a_position
+                                     0f,
+                                     0f,
+                                     //attribute vec2 a_texCoord
+                                     0f,
+                                     0f,
 
-        //set the buffer in the shader
-        this.libGLESv2.glActiveTexture(GL_TEXTURE0);
-        this.libGLESv2.glUniform1i(this.textureArg,
-                                   0);
+                                     //top right:
+                                     //attribute vec2 a_position
+                                     bufferWidth,
+                                     0f,
+                                     //attribute vec2 a_texCoord
+                                     1f,
+                                     0f,
 
-        //draw
-        //enable texture blending
-        this.libGLESv2.glEnable(GL_BLEND);
-        this.libGLESv2.glDrawArrays(GL_TRIANGLES,
-                                    0,
-                                    6);
+                                     //bottom right:
+                                     //vec2 a_position
+                                     bufferWidth,
+                                     bufferHeight,
+                                     //vec2 a_texCoord
+                                     1f,
+                                     1f,
 
-        //cleanup
-        this.libGLESv2.glDisable(GL_BLEND);
-        this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
-        this.libGLESv2.glDisableVertexAttribArray(this.textureArg);
-        this.libGLESv2.glUseProgram(0);
+                                     //bottom right:
+                                     //vec2 a_position
+                                     bufferWidth,
+                                     bufferHeight,
+                                     //vec2 a_texCoord
+                                     1f,
+                                     1f,
+
+                                     //bottom left:
+                                     //vec2 a_position
+                                     0f,
+                                     bufferHeight,
+                                     //vec2 a_texCoord
+                                     0f,
+                                     1f,
+
+                                     //top left:
+                                     //attribute vec2 a_position
+                                     0f,
+                                     0f,
+                                     //attribute vec2 a_texCoord
+                                     0f,
+                                     0f);
     }
 
     private Gles2SurfaceData querySurfaceData(final WlSurfaceResource surfaceResource,
@@ -604,6 +633,7 @@ public class Gles2Renderer implements GlRenderer {
                                        surfaceData);
         }
         else {
+            //FIXME also check for: shm buffer format & buffer type
             final int surfaceDataWidth  = surfaceData.getWidth();
             final int surfaceDataHeight = surfaceData.getHeight();
             final int bufferWidth       = shmBuffer.getWidth();
@@ -616,18 +646,6 @@ public class Gles2Renderer implements GlRenderer {
             }
         }
         return surfaceData;
-    }
-
-    private Gles2BufferFormat queryBufferFormat(final ShmBuffer buffer) {
-        final int bufferFormat = buffer.getFormat();
-
-        for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
-            if (gles2BufferFormat.getWlShmFormat() == bufferFormat) {
-                return gles2BufferFormat;
-            }
-        }
-
-        throw new UnsupportedOperationException("Format " + buffer.getFormat() + " not supported.");
     }
 
     @Override

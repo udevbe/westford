@@ -117,12 +117,11 @@ public class Gles2RendererTest {
         when(mode.getWidth()).thenReturn(width);
         when(mode.getHeight()).thenReturn(height);
 
-        final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
-                                                                                         "shaderPrograms");
-        for (final Gles2BufferFormat gles2BufferFormat : Gles2BufferFormat.values()) {
-            shaderPrograms.put(gles2BufferFormat,
-                               shaderProgram);
-        }
+        final Map<Integer, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
+                                                                               "shaderPrograms");
+        shaderPrograms.put(WlShmFormat.ARGB8888.value,
+                           shaderProgram);
+
         //@formatter:off
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   Mat4.create(2.0f / width, 0,              0, -1,
@@ -176,8 +175,8 @@ public class Gles2RendererTest {
         mockStatic(Gles2SurfaceData.class);
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
         final int              shmFormat        = WlShmFormat.ARGB8888.value;
-        final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
-                                                                                         "shaderPrograms");
+        final Map<Integer, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
+                                                                               "shaderPrograms");
         final Integer shaderProgram    = 12346;
         final Mat4    surfaceTransform = Mat4.IDENTITY;
         final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = Whitebox.getInternalState(this.eglGles2RenderEngine,
@@ -189,7 +188,7 @@ public class Gles2RendererTest {
         when(Gles2SurfaceData.create(this.libGLESv2,
                                      shmBuffer)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
+        shaderPrograms.put(WlShmFormat.ARGB8888.value,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
@@ -267,8 +266,8 @@ public class Gles2RendererTest {
         mockStatic(Gles2SurfaceData.class);
         final Gles2SurfaceData gles2SurfaceData = mock(Gles2SurfaceData.class);
         final int              shmFormat        = WlShmFormat.ARGB8888.value;
-        final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
-                                                                                         "shaderPrograms");
+        final Map<Integer, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
+                                                                               "shaderPrograms");
         final Integer shaderProgram    = 12346;
         final Mat4    surfaceTransform = Mat4.IDENTITY;
 
@@ -278,7 +277,7 @@ public class Gles2RendererTest {
         when(Gles2SurfaceData.create(this.libGLESv2,
                                      shmBuffer)).thenReturn(gles2SurfaceData);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
+        shaderPrograms.put(WlShmFormat.ARGB8888.value,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
@@ -330,8 +329,8 @@ public class Gles2RendererTest {
         final int              bufferWidth      = 640;
         final int              bufferHeight     = 480;
         final int              shmFormat        = WlShmFormat.ARGB8888.value;
-        final Map<Gles2BufferFormat, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
-                                                                                         "shaderPrograms");
+        final Map<Integer, Integer> shaderPrograms = Whitebox.getInternalState(this.eglGles2RenderEngine,
+                                                                               "shaderPrograms");
         final Integer shaderProgram    = 12346;
         final Mat4    surfaceTransform = Mat4.IDENTITY;
         final Map<WlSurfaceResource, Gles2SurfaceData> cachedSurfaceData = Whitebox.getInternalState(this.eglGles2RenderEngine,
@@ -346,7 +345,7 @@ public class Gles2RendererTest {
         when(shmBuffer.getHeight()).thenReturn(bufferHeight);
         when(shmBuffer.getHeight()).thenReturn(bufferHeight);
         when(shmBuffer.getFormat()).thenReturn(shmFormat);
-        shaderPrograms.put(Gles2BufferFormat.SHM_ARGB8888,
+        shaderPrograms.put(WlShmFormat.ARGB8888.value,
                            shaderProgram);
         Whitebox.setInternalState(this.eglGles2RenderEngine,
                                   "projection",
