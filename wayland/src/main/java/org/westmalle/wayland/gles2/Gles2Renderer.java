@@ -37,6 +37,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BUFFER_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_COLOR_BUFFER_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_DEPTH_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_HEIGHT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
@@ -53,6 +54,8 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGBA;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_UV_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_U_V_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_XUXV_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_Y_INVERTED_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WIDTH;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
@@ -455,24 +458,24 @@ public class Gles2Renderer implements GlRenderer {
 
         final EglQueryWaylandBufferWL queryWaylandBuffer = this.eglQueryWaylandBufferWL.get();
 
-        Pointer<Integer> widthP  = Pointer.nref(0);
-        Pointer<Integer> heightP = Pointer.nref(0);
+        final Pointer<Integer> widthP  = Pointer.nref(0);
+        final Pointer<Integer> heightP = Pointer.nref(0);
         queryWaylandBuffer.$(eglDisplay,
                              buffer,
-                             LibEGL.EGL_WIDTH,
+                             EGL_WIDTH,
                              widthP.address);
         queryWaylandBuffer.$(eglDisplay,
                              buffer,
-                             LibEGL.EGL_HEIGHT,
+                             EGL_HEIGHT,
                              heightP.address);
-        int bufferWidth  = widthP.dref();
-        int bufferHeight = heightP.dref();
+        final int bufferWidth  = widthP.dref();
+        final int bufferHeight = heightP.dref();
 
-        Pointer<Integer> yInvertedP = Pointer.nref(0);
-        final boolean    yInverted;
+        final Pointer<Integer> yInvertedP = Pointer.nref(0);
+        final boolean          yInverted;
         if (queryWaylandBuffer.$(eglDisplay,
                                  buffer,
-                                 LibEGL.EGL_WAYLAND_Y_INVERTED_WL,
+                                 EGL_WAYLAND_Y_INVERTED_WL,
                                  yInvertedP.address) != 0) {
             yInverted = yInvertedP.dref() != 0;
         }
