@@ -670,25 +670,21 @@ public class Gles2Renderer implements GlRenderer {
 
     @Override
     public long eglConfig(final long eglDisplay) {
+
+
         final int configs_size = 256 * sizeof((Pointer<?>) null);
         final Pointer<Pointer> configs = malloc(configs_size,
                                                 Pointer.class);
         final Pointer<Integer> num_configs = Pointer.nref(0);
         final Pointer<Integer> egl_config_attribs = Pointer.nref(
                 //@formatter:off
-                 EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
-                 EGL_BUFFER_SIZE,       32,
-                 EGL_RED_SIZE,          8,
-                 EGL_GREEN_SIZE,        8,
-                 EGL_BLUE_SIZE,         8,
-                 EGL_ALPHA_SIZE,        8,
-                 EGL_DEPTH_SIZE,        24,
-                 EGL_STENCIL_SIZE,      8,
-                 EGL_SAMPLE_BUFFERS,    0,
-                 EGL_SAMPLES,           0,
-                 EGL_SURFACE_TYPE,      EGL_WINDOW_BIT | EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
-                 EGL_RENDERABLE_TYPE,   EGL_OPENGL_ES2_BIT,
-                 EGL_NONE
+                EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+	            EGL_RED_SIZE, 1,
+	            EGL_GREEN_SIZE, 1,
+	            EGL_BLUE_SIZE, 1,
+	            EGL_ALPHA_SIZE, 0,
+	            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+	            EGL_NONE
                 //@formatter:on
                                                                 );
         if (this.libEGL.eglChooseConfig(eglDisplay,
