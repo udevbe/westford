@@ -31,6 +31,7 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FIL
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 
+//TODO scheduled for deletion
 public class Gles2SurfaceData {
 
     private final Pointer<Integer> textureId;

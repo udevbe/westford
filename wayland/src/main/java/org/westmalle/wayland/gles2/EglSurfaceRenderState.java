@@ -5,20 +5,22 @@ import org.freedesktop.jaccall.Pointer;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoValue
 public abstract class EglSurfaceRenderState implements SurfaceRenderState {
 
-    public static EglSurfaceRenderState create(final int pitch,
-                                               final int height,
+    public static EglSurfaceRenderState create(@Nonnegative final int pitch,
+                                               @Nonnegative final int height,
                                                final int target,
+                                               final int shaderProgram,
                                                final boolean yInverted,
                                                final int[] textures,
                                                final long[] eglImages) {
-        //TODO specify shader program to use?
         return new AutoValue_EglSurfaceRenderState(pitch,
                                                    height,
                                                    target,
+                                                   shaderProgram,
                                                    yInverted,
                                                    textures,
                                                    eglImages);
@@ -32,6 +34,8 @@ public abstract class EglSurfaceRenderState implements SurfaceRenderState {
 
     public abstract int getTarget();
 
+    public abstract int getShaderProgram();
+
     public abstract boolean getYInverted();
 
     public abstract int[] getTextures();
@@ -39,7 +43,7 @@ public abstract class EglSurfaceRenderState implements SurfaceRenderState {
     public abstract long[] getEglImages();
 
     @Override
-    public void accept(final SurfaceRenderStateVisitor surfaceRenderStateVisitor) {
-        surfaceRenderStateVisitor.visit(this);
+    public Optional<SurfaceRenderState> accept(final SurfaceRenderStateVisitor surfaceRenderStateVisitor) {
+        return surfaceRenderStateVisitor.visit(this);
     }
 }
