@@ -1,8 +1,10 @@
 package org.westmalle.wayland.gles2;
 
 
-public interface SurfaceRenderStateVisitor {
-    void visit(ShmSurfaceRenderState shmSurfaceRenderState);
+import java.util.Optional;
 
-    void visit(EglSurfaceRenderState eglSurfaceRenderState);
+public interface SurfaceRenderStateVisitor {
+    default Optional<SurfaceRenderState> visit(ShmSurfaceRenderState shmSurfaceRenderState) { return Optional.of(shmSurfaceRenderState); }
+
+    default Optional<SurfaceRenderState> visit(EglSurfaceRenderState eglSurfaceRenderState) { return Optional.of(eglSurfaceRenderState); }
 }
