@@ -12,7 +12,7 @@ import static org.mockito.Mockito.verify;
 public class X11EglPlatformTest {
 
     @Mock
-    private LibEGL  libEGL;
+    private LibEGL      libEGL;
     @Mock
     private X11Platform x11Platform;
 
@@ -27,7 +27,8 @@ public class X11EglPlatformTest {
                                                                  this.x11Platform,
                                                                  eglDisplay,
                                                                  eglSurface,
-                                                                 eglContext);
+                                                                 eglContext,
+                                                                 true);
         //when
         x11EglPlatform.begin();
         //then
@@ -48,7 +49,8 @@ public class X11EglPlatformTest {
                                                                  this.x11Platform,
                                                                  eglDisplay,
                                                                  eglSurface,
-                                                                 eglContext);
+                                                                 eglContext,
+                                                                 true);
         //when
         x11EglPlatform.end();
         //then
