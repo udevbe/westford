@@ -244,6 +244,7 @@ public class Surface {
             final WlBufferResource wlBufferResource = buffer.get();
             final ShmBuffer        shmBuffer        = ShmBuffer.get(wlBufferResource);
             if (shmBuffer == null) {
+                //TODO support other buffer types (eg egl) trough a specialised buffergeometry object
                 throw new RuntimeException("Got a buffer that is not an shm buffer!");
             }
             final int width  = shmBuffer.getWidth() / scale;

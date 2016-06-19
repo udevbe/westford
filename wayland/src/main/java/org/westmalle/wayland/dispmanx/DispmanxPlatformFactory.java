@@ -30,8 +30,6 @@ import org.westmalle.wayland.protocol.WlOutputFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import java.util.Collections;
-
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_NO_ROTATE;
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
 

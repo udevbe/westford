@@ -209,6 +209,7 @@ public class LibEGL {
     public static final int  EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z             = 0x30B8;
     public static final int  EGL_IMAGE_PRESERVED                            = 0x30D2;
     public static final long EGL_NO_IMAGE                                   = 0L;
+    public static final long EGL_NO_IMAGE_KHR                               = 0L;
 
     public native int eglInitialize(@Ptr long dpy,
                                     @Ptr long major,
