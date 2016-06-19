@@ -33,7 +33,9 @@ public class LibGLESv2 {
     public static final int GL_LINES              = 0x0001;
     public static final int GL_LINE_LOOP          = 0x0002;
     public static final int GL_LINE_STRIP         = 0x0003;
-    ;
+
+    public static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
+
     public static final int GL_TRIANGLES                                    = 0x0004;
     public static final int GL_TRIANGLE_STRIP                               = 0x0005;
     public static final int GL_TRIANGLE_FAN                                 = 0x0006;

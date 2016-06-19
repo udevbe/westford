@@ -36,20 +36,21 @@ public class X11EglPlatform implements EglPlatform {
     private final long        eglDisplay;
     private final long        eglSurface;
     private final long        eglContext;
-    private final boolean     bindDisplay;
+    @Nonnull
+    private final String      eglExtensions;
 
     X11EglPlatform(@Provided @Nonnull final LibEGL libEGL,
                    @Nonnull final X11Platform x11Platform,
                    final long eglDisplay,
                    final long eglSurface,
                    final long eglContext,
-                   final boolean bindDisplay) {
+                   @Nonnull final String eglExtensions) {
         this.libEGL = libEGL;
         this.x11Platform = x11Platform;
         this.eglDisplay = eglDisplay;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
-        this.bindDisplay = bindDisplay;
+        this.eglExtensions = eglExtensions;
     }
 
     @Override
@@ -94,12 +95,13 @@ public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
     public X11Platform getX11Platform() {
-        return x11Platform;
+        return this.x11Platform;
     }
 
+    @Nonnull
     @Override
-    public boolean hasBindDisplay() {
-        return this.bindDisplay;
+    public String getEglExtensions() {
+        return this.eglExtensions;
     }
 
     @Nonnull

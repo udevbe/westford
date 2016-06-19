@@ -14,10 +14,7 @@
 package org.westmalle.wayland.x11;
 
 import org.freedesktop.jaccall.Pointer;
-import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.nativ.libEGL.EglBindWaylandDisplayWL;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -26,40 +23,24 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.logging.Logger;
 
-import static org.freedesktop.jaccall.Pointer.malloc;
-import static org.freedesktop.jaccall.Size.sizeof;
 import static java.lang.String.format;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BUFFER_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_COLOR_BUFFER_TYPE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_DEPTH_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_X11_KHR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RGB_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SAMPLES;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SAMPLE_BUFFERS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_STENCIL_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 
 public class X11EglPlatformFactory {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    @Nonnull
-    private final Display                      display;
     @Nonnull
     private final LibEGL                       libEGL;
     @Nonnull
@@ -70,12 +51,10 @@ public class X11EglPlatformFactory {
     private final GlRenderer                   glRenderer;
 
     @Inject
-    X11EglPlatformFactory(@Nonnull final Display display,
-                          @Nonnull final LibEGL libEGL,
+    X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
                           @Nonnull final PrivateX11EglPlatformFactory privateX11EglOutputFactory,
                           @Nonnull final X11Platform x11Platform,
                           @Nonnull final GlRenderer glRenderer) {
-        this.display = display;
         this.libEGL = libEGL;
         this.privateX11EglOutputFactory = privateX11EglOutputFactory;
         this.x11Platform = x11Platform;
@@ -89,52 +68,59 @@ public class X11EglPlatformFactory {
             throw new RuntimeException("eglBindAPI failed");
         }
 
-        final Pointer<String> extensionsString = Pointer.wrap(String.class,
-                                                              this.libEGL.eglQueryString(EGL_NO_DISPLAY,
-                                                                                         EGL_EXTENSIONS));
-        if (extensionsString.address == 0L) {
-            throw new RuntimeException("Could not query egl extensions.");
-        }
-        final String extensions = extensionsString.dref();
+        final long eglDisplay = createEglDisplay(this.x11Platform.getxDisplay());
 
-        final long eglDisplay = createEglDisplay(x11Platform.getxDisplay(),
-                                                 extensions);
+        final String eglExtensions = Pointer.wrap(String.class,
+                                                  this.libEGL.eglQueryString(eglDisplay,
+                                                                             EGL_EXTENSIONS))
+                                            .dref();
+        final String eglClientApis = Pointer.wrap(String.class,
+                                                  this.libEGL.eglQueryString(eglDisplay,
+                                                                             EGL_CLIENT_APIS))
+                                            .dref();
+        final String eglVendor = Pointer.wrap(String.class,
+                                              this.libEGL.eglQueryString(eglDisplay,
+                                                                         EGL_VENDOR))
+                                        .dref();
+        final String eglVersion = Pointer.wrap(String.class,
+                                               this.libEGL.eglQueryString(eglDisplay,
+                                                                          EGL_VERSION))
+                                         .dref();
+        LOGGER.info(format("Creating X11 EGL output:\n"
+                           + "\tEGL client apis: %s\n"
+                           + "\tEGL vendor: %s\n"
+                           + "\tEGL version: %s\n"
+                           + "\tEGL extensions: %s",
+                           eglClientApis,
+                           eglVendor,
+                           eglVersion,
+                           eglExtensions));
 
-        final boolean hasBindDisplay = bindDisplay(eglDisplay,
-                                                   extensions);
-
-        final long config = this.glRenderer.eglConfig(eglDisplay);
+        final long config = this.glRenderer.eglConfig(eglDisplay,
+                                                      eglExtensions);
         final long eglContext = createEglContext(eglDisplay,
                                                  config);
         final long eglSurface = createEglSurface(eglDisplay,
                                                  config,
                                                  eglContext,
-                                                 x11Platform.getxWindow());
+                                                 this.x11Platform.getxWindow());
 
-        return this.privateX11EglOutputFactory.create(x11Platform,
+        return this.privateX11EglOutputFactory.create(this.x11Platform,
                                                       eglDisplay,
                                                       eglSurface,
                                                       eglContext,
-                                                      hasBindDisplay);
+                                                      eglExtensions);
     }
 
-    private boolean bindDisplay(final long eglDisplay,
-                                final String extensions) {
-        if (extensions.contains("EGL_WL_bind_wayland_display")) {
-            final Pointer<EglBindWaylandDisplayWL> eglBindWaylandDisplayWL = Pointer.wrap(EglBindWaylandDisplayWL.class,
-                                                                                          libEGL.eglGetProcAddress(Pointer.nref("eglBindWaylandDisplayWL").address));
-            return eglBindWaylandDisplayWL.dref()
-                                          .$(eglDisplay,
-                                             this.display.pointer) != 0;
+    private long createEglDisplay(final long nativeDisplay) {
 
+        final Pointer<String> noDisplayExtensions = Pointer.wrap(String.class,
+                                                                 this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                                                                            EGL_EXTENSIONS));
+        if (noDisplayExtensions.address == 0L) {
+            throw new RuntimeException("Could not query egl extensions.");
         }
-        else {
-            return false;
-        }
-    }
-
-    private long createEglDisplay(final long nativeDisplay,
-                                  final String extensions) {
+        final String extensions = noDisplayExtensions.dref();
 
         if (!extensions.contains("EGL_EXT_platform_x11")) {
             throw new RuntimeException("Required extension EGL_EXT_platform_x11 not available.");
@@ -155,29 +141,6 @@ public class X11EglPlatformFactory {
                                       0L) == 0) {
             throw new RuntimeException("eglInitialize() failed");
         }
-
-        final String eglClientApis = Pointer.wrap(String.class,
-                                                  this.libEGL.eglQueryString(eglDisplay,
-                                                                             LibEGL.EGL_CLIENT_APIS))
-                                            .dref();
-        final String eglVendor = Pointer.wrap(String.class,
-                                              this.libEGL.eglQueryString(eglDisplay,
-                                                                         LibEGL.EGL_VENDOR))
-                                        .dref();
-        final String eglVersion = Pointer.wrap(String.class,
-                                               this.libEGL.eglQueryString(eglDisplay,
-                                                                          LibEGL.EGL_VERSION))
-                                         .dref();
-
-        LOGGER.info(format("Creating X11 EGL output:\n"
-                           + "\tEGL client apis: %s\n"
-                           + "\tEGL vendor: %s\n"
-                           + "\tEGL version: %s\n"
-                           + "\tEGL extensions: %s",
-                           eglClientApis,
-                           eglVendor,
-                           eglVersion,
-                           extensions));
 
         return eglDisplay;
     }

@@ -34,6 +34,7 @@ import org.powermock.reflect.Whitebox;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.FiniteRegion;
 import org.westmalle.wayland.core.FiniteRegionFactory;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.SurfaceFactory;
@@ -78,6 +79,8 @@ public class WlCompositorTest {
     private Compositor          compositor;
     @Mock
     private Scene               scene;
+    @Mock
+    private Renderer            renderer;
 
     @Mock
     private WaylandServerCore waylandServerCore;
@@ -114,7 +117,8 @@ public class WlCompositorTest {
                                              this.finiteRegionFactory,
                                              this.surfaceFactory,
                                              this.compositor,
-                                             this.scene);
+                                             this.scene,
+                                             this.renderer);
     }
 
     @Test

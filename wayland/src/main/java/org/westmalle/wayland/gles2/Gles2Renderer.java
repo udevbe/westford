@@ -2,12 +2,16 @@ package org.westmalle.wayland.gles2;
 
 import org.freedesktop.jaccall.JNI;
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
+import org.westmalle.wayland.nativ.libEGL.EglBindWaylandDisplayWL;
+import org.westmalle.wayland.nativ.libEGL.EglCreateImageKHR;
+import org.westmalle.wayland.nativ.libEGL.EglDestroyImageKHR;
 import org.westmalle.wayland.nativ.libEGL.EglQueryWaylandBufferWL;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.GlEGLImageTargetTexture2DOES;
@@ -33,10 +37,19 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_HEIGHT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_IMAGE_KHR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_EXTERNAL_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGB;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGBA;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_UV_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_U_V_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_XUXV_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_PLANE_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_Y_INVERTED_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WIDTH;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
@@ -54,6 +67,7 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE_MINUS_SRC_ALPHA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE0;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_EXTERNAL_OES;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_S;
@@ -128,28 +142,33 @@ public class Gles2Renderer implements GlRenderer {
             "uniform sampler2D u_texture2;\n" +
             "varying vec2 v_texCoord;\n" +
             "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(tex, v_texCoord).x - 0.0625);\n" +
-            "  float u = texture2D(tex1, v_texCoord).x - 0.5;\n" +
-            "  float v = texture2D(tex2, v_texCoord).x - 0.5;\n" +
+            "  float y = 1.16438356 * (texture2D(u_texture, v_texCoord).x - 0.0625);\n" +
+            "  float u = texture2D(u_texture1, v_texCoord).x - 0.5;\n" +
+            "  float v = texture2D(u_texture2, v_texCoord).x - 0.5;\n" +
             FRAGMENT_CONVERT_YUV;
 
     private static final String FRAGMENT_SHADER_EGL_Y_XUXV =
             "precision mediump float;\n" +
             "uniform sampler2D u_texture;\n" +
             "uniform sampler2D u_texture1;\n" +
-            "varying vec2 v_texcoord;\n" +
+            "varying vec2 v_texCoord;\n" +
             "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n" +
-            "  float u = texture2D(tex1, v_texcoord).g - 0.5;\n" +
-            "  float v = texture2D(tex1, v_texcoord).a - 0.5;\n" +
+            "  float y = 1.16438356 * (texture2D(u_texture, v_texCoord).x - 0.0625);\n" +
+            "  float u = texture2D(u_texture1, v_texCoord).g - 0.5;\n" +
+            "  float v = texture2D(u_texture1, v_texCoord).a - 0.5;\n" +
             FRAGMENT_CONVERT_YUV;
 
 
     @Nonnull
     private final Map<WlSurfaceResource, SurfaceRenderState> surfaceRenderStates = new HashMap<>();
 
+    private boolean                                hasWlEglDisplay              = false;
     @Nonnull
     private Optional<EglQueryWaylandBufferWL>      eglQueryWaylandBufferWL      = Optional.empty();
+    @Nonnull
+    private Optional<EglCreateImageKHR>            eglCreateImageKHR            = Optional.empty();
+    @Nonnull
+    private Optional<EglDestroyImageKHR>           eglDestroyImageKHR           = Optional.empty();
     @Nonnull
     private Optional<GlEGLImageTargetTexture2DOES> glEGLImageTargetTexture2DOES = Optional.empty();
 
@@ -157,6 +176,8 @@ public class Gles2Renderer implements GlRenderer {
     private final LibEGL    libEGL;
     @Nonnull
     private final LibGLESv2 libGLESv2;
+    @Nonnull
+    private final Display   display;
     @Nonnull
     private final Scene     scene;
 
@@ -184,9 +205,11 @@ public class Gles2Renderer implements GlRenderer {
     @Inject
     Gles2Renderer(@Nonnull final LibEGL libEGL,
                   @Nonnull final LibGLESv2 libGLESv2,
+                  @Nonnull final Display display,
                   @Nonnull final Scene scene) {
         this.libEGL = libEGL;
         this.libGLESv2 = libGLESv2;
+        this.display = display;
         this.scene = scene;
     }
 
@@ -196,8 +219,8 @@ public class Gles2Renderer implements GlRenderer {
         surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
             @Override
             public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
-                libGLESv2.glDeleteTextures(1,
-                                           Pointer.nref(shmSurfaceRenderState.getTexture()).address);
+                Gles2Renderer.this.libGLESv2.glDeleteTextures(1,
+                                                              Pointer.nref(shmSurfaceRenderState.getTexture()).address);
 
                 return Optional.empty();
             }
@@ -212,8 +235,8 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     @Override
-    public long eglConfig(final long eglDisplay) {
-
+    public long eglConfig(final long eglDisplay,
+                          @Nonnull final String eglExtensions) {
 
         final int configs_size = 256 * sizeof((Pointer<?>) null);
         final Pointer<Pointer> configs = malloc(configs_size,
@@ -240,7 +263,36 @@ public class Gles2Renderer implements GlRenderer {
         if (num_configs.dref() == 0) {
             throw new RuntimeException("failed to find suitable EGLConfig");
         }
+
+        setupEglDisplay(eglDisplay,
+                        eglExtensions);
+
         return configs.dref().address;
+    }
+
+    private void setupEglDisplay(final long eglDisplay,
+                                 @Nonnull final String eglExtensions) {
+        final boolean bindDisplay = bindDisplay(eglDisplay,
+                                                eglExtensions);
+        if (bindDisplay) {
+            this.eglQueryWaylandBufferWL = Optional.of(wrap(EglQueryWaylandBufferWL.class,
+                                                            this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address)).dref());
+            this.glEGLImageTargetTexture2DOES = Optional.of(wrap(GlEGLImageTargetTexture2DOES.class,
+                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("glEGLImageTargetTexture2DOES").address)).dref());
+
+            if (eglExtensions.contains("EGL_KHR_image_base")) {
+                this.eglCreateImageKHR = Optional.of(wrap(EglCreateImageKHR.class,
+                                                          this.libEGL.eglGetProcAddress(Pointer.nref("eglCreateImageKHR").address)).dref());
+                this.eglDestroyImageKHR = Optional.of(wrap(EglDestroyImageKHR.class,
+                                                           this.libEGL.eglGetProcAddress(Pointer.nref("eglDestroyImageKHR").address)).dref());
+
+                //we need both the wl bind display & the egl khr image extensions before we can do anything meaningful.
+                this.hasWlEglDisplay = true;
+            }
+            else {
+                LOGGER.warning("Extension EGL_KHR_image_base not available. Required for client side egl support.");
+            }
+        }
     }
 
     @Override
@@ -273,7 +325,8 @@ public class Gles2Renderer implements GlRenderer {
 
         //FIXME move init to factory create method?
         if (!this.init) {
-            init(eglPlatform);
+            //one time setup
+            init();
         }
 
         final int width  = mode.getWidth();
@@ -299,14 +352,14 @@ public class Gles2Renderer implements GlRenderer {
         //@formatter:on
     }
 
-    private void init(final EglPlatform eglPlatform) {
-        //check for required texture extensions
-        final String extensions = wrap(String.class,
-                                       this.libGLESv2.glGetString(GL_EXTENSIONS)).dref();
+    private void init() {
+        //check for required texture glExtensions
+        final String glExtensions = wrap(String.class,
+                                         this.libGLESv2.glGetString(GL_EXTENSIONS)).dref();
 
         //init shm shaders
-        LOGGER.info("GLESv2 extensions: " + extensions);
-        if (!extensions.contains("GL_EXT_texture_format_BGRA8888")) {
+        LOGGER.info("GLESv2 glExtensions: " + glExtensions);
+        if (!glExtensions.contains("GL_EXT_texture_format_BGRA8888")) {
             LOGGER.severe("Required extension GL_EXT_texture_format_BGRA8888 not available");
             System.exit(1);
         }
@@ -316,12 +369,8 @@ public class Gles2Renderer implements GlRenderer {
         this.xrgb8888ShaderProgram = createShaderProgram(VERTEX_SHADER,
                                                          FRAGMENT_SHADER_XRGB8888);
 
-        //init wl egl functionality
-        if (eglPlatform.hasBindDisplay()) {
-            this.eglQueryWaylandBufferWL = Optional.of(wrap(EglQueryWaylandBufferWL.class,
-                                                            this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address))
-                                                               .dref());
-
+        //compile wl egl shaders
+        if (this.hasWlEglDisplay) {
             this.y_u_vShaderProgram = createShaderProgram(VERTEX_SHADER,
                                                           FRAGMENT_SHADER_EGL_Y_U_V);
             this.y_uvShaderProgram = createShaderProgram(VERTEX_SHADER,
@@ -329,17 +378,12 @@ public class Gles2Renderer implements GlRenderer {
             this.y_xuxvShaderProgram = createShaderProgram(VERTEX_SHADER,
                                                            FRAGMENT_SHADER_EGL_Y_XUXV);
 
-            this.glEGLImageTargetTexture2DOES = Optional.of(wrap(GlEGLImageTargetTexture2DOES.class,
-                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("glEGLImageTargetTexture2DOES").address))
-                                                                    .dref());
-
-            if (extensions.contains("GL_OES_EGL_image_external")) {
+            if (glExtensions.contains("GL_OES_EGL_image_external")) {
                 this.externalImageShaderProgram = createShaderProgram(VERTEX_SHADER,
                                                                       FRAGMENT_SHADER_EGL_EXTERNAL);
-
             }
             else {
-                LOGGER.warning("Extension GL_OES_EGL_image_external not available");
+                LOGGER.warning("Extension GL_OES_EGL_image_external not available.");
             }
         }
 
@@ -477,7 +521,7 @@ public class Gles2Renderer implements GlRenderer {
             drawShm(wlSurfaceResource,
                     shmBuffer);
         }
-        else if (eglPlatform.hasBindDisplay()) {
+        else if (this.hasWlEglDisplay) {
             final int textureFormat = this.eglQueryWaylandBufferWL.get()
                                                                   .$(eglPlatform.getEglDisplay(),
                                                                      wlBufferResource.pointer,
@@ -695,18 +739,72 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glUseProgram(0);
     }
 
-    private void drawEgl(final EglPlatform eglPlatform,
-                         final WlSurfaceResource wlSurfaceResource,
-                         final WlBufferResource wlBufferResource,
-                         final int textureFormat) {
+    private Optional<SurfaceRenderState> queryEglSurfaceRenderState(final EglPlatform eglPlatform,
+                                                                    final WlSurfaceResource wlSurfaceResource,
+                                                                    final WlBufferResource wlBufferResource,
+                                                                    final int textureFormat) {
+        @Nonnull
+        Optional<SurfaceRenderState> surfaceRenderState = Optional.ofNullable(this.surfaceRenderStates.get(wlSurfaceResource));
 
+        if (surfaceRenderState.isPresent()) {
+            surfaceRenderState = surfaceRenderState.get()
+                                                   .accept(new SurfaceRenderStateVisitor() {
+                                                       @Override
+                                                       public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
+                                                           //the surface was previously associated with an shm render state but is now using an egl render state. create it.
 
-        final Integer shadeProgram = null;//this.eglShaderPrograms.get(textureFormat);
-        if (shadeProgram == null) {
-            throw new RuntimeException(String.format("Egl texture format not supported: %d",
-                                                     textureFormat));
+                                                           //TODO we could reuse the texture id from the shm surface render state
+                                                           //TODO destroy shm surface render state
+
+                                                           return createEglSurfaceRenderState(eglPlatform,
+                                                                                              wlSurfaceResource,
+                                                                                              wlBufferResource,
+                                                                                              textureFormat,
+                                                                                              Optional.empty());
+                                                       }
+
+                                                       @Override
+                                                       public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
+                                                           //the surface already has an egl render state associated. update it.
+
+                                                           return createEglSurfaceRenderState(eglPlatform,
+                                                                                              wlSurfaceResource,
+                                                                                              wlBufferResource,
+                                                                                              textureFormat,
+                                                                                              Optional.of(eglSurfaceRenderState));
+                                                       }
+                                                   });
+        }
+        else {
+            //the surface was not previously associated with any render state. create an egl render state.
+            surfaceRenderState = createEglSurfaceRenderState(eglPlatform,
+                                                             wlSurfaceResource,
+                                                             wlBufferResource,
+                                                             textureFormat,
+                                                             Optional.empty());
         }
 
+        surfaceRenderState.ifPresent(renderState -> this.surfaceRenderStates.put(wlSurfaceResource,
+                                                                                 renderState));
+
+        return surfaceRenderState;
+    }
+
+    private Optional<SurfaceRenderState> createEglSurfaceRenderState(final EglPlatform eglPlatform,
+                                                                     final WlSurfaceResource wlSurfaceResource,
+                                                                     final WlBufferResource wlBufferResource,
+                                                                     final int textureFormat,
+                                                                     final Optional<EglSurfaceRenderState> oldRenderState) {
+        //surface egl render states:
+        final int     pitch;
+        final int     height;
+        final boolean yInverted;
+        final int     shaderProgram;
+        final int     target;
+        final int[]   textures;
+        final long[]  eglImages;
+
+        //gather render states:
         final long eglDisplay = eglPlatform.getEglDisplay();
         final long buffer     = wlBufferResource.pointer;
 
@@ -722,11 +820,11 @@ public class Gles2Renderer implements GlRenderer {
                              buffer,
                              EGL_HEIGHT,
                              heightP.address);
-        final int bufferWidth  = widthP.dref();
-        final int bufferHeight = heightP.dref();
+        pitch = widthP.dref();
+        height = heightP.dref();
 
         final Pointer<Integer> yInvertedP = Pointer.nref(0);
-        final boolean          yInverted;
+
         if (queryWaylandBuffer.$(eglDisplay,
                                  buffer,
                                  EGL_WAYLAND_Y_INVERTED_WL,
@@ -737,14 +835,114 @@ public class Gles2Renderer implements GlRenderer {
             yInverted = true;
         }
 
-//        setupVertexParams(wlSurfaceResource,
-//                          shadeProgram,
-//                          bufferWidth,
-//                          bufferHeight);
+        switch (textureFormat) {
+            case EGL_TEXTURE_RGB:
+            case EGL_TEXTURE_RGBA:
+            default:
+                textures = new int[1];
+                eglImages = new long[1];
+                target = GL_TEXTURE_2D;
+                shaderProgram = this.argb8888ShaderProgram;
+                break;
+            case EGL_TEXTURE_EXTERNAL_WL:
+                textures = new int[1];
+                eglImages = new long[1];
+                target = GL_TEXTURE_EXTERNAL_OES;
+                shaderProgram = this.externalImageShaderProgram;
+                break;
+            case EGL_TEXTURE_Y_UV_WL:
+                textures = new int[2];
+                eglImages = new long[2];
+                target = GL_TEXTURE_2D;
+                shaderProgram = this.y_uvShaderProgram;
+                break;
+            case EGL_TEXTURE_Y_U_V_WL:
+                textures = new int[3];
+                eglImages = new long[3];
+                target = GL_TEXTURE_2D;
+                shaderProgram = this.y_u_vShaderProgram;
+                break;
+            case EGL_TEXTURE_Y_XUXV_WL:
+                textures = new int[2];
+                eglImages = new long[2];
+                target = GL_TEXTURE_2D;
+                shaderProgram = this.y_xuxvShaderProgram;
+                break;
+        }
+
+        //create egl images
+        final Pointer<Integer> eglImageAttributes = Pointer.nref(0,
+                                                                 0,
+                                                                 0);
+        for (int i = 0; i < eglImages.length; i++) {
+            eglImageAttributes.writei(0,
+                                      EGL_WAYLAND_PLANE_WL);
+            eglImageAttributes.writei(1,
+                                      i);
+            eglImageAttributes.writei(2,
+                                      EGL_NONE);
+
+            final long eglImage = this.eglCreateImageKHR.get()
+                                                        .$(eglDisplay,
+                                                           EGL_NO_CONTEXT,
+                                                           target,
+                                                           buffer,
+                                                           eglImageAttributes.address);
+            if (eglImage == EGL_NO_IMAGE_KHR) {
+                return Optional.empty();
+            }
+            else {
+                eglImages[i] = eglImage;
+            }
+
+            //TODO make sure we have valid texture ids
+            this.libGLESv2.glActiveTexture(GL_TEXTURE0 + i);
+            this.libGLESv2.glBindTexture(target,
+                                         textures[i]);
+            this.glEGLImageTargetTexture2DOES.get()
+                                             .$(target,
+                                                eglImage);
+        }
+
+
+        final EglSurfaceRenderState eglSurfaceRenderState = EglSurfaceRenderState.create(pitch,
+                                                                                         height,
+                                                                                         target,
+                                                                                         shaderProgram,
+                                                                                         yInverted,
+                                                                                         textures,
+                                                                                         eglImages);
+        if (oldRenderState.isPresent()) {
+            final EglSurfaceRenderState oldEglSurfaceRenderState = oldRenderState.get();
+
+            //cleanup old egl images
+            for (final long oldEglImage : oldEglSurfaceRenderState.getEglImages()) {
+                this.eglDestroyImageKHR.get()
+                                       .$(eglDisplay,
+                                          oldEglImage);
+            }
+            //TODO update damaged
+
+        }
+        else {
+            //TODO full update
+
+        }
+
+        return Optional.of(eglSurfaceRenderState);
     }
 
-    private int genTexture(int target) {
-        Pointer<Integer> texture = Pointer.nref(0);
+
+    private void drawEgl(final EglPlatform eglPlatform,
+                         final WlSurfaceResource wlSurfaceResource,
+                         final WlBufferResource wlBufferResource,
+                         final int textureFormat) {
+
+
+    }
+
+    private int genTexture(final int target) {
+        final Pointer<Integer> texture = Pointer.nref(0);
         this.libGLESv2.glGenTextures(1,
                                      texture.address);
         final Integer textureId = texture.dref();
@@ -756,12 +954,12 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glTexParameteri(target,
                                        GL_TEXTURE_WRAP_T,
                                        GL_CLAMP_TO_EDGE);
-        libGLESv2.glTexParameteri(target,
-                                  GL_TEXTURE_MIN_FILTER,
-                                  GL_NEAREST);
-        libGLESv2.glTexParameteri(target,
-                                  GL_TEXTURE_MAG_FILTER,
-                                  GL_NEAREST);
+        this.libGLESv2.glTexParameteri(target,
+                                       GL_TEXTURE_MIN_FILTER,
+                                       GL_NEAREST);
+        this.libGLESv2.glTexParameteri(target,
+                                       GL_TEXTURE_MAG_FILTER,
+                                       GL_NEAREST);
         this.libGLESv2.glBindTexture(target,
                                      0);
         return textureId;
@@ -858,5 +1056,21 @@ public class Gles2Renderer implements GlRenderer {
                             //attribute vec2 a_texCoord
                             0f,
                             0f);
+    }
+
+    private boolean bindDisplay(final long eglDisplay,
+                                final String extensions) {
+        if (extensions.contains("EGL_WL_bind_wayland_display")) {
+            final Pointer<EglBindWaylandDisplayWL> eglBindWaylandDisplayWL = Pointer.wrap(EglBindWaylandDisplayWL.class,
+                                                                                          this.libEGL.eglGetProcAddress(Pointer.nref("eglBindWaylandDisplayWL").address));
+            return eglBindWaylandDisplayWL.dref()
+                                          .$(eglDisplay,
+                                             this.display.pointer) != 0;
+
+        }
+        else {
+            LOGGER.warning("Extension EGL_WL_bind_wayland_display not available. Required for client side egl support.");
+            return false;
+        }
     }
 }

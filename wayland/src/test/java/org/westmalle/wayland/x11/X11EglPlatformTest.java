@@ -28,7 +28,7 @@ public class X11EglPlatformTest {
                                                                  eglDisplay,
                                                                  eglSurface,
                                                                  eglContext,
-                                                                 true);
+                                                                 "egl_mock_extension");
         //when
         x11EglPlatform.begin();
         //then
@@ -50,7 +50,7 @@ public class X11EglPlatformTest {
                                                                  eglDisplay,
                                                                  eglSurface,
                                                                  eglContext,
-                                                                 true);
+                                                                 "egl_mock_extension");
         //when
         x11EglPlatform.end();
         //then

@@ -1,5 +1,7 @@
 package org.westmalle.wayland.core;
 
+import javax.annotation.Nonnull;
+
 public interface EglPlatform extends Platform {
     default void begin() {}
 
@@ -11,5 +13,6 @@ public interface EglPlatform extends Platform {
 
     long getEglContext();
 
-    boolean hasBindDisplay();
+    @Nonnull
+    String getEglExtensions();
 }

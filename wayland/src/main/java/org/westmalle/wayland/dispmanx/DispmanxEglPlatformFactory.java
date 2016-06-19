@@ -1,7 +1,6 @@
 package org.westmalle.wayland.dispmanx;
 
 import org.freedesktop.jaccall.Pointer;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
@@ -12,22 +11,16 @@ import javax.inject.Inject;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_SURFACE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
-import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 
 public class DispmanxEglPlatformFactory {
 
@@ -55,8 +48,8 @@ public class DispmanxEglPlatformFactory {
 
     public DispmanxEglPlatform create() {
 
-        final DISPMANX_MODEINFO_T modeinfo        = dispmanxPlatform.getModeinfo();
-        final int                 dispmanxElement = dispmanxPlatform.getDispmanxElement();
+        final DISPMANX_MODEINFO_T modeinfo        = this.dispmanxPlatform.getModeinfo();
+        final int                 dispmanxElement = this.dispmanxPlatform.getDispmanxElement();
 
         final EGL_DISPMANX_WINDOW_T nativewindow = new EGL_DISPMANX_WINDOW_T();
         nativewindow.element(dispmanxElement);
@@ -65,7 +58,35 @@ public class DispmanxEglPlatformFactory {
 
         final long nativeDisplay = LibEGL.EGL_DEFAULT_DISPLAY;
         final long eglDisplay    = createEglDisplay(nativeDisplay);
-        final long config        = this.glRenderer.eglConfig(eglDisplay);
+
+        final String eglExtensions = Pointer.wrap(String.class,
+                                                  this.libEGL.eglQueryString(eglDisplay,
+                                                                             EGL_EXTENSIONS))
+                                            .dref();
+        final String eglClientApis = Pointer.wrap(String.class,
+                                                  this.libEGL.eglQueryString(eglDisplay,
+                                                                             EGL_CLIENT_APIS))
+                                            .dref();
+        final String eglVendor = Pointer.wrap(String.class,
+                                              this.libEGL.eglQueryString(eglDisplay,
+                                                                         EGL_VENDOR))
+                                        .dref();
+        final String eglVersion = Pointer.wrap(String.class,
+                                               this.libEGL.eglQueryString(eglDisplay,
+                                                                          EGL_VERSION))
+                                         .dref();
+        LOGGER.info(format("Creating dispmanx EGL output:\n"
+                           + "\tEGL client apis: %s\n"
+                           + "\tEGL vendor: %s\n"
+                           + "\tEGL version: %s\n"
+                           + "\tEGL extensions: %s",
+                           eglClientApis,
+                           eglVendor,
+                           eglVersion,
+                           eglExtensions));
+
+        final long config = this.glRenderer.eglConfig(eglDisplay,
+                                                      eglExtensions);
         // create an EGL rendering eglContext
         final long eglContext = getContext(eglDisplay,
                                            config);
@@ -74,11 +95,11 @@ public class DispmanxEglPlatformFactory {
                                                  config,
                                                  eglContext);
 
-        return this.privateDispmanxEglOutputFactory.create(dispmanxPlatform,
+        return this.privateDispmanxEglOutputFactory.create(this.dispmanxPlatform,
                                                            eglDisplay,
                                                            eglSurface,
                                                            eglContext,
-                                                           false);
+                                                           eglExtensions);
     }
 
     private long createEglSurface(final long nativewindow,
@@ -135,26 +156,6 @@ public class DispmanxEglPlatformFactory {
                                       0L) != 0) {
             this.libEGL.throwError("eglInitialize");
         }
-
-        final String eglClientApis = Pointer.wrap(String.class,
-                                                  this.libEGL.eglQueryString(display,
-                                                                             LibEGL.EGL_CLIENT_APIS))
-                                            .dref();
-        final String eglVendor = Pointer.wrap(String.class,
-                                              this.libEGL.eglQueryString(display,
-                                                                         LibEGL.EGL_VENDOR))
-                                        .dref();
-        final String eglVersion = Pointer.wrap(String.class,
-                                               this.libEGL.eglQueryString(display,
-                                                                          LibEGL.EGL_VERSION))
-                                         .dref();
-        LOGGER.info(format("Creating X11 EGL output:\n"
-                           + "\tEGL client apis: %s\n"
-                           + "\tEGL vendor: %s\n"
-                           + "\tEGL version: %s\n",
-                           eglClientApis,
-                           eglVendor,
-                           eglVersion));
 
         return display;
     }
