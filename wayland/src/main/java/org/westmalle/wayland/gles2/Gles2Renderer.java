@@ -190,11 +190,83 @@ public class Gles2Renderer implements GlRenderer {
         this.scene = scene;
     }
 
-    public void begin(@Nonnull final EglPlatform eglPlatform) {
+    @Override
+    public void onDestroy(final WlSurfaceResource wlSurfaceResource) {
+        final SurfaceRenderState surfaceRenderState = this.surfaceRenderStates.remove(wlSurfaceResource);
+        surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+            @Override
+            public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
+                libGLESv2.glDeleteTextures(1,
+                                           Pointer.nref(shmSurfaceRenderState.getTexture()).address);
 
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
+                //TODO delete textures & egl images
+
+                return Optional.empty();
+            }
+        });
+    }
+
+    @Override
+    public long eglConfig(final long eglDisplay) {
+
+
+        final int configs_size = 256 * sizeof((Pointer<?>) null);
+        final Pointer<Pointer> configs = malloc(configs_size,
+                                                Pointer.class);
+        final Pointer<Integer> num_configs = Pointer.nref(0);
+        final Pointer<Integer> egl_config_attribs = Pointer.nref(
+                //@formatter:off
+                EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+	            EGL_RED_SIZE, 1,
+	            EGL_GREEN_SIZE, 1,
+	            EGL_BLUE_SIZE, 1,
+	            EGL_ALPHA_SIZE, 0,
+	            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+	            EGL_NONE
+                //@formatter:on
+                                                                );
+        if (this.libEGL.eglChooseConfig(eglDisplay,
+                                        egl_config_attribs.address,
+                                        configs.address,
+                                        configs_size,
+                                        num_configs.address) == 0) {
+            throw new RuntimeException("eglChooseConfig() failed");
+        }
+        if (num_configs.dref() == 0) {
+            throw new RuntimeException("failed to find suitable EGLConfig");
+        }
+        return configs.dref().address;
+    }
+
+    @Override
+    public void visit(final Platform platform) {
+        throw new UnsupportedOperationException(String.format("Need an egl capable platform. Got %s",
+                                                              platform));
+    }
+
+    @Override
+    public void visit(final EglPlatform eglPlatform) {
         eglPlatform.begin();
+        render(eglPlatform);
+        eglPlatform.end();
+    }
 
-        //FIXME how to render to multiple outputs?
+    private void render(@Nonnull final EglPlatform eglPlatform) {
+        setupRender(eglPlatform);
+
+        //naive single pass, bottom to top overdraw rendering.
+        this.scene.getSurfacesStack()
+                  .forEach((wlSurfaceResource) -> draw(eglPlatform,
+                                                       wlSurfaceResource));
+    }
+
+    private void setupRender(@Nonnull final EglPlatform eglPlatform) {
+
         final WlOutput   wlOutput = eglPlatform.getWlOutput();
         final Output     output   = wlOutput.getOutput();
         final OutputMode mode     = output.getMode();
@@ -279,10 +351,10 @@ public class Gles2Renderer implements GlRenderer {
 
     private int createShaderProgram(final String vertexShaderSource,
                                     final String fragmentShaderSource) {
-        final int vertexShader = createShader(vertexShaderSource,
-                                              GL_VERTEX_SHADER);
-        final int fragmentShader = createShader(fragmentShaderSource,
-                                                GL_FRAGMENT_SHADER);
+        final int vertexShader = compileShader(vertexShaderSource,
+                                               GL_VERTEX_SHADER);
+        final int fragmentShader = compileShader(fragmentShaderSource,
+                                                 GL_FRAGMENT_SHADER);
 
         //shader program
         final int shaderProgram = this.libGLESv2.glCreateProgram();
@@ -334,8 +406,8 @@ public class Gles2Renderer implements GlRenderer {
         return shaderProgram;
     }
 
-    private int createShader(final String shaderSource,
-                             final int shaderType) {
+    private int compileShader(final String shaderSource,
+                              final int shaderType) {
         final int                      shader  = this.libGLESv2.glCreateShader(shaderType);
         final Pointer<Pointer<String>> shaders = Pointer.nref(Pointer.nref(shaderSource));
         this.libGLESv2.glShaderSource(shader,
@@ -344,11 +416,11 @@ public class Gles2Renderer implements GlRenderer {
                                       0L);
         this.libGLESv2.glCompileShader(shader);
 
-        checkShader(shader);
+        checkShaderCompilation(shader);
         return shader;
     }
 
-    private void checkShader(final int shader) {
+    private void checkShaderCompilation(final int shader) {
         final Pointer<Integer> vstatus = Pointer.nref(0);
         this.libGLESv2.glGetShaderiv(shader,
                                      GL_COMPILE_STATUS,
@@ -376,13 +448,6 @@ public class Gles2Renderer implements GlRenderer {
         }
     }
 
-    public void render(@Nonnull final EglPlatform eglPlatform) {
-        //naive single pass, bottom to top overdraw rendering.
-        this.scene.getSurfacesStack()
-                  .forEach((wlSurfaceResource) -> draw(eglPlatform,
-                                                       wlSurfaceResource));
-    }
-
     private void draw(final EglPlatform eglPlatform,
                       final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
@@ -407,8 +472,6 @@ public class Gles2Renderer implements GlRenderer {
     private void draw(final EglPlatform eglPlatform,
                       final WlSurfaceResource wlSurfaceResource,
                       final WlBufferResource wlBufferResource) {
-        //FIXME we need to listen for surface destruction and clean up any resources associated with it.
-
         final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
         if (shmBuffer != null) {
             drawShm(wlSurfaceResource,
@@ -431,54 +494,19 @@ public class Gles2Renderer implements GlRenderer {
         //TODO dma buffer.
     }
 
-    private void drawEgl(final EglPlatform eglPlatform,
-                         final WlSurfaceResource wlSurfaceResource,
-                         final WlBufferResource wlBufferResource,
-                         final int textureFormat) {
+    private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,
+                         final ShmBuffer shmBuffer) {
 
-
-        final Integer shadeProgram = null;//this.eglShaderPrograms.get(textureFormat);
-        if (shadeProgram == null) {
-            throw new RuntimeException(String.format("Egl texture format not supported: %d",
-                                                     textureFormat));
-        }
-
-        final long eglDisplay = eglPlatform.getEglDisplay();
-        final long buffer     = wlBufferResource.pointer;
-
-        final EglQueryWaylandBufferWL queryWaylandBuffer = this.eglQueryWaylandBufferWL.get();
-
-        final Pointer<Integer> widthP  = Pointer.nref(0);
-        final Pointer<Integer> heightP = Pointer.nref(0);
-        queryWaylandBuffer.$(eglDisplay,
-                             buffer,
-                             EGL_WIDTH,
-                             widthP.address);
-        queryWaylandBuffer.$(eglDisplay,
-                             buffer,
-                             EGL_HEIGHT,
-                             heightP.address);
-        final int bufferWidth  = widthP.dref();
-        final int bufferHeight = heightP.dref();
-
-        final Pointer<Integer> yInvertedP = Pointer.nref(0);
-        final boolean          yInverted;
-        if (queryWaylandBuffer.$(eglDisplay,
-                                 buffer,
-                                 EGL_WAYLAND_Y_INVERTED_WL,
-                                 yInvertedP.address) != 0) {
-            yInverted = yInvertedP.dref() != 0;
-        }
-        else {
-            yInverted = true;
-        }
-
-//        setupVertexParams(wlSurfaceResource,
-//                          shadeProgram,
-//                          bufferWidth,
-//                          bufferHeight);
+        queryShmSurfaceRenderState(wlSurfaceResource,
+                                   shmBuffer).ifPresent(surfaceRenderState -> surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+            @Override
+            public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
+                drawShm(wlSurfaceResource,
+                        shmSurfaceRenderState);
+                return null;
+            }
+        }));
     }
-
 
     private Optional<SurfaceRenderState> queryShmSurfaceRenderState(final WlSurfaceResource wlSurfaceResource,
                                                                     final ShmBuffer shmBuffer) {
@@ -499,10 +527,8 @@ public class Gles2Renderer implements GlRenderer {
                                                        @Override
                                                        public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
                                                            //the surface was previously associated with an egl render state but is now using an shm render state. create it.
-
                                                            //TODO we could reuse the texture id from the egl surface render state
                                                            //TODO destroy egl surface render state
-
                                                            return createShmSurfaceRenderState(wlSurfaceResource,
                                                                                               shmBuffer,
                                                                                               Optional.empty());
@@ -638,45 +664,6 @@ public class Gles2Renderer implements GlRenderer {
                  .firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
     }
 
-    private int genTexture(int target) {
-        Pointer<Integer> texture = Pointer.nref(0);
-        this.libGLESv2.glGenTextures(1,
-                                     texture.address);
-        final Integer textureId = texture.dref();
-        this.libGLESv2.glBindTexture(target,
-                                     textureId);
-        this.libGLESv2.glTexParameteri(target,
-                                       GL_TEXTURE_WRAP_S,
-                                       GL_CLAMP_TO_EDGE);
-        this.libGLESv2.glTexParameteri(target,
-                                       GL_TEXTURE_WRAP_T,
-                                       GL_CLAMP_TO_EDGE);
-        libGLESv2.glTexParameteri(target,
-                                  GL_TEXTURE_MIN_FILTER,
-                                  GL_NEAREST);
-        libGLESv2.glTexParameteri(target,
-                                  GL_TEXTURE_MAG_FILTER,
-                                  GL_NEAREST);
-        this.libGLESv2.glBindTexture(target,
-                                     0);
-        return textureId;
-    }
-
-
-    private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,
-                         final ShmBuffer shmBuffer) {
-
-        queryShmSurfaceRenderState(wlSurfaceResource,
-                                   shmBuffer).ifPresent(surfaceRenderState -> surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
-            @Override
-            public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
-                drawShm(wlSurfaceResource,
-                        shmSurfaceRenderState);
-                return null;
-            }
-        }));
-    }
-
     private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,
                          final ShmSurfaceRenderState shmSurfaceRenderState) {
         final int shaderProgram = shmSurfaceRenderState.getShaderProgram();
@@ -706,6 +693,78 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
         this.libGLESv2.glDisableVertexAttribArray(this.textureArg);
         this.libGLESv2.glUseProgram(0);
+    }
+
+    private void drawEgl(final EglPlatform eglPlatform,
+                         final WlSurfaceResource wlSurfaceResource,
+                         final WlBufferResource wlBufferResource,
+                         final int textureFormat) {
+
+
+        final Integer shadeProgram = null;//this.eglShaderPrograms.get(textureFormat);
+        if (shadeProgram == null) {
+            throw new RuntimeException(String.format("Egl texture format not supported: %d",
+                                                     textureFormat));
+        }
+
+        final long eglDisplay = eglPlatform.getEglDisplay();
+        final long buffer     = wlBufferResource.pointer;
+
+        final EglQueryWaylandBufferWL queryWaylandBuffer = this.eglQueryWaylandBufferWL.get();
+
+        final Pointer<Integer> widthP  = Pointer.nref(0);
+        final Pointer<Integer> heightP = Pointer.nref(0);
+        queryWaylandBuffer.$(eglDisplay,
+                             buffer,
+                             EGL_WIDTH,
+                             widthP.address);
+        queryWaylandBuffer.$(eglDisplay,
+                             buffer,
+                             EGL_HEIGHT,
+                             heightP.address);
+        final int bufferWidth  = widthP.dref();
+        final int bufferHeight = heightP.dref();
+
+        final Pointer<Integer> yInvertedP = Pointer.nref(0);
+        final boolean          yInverted;
+        if (queryWaylandBuffer.$(eglDisplay,
+                                 buffer,
+                                 EGL_WAYLAND_Y_INVERTED_WL,
+                                 yInvertedP.address) != 0) {
+            yInverted = yInvertedP.dref() != 0;
+        }
+        else {
+            yInverted = true;
+        }
+
+//        setupVertexParams(wlSurfaceResource,
+//                          shadeProgram,
+//                          bufferWidth,
+//                          bufferHeight);
+    }
+
+    private int genTexture(int target) {
+        Pointer<Integer> texture = Pointer.nref(0);
+        this.libGLESv2.glGenTextures(1,
+                                     texture.address);
+        final Integer textureId = texture.dref();
+        this.libGLESv2.glBindTexture(target,
+                                     textureId);
+        this.libGLESv2.glTexParameteri(target,
+                                       GL_TEXTURE_WRAP_S,
+                                       GL_CLAMP_TO_EDGE);
+        this.libGLESv2.glTexParameteri(target,
+                                       GL_TEXTURE_WRAP_T,
+                                       GL_CLAMP_TO_EDGE);
+        libGLESv2.glTexParameteri(target,
+                                  GL_TEXTURE_MIN_FILTER,
+                                  GL_NEAREST);
+        libGLESv2.glTexParameteri(target,
+                                  GL_TEXTURE_MAG_FILTER,
+                                  GL_NEAREST);
+        this.libGLESv2.glBindTexture(target,
+                                     0);
+        return textureId;
     }
 
     private void setupVertexParams(final @Nonnull WlSurfaceResource wlSurfaceResource,
@@ -752,101 +811,52 @@ public class Gles2Renderer implements GlRenderer {
 
     private Pointer<Float> vertexData(final float bufferWidth,
                                       final float bufferHeight) {
-        return Pointer.nref(         //top left:
-                                     //attribute vec2 a_position
-                                     0f,
-                                     0f,
-                                     //attribute vec2 a_texCoord
-                                     0f,
-                                     0f,
+        return Pointer.nref(//top left:
+                            //attribute vec2 a_position
+                            0f,
+                            0f,
+                            //attribute vec2 a_texCoord
+                            0f,
+                            0f,
 
-                                     //top right:
-                                     //attribute vec2 a_position
-                                     bufferWidth,
-                                     0f,
-                                     //attribute vec2 a_texCoord
-                                     1f,
-                                     0f,
+                            //top right:
+                            //attribute vec2 a_position
+                            bufferWidth,
+                            0f,
+                            //attribute vec2 a_texCoord
+                            1f,
+                            0f,
 
-                                     //bottom right:
-                                     //vec2 a_position
-                                     bufferWidth,
-                                     bufferHeight,
-                                     //vec2 a_texCoord
-                                     1f,
-                                     1f,
+                            //bottom right:
+                            //vec2 a_position
+                            bufferWidth,
+                            bufferHeight,
+                            //vec2 a_texCoord
+                            1f,
+                            1f,
 
-                                     //bottom right:
-                                     //vec2 a_position
-                                     bufferWidth,
-                                     bufferHeight,
-                                     //vec2 a_texCoord
-                                     1f,
-                                     1f,
+                            //bottom right:
+                            //vec2 a_position
+                            bufferWidth,
+                            bufferHeight,
+                            //vec2 a_texCoord
+                            1f,
+                            1f,
 
-                                     //bottom left:
-                                     //vec2 a_position
-                                     0f,
-                                     bufferHeight,
-                                     //vec2 a_texCoord
-                                     0f,
-                                     1f,
+                            //bottom left:
+                            //vec2 a_position
+                            0f,
+                            bufferHeight,
+                            //vec2 a_texCoord
+                            0f,
+                            1f,
 
-                                     //top left:
-                                     //attribute vec2 a_position
-                                     0f,
-                                     0f,
-                                     //attribute vec2 a_texCoord
-                                     0f,
-                                     0f);
-    }
-
-    @Override
-    public void visit(final Platform platform) {
-        throw new UnsupportedOperationException(String.format("Need an egl capable platform. Got %s",
-                                                              platform));
-    }
-
-    @Override
-    public void visit(final EglPlatform eglPlatform) {
-        begin(eglPlatform);
-        render(eglPlatform);
-        end(eglPlatform);
-    }
-
-    public void end(final EglPlatform renderOutput) {
-        renderOutput.end();
-    }
-
-    @Override
-    public long eglConfig(final long eglDisplay) {
-
-
-        final int configs_size = 256 * sizeof((Pointer<?>) null);
-        final Pointer<Pointer> configs = malloc(configs_size,
-                                                Pointer.class);
-        final Pointer<Integer> num_configs = Pointer.nref(0);
-        final Pointer<Integer> egl_config_attribs = Pointer.nref(
-                //@formatter:off
-                EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-	            EGL_RED_SIZE, 1,
-	            EGL_GREEN_SIZE, 1,
-	            EGL_BLUE_SIZE, 1,
-	            EGL_ALPHA_SIZE, 0,
-	            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-	            EGL_NONE
-                //@formatter:on
-                                                                );
-        if (this.libEGL.eglChooseConfig(eglDisplay,
-                                        egl_config_attribs.address,
-                                        configs.address,
-                                        configs_size,
-                                        num_configs.address) == 0) {
-            throw new RuntimeException("eglChooseConfig() failed");
-        }
-        if (num_configs.dref() == 0) {
-            throw new RuntimeException("failed to find suitable EGLConfig");
-        }
-        return configs.dref().address;
+                            //top left:
+                            //attribute vec2 a_position
+                            0f,
+                            0f,
+                            //attribute vec2 a_texCoord
+                            0f,
+                            0f);
     }
 }
