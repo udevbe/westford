@@ -20,6 +20,7 @@ import org.freedesktop.wayland.server.WlCompositorRequestsV3;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Surface;
 
@@ -48,6 +49,8 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
     private final Compositor                                     compositor;
     @Nonnull
     private final Scene                                          scene;
+    @Nonnull
+    private final Renderer                                       renderer;
 
     @Inject
     WlCompositor(@Nonnull final Display display,
@@ -56,7 +59,8 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                  @Nonnull final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory,
                  @Nonnull final org.westmalle.wayland.core.SurfaceFactory surfaceFactory,
                  @Nonnull Compositor compositor,
-                 @Nonnull final Scene scene) {
+                 @Nonnull final Scene scene,
+                 @Nonnull final Renderer renderer) {
         super(display,
               WlCompositorResource.class,
               VERSION);
@@ -66,6 +70,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         this.surfaceFactory = surfaceFactory;
         this.compositor = compositor;
         this.scene = scene;
+        this.renderer = renderer;
     }
 
     @Override
@@ -92,6 +97,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                       .remove(wlSurfaceResource);
             this.scene.removeSubsurfaceStack(wlSurfaceResource);
             surface.markDestroyed();
+            this.renderer.onDestroy(wlSurfaceResource);
             this.compositor.requestRender();
         });
 

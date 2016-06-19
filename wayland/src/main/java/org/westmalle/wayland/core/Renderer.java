@@ -13,10 +13,15 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.WlSurfaceResource;
+
 public interface Renderer {
     void visit(Platform platform);
 
     void visit(EglPlatform eglPlatform);
 
+    //TODO pixman sw rendering platform
     //void visit(PixmanPlatform pixmanPlatform);
+
+    void onDestroy(WlSurfaceResource wlSurfaceResource);
 }
