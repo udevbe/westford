@@ -11,7 +11,7 @@ public class X11EglPlatformModule {
 
     @Provides
     @Singleton
-    X11Platform createX11Platform(X11PlatformFactory x11PlatformFactory) {
+    X11Platform createX11Platform(final X11PlatformFactory x11PlatformFactory) {
         //FIXME from config
         return x11PlatformFactory.create(":0",
                                          800,
@@ -20,7 +20,7 @@ public class X11EglPlatformModule {
 
     @Provides
     @Singleton
-    Platform createPlatform(X11EglPlatformFactory x11EglPlatformFactory) {
+    Platform createPlatform(final X11EglPlatformFactory x11EglPlatformFactory) {
         return x11EglPlatformFactory.create();
     }
 }

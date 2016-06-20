@@ -15,14 +15,14 @@ public class DispmanxEglPlatformModule {
 
     @Provides
     @Singleton
-    DispmanxPlatform createDispmanxPlatform(DispmanxPlatformFactory dispmanxPlatformFactory) {
+    DispmanxPlatform createDispmanxPlatform(final DispmanxPlatformFactory dispmanxPlatformFactory) {
         //FIXME from config
         return dispmanxPlatformFactory.create(DISPMANX_ID_HDMI);
     }
 
     @Provides
     @Singleton
-    Platform createPlatform(@Nonnull DispmanxEglPlatformFactory dispmanxEglPlatformFactory) {
+    Platform createPlatform(@Nonnull final DispmanxEglPlatformFactory dispmanxEglPlatformFactory) {
         return dispmanxEglPlatformFactory.create();
     }
 }

@@ -21,7 +21,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -61,9 +60,8 @@ public class Compositor {
         this.display.flushClients();
     }
 
-    private void renderOutput(Platform platform){
+    private void renderOutput(final Platform platform) {
         platform.accept(this.renderer);
-        platform.nextOutput().ifPresent(this::renderOutput);
     }
 
     public void requestRender() {
