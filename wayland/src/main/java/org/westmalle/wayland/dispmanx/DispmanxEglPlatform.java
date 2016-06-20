@@ -104,11 +104,4 @@ public class DispmanxEglPlatform implements EglPlatform {
     public String getEglExtensions() {
         return this.eglExtensions;
     }
-
-    @Nonnull
-    @Override
-    public Optional<Platform> nextOutput() {
-        //TODO read out config & init next output
-        return Optional.empty();
-    }
 }
