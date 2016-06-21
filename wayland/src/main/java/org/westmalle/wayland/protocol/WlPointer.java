@@ -16,6 +16,7 @@ package org.westmalle.wayland.protocol;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlPointerRequestsV3;
+import org.freedesktop.wayland.server.WlPointerRequestsV5;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlPointerError;
@@ -32,7 +33,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 
-public class WlPointer implements WlPointerRequestsV3, ProtocolObject<WlPointerResource> {
+public class WlPointer implements WlPointerRequestsV5, ProtocolObject<WlPointerResource> {
 
     private final Set<WlPointerResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 

@@ -22,6 +22,7 @@ import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSeatRequestsV4;
+import org.freedesktop.wayland.server.WlSeatRequestsV5;
 import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlTouchResource;
 import org.westmalle.wayland.core.Seat;
@@ -37,7 +38,7 @@ import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlSeatFactory",
              allowSubclasses = true)
-public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, ProtocolObject<WlSeatResource> {
+public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV5, ProtocolObject<WlSeatResource> {
 
     private final Set<WlSeatResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -139,6 +140,11 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV4, 
         this.wlTouchResources.put(wlSeatResource,
                                   wlTouchResource);
         wlTouchResource.register(() -> WlSeat.this.wlTouchResources.remove(wlSeatResource));
+    }
+
+    @Override
+    public void release(final WlSeatResource requester) {
+        //TODO
     }
 
     @Nonnull

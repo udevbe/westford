@@ -17,6 +17,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.WlDataDeviceManagerRequestsV2;
+import org.freedesktop.wayland.server.WlDataDeviceManagerRequestsV3;
 import org.freedesktop.wayland.server.WlDataDeviceManagerResource;
 import org.freedesktop.wayland.server.WlSeatResource;
 
@@ -29,7 +30,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @Singleton
-public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequestsV2, ProtocolObject<WlDataDeviceManagerResource> {
+public class WlDataDeviceManager extends Global<WlDataDeviceManagerResource> implements WlDataDeviceManagerRequestsV3, ProtocolObject<WlDataDeviceManagerResource> {
 
     private final Set<WlDataDeviceManagerResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 

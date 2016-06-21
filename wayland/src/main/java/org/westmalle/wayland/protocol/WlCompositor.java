@@ -17,6 +17,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.WlCompositorRequestsV3;
+import org.freedesktop.wayland.server.WlCompositorRequestsV4;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.core.Compositor;
@@ -33,7 +34,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 @Singleton
-public class WlCompositor extends Global<WlCompositorResource> implements WlCompositorRequestsV3, ProtocolObject<WlCompositorResource> {
+public class WlCompositor extends Global<WlCompositorResource> implements WlCompositorRequestsV4, ProtocolObject<WlCompositorResource> {
 
     private final Set<WlCompositorResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 

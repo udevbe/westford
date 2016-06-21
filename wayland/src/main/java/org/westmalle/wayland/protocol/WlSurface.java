@@ -20,6 +20,7 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.freedesktop.wayland.server.WlSurfaceRequestsV3;
+import org.freedesktop.wayland.server.WlSurfaceRequestsV4;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.freedesktop.wayland.shared.WlSurfaceError;
@@ -38,7 +39,7 @@ import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlSurfaceFactory",
              allowSubclasses = true)
-public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceResource> {
+public class WlSurface implements WlSurfaceRequestsV4, ProtocolObject<WlSurfaceResource> {
 
     private final Set<WlSurfaceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
     private final WlCallbackFactory wlCallbackFactory;
@@ -204,5 +205,14 @@ public class WlSurface implements WlSurfaceRequestsV3, ProtocolObject<WlSurfaceR
                                String.format("Invalid scale %d. Scale must be positive integer.",
                                              scale));
         }
+    }
+
+    @Override
+    public void damageBuffer(final WlSurfaceResource requester,
+                             final int x,
+                             final int y,
+                             final int width,
+                             final int height) {
+        //TODO
     }
 }
