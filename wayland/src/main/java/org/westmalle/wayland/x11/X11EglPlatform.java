@@ -30,14 +30,14 @@ import java.util.Optional;
 public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final LibEGL      libEGL;
+    private final LibEGL                libEGL;
     @Nonnull
-    private final X11Platform x11Platform;
-    private final long        eglDisplay;
-    private final long        eglSurface;
-    private final long        eglContext;
+    private final X11Platform           x11Platform;
+    private final long                  eglDisplay;
+    private final long                  eglSurface;
+    private final long                  eglContext;
     @Nonnull
-    private final String      eglExtensions;
+    private final String                eglExtensions;
 
     X11EglPlatform(@Provided @Nonnull final LibEGL libEGL,
                    @Nonnull final X11Platform x11Platform,

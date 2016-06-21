@@ -163,10 +163,10 @@ public class X11EglPlatformFactory {
         return context;
     }
 
-    private long createEglSurface(final long eglDisplay,
-                                  final long config,
-                                  final long context,
-                                  final int nativeWindow) {
+    public long createEglSurface(final long eglDisplay,
+                                 final long config,
+                                 final long context,
+                                 final int nativeWindow) {
         final Pointer<Integer> eglSurfaceAttribs = Pointer.nref(EGL_RENDER_BUFFER,
                                                                 EGL_BACK_BUFFER,
                                                                 EGL_NONE);
