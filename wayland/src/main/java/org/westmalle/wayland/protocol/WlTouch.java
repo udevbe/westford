@@ -15,6 +15,7 @@ package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlTouchRequestsV3;
+import org.freedesktop.wayland.server.WlTouchRequestsV5;
 import org.freedesktop.wayland.server.WlTouchResource;
 import org.westmalle.wayland.core.TouchDevice;
 
@@ -25,7 +26,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public class WlTouch implements WlTouchRequestsV3, ProtocolObject<WlTouchResource> {
+public class WlTouch implements WlTouchRequestsV5, ProtocolObject<WlTouchResource> {
 
     private final Set<WlTouchResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
     private final TouchDevice touchDevice;

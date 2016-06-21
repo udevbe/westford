@@ -16,6 +16,7 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataOfferRequests;
+import org.freedesktop.wayland.server.WlDataOfferRequestsV3;
 import org.freedesktop.wayland.server.WlDataOfferResource;
 
 import javax.annotation.Nonnegative;
@@ -26,7 +27,7 @@ import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataOfferFactory",
              allowSubclasses = true)
-public class WlDataOffer implements WlDataOfferRequests, ProtocolObject<WlDataOfferResource> {
+public class WlDataOffer implements WlDataOfferRequestsV3, ProtocolObject<WlDataOfferResource> {
 
     private final Set<WlDataOfferResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -50,6 +51,18 @@ public class WlDataOffer implements WlDataOfferRequests, ProtocolObject<WlDataOf
     @Override
     public void destroy(final WlDataOfferResource resource) {
         resource.destroy();
+    }
+
+    @Override
+    public void finish(final WlDataOfferResource requester) {
+        //TODO
+    }
+
+    @Override
+    public void setActions(final WlDataOfferResource requester,
+                           final int dndActions,
+                           final int preferredAction) {
+        //TODO
     }
 
     @Nonnull

@@ -16,6 +16,7 @@ package org.westmalle.wayland.protocol;
 import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataSourceRequests;
+import org.freedesktop.wayland.server.WlDataSourceRequestsV3;
 import org.freedesktop.wayland.server.WlDataSourceResource;
 
 import javax.annotation.Nonnegative;
@@ -28,7 +29,7 @@ import java.util.WeakHashMap;
 
 @AutoFactory(className = "WlDataSourceFactory",
              allowSubclasses = true)
-public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlDataSourceResource> {
+public class WlDataSource implements WlDataSourceRequestsV3, ProtocolObject<WlDataSourceResource> {
 
     private final Set<WlDataSourceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
     private final List<String>              mimeTypes = new ArrayList<>();
@@ -45,6 +46,12 @@ public class WlDataSource implements WlDataSourceRequests, ProtocolObject<WlData
     @Override
     public void destroy(final WlDataSourceResource resource) {
         resource.destroy();
+    }
+
+    @Override
+    public void setActions(final WlDataSourceResource requester,
+                           final int dndActions) {
+        //TODO
     }
 
     @Nonnull

@@ -15,6 +15,7 @@ package org.westmalle.wayland.protocol;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlDataDeviceRequestsV2;
+import org.freedesktop.wayland.server.WlDataDeviceRequestsV3;
 import org.freedesktop.wayland.server.WlDataDeviceResource;
 import org.freedesktop.wayland.server.WlDataSourceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
@@ -26,7 +27,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public class WlDataDevice implements WlDataDeviceRequestsV2, ProtocolObject<WlDataDeviceResource> {
+public class WlDataDevice implements WlDataDeviceRequestsV3, ProtocolObject<WlDataDeviceResource> {
 
     private final Set<WlDataDeviceResource> resources = Collections.newSetFromMap(new WeakHashMap<>());
 
