@@ -84,11 +84,9 @@ public class Boot {
          */
         final LifeCycle lifeCycle = x11EglCompositor.lifeCycle();
 
-        final X11SeatFactory seatFactory = x11EglCompositor.seatFactory();
-
         //setup seat for input support
-        //create a seat that listens for input on the X opengl window and passes it on to a wayland seat.
-        final WlSeat wlSeat = seatFactory.create();
+        //get the seat that listens for input on the X connection and passes it on to a wayland seat.
+        final WlSeat wlSeat = x11EglCompositor.wlSeat();
 
         //setup keyboard focus tracking to follow mouse pointer
         final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();

@@ -4,6 +4,7 @@ import dagger.Component;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.gles2.Gles2RendererModule;
+import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.X11EglPlatformModule;
 import org.westmalle.wayland.x11.X11SeatFactory;
 
@@ -20,5 +21,5 @@ public interface X11EglCompositor {
     /*
      * Define a platform to output pixels & handle user input.
      */
-    X11SeatFactory seatFactory();
+    WlSeat wlSeat();
 }

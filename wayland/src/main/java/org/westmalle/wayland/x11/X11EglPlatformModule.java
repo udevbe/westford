@@ -3,6 +3,7 @@ package org.westmalle.wayland.x11;
 import dagger.Module;
 import dagger.Provides;
 import org.westmalle.wayland.core.Platform;
+import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.inject.Singleton;
 
@@ -22,5 +23,11 @@ public class X11EglPlatformModule {
     @Singleton
     Platform createPlatform(final X11EglPlatformFactory x11EglPlatformFactory) {
         return x11EglPlatformFactory.create();
+    }
+
+    @Provides
+    @Singleton
+    WlSeat createWlSeat(final X11SeatFactory x11SeatFactory) {
+        return x11SeatFactory.create();
     }
 }
