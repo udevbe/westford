@@ -30,13 +30,14 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
+import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -110,15 +111,15 @@ public class X11PlatformFactory {
             throw new IllegalArgumentException("Got negative width or height");
         }
 
-        return createXPlatformOutput(xDisplay,
-                                     width,
-                                     height);
+        return createX11Platform(xDisplay,
+                                 width,
+                                 height);
     }
 
 
-    private X11Platform createXPlatformOutput(final String xDisplayName,
-                                              final int width,
-                                              final int height) {
+    private X11Platform createX11Platform(final String xDisplayName,
+                                          final int width,
+                                          final int height) {
         final long xDisplay = this.libX11.XOpenDisplay(Pointer.nref(xDisplayName).address);
         if (xDisplay == 0L) {
             throw new RuntimeException("XOpenDisplay() failed: " + xDisplayName);
@@ -160,10 +161,10 @@ public class X11PlatformFactory {
         return x11Platform;
     }
 
-    private int createXWindow(final long xcbConnection,
-                              final xcb_screen_t screen,
-                              final int width,
-                              final int height) {
+    public int createXWindow(final long xcbConnection,
+                             final xcb_screen_t screen,
+                             final int width,
+                             final int height) {
 
         final int window = this.libxcb.xcb_generate_id(xcbConnection);
         if (window <= 0) {
@@ -231,7 +232,7 @@ public class X11PlatformFactory {
                        }
                    });
 
-        return this.privateX11OutputFactory.create(wlOutput,
+        return this.privateX11OutputFactory.create(Optional.of(wlOutput),
                                                    x11EventBus,
                                                    connection,
                                                    xDisplay,

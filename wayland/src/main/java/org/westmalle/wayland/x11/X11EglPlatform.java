@@ -84,7 +84,7 @@ public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public WlOutput getWlOutput() {
+    public Optional<WlOutput> getWlOutput() {
         return this.x11Platform.getWlOutput();
     }
 

@@ -19,13 +19,14 @@ import org.westmalle.wayland.protocol.WlOutput;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @AutoFactory(className = "PrivateX11PlatformFactory",
              allowSubclasses = true)
 public class X11Platform {
 
     @Nonnull
-    private final WlOutput             wlOutput;
+    private final Optional<WlOutput>   wlOutput;
     @Nonnull
     private final X11EventBus          x11EventBus;
     private final long                 xcbConnection;
@@ -34,7 +35,7 @@ public class X11Platform {
     @Nonnull
     private final Map<String, Integer> atoms;
 
-    X11Platform(@Nonnull final WlOutput wlOutput,
+    X11Platform(@Nonnull final Optional<WlOutput> wlOutput,
                 @Nonnull final X11EventBus x11EventBus,
                 final long xcbConnection,
                 final long xDisplay,
@@ -71,7 +72,7 @@ public class X11Platform {
     }
 
     @Nonnull
-    public WlOutput getWlOutput() {
+    public Optional<WlOutput> getWlOutput() {
         return this.wlOutput;
     }
 }
