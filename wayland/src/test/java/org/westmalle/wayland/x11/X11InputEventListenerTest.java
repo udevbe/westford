@@ -14,8 +14,6 @@ import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlSeat;
 
-import javax.annotation.Nonnull;
-
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyShort;
 import static org.mockito.Matchers.eq;
@@ -66,7 +64,8 @@ public class X11InputEventListenerTest {
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverButton(anyInt(),
+        verify(this.x11Seat).deliverButton(event.event(),
+                                           anyInt(),
                                            anyShort(),
                                            eq(true));
     }
@@ -104,7 +103,8 @@ public class X11InputEventListenerTest {
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverButton(anyInt(),
+        verify(this.x11Seat).deliverButton(event.event(),
+                                           anyInt(),
                                            anyShort(),
                                            eq(false));
     }

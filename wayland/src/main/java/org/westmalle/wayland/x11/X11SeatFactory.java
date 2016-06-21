@@ -61,14 +61,14 @@ public class X11SeatFactory {
 
     public WlSeat create() {
 
-        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(this.x11XkbFactory.create(x11Platform.getXcbConnection()));
+        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(this.x11XkbFactory.create(this.x11Platform.getXcbConnection()));
         keyboardDevice.updateKeymap();
         final WlSeat wlSeat = this.wlSeatFactory.create(this.wlKeyboardFactory.create(keyboardDevice));
 
-        x11Platform.getX11EventBus()
-                   .getXEventSignal()
-                   .connect(this.x11InputEventListenerFactory.create(this.privateX11SeatFactory.create(x11Platform,
-                                                                                                       wlSeat)));
+        this.x11Platform.getX11EventBus()
+                        .getXEventSignal()
+                        .connect(this.x11InputEventListenerFactory.create(this.privateX11SeatFactory.create(this.x11Platform,
+                                                                                                            wlSeat)));
         //enable pointer and keyboard for wlseat as an X11 seat always has these.
         wlSeat.getSeat()
               .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,

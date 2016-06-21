@@ -26,31 +26,20 @@ import java.util.Optional;
 public class X11Platform {
 
     @Nonnull
-    private final Optional<WlOutput>   wlOutput;
-    @Nonnull
     private final X11EventBus          x11EventBus;
     private final long                 xcbConnection;
-    private final int                  xWindow;
     private final long                 xDisplay;
     @Nonnull
     private final Map<String, Integer> atoms;
 
-    X11Platform(@Nonnull final Optional<WlOutput> wlOutput,
-                @Nonnull final X11EventBus x11EventBus,
+    X11Platform(@Nonnull final X11EventBus x11EventBus,
                 final long xcbConnection,
                 final long xDisplay,
-                final int xWindow,
                 @Nonnull final Map<String, Integer> x11Atoms) {
-        this.wlOutput = wlOutput;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
-        this.xWindow = xWindow;
         this.xDisplay = xDisplay;
         this.atoms = x11Atoms;
-    }
-
-    public int getxWindow() {
-        return this.xWindow;
     }
 
     public long getxDisplay() {
@@ -69,10 +58,5 @@ public class X11Platform {
     @Nonnull
     public Map<String, Integer> getX11Atoms() {
         return this.atoms;
-    }
-
-    @Nonnull
-    public Optional<WlOutput> getWlOutput() {
-        return this.wlOutput;
     }
 }

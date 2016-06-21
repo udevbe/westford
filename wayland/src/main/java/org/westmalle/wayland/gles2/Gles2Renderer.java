@@ -335,17 +335,37 @@ public class Gles2Renderer implements GlRenderer {
             initRenderState();
         }
 
-        eglPlatform.getWlOutput()
-                   .ifPresent(wlOutput -> {
-                       updateRenderState(wlOutput);
-                       //naive single pass, bottom to top overdraw rendering.
-                       this.scene.getSurfacesStack()
-                                 .forEach((wlSurfaceResource) -> draw(eglPlatform,
-                                                                      wlSurfaceResource));
-                   });
+        for (final EglConnector eglConnector : eglPlatform.getConnectors()) {
+            eglConnector.getWlOutput()
+                        .ifPresent(wlOutput -> {
+                            updateRenderState(eglPlatform,
+                                              eglConnector,
+                                              wlOutput);
+                            //naive single pass, bottom to top overdraw rendering.
+                            this.scene.getSurfacesStack()
+                                      .forEach((wlSurfaceResource) -> draw(eglPlatform,
+                                                                           wlSurfaceResource));
+                            flushRenderState(eglPlatform,
+                                             eglConnector);
+                        });
+        }
+
     }
 
-    private void updateRenderState(@Nonnull final WlOutput wlOutput) {
+    private void flushRenderState(final EglPlatform eglPlatform,
+                                  final EglConnector eglConnector) {
+        this.libEGL.eglSwapBuffers(eglPlatform.getEglDisplay(),
+                                   eglConnector.getEglSurface());
+    }
+
+    private void updateRenderState(final EglPlatform eglPlatform,
+                                   final EglConnector eglConnector,
+                                   @Nonnull final WlOutput wlOutput) {
+
+        this.libEGL.eglMakeCurrent(eglPlatform.getEglDisplay(),
+                                   eglConnector.getEglSurface(),
+                                   eglConnector.getEglSurface(),
+                                   eglPlatform.getEglContext());
 
         final Output     output = wlOutput.getOutput();
         final OutputMode mode   = output.getMode();
