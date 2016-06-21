@@ -33,7 +33,7 @@
         <!-- dep versions -->
         <auto.factory.version>1.0-beta3</auto.factory.version>
         <auto.value.version>1.2</auto.value.version>
-        <dagger.version>2.0.2</dagger.version>
+        <dagger.version>2.2</dagger.version>
         <findbugs.version>3.0.1</findbugs.version>
         <jaccall.version>1.0.1</jaccall.version>
 
@@ -44,7 +44,7 @@
         <truth.version>0.28</truth.version>
 
         <!-- plugin dep versions-->
-        <maven.bundle.plugin.version>3.0.1 </maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>3.0.1</maven.bundle.plugin.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <maven.source.plugin.version>3.0.0</maven.source.plugin.version>
         <maven.javadoc.plugin.version>2.10.3</maven.javadoc.plugin.version>

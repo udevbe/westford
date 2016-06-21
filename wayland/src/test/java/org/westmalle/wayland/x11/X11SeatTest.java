@@ -68,7 +68,8 @@ public class X11SeatTest {
         final int time = 2134;
 
         //when
-        this.x11Seat.deliverButton(time,
+        this.x11Seat.deliverButton(event.event(),
+                                   time,
                                    xEventDetail,
                                    true);
         //then
@@ -108,7 +109,8 @@ public class X11SeatTest {
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
         final int time = 9876;
         //when
-        this.x11Seat.deliverButton(time,
+        this.x11Seat.deliverButton(event.event(),
+                                   time,
                                    xEventDetail,
                                    false);
         //then

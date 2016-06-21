@@ -134,13 +134,15 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
     }
 
     private void handle(final xcb_button_press_event_t event) {
-        this.x11Seat.deliverButton(event.time(),
+        this.x11Seat.deliverButton(event.event(),
+                                   event.time(),
                                    event.detail(),
                                    true);
     }
 
     private void handle(final xcb_button_release_event_t event) {
-        this.x11Seat.deliverButton(event.time(),
+        this.x11Seat.deliverButton(event.event(),
+                                   event.time(),
                                    event.detail(),
                                    false);
     }

@@ -15,6 +15,7 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.EglPlatform;
 import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Renderer;
@@ -30,51 +31,31 @@ import java.util.Optional;
 public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final LibEGL                libEGL;
+    private final X11Platform       x11Platform;
     @Nonnull
-    private final X11Platform           x11Platform;
-    private final long                  eglDisplay;
-    private final long                  eglSurface;
-    private final long                  eglContext;
-    @Nonnull
-    private final String                eglExtensions;
+    private final X11EglConnector[] eglConnectors;
 
-    X11EglPlatform(@Provided @Nonnull final LibEGL libEGL,
-                   @Nonnull final X11Platform x11Platform,
+    private final long eglDisplay;
+    private final long eglContext;
+
+    @Nonnull
+    private final String eglExtensions;
+
+    X11EglPlatform(@Nonnull final X11Platform x11Platform,
+                   @Nonnull final X11EglConnector[] eglConnectors,
                    final long eglDisplay,
-                   final long eglSurface,
                    final long eglContext,
                    @Nonnull final String eglExtensions) {
-        this.libEGL = libEGL;
         this.x11Platform = x11Platform;
+        this.eglConnectors = eglConnectors;
         this.eglDisplay = eglDisplay;
-        this.eglSurface = eglSurface;
         this.eglContext = eglContext;
         this.eglExtensions = eglExtensions;
     }
 
     @Override
-    public void begin() {
-        this.libEGL.eglMakeCurrent(this.eglDisplay,
-                                   this.eglSurface,
-                                   this.eglSurface,
-                                   this.eglContext);
-    }
-
-    @Override
-    public void end() {
-        this.libEGL.eglSwapBuffers(this.eglDisplay,
-                                   this.eglSurface);
-    }
-
-    @Override
     public long getEglDisplay() {
         return this.eglDisplay;
-    }
-
-    @Override
-    public long getEglSurface() {
-        return this.eglSurface;
     }
 
     @Override
@@ -84,8 +65,8 @@ public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public Optional<WlOutput> getWlOutput() {
-        return this.x11Platform.getWlOutput();
+    public X11EglConnector[] getConnectors() {
+        return this.eglConnectors;
     }
 
     @Override

@@ -13,15 +13,12 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import org.westmalle.wayland.protocol.WlOutput;
-
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 public interface Platform {
 
     @Nonnull
-    Optional<WlOutput> getWlOutput();
+    Connector[] getConnectors();
 
     void accept(@Nonnull Renderer renderer);
 }

@@ -76,10 +76,10 @@ public class LibinputDevice {
                                                      outputNamePointer)
                                                .dref();
 //        for (final WlOutput wlOutput : this.platform.getWlOutput()) {
-        //TODO give outputs a name
+        //TODO give outputs a name, iterate them and match
 //            if (deviceOutputName.equals(platform.getOutput()
 //                                                .getName())) {
-        return this.platform.getWlOutput();
+        return this.platform.getConnectors()[0].getWlOutput();
 //            }
         //     }
 

@@ -91,11 +91,13 @@ public class X11Seat {
         return eventDetail - 8;
     }
 
-    public void deliverButton(final int buttonTime,
+    public void deliverButton(final int window,
+                              final int buttonTime,
                               final short eventDetail,
                               final boolean pressed) {
 
-        final WlPointerButtonState wlPointerButtonState = wlPointerButtonState(buttonTime,
+        final WlPointerButtonState wlPointerButtonState = wlPointerButtonState(window,
+                                                                               buttonTime,
                                                                                pressed);
         final int button = toLinuxButton(eventDetail);
         if (button == 0 && pressed) {
@@ -143,14 +145,15 @@ public class X11Seat {
         pointerDevice.frame(wlPointer.getResources());
     }
 
-    private WlPointerButtonState wlPointerButtonState(final int buttonTime,
+    private WlPointerButtonState wlPointerButtonState(final int window,
+                                                      final int buttonTime,
                                                       final boolean pressed) {
         final WlPointerButtonState wlPointerButtonState;
         if (pressed) {
             wlPointerButtonState = WlPointerButtonState.PRESSED;
             this.libxcb.xcb_grab_pointer(this.x11Platform.getXcbConnection(),
                                          (byte) 0,
-                                         this.x11Platform.getxWindow(),
+                                         window,
                                          (short) (XCB_EVENT_MASK_BUTTON_PRESS |
                                                   XCB_EVENT_MASK_BUTTON_RELEASE |
                                                   XCB_EVENT_MASK_POINTER_MOTION |
@@ -158,7 +161,7 @@ public class X11Seat {
                                                   XCB_EVENT_MASK_LEAVE_WINDOW),
                                          (byte) XCB_GRAB_MODE_ASYNC,
                                          (byte) XCB_GRAB_MODE_ASYNC,
-                                         this.x11Platform.getxWindow(),
+                                         window,
                                          XCB_CURSOR_NONE,
                                          buttonTime);
         }

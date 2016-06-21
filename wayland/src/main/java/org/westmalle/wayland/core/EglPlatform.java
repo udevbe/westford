@@ -9,9 +9,11 @@ public interface EglPlatform extends Platform {
 
     long getEglDisplay();
 
-    long getEglSurface();
-
     long getEglContext();
+
+    @Nonnull
+    @Override
+    EglConnector[] getConnectors();
 
     @Nonnull
     String getEglExtensions();
