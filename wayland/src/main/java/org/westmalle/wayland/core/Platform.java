@@ -16,11 +16,12 @@ package org.westmalle.wayland.core;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public interface Platform {
 
     @Nonnull
-    WlOutput getWlOutput();
+    Optional<WlOutput> getWlOutput();
 
     void accept(@Nonnull Renderer renderer);
 }
