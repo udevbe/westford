@@ -79,7 +79,7 @@ public class LibinputDevice {
         //TODO give outputs a name
 //            if (deviceOutputName.equals(platform.getOutput()
 //                                                .getName())) {
-        return Optional.of(platform.getWlOutput());
+        return this.platform.getWlOutput();
 //            }
         //     }
 
