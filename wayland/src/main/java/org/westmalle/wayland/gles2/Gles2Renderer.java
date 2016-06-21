@@ -335,11 +335,14 @@ public class Gles2Renderer implements GlRenderer {
             initRenderState();
         }
 
-        updateRenderState(eglPlatform.getWlOutput());
-        //naive single pass, bottom to top overdraw rendering.
-        this.scene.getSurfacesStack()
-                  .forEach((wlSurfaceResource) -> draw(eglPlatform,
-                                                       wlSurfaceResource));
+        eglPlatform.getWlOutput()
+                   .ifPresent(wlOutput -> {
+                       updateRenderState(wlOutput);
+                       //naive single pass, bottom to top overdraw rendering.
+                       this.scene.getSurfacesStack()
+                                 .forEach((wlSurfaceResource) -> draw(eglPlatform,
+                                                                      wlSurfaceResource));
+                   });
     }
 
     private void updateRenderState(@Nonnull final WlOutput wlOutput) {
