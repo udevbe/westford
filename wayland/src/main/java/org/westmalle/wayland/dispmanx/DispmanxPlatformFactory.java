@@ -30,6 +30,8 @@ import org.westmalle.wayland.protocol.WlOutputFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import java.util.Optional;
+
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_NO_ROTATE;
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
 
@@ -79,7 +81,7 @@ public class DispmanxPlatformFactory {
         final Output   output   = createOutput(modeinfo);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
-        return this.privateDispmanxOutputFactory.create(wlOutput,
+        return this.privateDispmanxOutputFactory.create(Optional.of(wlOutput),
                                                         dispmanxElement,
                                                         modeinfo);
     }

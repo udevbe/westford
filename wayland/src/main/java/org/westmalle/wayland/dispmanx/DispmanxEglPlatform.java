@@ -85,7 +85,7 @@ public class DispmanxEglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public WlOutput getWlOutput() {
+    public Optional<WlOutput> getWlOutput() {
         return this.dispmanxPlatform.getWlOutput();
     }
 
