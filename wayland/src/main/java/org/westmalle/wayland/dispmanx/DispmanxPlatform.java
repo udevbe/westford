@@ -21,18 +21,19 @@ import org.westmalle.wayland.protocol.WlOutput;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 @AutoFactory(className = "PrivateDispmanxOutputFactory",
              allowSubclasses = true)
 public class DispmanxPlatform {
 
     @Nonnull
-    private final WlOutput            wlOutput;
+    private final Optional<WlOutput>  wlOutput;
     private final int                 dispmanxElement;
     @Nonnull
     private final DISPMANX_MODEINFO_T modeinfo;
 
-    DispmanxPlatform(@Nonnull final WlOutput wlOutput,
+    DispmanxPlatform(@Nonnull final Optional<WlOutput> wlOutput,
                      final int dispmanxElement,
                      @Nonnull final DISPMANX_MODEINFO_T modeinfo) {
         this.wlOutput = wlOutput;
@@ -50,7 +51,7 @@ public class DispmanxPlatform {
     }
 
     @Nonnull
-    public WlOutput getWlOutput() {
+    public Optional<WlOutput> getWlOutput() {
         return this.wlOutput;
     }
 }
