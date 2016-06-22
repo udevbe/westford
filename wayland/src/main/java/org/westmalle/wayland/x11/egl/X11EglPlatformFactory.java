@@ -11,13 +11,15 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.x11;
+package org.westmalle.wayland.x11.egl;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
+import org.westmalle.wayland.x11.X11Connector;
+import org.westmalle.wayland.x11.X11Platform;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -51,22 +53,18 @@ public class X11EglPlatformFactory {
     private final GlRenderer                   glRenderer;
     @Nonnull
     private final X11EglConnectorFactory       x11EglConnectorFactory;
-    @Nonnull
-    private final X11ConnectorFactory          x11ConnectorFactory;
 
     @Inject
     X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
                           @Nonnull final PrivateX11EglPlatformFactory privateX11EglOutputFactory,
                           @Nonnull final X11Platform x11Platform,
                           @Nonnull final GlRenderer glRenderer,
-                          @Nonnull final X11EglConnectorFactory x11EglConnectorFactory,
-                          @Nonnull final X11ConnectorFactory x11ConnectorFactory) {
+                          @Nonnull final X11EglConnectorFactory x11EglConnectorFactory) {
         this.libEGL = libEGL;
         this.privateX11EglOutputFactory = privateX11EglOutputFactory;
         this.x11Platform = x11Platform;
         this.glRenderer = glRenderer;
         this.x11EglConnectorFactory = x11EglConnectorFactory;
-        this.x11ConnectorFactory = x11ConnectorFactory;
     }
 
     @Nonnull
@@ -94,6 +92,7 @@ public class X11EglPlatformFactory {
                                                this.libEGL.eglQueryString(eglDisplay,
                                                                           EGL_VERSION))
                                          .dref();
+
         LOGGER.info(format("Creating X11 EGL output:\n"
                            + "\tEGL client apis: %s\n"
                            + "\tEGL vendor: %s\n"
@@ -109,18 +108,19 @@ public class X11EglPlatformFactory {
         final long eglContext = createEglContext(eglDisplay,
                                                  config);
 
+        final X11Connector[]    x11Connectors    = this.x11Platform.getConnectors();
+        final X11EglConnector[] x11EglConnectors = new X11EglConnector[x11Connectors.length];
 
-        //TODO from config
-        final X11EglConnector[] x11EglConnectors = new X11EglConnector[1];
-        final X11Connector x11Connector = this.x11ConnectorFactory.create(800,
-                                                                          600);
-        final long eglSurface = createEglSurface(eglDisplay,
-                                                 config,
-                                                 eglContext,
-                                                 x11Connector.getXWindow());
-        final X11EglConnector x11EglConnector = this.x11EglConnectorFactory.create(x11Connector,
-                                                                                   eglSurface);
-        x11EglConnectors[0] = x11EglConnector;
+        for (int i = 0, x11ConnectorsLength = x11Connectors.length; i < x11ConnectorsLength; i++) {
+            final X11Connector x11Connector = x11Connectors[i];
+            final long eglSurface = createEglSurface(eglDisplay,
+                                                     config,
+                                                     eglContext,
+                                                     x11Connector.getXWindow());
+            final X11EglConnector x11EglConnector = this.x11EglConnectorFactory.create(x11Connector,
+                                                                                       eglSurface);
+            x11EglConnectors[i] = x11EglConnector;
+        }
 
         return this.privateX11EglOutputFactory.create(this.x11Platform,
                                                       x11EglConnectors,

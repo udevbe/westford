@@ -11,20 +11,14 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.x11;
+package org.westmalle.wayland.x11.egl;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
-import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.EglPlatform;
-import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.nativ.libEGL.LibEGL;
-import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.x11.X11Platform;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Optional;
 
 @AutoFactory(className = "PrivateX11EglPlatformFactory",
              allowSubclasses = true)

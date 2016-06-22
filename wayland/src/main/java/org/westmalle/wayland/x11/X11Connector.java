@@ -4,10 +4,11 @@ import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.protocol.WlOutput;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
-             className = "PrivateX11ConnectorFactory")
+             className = "X11ConnectorFactory")
 public class X11Connector implements Connector {
 
     private final int                xWindow;
@@ -19,6 +20,7 @@ public class X11Connector implements Connector {
         this.wlOutput = wlOutput;
     }
 
+    @Nonnull
     @Override
     public Optional<WlOutput> getWlOutput() {
         return this.wlOutput;

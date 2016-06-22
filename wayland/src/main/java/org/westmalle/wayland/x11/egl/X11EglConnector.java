@@ -1,9 +1,10 @@
-package org.westmalle.wayland.x11;
+package org.westmalle.wayland.x11.egl;
 
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.x11.X11Connector;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -29,6 +30,7 @@ public class X11EglConnector implements EglConnector {
     }
 
 
+    @Nonnull
     @Override
     public Optional<WlOutput> getWlOutput() {
         return this.x11Connector.getWlOutput();
