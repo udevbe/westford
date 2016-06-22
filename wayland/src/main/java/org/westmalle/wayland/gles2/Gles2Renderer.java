@@ -95,27 +95,27 @@ public class Gles2Renderer implements GlRenderer {
 
     private static final String FRAGMENT_SHADER_ARGB8888 =
             "precision mediump float;\n" +
-            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture0;\n" +
             "varying vec2 v_texCoord;\n" +
             "void main(){\n" +
-            "    gl_FragColor = texture2D(u_texture, v_texCoord);\n" +
+            "    gl_FragColor = texture2D(u_texture0, v_texCoord);\n" +
             "}";
 
     private static final String FRAGMENT_SHADER_XRGB8888 =
             "precision mediump float;\n" +
-            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture0;\n" +
             "varying vec2 v_texCoord;\n" +
             "void main(){\n" +
-            "    gl_FragColor = vec4(texture2D(u_texture, v_texCoord).bgr, 1.0);\n" +
+            "    gl_FragColor = vec4(texture2D(u_texture0, v_texCoord).bgr, 1.0);\n" +
             "}";
 
     private static final String FRAGMENT_SHADER_EGL_EXTERNAL =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
-            "uniform samplerExternalOES u_texture;\n" +
+            "uniform samplerExternalOES u_texture0;\n" +
             "varying vec2 v_texCoord;\n" +
             "void main(){\n" +
-            "   gl_FragColor = texture2D(u_texture, v_texCoord)\n;" +
+            "   gl_FragColor = texture2D(u_texture0, v_texCoord)\n;" +
             "}";
 
     private static final String FRAGMENT_CONVERT_YUV =
@@ -127,34 +127,34 @@ public class Gles2Renderer implements GlRenderer {
 
     private static final String FRAGMENT_SHADER_EGL_Y_UV =
             "precision mediump float;\n" +
-            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture0;\n" +
             "uniform sampler2D u_texture1;\n" +
             "varying vec2 v_texCoord;\n" +
             "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(u_texture, v_texCoord).x - 0.0625);\n" +
+            "  float y = 1.16438356 * (texture2D(u_texture0, v_texCoord).x - 0.0625);\n" +
             "  float u = texture2D(u_texture1, v_texCoord).r - 0.5;\n" +
             "  float v = texture2D(u_texture1, v_texCoord).g - 0.5;\n" +
             FRAGMENT_CONVERT_YUV;
 
     private static final String FRAGMENT_SHADER_EGL_Y_U_V =
             "precision mediump float;\n" +
-            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture0;\n" +
             "uniform sampler2D u_texture1;\n" +
             "uniform sampler2D u_texture2;\n" +
             "varying vec2 v_texCoord;\n" +
             "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(u_texture, v_texCoord).x - 0.0625);\n" +
+            "  float y = 1.16438356 * (texture2D(u_texture0, v_texCoord).x - 0.0625);\n" +
             "  float u = texture2D(u_texture1, v_texCoord).x - 0.5;\n" +
             "  float v = texture2D(u_texture2, v_texCoord).x - 0.5;\n" +
             FRAGMENT_CONVERT_YUV;
 
     private static final String FRAGMENT_SHADER_EGL_Y_XUXV =
             "precision mediump float;\n" +
-            "uniform sampler2D u_texture;\n" +
+            "uniform sampler2D u_texture0;\n" +
             "uniform sampler2D u_texture1;\n" +
             "varying vec2 v_texCoord;\n" +
             "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(u_texture, v_texCoord).x - 0.0625);\n" +
+            "  float y = 1.16438356 * (texture2D(u_texture0, v_texCoord).x - 0.0625);\n" +
             "  float u = texture2D(u_texture1, v_texCoord).g - 0.5;\n" +
             "  float v = texture2D(u_texture1, v_texCoord).a - 0.5;\n" +
             FRAGMENT_CONVERT_YUV;
@@ -200,10 +200,7 @@ public class Gles2Renderer implements GlRenderer {
     private int transformArg;
     private int positionArg;
     private int textureCoordinateArg;
-    private int textureArg;
-    //used by egl;
-    private int textureArg1;
-    private int textureArg2;
+    private final int[] textureArgs = new int[3];
 
     private long    eglDisplay      = EGL_NO_DISPLAY;
     private boolean hasWlEglDisplay = false;
@@ -406,22 +403,28 @@ public class Gles2Renderer implements GlRenderer {
         }
         //this shader is reused in wl egl
         this.argb8888ShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                         FRAGMENT_SHADER_ARGB8888);
+                                                         FRAGMENT_SHADER_ARGB8888,
+                                                         1);
         this.xrgb8888ShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                         FRAGMENT_SHADER_XRGB8888);
+                                                         FRAGMENT_SHADER_XRGB8888,
+                                                         1);
 
         //compile wl egl shaders
         if (this.hasWlEglDisplay) {
             this.y_u_vShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                          FRAGMENT_SHADER_EGL_Y_U_V);
+                                                          FRAGMENT_SHADER_EGL_Y_U_V,
+                                                          3);
             this.y_uvShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                         FRAGMENT_SHADER_EGL_Y_UV);
+                                                         FRAGMENT_SHADER_EGL_Y_UV,
+                                                         2);
             this.y_xuxvShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                           FRAGMENT_SHADER_EGL_Y_XUXV);
+                                                           FRAGMENT_SHADER_EGL_Y_XUXV,
+                                                           2);
 
             if (glExtensions.contains("GL_OES_EGL_image_external")) {
                 this.externalImageShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                                      FRAGMENT_SHADER_EGL_EXTERNAL);
+                                                                      FRAGMENT_SHADER_EGL_EXTERNAL,
+                                                                      1);
             }
             else {
                 LOGGER.warning("Extension GL_OES_EGL_image_external not available.");
@@ -435,7 +438,8 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     private int createShaderProgram(final String vertexShaderSource,
-                                    final String fragmentShaderSource) {
+                                    final String fragmentShaderSource,
+                                    final int nroTextures) {
         final int vertexShader = compileShader(vertexShaderSource,
                                                GL_VERTEX_SHADER);
         final int fragmentShader = compileShader(fragmentShaderSource,
@@ -485,8 +489,12 @@ public class Gles2Renderer implements GlRenderer {
                                                               Pointer.nref("a_position").address);
         this.textureCoordinateArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
                                                                        Pointer.nref("a_texCoord").address);
-        this.textureArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
-                                                              Pointer.nref("u_texture").address);
+
+        for (int i = 0; i < nroTextures; i++) {
+            this.textureArgs[i] = this.libGLESv2.glGetUniformLocation(shaderProgram,
+                                                                      Pointer.nref("u_texture" + i).address);
+        }
+
 
         return shaderProgram;
     }
@@ -771,7 +779,7 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glActiveTexture(GL_TEXTURE0);
         this.libGLESv2.glBindTexture(shmSurfaceRenderState.getTarget(),
                                      shmSurfaceRenderState.getTexture());
-        this.libGLESv2.glUniform1i(this.textureArg,
+        this.libGLESv2.glUniform1i(this.textureArgs[0],
                                    0);
 
         //draw
@@ -784,7 +792,7 @@ public class Gles2Renderer implements GlRenderer {
         //cleanup
         this.libGLESv2.glDisable(GL_BLEND);
         this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
-        this.libGLESv2.glDisableVertexAttribArray(this.textureArg);
+        this.libGLESv2.glDisableVertexAttribArray(this.textureArgs[0]);
         this.libGLESv2.glUseProgram(0);
     }
 
@@ -1010,8 +1018,60 @@ public class Gles2Renderer implements GlRenderer {
                          final WlSurfaceResource wlSurfaceResource,
                          final WlBufferResource wlBufferResource,
                          final int textureFormat) {
+        queryEglSurfaceRenderState(eglPlatform,
+                                   wlSurfaceResource,
+                                   wlBufferResource,
+                                   textureFormat).ifPresent(surfaceRenderState -> {
+            surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+                @Override
+                public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
+                    drawEgl(wlSurfaceResource,
+                            eglSurfaceRenderState);
+                    return null;
+                }
+            });
+        });
+    }
+
+    private void drawEgl(final WlSurfaceResource wlSurfaceResource,
+                         final EglSurfaceRenderState eglSurfaceRenderState) {
+        //TODO unify with drawShm
+
+        final int shaderProgram = eglSurfaceRenderState.getShaderProgram();
+
+        //activate & setup shader
+        this.libGLESv2.glUseProgram(shaderProgram);
+        setupVertexParams(wlSurfaceResource,
+                          eglSurfaceRenderState.getPitch(),
+                          eglSurfaceRenderState.getHeight());
+
+        //set the buffer in the shader
+        final int[] textures = eglSurfaceRenderState.getTextures();
+        for (int i = 0, texturesLength = textures.length; i < texturesLength; i++) {
+            final int texture = textures[i];
+
+            this.libGLESv2.glActiveTexture(GL_TEXTURE0 + i);
+            this.libGLESv2.glBindTexture(eglSurfaceRenderState.getTarget(),
+                                         texture);
+            this.libGLESv2.glUniform1i(this.textureArgs[i],
+                                       0);
+        }
 
 
+        //draw
+        //enable texture blending
+        this.libGLESv2.glEnable(GL_BLEND);
+        this.libGLESv2.glDrawArrays(GL_TRIANGLES,
+                                    0,
+                                    6);
+
+        //cleanup
+        this.libGLESv2.glDisable(GL_BLEND);
+        this.libGLESv2.glDisableVertexAttribArray(this.positionArg);
+        for (int i = 0, texturesLength = textures.length; i < texturesLength; i++) {
+            this.libGLESv2.glDisableVertexAttribArray(this.textureArgs[i]);
+        }
+        this.libGLESv2.glUseProgram(0);
     }
 
     private int genTexture(final int target) {
