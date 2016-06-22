@@ -40,30 +40,30 @@ import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTE
 public class DispmanxPlatformFactory {
 
     @Nonnull
-    private final Libbcm_host                  libbcm_host;
+    private final Libbcm_host                    libbcm_host;
     @Nonnull
-    private final WlOutputFactory              wlOutputFactory;
+    private final WlOutputFactory                wlOutputFactory;
     @Nonnull
-    private final OutputFactory                outputFactory;
+    private final OutputFactory                  outputFactory;
     @Nonnull
-    private final PrivateDispmanxOutputFactory privateDispmanxOutputFactory;
+    private final PrivateDispmanxPlatformFactory privateDispmanxPlatformFactory;
+    @Nonnull
+    private final DispmanxConnectorFactory       dispmanxConnectorFactory;
 
     @Inject
     DispmanxPlatformFactory(@Nonnull final Libbcm_host libbcm_host,
                             @Nonnull final WlOutputFactory wlOutputFactory,
                             @Nonnull final OutputFactory outputFactory,
-                            @Nonnull final PrivateDispmanxOutputFactory privateDispmanxOutputFactory) {
+                            @Nonnull final PrivateDispmanxPlatformFactory privateDispmanxPlatformFactory,
+                            @Nonnull final DispmanxConnectorFactory dispmanxConnectorFactory) {
         this.libbcm_host = libbcm_host;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
-        this.privateDispmanxOutputFactory = privateDispmanxOutputFactory;
+        this.privateDispmanxPlatformFactory = privateDispmanxPlatformFactory;
+        this.dispmanxConnectorFactory = dispmanxConnectorFactory;
     }
 
     public DispmanxPlatform create(final int device) {
-        return createDispmanXPlatformOutput(device);
-    }
-
-    private DispmanxPlatform createDispmanXPlatformOutput(final int device) {
 
         final int display = this.libbcm_host.vc_dispmanx_display_open(device);
         if (display == 0) {
@@ -76,14 +76,19 @@ public class DispmanxPlatformFactory {
             throw new RuntimeException("Failed get info for display=" + device);
         }
 
+        //TODO from config
+        final DispmanxConnector[] dispmanxConnectors = new DispmanxConnector[1];
         final int dispmanxElement = createDispmanxWindow(display,
                                                          modeinfo);
         final Output   output   = createOutput(modeinfo);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
-        return this.privateDispmanxOutputFactory.create(Optional.of(wlOutput),
-                                                        dispmanxElement,
-                                                        modeinfo);
+        final DispmanxConnector dispmanxConnector = this.dispmanxConnectorFactory.create(Optional.of(wlOutput),
+                                                                                         dispmanxElement);
+        dispmanxConnectors[0] = dispmanxConnector;
+
+        return this.privateDispmanxPlatformFactory.create(modeinfo,
+                                                          dispmanxConnectors);
     }
 
 

@@ -11,19 +11,14 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.dispmanx;
+package org.westmalle.wayland.dispmanx.egl;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.EglPlatform;
-import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.nativ.libEGL.LibEGL;
-import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.dispmanx.DispmanxPlatform;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Optional;
 
 @AutoFactory(className = "PrivateDispmanxEglPlatformFactory",
              allowSubclasses = true)
@@ -31,51 +26,29 @@ import java.util.Optional;
 public class DispmanxEglPlatform implements EglPlatform {
 
     @Nonnull
-    private final LibEGL           libEGL;
+    private final DispmanxPlatform       dispmanxPlatform;
     @Nonnull
-    private final DispmanxPlatform dispmanxPlatform;
-    private final long             eglDisplay;
-    private final long             eglSurface;
-    private final long             eglContext;
+    private final DispmanxEglConnector[] dispmanxEglConnectors;
+    private final long                   eglDisplay;
+    private final long                   eglContext;
     @Nonnull
-    private final String           eglExtensions;
+    private final String                 eglExtensions;
 
-    DispmanxEglPlatform(@Provided @Nonnull final LibEGL libEGL,
-                        @Nonnull final DispmanxPlatform dispmanxPlatform,
+    DispmanxEglPlatform(@Nonnull final DispmanxPlatform dispmanxPlatform,
+                        @Nonnull final DispmanxEglConnector[] dispmanxEglConnectors,
                         final long eglDisplay,
-                        final long eglSurface,
                         final long eglContext,
                         @Nonnull final String eglExtensions) {
-        this.libEGL = libEGL;
         this.dispmanxPlatform = dispmanxPlatform;
+        this.dispmanxEglConnectors = dispmanxEglConnectors;
         this.eglDisplay = eglDisplay;
-        this.eglSurface = eglSurface;
         this.eglContext = eglContext;
         this.eglExtensions = eglExtensions;
     }
 
     @Override
-    public void begin() {
-        this.libEGL.eglMakeCurrent(this.eglDisplay,
-                                   this.eglSurface,
-                                   this.eglSurface,
-                                   this.eglContext);
-    }
-
-    @Override
-    public void end() {
-        this.libEGL.eglSwapBuffers(this.eglDisplay,
-                                   this.eglSurface);
-    }
-
-    @Override
     public long getEglDisplay() {
         return this.eglDisplay;
-    }
-
-    @Override
-    public long getEglSurface() {
-        return this.eglSurface;
     }
 
     @Override
@@ -85,8 +58,8 @@ public class DispmanxEglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public Optional<WlOutput> getWlOutput() {
-        return this.dispmanxPlatform.getWlOutput();
+    public DispmanxEglConnector[] getConnectors() {
+        return this.dispmanxEglConnectors;
     }
 
     @Override
