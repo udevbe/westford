@@ -45,6 +45,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_EXTERNAL_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_FORMAT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGB;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGBA;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_UV_WL;
@@ -222,7 +223,7 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     @Override
-    public void onDestroy(final WlSurfaceResource wlSurfaceResource) {
+    public void onDestroy(@Nonnull final WlSurfaceResource wlSurfaceResource) {
         final SurfaceRenderState surfaceRenderState = this.surfaceRenderStates.remove(wlSurfaceResource);
         surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
             @Override
@@ -249,6 +250,50 @@ public class Gles2Renderer implements GlRenderer {
                 return Optional.empty();
             }
         });
+    }
+
+    @Nonnull
+    @Override
+    public Optional<BufferGeometry> queryBufferGeometry(final WlBufferResource wlBufferResource) {
+
+        final Optional<BufferGeometry> bufferGeometry;
+
+        final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
+        if (shmBuffer != null) {
+            final int width  = shmBuffer.getWidth();
+            final int height = shmBuffer.getHeight();
+
+            bufferGeometry = Optional.of(BufferGeometry.create(width,
+                                                               height));
+        }
+        else if (this.eglQueryWaylandBufferWL.isPresent()) {
+            final EglQueryWaylandBufferWL queryWaylandBuffer = this.eglQueryWaylandBufferWL.get();
+
+            final long             buffer  = wlBufferResource.pointer;
+            final Pointer<Integer> widthP  = Pointer.nref(0);
+            final Pointer<Integer> heightP = Pointer.nref(0);
+
+            queryWaylandBuffer.$(this.eglDisplay,
+                                 buffer,
+                                 EGL_WIDTH,
+                                 widthP.address);
+            queryWaylandBuffer.$(this.eglDisplay,
+                                 buffer,
+                                 EGL_HEIGHT,
+                                 heightP.address);
+
+            final int width  = widthP.dref();
+            final int height = heightP.dref();
+
+            bufferGeometry = Optional.of(BufferGeometry.create(width,
+                                                               height));
+        }
+        else {
+            //unsupported buffer type
+            bufferGeometry = Optional.empty();
+        }
+
+        return bufferGeometry;
     }
 
     @Override
@@ -332,7 +377,7 @@ public class Gles2Renderer implements GlRenderer {
         //FIXME move init to factory create method?
         if (!this.init) {
             //one time init
-            initRenderState();
+            initRenderer();
         }
 
         for (final EglConnector eglConnector : eglPlatform.getConnectors()) {
@@ -393,7 +438,7 @@ public class Gles2Renderer implements GlRenderer {
         //@formatter:on
     }
 
-    private void initRenderState() {
+    private void initRenderer() {
         //check for required texture glExtensions
         final String glExtensions = wrap(String.class,
                                          this.libGLESv2.glGetString(GL_EXTENSIONS)).dref();
@@ -564,11 +609,13 @@ public class Gles2Renderer implements GlRenderer {
         }
         else {
             this.eglQueryWaylandBufferWL.ifPresent(eglQueryWaylandBufferWL1 -> {
-                //FIXME the extension check for eglQueryWaylandBufferWL could have been done against a different egl display, as such it's presence here does not indicate that it is actually supported.
-                final int textureFormat = eglQueryWaylandBufferWL1.$(eglPlatform.getEglDisplay(),
-                                                                     wlBufferResource.pointer,
-                                                                     LibEGL.EGL_TEXTURE_FORMAT,
-                                                                     0L);
+                final Pointer<Integer> textureFormatP = Pointer.nref(0);
+                eglQueryWaylandBufferWL1.$(eglPlatform.getEglDisplay(),
+                                           wlBufferResource.pointer,
+                                           EGL_TEXTURE_FORMAT,
+                                           textureFormatP.address);
+                final int textureFormat = textureFormatP.dref();
+
                 if (textureFormat != 0) {
                     drawEgl(eglPlatform,
                             wlSurfaceResource,

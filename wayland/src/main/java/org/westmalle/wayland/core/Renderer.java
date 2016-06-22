@@ -13,15 +13,22 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
+import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
-public interface Renderer {
-    void visit(Platform platform);
+import javax.annotation.Nonnull;
+import java.util.Optional;
 
-    void visit(EglPlatform eglPlatform);
+public interface Renderer {
+    void visit(@Nonnull Platform platform);
+
+    void visit(@Nonnull EglPlatform eglPlatform);
 
     //TODO pixman sw rendering platform
     //void visit(PixmanPlatform pixmanPlatform);
 
-    void onDestroy(WlSurfaceResource wlSurfaceResource);
+    void onDestroy(@Nonnull WlSurfaceResource wlSurfaceResource);
+
+    @Nonnull
+    Optional<BufferGeometry> queryBufferGeometry(WlBufferResource wlBufferResource);
 }

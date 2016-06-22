@@ -61,6 +61,8 @@ public class Surface {
     @Nonnull
     private final Compositor          compositor;
     @Nonnull
+    private final Renderer            renderer;
+    @Nonnull
     private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
     @Nonnull
     private final Set<WlKeyboardResource>   keyboardFocuses              = new HashSet<>();
@@ -93,9 +95,11 @@ public class Surface {
     private Rectangle size             = Rectangle.ZERO;
 
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
-            @Nonnull @Provided final Compositor compositor) {
+            @Nonnull @Provided final Compositor compositor,
+            @Nonnull @Provided final Renderer renderer) {
         this.finiteRegionFactory = finiteRegionFactory;
         this.compositor = compositor;
+        this.renderer = renderer;
     }
 
     @Nonnull
@@ -240,23 +244,20 @@ public class Surface {
         final SurfaceState               state  = getState();
         final Optional<WlBufferResource> buffer = state.getBuffer();
         final int                        scale  = state.getScale();
-        if (buffer.isPresent()) {
-            final WlBufferResource wlBufferResource = buffer.get();
-            final ShmBuffer        shmBuffer        = ShmBuffer.get(wlBufferResource);
-            if (shmBuffer == null) {
-                //TODO support other buffer types (eg egl) trough a specialised buffergeometry object
-                throw new RuntimeException("Got a buffer that is not an shm buffer!");
-            }
-            final int width  = shmBuffer.getWidth() / scale;
-            final int height = shmBuffer.getHeight() / scale;
-            this.size = Rectangle.builder()
-                                 .width(width)
-                                 .height(height)
-                                 .build();
-        }
-        else {
-            this.size = Rectangle.ZERO;
-        }
+
+        this.size = Rectangle.ZERO;
+
+        buffer.flatMap(this.renderer::queryBufferGeometry)
+              .ifPresent(bufferGeometry -> {
+
+                  final int width  = bufferGeometry.getWidth() / scale;
+                  final int height = bufferGeometry.getHeight() / scale;
+
+                  this.size = Rectangle.builder()
+                                       .width(width)
+                                       .height(height)
+                                       .build();
+              });
     }
 
     @Nonnull
