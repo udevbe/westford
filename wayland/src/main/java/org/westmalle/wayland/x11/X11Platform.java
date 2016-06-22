@@ -14,6 +14,9 @@
 package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
+import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.Platform;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
@@ -23,8 +26,10 @@ import java.util.Optional;
 
 @AutoFactory(className = "PrivateX11PlatformFactory",
              allowSubclasses = true)
-public class X11Platform {
+public class X11Platform implements Platform {
 
+    @Nonnull
+    private final X11Connector[]       connectors;
     @Nonnull
     private final X11EventBus          x11EventBus;
     private final long                 xcbConnection;
@@ -32,10 +37,12 @@ public class X11Platform {
     @Nonnull
     private final Map<String, Integer> atoms;
 
-    X11Platform(@Nonnull final X11EventBus x11EventBus,
+    X11Platform(@Nonnull final X11Connector[] connectors,
+                @Nonnull final X11EventBus x11EventBus,
                 final long xcbConnection,
                 final long xDisplay,
                 @Nonnull final Map<String, Integer> x11Atoms) {
+        this.connectors = connectors;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xDisplay = xDisplay;
@@ -58,5 +65,16 @@ public class X11Platform {
     @Nonnull
     public Map<String, Integer> getX11Atoms() {
         return this.atoms;
+    }
+
+    @Nonnull
+    @Override
+    public X11Connector[] getConnectors() {
+        return this.connectors;
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this);
     }
 }
