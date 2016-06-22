@@ -15,30 +15,27 @@ package org.westmalle.wayland.dispmanx;
 
 
 import com.google.auto.factory.AutoFactory;
+import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.Platform;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
-import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Optional;
 
-@AutoFactory(className = "PrivateDispmanxOutputFactory",
+@AutoFactory(className = "PrivateDispmanxPlatformFactory",
              allowSubclasses = true)
-public class DispmanxPlatform {
+public class DispmanxPlatform implements Platform {
 
-    @Nonnull
-    private final Optional<WlOutput>  wlOutput;
-    private final int                 dispmanxElement;
     @Nonnull
     private final DISPMANX_MODEINFO_T modeinfo;
 
-    DispmanxPlatform(@Nonnull final Optional<WlOutput> wlOutput,
-                     final int dispmanxElement,
-                     @Nonnull final DISPMANX_MODEINFO_T modeinfo) {
-        this.wlOutput = wlOutput;
-        this.dispmanxElement = dispmanxElement;
+    @Nonnull
+    private final DispmanxConnector[] dispmanxConnectors;
+
+    DispmanxPlatform(@Nonnull final DISPMANX_MODEINFO_T modeinfo,
+                     @Nonnull final DispmanxConnector[] dispmanxConnectors) {
         this.modeinfo = modeinfo;
+        this.dispmanxConnectors = dispmanxConnectors;
     }
 
     @Nonnull
@@ -46,12 +43,14 @@ public class DispmanxPlatform {
         return this.modeinfo;
     }
 
-    public int getDispmanxElement() {
-        return this.dispmanxElement;
+    @Nonnull
+    @Override
+    public DispmanxConnector[] getConnectors() {
+        return this.dispmanxConnectors;
     }
 
-    @Nonnull
-    public Optional<WlOutput> getWlOutput() {
-        return this.wlOutput;
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this);
     }
 }

@@ -1,9 +1,10 @@
-package org.westmalle.wayland.dispmanx;
+package org.westmalle.wayland.dispmanx.egl;
 
 import dagger.Module;
 import dagger.Provides;
-import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.core.Platform;
+import org.westmalle.wayland.dispmanx.DispmanxPlatform;
+import org.westmalle.wayland.dispmanx.DispmanxPlatformFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
