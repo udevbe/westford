@@ -1,4 +1,4 @@
-//Copyright 2015 Erik De Rijcke
+//Copyright 2016 Erik De Rijcke
 //
 //Licensed under the Apache License,Version2.0(the"License");
 //you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class Transforms {
     public static final Mat4 FLIPPED_90  = Mat4.create(0f, 1f, 0f, 0f,
                                                        1f, 0f, 0f, 0f,
                                                        0f, 0f, 1f, 0f,
-                                                       0f, 0f,  0f, 1f);
+                                                       0f, 0f, 0f, 1f);
     //@formatter:on
 
     //@formatter:off
@@ -75,16 +75,16 @@ public class Transforms {
     public static final Mat4 FLIPPED_270 = Mat4.create( 0f, -1f, 0f, 0f,
                                                        -1f,  0f, 0f, 0f,
                                                         0f,  0f, 1f, 0f,
-                                                        0f, 0f, 0f, 1f);
+                                                        0f,  0f, 0f, 1f);
     //@formatter:on
 
     //@formatter:off
     @Nonnull
     public static Mat4 SCALE(@Nonnegative final float scale) {
-        return Mat4.create( scale, 0f, 0f, 0f,
-                            0f, scale, 0f, 0f,
-                            0f, 0f, scale, 0f,
-                            0f, 0f, 0f, 1f);
+        return Mat4.create( scale, 0f,    0f,    0f,
+                            0f,    scale, 0f,    0f,
+                            0f,    0f,    scale, 0f,
+                            0f,    0f,    0f,    1f);
     }
     //@formatter:on
 
