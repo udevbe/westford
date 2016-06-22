@@ -16,7 +16,7 @@ public class X11EglPlatformModule {
     @Provides
     @Singleton
     X11Platform createX11Platform(final X11PlatformFactory x11PlatformFactory) {
-        return x11PlatformFactory.createX11Connector();
+        return x11PlatformFactory.create();
     }
 
     @Provides

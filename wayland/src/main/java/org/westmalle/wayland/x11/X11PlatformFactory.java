@@ -100,7 +100,7 @@ public class X11PlatformFactory {
         this.x11EventBusFactory = x11EventBusFactory;
     }
 
-    public X11Platform createX11Connector() {
+    public X11Platform create() {
         //TODO from config
         final String xDisplayName = ":0";
 
@@ -139,11 +139,11 @@ public class X11PlatformFactory {
 
         //TODO from config
         final X11Connector[] connectors = new X11Connector[1];
-        final X11Connector x11Connector = createX11Connector(xcbConnection,
-                                                             x11Atoms,
-                                                             x11EventBus,
-                                                             800,
-                                                             600);
+        final X11Connector x11Connector = create(xcbConnection,
+                                                 x11Atoms,
+                                                 x11EventBus,
+                                                 800,
+                                                 600);
         connectors[0] = x11Connector;
 
         return this.privateX11PlatformFactory.create(connectors,
@@ -194,11 +194,11 @@ public class X11PlatformFactory {
         return x11Atoms;
     }
 
-    private X11Connector createX11Connector(final long xcbConnection,
-                                            final Map<String, Integer> x11Atoms,
-                                            final X11EventBus x11EventBus,
-                                            final int width,
-                                            final int height) {
+    private X11Connector create(final long xcbConnection,
+                                final Map<String, Integer> x11Atoms,
+                                final X11EventBus x11EventBus,
+                                final int width,
+                                final int height) {
 
         if (width < 0 || height < 0) {
             throw new IllegalArgumentException("Got negative width or height");

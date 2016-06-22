@@ -65,10 +65,11 @@ public class X11SeatTest {
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
-        final int time = 2134;
+        final int time   = 2134;
+        final int window = 123;
 
         //when
-        this.x11Seat.deliverButton(event.event(),
+        this.x11Seat.deliverButton(window,
                                    time,
                                    xEventDetail,
                                    true);
@@ -107,9 +108,11 @@ public class X11SeatTest {
         final WlPointerResource      wlPointerResource  = mock(WlPointerResource.class);
         final Set<WlPointerResource> wlPointerResources = Collections.singleton(wlPointerResource);
         when(wlPointer.getResources()).thenReturn(wlPointerResources);
-        final int time = 9876;
+        final int time   = 9876;
+        final int window = 123;
+
         //when
-        this.x11Seat.deliverButton(event.event(),
+        this.x11Seat.deliverButton(window,
                                    time,
                                    xEventDetail,
                                    false);

@@ -26,6 +26,7 @@ import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libEGL.PointerEglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.PointerEglGetPlatformDisplayEXT;
+import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
@@ -51,7 +52,7 @@ public class X11EglPlatformFactoryTest {
     @Mock
     private LibEGL                       libEGL;
     @Mock
-    private PrivateX11EglPlatformFactory privateX11EglOutputFactory;
+    private X11EglPlatformFactory privateX11EglOutputFactory;
     @Mock
     private X11Platform                  x11Platform;
     @InjectMocks

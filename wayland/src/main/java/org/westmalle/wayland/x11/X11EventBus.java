@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
              allowSubclasses = true)
 public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
 
+    @Nonnull
     private final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal = new Signal<>();
     @Nonnull
     private final Libxcb libxcb;
@@ -52,6 +53,7 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
         return 0;
     }
 
+    @Nonnull
     public Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> getXEventSignal() {
         return this.xEventSignal;
     }
