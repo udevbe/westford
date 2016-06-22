@@ -39,6 +39,7 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
+import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
 
 import java.util.LinkedList;
 
@@ -96,16 +97,10 @@ public class X11PlatformFactoryTest {
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("XOpenDisplay() failed: :0");
 
-        final String xDisplayName = ":0";
-        final int    width        = 640;
-        final int    height       = 480;
-
         when(this.libX11.XOpenDisplay(anyLong())).thenReturn(0L);
 
         //when
-        this.x11PlatformFactory.create(xDisplayName,
-                                       width,
-                                       height);
+        this.x11PlatformFactory.create();
         //then
         verify(this.libX11).XOpenDisplay(anyLong());
         //an exception is thrown
@@ -118,20 +113,15 @@ public class X11PlatformFactoryTest {
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("error occurred while connecting to X server");
 
-        final String xDisplayName  = ":0";
-        final int    width         = 640;
-        final int    height        = 480;
-        final long   xDisplay      = 1234567;
-        final long   xcbConnection = 112358;
+        final long xDisplay      = 1234567;
+        final long xcbConnection = 112358;
 
         when(this.libX11.XOpenDisplay(anyLong())).thenReturn(xDisplay);
         when(this.libX11xcb.XGetXCBConnection(xDisplay)).thenReturn(xcbConnection);
         when(this.libxcb.xcb_connection_has_error(xcbConnection)).thenReturn(1);
 
         //when
-        this.x11PlatformFactory.create(xDisplayName,
-                                       width,
-                                       height);
+        this.x11PlatformFactory.create();
         //then
         verify(this.libX11).XOpenDisplay(anyLong());
         verify(this.libX11xcb).XGetXCBConnection(xDisplay);
@@ -148,9 +138,6 @@ public class X11PlatformFactoryTest {
         this.exception.expect(RuntimeException.class);
         this.exception.expectMessage("failed to generate X window id");
 
-        final String                xDisplayName  = ":0";
-        final int                   width         = 640;
-        final int                   height        = 480;
         final long                  xDisplay      = 1234567;
         final long                  xcbConnection = 112358;
         final long                  setup         = 473289;
@@ -166,9 +153,7 @@ public class X11PlatformFactoryTest {
         when(this.libxcb.xcb_generate_id(xcbConnection)).thenReturn(0);
 
         //when
-        this.x11PlatformFactory.create(xDisplayName,
-                                       width,
-                                       height);
+        this.x11PlatformFactory.create();
         //then
         verify(this.libX11).XOpenDisplay(anyLong());
         verify(this.libX11xcb).XGetXCBConnection(xDisplay);
@@ -185,12 +170,10 @@ public class X11PlatformFactoryTest {
     @Test
     public void testCreate() throws Exception {
         //given
-        final LinkedList<WlOutput>                                                     wlOutputs     = mock(LinkedList.class);
         final EventLoop                                                                eventLoop     = mock(EventLoop.class);
         final EventSource                                                              eventSource   = mock(EventSource.class);
         final X11EventBus                                                              x11EventBus   = mock(X11EventBus.class);
         final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal  = mock(Signal.class);
-        final String                                                                   xDisplayName  = ":0";
         final int                                                                      width         = 640;
         final int                                                                      height        = 480;
         final long                                                                     xDisplay      = 1234567;
@@ -230,9 +213,7 @@ public class X11PlatformFactoryTest {
                                                0L)).thenAnswer(invocation -> malloc(xcb_intern_atom_reply_t.SIZE,
                                                                                     xcb_intern_atom_reply_t.class).address);
         //when
-        this.x11PlatformFactory.create(xDisplayName,
-                                       width,
-                                       height);
+        this.x11PlatformFactory.create();
         //then
         verify(this.libX11).XOpenDisplay(anyLong());
         verify(this.libX11xcb).XGetXCBConnection(xDisplay);

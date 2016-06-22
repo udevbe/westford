@@ -12,10 +12,11 @@ import java.util.Optional;
 public class X11Connector implements Connector {
 
     private final int                xWindow;
+    @Nonnull
     private final Optional<WlOutput> wlOutput;
 
     X11Connector(final int xWindow,
-                 final Optional<WlOutput> wlOutput) {
+                 @Nonnull final Optional<WlOutput> wlOutput) {
         this.xWindow = xWindow;
         this.wlOutput = wlOutput;
     }

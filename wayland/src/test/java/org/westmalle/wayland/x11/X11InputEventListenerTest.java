@@ -64,7 +64,8 @@ public class X11InputEventListenerTest {
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverButton(event.event(),
+        verify(this.x11Seat).deliverButton(event.dref()
+                                                .event(),
                                            anyInt(),
                                            anyShort(),
                                            eq(true));
@@ -103,7 +104,8 @@ public class X11InputEventListenerTest {
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverButton(event.event(),
+        verify(this.x11Seat).deliverButton(event.dref()
+                                                .event(),
                                            anyInt(),
                                            anyShort(),
                                            eq(false));
