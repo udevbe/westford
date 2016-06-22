@@ -224,32 +224,41 @@ public class Gles2Renderer implements GlRenderer {
 
     @Override
     public void onDestroy(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        final SurfaceRenderState surfaceRenderState = this.surfaceRenderStates.remove(wlSurfaceResource);
-        surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
-            @Override
-            public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
-                //delete texture
-                Gles2Renderer.this.libGLESv2.glDeleteTextures(1,
-                                                              Pointer.nref(shmSurfaceRenderState.getTexture()).address);
-                return Optional.empty();
-            }
+        Optional.ofNullable(this.surfaceRenderStates.remove(wlSurfaceResource))
+                .ifPresent(surfaceRenderState -> {
+                    surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+                        @Override
+                        public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
+                            destroy(shmSurfaceRenderState);
+                            return Optional.empty();
+                        }
 
-            @Override
-            public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
-                //delete textures & egl images
-                for (final int texture : eglSurfaceRenderState.getTextures()) {
-                    Gles2Renderer.this.libGLESv2.glDeleteTextures(1,
-                                                                  Pointer.nref(texture).address);
-                }
+                        @Override
+                        public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
+                            destroy(eglSurfaceRenderState);
+                            return Optional.empty();
+                        }
+                    });
+                });
+    }
 
-                for (final long eglImage : eglSurfaceRenderState.getEglImages()) {
-                    Gles2Renderer.this.eglDestroyImageKHR.ifPresent(eglDestroyImageKHR1 -> eglDestroyImageKHR1.$(Gles2Renderer.this.eglDisplay,
-                                                                                                                 eglImage));
-                }
+    private void destroy(final EglSurfaceRenderState eglSurfaceRenderState) {
+        //delete textures & egl images
+        for (final int texture : eglSurfaceRenderState.getTextures()) {
+            Gles2Renderer.this.libGLESv2.glDeleteTextures(1,
+                                                          Pointer.nref(texture).address);
+        }
 
-                return Optional.empty();
-            }
-        });
+        for (final long eglImage : eglSurfaceRenderState.getEglImages()) {
+            Gles2Renderer.this.eglDestroyImageKHR.ifPresent(eglDestroyImageKHR1 -> eglDestroyImageKHR1.$(Gles2Renderer.this.eglDisplay,
+                                                                                                         eglImage));
+        }
+    }
+
+    private void destroy(final ShmSurfaceRenderState shmSurfaceRenderState) {
+        //delete texture
+        Gles2Renderer.this.libGLESv2.glDeleteTextures(1,
+                                                      Pointer.nref(shmSurfaceRenderState.getTexture()).address);
     }
 
     @Nonnull
@@ -662,8 +671,8 @@ public class Gles2Renderer implements GlRenderer {
                                                        @Override
                                                        public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
                                                            //the surface was previously associated with an egl render state but is now using an shm render state. create it.
+                                                           destroy(eglSurfaceRenderState);
                                                            //TODO we could reuse the texture id from the egl surface render state
-                                                           //TODO destroy egl surface render state
                                                            return createShmSurfaceRenderState(wlSurfaceResource,
                                                                                               shmBuffer,
                                                                                               Optional.empty());
@@ -848,7 +857,8 @@ public class Gles2Renderer implements GlRenderer {
                                                        @Override
                                                        public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
                                                            //the surface was previously associated with an shm render state but is now using an egl render state. create it.
-                                                           onDestroy(wlSurfaceResource);
+                                                           //TODO we could reuse the texture id
+                                                           destroy(shmSurfaceRenderState);
                                                            return createEglSurfaceRenderState(eglPlatform,
                                                                                               wlSurfaceResource,
                                                                                               wlBufferResource,
