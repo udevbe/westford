@@ -1,107 +1,119 @@
-////Copyright 2015 Erik De Rijcke
-////
-////Licensed under the Apache License,Version2.0(the"License");
-////you may not use this file except in compliance with the License.
-////You may obtain a copy of the License at
-////
-////http://www.apache.org/licenses/LICENSE-2.0
-////
-////Unless required by applicable law or agreed to in writing,software
-////distributed under the License is distributed on an"AS IS"BASIS,
-////WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
-////See the License for the specific language governing permissions and
-////limitations under the License.
-//package org.westmalle.wayland.gles2;
+//Copyright 2015 Erik De Rijcke
 //
-//import org.freedesktop.jaccall.Pointer;
-//import org.freedesktop.wayland.server.ShmBuffer;
-//import org.freedesktop.wayland.server.WlBufferResource;
-//import org.freedesktop.wayland.server.WlSurfaceResource;
-//import org.freedesktop.wayland.shared.WlShmFormat;
-//import org.junit.Before;
-//import org.junit.Rule;
-//import org.junit.Test;
-//import org.junit.rules.ExpectedException;
-//import org.junit.runner.RunWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.powermock.core.classloader.annotations.PrepareForTest;
-//import org.powermock.modules.junit4.PowerMockRunner;
-//import org.powermock.reflect.Whitebox;
-//import org.westmalle.wayland.core.EglPlatform;
-//import org.westmalle.wayland.core.Output;
-//import org.westmalle.wayland.core.OutputMode;
-//import org.westmalle.wayland.core.Scene;
-//import org.westmalle.wayland.core.Surface;
-//import org.westmalle.wayland.core.SurfaceState;
-//import org.westmalle.wayland.core.calc.Mat4;
-//import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
-//import org.westmalle.wayland.protocol.WlOutput;
-//import org.westmalle.wayland.protocol.WlSurface;
+//Licensed under the Apache License,Version2.0(the"License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
 //
-//import java.util.LinkedList;
-//import java.util.Map;
-//import java.util.Optional;
+//http://www.apache.org/licenses/LICENSE-2.0
 //
-//import static org.mockito.Matchers.anyInt;
-//import static org.mockito.Matchers.anyLong;
-//import static org.mockito.Matchers.eq;
-//import static org.mockito.Mockito.doAnswer;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.powermock.api.mockito.PowerMockito.mockStatic;
-//import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-//import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
-//import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
-//import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
-//
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest({ShmBuffer.class,
-//                 Gles2SurfaceData.class})
-//public class Gles2RendererTest {
-//
-//    @Rule
-//    public ExpectedException exception = ExpectedException.none();
-//
-//    @Mock
-//    private LibGLESv2     libGLESv2;
-//    @Mock
-//    private Scene         scene;
-//    @InjectMocks
-//    private Gles2Renderer eglGles2RenderEngine;
-//
-//    @Before
-//    public void setUp() {
-//        when(this.libGLESv2.glGetString(GL_EXTENSIONS)).thenReturn(Pointer.nref("GL_EXT_texture_format_BGRA8888")
-//                                                                           .address);
-//        doAnswer(invocation -> {
-//            final Object[] arguments = invocation.getArguments();
-//            final long     status    = (Long) arguments[2];
-//            Pointer.wrap(Integer.class,
-//                         status)
-//                   .write(1);
-//            return null;
-//        }).when(this.libGLESv2)
-//          .glGetProgramiv(anyInt(),
-//                          eq(GL_LINK_STATUS),
-//                          anyLong());
-//        doAnswer(invocation -> {
-//            final Object[] arguments = invocation.getArguments();
-//            final long     status    = (Long) arguments[2];
-//            Pointer.wrap(Integer.class,
-//                         status)
-//                   .write(1);
-//            return null;
-//        }).when(this.libGLESv2)
-//          .glGetShaderiv(anyInt(),
-//                         eq(GL_COMPILE_STATUS),
-//                         anyLong());
-//    }
-//
-//    @Test
-//    public void testBeginNoProjectionUpdate() throws Exception {
+//Unless required by applicable law or agreed to in writing,software
+//distributed under the License is distributed on an"AS IS"BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+package org.westmalle.wayland.gles2;
+
+import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.wayland.server.ShmBuffer;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.wayland.core.Scene;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
+
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ShmBuffer.class})
+public class Gles2RendererTest {
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+    @Mock
+    private LibGLESv2     libGLESv2;
+    @Mock
+    private Scene         scene;
+    @InjectMocks
+    private Gles2Renderer eglGles2RenderEngine;
+
+    @Before
+    public void setUp() {
+        when(this.libGLESv2.glGetString(GL_EXTENSIONS)).thenReturn(Pointer.nref("GL_EXT_texture_format_BGRA8888")
+                                                                           .address);
+        doAnswer(invocation -> {
+            final Object[] arguments = invocation.getArguments();
+            final long     status    = (Long) arguments[2];
+            Pointer.wrap(Integer.class,
+                         status)
+                   .write(1);
+            return null;
+        }).when(this.libGLESv2)
+          .glGetProgramiv(anyInt(),
+                          eq(GL_LINK_STATUS),
+                          anyLong());
+        doAnswer(invocation -> {
+            final Object[] arguments = invocation.getArguments();
+            final long     status    = (Long) arguments[2];
+            Pointer.wrap(Integer.class,
+                         status)
+                   .write(1);
+            return null;
+        }).when(this.libGLESv2)
+          .glGetShaderiv(anyInt(),
+                         eq(GL_COMPILE_STATUS),
+                         anyLong());
+    }
+
+    //TODO
+    @Test
+    public void testOnDestroy() throws Exception {
+        //TODO split out surfaces using unit test w/ args?
+        //given: a known surface, an unknown surface
+        //when: onDestroy is called
+        //then: surface state is cleaned up
+    }
+
+    //TODO
+    @Test
+    public void testVisit() throws Exception {
+        //TODO split out surfaces using unit test w/ args?
+        //given: a supported platform, a new surface w/ shm buffer, an existing surface w/ shm buffer, a new surface w/ egl buffer, an existing surface w/ egl buffer, a surface w/o buffer, a surface w/ unsupported buffer
+        //when: visit is called
+        //then: platform begin is called, projection is updated, platform end is called
+    }
+
+    @Test
+    public void testRequestRenderWithSubsurfaces() throws Exception {
+        //TODO
+        //given: a compositor, a surface, several stacks of nested subsurfaces
+        //when: request render is called
+        //then: the tree of subsurfaces is rendered in pre-order.
+    }
+
+    //TODO
+    public void testVisitUnsupportedPlatform() {
+        //given: an unsupported platform
+        //when: visit is called
+        //then: an exception is thrown.
+    }
+
+    //TODO convert?
+    @Test
+    public void testBeginNoProjectionUpdate() throws Exception {
 //        //given
 //
 //        final WlOutput    wlOutput      = mock(WlOutput.class);
@@ -139,10 +151,11 @@
 //                                            anyInt(),
 //                                            anyInt(),
 //                                            anyLong());
-//    }
-//
-//    @Test
-//    public void testBeginProjectionUpdate() throws Exception {
+    }
+
+    //TODO convert?
+    @Test
+    public void testBeginProjectionUpdate() throws Exception {
 //        //given
 //        final WlOutput    wlOutput = mock(WlOutput.class);
 //        final Output      output   = mock(Output.class);
@@ -161,10 +174,11 @@
 //
 //        //then FIXME do proper check
 //        verify(platform).begin();
-//    }
-//
-//    @Test
-//    public void testDrawExistingBuffer() throws Exception {
+    }
+
+    //TODO convert?
+    @Test
+    public void testDrawExistingBuffer() throws Exception {
 //        //given
 //        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
 //        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
@@ -217,10 +231,11 @@
 //        verify(gles2SurfaceData).update(this.libGLESv2,
 //                                        wlSurfaceResource,
 //                                        shmBuffer);
-//    }
-//
-//    @Test
-//    public void testDrawNotShmBuffer() throws Exception {
+    }
+
+    //TODO convert?
+    @Test
+    public void testDrawNotShmBuffer() throws Exception {
 //        //given
 //        this.exception.expect(IllegalArgumentException.class);
 //        this.exception.expectMessage("Buffer resource is not an ShmBuffer.");
@@ -252,10 +267,11 @@
 //        verifyStatic();
 //        ShmBuffer.get(wlBufferResource);
 //        //exception is thrown
-//    }
-//
-//    @Test
-//    public void testDrawNewBuffer() throws Exception {
+    }
+
+    //TODO convert test
+    @Test
+    public void testDrawNewBuffer() throws Exception {
 //        //given
 //        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
 //        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
@@ -313,10 +329,11 @@
 //               times(2)).update(this.libGLESv2,
 //                                wlSurfaceResource,
 //                                shmBuffer);
-//    }
-//
-//    @Test
-//    public void testDrawResizedBuffer() throws Exception {
+    }
+
+    //TODO convert test
+    @Test
+    public void testDrawResizedBuffer() throws Exception {
 //        //given
 //        final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
 //        final WlBufferResource  wlBufferResource  = mock(WlBufferResource.class);
@@ -373,34 +390,5 @@
 //        verify(gles2SurfaceData).update(this.libGLESv2,
 //                                        wlSurfaceResource,
 //                                        shmBuffer);
-//    }
-//
-//    @Test
-//    public void testEnd() throws Exception {
-//        //given
-//        final WlOutput    wlOutput = mock(WlOutput.class);
-//        final Output      output   = mock(Output.class);
-//        final EglPlatform platform = mock(EglPlatform.class);
-//
-//        when(wlOutput.getOutput()).thenReturn(output);
-//        //when
-//        this.eglGles2RenderEngine.end(platform);
-//        //then
-//        verify(platform).end();
-//    }
-//
-//    @Test
-//    public void testRequestRenderWithSubsurfaces() throws Exception {
-//        //TODO
-//        //given: a compositor, a surface, several stacks of nested subsurfaces
-//        //when: request render is called
-//        //then: the tree of subsurfaces is rendered in pre-order.
-//    }
-//
-//    //TODO
-//    public void testVisitUnsupportedPlatform() {
-//        //given: an unsupported platform
-//        //when: visit is called
-//        //then: an exception is thrown.
-//    }
-//}
+    }
+}
