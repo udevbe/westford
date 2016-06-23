@@ -53,7 +53,9 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
                                                       id);
         this.output.notifyGeometry(wlOutputResource)
                    .notifyMode(wlOutputResource);
-        wlOutputResource.done();
+        if (wlOutputResource.getVersion() >= 2) {
+            wlOutputResource.done();
+        }
         return wlOutputResource;
     }
 
