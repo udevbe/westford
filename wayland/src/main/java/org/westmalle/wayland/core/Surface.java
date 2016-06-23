@@ -144,15 +144,15 @@ public class Surface {
     }
 
     @Nonnull
-    public Surface attachBuffer(@Nonnull final WlBufferResource buffer,
+    public Surface attachBuffer(@Nonnull final WlBufferResource wlBufferResource,
                                 final int dx,
                                 final int dy) {
         getPendingState().getBuffer()
-                         .ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
+                         .ifPresent(previousWlBufferResource -> previousWlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
         this.pendingBufferDestroyListener = Optional.of(this::detachBuffer);
-        buffer.register(this.pendingBufferDestroyListener.get());
+        wlBufferResource.register(this.pendingBufferDestroyListener.get());
         final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .buffer(Optional.of(buffer))
+                                                                  .buffer(Optional.of(wlBufferResource))
                                                                   .positionTransform(Transforms.TRANSLATE(dx,
                                                                                                           dy)
                                                                                                .multiply(getState().getPositionTransform()))
