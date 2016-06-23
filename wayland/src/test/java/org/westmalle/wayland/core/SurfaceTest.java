@@ -14,12 +14,9 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.DestroyListener;
-import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
-import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlRegionResource;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -27,7 +24,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlRegion;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -35,25 +31,21 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({FiniteRegionFactory.class,
-                 ShmBuffer.class})
+@PrepareForTest({FiniteRegionFactory.class})
 public class SurfaceTest {
 
     @Mock
     private FiniteRegionFactory finiteRegionFactory;
     @Mock
     private Compositor          compositor;
-    @InjectMocks
-    private Surface             surface;
+    @Mock
+    private Renderer            renderer;
 
-    @Before
-    public void setUp() {
-        mockStatic(ShmBuffer.class);
-    }
+    @InjectMocks
+    private Surface surface;
 
     @Test
     public void testMarkDestroyed() throws Exception {
@@ -83,20 +75,19 @@ public class SurfaceTest {
     @Test
     public void testAttachCommit() throws Exception {
         //given
-        final WlBufferResource buffer = mock(WlBufferResource.class);
-        final Integer          relX   = -10;
-        final Integer          relY   = 200;
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final Integer          relX             = -10;
+        final Integer          relY             = 200;
 
-        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
-        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
-
+        final Buffer buffer = mock(Buffer.class);
         final int bufferWidth = 200;
-        when(shmBuffer.getWidth()).thenReturn(bufferWidth);
+        when(buffer.getWidth()).thenReturn(bufferWidth);
         final int bufferHeight = 300;
-        when(shmBuffer.getHeight()).thenReturn(bufferHeight);
+        when(buffer.getHeight()).thenReturn(bufferHeight);
+        when(this.renderer.queryBuffer(wlBufferResource)).thenReturn(buffer);
 
         //when
-        this.surface.attachBuffer(buffer,
+        this.surface.attachBuffer(wlBufferResource,
                                   relX,
                                   relY);
         this.surface.commit();
@@ -108,30 +99,29 @@ public class SurfaceTest {
                                                               .width(200)
                                                               .height(300)
                                                               .build());
-        verify(compositor).requestRender();
+        verify(this.compositor).requestRender();
     }
 
     @Test
     public void testAttachCommitAttachCommit() throws Exception {
         //given
-        final WlBufferResource buffer = mock(WlBufferResource.class);
-        final Integer          relX   = -10;
-        final Integer          relY   = 200;
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final Integer          relX             = -10;
+        final Integer          relY             = 200;
 
-        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
-        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
-
+        final Buffer buffer = mock(Buffer.class);
         final int bufferWidth = 200;
-        when(shmBuffer.getWidth()).thenReturn(bufferWidth);
+        when(buffer.getWidth()).thenReturn(bufferWidth);
         final int bufferHeight = 300;
-        when(shmBuffer.getHeight()).thenReturn(bufferHeight);
+        when(buffer.getHeight()).thenReturn(bufferHeight);
+        when(this.renderer.queryBuffer(wlBufferResource)).thenReturn(buffer);
 
         //when
-        this.surface.attachBuffer(buffer,
+        this.surface.attachBuffer(wlBufferResource,
                                   relX,
                                   relY);
         this.surface.commit();
-        this.surface.attachBuffer(buffer,
+        this.surface.attachBuffer(wlBufferResource,
                                   relX,
                                   relY);
         this.surface.commit();
@@ -140,48 +130,46 @@ public class SurfaceTest {
                                                               .width(200)
                                                               .height(300)
                                                               .build());
-        verify(buffer).release();
+        verify(wlBufferResource).release();
     }
 
     @Test
     public void testAttachAttachCommit() throws Exception {
         //given
-        final WlBufferResource buffer0 = mock(WlBufferResource.class);
-        final Integer          relX0   = -10;
-        final Integer          relY0   = 200;
+        final WlBufferResource wlBufferResource0 = mock(WlBufferResource.class);
+        final Integer          relX0             = -10;
+        final Integer          relY0             = 200;
 
-        final WlBufferResource buffer1 = mock(WlBufferResource.class);
-        final Integer          relX1   = -10;
-        final Integer          relY1   = 200;
+        final WlBufferResource wlBufferResource1 = mock(WlBufferResource.class);
+        final Integer          relX1             = -10;
+        final Integer          relY1             = 200;
 
-        final ShmBuffer shmBuffer0 = mock(ShmBuffer.class);
-        when(ShmBuffer.get(buffer0)).thenReturn(shmBuffer0);
-
-        final int bufferWidth0 = 200;
-        when(shmBuffer0.getWidth()).thenReturn(bufferWidth0);
+        final Buffer buffer0      = mock(Buffer.class);
+        final int    bufferWidth0 = 200;
+        when(buffer0.getWidth()).thenReturn(bufferWidth0);
         final int bufferHeight0 = 300;
-        when(shmBuffer0.getHeight()).thenReturn(bufferHeight0);
+        when(buffer0.getHeight()).thenReturn(bufferHeight0);
+        when(this.renderer.queryBuffer(wlBufferResource0)).thenReturn(buffer0);
 
-        final ShmBuffer shmBuffer1 = mock(ShmBuffer.class);
-        when(ShmBuffer.get(buffer1)).thenReturn(shmBuffer1);
-
-        final int bufferWidth1 = 123;
-        when(shmBuffer1.getWidth()).thenReturn(bufferWidth1);
+        final Buffer buffer1      = mock(Buffer.class);
+        final int    bufferWidth1 = 123;
+        when(buffer1.getWidth()).thenReturn(bufferWidth1);
         final int bufferHeight1 = 456;
-        when(shmBuffer1.getHeight()).thenReturn(bufferHeight1);
+        when(buffer1.getHeight()).thenReturn(bufferHeight1);
+        when(this.renderer.queryBuffer(wlBufferResource1)).thenReturn(buffer1);
 
         //when
-        this.surface.attachBuffer(buffer0,
+        this.surface.attachBuffer(wlBufferResource0,
                                   relX0,
                                   relY0);
-        this.surface.attachBuffer(buffer1,
+        this.surface.attachBuffer(wlBufferResource1,
                                   relX1,
                                   relY1);
         this.surface.commit();
         //then
         assertThat(this.surface.getState()
                                .getBuffer()
-                               .get()).isSameAs(buffer1);
+                               .get()).isSameAs(wlBufferResource1);
         assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder()
                                                               .width(123)
                                                               .height(456)
@@ -213,15 +201,19 @@ public class SurfaceTest {
     @Test
     public void testAttachDetachCommit() throws Exception {
         //given
-        final WlBufferResource buffer = mock(WlBufferResource.class);
-        final Integer          relX   = -10;
-        final Integer          relY   = 200;
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+        final Integer          relX             = -10;
+        final Integer          relY             = 200;
 
-        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
-        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+        final Buffer buffer = mock(Buffer.class);
+        final int bufferWidth = 200;
+        when(buffer.getWidth()).thenReturn(bufferWidth);
+        final int bufferHeight = 300;
+        when(buffer.getHeight()).thenReturn(bufferHeight);
+        when(this.renderer.queryBuffer(wlBufferResource)).thenReturn(buffer);
 
         //when
-        this.surface.attachBuffer(buffer,
+        this.surface.attachBuffer(wlBufferResource,
                                   relX,
                                   relY);
         this.surface.detachBuffer();
@@ -231,7 +223,7 @@ public class SurfaceTest {
                                .getBuffer()
                                .isPresent()).isFalse();
         assertThat(this.surface.getSize()).isEqualTo(Rectangle.ZERO);
-        verify(compositor).requestRender();
+        verify(this.compositor).requestRender();
     }
 
     @Test
@@ -308,13 +300,16 @@ public class SurfaceTest {
     @Test
     public void testUpdateSizeNoScaling() throws Exception {
         //given
-        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
-        when(shmBuffer.getWidth()).thenReturn(100);
-        when(shmBuffer.getHeight()).thenReturn(100);
-        final WlBufferResource buffer = mock(WlBufferResource.class);
-        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
 
-        this.surface.attachBuffer(buffer,
+        final Buffer buffer = mock(Buffer.class);
+        final int bufferWidth = 100;
+        when(buffer.getWidth()).thenReturn(bufferWidth);
+        final int bufferHeight = 100;
+        when(buffer.getHeight()).thenReturn(bufferHeight);
+        when(this.renderer.queryBuffer(wlBufferResource)).thenReturn(buffer);
+
+        this.surface.attachBuffer(wlBufferResource,
                                   0,
                                   0);
         //when
@@ -340,15 +335,18 @@ public class SurfaceTest {
     @Test
     public void testUpdateSizeScaling() throws Exception {
         //given
-        final ShmBuffer shmBuffer = mock(ShmBuffer.class);
-        when(shmBuffer.getWidth()).thenReturn(100);
-        when(shmBuffer.getHeight()).thenReturn(100);
-        final WlBufferResource buffer = mock(WlBufferResource.class);
-        when(ShmBuffer.get(buffer)).thenReturn(shmBuffer);
+        final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
+
+        final Buffer buffer = mock(Buffer.class);
+        final int bufferWidth = 100;
+        when(buffer.getWidth()).thenReturn(bufferWidth);
+        final int bufferHeight = 100;
+        when(buffer.getHeight()).thenReturn(bufferHeight);
+        when(this.renderer.queryBuffer(wlBufferResource)).thenReturn(buffer);
 
         this.surface.setScale(5);
 
-        this.surface.attachBuffer(buffer,
+        this.surface.attachBuffer(wlBufferResource,
                                   0,
                                   0);
         //when
