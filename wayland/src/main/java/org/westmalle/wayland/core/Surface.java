@@ -241,23 +241,22 @@ public class Surface {
     }
 
     public void updateSize() {
-        final SurfaceState               state  = getState();
-        final Optional<WlBufferResource> buffer = state.getBuffer();
-        final int                        scale  = state.getScale();
+        final SurfaceState               state                    = getState();
+        final Optional<WlBufferResource> wlBufferResourceOptional = state.getBuffer();
+        final int                        scale                    = state.getScale();
 
         this.size = Rectangle.ZERO;
 
-        buffer.flatMap(this.renderer::queryBufferGeometry)
-              .ifPresent(bufferGeometry -> {
+        wlBufferResourceOptional.ifPresent(wlBufferResource -> {
+            final Buffer buffer = this.renderer.queryBuffer(wlBufferResource);
+            final int    width  = buffer.getWidth() / scale;
+            final int    height = buffer.getHeight() / scale;
 
-                  final int width  = bufferGeometry.getWidth() / scale;
-                  final int height = bufferGeometry.getHeight() / scale;
-
-                  this.size = Rectangle.builder()
-                                       .width(width)
-                                       .height(height)
-                                       .build();
-              });
+            this.size = Rectangle.builder()
+                                 .width(width)
+                                 .height(height)
+                                 .build();
+        });
     }
 
     @Nonnull

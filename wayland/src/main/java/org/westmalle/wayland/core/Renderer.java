@@ -30,5 +30,5 @@ public interface Renderer {
     void onDestroy(@Nonnull WlSurfaceResource wlSurfaceResource);
 
     @Nonnull
-    Optional<BufferGeometry> queryBufferGeometry(WlBufferResource wlBufferResource);
+    Buffer queryBuffer(@Nonnull WlBufferResource wlBufferResource);
 }
