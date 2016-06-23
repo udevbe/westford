@@ -1106,10 +1106,17 @@ public class Gles2Renderer implements GlRenderer {
         final int[] textures = eglSurfaceRenderState.getTextures();
         for (int i = 0, texturesLength = textures.length; i < texturesLength; i++) {
             final int texture = textures[i];
+            final int target  = eglSurfaceRenderState.getTarget();
 
             this.libGLESv2.glActiveTexture(GL_TEXTURE0 + i);
-            this.libGLESv2.glBindTexture(eglSurfaceRenderState.getTarget(),
+            this.libGLESv2.glBindTexture(target,
                                          texture);
+            this.libGLESv2.glTexParameteri(target,
+                                           GL_TEXTURE_MIN_FILTER,
+                                           GL_NEAREST);
+            this.libGLESv2.glTexParameteri(target,
+                                           GL_TEXTURE_MAG_FILTER,
+                                           GL_NEAREST);
             this.libGLESv2.glUniform1i(this.textureArgs[i],
                                        0);
         }
