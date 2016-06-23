@@ -64,6 +64,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGBA;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_UV_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_U_V_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_XUXV_WL;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_BUFFER_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_PLANE_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_Y_INVERTED_WL;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WIDTH;
@@ -1003,23 +1004,19 @@ public class Gles2Renderer implements GlRenderer {
         });
 
         //create egl images
-        final Pointer<Integer> eglImageAttributes = Pointer.nref(0,
-                                                                 0,
-                                                                 0);
+        final int[] attribs = new int[3];
+
         for (int i = 0; i < eglImages.length; i++) {
-            eglImageAttributes.writei(0,
-                                      EGL_WAYLAND_PLANE_WL);
-            eglImageAttributes.writei(1,
-                                      i);
-            eglImageAttributes.writei(2,
-                                      EGL_NONE);
+            attribs[0] = EGL_WAYLAND_PLANE_WL;
+            attribs[1] = i;
+            attribs[2] = EGL_NONE;
 
             final long eglImage = this.eglCreateImageKHR.get()
                                                         .$(eglDisplay,
                                                            EGL_NO_CONTEXT,
-                                                           target,
+                                                           EGL_WAYLAND_BUFFER_WL,
                                                            buffer,
-                                                           eglImageAttributes.address);
+                                                           Pointer.nref(attribs).address);
             if (eglImage == EGL_NO_IMAGE_KHR) {
                 return Optional.empty();
             }
@@ -1064,23 +1061,13 @@ public class Gles2Renderer implements GlRenderer {
                                                 eglImage);
         }
 
-        final EglSurfaceRenderState eglSurfaceRenderState = EglSurfaceRenderState.create(pitch,
-                                                                                         height,
-                                                                                         target,
-                                                                                         shaderProgram,
-                                                                                         yInverted,
-                                                                                         textures,
-                                                                                         eglImages);
-        if (oldRenderState.isPresent()) {
-            //TODO update damaged
-
-        }
-        else {
-            //TODO full update
-
-        }
-
-        return Optional.of(eglSurfaceRenderState);
+        return Optional.of(EglSurfaceRenderState.create(pitch,
+                                                        height,
+                                                        target,
+                                                        shaderProgram,
+                                                        yInverted,
+                                                        textures,
+                                                        eglImages));
     }
 
 
@@ -1127,7 +1114,6 @@ public class Gles2Renderer implements GlRenderer {
                                        0);
         }
 
-
         //draw
         //enable texture blending
         this.libGLESv2.glEnable(GL_BLEND);
@@ -1142,6 +1128,10 @@ public class Gles2Renderer implements GlRenderer {
             this.libGLESv2.glDisableVertexAttribArray(this.textureArgs[i]);
         }
         this.libGLESv2.glUseProgram(0);
+
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        wlSurface.getSurface()
+                 .firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
     }
 
     private int genTexture(final int target) {
