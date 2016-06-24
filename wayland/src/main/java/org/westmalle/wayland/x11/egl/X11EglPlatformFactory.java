@@ -46,7 +46,7 @@ public class X11EglPlatformFactory {
     @Nonnull
     private final LibEGL                       libEGL;
     @Nonnull
-    private final PrivateX11EglPlatformFactory privateX11EglOutputFactory;
+    private final PrivateX11EglPlatformFactory privateX11EglPlatformFactory;
     @Nonnull
     private final X11Platform                  x11Platform;
     @Nonnull
@@ -56,12 +56,12 @@ public class X11EglPlatformFactory {
 
     @Inject
     X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
-                          @Nonnull final PrivateX11EglPlatformFactory privateX11EglOutputFactory,
+                          @Nonnull final PrivateX11EglPlatformFactory privateX11EglPlatformFactory,
                           @Nonnull final X11Platform x11Platform,
                           @Nonnull final GlRenderer glRenderer,
                           @Nonnull final X11EglConnectorFactory x11EglConnectorFactory) {
         this.libEGL = libEGL;
-        this.privateX11EglOutputFactory = privateX11EglOutputFactory;
+        this.privateX11EglPlatformFactory = privateX11EglPlatformFactory;
         this.x11Platform = x11Platform;
         this.glRenderer = glRenderer;
         this.x11EglConnectorFactory = x11EglConnectorFactory;
@@ -122,11 +122,11 @@ public class X11EglPlatformFactory {
             x11EglConnectors[i] = x11EglConnector;
         }
 
-        return this.privateX11EglOutputFactory.create(this.x11Platform,
-                                                      x11EglConnectors,
-                                                      eglDisplay,
-                                                      eglContext,
-                                                      eglExtensions);
+        return this.privateX11EglPlatformFactory.create(this.x11Platform,
+                                                        x11EglConnectors,
+                                                        eglDisplay,
+                                                        eglContext,
+                                                        eglExtensions);
     }
 
     private long createEglDisplay(final long nativeDisplay) {
@@ -198,12 +198,7 @@ public class X11EglPlatformFactory {
         if (eglSurface == 0L) {
             throw new RuntimeException("eglCreateWindowSurface() failed");
         }
-        if (this.libEGL.eglMakeCurrent(eglDisplay,
-                                       eglSurface,
-                                       eglSurface,
-                                       context) == 0L) {
-            throw new RuntimeException("eglMakeCurrent() failed");
-        }
+
         return eglSurface;
     }
 }
