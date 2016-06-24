@@ -399,17 +399,16 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     private void render(@Nonnull final EglPlatform eglPlatform) {
-        if (!this.init) {
-            //one time init
-            initRenderer();
-        }
-
         for (final EglConnector eglConnector : eglPlatform.getConnectors()) {
             eglConnector.getWlOutput()
                         .ifPresent(wlOutput -> {
                             updateRenderState(eglPlatform,
                                               eglConnector,
                                               wlOutput);
+                            if (!this.init) {
+                                //one time init because we need a current context
+                                initRenderer();
+                            }
                             //naive single pass, bottom to top overdraw rendering.
                             this.scene.getSurfacesStack()
                                       .forEach((wlSurfaceResource) -> draw(eglPlatform,
