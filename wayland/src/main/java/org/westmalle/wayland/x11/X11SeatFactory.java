@@ -16,6 +16,7 @@ package org.westmalle.wayland.x11;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
+import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
@@ -36,11 +37,10 @@ public class X11SeatFactory {
     private final WlSeatFactory                wlSeatFactory;
     @Nonnull
     private final WlKeyboardFactory            wlKeyboardFactory;
-
     @Nonnull
-    private final KeyboardDeviceFactory keyboardDeviceFactory;
+    private final KeyboardDeviceFactory        keyboardDeviceFactory;
     @Nonnull
-    private final PrivateX11SeatFactory privateX11SeatFactory;
+    private final PrivateX11SeatFactory        privateX11SeatFactory;
 
     @Inject
     X11SeatFactory(@Nonnull final PrivateX11SeatFactory privateX11SeatFactory,
@@ -61,8 +61,11 @@ public class X11SeatFactory {
 
     public WlSeat create() {
 
-        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(this.x11XkbFactory.create(this.x11Platform.getXcbConnection()));
+        final long           xcbConnection  = this.x11Platform.getXcbConnection();
+        final Xkb            xkb            = this.x11XkbFactory.create(xcbConnection);
+        final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(xkb);
         keyboardDevice.updateKeymap();
+
         final WlSeat wlSeat = this.wlSeatFactory.create(this.wlKeyboardFactory.create(keyboardDevice));
 
         this.x11Platform.getX11EventBus()
