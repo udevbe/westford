@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
@@ -41,6 +42,7 @@ import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -69,27 +71,26 @@ public class X11PlatformFactoryTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private Display               display;
+    private Display                   display;
     @Mock
-    private Libc                  libc;
+    private LibX11                    libX11;
     @Mock
-    private LibX11                libX11;
+    private Libxcb                    libxcb;
     @Mock
-    private Libxcb                libxcb;
+    private LibX11xcb                 libX11xcb;
     @Mock
-    private LibX11xcb             libX11xcb;
+    private PrivateX11PlatformFactory privateX11PlatformFactory;
     @Mock
-    private X11EglPlatformFactory x11EglPlatformFactory;
+    private WlOutputFactory           wlOutputFactory;
     @Mock
-    private WlOutputFactory       wlOutputFactory;
+    private OutputFactory             outputFactory;
     @Mock
-    private OutputFactory         platformFactory;
+    private X11EventBusFactory        x11EventBusFactory;
     @Mock
-    private X11EventBusFactory    x11EventBusFactory;
-    @Mock
-    private Compositor            compositor;
+    private X11ConnectorFactory       x11ConnectorFactory;
+
     @InjectMocks
-    private X11PlatformFactory    x11PlatformFactory;
+    private X11PlatformFactory x11PlatformFactory;
 
     @Test
     public void testCreateOpenDisplayFailed() throws Exception {
@@ -154,6 +155,7 @@ public class X11PlatformFactoryTest {
 
         //when
         this.x11PlatformFactory.create();
+
         //then
         verify(this.libX11).XOpenDisplay(anyLong());
         verify(this.libX11xcb).XGetXCBConnection(xDisplay);
@@ -161,6 +163,7 @@ public class X11PlatformFactoryTest {
         verify(this.libxcb).xcb_get_setup(xcbConnection);
         verify(this.libxcb).xcb_setup_roots_iterator(setup);
         verify(this.libxcb).xcb_generate_id(xcbConnection);
+
         //an exception is thrown
         verifyNoMoreInteractions(this.libX11);
         verifyNoMoreInteractions(this.libX11xcb);
@@ -170,6 +173,12 @@ public class X11PlatformFactoryTest {
     @Test
     public void testCreate() throws Exception {
         //given
+        final Output output = mock(Output.class);
+        when(this.outputFactory.create(any(),
+                                       any())).thenReturn(output);
+        final WlOutput wlOutput = mock(WlOutput.class);
+        when(this.wlOutputFactory.create(output)).thenReturn(wlOutput);
+
         final EventLoop                                                                eventLoop     = mock(EventLoop.class);
         final EventSource                                                              eventSource   = mock(EventSource.class);
         final X11EventBus                                                              x11EventBus   = mock(X11EventBus.class);
@@ -248,8 +257,8 @@ public class X11PlatformFactoryTest {
                                               eq(screen.root()),
                                               anyShort(),
                                               anyShort(),
-                                              eq((short) width),
-                                              eq((short) height),
+                                              eq((short) 800),
+                                              eq((short) 600),
                                               anyShort(),
                                               eq((short) Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT),
                                               eq(screen.root_visual()),
