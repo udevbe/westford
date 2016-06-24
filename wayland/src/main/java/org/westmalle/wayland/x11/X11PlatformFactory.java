@@ -129,13 +129,8 @@ public class X11PlatformFactory {
 
     private X11Platform createX11Output(final long xDisplay,
                                         final long xcbConnection) {
-        final X11EventBus x11EventBus = this.x11EventBusFactory.create(xcbConnection);
-        this.display.getEventLoop()
-                    .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(xcbConnection),
-                                       WaylandServerCore.WL_EVENT_READABLE,
-                                       x11EventBus)
-                    .check();
-        final Map<String, Integer> x11Atoms = internX11Atoms(xcbConnection);
+        final X11EventBus          x11EventBus = this.x11EventBusFactory.create(xcbConnection);
+        final Map<String, Integer> x11Atoms    = internX11Atoms(xcbConnection);
 
         //TODO from config
         final X11Connector[] connectors = new X11Connector[1];
@@ -145,6 +140,12 @@ public class X11PlatformFactory {
                                                  800,
                                                  600);
         connectors[0] = x11Connector;
+
+        this.display.getEventLoop()
+                    .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(xcbConnection),
+                                       WaylandServerCore.WL_EVENT_READABLE,
+                                       x11EventBus)
+                    .check();
 
         return this.privateX11PlatformFactory.create(connectors,
                                                      x11EventBus,
