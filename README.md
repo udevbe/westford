@@ -59,7 +59,7 @@ State
 | Window resizing             | :heavy_check_mark: |
 | Mouse input                 | :heavy_check_mark: |
 | Keyboard input              | :heavy_check_mark: |
-| Touch input                 | :x:                |
+| Touch input                 | :heavy_check_mark: |
 | Drag and Drop               | :x:                |
 
 Known Issues
@@ -70,14 +70,14 @@ Roadmap
 ====
 | Topic         | Progress  |
 | :-----------: | :-------: |
-| unit tests    | 100%      |
-| core protocol | 70%       |
+| unit tests    | 90%       |
+| core protocol | 80%       |
 | wl_shell      | 60%       |
 | sw rendering  | 0%        |
 | xdg_shell     | 0%        |
 | xwayland      | 0%        |
 | DRM/KMS       | 0%        |
-| multi seat    | 0%        |
+| multi seat    | 100%      |
 
 License
 =======
