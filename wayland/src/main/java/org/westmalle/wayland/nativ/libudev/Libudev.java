@@ -24,6 +24,8 @@ import javax.inject.Singleton;
 @Lib("udev")
 public class Libudev {
 
+    public static final String DEFAULT_SEAT = "seat0";
+
     @Inject
     Libudev() {
     }
@@ -34,4 +36,52 @@ public class Libudev {
     @Ptr
     public native long udev_new();
 
+    @Ptr
+    public native long udev_enumerate_new(@Ptr long udev);
+
+    public native int udev_enumerate_add_match_subsystem(@Ptr long udev_enumerate,
+                                                         @Ptr(String.class) long subsystem);
+
+    public native int udev_enumerate_add_match_sysname(@Ptr long udev_enumerate,
+                                                       @Ptr(String.class) long sysname);
+
+    public native int udev_enumerate_scan_devices(@Ptr long udev_enumerate);
+
+    @Ptr
+    public native long udev_enumerate_get_list_entry(@Ptr long udev_enumerate);
+
+    @Ptr(String.class)
+    public native long udev_list_entry_get_name(@Ptr long list_entry);
+
+    @Ptr
+    public native long udev_device_new_from_syspath(@Ptr long udev,
+                                                    @Ptr(String.class) long syspath);
+
+    @Ptr(String.class)
+    public native long udev_device_get_property_value(@Ptr long udev_device,
+                                                      @Ptr(String.class) long key);
+
+    @Ptr
+    public native long udev_device_unref(@Ptr long udev_device);
+
+    @Ptr
+    public native long udev_device_get_parent_with_subsystem_devtype(@Ptr long udev_device,
+                                                                     @Ptr(String.class) long subsystem,
+                                                                     @Ptr(String.class) long devtype);
+
+    @Ptr(String.class)
+    public native long udev_device_get_sysattr_value(@Ptr long udev_device,
+                                                     @Ptr(String.class) long sysattr);
+
+    @Ptr
+    public native long udev_enumerate_unref(@Ptr long udev_enumerate);
+
+    @Ptr
+    public native long udev_list_entry_get_next(@Ptr long list_entry);
+
+    @Ptr(String.class)
+    public native long udev_device_get_sysnum(@Ptr long udev_device);
+
+    @Ptr(String.class)
+    public native long udev_device_get_devnode(@Ptr long udev_device);
 }
