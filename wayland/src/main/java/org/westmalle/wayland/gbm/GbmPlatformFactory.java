@@ -1,43 +1,169 @@
 package org.westmalle.wayland.gbm;
 
 
-import org.freedesktop.jaccall.Pointer;
+import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
+import org.westmalle.wayland.nativ.libdrm.DrmModeEncoder;
+import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
+import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libudev.Libudev;
+import org.westmalle.wayland.protocol.WlOutputFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import static org.freedesktop.jaccall.Pointer.nref;
+import static org.freedesktop.jaccall.Pointer.wrap;
 import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
+import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
 
 public class GbmPlatformFactory {
 
     @Nonnull
-    private final Libudev libudev;
+    private final Libudev             libudev;
     @Nonnull
-    private final Libc    libc;
+    private final Libc                libc;
     @Nonnull
-    private final Libgbm  libgbm;
+    private final Libdrm              libdrm;
+    @Nonnull
+    private final Libgbm              libgbm;
+    @Nonnull
+    private final GbmConnectorFactory gbmConnectorFactory;
 
     @Inject
     GbmPlatformFactory(@Nonnull final Libc libc,
                        @Nonnull final Libudev libudev,
-                       @Nonnull final Libgbm libgbm) {
+                       @Nonnull final Libdrm libdrm,
+                       @Nonnull final Libgbm libgbm,
+                       @Nonnull final GbmConnectorFactory gbmConnectorFactory,
+                       @Nonnull final WlOutputFactory wlOutputFactory,
+                       @Nonnull final OutputFactory outputFactory) {
         this.libudev = libudev;
         this.libc = libc;
+        this.libdrm = libdrm;
         this.libgbm = libgbm;
+        this.gbmConnectorFactory = gbmConnectorFactory;
     }
 
     public GbmPlatform create() {
 
         //TODO seat from config
-        final long primaryGpu = findPrimaryGpu(udev,
-                                               "seat0");
-        final int  drmFd     = initDrm(primaryGpu);
+        final long drmDevice = findPrimaryGpu(udev,
+                                              "seat0");
+        if (drmDevice == 0L) {
+            throw new RuntimeException("No drm capable gpu device found.");
+        }
+
+        final int  drmFd     = initDrm(drmDevice);
         final long gbmDevice = this.libgbm.gbm_create_device(drmFd);
 
+        final GbmConnector[] gbmConnectors = createGbmConnectors(drmDevice,
+                                                                 drmFd);
+    }
+
+    private GbmConnector[] createGbmConnectors(final long drmDevice,
+                                               final int drmFd) {
+        final long resources = this.libdrm.drmModeGetResources(drmFd);
+        if (resources == 0L) {
+            throw new RuntimeException("Getting drm resources failed.");
+        }
+
+        final DrmModeRes drmModeRes = wrap(DrmModeRes.class,
+                                           resources).dref();
+
+        final int            countConnectors = drmModeRes.count_connectors();
+        final GbmConnector[] gbmConnectors   = new GbmConnector[countConnectors];
+        final Set<Integer>   usedCrtcs       = new HashSet<>();
+
+        for (int i = 0; i < countConnectors; i++) {
+            final long connector = this.libdrm.drmModeGetConnector(drmFd,
+                                                                   drmModeRes.connectors()
+                                                                             .dref(i));
+            if (connector == 0L) {
+                continue;
+            }
+
+            final DrmModeConnector drmModeConnector = wrap(DrmModeConnector.class,
+                                                           connector).dref();
+            final Optional<GbmConnector> gbmConnector;
+            if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
+                gbmConnector = createGbmConnector(drmFd,
+                                                  drmModeRes,
+                                                  drmModeConnector,
+                                                  usedCrtcs);
+            }
+            else {
+                gbmConnector = Optional.empty();
+
+            }
+
+            if (!gbmConnector.isPresent()) {
+                this.libdrm.drmModeFreeConnector(connector);
+            }
+
+            gbmConnectors[i] = gbmConnector.orElse(this.gbmConnectorFactory.create(Optional.empty(),
+                                                                                   0,
+                                                                                   -1));
+        }
+
+        return gbmConnectors;
+    }
+
+    private Optional<GbmConnector> createGbmConnector(final int drmFd,
+                                                      final DrmModeRes drmModeRes,
+                                                      final DrmModeConnector drmModeConnector,
+                                                      final Set<Integer> crtcAllocations) {
+        return findCrtcForConnector(drmFd,
+                                    drmModeRes,
+                                    drmModeConnector,
+                                    crtcAllocations).flatMap(crtcId -> createGbmConnector(drmFd,
+                                                                                          drmModeRes,
+                                                                                          drmModeConnector,
+                                                                                          crtcId));
+    }
+
+    private Optional<GbmConnector> createGbmConnector(final int drmFd,
+                                                      final DrmModeRes drmModeRes,
+                                                      final DrmModeConnector drmModeConnector,
+                                                      final int crtcId) {
+
+    }
+
+    private Optional<Integer> findCrtcForConnector(final int drmFd,
+                                                   final DrmModeRes drmModeRes,
+                                                   final DrmModeConnector drmModeConnector,
+                                                   final Set<Integer> crtcAllocations) {
+
+        for (int j = 0; j < drmModeConnector.count_encoders(); j++) {
+            final long encoder = this.libdrm.drmModeGetEncoder(drmFd,
+                                                               drmModeConnector.encoders()
+                                                                               .dref(j));
+            if (encoder == 0L) {
+                return Optional.empty();
+            }
+
+            //bitwise flag of available crtcs, each bit represents the index of crtcs in drmModeRes
+            final int possibleCrtcs = wrap(DrmModeEncoder.class,
+                                           encoder).dref()
+                                                   .possible_crtcs();
+            this.libdrm.drmModeFreeEncoder(encoder);
+
+            for (int i = 0; i < drmModeRes.count_crtcs(); i++) {
+                if ((possibleCrtcs & (1 << i)) != 0 &&
+                    !crtcAllocations.contains(drmModeRes.crtcs()
+                                                        .dref(i))) {
+                    return Optional.of(i);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
 
@@ -45,9 +171,9 @@ public class GbmPlatformFactory {
         final long sysnum = this.libudev.udev_device_get_sysnum(device);
         final int  drmId;
         if (sysnum != 0) {
-            drmId = Integer.parseInt(Pointer.wrap(String.class,
-                                                  sysnum)
-                                            .dref());
+            drmId = Integer.parseInt(wrap(String.class,
+                                          sysnum)
+                                             .dref());
         }
         else {
             drmId = 0;
@@ -105,9 +231,8 @@ public class GbmPlatformFactory {
                 deviceSeat = Libudev.DEFAULT_SEAT;
             }
             else {
-                deviceSeat = Pointer.wrap(String.class,
-                                          seatId)
-                                    .dref();
+                deviceSeat = wrap(String.class,
+                                  seatId).dref();
             }
             if (!deviceSeat.equals(seat)) {
                 //device has a seat, but not the one we want, process next entry
@@ -121,10 +246,9 @@ public class GbmPlatformFactory {
             if (pci != 0) {
                 final long id = this.libudev.udev_device_get_sysattr_value(pci,
                                                                            nref("boot_vga").address);
-                if (id != 0L && Pointer.wrap(String.class,
-                                             id)
-                                       .dref()
-                                       .equals("1")) {
+                if (id != 0L && wrap(String.class,
+                                     id).dref()
+                                        .equals("1")) {
                     if (drmDevice != 0L) {
                         this.libudev.udev_device_unref(drmDevice);
                     }

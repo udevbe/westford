@@ -37,7 +37,8 @@ import org.freedesktop.jaccall.Struct;
                 @Field(name = "count_encoders",
                        type = CType.INT),
                 @Field(name = "encoders",
-                       type = CType.UNSIGNED_INT),
+                       type = CType.POINTER,
+                       dataType = Integer.class),
 
         })
 public final class DrmModeConnector extends DrmModeConnector_Jaccall_StructType {}
