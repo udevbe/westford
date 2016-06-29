@@ -7,7 +7,7 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.EglConnector;
-import org.westmalle.wayland.drm.GbmConnector;
+import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libdrm.page_flip_handler;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
@@ -33,7 +33,7 @@ public class GbmEglConnector implements EglConnector {
     @Nonnull
     private final Pointer<page_flip_handler> pageFlipHandler;
     @Nonnull
-    private final GbmConnector               gbmConnector;
+    private final DrmConnector               drmConnector;
 
     GbmEglConnector(@Nonnull @Provided final Libgbm libgbm,
                     @Nonnull @Provided final Libdrm libdrm,
@@ -43,7 +43,7 @@ public class GbmEglConnector implements EglConnector {
                     final int fbId,
                     @Nonnull
                     final Pointer<page_flip_handler> pageFlipHandler,
-                    @Nonnull final GbmConnector gbmConnector) {
+                    @Nonnull final DrmConnector drmConnector) {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.drmFd = drmFd;
@@ -51,23 +51,23 @@ public class GbmEglConnector implements EglConnector {
         this.gbmSurface = gbmSurface;
         this.fbId = fbId;
         this.pageFlipHandler = pageFlipHandler;
-        this.gbmConnector = gbmConnector;
+        this.drmConnector = drmConnector;
     }
 
     @Override
     public void end() {
         final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(this.gbmSurface);
         this.libdrm.drmModeSetCrtc(this.drmFd,
-                                   this.gbmConnector.getCrtcId(),
+                                   this.drmConnector.getCrtcId(),
                                    this.fbId,
                                    0,
                                    0,
-                                   Pointer.nref(this.gbmConnector.getDrmModeConnector()
+                                   Pointer.nref(this.drmConnector.getDrmModeConnector()
                                                                  .connector_id()).address,
                                    1,
-                                   Pointer.ref(this.gbmConnector.getMode()).address);
+                                   Pointer.ref(this.drmConnector.getMode()).address);
         this.libdrm.drmModePageFlip(this.drmFd,
-                                    this.gbmConnector.getCrtcId(),
+                                    this.drmConnector.getCrtcId(),
                                     this.fbId,
                                     DRM_MODE_PAGE_FLIP_EVENT,
                                     &waiting_for_flip);
@@ -99,11 +99,11 @@ public class GbmEglConnector implements EglConnector {
     @Nonnull
     @Override
     public Optional<WlOutput> getWlOutput() {
-        return this.gbmConnector.getWlOutput();
+        return this.drmConnector.getWlOutput();
     }
 
     @Nonnull
-    public GbmConnector getGbmConnector() {
-        return this.gbmConnector;
+    public DrmConnector getDrmConnector() {
+        return this.drmConnector;
     }
 }
