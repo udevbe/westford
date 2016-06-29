@@ -9,27 +9,27 @@ import javax.annotation.Nonnull;
 //TODO drm platform, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "PrivateGbmPlatformFactory")
-public class GbmPlatform implements Platform {
+public class DrmPlatform implements Platform {
 
     private final long           drmDevice;
     private final int            drmFd;
     private final long           gbmDevice;
-    private final GbmConnector[] gbmConnectors;
+    private final DrmConnector[] drmConnectors;
 
-    GbmPlatform(final long drmDevice,
+    DrmPlatform(final long drmDevice,
                 final int drmFd,
                 final long gbmDevice,
-                final GbmConnector[] gbmConnectors) {
+                final DrmConnector[] drmConnectors) {
         this.drmDevice = drmDevice;
         this.drmFd = drmFd;
         this.gbmDevice = gbmDevice;
-        this.gbmConnectors = gbmConnectors;
+        this.drmConnectors = drmConnectors;
     }
 
     @Nonnull
     @Override
-    public GbmConnector[] getConnectors() {
-        return this.gbmConnectors;
+    public DrmConnector[] getConnectors() {
+        return this.drmConnectors;
     }
 
     @Override

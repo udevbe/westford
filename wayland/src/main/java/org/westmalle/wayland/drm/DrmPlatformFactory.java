@@ -2,8 +2,6 @@ package org.westmalle.wayland.drm;
 
 
 import org.freedesktop.jaccall.Pointer;
-import org.freedesktop.jaccall.Ptr;
-import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
@@ -35,7 +33,7 @@ import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
 
 //TODO drm platform factory, remove all gbm dependencies
-public class GbmPlatformFactory {
+public class DrmPlatformFactory {
 
     @Nonnull
     private final Libudev             libudev;
@@ -53,7 +51,7 @@ public class GbmPlatformFactory {
     private final OutputFactory       outputFactory;
 
     @Inject
-    GbmPlatformFactory(@Nonnull final Libc libc,
+    DrmPlatformFactory(@Nonnull final Libc libc,
                        @Nonnull final Libudev libudev,
                        @Nonnull final Libdrm libdrm,
                        @Nonnull final Libgbm libgbm,
@@ -69,7 +67,7 @@ public class GbmPlatformFactory {
         this.outputFactory = outputFactory;
     }
 
-    public GbmPlatform create() {
+    public DrmPlatform create() {
 
         //setup platform rendering handles
         //TODO seat from config
@@ -82,7 +80,7 @@ public class GbmPlatformFactory {
         final int  drmFd     = initDrm(drmDevice);
         final long gbmDevice = this.libgbm.gbm_create_device(drmFd);
 
-        final GbmConnector[] gbmConnectors = createGbmConnectors(gbmDevice,
+        final DrmConnector[] drmConnectors = createGbmConnectors(gbmDevice,
                                                                  drmFd);
 
         //setup page flipping mechanism
@@ -97,7 +95,7 @@ public class GbmPlatformFactory {
 
 
 
-    private GbmConnector[] createGbmConnectors(final long gbmDevice,
+    private DrmConnector[] createGbmConnectors(final long gbmDevice,
                                                final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
         if (resources == 0L) {
@@ -108,7 +106,7 @@ public class GbmPlatformFactory {
                                            resources).dref();
 
         final int            countConnectors = drmModeRes.count_connectors();
-        final GbmConnector[] gbmConnectors   = new GbmConnector[countConnectors];
+        final DrmConnector[] drmConnectors   = new DrmConnector[countConnectors];
         final Set<Integer>   usedCrtcs       = new HashSet<>();
 
         for (int i = 0; i < countConnectors; i++) {
@@ -121,7 +119,7 @@ public class GbmPlatformFactory {
 
             final DrmModeConnector drmModeConnector = wrap(DrmModeConnector.class,
                                                            connector).dref();
-            final Optional<GbmConnector> gbmConnector;
+            final Optional<DrmConnector> gbmConnector;
             if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
                 gbmConnector = createGbmConnector(drmFd,
                                                   drmModeRes,
@@ -134,7 +132,7 @@ public class GbmPlatformFactory {
 
             }
 
-            gbmConnectors[i] = gbmConnector.orElseGet(() -> {
+            drmConnectors[i] = gbmConnector.orElseGet(() -> {
                 this.libdrm.drmModeFreeConnector(connector);
                 return this.gbmConnectorFactory.create(Optional.empty(),
                                                        null,
@@ -145,10 +143,10 @@ public class GbmPlatformFactory {
             });
         }
 
-        return gbmConnectors;
+        return drmConnectors;
     }
 
-    private Optional<GbmConnector> createGbmConnector(final int drmFd,
+    private Optional<DrmConnector> createGbmConnector(final int drmFd,
                                                       final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
                                                       final Set<Integer> crtcAllocations,
@@ -162,7 +160,7 @@ public class GbmPlatformFactory {
                                                                                           gbmDevice));
     }
 
-    private Optional<GbmConnector> createGbmConnector(final DrmModeRes drmModeRes,
+    private Optional<DrmConnector> createGbmConnector(final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
                                                       final int crtcId,
                                                       final long gbmDevice) {
