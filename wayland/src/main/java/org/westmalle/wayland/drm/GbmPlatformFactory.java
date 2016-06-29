@@ -34,6 +34,7 @@ import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
 
+//TODO drm platform factory, remove all gbm dependencies
 public class GbmPlatformFactory {
 
     @Nonnull
@@ -94,15 +95,7 @@ public class GbmPlatformFactory {
 
     }
 
-    private void page_flip_handler(final int fd,
-                                   @Unsigned final int sequence,
-                                   @Unsigned final int tv_sec,
-                                   @Unsigned final int tv_usec,
-                                   @Ptr final long user_data) {
-        Pointer.wrap(Integer.class,
-                     user_data)
-               .write(0);
-    }
+
 
     private GbmConnector[] createGbmConnectors(final long gbmDevice,
                                                final int drmFd) {

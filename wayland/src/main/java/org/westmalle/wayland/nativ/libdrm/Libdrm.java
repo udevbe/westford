@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 @Singleton
 @Lib("drm")
 public class Libdrm {
+    public static final int DRM_MODE_PAGE_FLIP_EVENT = 0x01;
 
     public static final int DRM_EVENT_CONTEXT_VERSION = 2;
 

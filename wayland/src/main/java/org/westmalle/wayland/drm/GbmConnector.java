@@ -12,6 +12,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
+//TODO drm connector, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "GbmConnectorFactory")
 public class GbmConnector implements Connector {
