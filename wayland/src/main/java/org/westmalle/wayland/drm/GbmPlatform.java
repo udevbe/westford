@@ -1,7 +1,6 @@
-package org.westmalle.wayland.gbm;
+package org.westmalle.wayland.drm;
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Renderer;
 

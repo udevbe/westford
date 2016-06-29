@@ -10,6 +10,9 @@ import javax.inject.Singleton;
 @Singleton
 @Lib("drm")
 public class Libdrm {
+
+    public static final int DRM_EVENT_CONTEXT_VERSION = 2;
+
     public static final int DRM_DISPLAY_MODE_LEN = 32;
 
     public static final int DRM_MODE_CONNECTED         = 1;
