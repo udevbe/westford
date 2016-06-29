@@ -1,12 +1,20 @@
-package org.westmalle.wayland.gbm;
+package org.westmalle.wayland.drm;
 
 
+import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.OutputFactory;
+import org.westmalle.wayland.core.OutputGeometry;
+import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libdrm.DrmEventContext;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeEncoder;
+import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
+import org.westmalle.wayland.nativ.libdrm.Pointerpage_flip_handler;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.protocol.WlOutputFactory;
@@ -22,6 +30,9 @@ import static org.freedesktop.jaccall.Pointer.nref;
 import static org.freedesktop.jaccall.Pointer.wrap;
 import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
+import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
+import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
+import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
 
 public class GbmPlatformFactory {
 
@@ -35,6 +46,10 @@ public class GbmPlatformFactory {
     private final Libgbm              libgbm;
     @Nonnull
     private final GbmConnectorFactory gbmConnectorFactory;
+    @Nonnull
+    private final WlOutputFactory     wlOutputFactory;
+    @Nonnull
+    private final OutputFactory       outputFactory;
 
     @Inject
     GbmPlatformFactory(@Nonnull final Libc libc,
@@ -49,10 +64,13 @@ public class GbmPlatformFactory {
         this.libdrm = libdrm;
         this.libgbm = libgbm;
         this.gbmConnectorFactory = gbmConnectorFactory;
+        this.wlOutputFactory = wlOutputFactory;
+        this.outputFactory = outputFactory;
     }
 
     public GbmPlatform create() {
 
+        //setup platform rendering handles
         //TODO seat from config
         final long drmDevice = findPrimaryGpu(udev,
                                               "seat0");
@@ -63,11 +81,30 @@ public class GbmPlatformFactory {
         final int  drmFd     = initDrm(drmDevice);
         final long gbmDevice = this.libgbm.gbm_create_device(drmFd);
 
-        final GbmConnector[] gbmConnectors = createGbmConnectors(drmDevice,
+        final GbmConnector[] gbmConnectors = createGbmConnectors(gbmDevice,
                                                                  drmFd);
+
+        //setup page flipping mechanism
+        final Pointer<DrmEventContext> drmEventContextP = Pointer.malloc(DrmEventContext.SIZE,
+                                                                         DrmEventContext.class);
+        final DrmEventContext drmEventContext = drmEventContextP.dref();
+        drmEventContext.version(Libdrm.DRM_EVENT_CONTEXT_VERSION);
+        drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref(this::page_flip_handler));
+
+
     }
 
-    private GbmConnector[] createGbmConnectors(final long drmDevice,
+    private void page_flip_handler(final int fd,
+                                   @Unsigned final int sequence,
+                                   @Unsigned final int tv_sec,
+                                   @Unsigned final int tv_usec,
+                                   @Ptr final long user_data) {
+        Pointer.wrap(Integer.class,
+                     user_data)
+               .write(0);
+    }
+
+    private GbmConnector[] createGbmConnectors(final long gbmDevice,
                                                final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
         if (resources == 0L) {
@@ -96,20 +133,23 @@ public class GbmPlatformFactory {
                 gbmConnector = createGbmConnector(drmFd,
                                                   drmModeRes,
                                                   drmModeConnector,
-                                                  usedCrtcs);
+                                                  usedCrtcs,
+                                                  gbmDevice);
             }
             else {
                 gbmConnector = Optional.empty();
 
             }
 
-            if (!gbmConnector.isPresent()) {
+            gbmConnectors[i] = gbmConnector.orElseGet(() -> {
                 this.libdrm.drmModeFreeConnector(connector);
-            }
-
-            gbmConnectors[i] = gbmConnector.orElse(this.gbmConnectorFactory.create(Optional.empty(),
-                                                                                   0,
-                                                                                   -1));
+                return this.gbmConnectorFactory.create(Optional.empty(),
+                                                       null,
+                                                       null,
+                                                       -1,
+                                                       null,
+                                                       0L);
+            });
         }
 
         return gbmConnectors;
@@ -118,21 +158,65 @@ public class GbmPlatformFactory {
     private Optional<GbmConnector> createGbmConnector(final int drmFd,
                                                       final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
-                                                      final Set<Integer> crtcAllocations) {
+                                                      final Set<Integer> crtcAllocations,
+                                                      final long gbmDevice) {
         return findCrtcForConnector(drmFd,
                                     drmModeRes,
                                     drmModeConnector,
-                                    crtcAllocations).flatMap(crtcId -> createGbmConnector(drmFd,
-                                                                                          drmModeRes,
+                                    crtcAllocations).flatMap(crtcId -> createGbmConnector(drmModeRes,
                                                                                           drmModeConnector,
-                                                                                          crtcId));
+                                                                                          crtcId,
+                                                                                          gbmDevice));
     }
 
-    private Optional<GbmConnector> createGbmConnector(final int drmFd,
-                                                      final DrmModeRes drmModeRes,
+    private Optional<GbmConnector> createGbmConnector(final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
-                                                      final int crtcId) {
+                                                      final int crtcId,
+                                                      final long gbmDevice) {
 
+        /* find highest resolution mode: */
+        int             area = 0;
+        DrmModeModeInfo mode = null;
+        for (int i = 0; i < drmModeConnector.count_modes(); i++) {
+            final DrmModeModeInfo currentMode = drmModeConnector.modes()
+                                                                .dref(i);
+            final int current_area = currentMode.hdisplay() * currentMode.vdisplay();
+            if (current_area > area) {
+                mode = currentMode;
+                area = current_area;
+            }
+        }
+
+        if (mode == null) {
+            throw new RuntimeException("Could not find a valid mode.");
+        }
+
+        final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
+                                                               mode.hdisplay(),
+                                                               mode.vdisplay(),
+                                                               GBM_FORMAT_XRGB8888,
+                                                               GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+        //TODO gather more geo & mode info
+        final OutputGeometry outputGeometry = OutputGeometry.builder()
+                                                            .physicalWidth(drmModeConnector.mmWidth())
+                                                            .physicalHeight(drmModeConnector.mmHeight())
+                                                            .make("unknown")
+                                                            .model("unknown")
+                                                            .build();
+        final OutputMode outputMode = OutputMode.builder()
+                                                .height(mode.hdisplay())
+                                                .width(mode.vdisplay())
+                                                .refresh(mode.vrefresh())
+                                                .flags(mode.flags())
+                                                .build();
+
+        return Optional.of(this.gbmConnectorFactory.create(Optional.of(this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
+                                                                                                                             outputMode))),
+                                                           drmModeRes,
+                                                           drmModeConnector,
+                                                           crtcId,
+                                                           mode,
+                                                           gbmSurface));
     }
 
     private Optional<Integer> findCrtcForConnector(final int drmFd,

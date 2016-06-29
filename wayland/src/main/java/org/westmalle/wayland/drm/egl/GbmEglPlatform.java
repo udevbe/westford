@@ -1,4 +1,4 @@
-package org.westmalle.wayland.gbm.egl;
+package org.westmalle.wayland.drm.egl;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.EglPlatform;
@@ -11,16 +11,6 @@ public class GbmEglPlatform implements EglPlatform {
 
 
     GbmEglPlatform() {
-    }
-
-    @Override
-    public void begin() {
-
-    }
-
-    @Override
-    public void end() {
-
     }
 
     @Override
