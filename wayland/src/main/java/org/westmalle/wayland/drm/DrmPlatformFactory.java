@@ -44,7 +44,7 @@ public class DrmPlatformFactory {
     @Nonnull
     private final Libgbm              libgbm;
     @Nonnull
-    private final GbmConnectorFactory gbmConnectorFactory;
+    private final DrmConnectorFactory gbmConnectorFactory;
     @Nonnull
     private final WlOutputFactory     wlOutputFactory;
     @Nonnull
@@ -55,7 +55,7 @@ public class DrmPlatformFactory {
                        @Nonnull final Libudev libudev,
                        @Nonnull final Libdrm libdrm,
                        @Nonnull final Libgbm libgbm,
-                       @Nonnull final GbmConnectorFactory gbmConnectorFactory,
+                       @Nonnull final DrmConnectorFactory gbmConnectorFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
                        @Nonnull final OutputFactory outputFactory) {
         this.libudev = libudev;
@@ -83,16 +83,10 @@ public class DrmPlatformFactory {
         final DrmConnector[] drmConnectors = createGbmConnectors(gbmDevice,
                                                                  drmFd);
 
-        //setup page flipping mechanism
-        final Pointer<DrmEventContext> drmEventContextP = Pointer.malloc(DrmEventContext.SIZE,
-                                                                         DrmEventContext.class);
-        final DrmEventContext drmEventContext = drmEventContextP.dref();
-        drmEventContext.version(Libdrm.DRM_EVENT_CONTEXT_VERSION);
-        drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref(this::page_flip_handler));
+
 
 
     }
-
 
 
     private DrmConnector[] createGbmConnectors(final long gbmDevice,
@@ -138,8 +132,7 @@ public class DrmPlatformFactory {
                                                        null,
                                                        null,
                                                        -1,
-                                                       null,
-                                                       0L);
+                                                       null);
             });
         }
 
@@ -182,11 +175,7 @@ public class DrmPlatformFactory {
             throw new RuntimeException("Could not find a valid mode.");
         }
 
-        final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
-                                                               mode.hdisplay(),
-                                                               mode.vdisplay(),
-                                                               GBM_FORMAT_XRGB8888,
-                                                               GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+
         //TODO gather more geo & mode info
         final OutputGeometry outputGeometry = OutputGeometry.builder()
                                                             .physicalWidth(drmModeConnector.mmWidth())
@@ -206,8 +195,7 @@ public class DrmPlatformFactory {
                                                            drmModeRes,
                                                            drmModeConnector,
                                                            crtcId,
-                                                           mode,
-                                                           gbmSurface));
+                                                           mode));
     }
 
     private Optional<Integer> findCrtcForConnector(final int drmFd,
