@@ -14,7 +14,7 @@ import java.util.Optional;
 
 //TODO drm connector, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
-             className = "GbmConnectorFactory")
+             className = "DrmConnectorFactory")
 public class DrmConnector implements Connector {
 
     @Nonnull
@@ -26,7 +26,6 @@ public class DrmConnector implements Connector {
     private final int                crtcId;
     @Nonnull
     private final DrmModeModeInfo    mode;
-    private final long               gbmSurface;
 
     DrmConnector(@Nonnull
                  final Optional<WlOutput> wlOutput,
@@ -37,14 +36,12 @@ public class DrmConnector implements Connector {
                  @Nonnegative
                  final int crtcId,
                  @Nonnull
-                 final DrmModeModeInfo mode,
-                 final long gbmSurface) {
+                 final DrmModeModeInfo mode) {
         this.wlOutput = wlOutput;
         this.drmModeRes = drmModeRes;
         this.drmModeConnector = drmModeConnector;
         this.crtcId = crtcId;
         this.mode = mode;
-        this.gbmSurface = gbmSurface;
     }
 
     @Nonnull
@@ -70,10 +67,6 @@ public class DrmConnector implements Connector {
     @Nonnull
     public DrmModeModeInfo getMode() {
         return this.mode;
-    }
-
-    public long getGbmSurface() {
-        return this.gbmSurface;
     }
 
 

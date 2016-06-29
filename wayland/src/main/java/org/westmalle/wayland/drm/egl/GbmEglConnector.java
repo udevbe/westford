@@ -19,7 +19,8 @@ import java.util.Optional;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
 
 //TODO put all gbm/egl specifics here
-@AutoFactory
+@AutoFactory(allowSubclasses = true,
+             className = "GbmEglConnectorFactory")
 public class GbmEglConnector implements EglConnector {
 
     @Nonnull
@@ -70,7 +71,7 @@ public class GbmEglConnector implements EglConnector {
                                     this.drmConnector.getCrtcId(),
                                     this.fbId,
                                     DRM_MODE_PAGE_FLIP_EVENT,
-                                    &waiting_for_flip);
+                                    0L);
         //TODO handle drmFd events by registering it as an event source
 
         this.libdrm.drmHandleEvent(this.drmFd,

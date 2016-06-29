@@ -8,21 +8,18 @@ import javax.annotation.Nonnull;
 
 //TODO drm platform, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
-             className = "PrivateGbmPlatformFactory")
+             className = "PrivateDrmPlatformFactory")
 public class DrmPlatform implements Platform {
 
     private final long           drmDevice;
     private final int            drmFd;
-    private final long           gbmDevice;
     private final DrmConnector[] drmConnectors;
 
     DrmPlatform(final long drmDevice,
                 final int drmFd,
-                final long gbmDevice,
-                final DrmConnector[] drmConnectors) {
+                @Nonnull final DrmConnector[] drmConnectors) {
         this.drmDevice = drmDevice;
         this.drmFd = drmFd;
-        this.gbmDevice = gbmDevice;
         this.drmConnectors = drmConnectors;
     }
 
@@ -43,9 +40,5 @@ public class DrmPlatform implements Platform {
 
     public int getDrmFd() {
         return this.drmFd;
-    }
-
-    public long getGbmDevice() {
-        return this.gbmDevice;
     }
 }
