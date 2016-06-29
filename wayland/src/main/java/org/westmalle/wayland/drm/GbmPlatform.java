@@ -6,6 +6,7 @@ import org.westmalle.wayland.core.Renderer;
 
 import javax.annotation.Nonnull;
 
+//TODO drm platform, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "PrivateGbmPlatformFactory")
 public class GbmPlatform implements Platform {

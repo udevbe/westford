@@ -6,6 +6,7 @@ import org.westmalle.wayland.core.Renderer;
 
 import javax.annotation.Nonnull;
 
+//TODO put all gbm/egl specifics here
 @AutoFactory
 public class GbmEglPlatform implements EglPlatform {
 
