@@ -276,15 +276,16 @@ public class Gles2Renderer implements GlRenderer {
     @Override
     public Buffer queryBuffer(@Nonnull final WlBufferResource wlBufferResource) {
 
+        final Buffer buffer;
+
         final ShmBuffer shmBuffer = ShmBuffer.get(wlBufferResource);
         if (shmBuffer != null) {
-            return SmBuffer.create(shmBuffer.getWidth(),
-                                   shmBuffer.getHeight(),
-                                   wlBufferResource,
-                                   shmBuffer);
+            buffer = SmBuffer.create(shmBuffer.getWidth(),
+                                     shmBuffer.getHeight(),
+                                     wlBufferResource,
+                                     shmBuffer);
         }
-
-        if (this.eglQueryWaylandBufferWL.isPresent()) {
+        else if (this.eglQueryWaylandBufferWL.isPresent()) {
             final EglQueryWaylandBufferWL queryWlEglBuffer = this.eglQueryWaylandBufferWL.get();
             final Pointer<Integer>        textureFormatP   = Pointer.nref(0);
             final Long                    bufferPointer    = wlBufferResource.pointer;
@@ -309,21 +310,27 @@ public class Gles2Renderer implements GlRenderer {
                 final int width  = widthP.dref();
                 final int height = heightP.dref();
 
-                return EglBuffer.create(width,
-                                        height,
-                                        wlBufferResource,
-                                        textureFormat);
+                buffer = EglBuffer.create(width,
+                                          height,
+                                          wlBufferResource,
+                                          textureFormat);
+            }
+            else {
+                buffer = UnsupportedBuffer.create(wlBufferResource);
             }
         }
+        else //TODO dma buffer.
+        {
+            buffer = UnsupportedBuffer.create(wlBufferResource);
+        }
 
-        //TODO dma buffer.
-
-        return UnsupportedBuffer.create(wlBufferResource);
+        return buffer;
     }
 
     @Override
     public long eglConfig(final long eglDisplay,
                           @Nonnull final String eglExtensions) {
+        assert (eglDisplay != EGL_NO_DISPLAY);
 
         final int configs_size = 256 * sizeof((Pointer<?>) null);
         final Pointer<Pointer> configs = malloc(configs_size,
@@ -351,15 +358,16 @@ public class Gles2Renderer implements GlRenderer {
             throw new RuntimeException("failed to find suitable EGLConfig");
         }
 
-        bindEglDisplay(eglDisplay,
-                       eglExtensions);
+        bindWlEglDisplay(eglDisplay,
+                         eglExtensions);
+
         this.eglDisplay = eglDisplay;
 
         return configs.dref().address;
     }
 
-    private void bindEglDisplay(final long eglDisplay,
-                                @Nonnull final String eglExtensions) {
+    private void bindWlEglDisplay(final long eglDisplay,
+                                  @Nonnull final String eglExtensions) {
 
         if (bindDisplay(eglDisplay,
                         eglExtensions)) {
@@ -383,6 +391,21 @@ public class Gles2Renderer implements GlRenderer {
         }
     }
 
+    private boolean bindDisplay(final long eglDisplay,
+                                final String extensions) {
+        if (extensions.contains("EGL_WL_bind_wayland_display")) {
+            final Pointer<EglBindWaylandDisplayWL> eglBindWaylandDisplayWL = Pointer.wrap(EglBindWaylandDisplayWL.class,
+                                                                                          this.libEGL.eglGetProcAddress(Pointer.nref("eglBindWaylandDisplayWL").address));
+            return eglBindWaylandDisplayWL.dref()
+                                          .$(eglDisplay,
+                                             this.display.pointer) != 0;
+        }
+        else {
+            LOGGER.warning("Extension EGL_WL_bind_wayland_display not available. Required for client side egl support.");
+            return false;
+        }
+    }
+
     @Override
     public void visit(@Nonnull final Platform platform) {
         throw new UnsupportedOperationException(String.format("Need an egl capable platform. Got %s",
@@ -391,11 +414,9 @@ public class Gles2Renderer implements GlRenderer {
 
     @Override
     public void visit(@Nonnull final EglPlatform eglPlatform) {
-        if (this.eglDisplay != EGL_NO_DISPLAY) {
-            eglPlatform.begin();
-            render(eglPlatform);
-            eglPlatform.end();
-        }
+        eglPlatform.begin();
+        render(eglPlatform);
+        eglPlatform.end();
     }
 
     private void render(@Nonnull final EglPlatform eglPlatform) {
@@ -407,6 +428,7 @@ public class Gles2Renderer implements GlRenderer {
                                               wlOutput);
                             if (!this.init) {
                                 //one time init because we need a current context
+                                assert (eglPlatform.getEglContext() != EGL_NO_CONTEXT);
                                 initRenderer();
                             }
                             //naive single pass, bottom to top overdraw rendering.
@@ -417,7 +439,6 @@ public class Gles2Renderer implements GlRenderer {
                                              eglConnector);
                         });
         }
-
     }
 
     private void flushRenderState(final EglPlatform eglPlatform,
@@ -1227,20 +1248,5 @@ public class Gles2Renderer implements GlRenderer {
                             //attribute vec2 a_texCoord
                             0f,
                             0f);
-    }
-
-    private boolean bindDisplay(final long eglDisplay,
-                                final String extensions) {
-        if (extensions.contains("EGL_WL_bind_wayland_display")) {
-            final Pointer<EglBindWaylandDisplayWL> eglBindWaylandDisplayWL = Pointer.wrap(EglBindWaylandDisplayWL.class,
-                                                                                          this.libEGL.eglGetProcAddress(Pointer.nref("eglBindWaylandDisplayWL").address));
-            return eglBindWaylandDisplayWL.dref()
-                                          .$(eglDisplay,
-                                             this.display.pointer) != 0;
-        }
-        else {
-            LOGGER.warning("Extension EGL_WL_bind_wayland_display not available. Required for client side egl support.");
-            return false;
-        }
     }
 }
