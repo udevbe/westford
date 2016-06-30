@@ -7,6 +7,8 @@ import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPlatform;
+import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
+import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libdrm.DrmEventContext;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libdrm.Pointerpage_flip_handler;
@@ -15,6 +17,10 @@ import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_GBM_KHR;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_X11_KHR;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
@@ -28,6 +34,8 @@ public class GbmEglPlatformFactory {
     @Nonnull
     private final Libgbm                       libgbm;
     @Nonnull
+    private final LibEGL                       libEGL;
+    @Nonnull
     private final DrmPlatform                  drmPlatform;
     @Nonnull
     private final GbmEglConnectorFactory       eglGbmConnectorFactory;
@@ -36,11 +44,13 @@ public class GbmEglPlatformFactory {
     GbmEglPlatformFactory(@Nonnull final PrivateGbmEglPlatformFactory privateGbmEglPlatformFactory,
                           @Nonnull final Libdrm libdrm,
                           @Nonnull final Libgbm libgbm,
+                          @Nonnull final LibEGL libEGL,
                           @Nonnull final DrmPlatform drmPlatform,
                           @Nonnull final GbmEglConnectorFactory eglGbmConnectorFactory) {
         this.privateGbmEglPlatformFactory = privateGbmEglPlatformFactory;
         this.libdrm = libdrm;
         this.libgbm = libgbm;
+        this.libEGL = libEGL;
         this.drmPlatform = drmPlatform;
         this.eglGbmConnectorFactory = eglGbmConnectorFactory;
     }
@@ -56,6 +66,8 @@ public class GbmEglPlatformFactory {
             gbmEglConnectors[i] = createGbmEglConnector(gbmDevice,
                                                         drmConnector);
         }
+
+        final long eglDisplay = createEglDisplay(gbmDevice);
 
         this.privateGbmEglPlatformFactory.create(gbmDevice,
                                                  eglDisplay,
@@ -94,5 +106,38 @@ public class GbmEglPlatformFactory {
                                    Pointer.ref(drmConnector.getMode()).address);
 
         return gbmEglConnector;
+    }
+
+    private long createEglDisplay(final long gbmDevice) {
+
+        final Pointer<String> noDisplayExtensions = Pointer.wrap(String.class,
+                                                                 this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                                                                            EGL_EXTENSIONS));
+        if (noDisplayExtensions.address == 0L) {
+            throw new RuntimeException("Could not query egl extensions.");
+        }
+        final String extensions = noDisplayExtensions.dref();
+
+        if (!extensions.contains("EGL_EXT_platform_gbm")) {
+            throw new RuntimeException("Required extension EGL_EXT_platform_gbm not available.");
+        }
+
+        final Pointer<EglGetPlatformDisplayEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglGetPlatformDisplayEXT.class,
+                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("eglGetPlatformDisplayEXT").address));
+
+        final long eglDisplay = eglGetPlatformDisplayEXT.dref()
+                                                        .$(EGL_PLATFORM_GBM_KHR,
+                                                           gbmDevice,
+                                                           0L);
+        if (eglDisplay == 0L) {
+            throw new RuntimeException("eglGetDisplay() failed");
+        }
+        if (this.libEGL.eglInitialize(eglDisplay,
+                                      0L,
+                                      0L) == 0) {
+            throw new RuntimeException("eglInitialize() failed");
+        }
+
+        return eglDisplay;
     }
 }
