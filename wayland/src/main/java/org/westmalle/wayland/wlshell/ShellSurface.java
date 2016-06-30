@@ -46,12 +46,12 @@ import java.util.Set;
 public class ShellSurface implements Role {
 
     @Nonnull
-    private final Compositor compositor;
+    private final Compositor  compositor;
     @Nonnull
-    private final Scene scene;
-    private final int          pingSerial;
+    private final Scene       scene;
+    private final int         pingSerial;
     @Nonnull
-    private final EventSource  timerEventSource;
+    private final EventSource timerEventSource;
 
     private Optional<Slot<KeyboardFocusGained>> keyboardFocusListener = Optional.empty();
     private boolean                             active                = true;
@@ -310,7 +310,7 @@ public class ShellSurface implements Role {
         final LinkedList<WlSurfaceResource> surfacesStack = this.scene.getSurfacesStack();
         if (surfacesStack.remove(wlSurfaceResource)) {
             surfacesStack.addLast(wlSurfaceResource);
-            compositor.requestRender();
+            this.compositor.requestRender();
         }
     }
 

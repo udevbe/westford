@@ -59,7 +59,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                  @Nonnull final WlRegionFactory wlRegionFactory,
                  @Nonnull final org.westmalle.wayland.core.FiniteRegionFactory finiteRegionFactory,
                  @Nonnull final org.westmalle.wayland.core.SurfaceFactory surfaceFactory,
-                 @Nonnull Compositor compositor,
+                 @Nonnull final Compositor compositor,
                  @Nonnull final Scene scene,
                  @Nonnull final Renderer renderer) {
         super(display,

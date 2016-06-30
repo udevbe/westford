@@ -74,8 +74,6 @@ public class LibinputSeat {
     @Nonnull
     private final LibinputDeviceFactory libinputDeviceFactory;
     @Nonnull
-    private final Compositor            compositor;
-    @Nonnull
     private final WlSeat                wlSeat;
 
     private final Set<LibinputDevice> libinputDevices = new HashSet<>();
@@ -85,14 +83,12 @@ public class LibinputSeat {
                  @Provided @Nonnull final Libinput libinput,
                  @Provided @Nonnull final Libc libc,
                  @Provided @Nonnull final LibinputDeviceFactory libinputDeviceFactory,
-                 @Provided @Nonnull final Compositor compositor,
                  @Nonnull final WlSeat wlSeat) {
         this.display = display;
         this.libudev = libudev;
         this.libinput = libinput;
         this.libc = libc;
         this.libinputDeviceFactory = libinputDeviceFactory;
-        this.compositor = compositor;
         this.wlSeat = wlSeat;
     }
 
