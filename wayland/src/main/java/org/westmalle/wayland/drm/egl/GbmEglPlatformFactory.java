@@ -3,6 +3,7 @@ package org.westmalle.wayland.drm.egl;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPlatform;
@@ -23,6 +24,8 @@ public class GbmEglPlatformFactory {
     @Nonnull
     private final PrivateGbmEglPlatformFactory privateGbmEglPlatformFactory;
     @Nonnull
+    private final Libdrm                       libdrm;
+    @Nonnull
     private final Libgbm                       libgbm;
     @Nonnull
     private final DrmPlatform                  drmPlatform;
@@ -31,10 +34,12 @@ public class GbmEglPlatformFactory {
 
     @Inject
     GbmEglPlatformFactory(@Nonnull final PrivateGbmEglPlatformFactory privateGbmEglPlatformFactory,
+                          @Nonnull final Libdrm libdrm,
                           @Nonnull final Libgbm libgbm,
                           @Nonnull final DrmPlatform drmPlatform,
                           @Nonnull final GbmEglConnectorFactory eglGbmConnectorFactory) {
         this.privateGbmEglPlatformFactory = privateGbmEglPlatformFactory;
+        this.libdrm = libdrm;
         this.libgbm = libgbm;
         this.drmPlatform = drmPlatform;
         this.eglGbmConnectorFactory = eglGbmConnectorFactory;
@@ -71,12 +76,23 @@ public class GbmEglPlatformFactory {
                                                                GBM_FORMAT_XRGB8888,
                                                                GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
 
+        final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
 
+        final GbmEglConnector gbmEglConnector = this.eglGbmConnectorFactory.create(this.drmPlatform.getDrmFd(),
+                                                                                   gbmBo,
+                                                                                   gbmSurface,
+                                                                                   drmConnector);
+        final int fbId = gbmEglConnector.getFbId(gbmBo);
+        this.libdrm.drmModeSetCrtc(this.drmPlatform.getDrmFd(),
+                                   drmConnector.getCrtcId(),
+                                   fbId,
+                                   0,
+                                   0,
+                                   Pointer.nref(drmConnector.getDrmModeConnector()
+                                                            .connector_id()).address,
+                                   1,
+                                   Pointer.ref(drmConnector.getMode()).address);
 
-        return this.eglGbmConnectorFactory.create(this.drmPlatform.getDrmFd(),
-                                                  gbmSurface,
-                                                  fbId,
-                                                  drmEventContext,
-                                                  drmConnector);
+        return gbmEglConnector;
     }
 }

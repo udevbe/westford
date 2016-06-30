@@ -392,9 +392,7 @@ public class Gles2Renderer implements GlRenderer {
     @Override
     public void visit(@Nonnull final EglPlatform eglPlatform) {
         if (this.eglDisplay != EGL_NO_DISPLAY) {
-            eglPlatform.begin();
             render(eglPlatform);
-            eglPlatform.end();
         }
     }
 
@@ -424,11 +422,13 @@ public class Gles2Renderer implements GlRenderer {
                                   final EglConnector eglConnector) {
         this.libEGL.eglSwapBuffers(eglPlatform.getEglDisplay(),
                                    eglConnector.getEglSurface());
+        eglConnector.end();
     }
 
     private void updateRenderState(final EglPlatform eglPlatform,
                                    final EglConnector eglConnector,
                                    @Nonnull final WlOutput wlOutput) {
+        eglConnector.begin();
 
         this.libEGL.eglMakeCurrent(eglPlatform.getEglDisplay(),
                                    eglConnector.getEglSurface(),
