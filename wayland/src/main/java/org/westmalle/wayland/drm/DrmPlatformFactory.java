@@ -71,8 +71,6 @@ public class DrmPlatformFactory {
     }
 
     public DrmPlatform create() {
-
-        //setup platform rendering handles
         //TODO seat from config
         final long drmDevice = findPrimaryGpu(udev,
                                               "seat0");
@@ -120,19 +118,19 @@ public class DrmPlatformFactory {
 
             final DrmModeConnector drmModeConnector = wrap(DrmModeConnector.class,
                                                            connector).dref();
-            final Optional<DrmConnector> gbmConnector;
+            final Optional<DrmConnector> drmConnector;
             if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
-                gbmConnector = createDrmConnector(drmFd,
+                drmConnector = createDrmConnector(drmFd,
                                                   drmModeRes,
                                                   drmModeConnector,
                                                   usedCrtcs);
             }
             else {
-                gbmConnector = Optional.empty();
+                drmConnector = Optional.empty();
 
             }
 
-            drmConnectors[i] = gbmConnector.orElseGet(() -> {
+            drmConnectors[i] = drmConnector.orElseGet(() -> {
                 this.libdrm.drmModeFreeConnector(connector);
                 return this.drmConnectorFactory.create(Optional.empty(),
                                                        null,
@@ -149,18 +147,48 @@ public class DrmPlatformFactory {
                                                       final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
                                                       final Set<Integer> crtcAllocations) {
-        return findCrtcForConnector(drmFd,
-                                    drmModeRes,
-                                    drmModeConnector,
-                                    crtcAllocations).flatMap(crtcId -> createDrmConnector(drmModeRes,
-                                                                                          drmModeConnector,
-                                                                                          crtcId));
+        return findCrtcIdForConnector(drmFd,
+                                      drmModeRes,
+                                      drmModeConnector,
+                                      crtcAllocations).flatMap(crtcId -> createDrmConnector(drmModeRes,
+                                                                                            drmModeConnector,
+                                                                                            crtcId));
+    }
+
+    private Optional<Integer> findCrtcIdForConnector(final int drmFd,
+                                                     final DrmModeRes drmModeRes,
+                                                     final DrmModeConnector drmModeConnector,
+                                                     final Set<Integer> crtcAllocations) {
+
+        for (int j = 0; j < drmModeConnector.count_encoders(); j++) {
+            final long encoder = this.libdrm.drmModeGetEncoder(drmFd,
+                                                               drmModeConnector.encoders()
+                                                                               .dref(j));
+            if (encoder == 0L) {
+                return Optional.empty();
+            }
+
+            //bitwise flag of available crtcs, each bit represents the index of crtcs in drmModeRes
+            final int possibleCrtcs = wrap(DrmModeEncoder.class,
+                                           encoder).dref()
+                                                   .possible_crtcs();
+            this.libdrm.drmModeFreeEncoder(encoder);
+
+            for (int i = 0; i < drmModeRes.count_crtcs(); i++) {
+                if ((possibleCrtcs & (1 << i)) != 0 &&
+                    crtcAllocations.add(drmModeRes.crtcs()
+                                                  .dref(i))) {
+                    return Optional.of(i);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     private Optional<DrmConnector> createDrmConnector(final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
                                                       final int crtcId) {
-
         /* find highest resolution mode: */
         int             area = 0;
         DrmModeModeInfo mode = null;
@@ -199,37 +227,6 @@ public class DrmPlatformFactory {
                                                            drmModeConnector,
                                                            crtcId,
                                                            mode));
-    }
-
-    private Optional<Integer> findCrtcForConnector(final int drmFd,
-                                                   final DrmModeRes drmModeRes,
-                                                   final DrmModeConnector drmModeConnector,
-                                                   final Set<Integer> crtcAllocations) {
-
-        for (int j = 0; j < drmModeConnector.count_encoders(); j++) {
-            final long encoder = this.libdrm.drmModeGetEncoder(drmFd,
-                                                               drmModeConnector.encoders()
-                                                                               .dref(j));
-            if (encoder == 0L) {
-                return Optional.empty();
-            }
-
-            //bitwise flag of available crtcs, each bit represents the index of crtcs in drmModeRes
-            final int possibleCrtcs = wrap(DrmModeEncoder.class,
-                                           encoder).dref()
-                                                   .possible_crtcs();
-            this.libdrm.drmModeFreeEncoder(encoder);
-
-            for (int i = 0; i < drmModeRes.count_crtcs(); i++) {
-                if ((possibleCrtcs & (1 << i)) != 0 &&
-                    !crtcAllocations.contains(drmModeRes.crtcs()
-                                                        .dref(i))) {
-                    return Optional.of(i);
-                }
-            }
-        }
-
-        return Optional.empty();
     }
 
 
