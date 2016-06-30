@@ -2,6 +2,8 @@ package org.westmalle.wayland.drm.egl;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPlatform;
 import org.westmalle.wayland.nativ.libdrm.DrmEventContext;
@@ -46,29 +48,9 @@ public class GbmEglPlatformFactory {
 
         for (int i = 0; i < drmConnectors.length; i++) {
             final DrmConnector drmConnector = drmConnectors[i];
-
-            final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
-                                                                   drmConnector.getMode()
-                                                                               .hdisplay(),
-                                                                   drmConnector.getMode()
-                                                                               .vdisplay(),
-                                                                   GBM_FORMAT_XRGB8888,
-                                                                   GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-
-            //setup page flipping mechanism
-            final Pointer<DrmEventContext> drmEventContextP = Pointer.malloc(DrmEventContext.SIZE,
-                                                                             DrmEventContext.class);
-            final DrmEventContext drmEventContext = drmEventContextP.dref();
-            drmEventContext.version(Libdrm.DRM_EVENT_CONTEXT_VERSION);
-            drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref(this::page_flip_handler));
-
-            gbmEglConnectors[i] = this.eglGbmConnectorFactory.create(this.drmPlatform.getDrmFd(),
-                                                                     gbmSurface,
-                                                                     fbId,
-                                                                     pageFlipHandler,
-                                                                     drmConnector);
+            gbmEglConnectors[i] = createGbmEglConnector(gbmDevice,
+                                                        drmConnector);
         }
-
 
         this.privateGbmEglPlatformFactory.create(gbmDevice,
                                                  eglDisplay,
@@ -76,5 +58,25 @@ public class GbmEglPlatformFactory {
                                                  eglExtensions,
                                                  gbmEglConnectors);
 
+    }
+
+    private GbmEglConnector createGbmEglConnector(final long gbmDevice,
+                                                  final DrmConnector drmConnector) {
+
+        final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
+                                                               drmConnector.getMode()
+                                                                           .hdisplay(),
+                                                               drmConnector.getMode()
+                                                                           .vdisplay(),
+                                                               GBM_FORMAT_XRGB8888,
+                                                               GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+
+
+
+        return this.eglGbmConnectorFactory.create(this.drmPlatform.getDrmFd(),
+                                                  gbmSurface,
+                                                  fbId,
+                                                  drmEventContext,
+                                                  drmConnector);
     }
 }

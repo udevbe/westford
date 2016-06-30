@@ -8,8 +8,8 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.drm.DrmConnector;
+import org.westmalle.wayland.nativ.libdrm.DrmEventContext;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
-import org.westmalle.wayland.nativ.libdrm.page_flip_handler;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.protocol.WlOutput;
 
@@ -24,17 +24,17 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
 public class GbmEglConnector implements EglConnector {
 
     @Nonnull
-    private final Libgbm                     libgbm;
+    private final Libgbm          libgbm;
     @Nonnull
-    private final Libdrm                     libdrm;
-    private final int                        drmFd;
-    private       long                       gbmBo;
-    private final long                       gbmSurface;
-    private final int                        fbId;
+    private final Libdrm          libdrm;
+    private final int             drmFd;
+    private       long            gbmBo;
+    private final long            gbmSurface;
+    private final int             fbId;
     @Nonnull
-    private final Pointer<page_flip_handler> pageFlipHandler;
+    private final DrmEventContext drmEventContext;
     @Nonnull
-    private final DrmConnector               drmConnector;
+    private final DrmConnector    drmConnector;
 
     GbmEglConnector(@Nonnull @Provided final Libgbm libgbm,
                     @Nonnull @Provided final Libdrm libdrm,
@@ -43,7 +43,7 @@ public class GbmEglConnector implements EglConnector {
                     final long gbmSurface,
                     final int fbId,
                     @Nonnull
-                    final Pointer<page_flip_handler> pageFlipHandler,
+                    final DrmEventContext drmEventContext,
                     @Nonnull final DrmConnector drmConnector) {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
@@ -51,7 +51,7 @@ public class GbmEglConnector implements EglConnector {
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
         this.fbId = fbId;
-        this.pageFlipHandler = pageFlipHandler;
+        this.drmEventContext = drmEventContext;
         this.drmConnector = drmConnector;
     }
 
@@ -72,10 +72,10 @@ public class GbmEglConnector implements EglConnector {
                                     this.fbId,
                                     DRM_MODE_PAGE_FLIP_EVENT,
                                     0L);
-        //TODO handle drmFd events by registering it as an event source
+
 
         this.libdrm.drmHandleEvent(this.drmFd,
-                                   this.pageFlipHandler.address);
+                                   Pointer.ref(this.drmEventContext).address);
 
         this.libgbm.gbm_surface_release_buffer(this.gbmSurface,
                                                this.gbmBo);

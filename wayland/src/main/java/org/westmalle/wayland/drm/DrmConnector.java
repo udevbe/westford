@@ -27,16 +27,11 @@ public class DrmConnector implements Connector {
     @Nonnull
     private final DrmModeModeInfo    mode;
 
-    DrmConnector(@Nonnull
-                 final Optional<WlOutput> wlOutput,
-                 @Nonnull
-                 final DrmModeRes drmModeRes,
-                 @Nonnull
-                 final DrmModeConnector drmModeConnector,
-                 @Nonnegative
-                 final int crtcId,
-                 @Nonnull
-                 final DrmModeModeInfo mode) {
+    DrmConnector(@Nonnull final Optional<WlOutput> wlOutput,
+                 @Nonnull final DrmModeRes drmModeRes,
+                 @Nonnull final DrmModeConnector drmModeConnector,
+                 @Nonnegative final int crtcId,
+                 @Nonnull final DrmModeModeInfo mode) {
         this.wlOutput = wlOutput;
         this.drmModeRes = drmModeRes;
         this.drmModeConnector = drmModeConnector;
@@ -68,6 +63,4 @@ public class DrmConnector implements Connector {
     public DrmModeModeInfo getMode() {
         return this.mode;
     }
-
-
 }

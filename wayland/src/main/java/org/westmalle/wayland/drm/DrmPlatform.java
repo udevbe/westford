@@ -13,13 +13,18 @@ public class DrmPlatform implements Platform {
 
     private final long           drmDevice;
     private final int            drmFd;
+    @Nonnull
+    private final DrmEventBus    drmEventBus;
+    @Nonnull
     private final DrmConnector[] drmConnectors;
 
     DrmPlatform(final long drmDevice,
                 final int drmFd,
+                @Nonnull final DrmEventBus drmEventBus,
                 @Nonnull final DrmConnector[] drmConnectors) {
         this.drmDevice = drmDevice;
         this.drmFd = drmFd;
+        this.drmEventBus = drmEventBus;
         this.drmConnectors = drmConnectors;
     }
 
@@ -27,6 +32,11 @@ public class DrmPlatform implements Platform {
     @Override
     public DrmConnector[] getConnectors() {
         return this.drmConnectors;
+    }
+
+    @Nonnull
+    public DrmEventBus getDrmEventBus() {
+        return this.drmEventBus;
     }
 
     @Override
