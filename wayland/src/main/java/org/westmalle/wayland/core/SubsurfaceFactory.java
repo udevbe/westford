@@ -26,7 +26,7 @@ public class SubsurfaceFactory {
     @Nonnull
     private final PrivateSubsurfaceFactory privateSubsurfaceFactory;
     @Nonnull
-    private final Scene scene;
+    private final Scene                    scene;
 
     @Inject
     SubsurfaceFactory(@Nonnull final PrivateSubsurfaceFactory privateSubsurfaceFactory,
@@ -57,7 +57,7 @@ public class SubsurfaceFactory {
         parentSurface.getRole()
                      .ifPresent(role -> {
                          if (role instanceof Subsurface) {
-                             Subsurface parentSubsurface = (Subsurface) role;
+                             final Subsurface parentSubsurface = (Subsurface) role;
                              parentSubsurface.getEffectiveSyncSignal()
                                              .connect(subsurface::updateEffectiveSync);
                          }
