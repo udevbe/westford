@@ -1,19 +1,17 @@
 package org.westmalle.wayland.drm;
 
 
-import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.nativ.libc.Libc;
-import org.westmalle.wayland.nativ.libdrm.DrmEventContext;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeEncoder;
 import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
-import org.westmalle.wayland.nativ.libdrm.Pointerpage_flip_handler;
-import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
@@ -28,41 +26,46 @@ import static org.freedesktop.jaccall.Pointer.nref;
 import static org.freedesktop.jaccall.Pointer.wrap;
 import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
-import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
-import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
-import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
 
 //TODO drm platform factory, remove all gbm dependencies
 public class DrmPlatformFactory {
 
     @Nonnull
-    private final Libudev             libudev;
+    private final Libudev                   libudev;
     @Nonnull
-    private final Libc                libc;
+    private final Libc                      libc;
     @Nonnull
-    private final Libdrm              libdrm;
+    private final Libdrm                    libdrm;
     @Nonnull
-    private final Libgbm              libgbm;
+    private final Display                   display;
     @Nonnull
-    private final DrmConnectorFactory gbmConnectorFactory;
+    private final DrmConnectorFactory       drmConnectorFactory;
     @Nonnull
-    private final WlOutputFactory     wlOutputFactory;
+    private final DrmEventBusFactory        drmEventBusFactory;
     @Nonnull
-    private final OutputFactory       outputFactory;
+    private final PrivateDrmPlatformFactory privateDrmPlatformFactory;
+    @Nonnull
+    private final WlOutputFactory           wlOutputFactory;
+    @Nonnull
+    private final OutputFactory             outputFactory;
 
     @Inject
     DrmPlatformFactory(@Nonnull final Libc libc,
                        @Nonnull final Libudev libudev,
                        @Nonnull final Libdrm libdrm,
-                       @Nonnull final Libgbm libgbm,
-                       @Nonnull final DrmConnectorFactory gbmConnectorFactory,
+                       @Nonnull final Display display,
+                       @Nonnull final DrmConnectorFactory drmConnectorFactory,
+                       @Nonnull final DrmEventBusFactory drmEventBusFactory,
+                       @Nonnull final PrivateDrmPlatformFactory privateDrmPlatformFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
                        @Nonnull final OutputFactory outputFactory) {
         this.libudev = libudev;
         this.libc = libc;
         this.libdrm = libdrm;
-        this.libgbm = libgbm;
-        this.gbmConnectorFactory = gbmConnectorFactory;
+        this.display = display;
+        this.drmConnectorFactory = drmConnectorFactory;
+        this.drmEventBusFactory = drmEventBusFactory;
+        this.privateDrmPlatformFactory = privateDrmPlatformFactory;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
     }
@@ -77,20 +80,24 @@ public class DrmPlatformFactory {
             throw new RuntimeException("No drm capable gpu device found.");
         }
 
-        final int  drmFd     = initDrm(drmDevice);
-        final long gbmDevice = this.libgbm.gbm_create_device(drmFd);
+        final int drmFd = initDrm(drmDevice);
 
-        final DrmConnector[] drmConnectors = createGbmConnectors(gbmDevice,
-                                                                 drmFd);
+        final DrmConnector[] drmConnectors = createDrmConnectors(drmFd);
 
+        final DrmEventBus drmEventBus = this.drmEventBusFactory.create(drmFd);
+        this.display.getEventLoop()
+                    .addFileDescriptor(drmFd,
+                                       WaylandServerCore.WL_EVENT_READABLE,
+                                       drmEventBus);
 
-
-
+        return this.privateDrmPlatformFactory.create(drmDevice,
+                                                     drmFd,
+                                                     drmEventBus,
+                                                     drmConnectors);
     }
 
 
-    private DrmConnector[] createGbmConnectors(final long gbmDevice,
-                                               final int drmFd) {
+    private DrmConnector[] createDrmConnectors(final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
         if (resources == 0L) {
             throw new RuntimeException("Getting drm resources failed.");
@@ -115,11 +122,10 @@ public class DrmPlatformFactory {
                                                            connector).dref();
             final Optional<DrmConnector> gbmConnector;
             if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
-                gbmConnector = createGbmConnector(drmFd,
+                gbmConnector = createDrmConnector(drmFd,
                                                   drmModeRes,
                                                   drmModeConnector,
-                                                  usedCrtcs,
-                                                  gbmDevice);
+                                                  usedCrtcs);
             }
             else {
                 gbmConnector = Optional.empty();
@@ -128,7 +134,7 @@ public class DrmPlatformFactory {
 
             drmConnectors[i] = gbmConnector.orElseGet(() -> {
                 this.libdrm.drmModeFreeConnector(connector);
-                return this.gbmConnectorFactory.create(Optional.empty(),
+                return this.drmConnectorFactory.create(Optional.empty(),
                                                        null,
                                                        null,
                                                        -1,
@@ -139,24 +145,21 @@ public class DrmPlatformFactory {
         return drmConnectors;
     }
 
-    private Optional<DrmConnector> createGbmConnector(final int drmFd,
+    private Optional<DrmConnector> createDrmConnector(final int drmFd,
                                                       final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
-                                                      final Set<Integer> crtcAllocations,
-                                                      final long gbmDevice) {
+                                                      final Set<Integer> crtcAllocations) {
         return findCrtcForConnector(drmFd,
                                     drmModeRes,
                                     drmModeConnector,
-                                    crtcAllocations).flatMap(crtcId -> createGbmConnector(drmModeRes,
+                                    crtcAllocations).flatMap(crtcId -> createDrmConnector(drmModeRes,
                                                                                           drmModeConnector,
-                                                                                          crtcId,
-                                                                                          gbmDevice));
+                                                                                          crtcId));
     }
 
-    private Optional<DrmConnector> createGbmConnector(final DrmModeRes drmModeRes,
+    private Optional<DrmConnector> createDrmConnector(final DrmModeRes drmModeRes,
                                                       final DrmModeConnector drmModeConnector,
-                                                      final int crtcId,
-                                                      final long gbmDevice) {
+                                                      final int crtcId) {
 
         /* find highest resolution mode: */
         int             area = 0;
@@ -190,7 +193,7 @@ public class DrmPlatformFactory {
                                                 .flags(mode.flags())
                                                 .build();
 
-        return Optional.of(this.gbmConnectorFactory.create(Optional.of(this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
+        return Optional.of(this.drmConnectorFactory.create(Optional.of(this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
                                                                                                                              outputMode))),
                                                            drmModeRes,
                                                            drmModeConnector,
