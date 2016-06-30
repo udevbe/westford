@@ -2,13 +2,10 @@ package org.westmalle.wayland.drm;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.EventLoop;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.drm.events.DrmPageFlip;
-import org.westmalle.wayland.drm.events.DrmVBlank;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 
 import javax.annotation.Nonnull;
@@ -18,8 +15,6 @@ import javax.annotation.Nonnull;
              className = "PrivateDrmEventBusFactory")
 public class DrmEventBus implements EventLoop.FileDescriptorEventHandler {
 
-    private final Signal<DrmPageFlip, Slot<DrmPageFlip>> pageFlipSignal = new Signal<>();
-    private final Signal<DrmVBlank, Slot<DrmVBlank>>     vBlankSignal   = new Signal<>();
 
     @Nonnull
     private final Libdrm libdrm;
@@ -47,10 +42,14 @@ public class DrmEventBus implements EventLoop.FileDescriptorEventHandler {
                                 @Unsigned final int tv_sec,
                                 @Unsigned final int tv_usec,
                                 @Ptr final long user_data) {
-        this.pageFlipSignal.emit(DrmPageFlip.create(sequence,
-                                                    tv_sec,
-                                                    tv_usec,
-                                                    user_data));
+        try (final Pointer<DrmPageFlipCallback> drmPageFlipCallbackPointer = Pointer.wrap(DrmPageFlipCallback.class,
+                                                                                          user_data)) {
+            drmPageFlipCallbackPointer
+                    .dref()
+                    .onPageFlip(sequence,
+                                tv_sec,
+                                tv_usec);
+        }
     }
 
     public void vblankHandler(final int fd,
@@ -58,17 +57,13 @@ public class DrmEventBus implements EventLoop.FileDescriptorEventHandler {
                               @Unsigned final int tv_sec,
                               @Unsigned final int tv_usec,
                               @Ptr final long user_data) {
-        this.vBlankSignal.emit(DrmVBlank.create(sequence,
-                                                tv_sec,
-                                                tv_usec,
-                                                user_data));
-    }
-
-    public Signal<DrmPageFlip, Slot<DrmPageFlip>> getPageFlipSignal() {
-        return this.pageFlipSignal;
-    }
-
-    public Signal<DrmVBlank, Slot<DrmVBlank>> getVBlankSignal() {
-        return this.vBlankSignal;
+        try (final Pointer<DrmPageFlipCallback> drmPageFlipCallbackPointer = Pointer.wrap(DrmPageFlipCallback.class,
+                                                                                          user_data)) {
+            drmPageFlipCallbackPointer
+                    .dref()
+                    .onVBlank(sequence,
+                              tv_sec,
+                              tv_usec);
+        }
     }
 }
