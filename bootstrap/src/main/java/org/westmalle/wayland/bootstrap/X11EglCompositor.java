@@ -18,7 +18,7 @@ public interface X11EglCompositor {
     LifeCycle lifeCycle();
 
     /*
-     * Define a platform to output pixels & handle user input.
+     * X11 egl platform provides a single seat.
      */
     WlSeat wlSeat();
 }
