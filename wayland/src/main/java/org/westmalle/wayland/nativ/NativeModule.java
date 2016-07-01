@@ -27,6 +27,10 @@ import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
 import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host_Symbols;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libc.Libc_Symbols;
+import org.westmalle.wayland.nativ.libdrm.Libdrm;
+import org.westmalle.wayland.nativ.libdrm.Libdrm_Symbols;
+import org.westmalle.wayland.nativ.libgbm.Libgbm;
+import org.westmalle.wayland.nativ.libgbm.Libgbm_Symbols;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1_Symbols;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
@@ -40,6 +44,20 @@ import javax.inject.Singleton;
 
 @Module
 public class NativeModule {
+
+    @Singleton
+    @Provides
+    Libdrm provideLibdrm() {
+        new Libdrm_Symbols().link();
+        return new Libdrm();
+    }
+
+    @Singleton
+    @Provides
+    Libgbm provideLibgbm() {
+        new Libgbm_Symbols().link();
+        return new Libgbm();
+    }
 
     @Singleton
     @Provides
