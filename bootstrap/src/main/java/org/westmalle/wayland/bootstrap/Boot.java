@@ -80,9 +80,9 @@ public class Boot {
         final WlSeat wlSeat = drmEglCompositor.seatFactory()
                                               .create("seat0",
                                                       "",
-                                                      "pc105",
-                                                      "us",
-                                                      "qwerty",
+                                                      "",
+                                                      "",
+                                                      "",
                                                       "");
 
         //setup keyboard focus tracking to follow mouse pointer & touch
@@ -116,9 +116,9 @@ public class Boot {
         final WlSeat wlSeat = dispmanxEglCompositor.seatFactory()
                                                    .create("seat0",
                                                            "",
-                                                           "pc105",
-                                                           "us",
-                                                           "qwerty",
+                                                           "",
+                                                           "",
+                                                           "",
                                                            "");
 
         //setup keyboard focus tracking to follow mouse pointer & touch
