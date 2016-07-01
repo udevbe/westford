@@ -19,12 +19,12 @@ import org.westmalle.wayland.core.Point;
 import javax.annotation.Nonnull;
 
 @AutoValue
-public abstract class Motion {
+public abstract class PointerMotion {
 
-    public static Motion create(final int time,
-                                @Nonnull final Point point) {
-        return new AutoValue_Motion(time,
-                                    point);
+    public static PointerMotion create(final int time,
+                                       @Nonnull final Point point) {
+        return new AutoValue_PointerMotion(time,
+                                           point);
     }
 
     public abstract int getTime();

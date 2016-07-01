@@ -33,10 +33,9 @@ import org.westmalle.wayland.core.*;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
-import org.westmalle.wayland.core.events.Motion;
+import org.westmalle.wayland.core.events.PointerMotion;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -116,8 +115,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(98765,
-                                               Point.create(110,
+        pointerGrabMotion.motion(PointerMotion.create(98765,
+                                                      Point.create(110,
                                                             110)));
         //then
         verify(surface).setPosition(Point.create(85,
@@ -179,8 +178,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.RIGHT.value,
                                                  200,
@@ -241,8 +240,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_RIGHT.value,
                                                  200,
@@ -304,8 +303,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP.value,
                                                  100,
@@ -367,8 +366,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP_RIGHT.value,
                                                  200,
@@ -430,8 +429,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.LEFT.value,
                                                  200,
@@ -493,8 +492,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP_LEFT.value,
                                                  200,
@@ -556,8 +555,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM.value,
                                                  100,
@@ -619,8 +618,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(Motion.create(456767,
-                                               pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.create(456767,
+                                                      pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_LEFT.value,
                                                  200,
