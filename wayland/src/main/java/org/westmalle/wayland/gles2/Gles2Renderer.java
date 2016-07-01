@@ -54,6 +54,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_IMAGE_KHR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
@@ -261,8 +262,8 @@ public class Gles2Renderer implements GlRenderer {
         }
 
         for (final long eglImage : eglSurfaceRenderState.getEglImages()) {
-            Gles2Renderer.this.eglDestroyImageKHR.ifPresent(eglDestroyImageKHR1 -> eglDestroyImageKHR1.$(Gles2Renderer.this.eglDisplay,
-                                                                                                         eglImage));
+            Gles2Renderer.this.eglDestroyImageKHR.ifPresent(eglDestroyImage -> eglDestroyImage.$(Gles2Renderer.this.eglDisplay,
+                                                                                                 eglImage));
         }
     }
 
@@ -324,6 +325,10 @@ public class Gles2Renderer implements GlRenderer {
     @Override
     public long eglConfig(final long eglDisplay,
                           @Nonnull final String eglExtensions) {
+
+        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) == 0L) {
+            throw new RuntimeException("eglBindAPI failed");
+        }
 
         final int configs_size = 256 * sizeof((Pointer<?>) null);
         final Pointer<Pointer> configs = malloc(configs_size,

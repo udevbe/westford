@@ -1,9 +1,23 @@
+//Copyright 2016 Erik De Rijcke
+//
+//Licensed under the Apache License,Version2.0(the"License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//
+//http://www.apache.org/licenses/LICENSE-2.0
+//
+//Unless required by applicable law or agreed to in writing,software
+//distributed under the License is distributed on an"AS IS"BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
 package org.westmalle.wayland.drm.egl;
 
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.EglConnector;
@@ -11,6 +25,7 @@ import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPageFlipCallback;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
+import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
@@ -95,11 +110,22 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
             throw new RuntimeException("failed to create fb");
         }
 
+
         this.libgbm.gbm_bo_set_user_data(gbmBo,
                                          fb.address,
-                                         drm_fb_destroy_callback);
+                                         Pointerdestroy_user_data.nref(this::destroyUserData).address);
 
         return fb.dref();
+    }
+
+    private void destroyUserData(@Ptr final long bo,
+                                 @Ptr final long data) {
+        final Pointer<Integer> fbidP = Pointer.wrap(Integer.class,
+                                                    data);
+        final Integer fbId = fbidP.dref();
+        this.libdrm.drmModeRmFB(this.drmFd,
+                                fbId);
+        fbidP.close();
     }
 
     @Override

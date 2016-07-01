@@ -140,10 +140,6 @@ public class DispmanxEglPlatformFactory {
                                   final long display,
                                   final long config,
                                   final long context) {
-        // get an appropriate EGL frame buffer configuration
-        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) != 0) {
-            this.libEGL.throwError("eglBindAPI");
-        }
 
         final long surface = this.libEGL.eglCreateWindowSurface(display,
                                                                 config,
