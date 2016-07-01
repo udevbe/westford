@@ -15,9 +15,9 @@ package org.westmalle.wayland.bootstrap;
 
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.TouchDevice;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
-import org.westmalle.wayland.x11.X11SeatFactory;
 
 import java.util.logging.Logger;
 
@@ -70,9 +70,29 @@ public class Boot {
          */
         final LifeCycle lifeCycle = dispmanxEglCompositor.lifeCycle();
 
-        //TODO setup seat
-        //dispmanxEglCompositor.seatFactory().create("seat0",...);
+        final WlSeat wlSeat = dispmanxEglCompositor.seatFactory()
+                                                   .create("seat0",
+                                                           "",
+                                                           "pc105",
+                                                           "us",
+                                                           "qwerty",
+                                                           "");
 
+        //setup keyboard focus tracking to follow mouse pointer & touch
+        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
+        final PointerDevice pointerDevice = wlSeat.getWlPointer()
+                                                  .getPointerDevice();
+        final TouchDevice touchDevice = wlSeat.getWlTouch()
+                                              .getTouchDevice();
+
+        pointerDevice.getPointerFocusSignal()
+                     .connect(event -> wlKeyboard.getKeyboardDevice()
+                                                 .setFocus(wlKeyboard.getResources(),
+                                                           pointerDevice.getFocus()));
+//        touchDevice.getTouchFocusSignal()
+//                   .connect(event -> wlKeyboard.getKeyboardDevice()
+//                                               .setFocus(wlKeyboard.getResources(),
+//                                                         pointerDevice.getFocus()));
         //start the compositor
         lifeCycle.start();
     }
