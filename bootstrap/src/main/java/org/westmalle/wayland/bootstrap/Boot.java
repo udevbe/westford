@@ -13,12 +13,15 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
+import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class Boot {
@@ -57,10 +60,50 @@ public class Boot {
                 boot.strap(DaggerDispmanxEglCompositor.create());
                 break;
 
+            case "DrmEgl":
+                boot.strap(DaggerDrmEglCompositor.create());
+                break;
+
             default:
                 //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
                 boot.strap(DaggerX11EglCompositor.create());
         }
+    }
+
+    private void strap(final DrmEglCompositor drmEglCompositor) {
+        /*
+         * Keep this first as weston demo clients *really* like their globals
+         * to be initialized in a certain order, else they segfault...
+         */
+        final LifeCycle lifeCycle = drmEglCompositor.lifeCycle();
+
+        final WlSeat wlSeat = drmEglCompositor.seatFactory()
+                                              .create("seat0",
+                                                      "",
+                                                      "pc105",
+                                                      "us",
+                                                      "qwerty",
+                                                      "");
+
+        //setup keyboard focus tracking to follow mouse pointer & touch
+        final PointerDevice pointerDevice = wlSeat.getWlPointer()
+                                                  .getPointerDevice();
+        final TouchDevice touchDevice = wlSeat.getWlTouch()
+                                              .getTouchDevice();
+
+        final WlKeyboard              wlKeyboard          = wlSeat.getWlKeyboard();
+        final KeyboardDevice          keyboardDevice      = wlKeyboard.getKeyboardDevice();
+        final Set<WlKeyboardResource> wlKeyboardResources = wlKeyboard.getResources();
+
+        pointerDevice.getPointerFocusSignal()
+                     .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
+                                                               pointerDevice.getFocus()));
+        touchDevice.getTouchDownSignal()
+                   .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
+                                                             touchDevice.getGrab()));
+
+        //start the compositor
+        lifeCycle.start();
     }
 
     private void strap(final DispmanxEglCompositor dispmanxEglCompositor) {
@@ -79,20 +122,22 @@ public class Boot {
                                                            "");
 
         //setup keyboard focus tracking to follow mouse pointer & touch
-        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
         final PointerDevice pointerDevice = wlSeat.getWlPointer()
                                                   .getPointerDevice();
         final TouchDevice touchDevice = wlSeat.getWlTouch()
                                               .getTouchDevice();
 
+        final WlKeyboard              wlKeyboard          = wlSeat.getWlKeyboard();
+        final KeyboardDevice          keyboardDevice      = wlKeyboard.getKeyboardDevice();
+        final Set<WlKeyboardResource> wlKeyboardResources = wlKeyboard.getResources();
+
         pointerDevice.getPointerFocusSignal()
-                     .connect(event -> wlKeyboard.getKeyboardDevice()
-                                                 .setFocus(wlKeyboard.getResources(),
-                                                           pointerDevice.getFocus()));
+                     .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
+                                                               pointerDevice.getFocus()));
         touchDevice.getTouchDownSignal()
-                   .connect(event -> wlKeyboard.getKeyboardDevice()
-                                               .setFocus(wlKeyboard.getResources(),
-                                                         pointerDevice.getFocus()));
+                   .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
+                                                             touchDevice.getGrab()));
+
         //start the compositor
         lifeCycle.start();
     }
