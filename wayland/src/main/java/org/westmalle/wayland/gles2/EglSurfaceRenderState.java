@@ -51,8 +51,10 @@ public abstract class EglSurfaceRenderState implements SurfaceRenderState {
 
     public abstract boolean getYInverted();
 
+    @SuppressWarnings("mutable")
     public abstract int[] getTextures();
 
+    @SuppressWarnings("mutable")
     public abstract long[] getEglImages();
 
     @Override
