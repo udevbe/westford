@@ -70,10 +70,6 @@ public class X11EglPlatformFactory {
     @Nonnull
     public X11EglPlatform create() {
 
-        if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) == 0L) {
-            throw new RuntimeException("eglBindAPI failed");
-        }
-
         final long eglDisplay = createEglDisplay(this.x11Platform.getxDisplay());
 
         final String eglExtensions = Pointer.wrap(String.class,

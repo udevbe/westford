@@ -76,22 +76,6 @@ public class X11EglPlatformFactoryTest {
     }
 
     @Test
-    public void testCreateNoEsAPi() throws Exception {
-        //given
-        this.exception.expect(RuntimeException.class);
-        this.exception.expectMessage("eglBindAPI failed");
-
-        when(this.libEGL.eglBindAPI(EGL_OPENGL_ES_API)).thenReturn(0);
-        when(this.libEGL.eglBindAPI(EGL_OPENGL_API)).thenReturn(1);
-        //when
-        this.x11EglPlatformFactory.create();
-        //then
-        verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
-        //runtime exception is thrown
-        verifyNoMoreInteractions(this.libEGL);
-    }
-
-    @Test
     public void testCreateNoEglExtPlatformX11() {
         //given
         this.exception.expect(RuntimeException.class);
@@ -407,7 +391,6 @@ public class X11EglPlatformFactoryTest {
         //when
         this.x11EglPlatformFactory.create();
         //then
-        verify(this.libEGL).eglBindAPI(EGL_OPENGL_ES_API);
         verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
                                            EGL_EXTENSIONS);
         verify(this.libEGL).eglInitialize(eglDisplay,
