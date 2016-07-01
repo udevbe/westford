@@ -89,10 +89,10 @@ public class Boot {
                      .connect(event -> wlKeyboard.getKeyboardDevice()
                                                  .setFocus(wlKeyboard.getResources(),
                                                            pointerDevice.getFocus()));
-//        touchDevice.getTouchFocusSignal()
-//                   .connect(event -> wlKeyboard.getKeyboardDevice()
-//                                               .setFocus(wlKeyboard.getResources(),
-//                                                         pointerDevice.getFocus()));
+        touchDevice.getTouchDownSignal()
+                   .connect(event -> wlKeyboard.getKeyboardDevice()
+                                               .setFocus(wlKeyboard.getResources(),
+                                                         pointerDevice.getFocus()));
         //start the compositor
         lifeCycle.start();
     }
