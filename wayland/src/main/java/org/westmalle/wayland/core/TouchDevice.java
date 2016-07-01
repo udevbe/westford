@@ -18,6 +18,12 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.WlTouchResource;
 import org.freedesktop.wayland.util.Fixed;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
+import org.westmalle.wayland.core.events.TouchDown;
+import org.westmalle.wayland.core.events.TouchGrab;
+import org.westmalle.wayland.core.events.TouchMotion;
+import org.westmalle.wayland.core.events.TouchUp;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
@@ -28,6 +34,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TouchDevice {
+
+    @Nonnull
+    private final Signal<TouchDown, Slot<TouchDown>>     touchDownSignal   = new Signal<>();
+    @Nonnull
+    private final Signal<TouchGrab, Slot<TouchGrab>>     touchGrabSignal   = new Signal<>();
+    @Nonnull
+    private final Signal<TouchMotion, Slot<TouchMotion>> touchMotionSignal = new Signal<>();
+    @Nonnull
+    private final Signal<TouchUp, Slot<TouchUp>>         touchUpSignal     = new Signal<>();
 
     @Nonnull
     private final Display display;
@@ -65,6 +80,7 @@ public class TouchDevice {
                                                         wlSurfaceResource.getClient()).forEach(wlTouchResource -> {
             if (this.touchCount == 0) {
                 this.grab = Optional.empty();
+                this.touchGrabSignal.emit(TouchGrab.create());
             }
             wlTouchResource.frame();
         }));
@@ -83,6 +99,7 @@ public class TouchDevice {
         if (!getGrab().isPresent()) {
             this.grab = this.scene.pickSurface(Point.create(x,
                                                             y));
+            this.touchGrabSignal.emit(TouchGrab.create());
         }
 
         //report 'down' to grab (if any)
@@ -102,7 +119,7 @@ public class TouchDevice {
                                                                                                   Fixed.create(local.getY())));
         });
 
-        //TODO send event(s)?
+        this.touchDownSignal.emit(TouchDown.create());
     }
 
     private int nextDownSerial() {
@@ -129,7 +146,7 @@ public class TouchDevice {
             }
         });
 
-        //TODO send event(s)?
+        this.touchUpSignal.emit(TouchUp.create());
     }
 
     //TODO unit test
@@ -149,7 +166,8 @@ public class TouchDevice {
                                                                                                     Fixed.create(local.getX()),
                                                                                                     Fixed.create(local.getY())));
         });
-        //TODO send event(s)?
+
+        this.touchMotionSignal.emit(TouchMotion.create());
     }
 
     private int nextUpSerial() {
@@ -173,5 +191,29 @@ public class TouchDevice {
                                .filter(wlPointerResource -> wlPointerResource.getClient()
                                                                              .equals(client))
                                .collect(Collectors.toSet());
+    }
+
+    public int getTouchCount() {
+        return this.touchCount;
+    }
+
+    @Nonnull
+    public Signal<TouchDown, Slot<TouchDown>> getTouchDownSignal() {
+        return this.touchDownSignal;
+    }
+
+    @Nonnull
+    public Signal<TouchGrab, Slot<TouchGrab>> getTouchGrabSignal() {
+        return this.touchGrabSignal;
+    }
+
+    @Nonnull
+    public Signal<TouchMotion, Slot<TouchMotion>> getTouchMotionSignal() {
+        return this.touchMotionSignal;
+    }
+
+    @Nonnull
+    public Signal<TouchUp, Slot<TouchUp>> getTouchUpSignal() {
+        return this.touchUpSignal;
     }
 }
