@@ -33,7 +33,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.events.Motion;
+import org.westmalle.wayland.core.events.PointerMotion;
 import org.westmalle.wayland.protocol.WlRegion;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -1152,8 +1152,8 @@ public class PointerDeviceTest {
                                   y1);
 
         //then
-        verify(pointerGrabMotion).motion(eq(Motion.create(time3,
-                                                          Point.create(x1,
+        verify(pointerGrabMotion).motion(eq(PointerMotion.create(time3,
+                                                                 Point.create(x1,
                                                                        y1))));
         final ArgumentCaptor<DestroyListener> listenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource0,

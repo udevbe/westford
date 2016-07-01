@@ -18,14 +18,13 @@ import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlPointerResource;
-import org.freedesktop.wayland.server.WlSurfaceRequests;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.events.Button;
-import org.westmalle.wayland.core.events.Motion;
+import org.westmalle.wayland.core.events.PointerMotion;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.core.events.Signal;
@@ -37,7 +36,6 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -46,13 +44,13 @@ import java.util.stream.Collectors;
 public class PointerDevice implements Role {
 
     @Nonnull
-    private final Signal<Motion, Slot<Motion>>             motionSignal       = new Signal<>();
+    private final Signal<PointerMotion, Slot<PointerMotion>> motionSignal       = new Signal<>();
     @Nonnull
-    private final Signal<Button, Slot<Button>>             buttonSignal       = new Signal<>();
+    private final Signal<Button, Slot<Button>>               buttonSignal       = new Signal<>();
     @Nonnull
-    private final Signal<PointerGrab, Slot<PointerGrab>>   pointerGrabSignal  = new Signal<>();
+    private final Signal<PointerGrab, Slot<PointerGrab>>     pointerGrabSignal  = new Signal<>();
     @Nonnull
-    private final Signal<PointerFocus, Slot<PointerFocus>> pointerFocusSignal = new Signal<>();
+    private final Signal<PointerFocus, Slot<PointerFocus>>   pointerFocusSignal = new Signal<>();
 
     @Nonnull
     private final Set<Integer>                   pressedButtons = new HashSet<>();
@@ -225,8 +223,8 @@ public class PointerDevice implements Role {
                                      reportMotion(wlPointerResources,
                                                   time,
                                                   wlSurfaceResource));
-        this.motionSignal.emit(Motion.create(time,
-                                             getPosition()));
+        this.motionSignal.emit(PointerMotion.create(time,
+                                                    getPosition()));
     }
 
     public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources) {
@@ -465,7 +463,7 @@ public class PointerDevice implements Role {
      *
      * @param wlSurfaceResource Surface that is grabbed.
      * @param buttonPressSerial Serial that triggered the grab.
-     * @param pointerGrabMotion Motion listener.
+     * @param pointerGrabMotion PointerMotion listener.
      *
      * @return true if the listener was registered, false if not.
      */
@@ -481,9 +479,9 @@ public class PointerDevice implements Role {
         }
 
 
-        final Slot<Motion> motionSlot = new Slot<Motion>() {
+        final Slot<PointerMotion> motionSlot = new Slot<PointerMotion>() {
 
-            public void handle(@Nonnull final Motion motion) {
+            public void handle(@Nonnull final PointerMotion motion) {
                 if (getGrab().isPresent() &&
                     getGrab().get()
                              .equals(wlSurfaceResource)) {
@@ -509,7 +507,7 @@ public class PointerDevice implements Role {
     }
 
     @Nonnull
-    public Signal<Motion, Slot<Motion>> getMotionSignal() {
+    public Signal<PointerMotion, Slot<PointerMotion>> getMotionSignal() {
         return this.motionSignal;
     }
 

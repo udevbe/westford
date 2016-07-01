@@ -167,8 +167,8 @@ public class ShellSurface implements Role {
                          .connect(new Slot<PointerGrab>() {
                              @Override
                              public void handle(@Nonnull final PointerGrab event) {
-                                 if (!event.getWlSurfaceResource()
-                                           .isPresent()) {
+                                 if (!pointerDevice.getGrab()
+                                                   .isPresent()) {
                                      pointerDevice.getPointerGrabSignal()
                                                   .disconnect(this);
                                      wlPointerResource.enter(pointerDevice.nextEnterSerial(),

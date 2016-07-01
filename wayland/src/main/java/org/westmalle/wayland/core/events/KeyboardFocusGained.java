@@ -21,7 +21,7 @@ import java.util.Set;
 
 @AutoValue
 public abstract class KeyboardFocusGained {
-    public static KeyboardFocusGained create(@Nonnull Set<WlKeyboardResource> wlKeyboardResources) {
+    public static KeyboardFocusGained create(@Nonnull final Set<WlKeyboardResource> wlKeyboardResources) {
         return new AutoValue_KeyboardFocusGained(wlKeyboardResources);
     }
 
