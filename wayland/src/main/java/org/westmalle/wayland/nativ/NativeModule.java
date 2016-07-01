@@ -33,6 +33,8 @@ import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm_Symbols;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1_Symbols;
+import org.westmalle.wayland.nativ.libudev.Libudev;
+import org.westmalle.wayland.nativ.libudev.Libudev_Symbols;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.Libxcb_Symbols;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
@@ -44,6 +46,13 @@ import javax.inject.Singleton;
 
 @Module
 public class NativeModule {
+
+    @Singleton
+    @Provides
+    Libudev provideLibudev() {
+        new Libudev_Symbols().link();
+        return new Libudev();
+    }
 
     @Singleton
     @Provides

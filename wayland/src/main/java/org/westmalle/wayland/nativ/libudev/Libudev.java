@@ -26,10 +26,6 @@ public class Libudev {
 
     public static final String DEFAULT_SEAT = "seat0";
 
-    @Inject
-    Libudev() {
-    }
-
     @Ptr
     public native long udev_unref(@Ptr long udev);
 
