@@ -179,12 +179,11 @@ public class X11PlatformFactoryTest {
         final WlOutput wlOutput = mock(WlOutput.class);
         when(this.wlOutputFactory.create(output)).thenReturn(wlOutput);
 
+        final X11Connector                                                             x11Connector  = mock(X11Connector.class);
         final EventLoop                                                                eventLoop     = mock(EventLoop.class);
         final EventSource                                                              eventSource   = mock(EventSource.class);
         final X11EventBus                                                              x11EventBus   = mock(X11EventBus.class);
         final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal  = mock(Signal.class);
-        final int                                                                      width         = 640;
-        final int                                                                      height        = 480;
         final long                                                                     xDisplay      = 1234567;
         final long                                                                     xcbConnection = 112358;
         final long                                                                     setup         = 473289;
@@ -221,6 +220,8 @@ public class X11PlatformFactoryTest {
                                                cookie,
                                                0L)).thenAnswer(invocation -> malloc(xcb_intern_atom_reply_t.SIZE,
                                                                                     xcb_intern_atom_reply_t.class).address);
+        when(this.x11ConnectorFactory.create(window,
+                                             wlOutput)).thenReturn(x11Connector);
         //when
         this.x11PlatformFactory.create();
         //then

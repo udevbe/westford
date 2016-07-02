@@ -35,6 +35,10 @@ import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
 
 import javax.annotation.Nonnull;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -71,8 +75,10 @@ public class X11EglPlatformFactoryTest {
 
     @Before
     public void setUp() {
-        final X11Connector x11Connector = mock(X11Connector.class);
-        when(this.x11Platform.getConnectors()).thenReturn(new X11Connector[]{x11Connector});
+        final X11Connector                 x11Connector  = mock(X11Connector.class);
+        final List<Optional<X11Connector>> x11Connectors = new LinkedList<>();
+        x11Connectors.add(Optional.of(x11Connector));
+        when(this.x11Platform.getConnectors()).thenReturn(x11Connectors);
     }
 
     @Test
