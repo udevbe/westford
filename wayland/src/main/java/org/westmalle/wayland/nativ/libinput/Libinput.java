@@ -224,11 +224,6 @@ public class Libinput {
     public static final int LIBINPUT_DEVICE_CAP_TABLET_PAD  = 4;
     public static final int LIBINPUT_DEVICE_CAP_GESTURE     = 5;
 
-
-    @Inject
-    Libinput() {
-    }
-
     @Ptr
     public native long libinput_udev_create_context(@Ptr(libinput_interface.class) long interface_,
                                                     @Ptr(Void.class) long user_data,
