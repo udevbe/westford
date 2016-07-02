@@ -99,10 +99,10 @@ public class X11EglPlatformFactory {
                            eglVersion,
                            eglExtensions));
 
-        final long config = this.glRenderer.eglConfig(eglDisplay,
-                                                      eglExtensions);
+        final long eglConfig = this.glRenderer.eglConfig(eglDisplay,
+                                                         eglExtensions);
         final long eglContext = createEglContext(eglDisplay,
-                                                 config);
+                                                 eglConfig);
 
         final X11Connector[]    x11Connectors    = this.x11Platform.getConnectors();
         final X11EglConnector[] x11EglConnectors = new X11EglConnector[x11Connectors.length];
@@ -110,8 +110,7 @@ public class X11EglPlatformFactory {
         for (int i = 0, x11ConnectorsLength = x11Connectors.length; i < x11ConnectorsLength; i++) {
             final X11Connector x11Connector = x11Connectors[i];
             final long eglSurface = createEglSurface(eglDisplay,
-                                                     config,
-                                                     eglContext,
+                                                     eglConfig,
                                                      x11Connector.getXWindow());
             final X11EglConnector x11EglConnector = this.x11EglConnectorFactory.create(x11Connector,
                                                                                        eglSurface);
@@ -178,7 +177,6 @@ public class X11EglPlatformFactory {
 
     public long createEglSurface(final long eglDisplay,
                                  final long config,
-                                 final long context,
                                  final int nativeWindow) {
         final Pointer<Integer> eglSurfaceAttribs = Pointer.nref(EGL_RENDER_BUFFER,
                                                                 EGL_BACK_BUFFER,
