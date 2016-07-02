@@ -18,8 +18,10 @@ import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPlatform;
+import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
+import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 
@@ -29,6 +31,7 @@ import javax.inject.Inject;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
@@ -36,6 +39,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_GBM_KHR;
+import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
@@ -48,6 +52,8 @@ public class GbmEglPlatformFactory {
 
     @Nonnull
     private final PrivateGbmEglPlatformFactory privateGbmEglPlatformFactory;
+    @Nonnull
+    private final Libc                         libc;
     @Nonnull
     private final Libdrm                       libdrm;
     @Nonnull
@@ -63,6 +69,7 @@ public class GbmEglPlatformFactory {
 
     @Inject
     GbmEglPlatformFactory(@Nonnull final PrivateGbmEglPlatformFactory privateGbmEglPlatformFactory,
+                          @Nonnull final Libc libc,
                           @Nonnull final Libdrm libdrm,
                           @Nonnull final Libgbm libgbm,
                           @Nonnull final LibEGL libEGL,
@@ -70,6 +77,7 @@ public class GbmEglPlatformFactory {
                           @Nonnull final GbmEglConnectorFactory eglGbmConnectorFactory,
                           @Nonnull final GlRenderer glRenderer) {
         this.privateGbmEglPlatformFactory = privateGbmEglPlatformFactory;
+        this.libc = libc;
         this.libdrm = libdrm;
         this.libgbm = libgbm;
         this.libEGL = libEGL;
@@ -79,17 +87,7 @@ public class GbmEglPlatformFactory {
     }
 
     public GbmEglPlatform create() {
-        final long gbmDevice = this.libgbm.gbm_create_device(this.drmPlatform.getDrmFd());
-
-        final DrmConnector[]    drmConnectors    = this.drmPlatform.getConnectors();
-        final GbmEglConnector[] gbmEglConnectors = new GbmEglConnector[drmConnectors.length];
-
-        for (int i = 0; i < drmConnectors.length; i++) {
-            final DrmConnector drmConnector = drmConnectors[i];
-            gbmEglConnectors[i] = createGbmEglConnector(gbmDevice,
-                                                        drmConnector);
-        }
-
+        final long gbmDevice  = this.libgbm.gbm_create_device(this.drmPlatform.getDrmFd());
         final long eglDisplay = createEglDisplay(gbmDevice);
 
         final String eglExtensions = Pointer.wrap(String.class,
@@ -109,7 +107,7 @@ public class GbmEglPlatformFactory {
                                                                           EGL_VERSION))
                                          .dref();
 
-        LOGGER.info(format("Creating X11 EGL output:\n"
+        LOGGER.info(format("Creating DRM EGL output:\n"
                            + "\tEGL client apis: %s\n"
                            + "\tEGL vendor: %s\n"
                            + "\tEGL version: %s\n"
@@ -119,10 +117,23 @@ public class GbmEglPlatformFactory {
                            eglVersion,
                            eglExtensions));
 
-        final long config = this.glRenderer.eglConfig(eglDisplay,
-                                                      eglExtensions);
+        final long eglConfig = this.glRenderer.eglConfig(eglDisplay,
+                                                         eglExtensions);
         final long eglContext = createEglContext(eglDisplay,
-                                                 config);
+                                                 eglConfig);
+
+        final DrmConnector[]    drmConnectors    = this.drmPlatform.getConnectors();
+        final GbmEglConnector[] gbmEglConnectors = new GbmEglConnector[drmConnectors.length];
+
+        for (int i = 0; i < drmConnectors.length; i++) {
+            final DrmConnector drmConnector = drmConnectors[i];
+            gbmEglConnectors[i] = createGbmEglConnector(drmConnector,
+                                                        gbmDevice,
+                                                        eglDisplay,
+                                                        eglContext,
+                                                        eglConfig);
+        }
+
 
         return this.privateGbmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,
@@ -149,8 +160,11 @@ public class GbmEglPlatformFactory {
         return context;
     }
 
-    private GbmEglConnector createGbmEglConnector(final long gbmDevice,
-                                                  final DrmConnector drmConnector) {
+    private GbmEglConnector createGbmEglConnector(final DrmConnector drmConnector,
+                                                  final long gbmDevice,
+                                                  final long eglDisplay,
+                                                  final long eglContext,
+                                                  final long eglConfig) {
 
         final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
                                                                drmConnector.getMode()
@@ -160,22 +174,41 @@ public class GbmEglPlatformFactory {
                                                                GBM_FORMAT_XRGB8888,
                                                                GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
 
+        if (gbmSurface == 0) {
+            throw new RuntimeException("failed to create gbm surface");
+        }
+
+        final long eglSurface = createEglSurface(eglDisplay,
+                                                 eglConfig,
+                                                 gbmSurface);
+
+        this.libEGL.eglMakeCurrent(eglDisplay,
+                                   eglSurface,
+                                   eglSurface,
+                                   eglContext);
+        this.libEGL.eglSwapBuffers(eglDisplay,
+                                   eglSurface);
         final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
 
         final GbmEglConnector gbmEglConnector = this.eglGbmConnectorFactory.create(this.drmPlatform.getDrmFd(),
                                                                                    gbmBo,
                                                                                    gbmSurface,
-                                                                                   drmConnector);
+                                                                                   drmConnector,
+                                                                                   eglSurface);
         final int fbId = gbmEglConnector.getFbId(gbmBo);
-        this.libdrm.drmModeSetCrtc(this.drmPlatform.getDrmFd(),
-                                   drmConnector.getCrtcId(),
-                                   fbId,
-                                   0,
-                                   0,
-                                   Pointer.nref(drmConnector.getDrmModeConnector()
-                                                            .connector_id()).address,
-                                   1,
-                                   Pointer.ref(drmConnector.getMode()).address);
+        final int error = this.libdrm.drmModeSetCrtc(this.drmPlatform.getDrmFd(),
+                                                     drmConnector.getCrtcId(),
+                                                     fbId,
+                                                     0,
+                                                     0,
+                                                     Pointer.nref(drmConnector.getDrmModeConnector()
+                                                                              .connector_id()).address,
+                                                     1,
+                                                     Pointer.ref(drmConnector.getMode()).address);
+        if (error != 0) {
+            throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
+                                                     this.libc.getErrno()));
+        }
 
         return gbmEglConnector;
     }
@@ -190,8 +223,8 @@ public class GbmEglPlatformFactory {
         }
         final String extensions = noDisplayExtensions.dref();
 
-        if (!extensions.contains("EGL_EXT_platform_gbm")) {
-            throw new RuntimeException("Required extension EGL_EXT_platform_gbm not available.");
+        if (!extensions.contains("EGL_MESA_platform_gbm")) {
+            throw new RuntimeException("Required extension EGL_MESA_platform_gbm not available.");
         }
 
         final Pointer<EglGetPlatformDisplayEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglGetPlatformDisplayEXT.class,
@@ -211,5 +244,26 @@ public class GbmEglPlatformFactory {
         }
 
         return eglDisplay;
+    }
+
+    public long createEglSurface(final long eglDisplay,
+                                 final long config,
+                                 final long gbmSurface) {
+        final Pointer<Integer> eglSurfaceAttribs = Pointer.nref(EGL_RENDER_BUFFER,
+                                                                EGL_BACK_BUFFER,
+                                                                EGL_NONE);
+
+        final Pointer<EglCreatePlatformWindowSurfaceEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglCreatePlatformWindowSurfaceEXT.class,
+                                                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("eglCreatePlatformWindowSurfaceEXT").address));
+        final long eglSurface = eglGetPlatformDisplayEXT.dref()
+                                                        .$(eglDisplay,
+                                                           config,
+                                                           gbmSurface,
+                                                           eglSurfaceAttribs.address);
+        if (eglSurface == 0L) {
+            throw new RuntimeException("eglCreateWindowSurface() failed");
+        }
+
+        return eglSurface;
     }
 }

@@ -47,6 +47,7 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
     private final long         gbmSurface;
     @Nonnull
     private final DrmConnector drmConnector;
+    private final long         eglSurface;
 
     private long nextGbmBo;
 
@@ -55,13 +56,15 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
                     final int drmFd,
                     final long gbmBo,
                     final long gbmSurface,
-                    @Nonnull final DrmConnector drmConnector) {
+                    @Nonnull final DrmConnector drmConnector,
+                    final long eglSurface) {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.drmFd = drmFd;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
         this.drmConnector = drmConnector;
+        this.eglSurface = eglSurface;
     }
 
     @Override
@@ -130,7 +133,7 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     @Override
     public long getEglSurface() {
-        return 0;
+        return this.eglSurface;
     }
 
     @Nonnull

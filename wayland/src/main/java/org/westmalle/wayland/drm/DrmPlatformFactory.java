@@ -196,7 +196,8 @@ public class DrmPlatformFactory {
                 if ((possibleCrtcs & (1 << i)) != 0 &&
                     crtcAllocations.add(drmModeRes.crtcs()
                                                   .dref(i))) {
-                    return Optional.of(i);
+                    return Optional.of(drmModeRes.crtcs()
+                                                 .dref(i));
                 }
             }
         }
@@ -231,6 +232,10 @@ public class DrmPlatformFactory {
                                                             .physicalHeight(drmModeConnector.mmHeight())
                                                             .make("unknown")
                                                             .model("unknown")
+                                                            .x(0)
+                                                            .y(0)
+                                                            .subpixel(0)
+                                                            .transform(0)
                                                             .build();
         final OutputMode outputMode = OutputMode.builder()
                                                 .height(mode.hdisplay())
