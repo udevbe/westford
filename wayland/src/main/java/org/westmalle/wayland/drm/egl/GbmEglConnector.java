@@ -123,12 +123,12 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     private void destroyUserData(@Ptr final long bo,
                                  @Ptr final long data) {
-        final Pointer<Integer> fbidP = Pointer.wrap(Integer.class,
+        final Pointer<Integer> fbIdP = Pointer.wrap(Integer.class,
                                                     data);
-        final Integer fbId = fbidP.dref();
+        final Integer fbId = fbIdP.dref();
         this.libdrm.drmModeRmFB(this.drmFd,
                                 fbId);
-        fbidP.close();
+        fbIdP.close();
     }
 
     @Override
@@ -138,7 +138,7 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     @Nonnull
     @Override
-    public Optional<WlOutput> getWlOutput() {
+    public WlOutput getWlOutput() {
         return this.drmConnector.getWlOutput();
     }
 

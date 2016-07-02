@@ -18,6 +18,8 @@ import org.westmalle.wayland.core.EglPlatform;
 import org.westmalle.wayland.core.Renderer;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 
 @AutoFactory(allowSubclasses = true,
@@ -25,18 +27,18 @@ import javax.annotation.Nonnull;
 public class GbmEglPlatform implements EglPlatform {
 
 
-    private final long              gbmDevice;
-    private final long              eglDisplay;
-    private final long              eglContext;
-    private final String            eglExtensions;
+    private final long                            gbmDevice;
+    private final long                            eglDisplay;
+    private final long                            eglContext;
+    private final String                          eglExtensions;
     @Nonnull
-    private final GbmEglConnector[] gbmEglConnectors;
+    private final List<Optional<GbmEglConnector>> gbmEglConnectors;
 
     GbmEglPlatform(final long gbmDevice,
                    final long eglDisplay,
                    final long eglContext,
                    final String eglExtensions,
-                   @Nonnull final GbmEglConnector[] gbmEglConnectors) {
+                   @Nonnull final List<Optional<GbmEglConnector>> gbmEglConnectors) {
         this.gbmDevice = gbmDevice;
         this.eglDisplay = eglDisplay;
         this.eglContext = eglContext;
@@ -56,7 +58,7 @@ public class GbmEglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public GbmEglConnector[] getConnectors() {
+    public List<Optional<GbmEglConnector>> getConnectors() {
         return this.gbmEglConnectors;
     }
 

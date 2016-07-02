@@ -21,6 +21,8 @@ import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 @AutoFactory(className = "PrivateDispmanxPlatformFactory",
              allowSubclasses = true)
@@ -30,10 +32,10 @@ public class DispmanxPlatform implements Platform {
     private final DISPMANX_MODEINFO_T modeinfo;
 
     @Nonnull
-    private final DispmanxConnector[] dispmanxConnectors;
+    private final List<Optional<DispmanxConnector>> dispmanxConnectors;
 
     DispmanxPlatform(@Nonnull final DISPMANX_MODEINFO_T modeinfo,
-                     @Nonnull final DispmanxConnector[] dispmanxConnectors) {
+                     @Nonnull final List<Optional<DispmanxConnector>> dispmanxConnectors) {
         this.modeinfo = modeinfo;
         this.dispmanxConnectors = dispmanxConnectors;
     }
@@ -45,7 +47,7 @@ public class DispmanxPlatform implements Platform {
 
     @Nonnull
     @Override
-    public DispmanxConnector[] getConnectors() {
+    public List<Optional<DispmanxConnector>> getConnectors() {
         return this.dispmanxConnectors;
     }
 

@@ -14,6 +14,8 @@
 package org.westmalle.wayland.core;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 public interface EglPlatform extends Platform {
 
@@ -23,7 +25,7 @@ public interface EglPlatform extends Platform {
 
     @Nonnull
     @Override
-    EglConnector[] getConnectors();
+    List<? extends Optional<? extends EglConnector>> getConnectors();
 
     @Nonnull
     String getEglExtensions();

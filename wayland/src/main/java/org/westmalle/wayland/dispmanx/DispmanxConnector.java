@@ -25,11 +25,11 @@ import java.util.Optional;
              className = "DispmanxConnectorFactory")
 public class DispmanxConnector implements Connector {
 
-    private final Optional<WlOutput> wlOutput;
-    private final int                dispmanxElement;
+    private final WlOutput wlOutput;
+    private final int      dispmanxElement;
 
 
-    DispmanxConnector(final Optional<WlOutput> wlOutput,
+    DispmanxConnector(final WlOutput wlOutput,
                       final int dispmanxElement) {
         this.wlOutput = wlOutput;
         this.dispmanxElement = dispmanxElement;
@@ -37,7 +37,7 @@ public class DispmanxConnector implements Connector {
 
     @Nonnull
     @Override
-    public Optional<WlOutput> getWlOutput() {
+    public WlOutput getWlOutput() {
         return this.wlOutput;
     }
 

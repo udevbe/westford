@@ -89,10 +89,13 @@ public class LibinputDevice {
                                                      outputNamePointer)
                                                .dref();
 //        for (final WlOutput wlOutput : this.platform.getWlOutput()) {
-        //TODO give outputs a name, iterate them and match
+        //FIXME give outputs a name, iterate them and match
 //            if (deviceOutputName.equals(platform.getOutput()
 //                                                .getName())) {
-        return this.platform.getConnectors()[0].getWlOutput();
+        return Optional.of(this.platform.getConnectors()
+                                        .get(0)
+                                        .get()
+                                        .getWlOutput());
 //            }
         //     }
 

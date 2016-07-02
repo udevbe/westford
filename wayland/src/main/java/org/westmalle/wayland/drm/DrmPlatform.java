@@ -18,23 +18,25 @@ import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.core.Renderer;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 //TODO drm platform, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "PrivateDrmPlatformFactory")
 public class DrmPlatform implements Platform {
 
-    private final long           drmDevice;
-    private final int            drmFd;
+    private final long                         drmDevice;
+    private final int                          drmFd;
     @Nonnull
-    private final DrmEventBus    drmEventBus;
+    private final DrmEventBus                  drmEventBus;
     @Nonnull
-    private final DrmConnector[] drmConnectors;
+    private final List<Optional<DrmConnector>> drmConnectors;
 
     DrmPlatform(final long drmDevice,
                 final int drmFd,
                 @Nonnull final DrmEventBus drmEventBus,
-                @Nonnull final DrmConnector[] drmConnectors) {
+                @Nonnull final List<Optional<DrmConnector>> drmConnectors) {
         this.drmDevice = drmDevice;
         this.drmFd = drmFd;
         this.drmEventBus = drmEventBus;
@@ -43,7 +45,7 @@ public class DrmPlatform implements Platform {
 
     @Nonnull
     @Override
-    public DrmConnector[] getConnectors() {
+    public List<Optional<DrmConnector>> getConnectors() {
         return this.drmConnectors;
     }
 

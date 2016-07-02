@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public interface Connector {
     @Nonnull
-    Optional<WlOutput> getWlOutput();
+    WlOutput getWlOutput();
 
     default void begin() {}
 

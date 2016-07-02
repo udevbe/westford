@@ -31,7 +31,9 @@ import org.westmalle.wayland.protocol.WlOutputFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -98,7 +100,7 @@ public class DrmPlatformFactory {
 
         final int drmFd = initDrm(drmDevice);
 
-        final DrmConnector[] drmConnectors = createDrmConnectors(drmFd);
+        final List<Optional<DrmConnector>> drmConnectors = createDrmConnectors(drmFd);
 
         final DrmEventBus drmEventBus = this.drmEventBusFactory.create(drmFd);
         this.display.getEventLoop()
@@ -113,7 +115,7 @@ public class DrmPlatformFactory {
     }
 
 
-    private DrmConnector[] createDrmConnectors(final int drmFd) {
+    private List<Optional<DrmConnector>> createDrmConnectors(final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
         if (resources == 0L) {
             throw new RuntimeException("Getting drm resources failed.");
@@ -122,9 +124,9 @@ public class DrmPlatformFactory {
         final DrmModeRes drmModeRes = wrap(DrmModeRes.class,
                                            resources).dref();
 
-        final int            countConnectors = drmModeRes.count_connectors();
-        final DrmConnector[] drmConnectors   = new DrmConnector[countConnectors];
-        final Set<Integer>   usedCrtcs       = new HashSet<>();
+        final int                          countConnectors = drmModeRes.count_connectors();
+        final List<Optional<DrmConnector>> drmConnectors   = new ArrayList<>(countConnectors);
+        final Set<Integer>                 usedCrtcs       = new HashSet<>();
 
         for (int i = 0; i < countConnectors; i++) {
             final long connector = this.libdrm.drmModeGetConnector(drmFd,
@@ -145,17 +147,9 @@ public class DrmPlatformFactory {
             }
             else {
                 drmConnector = Optional.empty();
-
             }
 
-            drmConnectors[i] = drmConnector.orElseGet(() -> {
-                this.libdrm.drmModeFreeConnector(connector);
-                return this.drmConnectorFactory.create(Optional.empty(),
-                                                       null,
-                                                       null,
-                                                       -1,
-                                                       null);
-            });
+            drmConnectors.add(drmConnector);
         }
 
         return drmConnectors;
@@ -244,8 +238,8 @@ public class DrmPlatformFactory {
                                                 .flags(mode.flags())
                                                 .build();
 
-        return Optional.of(this.drmConnectorFactory.create(Optional.of(this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
-                                                                                                                             outputMode))),
+        return Optional.of(this.drmConnectorFactory.create(this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
+                                                                                                                 outputMode)),
                                                            drmModeRes,
                                                            drmModeConnector,
                                                            crtcId,

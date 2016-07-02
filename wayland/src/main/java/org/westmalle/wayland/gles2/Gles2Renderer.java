@@ -423,24 +423,22 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     private void render(@Nonnull final EglPlatform eglPlatform) {
-        for (final EglConnector eglConnector : eglPlatform.getConnectors()) {
-            eglConnector.getWlOutput()
-                        .ifPresent(wlOutput -> {
-                            updateRenderState(eglPlatform,
-                                              eglConnector,
-                                              wlOutput);
-                            if (!this.init) {
-                                //one time init because we need a current context
-                                assert (eglPlatform.getEglContext() != EGL_NO_CONTEXT);
-                                initRenderer();
-                            }
-                            //naive single pass, bottom to top overdraw rendering.
-                            this.scene.getSurfacesStack()
-                                      .forEach((wlSurfaceResource) -> draw(eglPlatform,
-                                                                           wlSurfaceResource));
-                            flushRenderState(eglPlatform,
-                                             eglConnector);
-                        });
+        for (final Optional<? extends EglConnector> optionalEglConnector : eglPlatform.getConnectors()) {
+            optionalEglConnector.ifPresent(eglConnector -> {
+                updateRenderState(eglPlatform,
+                                  eglConnector);
+                if (!this.init) {
+                    //one time init because we need a current context
+                    assert (eglPlatform.getEglContext() != EGL_NO_CONTEXT);
+                    initRenderer();
+                }
+                //naive single pass, bottom to top overdraw rendering.
+                this.scene.getSurfacesStack()
+                          .forEach((wlSurfaceResource) -> draw(eglPlatform,
+                                                               wlSurfaceResource));
+                flushRenderState(eglPlatform,
+                                 eglConnector);
+            });
         }
     }
 
@@ -452,8 +450,7 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     private void updateRenderState(final EglPlatform eglPlatform,
-                                   final EglConnector eglConnector,
-                                   @Nonnull final WlOutput wlOutput) {
+                                   final EglConnector eglConnector) {
         eglConnector.begin();
 
         this.libEGL.eglMakeCurrent(eglPlatform.getEglDisplay(),
@@ -461,8 +458,9 @@ public class Gles2Renderer implements GlRenderer {
                                    eglConnector.getEglSurface(),
                                    eglPlatform.getEglContext());
 
-        final Output     output = wlOutput.getOutput();
-        final OutputMode mode   = output.getMode();
+        final Output output = eglConnector.getWlOutput()
+                                          .getOutput();
+        final OutputMode mode = output.getMode();
 
         final int width  = mode.getWidth();
         final int height = mode.getHeight();

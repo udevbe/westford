@@ -31,16 +31,16 @@ import java.util.Optional;
 public class DrmConnector implements Connector {
 
     @Nonnull
-    private final Optional<WlOutput> wlOutput;
+    private final WlOutput         wlOutput;
     @Nonnull
-    private final DrmModeRes         drmModeRes;
+    private final DrmModeRes       drmModeRes;
     @Nonnull
-    private final DrmModeConnector   drmModeConnector;
-    private final int                crtcId;
+    private final DrmModeConnector drmModeConnector;
+    private final int              crtcId;
     @Nonnull
-    private final DrmModeModeInfo    mode;
+    private final DrmModeModeInfo  mode;
 
-    DrmConnector(@Nonnull final Optional<WlOutput> wlOutput,
+    DrmConnector(@Nonnull final WlOutput wlOutput,
                  @Nonnull final DrmModeRes drmModeRes,
                  @Nonnull final DrmModeConnector drmModeConnector,
                  @Nonnegative final int crtcId,
@@ -54,7 +54,7 @@ public class DrmConnector implements Connector {
 
     @Nonnull
     @Override
-    public Optional<WlOutput> getWlOutput() {
+    public WlOutput getWlOutput() {
         return this.wlOutput;
     }
 

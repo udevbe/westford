@@ -29,15 +29,15 @@ import java.util.Optional;
 public class X11Platform implements Platform {
 
     @Nonnull
-    private final X11Connector[]       connectors;
+    private final List<Optional<X11Connector>> connectors;
     @Nonnull
-    private final X11EventBus          x11EventBus;
-    private final long                 xcbConnection;
-    private final long                 xDisplay;
+    private final X11EventBus                  x11EventBus;
+    private final long                         xcbConnection;
+    private final long                         xDisplay;
     @Nonnull
-    private final Map<String, Integer> atoms;
+    private final Map<String, Integer>         atoms;
 
-    X11Platform(@Nonnull final X11Connector[] connectors,
+    X11Platform(@Nonnull final List<Optional<X11Connector>> connectors,
                 @Nonnull final X11EventBus x11EventBus,
                 final long xcbConnection,
                 final long xDisplay,
@@ -69,7 +69,7 @@ public class X11Platform implements Platform {
 
     @Nonnull
     @Override
-    public X11Connector[] getConnectors() {
+    public List<Optional<X11Connector>> getConnectors() {
         return this.connectors;
     }
 

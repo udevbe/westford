@@ -23,6 +23,9 @@ import org.westmalle.wayland.x11.X11Platform;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -104,18 +107,20 @@ public class X11EglPlatformFactory {
         final long eglContext = createEglContext(eglDisplay,
                                                  eglConfig);
 
-        final X11Connector[]    x11Connectors    = this.x11Platform.getConnectors();
-        final X11EglConnector[] x11EglConnectors = new X11EglConnector[x11Connectors.length];
+        final List<Optional<X11Connector>>    x11Connectors    = this.x11Platform.getConnectors();
+        final List<Optional<X11EglConnector>> x11EglConnectors = new ArrayList<>(x11Connectors.size());
 
-        for (int i = 0, x11ConnectorsLength = x11Connectors.length; i < x11ConnectorsLength; i++) {
-            final X11Connector x11Connector = x11Connectors[i];
-            final long eglSurface = createEglSurface(eglDisplay,
-                                                     eglConfig,
-                                                     x11Connector.getXWindow());
-            final X11EglConnector x11EglConnector = this.x11EglConnectorFactory.create(x11Connector,
-                                                                                       eglSurface);
-            x11EglConnectors[i] = x11EglConnector;
-        }
+        x11Connectors.forEach(optionalX11Connector -> {
+            final Optional<X11EglConnector> optionalX11EglConnector = optionalX11Connector.map(x11Connector -> {
+                final long eglSurface = createEglSurface(eglDisplay,
+                                                         eglConfig,
+                                                         x11Connector.getXWindow());
+                return this.x11EglConnectorFactory.create(x11Connector,
+                                                          eglSurface);
+            });
+
+            x11EglConnectors.add(optionalX11EglConnector);
+        });
 
         return this.privateX11EglPlatformFactory.create(this.x11Platform,
                                                         x11EglConnectors,

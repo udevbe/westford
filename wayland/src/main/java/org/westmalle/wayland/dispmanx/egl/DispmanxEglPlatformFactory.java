@@ -23,6 +23,9 @@ import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -105,29 +108,28 @@ public class DispmanxEglPlatformFactory {
         final long eglContext = getContext(eglDisplay,
                                            config);
 
-        final DispmanxConnector[]    dispmanxConnectors    = this.dispmanxPlatform.getConnectors();
-        final DispmanxEglConnector[] dispmanxEglConnectors = new DispmanxEglConnector[dispmanxConnectors.length];
+        final List<Optional<DispmanxConnector>>    dispmanxConnectors    = this.dispmanxPlatform.getConnectors();
+        final List<Optional<DispmanxEglConnector>> dispmanxEglConnectors = new ArrayList<>(dispmanxConnectors.size());
 
-        for (int i = 0, dispmanxConnectorsLength = dispmanxConnectors.length; i < dispmanxConnectorsLength; i++) {
-            final DispmanxConnector dispmanxConnector = dispmanxConnectors[i];
+        dispmanxConnectors.forEach(dispmanxConnectorOptional -> {
+            final Optional<DispmanxEglConnector> dispmanxEglConnector = dispmanxConnectorOptional.map(dispmanxConnector -> {
+                final int                   dispmanxElement   = dispmanxConnector.getDispmanxElement();
+                final EGL_DISPMANX_WINDOW_T eglDispmanxWindow = new EGL_DISPMANX_WINDOW_T();
+                eglDispmanxWindow.element(dispmanxElement);
+                eglDispmanxWindow.width(modeinfo.width());
+                eglDispmanxWindow.height(modeinfo.height());
 
-            final int                   dispmanxElement   = dispmanxConnector.getDispmanxElement();
-            final EGL_DISPMANX_WINDOW_T eglDispmanxWindow = new EGL_DISPMANX_WINDOW_T();
-            eglDispmanxWindow.element(dispmanxElement);
-            eglDispmanxWindow.width(modeinfo.width());
-            eglDispmanxWindow.height(modeinfo.height());
+                final long eglSurface = createEglSurface(Pointer.ref(eglDispmanxWindow).address,
+                                                         eglDisplay,
+                                                         config,
+                                                         eglContext);
 
-            final long eglSurface = createEglSurface(Pointer.ref(eglDispmanxWindow).address,
-                                                     eglDisplay,
-                                                     config,
-                                                     eglContext);
-
-            final DispmanxEglConnector dispmanxEglConnector = this.dispmanxEglConnectorFactory.create(dispmanxConnector,
-                                                                                                      eglDispmanxWindow,
-                                                                                                      eglSurface);
-            dispmanxEglConnectors[i] = dispmanxEglConnector;
-        }
-
+                return this.dispmanxEglConnectorFactory.create(dispmanxConnector,
+                                                               eglDispmanxWindow,
+                                                               eglSurface);
+            });
+            dispmanxEglConnectors.add(dispmanxEglConnector);
+        });
 
         return this.privateDispmanxEglOutputFactory.create(this.dispmanxPlatform,
                                                            dispmanxEglConnectors,

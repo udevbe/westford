@@ -19,6 +19,8 @@ import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.dispmanx.DispmanxPlatform;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 @AutoFactory(className = "PrivateDispmanxEglPlatformFactory",
              allowSubclasses = true)
@@ -26,16 +28,16 @@ import javax.annotation.Nonnull;
 public class DispmanxEglPlatform implements EglPlatform {
 
     @Nonnull
-    private final DispmanxPlatform       dispmanxPlatform;
+    private final DispmanxPlatform                     dispmanxPlatform;
     @Nonnull
-    private final DispmanxEglConnector[] dispmanxEglConnectors;
-    private final long                   eglDisplay;
-    private final long                   eglContext;
+    private final List<Optional<DispmanxEglConnector>> dispmanxEglConnectors;
+    private final long                                 eglDisplay;
+    private final long                                 eglContext;
     @Nonnull
-    private final String                 eglExtensions;
+    private final String                               eglExtensions;
 
     DispmanxEglPlatform(@Nonnull final DispmanxPlatform dispmanxPlatform,
-                        @Nonnull final DispmanxEglConnector[] dispmanxEglConnectors,
+                        @Nonnull final List<Optional<DispmanxEglConnector>> dispmanxEglConnectors,
                         final long eglDisplay,
                         final long eglContext,
                         @Nonnull final String eglExtensions) {
@@ -58,7 +60,7 @@ public class DispmanxEglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public DispmanxEglConnector[] getConnectors() {
+    public List<Optional<DispmanxEglConnector>> getConnectors() {
         return this.dispmanxEglConnectors;
     }
 

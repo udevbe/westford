@@ -33,7 +33,9 @@ import org.westmalle.wayland.protocol.WlOutputFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -133,13 +135,13 @@ public class X11PlatformFactory {
         final Map<String, Integer> x11Atoms    = internX11Atoms(xcbConnection);
 
         //TODO from config
-        final X11Connector[] connectors = new X11Connector[1];
+        final List<Optional<X11Connector>> connectors = new ArrayList<>(1);
         final X11Connector x11Connector = create(xcbConnection,
                                                  x11Atoms,
                                                  x11EventBus,
                                                  800,
                                                  600);
-        connectors[0] = x11Connector;
+        connectors.add(Optional.of(x11Connector));
 
         this.display.getEventLoop()
                     .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(xcbConnection),
@@ -273,7 +275,7 @@ public class X11PlatformFactory {
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
         return this.x11ConnectorFactory.create(window,
-                                               Optional.of(wlOutput));
+                                               wlOutput);
     }
 
     private Output createOutput(final int width,

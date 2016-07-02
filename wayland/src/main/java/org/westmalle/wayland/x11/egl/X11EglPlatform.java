@@ -19,15 +19,17 @@ import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.x11.X11Platform;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 @AutoFactory(className = "PrivateX11EglPlatformFactory",
              allowSubclasses = true)
 public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final X11Platform       x11Platform;
+    private final X11Platform                     x11Platform;
     @Nonnull
-    private final X11EglConnector[] eglConnectors;
+    private final List<Optional<X11EglConnector>> eglConnectors;
 
     private final long eglDisplay;
     private final long eglContext;
@@ -36,7 +38,7 @@ public class X11EglPlatform implements EglPlatform {
     private final String eglExtensions;
 
     X11EglPlatform(@Nonnull final X11Platform x11Platform,
-                   @Nonnull final X11EglConnector[] eglConnectors,
+                   @Nonnull final List<Optional<X11EglConnector>> eglConnectors,
                    final long eglDisplay,
                    final long eglContext,
                    @Nonnull final String eglExtensions) {
@@ -59,7 +61,7 @@ public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public X11EglConnector[] getConnectors() {
+    public List<Optional<X11EglConnector>> getConnectors() {
         return this.eglConnectors;
     }
 
