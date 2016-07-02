@@ -57,7 +57,7 @@ public class DispmanxEglConnector implements EglConnector {
 
     @Nonnull
     @Override
-    public Optional<WlOutput> getWlOutput() {
+    public WlOutput getWlOutput() {
         return this.dispmanxConnector.getWlOutput();
     }
 }

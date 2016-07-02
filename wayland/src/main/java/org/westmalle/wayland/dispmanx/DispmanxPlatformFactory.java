@@ -30,6 +30,8 @@ import org.westmalle.wayland.protocol.WlOutputFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_NO_ROTATE;
@@ -77,15 +79,15 @@ public class DispmanxPlatformFactory {
         }
 
         //TODO from config
-        final DispmanxConnector[] dispmanxConnectors = new DispmanxConnector[1];
+        final List<Optional<DispmanxConnector>> dispmanxConnectors = new ArrayList<>(1);
         final int dispmanxElement = createDispmanxWindow(display,
                                                          modeinfo);
         final Output   output   = createOutput(modeinfo);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
-        final DispmanxConnector dispmanxConnector = this.dispmanxConnectorFactory.create(Optional.of(wlOutput),
+        final DispmanxConnector dispmanxConnector = this.dispmanxConnectorFactory.create(wlOutput,
                                                                                          dispmanxElement);
-        dispmanxConnectors[0] = dispmanxConnector;
+        dispmanxConnectors.add(Optional.of(dispmanxConnector));
 
         return this.privateDispmanxPlatformFactory.create(modeinfo,
                                                           dispmanxConnectors);

@@ -14,11 +14,13 @@
 package org.westmalle.wayland.core;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 public interface Platform {
 
     @Nonnull
-    Connector[] getConnectors();
+    List<? extends Optional<? extends Connector>> getConnectors();
 
     void accept(@Nonnull Renderer renderer);
 }

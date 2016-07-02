@@ -28,6 +28,9 @@ import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -122,18 +125,16 @@ public class GbmEglPlatformFactory {
         final long eglContext = createEglContext(eglDisplay,
                                                  eglConfig);
 
-        final DrmConnector[]    drmConnectors    = this.drmPlatform.getConnectors();
-        final GbmEglConnector[] gbmEglConnectors = new GbmEglConnector[drmConnectors.length];
+        final List<Optional<DrmConnector>>    drmConnectors    = this.drmPlatform.getConnectors();
+        final List<Optional<GbmEglConnector>> gbmEglConnectors = new ArrayList<>(drmConnectors.size());
 
-        for (int i = 0; i < drmConnectors.length; i++) {
-            final DrmConnector drmConnector = drmConnectors[i];
-            gbmEglConnectors[i] = createGbmEglConnector(drmConnector,
-                                                        gbmDevice,
-                                                        eglDisplay,
-                                                        eglContext,
-                                                        eglConfig);
-        }
-
+        drmConnectors.forEach(drmConnectorOptional ->
+                                      gbmEglConnectors.add(drmConnectorOptional.map(drmConnector ->
+                                                                                            createGbmEglConnector(drmConnector,
+                                                                                                                  gbmDevice,
+                                                                                                                  eglDisplay,
+                                                                                                                  eglContext,
+                                                                                                                  eglConfig))));
 
         return this.privateGbmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,

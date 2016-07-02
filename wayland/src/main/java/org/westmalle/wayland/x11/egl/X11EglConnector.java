@@ -45,7 +45,7 @@ public class X11EglConnector implements EglConnector {
 
     @Nonnull
     @Override
-    public Optional<WlOutput> getWlOutput() {
+    public WlOutput getWlOutput() {
         return this.x11Connector.getWlOutput();
     }
 
