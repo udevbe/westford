@@ -460,10 +460,14 @@ public class Gles2Renderer implements GlRenderer {
 
         final Output output = eglConnector.getWlOutput()
                                           .getOutput();
-        final OutputMode mode = output.getMode();
+        final OutputMode     mode     = output.getMode();
+        final OutputGeometry geometry = output.getGeometry();
 
+        final int x      = geometry.getX();
+        final int y      = geometry.getY();
         final int width  = mode.getWidth();
         final int height = mode.getHeight();
+
 
         this.libGLESv2.glViewport(0,
                                   0,
@@ -481,7 +485,8 @@ public class Gles2Renderer implements GlRenderer {
         this.projection = Mat4.create(2.0f / width, 0,              0, -1,
                                       0,            2.0f / -height, 0,  1,
                                       0,            0,              1,  0,
-                                      0,            0,              0,  1).toArray();
+                                      0,            0,              0,  1).multiply(Transforms.TRANSLATE(x,y)).toArray();
+
         //@formatter:on
     }
 

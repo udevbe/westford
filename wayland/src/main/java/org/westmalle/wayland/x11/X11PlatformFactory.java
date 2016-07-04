@@ -35,8 +35,8 @@ import org.westmalle.wayland.x11.config.X11PlatformConfig;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -139,8 +139,8 @@ public class X11PlatformFactory {
         final X11EventBus          x11EventBus = this.x11EventBusFactory.create(xcbConnection);
         final Map<String, Integer> x11Atoms    = internX11Atoms(xcbConnection);
 
-        final List<X11ConnectorConfig>     x11ConnectorConfigs   = this.x11PlatformConfig.getX11ConnectorConfigs();
-        final List<Optional<X11Connector>> optionalX11Connectors = new ArrayList<>(x11ConnectorConfigs.size());
+        final Iterable<X11ConnectorConfig> x11ConnectorConfigs   = this.x11PlatformConfig.getX11ConnectorConfigs();
+        final List<Optional<X11Connector>> optionalX11Connectors = new LinkedList<>();
 
         x11ConnectorConfigs.forEach(x11ConnectorConfig -> {
             final X11Connector x11Connector = create(xcbConnection,
@@ -280,8 +280,7 @@ public class X11PlatformFactory {
         this.libxcb.xcb_map_window(xcbConnection,
                                    window);
 
-        final Output output = createOutput(width,
-                                           height,
+        final Output output = createOutput(x11ConnectorConfig,
                                            screen);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
@@ -289,12 +288,15 @@ public class X11PlatformFactory {
                                                wlOutput);
     }
 
-    private Output createOutput(final int width,
-                                final int height,
+    private Output createOutput(final X11ConnectorConfig x11ConnectorConfig,
                                 final xcb_screen_t screen) {
+
+        final int width  = x11ConnectorConfig.getWidth();
+        final int height = x11ConnectorConfig.getHeight();
+
         final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(0)
-                                                            .y(0)
+                                                            .x(x11ConnectorConfig.getX())
+                                                            .y(x11ConnectorConfig.getY())
                                                             .subpixel(0)
                                                             .make("Westmalle xcb")
                                                             .model("X11")
@@ -306,8 +308,8 @@ public class X11PlatformFactory {
                                                             .build();
         final OutputMode outputMode = OutputMode.builder()
                                                 .flags(0)
-                                                .height(height)
                                                 .width(width)
+                                                .height(height)
                                                 .refresh(60)
                                                 .build();
         return this.outputFactory.create(outputGeometry,
