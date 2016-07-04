@@ -15,10 +15,11 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.OutputGeometry;
+import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
              className = "X11ConnectorFactory")
@@ -42,5 +43,16 @@ public class X11Connector implements Connector {
 
     public int getXWindow() {
         return this.xWindow;
+    }
+
+    public Point toGlobal(final int x11WindowX,
+                          final int x11WindowY) {
+        final OutputGeometry geometry = getWlOutput().getOutput()
+                                                     .getGeometry();
+        final int globalX = geometry.getX() + x11WindowX;
+        final int globalY = geometry.getY() + x11WindowY;
+
+        return Point.create(globalX,
+                            globalY);
     }
 }

@@ -40,28 +40,28 @@ public class X11EglCompositorConfig implements X11PlatformConfig {
                                      return 0;
                                  }
                              }
-//                ,
-//                             new X11ConnectorConfig() {
-//                                 @Override
-//                                 public int getWidth() {
-//                                     return 800;
-//                                 }
-//
-//                                 @Override
-//                                 public int getHeight() {
-//                                     return 600;
-//                                 }
-//
-//                                 @Override
-//                                 public int getX() {
-//                                     return 800;
-//                                 }
-//
-//                                 @Override
-//                                 public int getY() {
-//                                     return 0;
-//                                 }
-//                             }
+                ,
+                             new X11ConnectorConfig() {
+                                 @Override
+                                 public int getWidth() {
+                                     return 800;
+                                 }
+
+                                 @Override
+                                 public int getHeight() {
+                                     return 600;
+                                 }
+
+                                 @Override
+                                 public int getX() {
+                                     return 800;
+                                 }
+
+                                 @Override
+                                 public int getY() {
+                                     return 0;
+                                 }
+                             }
                             );
     }
 }

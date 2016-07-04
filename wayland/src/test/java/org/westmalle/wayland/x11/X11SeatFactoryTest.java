@@ -99,8 +99,7 @@ public class X11SeatFactoryTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         when(wlKeyboard.getKeyboardDevice()).thenReturn(keyboardDevice);
         when(this.wlSeatFactory.create(wlKeyboard)).thenReturn(wlSeat);
-        when(this.privateX11SeatFactory.create(this.x11Platform,
-                                               wlSeat)).thenReturn(x11Seat);
+        when(this.privateX11SeatFactory.create(wlSeat)).thenReturn(x11Seat);
         when(this.x11InputEventListenerFactory.create(x11Seat)).thenReturn(x11InputEventListener);
         when(this.x11XkbFactory.create(xcbConnection)).thenReturn(xkb);
         when(this.keyboardDeviceFactory.create(xkb)).thenReturn(keyboardDevice);

@@ -127,6 +127,7 @@ public class X11InputEventListenerTest {
         //then
         this.x11Seat.deliverMotion(anyInt(),
                                    anyInt(),
+                                   anyInt(),
                                    anyInt());
     }
 

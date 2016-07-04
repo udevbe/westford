@@ -28,6 +28,7 @@ import org.westmalle.wayland.protocol.WlSeat;
 import java.util.Collections;
 import java.util.Set;
 
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -149,7 +150,8 @@ public class X11SeatTest {
         final int x    = 80;
         final int y    = -120;
         //when
-        this.x11Seat.deliverMotion(time,
+        this.x11Seat.deliverMotion(12345,
+                                   time,
                                    x,
                                    y);
         //then
