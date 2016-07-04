@@ -52,11 +52,15 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
     @Nonnull
     private final X11XkbFactory x11XkbFactory;
     @Nonnull
+    private final X11Platform   x11Platform;
+    @Nonnull
     private final X11Seat       x11Seat;
 
     X11InputEventListener(@Provided @Nonnull final X11XkbFactory x11XkbFactory,
+                          @Provided @Nonnull final X11Platform x11Platform,
                           @Nonnull final X11Seat x11Seat) {
         this.x11XkbFactory = x11XkbFactory;
+        this.x11Platform = x11Platform;
         this.x11Seat = x11Seat;
     }
 
@@ -128,7 +132,8 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
     }
 
     private void handle(final xcb_motion_notify_event_t event) {
-        this.x11Seat.deliverMotion(event.time(),
+        this.x11Seat.deliverMotion(event.event(),
+                                   event.time(),
                                    event.event_x(),
                                    event.event_y());
     }
@@ -164,8 +169,7 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
             final WlKeyboard wlKeyboard = this.x11Seat.getWlSeat()
                                                       .getWlKeyboard();
             final KeyboardDevice keyboardDevice = wlKeyboard.getKeyboardDevice();
-            final Xkb xkb = this.x11XkbFactory.create(this.x11Seat.getX11Platform()
-                                                                  .getXcbConnection());
+            final Xkb            xkb            = this.x11XkbFactory.create(this.x11Platform.getXcbConnection());
             keyboardDevice.setXkb(xkb);
             keyboardDevice.updateKeymap();
             keyboardDevice.emitKeymap(wlKeyboard.getResources());

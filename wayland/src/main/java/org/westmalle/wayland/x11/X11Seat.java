@@ -18,6 +18,7 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
+import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
@@ -54,7 +55,7 @@ public class X11Seat {
     private final WlSeat      wlSeat;
 
     X11Seat(@Provided @Nonnull final Libxcb libxcb,
-            @Nonnull final X11Platform x11Platform,
+            @Provided @Nonnull final X11Platform x11Platform,
             @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
         this.x11Platform = x11Platform;
@@ -198,22 +199,29 @@ public class X11Seat {
         return button;
     }
 
-    public void deliverMotion(final int time,
+    public void deliverMotion(final int windowId,
+                              final int time,
                               final int x,
                               final int y) {
-        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
-        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
 
-        pointerDevice.motion(wlPointer.getResources(),
-                             time,
-                             x,
-                             y);
-        pointerDevice.frame(wlPointer.getResources());
-    }
+        this.x11Platform.getConnectors()
+                        .forEach(x11ConnectorOptional ->
+                                         x11ConnectorOptional.ifPresent(x11Connector -> {
+                                             if (x11Connector.getXWindow() == windowId) {
 
-    @Nonnull
-    public X11Platform getX11Platform() {
-        return this.x11Platform;
+                                                 final Point point = x11Connector.toGlobal(x,
+                                                                                           y);
+
+                                                 final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+                                                 final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+                                                 pointerDevice.motion(wlPointer.getResources(),
+                                                                      time,
+                                                                      point.getX(),
+                                                                      point.getY());
+                                                 pointerDevice.frame(wlPointer.getResources());
+                                             }
+                                         }));
     }
 
     @Nonnull

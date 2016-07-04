@@ -458,6 +458,8 @@ public class Gles2Renderer implements GlRenderer {
                                    eglConnector.getEglSurface(),
                                    eglPlatform.getEglContext());
 
+        //TODO we can improve performance by keeping an output state and only trigger this logic if the output geometry & mode changes
+
         final Output output = eglConnector.getWlOutput()
                                           .getOutput();
         final OutputMode     mode     = output.getMode();
@@ -485,7 +487,7 @@ public class Gles2Renderer implements GlRenderer {
         this.projection = Mat4.create(2.0f / width, 0,              0, -1,
                                       0,            2.0f / -height, 0,  1,
                                       0,            0,              1,  0,
-                                      0,            0,              0,  1).multiply(Transforms.TRANSLATE(x,y)).toArray();
+                                      0,            0,              0,  1).multiply(Transforms.TRANSLATE(-x,-y)).toArray();
 
         //@formatter:on
     }
