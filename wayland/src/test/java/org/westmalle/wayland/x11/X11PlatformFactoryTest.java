@@ -17,6 +17,7 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -40,9 +41,13 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
+import org.westmalle.wayland.x11.config.X11ConnectorConfig;
+import org.westmalle.wayland.x11.config.X11PlatformConfig;
 import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -88,9 +93,22 @@ public class X11PlatformFactoryTest {
     private X11EventBusFactory        x11EventBusFactory;
     @Mock
     private X11ConnectorFactory       x11ConnectorFactory;
+    @Mock
+    private X11PlatformConfig         x11PlatformConfig;
 
     @InjectMocks
     private X11PlatformFactory x11PlatformFactory;
+
+    @Before
+    public void setUp() {
+        when(this.x11PlatformConfig.getDisplay()).thenReturn(":0");
+        final X11ConnectorConfig x11ConnectorConfig = mock(X11ConnectorConfig.class);
+        when(x11ConnectorConfig.getX()).thenReturn(10);
+        when(x11ConnectorConfig.getY()).thenReturn(20);
+        when(x11ConnectorConfig.getWidth()).thenReturn(100);
+        when(x11ConnectorConfig.getHeight()).thenReturn(200);
+        when(this.x11PlatformConfig.getX11ConnectorConfigs()).thenReturn(Collections.singletonList(x11ConnectorConfig));
+    }
 
     @Test
     public void testCreateOpenDisplayFailed() throws Exception {
@@ -256,10 +274,10 @@ public class X11PlatformFactoryTest {
                                               anyByte(),
                                               eq(window),
                                               eq(screen.root()),
-                                              anyShort(),
-                                              anyShort(),
-                                              eq((short) 800),
-                                              eq((short) 600),
+                                              eq((short) 10),
+                                              eq((short) 20),
+                                              eq((short) 100),
+                                              eq((short) 200),
                                               anyShort(),
                                               eq((short) Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT),
                                               eq(screen.root_visual()),
