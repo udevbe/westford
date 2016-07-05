@@ -20,12 +20,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Matchers.anyInt;
@@ -139,6 +142,13 @@ public class X11SeatTest {
     @Test
     public void testHandleMotion() throws Exception {
         //given
+        final X11Connector x11Connector = mock(X11Connector.class);
+        when(x11Connector.getXWindow()).thenReturn(12345);
+        when(x11Connector.toGlobal(80,
+                                   -120)).thenReturn(Point.create(10,
+                                                                  20));
+        when(this.x11Platform.getConnectors()).thenReturn(Collections.singletonList(Optional.of(x11Connector)));
+
         final WlPointer wlPointer = mock(WlPointer.class);
         when(this.wlSeat.getWlPointer()).thenReturn(wlPointer);
         final PointerDevice pointerDevice = mock(PointerDevice.class);
@@ -157,7 +167,7 @@ public class X11SeatTest {
         //then
         verify(pointerDevice).motion(wlPointerResources,
                                      time,
-                                     x,
-                                     y);
+                                     10,
+                                     20);
     }
 }
