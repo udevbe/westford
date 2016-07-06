@@ -50,6 +50,7 @@ public class X11EventBus implements EventLoop.FileDescriptorEventHandler {
                 getXEventSignal().emit(generic_event);
             }
         }
+        this.libxcb.xcb_flush(this.xcbConnection);
         return 0;
     }
 

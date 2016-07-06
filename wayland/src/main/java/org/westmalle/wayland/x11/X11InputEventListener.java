@@ -66,7 +66,7 @@ public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>>
 
     public void handle(@Nonnull final Pointer<xcb_generic_event_t> event) {
         final int responseType = (event.dref()
-                                       .response_type() & ~0x80);
+                                       .response_type() & 0x7f);
         switch (responseType) {
             case XCB_MOTION_NOTIFY: {
                 final Pointer<xcb_motion_notify_event_t> motion_notify_event = event.castp(xcb_motion_notify_event_t.class);
