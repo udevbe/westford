@@ -143,11 +143,11 @@ public class X11PlatformFactory {
         final List<Optional<X11Connector>> optionalX11Connectors = new LinkedList<>();
 
         x11ConnectorConfigs.forEach(x11ConnectorConfig -> {
-            final X11Connector x11Connector = create(xcbConnection,
-                                                     x11Atoms,
-                                                     x11EventBus,
-                                                     x11ConnectorConfig);
-            optionalX11Connectors.add(Optional.of(x11Connector));
+            addX11Connector(optionalX11Connectors,
+                            xcbConnection,
+                            x11Atoms,
+                            x11EventBus,
+                            x11ConnectorConfig);
         });
 
         this.display.getEventLoop()
@@ -204,10 +204,11 @@ public class X11PlatformFactory {
         return x11Atoms;
     }
 
-    private X11Connector create(final long xcbConnection,
-                                final Map<String, Integer> x11Atoms,
-                                final X11EventBus x11EventBus,
-                                final X11ConnectorConfig x11ConnectorConfig) {
+    private void addX11Connector(final List<Optional<X11Connector>> optionalX11Connectors,
+                                 final long xcbConnection,
+                                 final Map<String, Integer> x11Atoms,
+                                 final X11EventBus x11EventBus,
+                                 final X11ConnectorConfig x11ConnectorConfig) {
 
         final int x      = x11ConnectorConfig.getX();
         final int y      = x11ConnectorConfig.getY();
@@ -263,19 +264,6 @@ public class X11PlatformFactory {
         setName(xcbConnection,
                 window,
                 x11Atoms);
-        x11EventBus.getXEventSignal()
-                   .connect(event -> {
-                       final int responseType = (event.dref()
-                                                      .response_type() & ~0x80);
-                       switch (responseType) {
-                           case XCB_CLIENT_MESSAGE: {
-                               handle(event.castp(xcb_client_message_event_t.class),
-                                      x11Atoms,
-                                      window);
-                               break;
-                           }
-                       }
-                   });
 
         this.libxcb.xcb_map_window(xcbConnection,
                                    window);
@@ -284,8 +272,26 @@ public class X11PlatformFactory {
                                            screen);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
-        return this.x11ConnectorFactory.create(window,
-                                               wlOutput);
+        final X11Connector x11Connector = this.x11ConnectorFactory.create(window,
+                                                                          wlOutput);
+
+        x11EventBus.getXEventSignal()
+                   .connect(event -> {
+                       final int responseType = (event.dref()
+                                                      .response_type() & 0x7f);
+                       switch (responseType) {
+                           case XCB_CLIENT_MESSAGE: {
+                               handle(xcbConnection,
+                                      event.castp(xcb_client_message_event_t.class),
+                                      x11Atoms,
+                                      optionalX11Connectors);
+
+                               break;
+                           }
+                       }
+                   });
+
+        optionalX11Connectors.add(Optional.of(x11Connector));
     }
 
     private Output createOutput(final X11ConnectorConfig x11ConnectorConfig,
@@ -355,18 +361,27 @@ public class X11PlatformFactory {
                                         nameNative);
     }
 
-    private void handle(final Pointer<xcb_client_message_event_t> event,
+    private void handle(final long connection,
+                        final Pointer<xcb_client_message_event_t> event,
                         final Map<String, Integer> x11Atoms,
-                        final int window) {
+                        final List<Optional<X11Connector>> optionalX11Connectors) {
         final int atom = event.dref()
                               .data()
                               .data32()
                               .dref();
         final int sourceWindow = event.dref()
                                       .window();
-        if (atom == x11Atoms.get("WM_DELETE_WINDOW") &&
-            window == sourceWindow) {
-            System.exit(0);
+
+        if (atom == x11Atoms.get("WM_DELETE_WINDOW")) {
+            optionalX11Connectors.replaceAll(x11ConnectorOptional -> {
+                if (x11ConnectorOptional.isPresent() && x11ConnectorOptional.get()
+                                                                            .getXWindow() == sourceWindow) {
+                    this.libxcb.xcb_destroy_window(connection,
+                                                   sourceWindow);
+                    return Optional.empty();
+                }
+                return x11ConnectorOptional;
+            });
         }
     }
 }

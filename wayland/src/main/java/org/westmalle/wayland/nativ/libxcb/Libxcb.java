@@ -18,6 +18,7 @@ import org.freedesktop.jaccall.Lib;
 import org.freedesktop.jaccall.Ptr;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
 @Singleton
 @Lib("xcb")
@@ -122,4 +123,7 @@ public class Libxcb {
                                           byte format,
                                           int data_len,
                                           @Ptr long data);
+
+    public native int xcb_destroy_window(@Ptr long c,
+                                         int window);
 }
