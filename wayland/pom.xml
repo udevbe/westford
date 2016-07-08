@@ -15,6 +15,8 @@
 
     <properties>
         <wayland-java-bindings.version>1.4.0</wayland-java-bindings.version>
+
+        <jetty.version>9.3.7.v20160115</jetty.version>
     </properties>
 
     <dependencies>
@@ -22,6 +24,18 @@
             <groupId>org.freedesktop</groupId>
             <artifactId>wayland</artifactId>
             <version>${wayland-java-bindings.version}</version>
+        </dependency>
+
+        <!-- dependencies for native jetty websocket -->
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-servlet</artifactId>
+            <version>${jetty.version}</version>
         </dependency>
     </dependencies>
 </project>
