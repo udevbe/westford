@@ -21,6 +21,7 @@ import org.westmalle.wayland.drm.DrmPlatform;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
+import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
@@ -45,6 +46,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_GBM_KHR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
@@ -64,6 +66,8 @@ public class GbmEglPlatformFactory {
     @Nonnull
     private final LibEGL                       libEGL;
     @Nonnull
+    private final LibGLESv2                    libGLESv2;
+    @Nonnull
     private final DrmPlatform                  drmPlatform;
     @Nonnull
     private final GbmEglConnectorFactory       eglGbmConnectorFactory;
@@ -76,6 +80,7 @@ public class GbmEglPlatformFactory {
                           @Nonnull final Libdrm libdrm,
                           @Nonnull final Libgbm libgbm,
                           @Nonnull final LibEGL libEGL,
+                          @Nonnull final LibGLESv2 libGLESv2,
                           @Nonnull final DrmPlatform drmPlatform,
                           @Nonnull final GbmEglConnectorFactory eglGbmConnectorFactory,
                           @Nonnull final GlRenderer glRenderer) {
@@ -84,6 +89,7 @@ public class GbmEglPlatformFactory {
         this.libdrm = libdrm;
         this.libgbm = libgbm;
         this.libEGL = libEGL;
+        this.libGLESv2 = libGLESv2;
         this.drmPlatform = drmPlatform;
         this.eglGbmConnectorFactory = eglGbmConnectorFactory;
         this.glRenderer = glRenderer;
@@ -187,6 +193,11 @@ public class GbmEglPlatformFactory {
                                    eglSurface,
                                    eglSurface,
                                    eglContext);
+        this.libGLESv2.glClearColor(1.0f,
+                                    1.0f,
+                                    1.0f,
+                                    1.0f);
+        this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
         this.libEGL.eglSwapBuffers(eglDisplay,
                                    eglSurface);
         final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
