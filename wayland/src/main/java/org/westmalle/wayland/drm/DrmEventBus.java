@@ -55,14 +55,13 @@ public class DrmEventBus implements EventLoop.FileDescriptorEventHandler {
                                 @Unsigned final int tv_sec,
                                 @Unsigned final int tv_usec,
                                 @Ptr final long user_data) {
-        try (final Pointer<DrmPageFlipCallback> drmPageFlipCallbackPointer = Pointer.wrap(DrmPageFlipCallback.class,
-                                                                                          user_data)) {
-            drmPageFlipCallbackPointer
-                    .dref()
-                    .onPageFlip(sequence,
-                                tv_sec,
-                                tv_usec);
-        }
+        final Pointer<Object> drmPageFlipCallbackPointer = Pointer.wrap(Object.class,
+                                                                        user_data);
+        final DrmPageFlipCallback drmPageFlipCallback = (DrmPageFlipCallback) drmPageFlipCallbackPointer.dref();
+        drmPageFlipCallback.onPageFlip(sequence,
+                                       tv_sec,
+                                       tv_usec);
+        drmPageFlipCallbackPointer.close();
     }
 
     public void vblankHandler(final int fd,
@@ -70,13 +69,12 @@ public class DrmEventBus implements EventLoop.FileDescriptorEventHandler {
                               @Unsigned final int tv_sec,
                               @Unsigned final int tv_usec,
                               @Ptr final long user_data) {
-        try (final Pointer<DrmPageFlipCallback> drmPageFlipCallbackPointer = Pointer.wrap(DrmPageFlipCallback.class,
-                                                                                          user_data)) {
-            drmPageFlipCallbackPointer
-                    .dref()
-                    .onVBlank(sequence,
-                              tv_sec,
-                              tv_usec);
-        }
+        final Pointer<Object> drmPageFlipCallbackPointer = Pointer.wrap(Object.class,
+                                                                        user_data);
+        final DrmPageFlipCallback drmPageFlipCallback = (DrmPageFlipCallback) drmPageFlipCallbackPointer.dref();
+        drmPageFlipCallback.onVBlank(sequence,
+                                     tv_sec,
+                                     tv_usec);
+        drmPageFlipCallbackPointer.close();
     }
 }
