@@ -36,7 +36,6 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_X11_KHR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
@@ -122,8 +121,7 @@ public class X11EglPlatformFactory {
             x11EglConnectors.add(optionalX11EglConnector);
         });
 
-        return this.privateX11EglPlatformFactory.create(this.x11Platform,
-                                                        x11EglConnectors,
+        return this.privateX11EglPlatformFactory.create(x11EglConnectors,
                                                         eglDisplay,
                                                         eglContext,
                                                         eglExtensions);
@@ -180,9 +178,9 @@ public class X11EglPlatformFactory {
         return context;
     }
 
-    public long createEglSurface(final long eglDisplay,
-                                 final long config,
-                                 final int nativeWindow) {
+    private long createEglSurface(final long eglDisplay,
+                                  final long config,
+                                  final int nativeWindow) {
         final Pointer<Integer> eglSurfaceAttribs = Pointer.nref(EGL_RENDER_BUFFER,
                                                                 EGL_BACK_BUFFER,
                                                                 EGL_NONE);
