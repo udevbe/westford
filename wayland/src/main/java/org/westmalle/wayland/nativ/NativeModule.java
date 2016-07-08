@@ -96,7 +96,7 @@ public class NativeModule {
     @Singleton
     @Provides
     Libc provideLibc() {
-        new Libc_Symbols().link("/lib/libc.so.6");
+        new Libc_Symbols().link("libc.so.6");
         return new Libc();
     }
 
