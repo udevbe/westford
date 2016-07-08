@@ -859,6 +859,9 @@ public class Gles2Renderer implements GlRenderer {
         shmBuffer.endAccess();
         this.libGLESv2.glBindTexture(newShmSurfaceRenderState.getTarget(),
                                      0);
+
+        //FIXME firing the paint callback here is actually wrong since we might still need to draw on a different output. Only when all views of a surface are processed, we can call the fire paint callback.
+        //TODO Introduce the concept of views => output <-- view (=many2many) --> surface
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         wlSurface.getSurface()
                  .firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
