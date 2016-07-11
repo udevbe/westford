@@ -13,13 +13,15 @@
 //limitations under the License.
 package org.westmalle.wayland.drm.egl;
 
-
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.drm.DrmConnector;
@@ -40,9 +42,12 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
 public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     @Nonnull
-    private final Libgbm       libgbm;
+    private final Libgbm  libgbm;
     @Nonnull
-    private final Libdrm       libdrm;
+    private final Libdrm  libdrm;
+    @Nonnull
+    private final Display display;
+
     private final int          drmFd;
     private       long         gbmBo;
     private final long         gbmSurface;
@@ -54,8 +59,14 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     private long nextGbmBo;
 
+    private Optional<EventSource>           renderJobEvent   = Optional.empty();
+    private Optional<EventLoop.IdleHandler> delayedRenderJob = Optional.empty();
+
+    private boolean pageFlipPending;
+
     GbmEglConnector(@Nonnull @Provided final Libgbm libgbm,
                     @Nonnull @Provided final Libdrm libdrm,
+                    @Nonnull @Provided final Display display,
                     final int drmFd,
                     final long gbmBo,
                     final long gbmSurface,
@@ -65,6 +76,7 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
                     final long eglDisplay) {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
+        this.display = display;
         this.drmFd = drmFd;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
@@ -82,6 +94,7 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
                                     getFbId(this.nextGbmBo),
                                     DRM_MODE_PAGE_FLIP_EVENT,
                                     Pointer.from(this).address);
+        this.pageFlipPending = true;
     }
 
     @Override
@@ -91,6 +104,13 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
         this.libgbm.gbm_surface_release_buffer(this.gbmSurface,
                                                this.gbmBo);
         this.gbmBo = this.nextGbmBo;
+        this.pageFlipPending = false;
+
+        this.delayedRenderJob.ifPresent(render -> {
+            assert (!this.renderJobEvent.isPresent());
+            whenIdle(render);
+            this.delayedRenderJob = Optional.empty();
+        });
     }
 
     public int getFbId(final long gbmBo) {
@@ -119,7 +139,6 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
         if (ret != 0) {
             throw new RuntimeException("failed to create fb");
         }
-
 
         this.libgbm.gbm_bo_set_user_data(gbmBo,
                                          fb.address,
@@ -166,6 +185,28 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     @Override
     public void accept(@Nonnull final Renderer renderer) {
+        if (this.pageFlipPending && !this.delayedRenderJob.isPresent()) {
+            whenPageFlip(() -> renderOn(renderer));
+        }
+        else if (!this.renderJobEvent.isPresent()) {
+            whenIdle(() -> renderOn(renderer));
+        }
+    }
+
+    private void whenPageFlip(final EventLoop.IdleHandler idleHandler) {
+        this.delayedRenderJob = Optional.of(idleHandler);
+    }
+
+    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
+        this.renderJobEvent = Optional.of(this.display.getEventLoop()
+                                                      .addIdle(idleHandler));
+    }
+
+    private void renderOn(@Nonnull final Renderer renderer) {
+        this.renderJobEvent.get()
+                           .remove();
+        this.renderJobEvent = Optional.empty();
         renderer.visit(this);
+        this.display.flushClients();
     }
 }
