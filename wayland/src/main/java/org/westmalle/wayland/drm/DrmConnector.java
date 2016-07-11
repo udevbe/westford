@@ -24,7 +24,6 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 //TODO drm connector, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,

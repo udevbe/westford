@@ -15,6 +15,10 @@ package org.westmalle.wayland.x11.egl;
 
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -29,15 +33,20 @@ public class X11EglConnector implements EglConnector {
 
     @Nonnull
     private final X11Connector x11Connector;
+    @Nonnull
+    private final Display      display;
     private final long         eglSurface;
     private final long         eglContext;
     private final long         eglDisplay;
 
+    private Optional<EventSource> renderJobEvent = Optional.empty();
 
-    X11EglConnector(@Nonnull final X11Connector x11Connector,
+    X11EglConnector(@Nonnull @Provided final Display display,
+                    @Nonnull final X11Connector x11Connector,
                     final long eglSurface,
                     final long eglContext,
                     final long eglDisplay) {
+        this.display = display;
         this.x11Connector = x11Connector;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
@@ -72,6 +81,21 @@ public class X11EglConnector implements EglConnector {
 
     @Override
     public void accept(@Nonnull final Renderer renderer) {
+        if (!this.renderJobEvent.isPresent()) {
+            whenIdle(() -> renderOn(renderer));
+        }
+    }
+
+    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
+        this.renderJobEvent = Optional.of(this.display.getEventLoop()
+                                                      .addIdle(idleHandler));
+    }
+
+    private void renderOn(@Nonnull final Renderer renderer) {
+        this.renderJobEvent.get()
+                           .remove();
+        this.renderJobEvent = Optional.empty();
         renderer.visit(this);
+        this.display.flushClients();
     }
 }
