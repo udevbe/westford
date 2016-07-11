@@ -64,11 +64,6 @@ public class DispmanxEglPlatform implements EglPlatform {
         return this.dispmanxEglConnectors;
     }
 
-    @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-    }
-
     @Nonnull
     public DispmanxPlatform getDispmanxPlatform() {
         return this.dispmanxPlatform;

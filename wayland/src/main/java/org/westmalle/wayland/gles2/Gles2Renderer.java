@@ -412,51 +412,42 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     @Override
-    public void visit(@Nonnull final Platform platform) {
-        throw new UnsupportedOperationException(String.format("Need an egl capable platform. Got %s",
-                                                              platform));
+    public void visit(@Nonnull final Connector connector) {
+        throw new UnsupportedOperationException(String.format("Need an egl capable connector. Got %s",
+                                                              connector));
     }
 
     @Override
-    public void visit(@Nonnull final EglPlatform eglPlatform) {
-        render(eglPlatform);
+    public void visit(@Nonnull final EglConnector eglConnector) {
+        render(eglConnector);
     }
 
-    private void render(@Nonnull final EglPlatform eglPlatform) {
-        for (final Optional<? extends EglConnector> optionalEglConnector : eglPlatform.getConnectors()) {
-            optionalEglConnector.ifPresent(eglConnector -> {
-                updateRenderState(eglPlatform,
-                                  eglConnector);
-                if (!this.init) {
-                    //one time init because we need a current context
-                    assert (eglPlatform.getEglContext() != EGL_NO_CONTEXT);
-                    initRenderer();
-                }
-                //naive single pass, bottom to top overdraw rendering.
-                this.scene.getSurfacesStack()
-                          .forEach((wlSurfaceResource) -> draw(eglPlatform,
-                                                               wlSurfaceResource));
-                flushRenderState(eglPlatform,
-                                 eglConnector);
-            });
+    private void render(@Nonnull final EglConnector eglConnector) {
+        updateRenderState(eglConnector);
+        if (!this.init) {
+            //one time init because we need a current context
+            assert (eglConnector.getEglContext() != EGL_NO_CONTEXT);
+            initRenderer();
         }
+        //naive single pass, bottom to top overdraw rendering.
+        this.scene.getSurfacesStack()
+                  .forEach(this::draw);
+        flushRenderState(eglConnector);
     }
 
-    private void flushRenderState(final EglPlatform eglPlatform,
-                                  final EglConnector eglConnector) {
-        this.libEGL.eglSwapBuffers(eglPlatform.getEglDisplay(),
+    private void flushRenderState(final EglConnector eglConnector) {
+        this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    eglConnector.getEglSurface());
         eglConnector.end();
     }
 
-    private void updateRenderState(final EglPlatform eglPlatform,
-                                   final EglConnector eglConnector) {
+    private void updateRenderState(final EglConnector eglConnector) {
         eglConnector.begin();
 
-        this.libEGL.eglMakeCurrent(eglPlatform.getEglDisplay(),
+        this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglConnector.getEglSurface(),
                                    eglConnector.getEglSurface(),
-                                   eglPlatform.getEglContext());
+                                   eglConnector.getEglContext());
 
         //TODO we can improve performance by keeping an output state and only trigger this logic if the output geometry & mode changes
 
@@ -644,8 +635,7 @@ public class Gles2Renderer implements GlRenderer {
         }
     }
 
-    private void draw(final EglPlatform eglPlatform,
-                      final WlSurfaceResource wlSurfaceResource) {
+    private void draw(final WlSurfaceResource wlSurfaceResource) {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         //don't bother rendering subsurfaces if the parent doesn't have a buffer.
         wlSurface.getSurface()
@@ -653,20 +643,17 @@ public class Gles2Renderer implements GlRenderer {
                  .getBuffer()
                  .ifPresent(wlBufferResource -> {
                      final LinkedList<WlSurfaceResource> subsurfaces = this.scene.getSubsurfaceStack(wlSurfaceResource);
-                     draw(eglPlatform,
-                          wlSurfaceResource,
+                     draw(wlSurfaceResource,
                           wlBufferResource);
                      subsurfaces.forEach((subsurface) -> {
                          if (subsurface != wlSurfaceResource) {
-                             draw(eglPlatform,
-                                  subsurface);
+                             draw(subsurface);
                          }
                      });
                  });
     }
 
-    private void draw(final EglPlatform eglPlatform,
-                      final WlSurfaceResource wlSurfaceResource,
+    private void draw(final WlSurfaceResource wlSurfaceResource,
                       final WlBufferResource wlBufferResource) {
         queryBuffer(wlBufferResource).accept(new BufferVisitor() {
             @Override
@@ -676,8 +663,7 @@ public class Gles2Renderer implements GlRenderer {
 
             @Override
             public void visit(@Nonnull final EglBuffer eglBuffer) {
-                drawEgl(eglPlatform,
-                        wlSurfaceResource,
+                drawEgl(wlSurfaceResource,
                         eglBuffer);
             }
 
@@ -898,8 +884,7 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glUseProgram(0);
     }
 
-    private Optional<SurfaceRenderState> queryEglSurfaceRenderState(final EglPlatform eglPlatform,
-                                                                    final WlSurfaceResource wlSurfaceResource,
+    private Optional<SurfaceRenderState> queryEglSurfaceRenderState(final WlSurfaceResource wlSurfaceResource,
                                                                     final EglBuffer eglBuffer) {
         @Nonnull
         Optional<SurfaceRenderState> surfaceRenderState = Optional.ofNullable(this.surfaceRenderStates.get(wlSurfaceResource));
@@ -912,24 +897,21 @@ public class Gles2Renderer implements GlRenderer {
                                                            //the surface was previously associated with an shm render state but is now using an egl render state. create it.
                                                            //TODO we could reuse the texture id
                                                            destroy(shmSurfaceRenderState);
-                                                           return createEglSurfaceRenderState(eglPlatform,
-                                                                                              eglBuffer,
+                                                           return createEglSurfaceRenderState(eglBuffer,
                                                                                               Optional.empty());
                                                        }
 
                                                        @Override
                                                        public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
                                                            //the surface already has an egl render state associated. update it.
-                                                           return createEglSurfaceRenderState(eglPlatform,
-                                                                                              eglBuffer,
+                                                           return createEglSurfaceRenderState(eglBuffer,
                                                                                               Optional.of(eglSurfaceRenderState));
                                                        }
                                                    });
         }
         else {
             //the surface was not previously associated with any render state. create an egl render state.
-            surfaceRenderState = createEglSurfaceRenderState(eglPlatform,
-                                                             eglBuffer,
+            surfaceRenderState = createEglSurfaceRenderState(eglBuffer,
                                                              Optional.empty());
         }
 
@@ -944,8 +926,7 @@ public class Gles2Renderer implements GlRenderer {
         return surfaceRenderState;
     }
 
-    private Optional<SurfaceRenderState> createEglSurfaceRenderState(final EglPlatform eglPlatform,
-                                                                     final EglBuffer eglBuffer,
+    private Optional<SurfaceRenderState> createEglSurfaceRenderState(final EglBuffer eglBuffer,
                                                                      final Optional<EglSurfaceRenderState> oldRenderState) {
         //surface egl render states:
         final int     pitch  = eglBuffer.getWidth();
@@ -957,14 +938,13 @@ public class Gles2Renderer implements GlRenderer {
         final long[]  eglImages;
 
         //gather render states:
-        final long eglDisplay = eglPlatform.getEglDisplay();
-        final long buffer     = eglBuffer.getWlBufferResource().pointer;
+        final long buffer = eglBuffer.getWlBufferResource().pointer;
 
         final EglQueryWaylandBufferWL queryWaylandBuffer = this.eglQueryWaylandBufferWL.get();
 
         final Pointer<Integer> yInvertedP = Pointer.nref(0);
 
-        yInverted = queryWaylandBuffer.$(eglDisplay,
+        yInverted = queryWaylandBuffer.$(this.eglDisplay,
                                          buffer,
                                          EGL_WAYLAND_Y_INVERTED_WL,
                                          yInvertedP.address) == 0 || yInvertedP.dref() != 0;
@@ -1008,7 +988,7 @@ public class Gles2Renderer implements GlRenderer {
         oldRenderState.ifPresent(oldEglSurfaceRenderState -> {
             for (final long oldEglImage : oldEglSurfaceRenderState.getEglImages()) {
                 this.eglDestroyImageKHR.get()
-                                       .$(eglDisplay,
+                                       .$(this.eglDisplay,
                                           oldEglImage);
             }
         });
@@ -1022,7 +1002,7 @@ public class Gles2Renderer implements GlRenderer {
             attribs[2] = EGL_NONE;
 
             final long eglImage = this.eglCreateImageKHR.get()
-                                                        .$(eglDisplay,
+                                                        .$(this.eglDisplay,
                                                            EGL_NO_CONTEXT,
                                                            EGL_WAYLAND_BUFFER_WL,
                                                            buffer,
@@ -1081,11 +1061,9 @@ public class Gles2Renderer implements GlRenderer {
     }
 
 
-    private void drawEgl(final EglPlatform eglPlatform,
-                         final WlSurfaceResource wlSurfaceResource,
+    private void drawEgl(final WlSurfaceResource wlSurfaceResource,
                          final EglBuffer eglBuffer) {
-        queryEglSurfaceRenderState(eglPlatform,
-                                   wlSurfaceResource,
+        queryEglSurfaceRenderState(wlSurfaceResource,
                                    eglBuffer).ifPresent(surfaceRenderState -> surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
             @Override
             public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {

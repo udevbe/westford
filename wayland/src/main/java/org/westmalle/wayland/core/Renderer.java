@@ -20,9 +20,9 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public interface Renderer {
-    void visit(@Nonnull Platform platform);
+    void visit(@Nonnull Connector connector);
 
-    void visit(@Nonnull EglPlatform eglPlatform);
+    void visit(@Nonnull EglConnector eglConnector);
 
     //TODO pixman sw rendering platform
     //void visit(PixmanPlatform pixmanPlatform);

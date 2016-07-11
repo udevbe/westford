@@ -206,7 +206,9 @@ public class GbmEglPlatformFactory {
                                                                                    gbmBo,
                                                                                    gbmSurface,
                                                                                    drmConnector,
-                                                                                   eglSurface);
+                                                                                   eglSurface,
+                                                                                   eglContext,
+                                                                                   eglDisplay);
         final int fbId = gbmEglConnector.getFbId(gbmBo);
         final int error = this.libdrm.drmModeSetCrtc(this.drmPlatform.getDrmFd(),
                                                      drmConnector.getCrtcId(),
