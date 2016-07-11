@@ -24,8 +24,6 @@ import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;
 import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.nativ.libudev.Libudev_Symbols;
 
-import javax.annotation.Nonnull;
-
 import static org.freedesktop.jaccall.Pointer.malloc;
 import static org.freedesktop.jaccall.Pointer.nref;
 import static org.freedesktop.jaccall.Pointer.wrap;
@@ -48,6 +46,14 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FALSE;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
@@ -65,11 +71,11 @@ public class DrmTest {
     private final LibGLESv2 libGLESv2;
     private final int       drmFd;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(final String[] args) throws InterruptedException {
         new DrmTest();
     }
 
-    public DrmTest() throws InterruptedException {
+    private DrmTest() throws InterruptedException {
 
         new Libudev_Symbols().link();
         this.libudev = new Libudev();
@@ -89,7 +95,6 @@ public class DrmTest {
             throw new RuntimeException("Failed to initialize udev");
         }
 
-        //TODO seat from config
         final long drmDevice = findPrimaryGpu(udev,
                                               "seat0");
         if (drmDevice == 0L) {
@@ -161,13 +166,7 @@ public class DrmTest {
         final long gbmDevice  = this.libgbm.gbm_create_device(this.drmFd);
         final long eglDisplay = createEglDisplay(gbmDevice);
 
-        final String eglExtensions = Pointer.wrap(String.class,
-                                                  this.libEGL.eglQueryString(eglDisplay,
-                                                                             EGL_EXTENSIONS))
-                                            .dref();
-
-        final long eglConfig = eglConfig(eglDisplay,
-                                         eglExtensions);
+        final long eglConfig = eglConfig(eglDisplay);
         final long eglContext = createEglContext(eglDisplay,
                                                  eglConfig);
 
@@ -189,10 +188,24 @@ public class DrmTest {
                                    eglSurface,
                                    eglSurface,
                                    eglContext);
+
+        final String fShaderStr = "precision mediump float;                   \n" +
+                                  "void main()                                \n" +
+                                  "{                                          \n" +
+                                  "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n" +
+                                  "}";
+        final String vShaderStr = "attribute vec4 vPosition;   \n" +
+                                  "void main()                 \n" +
+                                  "{                           \n" +
+                                  "  gl_Position = vPosition;  \n" +
+                                  "}                           \n";
+        final int shaderProgram = createShaderProgram(vShaderStr,
+                                                      fShaderStr);
+
         this.libGLESv2.glClearColor(0.5f,
                                     0.5f,
                                     0.5f,
-                                    0.5f);
+                                    1.0f);
         this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
         this.libEGL.eglSwapBuffers(eglDisplay,
                                    eglSurface);
@@ -208,26 +221,26 @@ public class DrmTest {
                                                      Pointer.ref(mode).address);
 
         while (true) {
-            int waiting_for_flip = 1;
-
-            draw();
+            draw(shaderProgram,
+                 mode.hdisplay(),
+                 mode.vdisplay());
 
             this.libEGL.eglSwapBuffers(eglDisplay,
                                        eglSurface);
-            long next_bo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
+            final long next_bo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
             fbId = getFbId(next_bo);
 
-            int ret = this.libdrm.drmModePageFlip(this.drmFd,
-                                                  drmModeEncoder.crtc_id(),
-                                                  fbId,
-                                                  DRM_MODE_PAGE_FLIP_EVENT,
-                                                  0L);
+            final int ret = this.libdrm.drmModePageFlip(this.drmFd,
+                                                        drmModeEncoder.crtc_id(),
+                                                        fbId,
+                                                        DRM_MODE_PAGE_FLIP_EVENT,
+                                                        0L);
             if (ret != 0) {
                 throw new RuntimeException(String.format("failed to queue page flip: %d\n",
                                                          this.libc.getErrno()));
             }
 
-            //fugly, normally we listen for fd events,  now we just draw at 10fps and assume the pageflip occurred.
+            //FIXME fugly, normally we listen for fd events & handle a pageflip callback, now we just draw at 10fps and assume the pageflip occurred.
             Thread.sleep(100);
 
 //            this.libdrm.drmHandleEvent(this.drmFd,
@@ -240,11 +253,41 @@ public class DrmTest {
         }
     }
 
-    private void draw() {
+    private void draw(final int shaderProgram,
+                      final short hdisplay,
+                      final short vdisplay) {
         //TODO
+        final float[] vVertices = {0.0f, 0.5f, 0.0f,
+                                   -0.5f, -0.5f, 0.0f,
+                                   0.5f, -0.5f, 0.0f};
+
+        // Set the viewport
+        this.libGLESv2.glViewport(0,
+                                  0,
+                                  hdisplay,
+                                  vdisplay);
+
+        // Clear the color buffer
+        this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
+
+        // Use the program object
+        this.libGLESv2.glUseProgram(shaderProgram);
+
+        // Load the vertex data
+        this.libGLESv2.glVertexAttribPointer(0,
+                                             3,
+                                             GL_FLOAT,
+                                             GL_FALSE,
+                                             0,
+                                             Pointer.nref(vVertices).address);
+        this.libGLESv2.glEnableVertexAttribArray(0);
+
+        this.libGLESv2.glDrawArrays(GL_TRIANGLES,
+                                    0,
+                                    3);
     }
 
-    public int getFbId(final long gbmBo) {
+    private int getFbId(final long gbmBo) {
         final long fbIdP = this.libgbm.gbm_bo_get_user_data(gbmBo);
         if (fbIdP != 0L) {
             return Pointer.wrap(Integer.class,
@@ -289,9 +332,9 @@ public class DrmTest {
         fbIdP.close();
     }
 
-    public long createEglSurface(final long eglDisplay,
-                                 final long config,
-                                 final long gbmSurface) {
+    private long createEglSurface(final long eglDisplay,
+                                  final long config,
+                                  final long gbmSurface) {
         final Pointer<Integer> eglSurfaceAttribs = Pointer.nref(EGL_RENDER_BUFFER,
                                                                 EGL_BACK_BUFFER,
                                                                 EGL_NONE);
@@ -328,8 +371,7 @@ public class DrmTest {
         return context;
     }
 
-    public long eglConfig(final long eglDisplay,
-                          @Nonnull final String eglExtensions) {
+    private long eglConfig(final long eglDisplay) {
         assert (eglDisplay != EGL_NO_DISPLAY);
 
         if (this.libEGL.eglBindAPI(EGL_OPENGL_ES_API) == 0L) {
@@ -491,5 +533,92 @@ public class DrmTest {
 
         this.libudev.udev_enumerate_unref(udevEnumerate);
         return drmDevice;
+    }
+
+    private int createShaderProgram(final String vertexShaderSource,
+                                    final String fragmentShaderSource) {
+        final int vertexShader = compileShader(vertexShaderSource,
+                                               GL_VERTEX_SHADER);
+        final int fragmentShader = compileShader(fragmentShaderSource,
+                                                 GL_FRAGMENT_SHADER);
+
+        //shader program
+        final int shaderProgram = this.libGLESv2.glCreateProgram();
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      vertexShader);
+
+        this.libGLESv2.glAttachShader(shaderProgram,
+                                      fragmentShader);
+
+        this.libGLESv2.glLinkProgram(shaderProgram);
+
+        //check the link status
+        final Pointer<Integer> linked = Pointer.nref(0);
+        this.libGLESv2.glGetProgramiv(shaderProgram,
+                                      GL_LINK_STATUS,
+                                      linked.address);
+        if (linked.dref() == 0) {
+            final Pointer<Integer> infoLen = Pointer.nref(0);
+            this.libGLESv2.glGetProgramiv(shaderProgram,
+                                          GL_INFO_LOG_LENGTH,
+                                          infoLen.address);
+            int logSize = infoLen.dref();
+            if (logSize <= 0) {
+                //some drivers report incorrect log size
+                logSize = 1024;
+            }
+            final Pointer<String> log = Pointer.nref(new String(new char[logSize]));
+            this.libGLESv2.glGetProgramInfoLog(shaderProgram,
+                                               logSize,
+                                               0L,
+                                               log.address);
+            this.libGLESv2.glDeleteProgram(shaderProgram);
+            System.err.println("Error compiling the vertex shader: " + log.dref());
+            System.exit(1);
+        }
+
+        return shaderProgram;
+    }
+
+    private int compileShader(final String shaderSource,
+                              final int shaderType) {
+        final int                      shader  = this.libGLESv2.glCreateShader(shaderType);
+        final Pointer<Pointer<String>> shaders = Pointer.nref(Pointer.nref(shaderSource));
+        this.libGLESv2.glShaderSource(shader,
+                                      1,
+                                      shaders.address,
+                                      0L);
+        this.libGLESv2.glCompileShader(shader);
+
+        checkShaderCompilation(shader);
+        return shader;
+    }
+
+    private void checkShaderCompilation(final int shader) {
+        final Pointer<Integer> vstatus = Pointer.nref(0);
+        this.libGLESv2.glGetShaderiv(shader,
+                                     GL_COMPILE_STATUS,
+                                     vstatus.address);
+        if (vstatus.dref() == 0) {
+            //failure!
+            //get log length
+            final Pointer<Integer> logLength = Pointer.nref(0);
+            this.libGLESv2.glGetShaderiv(shader,
+                                         GL_INFO_LOG_LENGTH,
+                                         logLength.address);
+            //get log
+            int logSize = logLength.dref();
+            if (logSize == 0) {
+                //some drivers report incorrect log size
+                logSize = 1024;
+            }
+            final Pointer<String> log = Pointer.nref(new String(new char[logSize]));
+            this.libGLESv2.glGetShaderInfoLog(shader,
+                                              logSize,
+                                              0L,
+                                              log.address);
+            System.err.println("Error compiling the vertex shader: " + log.dref());
+            System.exit(1);
+        }
     }
 }
