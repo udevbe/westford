@@ -61,10 +61,13 @@ public class Compositor {
     }
 
     private void renderOutput(final Platform platform) {
-        platform.accept(this.renderer);
+        platform.getConnectors()
+                .forEach(connectorOptional -> connectorOptional.ifPresent(connector -> connector.accept(this.renderer)));
     }
 
     public void requestRender() {
+        //TODO optimize by only requesting a render for a specific connector.
+
         if (!this.renderEvent.isPresent()) {
             renderScene();
         }

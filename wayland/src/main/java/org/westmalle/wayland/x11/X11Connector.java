@@ -17,6 +17,7 @@ import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
@@ -54,5 +55,10 @@ public class X11Connector implements Connector {
 
         return Point.create(globalX,
                             globalY);
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this);
     }
 }

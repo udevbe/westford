@@ -16,6 +16,7 @@ package org.westmalle.wayland.drm;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
@@ -75,5 +76,10 @@ public class DrmConnector implements Connector {
     @Nonnull
     public DrmModeModeInfo getMode() {
         return this.mode;
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this);
     }
 }

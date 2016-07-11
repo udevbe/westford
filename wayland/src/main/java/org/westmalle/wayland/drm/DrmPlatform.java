@@ -54,11 +54,6 @@ public class DrmPlatform implements Platform {
         return this.drmEventBus;
     }
 
-    @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-    }
-
     public long getDrmDevice() {
         return this.drmDevice;
     }

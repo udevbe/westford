@@ -21,6 +21,7 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.EglConnector;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPageFlipCallback;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
@@ -48,6 +49,8 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
     @Nonnull
     private final DrmConnector drmConnector;
     private final long         eglSurface;
+    private final long         eglContext;
+    private final long         eglDisplay;
 
     private long nextGbmBo;
 
@@ -57,7 +60,9 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
                     final long gbmBo,
                     final long gbmSurface,
                     @Nonnull final DrmConnector drmConnector,
-                    final long eglSurface) {
+                    final long eglSurface,
+                    final long eglContext,
+                    final long eglDisplay) {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.drmFd = drmFd;
@@ -65,6 +70,8 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
         this.gbmSurface = gbmSurface;
         this.drmConnector = drmConnector;
         this.eglSurface = eglSurface;
+        this.eglContext = eglContext;
+        this.eglDisplay = eglDisplay;
     }
 
     @Override
@@ -136,6 +143,16 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
         return this.eglSurface;
     }
 
+    @Override
+    public long getEglContext() {
+        return this.eglContext;
+    }
+
+    @Override
+    public long getEglDisplay() {
+        return this.eglDisplay;
+    }
+
     @Nonnull
     @Override
     public WlOutput getWlOutput() {
@@ -145,5 +162,10 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
     @Nonnull
     public DrmConnector getDrmConnector() {
         return this.drmConnector;
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this);
     }
 }

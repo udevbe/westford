@@ -115,7 +115,9 @@ public class X11EglPlatformFactory {
                                                          eglConfig,
                                                          x11Connector.getXWindow());
                 return this.x11EglConnectorFactory.create(x11Connector,
-                                                          eglSurface);
+                                                          eglSurface,
+                                                          eglContext,
+                                                          eglDisplay);
             });
 
             x11EglConnectors.add(optionalX11EglConnector);

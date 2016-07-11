@@ -16,6 +16,7 @@ package org.westmalle.wayland.x11.egl;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.EglConnector;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.x11.X11Connector;
 
@@ -29,12 +30,18 @@ public class X11EglConnector implements EglConnector {
     @Nonnull
     private final X11Connector x11Connector;
     private final long         eglSurface;
+    private final long         eglContext;
+    private final long         eglDisplay;
 
 
     X11EglConnector(@Nonnull final X11Connector x11Connector,
-                    final long eglSurface) {
+                    final long eglSurface,
+                    final long eglContext,
+                    final long eglDisplay) {
         this.x11Connector = x11Connector;
         this.eglSurface = eglSurface;
+        this.eglContext = eglContext;
+        this.eglDisplay = eglDisplay;
     }
 
     @Override
@@ -42,6 +49,15 @@ public class X11EglConnector implements EglConnector {
         return this.eglSurface;
     }
 
+    @Override
+    public long getEglContext() {
+        return this.eglContext;
+    }
+
+    @Override
+    public long getEglDisplay() {
+        return this.eglDisplay;
+    }
 
     @Nonnull
     @Override
@@ -52,5 +68,10 @@ public class X11EglConnector implements EglConnector {
     @Nonnull
     public X11Connector getX11Connector() {
         return this.x11Connector;
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this);
     }
 }

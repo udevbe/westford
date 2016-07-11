@@ -126,7 +126,9 @@ public class DispmanxEglPlatformFactory {
 
                 return this.dispmanxEglConnectorFactory.create(dispmanxConnector,
                                                                eglDispmanxWindow,
-                                                               eglSurface);
+                                                               eglSurface,
+                                                               eglContext,
+                                                               eglDisplay);
             });
             dispmanxEglConnectors.add(dispmanxEglConnector);
         });
