@@ -4,6 +4,7 @@ package org.westmalle.wayland.bootstrap;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
+import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -47,7 +48,6 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FALSE;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
@@ -70,6 +70,9 @@ public class DrmTest {
     private final LibEGL    libEGL;
     private final LibGLESv2 libGLESv2;
     private final int       drmFd;
+
+    private int projectionArg;
+    private int positionArg;
 
     public static void main(final String[] args) throws InterruptedException {
         new DrmTest();
@@ -131,6 +134,10 @@ public class DrmTest {
             }
         }
 
+        if (drmModeConnector == null) {
+            throw new RuntimeException("Could not find a valid connector.");
+        }
+
         int             area = 0;
         DrmModeModeInfo mode = null;
         for (int i = 0; i < drmModeConnector.count_modes(); i++) {
@@ -162,6 +169,10 @@ public class DrmTest {
             }
         }
 
+        if (drmModeEncoder == null) {
+            throw new RuntimeException("Could not find a valid encoder.");
+        }
+
 
         final long gbmDevice  = this.libgbm.gbm_create_device(this.drmFd);
         final long eglDisplay = createEglDisplay(gbmDevice);
@@ -189,19 +200,21 @@ public class DrmTest {
                                    eglSurface,
                                    eglContext);
 
-        final String fShaderStr = "precision mediump float;                   \n" +
-                                  "void main()                                \n" +
-                                  "{                                          \n" +
-                                  "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n" +
-                                  "}";
-        final String vShaderStr = "attribute vec4 vPosition;   \n" +
-                                  "void main()                 \n" +
-                                  "{                           \n" +
-                                  "  gl_Position = vPosition;  \n" +
-                                  "}                           \n";
-        final int shaderProgram = createShaderProgram(vShaderStr,
-                                                      fShaderStr);
+        final String VERTEX_SHADER =
+                "uniform mat4 u_projection;\n" +
+                "attribute vec2 a_position;\n" +
+                "void main(){\n" +
+                "    gl_Position = u_projection * vec4(a_position, 0.0, 1.0) ;\n" +
+                "}";
 
+        final String FRAGMENT_SHADER = "precision mediump float;                   \n" +
+                                       "void main()                                \n" +
+                                       "{                                          \n" +
+                                       "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n" +
+                                       "}";
+
+        final int shaderProgram = createShaderProgram(VERTEX_SHADER,
+                                                      FRAGMENT_SHADER);
         this.libGLESv2.glClearColor(0.5f,
                                     0.5f,
                                     0.5f,
@@ -209,19 +222,22 @@ public class DrmTest {
         this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
         this.libEGL.eglSwapBuffers(eglDisplay,
                                    eglSurface);
+
         long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
         int  fbId  = getFbId(gbmBo);
-        final int error = this.libdrm.drmModeSetCrtc(this.drmFd,
-                                                     drmModeEncoder.crtc_id(),
-                                                     fbId,
-                                                     0,
-                                                     0,
-                                                     Pointer.nref(drmModeConnector.connector_id()).address,
-                                                     1,
-                                                     Pointer.ref(mode).address);
-
+        this.libdrm.drmModeSetCrtc(this.drmFd,
+                                   drmModeEncoder.crtc_id(),
+                                   fbId,
+                                   0,
+                                   0,
+                                   Pointer.nref(drmModeConnector.connector_id()).address,
+                                   1,
+                                   Pointer.ref(mode).address);
+        int i = 0;
         while (true) {
-            draw(shaderProgram,
+            i++;
+            draw(i,
+                 shaderProgram,
                  mode.hdisplay(),
                  mode.vdisplay());
 
@@ -241,7 +257,7 @@ public class DrmTest {
             }
 
             //FIXME fugly, normally we listen for fd events & handle a pageflip callback, now we just draw at 10fps and assume the pageflip occurred.
-            Thread.sleep(100);
+            Thread.sleep(250);
 
 //            this.libdrm.drmHandleEvent(this.drmFd,
 //                                       0L);
@@ -253,13 +269,11 @@ public class DrmTest {
         }
     }
 
-    private void draw(final int shaderProgram,
+    private void draw(final int i,
+                      final int shaderProgram,
                       final short hdisplay,
                       final short vdisplay) {
-        //TODO
-        final float[] vVertices = {0.0f, 0.5f, 0.0f,
-                                   -0.5f, -0.5f, 0.0f,
-                                   0.5f, -0.5f, 0.0f};
+
 
         // Set the viewport
         this.libGLESv2.glViewport(0,
@@ -267,24 +281,78 @@ public class DrmTest {
                                   hdisplay,
                                   vdisplay);
 
-        // Clear the color buffer
-        this.libGLESv2.glClear(GL_COLOR_BUFFER_BIT);
+        this.libGLESv2.glClearColor(1.0f,
+                                    1.0f,
+                                    1.0f,
+                                    1.0f);
+        this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
+
+        //@formatter:off
+        final float[] projection = Mat4.create(2.0f / hdisplay, 0,                0, -1,
+                                               0,               2.0f / -vdisplay, 0,  1,
+                                               0,               0,                1,  0,
+                                               0,               0,                0,  1).toArray();
+        //@formatter:on
 
         // Use the program object
         this.libGLESv2.glUseProgram(shaderProgram);
 
-        // Load the vertex data
-        this.libGLESv2.glVertexAttribPointer(0,
-                                             3,
+        //define vertex data
+        final Pointer<Float> vertexData = vertexData(50 * (i % 10),
+                                                     50 * (i % 10));
+
+        //upload uniform vertex data
+        final Pointer<Float> projectionBuffer = Pointer.nref(projection);
+        this.libGLESv2.glUniformMatrix4fv(this.projectionArg,
+                                          1,
+                                          0,
+                                          projectionBuffer.address);
+
+        //set vertex data in shader
+        this.libGLESv2.glEnableVertexAttribArray(this.positionArg);
+        this.libGLESv2.glVertexAttribPointer(this.positionArg,
+                                             2,
                                              GL_FLOAT,
-                                             GL_FALSE,
                                              0,
-                                             Pointer.nref(vVertices).address);
-        this.libGLESv2.glEnableVertexAttribArray(0);
+                                             0,
+                                             vertexData.address);
 
         this.libGLESv2.glDrawArrays(GL_TRIANGLES,
                                     0,
-                                    3);
+                                    6);
+    }
+
+    private Pointer<Float> vertexData(final float bufferWidth,
+                                      final float bufferHeight) {
+        return Pointer.nref(//top left:
+                            //attribute vec2 a_position
+                            0f,
+                            0f,
+
+                            //top right:
+                            //attribute vec2 a_position
+                            bufferWidth,
+                            0f,
+
+                            //bottom right:
+                            //vec2 a_position
+                            bufferWidth,
+                            bufferHeight,
+
+                            //bottom right:
+                            //vec2 a_position
+                            bufferWidth,
+                            bufferHeight,
+
+                            //bottom left:
+                            //vec2 a_position
+                            0f,
+                            bufferHeight,
+
+                            //top left:
+                            //attribute vec2 a_position
+                            0f,
+                            0f);
     }
 
     private int getFbId(final long gbmBo) {
@@ -576,6 +644,13 @@ public class DrmTest {
             System.err.println("Error compiling the vertex shader: " + log.dref());
             System.exit(1);
         }
+
+        //find shader arguments
+        this.projectionArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
+                                                                 Pointer.nref("u_projection").address);
+        this.positionArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                              Pointer.nref("a_position").address);
+
 
         return shaderProgram;
     }
