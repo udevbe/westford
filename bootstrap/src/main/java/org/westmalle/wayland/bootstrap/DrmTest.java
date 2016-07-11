@@ -13,12 +13,15 @@ import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2_Symbols;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libc.Libc_Symbols;
+import org.westmalle.wayland.nativ.libdrm.DrmEventContext;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeEncoder;
 import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libdrm.Libdrm_Symbols;
+import org.westmalle.wayland.nativ.libdrm.Pointerpage_flip_handler;
+import org.westmalle.wayland.nativ.libdrm.Pointervblank_handler;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm_Symbols;
 import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;
@@ -234,6 +237,18 @@ public class DrmTest {
                                    1,
                                    Pointer.ref(mode).address);
         int i = 0;
+
+        final Pointer<DrmEventContext> drmEventContextP = Pointer.malloc(DrmEventContext.SIZE,
+                                                                         DrmEventContext.class);
+        final DrmEventContext drmEventContext = drmEventContextP.dref();
+        drmEventContext.version(Libdrm.DRM_EVENT_CONTEXT_VERSION);
+        drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref((fd, sequence, tv_sec, tv_usec, user_data) -> {
+            //System.out.println("pageflip!");
+        }));
+        drmEventContext.vblank_handler(Pointervblank_handler.nref((fd, sequence, tv_sec, tv_usec, user_data) -> {
+            //System.out.println("vblank!");
+        }));
+
         while (true) {
             i++;
             draw(i,
@@ -259,8 +274,8 @@ public class DrmTest {
             //FIXME fugly, normally we listen for fd events & handle a pageflip callback, now we just draw at 10fps and assume the pageflip occurred.
             Thread.sleep(250);
 
-//            this.libdrm.drmHandleEvent(this.drmFd,
-//                                       0L);
+            this.libdrm.drmHandleEvent(this.drmFd,
+                                       drmEventContextP.address);
 
 		/* release last buffer to render on again: */
             this.libgbm.gbm_surface_release_buffer(gbmSurface,
@@ -268,6 +283,7 @@ public class DrmTest {
             gbmBo = next_bo;
         }
     }
+
 
     private void draw(final int i,
                       final int shaderProgram,
@@ -398,6 +414,8 @@ public class DrmTest {
         this.libdrm.drmModeRmFB(this.drmFd,
                                 fbId);
         fbIdP.close();
+
+        System.out.println("fb user data destroyed!");
     }
 
     private long createEglSurface(final long eglDisplay,
