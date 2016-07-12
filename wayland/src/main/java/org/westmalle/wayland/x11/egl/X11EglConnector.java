@@ -81,6 +81,8 @@ public class X11EglConnector implements EglConnector {
 
     @Override
     public void accept(@Nonnull final Renderer renderer) {
+        //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
+
         if (!this.renderJobEvent.isPresent()) {
             whenIdle(() -> renderOn(renderer));
         }
