@@ -187,8 +187,10 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
     public void accept(@Nonnull final Renderer renderer) {
         //TODO unit test 3 cases here: schedule idle, no-op when already scheduled, delayed render when pageflip pending
 
-        if (this.pageFlipPending && !this.delayedRenderJob.isPresent()) {
-            whenPageFlip(() -> renderOn(renderer));
+        if (this.pageFlipPending) {
+            if (!this.delayedRenderJob.isPresent()) {
+                whenPageFlip(() -> renderOn(renderer));
+            }
         }
         else if (!this.renderJobEvent.isPresent()) {
             whenIdle(() -> renderOn(renderer));
