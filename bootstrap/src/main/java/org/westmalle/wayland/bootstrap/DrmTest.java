@@ -1,6 +1,7 @@
 package org.westmalle.wayland.bootstrap;
 
 
+import org.freedesktop.jaccall.JNI;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
@@ -49,13 +50,24 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BGRA_EXT;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_CLAMP_TO_EDGE;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE0;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_S;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_T;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
+import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
@@ -76,6 +88,8 @@ public class DrmTest {
 
     private int projectionArg;
     private int positionArg;
+    private int textureCoordinateArg;
+    private int textureArg;
 
     public static void main(final String[] args) throws InterruptedException {
         new DrmTest();
@@ -206,18 +220,26 @@ public class DrmTest {
         final String VERTEX_SHADER =
                 "uniform mat4 u_projection;\n" +
                 "attribute vec2 a_position;\n" +
+                "attribute vec2 a_texCoord;\n" +
+                "varying vec2 v_texCoord;\n" +
                 "void main(){\n" +
+                "    v_texCoord = a_texCoord;\n" +
                 "    gl_Position = u_projection * vec4(a_position, 0.0, 1.0) ;\n" +
                 "}";
 
-        final String FRAGMENT_SHADER = "precision mediump float;                   \n" +
-                                       "void main()                                \n" +
-                                       "{                                          \n" +
-                                       "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n" +
-                                       "}";
+        final String FRAGMENT_SHADER =
+                "precision mediump float;\n" +
+                "uniform sampler2D u_texture0;\n" +
+                "varying vec2 v_texCoord;\n" +
+                "void main(){\n" +
+                "    gl_FragColor = texture2D(u_texture0, v_texCoord);\n" +
+                "}";
 
         final int shaderProgram = createShaderProgram(VERTEX_SHADER,
                                                       FRAGMENT_SHADER);
+
+        final int textureId = genTexture();
+
         this.libGLESv2.glClearColor(0.5f,
                                     0.5f,
                                     0.5f,
@@ -252,6 +274,7 @@ public class DrmTest {
         while (true) {
             i++;
             draw(i,
+                 textureId,
                  shaderProgram,
                  mode.hdisplay(),
                  mode.vdisplay());
@@ -286,6 +309,7 @@ public class DrmTest {
 
 
     private void draw(final int i,
+                      final int textureId,
                       final int shaderProgram,
                       final short hdisplay,
                       final short vdisplay) {
@@ -310,12 +334,31 @@ public class DrmTest {
                                                0,               0,                0,  1).toArray();
         //@formatter:on
 
+        //upload texture
+        this.libGLESv2.glBindTexture(GL_TEXTURE_2D,
+                                     textureId);
+        final byte[] textureBuffer = new byte[100 * 100 * 4];
+        for (int i1 = 0, textureBufferLength = textureBuffer.length; i1 < textureBufferLength; i1++) {
+            textureBuffer[i1] = 1;
+        }
+
+        this.libGLESv2.glTexImage2D(GL_TEXTURE_2D,
+                                    0,
+                                    GL_BGRA_EXT,
+                                    100,
+                                    100,
+                                    0,
+                                    GL_BGRA_EXT,
+                                    GL_UNSIGNED_BYTE,
+                                    Pointer.nref(textureBuffer).address);
+
         // Use the program object
         this.libGLESv2.glUseProgram(shaderProgram);
 
+
         //define vertex data
-        final Pointer<Float> vertexData = vertexData(50 * (i % 10),
-                                                     50 * (i % 10));
+        final Pointer<Float> vertexData = vertexData(100,
+                                                     100);
 
         //upload uniform vertex data
         final Pointer<Float> projectionBuffer = Pointer.nref(projection);
@@ -330,12 +373,55 @@ public class DrmTest {
                                              2,
                                              GL_FLOAT,
                                              0,
-                                             0,
+                                             4 * Float.BYTES,
                                              vertexData.address);
+
+        this.libGLESv2.glEnableVertexAttribArray(this.textureCoordinateArg);
+        this.libGLESv2.glVertexAttribPointer(this.textureCoordinateArg,
+                                             2,
+                                             GL_FLOAT,
+                                             0,
+                                             4 * Float.BYTES,
+                                             vertexData.offset(2).address);
+
+
+        //set the buffer in the shader
+        this.libGLESv2.glActiveTexture(GL_TEXTURE0);
+        this.libGLESv2.glBindTexture(GL_TEXTURE_2D,
+                                     textureId);
+        this.libGLESv2.glUniform1i(this.textureArg,
+                                   0);
+
+        //enable texture blending
+        this.libGLESv2.glEnable(GL_BLEND);
 
         this.libGLESv2.glDrawArrays(GL_TRIANGLES,
                                     0,
                                     6);
+    }
+
+    private int genTexture() {
+        final Pointer<Integer> texture = Pointer.nref(0);
+        this.libGLESv2.glGenTextures(1,
+                                     texture.address);
+        final Integer textureId = texture.dref();
+        this.libGLESv2.glBindTexture(GL_TEXTURE_2D,
+                                     textureId);
+        this.libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                       GL_TEXTURE_WRAP_S,
+                                       GL_CLAMP_TO_EDGE);
+        this.libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                       GL_TEXTURE_WRAP_T,
+                                       GL_CLAMP_TO_EDGE);
+        this.libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                       GL_TEXTURE_MIN_FILTER,
+                                       GL_NEAREST);
+        this.libGLESv2.glTexParameteri(GL_TEXTURE_2D,
+                                       GL_TEXTURE_MAG_FILTER,
+                                       GL_NEAREST);
+        this.libGLESv2.glBindTexture(GL_TEXTURE_2D,
+                                     0);
+        return textureId;
     }
 
     private Pointer<Float> vertexData(final float bufferWidth,
@@ -344,29 +430,47 @@ public class DrmTest {
                             //attribute vec2 a_position
                             0f,
                             0f,
+                            //attribute vec2 a_texCoord
+                            0f,
+                            0f,
 
                             //top right:
                             //attribute vec2 a_position
                             bufferWidth,
                             0f,
+                            //attribute vec2 a_texCoord
+                            1f,
+                            0f,
 
                             //bottom right:
                             //vec2 a_position
                             bufferWidth,
                             bufferHeight,
+                            //vec2 a_texCoord
+                            1f,
+                            1f,
 
                             //bottom right:
                             //vec2 a_position
                             bufferWidth,
                             bufferHeight,
+                            //vec2 a_texCoord
+                            1f,
+                            1f,
 
                             //bottom left:
                             //vec2 a_position
                             0f,
                             bufferHeight,
+                            //vec2 a_texCoord
+                            0f,
+                            1f,
 
                             //top left:
                             //attribute vec2 a_position
+                            0f,
+                            0f,
+                            //attribute vec2 a_texCoord
                             0f,
                             0f);
     }
@@ -668,6 +772,10 @@ public class DrmTest {
                                                                  Pointer.nref("u_projection").address);
         this.positionArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
                                                               Pointer.nref("a_position").address);
+        this.textureCoordinateArg = this.libGLESv2.glGetAttribLocation(shaderProgram,
+                                                                       Pointer.nref("a_texCoord").address);
+        this.textureArg = this.libGLESv2.glGetUniformLocation(shaderProgram,
+                                                              Pointer.nref("u_texture").address);
 
 
         return shaderProgram;
