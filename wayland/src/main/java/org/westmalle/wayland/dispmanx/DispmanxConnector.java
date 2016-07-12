@@ -15,32 +15,22 @@ package org.westmalle.wayland.dispmanx;
 
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
-import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
-import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
              className = "DispmanxConnectorFactory")
 public class DispmanxConnector implements Connector {
 
-    @Nonnull
-    private final Display  display;
+
     private final WlOutput wlOutput;
     private final int      dispmanxElement;
 
-    private Optional<EventSource> renderJobEvent = Optional.empty();
-
-    DispmanxConnector(@Nonnull @Provided final Display display,
-                      final WlOutput wlOutput,
+    DispmanxConnector(final WlOutput wlOutput,
                       final int dispmanxElement) {
-        this.display = display;
         this.wlOutput = wlOutput;
         this.dispmanxElement = dispmanxElement;
     }
@@ -58,21 +48,6 @@ public class DispmanxConnector implements Connector {
 
     @Override
     public void accept(@Nonnull final Renderer renderer) {
-        if (!this.renderJobEvent.isPresent()) {
-            whenIdle(() -> renderOn(renderer));
-        }
-    }
-
-    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
-        this.renderJobEvent = Optional.of(this.display.getEventLoop()
-                                                      .addIdle(idleHandler));
-    }
-
-    private void renderOn(@Nonnull final Renderer renderer) {
-        this.renderJobEvent.get()
-                           .remove();
-        this.renderJobEvent = Optional.empty();
         renderer.visit(this);
-        this.display.flushClients();
     }
 }

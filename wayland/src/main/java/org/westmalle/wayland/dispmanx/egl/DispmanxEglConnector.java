@@ -14,6 +14,10 @@
 package org.westmalle.wayland.dispmanx.egl;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.dispmanx.DispmanxConnector;
@@ -28,18 +32,25 @@ import java.util.Optional;
 public class DispmanxEglConnector implements EglConnector {
 
     @Nonnull
+    private final Display               display;
+    @Nonnull
     private final DispmanxConnector     dispmanxConnector;
     @Nonnull
     private final EGL_DISPMANX_WINDOW_T eglDispmanxWindow;
-    private final long                  eglSurface;
-    private final long                  eglContext;
-    private final long                  eglDisplay;
 
-    DispmanxEglConnector(@Nonnull final DispmanxConnector dispmanxConnector,
+    private Optional<EventSource> renderJobEvent = Optional.empty();
+
+    private final long eglSurface;
+    private final long eglContext;
+    private final long eglDisplay;
+
+    DispmanxEglConnector(@Nonnull @Provided final Display display,
+                         @Nonnull final DispmanxConnector dispmanxConnector,
                          @Nonnull final EGL_DISPMANX_WINDOW_T eglDispmanxWindow,
                          final long eglSurface,
                          final long eglContext,
                          final long eglDisplay) {
+        this.display = display;
         this.dispmanxConnector = dispmanxConnector;
         this.eglDispmanxWindow = eglDispmanxWindow;
         this.eglSurface = eglSurface;
@@ -81,7 +92,21 @@ public class DispmanxEglConnector implements EglConnector {
     @Override
     public void accept(@Nonnull final Renderer renderer) {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
+        if (!this.renderJobEvent.isPresent()) {
+            whenIdle(() -> renderOn(renderer));
+        }
+    }
 
+    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
+        this.renderJobEvent = Optional.of(this.display.getEventLoop()
+                                                      .addIdle(idleHandler));
+    }
+
+    private void renderOn(@Nonnull final Renderer renderer) {
+        this.renderJobEvent.get()
+                           .remove();
+        this.renderJobEvent = Optional.empty();
         renderer.visit(this);
+        this.display.flushClients();
     }
 }
