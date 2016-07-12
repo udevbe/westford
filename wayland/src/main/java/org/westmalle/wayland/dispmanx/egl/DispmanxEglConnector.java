@@ -32,8 +32,8 @@ public class DispmanxEglConnector implements EglConnector {
     @Nonnull
     private final EGL_DISPMANX_WINDOW_T eglDispmanxWindow;
     private final long                  eglSurface;
-    private final long eglContext;
-    private final long eglDisplay;
+    private final long                  eglContext;
+    private final long                  eglDisplay;
 
     DispmanxEglConnector(@Nonnull final DispmanxConnector dispmanxConnector,
                          @Nonnull final EGL_DISPMANX_WINDOW_T eglDispmanxWindow,
@@ -80,6 +80,8 @@ public class DispmanxEglConnector implements EglConnector {
 
     @Override
     public void accept(@Nonnull final Renderer renderer) {
+        //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
+
         renderer.visit(this);
     }
 }
