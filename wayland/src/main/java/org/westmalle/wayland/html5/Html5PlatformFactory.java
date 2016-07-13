@@ -17,12 +17,18 @@ import java.util.Optional;
 
 public class Html5PlatformFactory {
 
+    private final Html5SocketServletFactory   html5SocketServletFactory;
+    private final Html5ConnectorFactory       html5ConnectorFactory;
     private final Platform                    platform;
     private final PrivateHtml5PlatformFactory privateHtml5PlatformFactory;
 
     @Inject
-    Html5PlatformFactory(final Platform platform,
+    Html5PlatformFactory(final Html5SocketServletFactory html5SocketServletFactory,
+                         final Html5ConnectorFactory html5ConnectorFactory,
+                         final Platform platform,
                          final PrivateHtml5PlatformFactory privateHtml5PlatformFactory) {
+        this.html5SocketServletFactory = html5SocketServletFactory;
+        this.html5ConnectorFactory = html5ConnectorFactory;
         this.platform = platform;
         this.privateHtml5PlatformFactory = privateHtml5PlatformFactory;
     }
@@ -75,13 +81,15 @@ public class Html5PlatformFactory {
 
     private Optional<Html5Connector> createHtml5Connector(final ServletContextHandler context,
                                                           final Connector connector) {
+
+        final Html5Connector html5Connector = this.html5ConnectorFactory.create(connector);
+
         // Add websocket servlet
-        final ServletHolder servletHolder = new ServletHolder("wayland",
-                                                              new Html5SocketServlet());
         //TODO deduce identifier from connector
         final String connectorId = "vga-0";
-        context.addServlet(servletHolder,
+        context.addServlet(new ServletHolder(connectorId,
+                                             this.html5SocketServletFactory.create(html5Connector)),
                            "/wayland/" + connectorId);
-        return null;
+        return Optional.of(html5Connector);
     }
 }
