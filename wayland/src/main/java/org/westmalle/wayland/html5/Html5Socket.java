@@ -1,38 +1,63 @@
 package org.westmalle.wayland.html5;
 
 
+import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.westmalle.wayland.core.JobExecutor;
 
+import javax.annotation.Nonnull;
+
+@AutoFactory
 public class Html5Socket implements WebSocketListener {
+
+    @Nonnull
+    private final JobExecutor    jobExecutor;
+    private final Html5Connector html5Connector;
+
+    Html5Socket(@Provided @Nonnull final JobExecutor jobExecutor,
+                final Html5Connector html5Connector) {
+        this.jobExecutor = jobExecutor;
+        this.html5Connector = html5Connector;
+    }
 
     //TODO implement
 
+    //we offload all incoming events from the web server thread to our own main thread.
     @Override
-    public void onWebSocketBinary(final byte[] bytes,
-                                  final int i,
-                                  final int i1) {
-
+    public void onWebSocketBinary(final byte[] payload,
+                                  final int offset,
+                                  final int len) {
+        this.jobExecutor.submit(() -> this.html5Connector.onWebSocketBinary(this,
+                                                                            payload,
+                                                                            offset,
+                                                                            len));
     }
 
     @Override
-    public void onWebSocketText(final String s) {
-
+    public void onWebSocketText(final String message) {
+        this.jobExecutor.submit(() -> this.html5Connector.onWebSocketText(this,
+                                                                          message));
     }
 
     @Override
-    public void onWebSocketClose(final int i,
-                                 final String s) {
-
+    public void onWebSocketClose(final int statusCode,
+                                 final String reason) {
+        this.jobExecutor.submit(() -> this.html5Connector.onWebSocketClose(this,
+                                                                           statusCode,
+                                                                           reason));
     }
 
     @Override
     public void onWebSocketConnect(final Session session) {
-
+        this.jobExecutor.submit(() -> this.html5Connector.onWebSocketConnect(this,
+                                                                             session));
     }
 
     @Override
-    public void onWebSocketError(final Throwable throwable) {
-
+    public void onWebSocketError(final Throwable cause) {
+        this.jobExecutor.submit(() -> this.html5Connector.onWebSocketError(this,
+                                                                           cause));
     }
 }
