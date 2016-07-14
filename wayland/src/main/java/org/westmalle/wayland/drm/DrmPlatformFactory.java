@@ -220,20 +220,34 @@ public class DrmPlatformFactory {
         }
 
 
+        final int fallBackDpi = 96;
+
+        int         mmWidth  = drmModeConnector.mmWidth();
+        final short hdisplay = mode.hdisplay();
+        if (mmWidth == 0) {
+            mmWidth = (int) ((hdisplay * 25.4) / fallBackDpi);
+        }
+
+        int         mmHeight = drmModeConnector.mmHeight();
+        final short vdisplay = mode.vdisplay();
+        if (mmHeight == 0) {
+            mmHeight = (int) ((hdisplay * 25.4) / fallBackDpi);
+        }
+
         //TODO gather more geo & mode info
         final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .physicalWidth(drmModeConnector.mmWidth())
-                                                            .physicalHeight(drmModeConnector.mmHeight())
+                                                            .physicalWidth(mmWidth)
+                                                            .physicalHeight(mmHeight)
                                                             .make("unknown")
                                                             .model("unknown")
                                                             .x(0)
                                                             .y(0)
-                                                            .subpixel(0)
+                                                            .subpixel(drmModeConnector.drmModeSubPixel())
                                                             .transform(0)
                                                             .build();
         final OutputMode outputMode = OutputMode.builder()
-                                                .height(mode.vdisplay())
-                                                .width(mode.hdisplay())
+                                                .width(hdisplay)
+                                                .height(vdisplay)
                                                 .refresh(mode.vrefresh())
                                                 .flags(mode.flags())
                                                 .build();
