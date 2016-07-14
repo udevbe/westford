@@ -13,66 +13,34 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
-import org.freedesktop.wayland.server.EventSource;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class Compositor {
 
     @Nonnull
-    private final Display               display;
+    private final Renderer renderer;
     @Nonnull
-    private final Renderer              renderer;
-    @Nonnull
-    private final Platform              platform;
-    @Nonnull
-    private final EventLoop.IdleHandler idleHandler;
-
-    @Nonnull
-    private Optional<EventSource> renderEvent = Optional.empty();
+    private final Platform platform;
 
     @Inject
-    Compositor(@Nonnull final Display display,
-               @Nonnull final Platform platform,
+    Compositor(@Nonnull final Platform platform,
                @Nonnull final Renderer renderer) {
-        this.display = display;
         this.platform = platform;
         this.renderer = renderer;
-        this.idleHandler = this::handleIdle;
-    }
-
-    private void handleIdle() {
-        this.renderEvent.get()
-                        .remove();
-        this.renderEvent = Optional.empty();
-        //TODO unit test with subsurfaces render order
-        //TODO unit test with parent surface without buffer while clients have a buffer.
-        renderOutput(this.platform);
-
-        this.display.flushClients();
-    }
-
-    private void renderOutput(final Platform platform) {
-        platform.accept(this.renderer);
     }
 
     public void requestRender() {
-        if (!this.renderEvent.isPresent()) {
-            renderScene();
-        }
-    }
-
-    private void renderScene() {
-        this.renderEvent = Optional.of(this.display.getEventLoop()
-                                                   .addIdle(this.idleHandler));
+        //TODO optimize by only requesting a render for a specific connector.
+        this.platform.getConnectors()
+                     .forEach(connectorOptional ->
+                                      connectorOptional.ifPresent(connector ->
+                                                                          connector.accept(this.renderer)));
     }
 
     @Nonnegative

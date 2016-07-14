@@ -62,11 +62,6 @@ public class GbmEglPlatform implements EglPlatform {
         return this.gbmEglConnectors;
     }
 
-    @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-    }
-
     @Nonnull
     @Override
     public String getEglExtensions() {

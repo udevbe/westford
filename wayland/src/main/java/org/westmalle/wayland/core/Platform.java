@@ -21,6 +21,4 @@ public interface Platform {
 
     @Nonnull
     List<? extends Optional<? extends Connector>> getConnectors();
-
-    void accept(@Nonnull Renderer renderer);
 }

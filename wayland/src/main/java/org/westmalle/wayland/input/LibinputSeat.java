@@ -197,8 +197,8 @@ public class LibinputSeat {
             //device was not mapped to a device we can handle
             return;
         }
-        final LibinputDevice libinputDevice = wrap(LibinputDevice.class,
-                                                   deviceData).dref();
+        final LibinputDevice libinputDevice = (LibinputDevice) wrap(Object.class,
+                                                                    deviceData).dref();
 
         switch (eventType) {
             case LIBINPUT_EVENT_KEYBOARD_KEY:

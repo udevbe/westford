@@ -232,8 +232,8 @@ public class DrmPlatformFactory {
                                                             .transform(0)
                                                             .build();
         final OutputMode outputMode = OutputMode.builder()
-                                                .height(mode.hdisplay())
-                                                .width(mode.vdisplay())
+                                                .height(mode.vdisplay())
+                                                .width(mode.hdisplay())
                                                 .refresh(mode.vrefresh())
                                                 .flags(mode.flags())
                                                 .build();
