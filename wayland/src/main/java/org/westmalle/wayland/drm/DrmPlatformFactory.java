@@ -219,7 +219,6 @@ public class DrmPlatformFactory {
             throw new RuntimeException("Could not find a valid mode.");
         }
 
-
         final int fallBackDpi = 96;
 
         int         mmWidth  = drmModeConnector.mmWidth();
@@ -231,7 +230,7 @@ public class DrmPlatformFactory {
         int         mmHeight = drmModeConnector.mmHeight();
         final short vdisplay = mode.vdisplay();
         if (mmHeight == 0) {
-            mmHeight = (int) ((hdisplay * 25.4) / fallBackDpi);
+            mmHeight = (int) ((vdisplay * 25.4) / fallBackDpi);
         }
 
         //TODO gather more geo & mode info
