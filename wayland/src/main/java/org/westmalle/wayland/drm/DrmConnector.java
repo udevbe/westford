@@ -16,6 +16,7 @@ package org.westmalle.wayland.drm;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
@@ -23,7 +24,6 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 //TODO drm connector, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
@@ -75,5 +75,10 @@ public class DrmConnector implements Connector {
     @Nonnull
     public DrmModeModeInfo getMode() {
         return this.mode;
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this);
     }
 }

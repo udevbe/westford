@@ -14,7 +14,12 @@
 package org.westmalle.wayland.dispmanx.egl;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.dispmanx.DispmanxConnector;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -27,17 +32,30 @@ import java.util.Optional;
 public class DispmanxEglConnector implements EglConnector {
 
     @Nonnull
+    private final Display               display;
+    @Nonnull
     private final DispmanxConnector     dispmanxConnector;
     @Nonnull
     private final EGL_DISPMANX_WINDOW_T eglDispmanxWindow;
-    private final long                  eglSurface;
 
-    DispmanxEglConnector(@Nonnull final DispmanxConnector dispmanxConnector,
+    private Optional<EventSource> renderJobEvent = Optional.empty();
+
+    private final long eglSurface;
+    private final long eglContext;
+    private final long eglDisplay;
+
+    DispmanxEglConnector(@Nonnull @Provided final Display display,
+                         @Nonnull final DispmanxConnector dispmanxConnector,
                          @Nonnull final EGL_DISPMANX_WINDOW_T eglDispmanxWindow,
-                         final long eglSurface) {
+                         final long eglSurface,
+                         final long eglContext,
+                         final long eglDisplay) {
+        this.display = display;
         this.dispmanxConnector = dispmanxConnector;
         this.eglDispmanxWindow = eglDispmanxWindow;
         this.eglSurface = eglSurface;
+        this.eglContext = eglContext;
+        this.eglDisplay = eglDisplay;
     }
 
     @Nonnull
@@ -50,6 +68,16 @@ public class DispmanxEglConnector implements EglConnector {
         return this.eglSurface;
     }
 
+    @Override
+    public long getEglContext() {
+        return this.eglContext;
+    }
+
+    @Override
+    public long getEglDisplay() {
+        return this.eglDisplay;
+    }
+
     @Nonnull
     public EGL_DISPMANX_WINDOW_T getEglDispmanxWindow() {
         return this.eglDispmanxWindow;
@@ -59,5 +87,26 @@ public class DispmanxEglConnector implements EglConnector {
     @Override
     public WlOutput getWlOutput() {
         return this.dispmanxConnector.getWlOutput();
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
+        if (!this.renderJobEvent.isPresent()) {
+            whenIdle(() -> renderOn(renderer));
+        }
+    }
+
+    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
+        this.renderJobEvent = Optional.of(this.display.getEventLoop()
+                                                      .addIdle(idleHandler));
+    }
+
+    private void renderOn(@Nonnull final Renderer renderer) {
+        this.renderJobEvent.get()
+                           .remove();
+        this.renderJobEvent = Optional.empty();
+        renderer.visit(this);
+        this.display.flushClients();
     }
 }

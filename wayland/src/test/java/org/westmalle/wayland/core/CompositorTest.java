@@ -13,23 +13,18 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,8 +33,6 @@ import static org.mockito.Mockito.when;
 @PrepareForTest(EventSource.class)
 public class CompositorTest {
 
-    @Mock
-    private Display  display;
     @Mock
     private Renderer renderer;
     @Mock
@@ -51,58 +44,18 @@ public class CompositorTest {
     @Test
     public void testRequestRender() throws Exception {
         //given
-        final EventLoop eventLoop = mock(EventLoop.class);
-        when(this.display.getEventLoop()).thenReturn(eventLoop);
-        final List<EventLoop.IdleHandler> idleHandlers = new LinkedList<>();
-        when(eventLoop.addIdle(any())).thenAnswer(invocation -> {
-            final Object                arg0        = invocation.getArguments()[0];
-            final EventLoop.IdleHandler idleHandler = (EventLoop.IdleHandler) arg0;
-            idleHandlers.add(idleHandler);
-            return mock(EventSource.class);
-        });
+        Connector connector0 = mock(Connector.class);
+        Connector connector1 = mock(Connector.class);
+        final List<? extends Optional<? extends Connector>> connectors = Arrays.asList(Optional.of(connector0),
+                                                                                       Optional.empty(),
+                                                                                       Optional.of(connector1));
+        when(platform.getConnectors()).thenReturn((List) connectors);
 
         //when
         this.compositor.requestRender();
-        idleHandlers.get(0)
-                    .handle();
+
         //then
-        final InOrder inOrder0 = inOrder(this.platform,
-                                         this.renderer);
-        inOrder0.verify(this.platform)
-                .accept(this.renderer);
-
-        final InOrder inOrder1 = inOrder(this.platform,
-                                         this.renderer);
-        inOrder1.verify(this.platform)
-                .accept(renderer);
-
-        verify(this.display).flushClients();
-    }
-
-    @Test
-    public void testRequestRenderPreviousRenderBusy() throws Exception {
-        //given
-        final EventLoop eventLoop = mock(EventLoop.class);
-        when(this.display.getEventLoop()).thenReturn(eventLoop);
-
-        final List<EventLoop.IdleHandler> idleHandlers = new LinkedList<>();
-        when(eventLoop.addIdle(any())).thenAnswer(invocation -> {
-            final Object                arg0        = invocation.getArguments()[0];
-            final EventLoop.IdleHandler idleHandler = (EventLoop.IdleHandler) arg0;
-            idleHandlers.add(idleHandler);
-            return mock(EventSource.class);
-        });
-
-        //when
-        this.compositor.requestRender();
-        this.compositor.requestRender();
-        //then
-        assertThat(idleHandlers).hasSize(1);
-        //and when
-        idleHandlers.get(0)
-                    .handle();
-        this.compositor.requestRender();
-        //then
-        assertThat(idleHandlers).hasSize(2);
+        verify(connector0).accept(this.renderer);
+        verify(connector1).accept(this.renderer);
     }
 }

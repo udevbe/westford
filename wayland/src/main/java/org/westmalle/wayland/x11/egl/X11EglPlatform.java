@@ -27,8 +27,6 @@ import java.util.Optional;
 public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final X11Platform                     x11Platform;
-    @Nonnull
     private final List<Optional<X11EglConnector>> eglConnectors;
 
     private final long eglDisplay;
@@ -37,12 +35,10 @@ public class X11EglPlatform implements EglPlatform {
     @Nonnull
     private final String eglExtensions;
 
-    X11EglPlatform(@Nonnull final X11Platform x11Platform,
-                   @Nonnull final List<Optional<X11EglConnector>> eglConnectors,
+    X11EglPlatform(@Nonnull final List<Optional<X11EglConnector>> eglConnectors,
                    final long eglDisplay,
                    final long eglContext,
                    @Nonnull final String eglExtensions) {
-        this.x11Platform = x11Platform;
         this.eglConnectors = eglConnectors;
         this.eglDisplay = eglDisplay;
         this.eglContext = eglContext;
@@ -63,16 +59,6 @@ public class X11EglPlatform implements EglPlatform {
     @Override
     public List<Optional<X11EglConnector>> getConnectors() {
         return this.eglConnectors;
-    }
-
-    @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-    }
-
-    @Nonnull
-    public X11Platform getX11Platform() {
-        return this.x11Platform;
     }
 
     @Nonnull

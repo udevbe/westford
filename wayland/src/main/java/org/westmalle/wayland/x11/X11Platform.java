@@ -72,9 +72,4 @@ public class X11Platform implements Platform {
     public List<Optional<X11Connector>> getConnectors() {
         return this.connectors;
     }
-
-    @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-    }
 }

@@ -50,9 +50,4 @@ public class DispmanxPlatform implements Platform {
     public List<Optional<DispmanxConnector>> getConnectors() {
         return this.dispmanxConnectors;
     }
-
-    @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-    }
 }
