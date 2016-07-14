@@ -51,9 +51,7 @@ public class Html5PlatformFactory {
         // Add default servlet (to serve the html/css/js)
         // Figure out where the static files are stored.
         //TODO write index.html & js
-        final URL urlStatics = Thread.currentThread()
-                                     .getContextClassLoader()
-                                     .getResource("index.html");
+        final URL urlStatics = getClass().getResource("/html5/index.html");
         Objects.requireNonNull(urlStatics,
                                "Unable to find index.html in classpath");
         final String urlBase = urlStatics.toExternalForm()
