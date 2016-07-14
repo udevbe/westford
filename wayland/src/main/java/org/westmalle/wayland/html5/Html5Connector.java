@@ -4,6 +4,7 @@ package org.westmalle.wayland.html5;
 import com.google.auto.factory.AutoFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
@@ -54,5 +55,10 @@ public class Html5Connector implements Connector {
     public void onWebSocketError(final Html5Socket html5Socket,
                                  final Throwable cause) {
 
+    }
+
+    @Override
+    public void accept(@Nonnull final Renderer renderer) {
+        renderer.visit(this.connector);
     }
 }
