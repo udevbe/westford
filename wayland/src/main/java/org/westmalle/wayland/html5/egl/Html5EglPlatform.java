@@ -37,11 +37,6 @@ public class Html5EglPlatform implements EglPlatform {
         return this.eglConnectors;
     }
 
-    @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-    }
-
     @Nonnull
     @Override
     public String getEglExtensions() {
