@@ -8,6 +8,7 @@ import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.westmalle.wayland.core.JobExecutor;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoFactory
 public class Html5Socket implements WebSocketListener {
@@ -15,6 +16,8 @@ public class Html5Socket implements WebSocketListener {
     @Nonnull
     private final JobExecutor    jobExecutor;
     private final Html5Connector html5Connector;
+
+    private Optional<Session> session = Optional.empty();
 
     Html5Socket(@Provided @Nonnull final JobExecutor jobExecutor,
                 final Html5Connector html5Connector) {
@@ -44,20 +47,30 @@ public class Html5Socket implements WebSocketListener {
     @Override
     public void onWebSocketClose(final int statusCode,
                                  final String reason) {
-        this.jobExecutor.submit(() -> this.html5Connector.onWebSocketClose(this,
-                                                                           statusCode,
-                                                                           reason));
+        this.jobExecutor.submit(() -> {
+            this.session = Optional.empty();
+            this.html5Connector.onWebSocketClose(this,
+                                                 statusCode,
+                                                 reason);
+        });
     }
 
     @Override
     public void onWebSocketConnect(final Session session) {
-        this.jobExecutor.submit(() -> this.html5Connector.onWebSocketConnect(this,
-                                                                             session));
+        this.jobExecutor.submit(() -> {
+            this.session = Optional.of(session);
+            this.html5Connector.onWebSocketConnect(this,
+                                                   session);
+        });
     }
 
     @Override
     public void onWebSocketError(final Throwable cause) {
         this.jobExecutor.submit(() -> this.html5Connector.onWebSocketError(this,
                                                                            cause));
+    }
+
+    public Optional<Session> getSession() {
+        return this.session;
     }
 }

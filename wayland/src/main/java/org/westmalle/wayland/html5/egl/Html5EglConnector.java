@@ -45,8 +45,14 @@ public class Html5EglConnector implements EglConnector {
     public void end() {
         this.eglConnector.end();
 
-        //TODO read pixels from screen and forward to html client
-        //TODO send pixel buffer using html5Connector
+        //TODO read pixels from screen
+
+        this.html5Connector.getHtml5Sockets()
+                           .forEach(html5Socket ->
+                                            html5Socket.getSession()
+                                                       .ifPresent(session -> {
+                                                           //TODO send frame blob
+                                                       }));
     }
 
     @Nonnull
