@@ -53,9 +53,9 @@ public abstract class SurfaceState {
     public abstract Mat4 getPositionTransform();
 
     @Nonnegative
-    abstract int getScale();
+    public abstract int getScale();
 
-    abstract Builder toBuilder();
+    public abstract Builder toBuilder();
 
     @AutoValue.Builder
     interface Builder {
