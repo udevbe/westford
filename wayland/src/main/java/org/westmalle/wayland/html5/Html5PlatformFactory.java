@@ -34,7 +34,7 @@ public class Html5PlatformFactory {
     }
 
     public Html5Platform create() {
-        //TODO setup factory that properly inits an embedded jetty server with a websocket and pass it in the constructor
+        //TODO from configuration
 
         final Server server = new Server(8080);
 
@@ -50,7 +50,6 @@ public class Html5PlatformFactory {
 
         // Add default servlet (to serve the html/css/js)
         // Figure out where the static files are stored.
-        //TODO write index.html & js
         final URL urlStatics = getClass().getResource("/html5/index.html");
         Objects.requireNonNull(urlStatics,
                                "Unable to find index.html in classpath");
