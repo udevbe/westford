@@ -32,7 +32,7 @@
     <properties>
         <!-- dep versions -->
         <auto.factory.version>1.0-beta3</auto.factory.version>
-        <auto.value.version>1.2</auto.value.version>
+        <auto.value.version>1.3-rc2</auto.value.version>
         <dagger.version>2.2</dagger.version>
         <findbugs.version>3.0.1</findbugs.version>
         <jaccall.version>1.0.1</jaccall.version>
