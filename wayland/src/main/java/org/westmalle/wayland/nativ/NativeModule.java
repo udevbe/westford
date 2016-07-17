@@ -35,6 +35,8 @@ import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.nativ.libinput.Libinput_Symbols;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1_Symbols;
+import org.westmalle.wayland.nativ.libpng.Libpng;
+import org.westmalle.wayland.nativ.libpng.Libpng_Symbols;
 import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.nativ.libudev.Libudev_Symbols;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
@@ -48,6 +50,13 @@ import javax.inject.Singleton;
 
 @Module
 public class NativeModule {
+
+    @Singleton
+    @Provides
+    Libpng provideLibpng() {
+        new Libpng_Symbols().link();
+        return new Libpng();
+    }
 
     @Singleton
     @Provides
