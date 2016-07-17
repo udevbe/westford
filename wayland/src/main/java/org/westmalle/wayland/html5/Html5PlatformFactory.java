@@ -19,21 +19,18 @@ public class Html5PlatformFactory {
 
     private final Html5SocketServletFactory   html5SocketServletFactory;
     private final Html5ConnectorFactory       html5ConnectorFactory;
-    private final Platform                    platform;
     private final PrivateHtml5PlatformFactory privateHtml5PlatformFactory;
 
     @Inject
     Html5PlatformFactory(final Html5SocketServletFactory html5SocketServletFactory,
                          final Html5ConnectorFactory html5ConnectorFactory,
-                         final Platform platform,
                          final PrivateHtml5PlatformFactory privateHtml5PlatformFactory) {
         this.html5SocketServletFactory = html5SocketServletFactory;
         this.html5ConnectorFactory = html5ConnectorFactory;
-        this.platform = platform;
         this.privateHtml5PlatformFactory = privateHtml5PlatformFactory;
     }
 
-    public Html5Platform create() {
+    public Html5Platform create(final Platform platform) {
         //TODO from configuration
 
         final Server server = new Server(8080);
@@ -43,7 +40,7 @@ public class Html5PlatformFactory {
         server.setHandler(context);
 
         final List<Optional<Html5Connector>> html5Connectors = new ArrayList<>();
-        for (final Optional<? extends Connector> connectorOptional : this.platform.getConnectors()) {
+        for (final Optional<? extends Connector> connectorOptional : platform.getConnectors()) {
             html5Connectors.add(connectorOptional.flatMap(connector -> createHtml5Connector(context,
                                                                                             connector)));
         }

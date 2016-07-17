@@ -49,13 +49,13 @@ public class Html5EglConnector implements EglConnector {
     }
 
     @Override
-    public void begin() {
-        this.eglConnector.begin();
+    public void renderBegin() {
+        this.eglConnector.renderBegin();
     }
 
     @Override
-    public void end() {
-        this.eglConnector.end();
+    public void renderEndBeforeSwap() {
+        this.eglConnector.renderEndBeforeSwap();
 
         final OutputMode mode = getWlOutput().getOutput()
                                              .getMode();
@@ -76,6 +76,11 @@ public class Html5EglConnector implements EglConnector {
         this.html5Connector.commitFrame(frameBuffer,
                                         width,
                                         height);
+    }
+
+    @Override
+    public void renderEndAfterSwap() {
+        this.eglConnector.renderEndAfterSwap();
     }
 
     @Nonnull

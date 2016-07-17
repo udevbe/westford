@@ -181,6 +181,7 @@ public class Html5Connector implements Connector {
                 break;
             }
             default: {
+                //TODO move to html5 seat implementation
                 handleInput(message);
             }
         }
