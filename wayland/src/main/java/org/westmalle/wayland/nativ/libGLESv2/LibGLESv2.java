@@ -490,4 +490,13 @@ public class LibGLESv2 {
     public native void glDisable(int cap);
 
     public native void glDisableVertexAttribArray(final int index);
+
+    public native void glReadPixels(int x,
+                                    int y,
+                                    int width,
+                                    int height,
+                                    int format,
+                                    int type,
+                                    @Ptr(Void.class) long data);
+
 }

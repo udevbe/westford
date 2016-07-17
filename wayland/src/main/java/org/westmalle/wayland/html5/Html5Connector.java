@@ -8,7 +8,6 @@ import org.freedesktop.jaccall.JNI;
 import org.freedesktop.jaccall.Lng;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
-import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
@@ -80,14 +79,14 @@ public class Html5Connector implements Connector {
                 .forEach(html5Socket ->
                                  html5Socket.getSession()
                                             .ifPresent(session -> {
-                                                try {
-                                                    session.getRemote()
-                                                           .sendBytes(pngByteBuffer);
-                                                }
-                                                catch (IOException e) {
-                                                    //TODO log
-                                                    e.printStackTrace();
-                                                }
+                                                //TODO we should send frame were unchanged pixels have an rgba int of 0,
+                                                //this will make the png compression much better. However this means we need
+                                                //to resend a full frame when a delta frame was not received and as such need
+                                                //to keep track of frame delivery per remote.
+
+                                                //we send full frames for now so we don't care about delivery state.
+                                                session.getRemote()
+                                                       .sendBytesByFuture(pngByteBuffer);
                                             }));
         targetPNG.close();
     }
