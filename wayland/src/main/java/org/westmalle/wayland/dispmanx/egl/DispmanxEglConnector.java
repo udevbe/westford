@@ -20,6 +20,11 @@ import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
+import org.westmalle.wayland.core.events.RenderBegin;
+import org.westmalle.wayland.core.events.RenderEndAfterSwap;
+import org.westmalle.wayland.core.events.RenderEndBeforeSwap;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.dispmanx.DispmanxConnector;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -30,6 +35,10 @@ import java.util.Optional;
 @AutoFactory(className = "DispmanxEglConnectorFactory",
              allowSubclasses = true)
 public class DispmanxEglConnector implements EglConnector {
+
+    private final Signal<RenderBegin, Slot<RenderBegin>>                 renderBeginSignal         = new Signal<>();
+    private final Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> renderEndBeforeSwapSignal = new Signal<>();
+    private final Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>>   renderEndAfterSwapSignal  = new Signal<>();
 
     @Nonnull
     private final Display               display;
@@ -87,6 +96,21 @@ public class DispmanxEglConnector implements EglConnector {
     @Override
     public WlOutput getWlOutput() {
         return this.dispmanxConnector.getWlOutput();
+    }
+
+    @Override
+    public Signal<RenderBegin, Slot<RenderBegin>> getRenderBeginSignal() {
+        return this.renderBeginSignal;
+    }
+
+    @Override
+    public Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> getRenderEndBeforeSwapSignal() {
+        return this.renderEndBeforeSwapSignal;
+    }
+
+    @Override
+    public Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>> getRenderEndAfterSwapSignal() {
+        return this.renderEndAfterSwapSignal;
     }
 
     @Override
