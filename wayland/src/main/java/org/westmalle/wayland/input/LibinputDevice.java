@@ -22,6 +22,7 @@ import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
@@ -35,7 +36,9 @@ import org.westmalle.wayland.protocol.WlTouch;
 
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_PRESSED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_RELEASED;
@@ -82,7 +85,15 @@ public class LibinputDevice {
 
         final long outputNamePointer = this.libinput.libinput_device_get_output_name(this.device);
         if (outputNamePointer == 0L) {
-            return Optional.empty();
+            final Iterator<? extends Optional<? extends Connector>> iterator = this.platform.getConnectors()
+                                                                                            .iterator();
+            if (iterator.hasNext()) {
+                final Optional<? extends Connector> connector = iterator.next();
+                return connector.map(Connector::getWlOutput);
+            }
+            else {
+                return Optional.empty();
+            }
         }
 
         final String deviceOutputName = Pointer.wrap(String.class,

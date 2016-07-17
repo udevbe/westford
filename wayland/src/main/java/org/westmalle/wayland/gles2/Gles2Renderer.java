@@ -436,18 +436,19 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     private void flushRenderState(final EglConnector eglConnector) {
+        eglConnector.renderEndBeforeSwap();
         this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    eglConnector.getEglSurface());
-        eglConnector.end();
+        eglConnector.renderEndAfterSwap();
     }
 
     private void updateRenderState(final EglConnector eglConnector) {
-        eglConnector.begin();
-
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglConnector.getEglSurface(),
                                    eglConnector.getEglSurface(),
                                    eglConnector.getEglContext());
+        eglConnector.renderBegin();
+
 
         //TODO we can improve performance by keeping an output state and only trigger this logic if the output geometry & mode changes
 
