@@ -319,4 +319,10 @@ public class Libc {
                               @Ptr long src);
 
     public native int setjmp(@Ptr long env);
+
+    @Ptr(Void.class)
+    public native long memcpy(@Ptr(Void.class) long dest,
+                              @Ptr(Void.class) long src,
+                              int num);
+
 }

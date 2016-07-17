@@ -7,6 +7,19 @@ import org.freedesktop.jaccall.Unsigned;
 
 @Lib("png")
 public class Libpng {
+
+    public static final int PNG_COLOR_MASK_COLOR = 2;
+    public static final int PNG_COLOR_MASK_ALPHA = 4;
+
+    public static final int PNG_COLOR_TYPE_RGB_ALPHA     = PNG_COLOR_MASK_COLOR | PNG_COLOR_MASK_ALPHA;
+    public static final int PNG_COLOR_TYPE_RGBA          = PNG_COLOR_TYPE_RGB_ALPHA;
+    public static final int PNG_INTERLACE_NONE           = 0;
+    public static final int PNG_COMPRESSION_TYPE_BASE    = 0;
+    public static final int PNG_COMPRESSION_TYPE_DEFAULT = PNG_COMPRESSION_TYPE_BASE;
+    public static final int PNG_FILTER_TYPE_BASE         = 0;
+    public static final int PNG_FILTER_TYPE_DEFAULT      = PNG_FILTER_TYPE_BASE;
+    public static final int PNG_TRANSFORM_IDENTITY       = 0x0000;
+
     @Ptr
     public native long png_create_write_struct(@Ptr(char.class) long user_png_ver,
                                                @Ptr(Void.class) long error_ptr,

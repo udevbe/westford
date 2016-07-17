@@ -2,31 +2,55 @@ package org.westmalle.wayland.html5;
 
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.eclipse.jetty.websocket.api.Session;
+import org.freedesktop.jaccall.JNI;
+import org.freedesktop.jaccall.Lng;
+import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Size;
+import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
+import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.libpng.Libpng;
+import org.westmalle.wayland.nativ.libpng.Pointerpng_rw_ptr;
+import org.westmalle.wayland.nativ.libpng.png_rw_ptr;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.zip.CRC32;
-import java.util.zip.ZipOutputStream;
+
+import static org.freedesktop.jaccall.Pointer.malloc;
+import static org.freedesktop.jaccall.Size.sizeof;
+import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_COLOR_TYPE_RGBA;
+import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_COMPRESSION_TYPE_DEFAULT;
+import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_FILTER_TYPE_DEFAULT;
+import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_INTERLACE_NONE;
+import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_TRANSFORM_IDENTITY;
 
 @AutoFactory(allowSubclasses = true,
              className = "Html5ConnectorFactory")
 public class Html5Connector implements Connector {
 
+    @Nonnull
+    private final Libc      libc;
+    @Nonnull
+    private final Libpng    libpng;
     private final Connector connector;
 
     private final Set<Html5Socket> html5Sockets = new HashSet<>();
 
-    Html5Connector(final Connector connector) {
+    private final Pointer<png_rw_ptr> pngWriteCallback = Pointerpng_rw_ptr.nref(this::pngWriteCallback);
+
+    Html5Connector(@Provided @Nonnull final Libc libc,
+                   @Provided @Nonnull final Libpng libpng,
+                   @Nonnull final Connector connector) {
+        this.libc = libc;
+        this.libpng = libpng;
         this.connector = connector;
     }
 
@@ -41,34 +65,99 @@ public class Html5Connector implements Connector {
     }
 
     //TODO add methods to send screen updates to all connected sockets
-    public void commitFrame(final byte[] raw,
+    public void commitFrame(final Pointer<Byte> bufferRGBA,
                             final int pitch,
                             final int height) {
+        final Pointer<Pointer<Byte>> targetPNG = malloc(sizeof((Pointer) null),
+                                                        Byte.class).castpp();
+        toPng(bufferRGBA,
+              targetPNG,
+              pitch,
+              height);
+        final ByteBuffer pngByteBuffer = JNI.wrap(targetPNG.address,
+                                                  pitch * height * 4);
         getHtml5Sockets()
                 .forEach(html5Socket ->
                                  html5Socket.getSession()
                                             .ifPresent(session -> {
                                                 try {
                                                     session.getRemote()
-                                                           .sendBytes(ByteBuffer.wrap(toPng(raw,
-                                                                                            pitch,
-                                                                                            height)));
+                                                           .sendBytes(pngByteBuffer);
                                                 }
-                                                catch (final IOException e) {
+                                                catch (IOException e) {
                                                     //TODO log
                                                     e.printStackTrace();
                                                 }
                                             }));
+        targetPNG.close();
     }
 
-    private byte[] toPng(final byte[] raw,
-                         final int pitch,
-                         final int height) throws IOException {
+    private void toPng(final Pointer<Byte> sourceRGBA,
+                       final Pointer<Pointer<Byte>> targetPNG,
+                       final int pitch,
+                       final int height) {
+        final long p = this.libpng.png_create_write_struct(Pointer.nref("1.6.23+apng").address,
+                                                           0L,
+                                                           0L,
+                                                           0L);
+        if (p == 0L) {
+            throw new RuntimeException("png_create_write_struct() failed");
+        }
 
-        //TODO use libpng
+        final long infoPtr = this.libpng.png_create_info_struct(p);
+        if (infoPtr == 0L) {
+            throw new RuntimeException("png_create_info_struct() failed");
+        }
 
-        return null;
+        if (0 != this.libc.setjmp(this.libpng.png_jmpbuf(p))) {
+            throw new RuntimeException("setjmp(png_jmpbuf(p) failed");
+        }
+
+        this.libpng.png_set_IHDR(p,
+                                 infoPtr,
+                                 pitch,
+                                 height,
+                                 8,
+                                 PNG_COLOR_TYPE_RGBA,
+                                 PNG_INTERLACE_NONE,
+                                 PNG_COMPRESSION_TYPE_DEFAULT,
+                                 PNG_FILTER_TYPE_DEFAULT);
+
+        final Pointer<Pointer<Byte>> rows = malloc(height * sizeof((Pointer) null),
+                                                   Byte.class).castpp();
+        for (int y = 0; y < height; ++y) {
+            rows.writei(y,
+                        sourceRGBA.offset(y * pitch * 4));
+        }
+        this.libpng.png_set_rows(p,
+                                 infoPtr,
+                                 rows.address);
+        rows.close();
+
+        this.libpng.png_set_write_fn(p,
+                                     targetPNG.address,
+                                     this.pngWriteCallback.address,
+                                     0L);
+        this.libpng.png_write_png(p,
+                                  infoPtr,
+                                  PNG_TRANSFORM_IDENTITY,
+                                  0L);
     }
+
+    private void pngWriteCallback(@Ptr final long png_ptr,
+                                  @Ptr(byte.class) final long png_bytep,
+                                  @Unsigned @Lng final long png_size_t) {
+        final Pointer<Pointer<Byte>> ioPtr = Pointer.wrap(Byte.class,
+                                                          this.libpng.png_get_io_ptr(png_ptr))
+                                                    .castpp();
+        final Pointer<Byte> pngBuffer = malloc((int) png_size_t,
+                                               Byte.class);
+        this.libc.memcpy(pngBuffer.address,
+                         png_bytep,
+                         (int) png_size_t);
+        ioPtr.write(pngBuffer);
+    }
+
 
     //TODO handle socket input events
 
