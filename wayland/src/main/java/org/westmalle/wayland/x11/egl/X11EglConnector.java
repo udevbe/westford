@@ -21,11 +21,6 @@ import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.core.events.RenderBegin;
-import org.westmalle.wayland.core.events.RenderEndAfterSwap;
-import org.westmalle.wayland.core.events.RenderEndBeforeSwap;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.x11.X11Connector;
 
@@ -35,10 +30,6 @@ import java.util.Optional;
 @AutoFactory(allowSubclasses = true,
              className = "X11EglConnectorFactory")
 public class X11EglConnector implements EglConnector {
-
-    private final Signal<RenderBegin, Slot<RenderBegin>>                 renderBeginSignal         = new Signal<>();
-    private final Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> renderEndBeforeSwapSignal = new Signal<>();
-    private final Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>>   renderEndAfterSwapSignal  = new Signal<>();
 
     @Nonnull
     private final X11Connector x11Connector;
@@ -108,20 +99,5 @@ public class X11EglConnector implements EglConnector {
         this.renderJobEvent = Optional.empty();
         renderer.visit(this);
         this.display.flushClients();
-    }
-
-    @Override
-    public Signal<RenderBegin, Slot<RenderBegin>> getRenderBeginSignal() {
-        return this.renderBeginSignal;
-    }
-
-    @Override
-    public Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> getRenderEndBeforeSwapSignal() {
-        return this.renderEndBeforeSwapSignal;
-    }
-
-    @Override
-    public Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>> getRenderEndAfterSwapSignal() {
-        return this.renderEndAfterSwapSignal;
     }
 }

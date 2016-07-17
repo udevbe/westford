@@ -13,16 +13,9 @@
 //limitations under the License.
 package org.westmalle.wayland.core;
 
-
-import org.westmalle.wayland.core.events.RenderBegin;
-import org.westmalle.wayland.core.events.RenderEndAfterSwap;
-import org.westmalle.wayland.core.events.RenderEndBeforeSwap;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 public interface Connector {
 
@@ -32,20 +25,11 @@ public interface Connector {
     WlOutput getWlOutput();
 
     default void renderBegin() {
-        getRenderBeginSignal().emit(RenderBegin.create(System.nanoTime()));
     }
 
     default void renderEndBeforeSwap() {
-        getRenderEndBeforeSwapSignal().emit(RenderEndBeforeSwap.create(System.nanoTime()));
     }
 
     default void renderEndAfterSwap() {
-        getRenderEndAfterSwapSignal().emit(RenderEndAfterSwap.create(System.nanoTime()));
     }
-
-    Signal<RenderBegin, Slot<RenderBegin>> getRenderBeginSignal();
-
-    Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> getRenderEndBeforeSwapSignal();
-
-    Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>> getRenderEndAfterSwapSignal();
 }
