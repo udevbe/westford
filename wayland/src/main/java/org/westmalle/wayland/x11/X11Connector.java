@@ -18,11 +18,6 @@ import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.core.events.RenderBegin;
-import org.westmalle.wayland.core.events.RenderEndAfterSwap;
-import org.westmalle.wayland.core.events.RenderEndBeforeSwap;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
@@ -30,10 +25,6 @@ import javax.annotation.Nonnull;
 @AutoFactory(allowSubclasses = true,
              className = "X11ConnectorFactory")
 public class X11Connector implements Connector {
-
-    private final Signal<RenderBegin, Slot<RenderBegin>>                 renderBeginSignal         = new Signal<>();
-    private final     Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> renderEndBeforeSwapSignal = new Signal<>();
-    private final     Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>>   renderEndAfterSwapSignal  = new Signal<>();
 
     private final int      xWindow;
     @Nonnull
@@ -69,20 +60,5 @@ public class X11Connector implements Connector {
     @Override
     public void accept(@Nonnull final Renderer renderer) {
         renderer.visit(this);
-    }
-
-    @Override
-    public Signal<RenderBegin, Slot<RenderBegin>> getRenderBeginSignal() {
-        return this.renderBeginSignal;
-    }
-
-    @Override
-    public Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> getRenderEndBeforeSwapSignal() {
-        return this.renderEndBeforeSwapSignal;
-    }
-
-    @Override
-    public Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>> getRenderEndAfterSwapSignal() {
-        return this.renderEndAfterSwapSignal;
     }
 }

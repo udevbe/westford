@@ -22,14 +22,8 @@ import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.core.events.RenderBegin;
-import org.westmalle.wayland.core.events.RenderEndAfterSwap;
-import org.westmalle.wayland.core.events.RenderEndBeforeSwap;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPageFlipCallback;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
@@ -46,10 +40,6 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
 @AutoFactory(allowSubclasses = true,
              className = "GbmEglConnectorFactory")
 public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
-
-    private final Signal<RenderBegin, Slot<RenderBegin>>                 renderBeginSignal         = new Signal<>();
-    private final Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> renderEndBeforeSwapSignal = new Signal<>();
-    private final Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>>   renderEndAfterSwapSignal  = new Signal<>();
 
     @Nonnull
     private final Libgbm  libgbm;
@@ -121,9 +111,6 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
             whenIdle(render);
             this.delayedRenderJob = Optional.empty();
         });
-
-        //emit event
-        EglConnector.super.renderEndAfterSwap();
     }
 
     public int getFbId(final long gbmBo) {
@@ -225,20 +212,5 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
         this.renderJobEvent = Optional.empty();
         renderer.visit(this);
         this.display.flushClients();
-    }
-
-    @Override
-    public Signal<RenderBegin, Slot<RenderBegin>> getRenderBeginSignal() {
-        return this.renderBeginSignal;
-    }
-
-    @Override
-    public Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> getRenderEndBeforeSwapSignal() {
-        return this.renderEndBeforeSwapSignal;
-    }
-
-    @Override
-    public Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>> getRenderEndAfterSwapSignal() {
-        return this.renderEndAfterSwapSignal;
     }
 }

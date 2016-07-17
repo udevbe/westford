@@ -17,11 +17,6 @@ package org.westmalle.wayland.drm;
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.core.events.RenderBegin;
-import org.westmalle.wayland.core.events.RenderEndAfterSwap;
-import org.westmalle.wayland.core.events.RenderEndBeforeSwap;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
@@ -34,10 +29,6 @@ import javax.annotation.Nonnull;
 @AutoFactory(allowSubclasses = true,
              className = "DrmConnectorFactory")
 public class DrmConnector implements Connector {
-
-    private final Signal<RenderBegin, Slot<RenderBegin>>                 renderBeginSignal         = new Signal<>();
-    private final Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> renderEndBeforeSwapSignal = new Signal<>();
-    private final Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>>   renderEndAfterSwapSignal  = new Signal<>();
 
     @Nonnull
     private final WlOutput         wlOutput;
@@ -89,20 +80,5 @@ public class DrmConnector implements Connector {
     @Override
     public void accept(@Nonnull final Renderer renderer) {
         renderer.visit(this);
-    }
-
-    @Override
-    public Signal<RenderBegin, Slot<RenderBegin>> getRenderBeginSignal() {
-        return this.renderBeginSignal;
-    }
-
-    @Override
-    public Signal<RenderEndBeforeSwap, Slot<RenderEndBeforeSwap>> getRenderEndBeforeSwapSignal() {
-        return this.renderEndBeforeSwapSignal;
-    }
-
-    @Override
-    public Signal<RenderEndAfterSwap, Slot<RenderEndAfterSwap>> getRenderEndAfterSwapSignal() {
-        return this.renderEndAfterSwapSignal;
     }
 }
