@@ -24,12 +24,16 @@ import java.util.Set;
 public class Output {
 
     @Nonnull
-    private OutputGeometry outputGeometry;
+    private final String         name;
     @Nonnull
-    private OutputMode     outputMode;
+    private       OutputGeometry outputGeometry;
+    @Nonnull
+    private       OutputMode     outputMode;
 
-    Output(@Nonnull final OutputGeometry outputGeometry,
+    Output(@Nonnull final String name,
+           @Nonnull final OutputGeometry outputGeometry,
            @Nonnull final OutputMode outputMode) {
+        this.name = name;
         this.outputGeometry = outputGeometry;
         this.outputMode = outputMode;
     }
@@ -76,5 +80,10 @@ public class Output {
     @Nonnull
     public OutputGeometry getGeometry() {
         return this.outputGeometry;
+    }
+
+    @Nonnull
+    public String getName() {
+        return this.name;
     }
 }

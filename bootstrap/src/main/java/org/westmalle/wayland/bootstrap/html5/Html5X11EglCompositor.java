@@ -11,25 +11,24 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.x11.egl;
+package org.westmalle.wayland.bootstrap.html5;
 
-import dagger.Module;
-import dagger.Provides;
-import org.westmalle.wayland.core.EglPlatform;
-import org.westmalle.wayland.core.Platform;
-import org.westmalle.wayland.protocol.WlSeat;
-import org.westmalle.wayland.x11.X11Platform;
-import org.westmalle.wayland.x11.X11PlatformFactory;
+import dagger.Component;
+import org.westmalle.wayland.core.CoreModule;
+import org.westmalle.wayland.core.LifeCycle;
+import org.westmalle.wayland.gles2.Gles2RendererModule;
+import org.westmalle.wayland.html5.egl.Html5EglPlatformFactory;
 import org.westmalle.wayland.x11.X11PlatformModule;
-import org.westmalle.wayland.x11.X11SeatFactory;
+import org.westmalle.wayland.x11.egl.X11EglPlatformModule;
 
 import javax.inject.Singleton;
 
-@Module(includes = {X11PlatformModule.class})
-public class X11EglPlatformModule {
-    @Provides
-    @Singleton
-    X11EglPlatform provideX11EglPlatform(final X11EglPlatformFactory x11EglPlatformFactory) {
-        return x11EglPlatformFactory.create();
-    }
+@Singleton
+@Component(modules = {CoreModule.class,
+                      Gles2RendererModule.class,
+                      X11EglPlatformModule.class,
+                      Html5X11EglPlatformAdaptorModule.class})
+public interface Html5X11EglCompositor {
+
+    LifeCycle lifeCycle();
 }

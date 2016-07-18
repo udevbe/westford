@@ -18,6 +18,8 @@ import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.drm.DaggerDrmEglCompositor;
 import org.westmalle.wayland.bootstrap.drm.DrmEglCompositor;
+import org.westmalle.wayland.bootstrap.html5.DaggerHtml5X11EglCompositor;
+import org.westmalle.wayland.bootstrap.html5.Html5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.DaggerX11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.X11PlatformConfigSimple;
@@ -25,6 +27,7 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
+import org.westmalle.wayland.html5.egl.Html5EglPlatformFactory;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.X11PlatformModule;
@@ -71,11 +74,21 @@ public class Boot {
             case "DrmEgl":
                 boot.strap(DaggerDrmEglCompositor.builder());
                 break;
-
+            case "Html5X11Egl":
+                boot.strap(DaggerHtml5X11EglCompositor.builder());
+                break;
             default:
                 //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
-                boot.strap(DaggerX11EglCompositor.builder());
+                //boot.strap(DaggerX11EglCompositor.builder());
+                boot.strap(DaggerHtml5X11EglCompositor.builder());
         }
+    }
+
+    private void strap(final DaggerHtml5X11EglCompositor.Builder builder) {
+        final Html5X11EglCompositor html5X11EglCompositor = builder.x11PlatformModule(new X11PlatformModule(new X11PlatformConfigSimple()))
+                                                                   .build();
+        final LifeCycle lifeCycle = html5X11EglCompositor.lifeCycle();
+        lifeCycle.start();
     }
 
     private void strap(final DaggerDrmEglCompositor.Builder builder) {

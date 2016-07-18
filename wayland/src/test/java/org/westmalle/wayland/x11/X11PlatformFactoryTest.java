@@ -193,6 +193,7 @@ public class X11PlatformFactoryTest {
         //given
         final Output output = mock(Output.class);
         when(this.outputFactory.create(any(),
+                                       any(),
                                        any())).thenReturn(output);
         final WlOutput wlOutput = mock(WlOutput.class);
         when(this.wlOutputFactory.create(output)).thenReturn(wlOutput);

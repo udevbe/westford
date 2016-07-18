@@ -79,8 +79,9 @@ public class Html5PlatformFactory {
         final Html5Connector html5Connector = this.html5ConnectorFactory.create(connector);
 
         // Add websocket servlet
-        //TODO deduce identifier from connector
-        final String connectorId = "vga-0";
+        final String connectorId = connector.getWlOutput()
+                                            .getOutput()
+                                            .getName();
         context.addServlet(new ServletHolder(connectorId,
                                              this.html5SocketServletFactory.create(html5Connector)),
                            "/wayland/" + connectorId);

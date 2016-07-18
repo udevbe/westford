@@ -142,13 +142,12 @@ public class X11PlatformFactory {
         final Iterable<X11ConnectorConfig> x11ConnectorConfigs   = this.x11PlatformConfig.getX11ConnectorConfigs();
         final List<Optional<X11Connector>> optionalX11Connectors = new LinkedList<>();
 
-        x11ConnectorConfigs.forEach(x11ConnectorConfig -> {
-            addX11Connector(optionalX11Connectors,
-                            xcbConnection,
-                            x11Atoms,
-                            x11EventBus,
-                            x11ConnectorConfig);
-        });
+        x11ConnectorConfigs.forEach(x11ConnectorConfig ->
+                                            addX11Connector(optionalX11Connectors,
+                                                            xcbConnection,
+                                                            x11Atoms,
+                                                            x11EventBus,
+                                                            x11ConnectorConfig));
 
         this.display.getEventLoop()
                     .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(xcbConnection),
@@ -261,7 +260,8 @@ public class X11PlatformFactory {
                       window,
                       x11Atoms.get("WM_PROTOCOLS"),
                       x11Atoms.get("WM_DELETE_WINDOW"));
-        setName(xcbConnection,
+        setName(x11ConnectorConfig,
+                xcbConnection,
                 window,
                 x11Atoms);
 
@@ -318,7 +318,8 @@ public class X11PlatformFactory {
                                                 .height(height)
                                                 .refresh(60)
                                                 .build();
-        return this.outputFactory.create(outputGeometry,
+        return this.outputFactory.create(x11ConnectorConfig.getName(),
+                                         outputGeometry,
                                          outputMode);
     }
 
@@ -336,10 +337,11 @@ public class X11PlatformFactory {
                                         Pointer.nref(wmDeleteWindow).address);
     }
 
-    private void setName(final long connection,
+    private void setName(final X11ConnectorConfig x11ConnectorConfig,
+                         final long connection,
                          final int window,
                          final Map<String, Integer> x11Atoms) {
-        final String name       = "Westmalle";
+        final String name       = x11ConnectorConfig.getName();
         final int    nameLength = name.length();
         final long   nameNative = Pointer.nref(name).address;
 

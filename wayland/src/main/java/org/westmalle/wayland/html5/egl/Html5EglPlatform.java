@@ -21,7 +21,7 @@ public class Html5EglPlatform implements EglPlatform {
     private final List<Optional<Html5EglConnector>> eglConnectors;
 
     @Inject
-    Html5EglPlatform(@Provided @Nonnull final EglPlatform eglPlatform,
+    Html5EglPlatform(@Nonnull final EglPlatform eglPlatform,
                      @Nonnull final List<Optional<Html5EglConnector>> eglConnectors) {
         this.eglPlatform = eglPlatform;
         this.eglConnectors = eglConnectors;

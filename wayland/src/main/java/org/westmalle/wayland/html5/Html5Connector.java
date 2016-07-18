@@ -108,9 +108,9 @@ public class Html5Connector implements Connector {
             throw new RuntimeException("png_create_info_struct() failed");
         }
 
-        if (0 != this.libc.setjmp(this.libpng.png_jmpbuf(p))) {
-            throw new RuntimeException("setjmp(png_jmpbuf(p) failed");
-        }
+//        if (0 != this.libc.setjmp(this.libpng.png_jmpbuf(p))) {
+//            throw new RuntimeException("setjmp(png_jmpbuf(p) failed");
+//        }
 
         this.libpng.png_set_IHDR(p,
                                  infoPtr,
