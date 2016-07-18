@@ -11,24 +11,29 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.bootstrap;
+package org.westmalle.wayland.bootstrap.x11;
 
 import dagger.Component;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
-import org.westmalle.wayland.drm.egl.GbmEglPlatformModule;
 import org.westmalle.wayland.gles2.Gles2RendererModule;
-import org.westmalle.wayland.input.LibinputSeatFactory;
+import org.westmalle.wayland.protocol.WlSeat;
+import org.westmalle.wayland.x11.X11PlatformModule;
+import org.westmalle.wayland.x11.egl.X11EglPlatformModule;
 
 import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = {CoreModule.class,
                       Gles2RendererModule.class,
-                      GbmEglPlatformModule.class})
-public interface DrmEglCompositor {
+                      X11PlatformModule.class,
+                      X11EglPlatformModule.class})
+public interface X11EglCompositor {
 
     LifeCycle lifeCycle();
 
-    LibinputSeatFactory seatFactory();
+    /*
+     * X11 egl platform provides a single seat.
+     */
+    WlSeat wlSeat();
 }

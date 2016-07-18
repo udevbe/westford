@@ -14,12 +14,20 @@
 package org.westmalle.wayland.bootstrap;
 
 import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
+import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
+import org.westmalle.wayland.bootstrap.drm.DaggerDrmEglCompositor;
+import org.westmalle.wayland.bootstrap.drm.DrmEglCompositor;
+import org.westmalle.wayland.bootstrap.x11.DaggerX11EglCompositor;
+import org.westmalle.wayland.bootstrap.x11.X11EglCompositor;
+import org.westmalle.wayland.bootstrap.x11.X11PlatformConfigSimple;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
+import org.westmalle.wayland.x11.X11PlatformModule;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -53,24 +61,27 @@ public class Boot {
 
         switch (backEnd) {
             case "X11Egl":
-                boot.strap(DaggerX11EglCompositor.create());
+                boot.strap(DaggerX11EglCompositor.builder());
                 break;
 
             case "DispmanxEgl":
-                boot.strap(DaggerDispmanxEglCompositor.create());
+                boot.strap(DaggerDispmanxEglCompositor.builder());
                 break;
 
             case "DrmEgl":
-                boot.strap(DaggerDrmEglCompositor.create());
+                boot.strap(DaggerDrmEglCompositor.builder());
                 break;
 
             default:
                 //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
-                boot.strap(DaggerX11EglCompositor.create());
+                boot.strap(DaggerX11EglCompositor.builder());
         }
     }
 
-    private void strap(final DrmEglCompositor drmEglCompositor) {
+    private void strap(final DaggerDrmEglCompositor.Builder builder) {
+
+        final DrmEglCompositor drmEglCompositor = builder.build();
+
         /*
          * Keep this first as weston demo clients *really* like their globals
          * to be initialized in a certain order, else they segfault...
@@ -106,7 +117,10 @@ public class Boot {
         lifeCycle.start();
     }
 
-    private void strap(final DispmanxEglCompositor dispmanxEglCompositor) {
+    private void strap(final DaggerDispmanxEglCompositor.Builder builder) {
+
+        final DispmanxEglCompositor dispmanxEglCompositor = builder.build();
+
         /*
          * Keep this first as weston demo clients *really* like their globals
          * to be initialized in a certain order, else they segfault...
@@ -142,7 +156,12 @@ public class Boot {
         lifeCycle.start();
     }
 
-    private void strap(final X11EglCompositor x11EglCompositor) {
+    private void strap(final DaggerX11EglCompositor.Builder builder) {
+
+        //inject config
+        final X11EglCompositor x11EglCompositor = builder.x11PlatformModule(new X11PlatformModule(new X11PlatformConfigSimple()))
+                                                         .build();
+
         /*
          * Keep this first as weston demo clients *really* like their globals
          * to be initialized in a certain order, else they segfault...
