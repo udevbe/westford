@@ -11,7 +11,7 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.bootstrap;
+package org.westmalle.wayland.bootstrap.x11;
 
 
 import org.westmalle.wayland.x11.config.X11ConnectorConfig;
@@ -20,10 +20,7 @@ import org.westmalle.wayland.x11.config.X11PlatformConfig;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 
-public class X11EglCompositorConfig implements X11PlatformConfig {
-
-    X11EglCompositorConfig() {
-    }
+public class X11PlatformConfigSimple implements X11PlatformConfig {
 
     @Nonnull
     @Override

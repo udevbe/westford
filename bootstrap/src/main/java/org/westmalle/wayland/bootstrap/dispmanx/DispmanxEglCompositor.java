@@ -1,4 +1,4 @@
-package org.westmalle.wayland.bootstrap;
+package org.westmalle.wayland.bootstrap.dispmanx;
 
 import dagger.Component;
 import org.westmalle.wayland.core.CoreModule;
