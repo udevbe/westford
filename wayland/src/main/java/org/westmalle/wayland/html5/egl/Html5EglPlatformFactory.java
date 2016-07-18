@@ -17,8 +17,6 @@ import java.util.Optional;
 public class Html5EglPlatformFactory {
 
     @Nonnull
-    private final EglPlatform                    eglPlatform;
-    @Nonnull
     private final Html5PlatformFactory           html5PlatformFactory;
     @Nonnull
     private final PrivateHtml5EglPlatformFactory privateHtml5EglPlatformFactory;
@@ -26,21 +24,19 @@ public class Html5EglPlatformFactory {
     private final Html5EglConnectorFactory       html5EglConnectorFactory;
 
     @Inject
-    Html5EglPlatformFactory(@Nonnull final EglPlatform eglPlatform,
-                            @Nonnull final Html5PlatformFactory html5PlatformFactory,
+    Html5EglPlatformFactory(@Nonnull final Html5PlatformFactory html5PlatformFactory,
                             @Nonnull final PrivateHtml5EglPlatformFactory privateHtml5EglPlatformFactory,
                             @Nonnull final Html5EglConnectorFactory html5EglConnectorFactory) {
-        this.eglPlatform = eglPlatform;
         this.html5PlatformFactory = html5PlatformFactory;
         this.privateHtml5EglPlatformFactory = privateHtml5EglPlatformFactory;
         this.html5EglConnectorFactory = html5EglConnectorFactory;
     }
 
-    public Html5EglPlatform create() {
+    public Html5EglPlatform create(@Nonnull final EglPlatform eglPlatform) {
 
-        final Html5Platform html5Platform = this.html5PlatformFactory.create(this.eglPlatform);
+        final Html5Platform html5Platform = this.html5PlatformFactory.create(eglPlatform);
 
-        final List<? extends Optional<? extends EglConnector>> eglConnectors   = this.eglPlatform.getConnectors();
+        final List<? extends Optional<? extends EglConnector>> eglConnectors   = eglPlatform.getConnectors();
         final List<Optional<Html5Connector>>                   html5Connectors = html5Platform.getConnectors();
 
         final Iterator<? extends Optional<? extends EglConnector>> eglConnectorIterator   = eglConnectors.iterator();
@@ -66,6 +62,7 @@ public class Html5EglPlatformFactory {
             html5EglConnectors.add(html5EglConnector);
         }
 
-        return this.privateHtml5EglPlatformFactory.create(html5EglConnectors);
+        return this.privateHtml5EglPlatformFactory.create(eglPlatform,
+                                                          html5EglConnectors);
     }
 }

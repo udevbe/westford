@@ -5,7 +5,7 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 
-@Lib("png")
+@Lib("png16")
 public class Libpng {
 
     public static final int PNG_COLOR_MASK_COLOR = 2;
@@ -56,6 +56,6 @@ public class Libpng {
     @Ptr
     public native long png_get_io_ptr(@Ptr long png_ptr);
 
-    @Ptr
-    public native long png_jmpbuf(@Ptr long png_ptr);
+//    @Ptr
+//    public native long png_jmpbuf(@Ptr long png_ptr);
 }

@@ -32,6 +32,12 @@ public class X11PlatformConfigSimple implements X11PlatformConfig {
     @Override
     public Iterable<X11ConnectorConfig> getX11ConnectorConfigs() {
         return Arrays.asList(new X11ConnectorConfig() {
+                                 @Nonnull
+                                 @Override
+                                 public String getName() {
+                                     return "window0";
+                                 }
+
                                  @Override
                                  public int getWidth() {
                                      return 800;
@@ -54,6 +60,12 @@ public class X11PlatformConfigSimple implements X11PlatformConfig {
                              }
                 ,
                              new X11ConnectorConfig() {
+                                 @Nonnull
+                                 @Override
+                                 public String getName() {
+                                     return "window1";
+                                 }
+
                                  @Override
                                  public int getWidth() {
                                      return 800;

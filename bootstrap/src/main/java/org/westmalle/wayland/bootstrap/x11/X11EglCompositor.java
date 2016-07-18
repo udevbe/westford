@@ -26,8 +26,8 @@ import javax.inject.Singleton;
 @Singleton
 @Component(modules = {CoreModule.class,
                       Gles2RendererModule.class,
-                      X11PlatformModule.class,
-                      X11EglPlatformModule.class})
+                      X11EglPlatformModule.class,
+                      X11EglPlatformAdaptorModule.class})
 public interface X11EglCompositor {
 
     LifeCycle lifeCycle();

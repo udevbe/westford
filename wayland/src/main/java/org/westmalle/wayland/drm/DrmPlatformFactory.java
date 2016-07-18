@@ -251,7 +251,9 @@ public class DrmPlatformFactory {
                                                 .flags(mode.flags())
                                                 .build();
 
-        return Optional.of(this.drmConnectorFactory.create(this.wlOutputFactory.create(this.outputFactory.create(outputGeometry,
+        //FIXME decuse an output name from the drm connector
+        return Optional.of(this.drmConnectorFactory.create(this.wlOutputFactory.create(this.outputFactory.create("dummy",
+                                                                                                                 outputGeometry,
                                                                                                                  outputMode)),
                                                            drmModeRes,
                                                            drmModeConnector,

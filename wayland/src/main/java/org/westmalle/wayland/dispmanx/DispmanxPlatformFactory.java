@@ -82,7 +82,8 @@ public class DispmanxPlatformFactory {
         final List<Optional<DispmanxConnector>> dispmanxConnectors = new ArrayList<>(1);
         final int dispmanxElement = createDispmanxWindow(display,
                                                          modeinfo);
-        final Output   output   = createOutput(modeinfo);
+        final Output output = createOutput(device,
+                                           modeinfo);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
         final DispmanxConnector dispmanxConnector = this.dispmanxConnectorFactory.create(wlOutput,
@@ -94,7 +95,8 @@ public class DispmanxPlatformFactory {
     }
 
 
-    private Output createOutput(final DISPMANX_MODEINFO_T modeinfo) {
+    private Output createOutput(final int device,
+                                final DISPMANX_MODEINFO_T modeinfo) {
         //TODO this is all guessing. Does dispmanx expose actual values?
 
         //TODO assume 96dpi for physical width(?)
@@ -114,7 +116,9 @@ public class DispmanxPlatformFactory {
                                                 .width(modeinfo.width())
                                                 .refresh(60)
                                                 .build();
-        return this.outputFactory.create(outputGeometry,
+        //TODO translate dispmanx output number to udev readable nam
+        return this.outputFactory.create("" + device,
+                                         outputGeometry,
                                          outputMode);
     }
 
