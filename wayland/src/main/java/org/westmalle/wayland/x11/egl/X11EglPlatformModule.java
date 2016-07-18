@@ -25,24 +25,23 @@ import org.westmalle.wayland.x11.X11SeatFactory;
 
 import javax.inject.Singleton;
 
-@Module(includes = X11PlatformModule.class)
+@Module
 public class X11EglPlatformModule {
-
     @Provides
     @Singleton
-    EglPlatform createEglPlatform(final X11EglPlatformFactory x11EglPlatformFactory) {
+    X11EglPlatform provideX11EglPlatform(final X11EglPlatformFactory x11EglPlatformFactory) {
         return x11EglPlatformFactory.create();
     }
 
     @Provides
     @Singleton
-    Platform createPlatform(final EglPlatform eglPlatform) {
-        return eglPlatform;
+    EglPlatform provideEglPlatform(final X11EglPlatform x11EglPlatform) {
+        return x11EglPlatform;
     }
 
     @Provides
     @Singleton
-    WlSeat createWlSeat(final X11SeatFactory x11SeatFactory) {
-        return x11SeatFactory.create();
+    Platform providePlatform(final X11EglPlatform x11EglPlatform) {
+        return x11EglPlatform;
     }
 }

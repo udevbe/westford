@@ -54,20 +54,6 @@ public class CoreModule {
         final int readFd  = pipeFds.dref(0);
         final int writeFd = pipeFds.dref(1);
 
-        configure(readFd,
-                  writeFd,
-                  libc);
-
-        return new JobExecutor(display,
-                               readFd,
-                               writeFd,
-                               libc);
-    }
-
-    private void configure(final int readFd,
-                           final int writeFd,
-                           final Libc libc) {
-
         final int readFlags = libc.fcntl(readFd,
                                          Libc.F_GETFD,
                                          0);
@@ -81,5 +67,10 @@ public class CoreModule {
         libc.fcntl(writeFd,
                    Libc.F_SETFD,
                    writeFlags | Libc.FD_CLOEXEC);
+
+        return new JobExecutor(display,
+                               readFd,
+                               writeFd,
+                               libc);
     }
 }
