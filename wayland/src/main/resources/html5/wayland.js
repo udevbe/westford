@@ -15,8 +15,8 @@ function createOutputCanvas(outputInfo){
 
     //TODO map canvas geometry to reported server output
     canvas.id     = "output";
-    canvas.width  = 1024;
-    canvas.height = 768;
+    canvas.width  = 800;
+    canvas.height = 600;
     canvas.style.position = "absolute";
     canvas.style.border   = "1px solid";
 
@@ -35,8 +35,8 @@ function createOutputCanvas(outputInfo){
     }, false);
     canvas.addEventListener('mousemove', function(ev) {
         var rect = canvas.getBoundingClientRect();
-        var x = Math.round((evt.clientX-rect.left)/(rect.right-rect.left)*canvas.width);
-        var y = Math.round((evt.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height);
+        var x = Math.round((ev.clientX-rect.left)/(rect.right-rect.left)*canvas.width);
+        var y = Math.round((ev.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height);
         //p(ointer):m(otion):x:xxxx:y:xxxx:t(ime):xxxxxxx
         socket.send("p:m:x:"+x+":y:"+y+":t:"+Date.now())
     }, false);
@@ -56,11 +56,12 @@ function createOutputCanvas(outputInfo){
     //replace text handler with blob handler
     socket.onmessage = function (e) {
         //read binary data as image & put it in the canvas
-        var img = new Image;
+        var img = new Image();
         img.onload = function() {
-            ctx.drawImage(img, canvas.width, canvas.height);
-        }
-        img.src = URL.createObjectURL(e.data);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        var imgSrc = URL.createObjectURL(e.data);
+        img.src = imgSrc;
     };
     //notify server we have created the output canvas and are now ready to receive binary frames
     socket.send("ack-output-info");

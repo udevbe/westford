@@ -13,7 +13,6 @@ import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libpng.Libpng;
-import org.westmalle.wayland.nativ.libpng.Pointerpng_rw_ptr;
 import org.westmalle.wayland.nativ.libpng.png_rw_ptr;
 import org.westmalle.wayland.protocol.WlOutput;
 
@@ -30,10 +29,82 @@ import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_COMPRESSION_TYPE_DEF
 import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_FILTER_TYPE_DEFAULT;
 import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_INTERLACE_NONE;
 import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_TRANSFORM_IDENTITY;
+import static org.westmalle.wayland.nativ.libpng.Pointerpng_rw_ptr.nref;
 
 @AutoFactory(allowSubclasses = true,
              className = "Html5ConnectorFactory")
 public class Html5Connector implements Connector {
+
+
+    private static final byte[] red_border = {
+            (byte) 0x89, (byte) 0x50, (byte) 0x4e, (byte) 0x47, (byte) 0x0d, (byte) 0x0a, (byte) 0x1a, (byte) 0x0a, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0d,
+            0x49, (byte) 0x48, (byte) 0x44, (byte) 0x52, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0e, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0e,
+            0x08, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x28, (byte) 0x96, (byte) 0xdd, (byte) 0xe3, (byte) 0x00, (byte) 0x00, (byte) 0x02,
+            (byte) 0x88, (byte) 0x50, (byte) 0x4c, (byte) 0x54, (byte) 0x45, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xcc, (byte) 0xff,
+            (byte) 0xff, (byte) 0x99, (byte) 0xff, (byte) 0xff, (byte) 0x66, (byte) 0xff, (byte) 0xff, (byte) 0x33, (byte) 0xff, (byte) 0xff, (byte) 0x00, (byte) 0xff,
+            (byte) 0xcc, (byte) 0xff, (byte) 0xff, (byte) 0xcc, (byte) 0xcc, (byte) 0xff, (byte) 0xcc, (byte) 0x99, (byte) 0xff, (byte) 0xcc, (byte) 0x66, (byte) 0xff,
+            (byte) 0xcc, (byte) 0x33, (byte) 0xff, (byte) 0xcc, (byte) 0x00, (byte) 0xff, (byte) 0x99, (byte) 0xff, (byte) 0xff, (byte) 0x99, (byte) 0xcc, (byte) 0xff,
+            (byte) 0x99, (byte) 0x99, (byte) 0xff, (byte) 0x99, (byte) 0x66, (byte) 0xff, (byte) 0x99, (byte) 0x33, (byte) 0xff, (byte) 0x99, (byte) 0x00, (byte) 0xff,
+            0x66, (byte) 0xff, (byte) 0xff, (byte) 0x66, (byte) 0xcc, (byte) 0xff, (byte) 0x66, (byte) 0x99, (byte) 0xff, (byte) 0x66, (byte) 0x66, (byte) 0xff,
+            0x66, (byte) 0x33, (byte) 0xff, (byte) 0x66, (byte) 0x00, (byte) 0xff, (byte) 0x33, (byte) 0xff, (byte) 0xff, (byte) 0x33, (byte) 0xcc, (byte) 0xff,
+            0x33, (byte) 0x99, (byte) 0xff, (byte) 0x33, (byte) 0x66, (byte) 0xff, (byte) 0x33, (byte) 0x33, (byte) 0xff, (byte) 0x33, (byte) 0x00, (byte) 0xff,
+            0x00, (byte) 0xff, (byte) 0xff, (byte) 0x00, (byte) 0xcc, (byte) 0xff, (byte) 0x00, (byte) 0x99, (byte) 0xff, (byte) 0x00, (byte) 0x66, (byte) 0xff,
+            0x00, (byte) 0x33, (byte) 0xff, (byte) 0x00, (byte) 0x00, (byte) 0xcc, (byte) 0xff, (byte) 0xff, (byte) 0xcc, (byte) 0xff, (byte) 0xcc, (byte) 0xcc,
+            (byte) 0xff, (byte) 0x99, (byte) 0xcc, (byte) 0xff, (byte) 0x66, (byte) 0xcc, (byte) 0xff, (byte) 0x33, (byte) 0xcc, (byte) 0xff, (byte) 0x00, (byte) 0xcc,
+            (byte) 0xcc, (byte) 0xff, (byte) 0xcc, (byte) 0xcc, (byte) 0xcc, (byte) 0xcc, (byte) 0xcc, (byte) 0x99, (byte) 0xcc, (byte) 0xcc, (byte) 0x66, (byte) 0xcc,
+            (byte) 0xcc, (byte) 0x33, (byte) 0xcc, (byte) 0xcc, (byte) 0x00, (byte) 0xcc, (byte) 0x99, (byte) 0xff, (byte) 0xcc, (byte) 0x99, (byte) 0xcc, (byte) 0xcc,
+            (byte) 0x99, (byte) 0x99, (byte) 0xcc, (byte) 0x99, (byte) 0x66, (byte) 0xcc, (byte) 0x99, (byte) 0x33, (byte) 0xcc, (byte) 0x99, (byte) 0x00, (byte) 0xcc,
+            0x66, (byte) 0xff, (byte) 0xcc, (byte) 0x66, (byte) 0xcc, (byte) 0xcc, (byte) 0x66, (byte) 0x99, (byte) 0xcc, (byte) 0x66, (byte) 0x66, (byte) 0xcc,
+            0x66, (byte) 0x33, (byte) 0xcc, (byte) 0x66, (byte) 0x00, (byte) 0xcc, (byte) 0x33, (byte) 0xff, (byte) 0xcc, (byte) 0x33, (byte) 0xcc, (byte) 0xcc,
+            0x33, (byte) 0x99, (byte) 0xcc, (byte) 0x33, (byte) 0x66, (byte) 0xcc, (byte) 0x33, (byte) 0x33, (byte) 0xcc, (byte) 0x33, (byte) 0x00, (byte) 0xcc,
+            0x00, (byte) 0xff, (byte) 0xcc, (byte) 0x00, (byte) 0xcc, (byte) 0xcc, (byte) 0x00, (byte) 0x99, (byte) 0xcc, (byte) 0x00, (byte) 0x66, (byte) 0xcc,
+            0x00, (byte) 0x33, (byte) 0xcc, (byte) 0x00, (byte) 0x00, (byte) 0x99, (byte) 0xff, (byte) 0xff, (byte) 0x99, (byte) 0xff, (byte) 0xcc, (byte) 0x99,
+            (byte) 0xff, (byte) 0x99, (byte) 0x99, (byte) 0xff, (byte) 0x66, (byte) 0x99, (byte) 0xff, (byte) 0x33, (byte) 0x99, (byte) 0xff, (byte) 0x00, (byte) 0x99,
+            (byte) 0xcc, (byte) 0xff, (byte) 0x99, (byte) 0xcc, (byte) 0xcc, (byte) 0x99, (byte) 0xcc, (byte) 0x99, (byte) 0x99, (byte) 0xcc, (byte) 0x66, (byte) 0x99,
+            (byte) 0xcc, (byte) 0x33, (byte) 0x99, (byte) 0xcc, (byte) 0x00, (byte) 0x99, (byte) 0x99, (byte) 0xff, (byte) 0x99, (byte) 0x99, (byte) 0xcc, (byte) 0x99,
+            (byte) 0x99, (byte) 0x99, (byte) 0x99, (byte) 0x99, (byte) 0x66, (byte) 0x99, (byte) 0x99, (byte) 0x33, (byte) 0x99, (byte) 0x99, (byte) 0x00, (byte) 0x99,
+            0x66, (byte) 0xff, (byte) 0x99, (byte) 0x66, (byte) 0xcc, (byte) 0x99, (byte) 0x66, (byte) 0x99, (byte) 0x99, (byte) 0x66, (byte) 0x66, (byte) 0x99,
+            0x66, (byte) 0x33, (byte) 0x99, (byte) 0x66, (byte) 0x00, (byte) 0x99, (byte) 0x33, (byte) 0xff, (byte) 0x99, (byte) 0x33, (byte) 0xcc, (byte) 0x99,
+            0x33, (byte) 0x99, (byte) 0x99, (byte) 0x33, (byte) 0x66, (byte) 0x99, (byte) 0x33, (byte) 0x33, (byte) 0x99, (byte) 0x33, (byte) 0x00, (byte) 0x99,
+            0x00, (byte) 0xff, (byte) 0x99, (byte) 0x00, (byte) 0xcc, (byte) 0x99, (byte) 0x00, (byte) 0x99, (byte) 0x99, (byte) 0x00, (byte) 0x66, (byte) 0x99,
+            0x00, (byte) 0x33, (byte) 0x99, (byte) 0x00, (byte) 0x00, (byte) 0x66, (byte) 0xff, (byte) 0xff, (byte) 0x66, (byte) 0xff, (byte) 0xcc, (byte) 0x66,
+            (byte) 0xff, (byte) 0x99, (byte) 0x66, (byte) 0xff, (byte) 0x66, (byte) 0x66, (byte) 0xff, (byte) 0x33, (byte) 0x66, (byte) 0xff, (byte) 0x00, (byte) 0x66,
+            (byte) 0xcc, (byte) 0xff, (byte) 0x66, (byte) 0xcc, (byte) 0xcc, (byte) 0x66, (byte) 0xcc, (byte) 0x99, (byte) 0x66, (byte) 0xcc, (byte) 0x66, (byte) 0x66,
+            (byte) 0xcc, (byte) 0x33, (byte) 0x66, (byte) 0xcc, (byte) 0x00, (byte) 0x66, (byte) 0x99, (byte) 0xff, (byte) 0x66, (byte) 0x99, (byte) 0xcc, (byte) 0x66,
+            (byte) 0x99, (byte) 0x99, (byte) 0x66, (byte) 0x99, (byte) 0x66, (byte) 0x66, (byte) 0x99, (byte) 0x33, (byte) 0x66, (byte) 0x99, (byte) 0x00, (byte) 0x66,
+            0x66, (byte) 0xff, (byte) 0x66, (byte) 0x66, (byte) 0xcc, (byte) 0x66, (byte) 0x66, (byte) 0x99, (byte) 0x66, (byte) 0x66, (byte) 0x66, (byte) 0x66,
+            0x66, (byte) 0x33, (byte) 0x66, (byte) 0x66, (byte) 0x00, (byte) 0x66, (byte) 0x33, (byte) 0xff, (byte) 0x66, (byte) 0x33, (byte) 0xcc, (byte) 0x66,
+            0x33, (byte) 0x99, (byte) 0x66, (byte) 0x33, (byte) 0x66, (byte) 0x66, (byte) 0x33, (byte) 0x33, (byte) 0x66, (byte) 0x33, (byte) 0x00, (byte) 0x66,
+            0x00, (byte) 0xff, (byte) 0x66, (byte) 0x00, (byte) 0xcc, (byte) 0x66, (byte) 0x00, (byte) 0x99, (byte) 0x66, (byte) 0x00, (byte) 0x66, (byte) 0x66,
+            0x00, (byte) 0x33, (byte) 0x66, (byte) 0x00, (byte) 0x00, (byte) 0x33, (byte) 0xff, (byte) 0xff, (byte) 0x33, (byte) 0xff, (byte) 0xcc, (byte) 0x33,
+            (byte) 0xff, (byte) 0x99, (byte) 0x33, (byte) 0xff, (byte) 0x66, (byte) 0x33, (byte) 0xff, (byte) 0x33, (byte) 0x33, (byte) 0xff, (byte) 0x00, (byte) 0x33,
+            (byte) 0xcc, (byte) 0xff, (byte) 0x33, (byte) 0xcc, (byte) 0xcc, (byte) 0x33, (byte) 0xcc, (byte) 0x99, (byte) 0x33, (byte) 0xcc, (byte) 0x66, (byte) 0x33,
+            (byte) 0xcc, (byte) 0x33, (byte) 0x33, (byte) 0xcc, (byte) 0x00, (byte) 0x33, (byte) 0x99, (byte) 0xff, (byte) 0x33, (byte) 0x99, (byte) 0xcc, (byte) 0x33,
+            (byte) 0x99, (byte) 0x99, (byte) 0x33, (byte) 0x99, (byte) 0x66, (byte) 0x33, (byte) 0x99, (byte) 0x33, (byte) 0x33, (byte) 0x99, (byte) 0x00, (byte) 0x33,
+            0x66, (byte) 0xff, (byte) 0x33, (byte) 0x66, (byte) 0xcc, (byte) 0x33, (byte) 0x66, (byte) 0x99, (byte) 0x33, (byte) 0x66, (byte) 0x66, (byte) 0x33,
+            0x66, (byte) 0x33, (byte) 0x33, (byte) 0x66, (byte) 0x00, (byte) 0x33, (byte) 0x33, (byte) 0xff, (byte) 0x33, (byte) 0x33, (byte) 0xcc, (byte) 0x33,
+            0x33, (byte) 0x99, (byte) 0x33, (byte) 0x33, (byte) 0x66, (byte) 0x33, (byte) 0x33, (byte) 0x33, (byte) 0x33, (byte) 0x33, (byte) 0x00, (byte) 0x33,
+            0x00, (byte) 0xff, (byte) 0x33, (byte) 0x00, (byte) 0xcc, (byte) 0x33, (byte) 0x00, (byte) 0x99, (byte) 0x33, (byte) 0x00, (byte) 0x66, (byte) 0x33,
+            0x00, (byte) 0x33, (byte) 0x33, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff, (byte) 0x00, (byte) 0xff, (byte) 0xcc, (byte) 0x00,
+            (byte) 0xff, (byte) 0x99, (byte) 0x00, (byte) 0xff, (byte) 0x66, (byte) 0x00, (byte) 0xff, (byte) 0x33, (byte) 0x00, (byte) 0xff, (byte) 0x00, (byte) 0x00,
+            (byte) 0xcc, (byte) 0xff, (byte) 0x00, (byte) 0xcc, (byte) 0xcc, (byte) 0x00, (byte) 0xcc, (byte) 0x99, (byte) 0x00, (byte) 0xcc, (byte) 0x66, (byte) 0x00,
+            (byte) 0xcc, (byte) 0x33, (byte) 0x00, (byte) 0xcc, (byte) 0x00, (byte) 0x00, (byte) 0x99, (byte) 0xff, (byte) 0x00, (byte) 0x99, (byte) 0xcc, (byte) 0x00,
+            (byte) 0x99, (byte) 0x99, (byte) 0x00, (byte) 0x99, (byte) 0x66, (byte) 0x00, (byte) 0x99, (byte) 0x33, (byte) 0x00, (byte) 0x99, (byte) 0x00, (byte) 0x00,
+            0x66, (byte) 0xff, (byte) 0x00, (byte) 0x66, (byte) 0xcc, (byte) 0x00, (byte) 0x66, (byte) 0x99, (byte) 0x00, (byte) 0x66, (byte) 0x66, (byte) 0x00,
+            0x66, (byte) 0x33, (byte) 0x00, (byte) 0x66, (byte) 0x00, (byte) 0x00, (byte) 0x33, (byte) 0xff, (byte) 0x00, (byte) 0x33, (byte) 0xcc, (byte) 0x00,
+            0x33, (byte) 0x99, (byte) 0x00, (byte) 0x33, (byte) 0x66, (byte) 0x00, (byte) 0x33, (byte) 0x33, (byte) 0x00, (byte) 0x33, (byte) 0x00, (byte) 0x00,
+            0x00, (byte) 0xff, (byte) 0x00, (byte) 0x00, (byte) 0xcc, (byte) 0x00, (byte) 0x00, (byte) 0x99, (byte) 0x00, (byte) 0x00, (byte) 0x66, (byte) 0x00,
+            0x00, (byte) 0x33, (byte) 0xee, (byte) 0x00, (byte) 0x00, (byte) 0xa8, (byte) 0xf6, (byte) 0xef, (byte) 0x70, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            0x21, (byte) 0x74, (byte) 0x45, (byte) 0x58, (byte) 0x74, (byte) 0x53, (byte) 0x6f, (byte) 0x66, (byte) 0x74, (byte) 0x77, (byte) 0x61, (byte) 0x72,
+            0x65, (byte) 0x00, (byte) 0x47, (byte) 0x72, (byte) 0x61, (byte) 0x70, (byte) 0x68, (byte) 0x69, (byte) 0x63, (byte) 0x43, (byte) 0x6f, (byte) 0x6e,
+            0x76, (byte) 0x65, (byte) 0x72, (byte) 0x74, (byte) 0x65, (byte) 0x72, (byte) 0x20, (byte) 0x28, (byte) 0x49, (byte) 0x6e, (byte) 0x74, (byte) 0x65,
+            0x6c, (byte) 0x29, (byte) 0x77, (byte) 0x87, (byte) 0xfa, (byte) 0x19, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x21, (byte) 0x49, (byte) 0x44,
+            0x41, (byte) 0x54, (byte) 0x78, (byte) 0x9c, (byte) 0x62, (byte) 0x60, (byte) 0x60, (byte) 0xb8, (byte) 0x0e, (byte) 0x07, (byte) 0x0c, (byte) 0x20,
+            (byte) 0x80, (byte) 0xc1, (byte) 0x65, (byte) 0x40, (byte) 0xa6, (byte) 0xa9, (byte) 0xca, (byte) 0xc5, (byte) 0x67, (byte) 0x2f, (byte) 0xd9, (byte) 0x00,
+            0x00, (byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff, (byte) 0x03, (byte) 0x00, (byte) 0x5a, (byte) 0xb6, (byte) 0x35, (byte) 0xc1, (byte) 0xba,
+            (byte) 0xd4, (byte) 0xa9, (byte) 0xf8, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x49, (byte) 0x45, (byte) 0x4e, (byte) 0x44, (byte) 0xae,
+            (byte) 0x42, (byte) 0x60, (byte) 0x82
+    };
 
     @Nonnull
     private final Libc      libc;
@@ -43,7 +114,9 @@ public class Html5Connector implements Connector {
 
     private final Set<Html5Socket> html5Sockets = new HashSet<>();
 
-    private final Pointer<png_rw_ptr> pngWriteCallback = Pointerpng_rw_ptr.nref(this::pngWriteCallback);
+    private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
+    private ByteBuffer targetPngFrame;
+
 
     Html5Connector(@Provided @Nonnull final Libc libc,
                    @Provided @Nonnull final Libpng libpng,
@@ -67,14 +140,16 @@ public class Html5Connector implements Connector {
     public void commitFrame(final Pointer<Byte> bufferRGBA,
                             final int pitch,
                             final int height) {
-        final Pointer<Pointer<Byte>> targetPNG = malloc(sizeof((Pointer) null),
-                                                        Byte.class).castpp();
+
+        //TODO we could reuse the targetPngFrame and only allocate a new one if the resolution changed
+        this.targetPngFrame = ByteBuffer.allocate(maxPNGSize(pitch,
+                                                             height));
+        //this.targetPngFrame.put(red_border);
         toPng(bufferRGBA,
-              targetPNG,
               pitch,
               height);
-        final ByteBuffer pngByteBuffer = JNI.wrap(targetPNG.address,
-                                                  pitch * height * 4);
+
+        this.targetPngFrame.rewind();
         getHtml5Sockets()
                 .forEach(html5Socket ->
                                  html5Socket.getSession()
@@ -85,17 +160,38 @@ public class Html5Connector implements Connector {
                                                 //to keep track of frame delivery per remote.
 
                                                 //we send full frames for now so we don't care about delivery state.
-                                                session.getRemote()
-                                                       .sendBytesByFuture(pngByteBuffer);
+                                                try {
+                                                    session.getRemote()
+                                                           .sendBytes(this.targetPngFrame);
+                                                }
+                                                catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
                                             }));
-        targetPNG.close();
+    }
+
+    private int maxPNGSize(final int width,
+                           final int height) {
+        return 8 // PNG signature bytes
+               + 25 // IHDR chunk
+               + 12 // IDAT chunk (assuming only one IDAT chunk)
+               + height //pixels
+                 * (1 // filter byte for each row
+                    + (width // pixels
+                       * 3 // Red, blue, green color samples
+                       * 2 // 16 bits per color sample
+                    )
+                 )
+               + 6 // zlib compression overhead
+               + 2 // deflate overhead
+               + 12; // IEND chunk
     }
 
     private void toPng(final Pointer<Byte> sourceRGBA,
-                       final Pointer<Pointer<Byte>> targetPNG,
                        final int pitch,
                        final int height) {
-        final long p = this.libpng.png_create_write_struct(Pointer.nref("1.6.23+apng").address,
+
+        final long p = this.libpng.png_create_write_struct(nref("1.6.23+apng").address,
                                                            0L,
                                                            0L,
                                                            0L);
@@ -131,30 +227,28 @@ public class Html5Connector implements Connector {
         this.libpng.png_set_rows(p,
                                  infoPtr,
                                  rows.address);
-        rows.close();
 
         this.libpng.png_set_write_fn(p,
-                                     targetPNG.address,
+                                     0L,
                                      this.pngWriteCallback.address,
                                      0L);
         this.libpng.png_write_png(p,
                                   infoPtr,
                                   PNG_TRANSFORM_IDENTITY,
                                   0L);
+
+        rows.close();
+        this.libpng.png_destroy_write_struct(Pointer.nref(Pointer.wrap(p)).address,
+                                             Pointer.nref(Pointer.wrap(infoPtr)).address);
     }
 
     private void pngWriteCallback(@Ptr final long png_ptr,
                                   @Ptr(byte.class) final long png_bytep,
                                   @Unsigned @Lng final long png_size_t) {
-        final Pointer<Pointer<Byte>> ioPtr = Pointer.wrap(Byte.class,
-                                                          this.libpng.png_get_io_ptr(png_ptr))
-                                                    .castpp();
-        final Pointer<Byte> pngBuffer = malloc((int) png_size_t,
-                                               Byte.class);
-        this.libc.memcpy(pngBuffer.address,
-                         png_bytep,
-                         (int) png_size_t);
-        ioPtr.write(pngBuffer);
+        for (int i = 0; i < png_size_t; i++) {
+            this.targetPngFrame.put(JNI.readByte(png_bytep,
+                                                 i));
+        }
     }
 
 
