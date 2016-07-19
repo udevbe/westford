@@ -74,6 +74,7 @@ public class Html5EglConnector implements EglConnector {
                                         frameBuffer.address);
 
             this.html5Connector.commitFrame(frameBuffer,
+                                            true,
                                             width,
                                             height);
         }

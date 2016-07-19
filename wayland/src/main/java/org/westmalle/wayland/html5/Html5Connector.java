@@ -138,6 +138,7 @@ public class Html5Connector implements Connector {
 
     //TODO add methods to send screen updates to all connected sockets
     public void commitFrame(final Pointer<Byte> bufferRGBA,
+                            final boolean flipHorizontal,
                             final int pitch,
                             final int height) {
 
@@ -146,6 +147,7 @@ public class Html5Connector implements Connector {
                                                              height));
         //this.targetPngFrame.put(red_border);
         toPng(bufferRGBA,
+              flipHorizontal,
               pitch,
               height);
 
@@ -188,6 +190,7 @@ public class Html5Connector implements Connector {
     }
 
     private void toPng(final Pointer<Byte> sourceRGBA,
+                       final boolean flipHorizontal,
                        final int pitch,
                        final int height) {
 
@@ -220,9 +223,18 @@ public class Html5Connector implements Connector {
 
         final Pointer<Pointer<Byte>> rows = malloc(height * sizeof((Pointer) null),
                                                    Byte.class).castpp();
-        for (int y = 0; y < height; ++y) {
-            rows.writei(y,
-                        sourceRGBA.offset(y * pitch * 4));
+        if (flipHorizontal) {
+            int row = 0;
+            for (int y = height - 1; y >= 0; --y, row++) {
+                rows.writei(row,
+                            sourceRGBA.offset(y * pitch * 4));
+            }
+        }
+        else {
+            for (int y = 0; y < height; ++y) {
+                rows.writei(y,
+                            sourceRGBA.offset(y * pitch * 4));
+            }
         }
         this.libpng.png_set_rows(p,
                                  infoPtr,
