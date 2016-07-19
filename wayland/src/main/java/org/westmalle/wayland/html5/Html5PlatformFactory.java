@@ -5,6 +5,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.resource.Resource;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Platform;
 
@@ -36,7 +37,7 @@ public class Html5PlatformFactory {
         final Server server = new Server(8080);
 
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
+        context.setContextPath("/wayland");
         server.setHandler(context);
 
         final List<Optional<Html5Connector>> html5Connectors = new ArrayList<>();
@@ -57,8 +58,6 @@ public class Html5PlatformFactory {
                                                           new DefaultServlet());
         defHolder.setInitParameter("resourceBase",
                                    urlBase);
-        defHolder.setInitParameter("dirAllowed",
-                                   "true");
         context.addServlet(defHolder,
                            "/");
 
@@ -84,7 +83,7 @@ public class Html5PlatformFactory {
                                             .getName();
         context.addServlet(new ServletHolder(connectorId,
                                              this.html5SocketServletFactory.create(html5Connector)),
-                           "/wayland/" + connectorId);
+                           "/" + connectorId);
         return Optional.of(html5Connector);
     }
 }

@@ -1,5 +1,10 @@
 //use browser url to find socket to connect to
-var socket = new WebSocket("wss://" + location.hostname);
+
+var parser = document.createElement('a');
+parser.href = document.URL;
+
+var socket = new WebSocket("ws://" + parser.host + parser.pathname + parser.hash.substring(1));
+
 //initialize socket using text for communication, used to initialize our output
 socket.binaryType = "text";
 
@@ -64,6 +69,7 @@ function createOutputCanvas(outputInfo){
 socket.onopen = function () {
     //request output info so we can initialize our html5 canvas with the correct size
     socket.onmessage = function (e) {
+
         //TODO validate reply
         //create canvas object based on output info reply
         createOutputCanvas(e.data);
@@ -73,11 +79,9 @@ socket.onopen = function () {
 
 socket.onerror = function (error) {
   //TODO show error on screen
-  console.log("WebSocket Error " + error);
 };
 
-socket.onclose = function () {
-    alert("Connection with server closed; Maybe the server wasn't found, it shut down or you're behind a firewall/proxy.");
+socket.onclose = function (event) {
     //TODO should we attempt to reconnect?
 };
 
