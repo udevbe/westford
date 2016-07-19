@@ -25,8 +25,6 @@ public class Html5Socket implements WebSocketListener {
         this.html5Connector = html5Connector;
     }
 
-    //TODO implement
-
     //we offload all incoming events from the web server thread to our own main thread.
     @Override
     public void onWebSocketBinary(final byte[] payload,
