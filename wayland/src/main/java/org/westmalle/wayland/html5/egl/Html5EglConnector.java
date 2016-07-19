@@ -13,6 +13,7 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 
+import static org.freedesktop.jaccall.Pointer.malloc;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_RGBA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 
@@ -62,20 +63,20 @@ public class Html5EglConnector implements EglConnector {
         final int width  = mode.getWidth();
         final int height = mode.getHeight();
 
-        final Pointer<Byte> frameBuffer = Pointer.malloc(width * height * Size.sizeof((Integer) null),
-                                                         Byte.class);
-
-        this.libGLESv2.glReadPixels(0,
-                                    0,
-                                    width,
-                                    height,
-                                    GL_RGBA,
-                                    GL_UNSIGNED_BYTE,
-                                    frameBuffer.address);
-
-        this.html5Connector.commitFrame(frameBuffer,
+        try (final Pointer<Byte> frameBuffer = malloc(width * height * Size.sizeof((Integer) null),
+                                                      Byte.class)) {
+            this.libGLESv2.glReadPixels(0,
+                                        0,
                                         width,
-                                        height);
+                                        height,
+                                        GL_RGBA,
+                                        GL_UNSIGNED_BYTE,
+                                        frameBuffer.address);
+
+            this.html5Connector.commitFrame(frameBuffer,
+                                            width,
+                                            height);
+        }
     }
 
     @Override
@@ -91,6 +92,6 @@ public class Html5EglConnector implements EglConnector {
 
     @Override
     public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this.eglConnector);
+        renderer.visit(this);
     }
 }

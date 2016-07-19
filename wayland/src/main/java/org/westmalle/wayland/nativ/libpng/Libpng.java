@@ -53,8 +53,8 @@ public class Libpng {
                                      int transforms,
                                      @Ptr(Void.class) long params);
 
-    @Ptr
-    public native long png_get_io_ptr(@Ptr long png_ptr);
+    public native void png_destroy_write_struct(@Ptr long png_ptr_ptr,
+                                                @Ptr long info_ptr_ptr);
 
 //    @Ptr
 //    public native long png_jmpbuf(@Ptr long png_ptr);
