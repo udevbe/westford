@@ -63,21 +63,20 @@ public class Html5EglConnector implements EglConnector {
         final int width  = mode.getWidth();
         final int height = mode.getHeight();
 
-        try (final Pointer<Byte> frameBuffer = malloc(width * height * Size.sizeof((Integer) null),
-                                                      Byte.class)) {
-            this.libGLESv2.glReadPixels(0,
-                                        0,
+        final Pointer<Byte> frameBuffer = malloc(width * height * Size.sizeof((Integer) null),
+                                                 Byte.class);
+        this.libGLESv2.glReadPixels(0,
+                                    0,
+                                    width,
+                                    height,
+                                    GL_RGBA,
+                                    GL_UNSIGNED_BYTE,
+                                    frameBuffer.address);
+        this.html5Connector.commitFrame(frameBuffer,
+                                        true,
                                         width,
-                                        height,
-                                        GL_RGBA,
-                                        GL_UNSIGNED_BYTE,
-                                        frameBuffer.address);
-
-            this.html5Connector.commitFrame(frameBuffer,
-                                            true,
-                                            width,
-                                            height);
-        }
+                                        height);
+        frameBuffer.close();
     }
 
     @Override
