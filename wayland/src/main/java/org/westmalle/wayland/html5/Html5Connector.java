@@ -3,13 +3,13 @@ package org.westmalle.wayland.html5;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.freedesktop.jaccall.JNI;
 import org.freedesktop.jaccall.Lng;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
+import org.freedesktop.wayland.server.Display;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libpng.Libpng;
@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,20 +41,24 @@ public class Html5Connector implements Connector {
 
     @Nonnull
     private final Libpng    libpng;
+    @Nonnull
+    private final Display   display;
     private final Connector connector;
 
-    private final Set<Html5Socket> html5Sockets = new HashSet<>();
-
     private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
-    private ByteBuffer targetPngFrame;
 
     //FIXME busy flag granularity should be on a per websocket connection level
-    private final AtomicBoolean   commitBusy = new AtomicBoolean(false);
-    private       ExecutorService sender     = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean commitBusy = new AtomicBoolean(false);
+
+    private final ExecutorService      senderThread = Executors.newSingleThreadExecutor();
+    private final Set<Html5Socket>     html5Sockets = new HashSet<>();
+    private       Optional<ByteBuffer> pngBuffer    = Optional.empty();
 
     Html5Connector(@Provided @Nonnull final Libpng libpng,
+                   @Provided @Nonnull final Display display,
                    @Nonnull final Connector connector) {
         this.libpng = libpng;
+        this.display = display;
         this.connector = connector;
     }
 
@@ -77,33 +82,28 @@ public class Html5Connector implements Connector {
                                final boolean flipHorizontal,
                                final int pitch,
                                final int height) {
+        //TODO/FIXME always keep the png buffer up to date unless all connected clients are busy or no clients are present
+        //TODO/FIXME only send out updated png buffers to those clients who are not busy ie have ack'ed their previous frame
+        //TODO/FIXME if a client has ack'ed it's frame and the png buffer was updated, send out a new frame to this client
+        //TODO/FIXME if a new client connects, consider it as an frame ack'ed client.
+
         if (this.commitBusy.compareAndSet(false,
                                           true)) {
-            this.sender.submit(() -> {
-                //TODO we could reuse the targetPngFrame and only allocate a new one if the resolution changed
-                this.targetPngFrame = ByteBuffer.allocate(maxPNGSize(pitch,
-                                                                     height));
-                //this.targetPngFrame.put(red_border);
+            this.senderThread.submit(() -> {
+                //TODO we could reuse the pngBuffer and only allocate a new one if the resolution changed
+                final ByteBuffer buffer = ByteBuffer.allocate(maxPNGSize(pitch,
+                                                                         height));
+                this.pngBuffer = Optional.of(buffer);
+                //this.pngBuffer.put(red_border);
                 toPng(bufferRGBA,
                       flipHorizontal,
                       pitch,
                       height);
-
-                this.targetPngFrame.rewind();
-                this.html5Sockets.forEach(html5Socket ->
-                                                  html5Socket.getSession()
-                                                             .ifPresent(session -> {
-                                                                 //TODO we should send frame where unchanged pixels have an rgba int of 0,
-                                                                 //this will make the png compression much better. However this means we need
-                                                                 //to resend a full frame when a delta frame was not received and as such need
-                                                                 //to keep track of frame delivery per remote.
-
-                                                                 //we send full frames for now so we don't care about delivery state.
-                                                                 session.getRemote()
-                                                                        .sendBytesByFuture(this.targetPngFrame);
-
-                                                             }));
                 bufferRGBA.close();
+
+                buffer.rewind();
+                this.html5Sockets.forEach(html5Socket -> sendPngBuffer(html5Socket,
+                                                                       buffer));
             });
 
             return true;
@@ -111,6 +111,22 @@ public class Html5Connector implements Connector {
         else {
             return false;
         }
+    }
+
+    private void sendPngBuffer(final Html5Socket html5Socket,
+                               final ByteBuffer buffer) {
+        html5Socket.getSession()
+                   .ifPresent(session -> {
+                       //TODO we should send frame where unchanged pixels have an rgba int of 0,
+                       //this will make the png compression much better. However this means we need
+                       //to resend a full frame when a delta frame was not received and as such need
+                       //to keep track of frame delivery per remote.
+
+                       //we send full frames for now so we don't care about delivery state.
+                       session.getRemote()
+                              .sendBytesByFuture(buffer);
+
+                   });
     }
 
     public boolean getCommitBusy() {
@@ -139,7 +155,7 @@ public class Html5Connector implements Connector {
                        final int pitch,
                        final int height) {
 
-        final long p = this.libpng.png_create_write_struct(nref("1.6.23+apng").address,
+        final long p = this.libpng.png_create_write_struct(Pointer.nref("1.6.23+apng").address,
                                                            0L,
                                                            0L,
                                                            0L);
@@ -152,6 +168,7 @@ public class Html5Connector implements Connector {
             throw new RuntimeException("png_create_info_struct() failed");
         }
 
+        //FIXME get this to work...
 //        if (0 != this.libc.setjmp(this.libpng.png_jmpbuf(p))) {
 //            throw new RuntimeException("setjmp(png_jmpbuf(p) failed");
 //        }
@@ -202,10 +219,12 @@ public class Html5Connector implements Connector {
     private void pngWriteCallback(@Ptr final long png_ptr,
                                   @Ptr(byte.class) final long png_bytep,
                                   @Unsigned @Lng final long png_size_t) {
-        for (int i = 0; i < png_size_t; i++) {
-            this.targetPngFrame.put(JNI.readByte(png_bytep,
-                                                 i));
-        }
+        this.pngBuffer.ifPresent(buffer -> {
+            for (int i = 0; i < png_size_t; i++) {
+                buffer.put(JNI.readByte(png_bytep,
+                                        i));
+            }
+        });
     }
 
 
@@ -220,20 +239,35 @@ public class Html5Connector implements Connector {
 
     public void onWebSocketText(final Html5Socket html5Socket,
                                 final String message) {
-
+        //TODO we should probably be a bit smarter with threading.
         switch (message) {
             case "req-output-info": {
                 handleOutputInfoRequest(html5Socket);
                 break;
             }
             case "ack-output-info": {
-                //enable sending frames
-                this.html5Sockets.add(html5Socket);
+
+                this.senderThread.submit(() -> {
+                    //enable sending frames
+                    this.html5Sockets.add(html5Socket);
+                });
+
+                //FIXME this won't work if a commit is busy as the png buffer will not be updated then. ie the view will be init with an old png buffer.
+                this.display.getEventLoop()
+                            .addIdle(() -> {
+                                //ensure view as soon as render loop is idle, this ensures the latest local view is send out.
+                                this.senderThread.submit(() -> this.pngBuffer.ifPresent(byteBuffer ->
+                                                                                                sendPngBuffer(html5Socket,
+                                                                                                              byteBuffer)));
+                            });
                 break;
             }
             case "ack-frame": {
                 //wait until browser confirms it has rendered the frame we send.
                 this.commitBusy.set(false);
+
+                //TODO schedule a view init for those sockets that had no/old view init.
+
             }
             default: {
                 //TODO move to html5 seat implementation
@@ -281,7 +315,7 @@ public class Html5Connector implements Connector {
     public void onWebSocketClose(final Html5Socket html5Socket,
                                  final int statusCode,
                                  final String reason) {
-        this.html5Sockets.remove(html5Socket);
+        this.senderThread.submit(() -> this.html5Sockets.remove(html5Socket));
     }
 
     public void onWebSocketConnect(final Html5Socket html5Socket,
