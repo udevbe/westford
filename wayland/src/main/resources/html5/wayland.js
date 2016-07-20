@@ -5,9 +5,6 @@ parser.href = document.URL;
 
 var socket = new WebSocket("ws://" + parser.host + parser.pathname + parser.hash.substring(1));
 
-//initialize socket using text for communication, used to initialize our output
-socket.binaryType = "text";
-
 function createOutputCanvas(outputInfo){
     //make canvas & context global
     canvas = document.createElement('canvas');
@@ -16,6 +13,7 @@ function createOutputCanvas(outputInfo){
     img = new Image();
     img.onload = function() {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+        socket.send("ack-frame");
         URL.revokeObjectURL(img.src);
     };
 

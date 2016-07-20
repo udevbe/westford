@@ -26,6 +26,7 @@ import org.westmalle.wayland.x11.X11Connector;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @AutoFactory(allowSubclasses = true,
              className = "X11EglConnectorFactory")
@@ -39,7 +40,7 @@ public class X11EglConnector implements EglConnector {
     private final long         eglContext;
     private final long         eglDisplay;
 
-    private Optional<EventSource> renderJobEvent = Optional.empty();
+    private final AtomicBoolean rendererAvailable = new AtomicBoolean(true);
 
     X11EglConnector(@Nonnull @Provided final Display display,
                     @Nonnull final X11Connector x11Connector,
@@ -82,22 +83,20 @@ public class X11EglConnector implements EglConnector {
     @Override
     public void accept(@Nonnull final Renderer renderer) {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
-
-        if (!this.renderJobEvent.isPresent()) {
-            whenIdle(() -> renderOn(renderer));
-        }
+        whenIdle(() -> renderOn(renderer));
     }
 
     private void whenIdle(final EventLoop.IdleHandler idleHandler) {
-        this.renderJobEvent = Optional.of(this.display.getEventLoop()
-                                                      .addIdle(idleHandler));
+        if (this.rendererAvailable.compareAndSet(true,
+                                                 false)) {
+            this.display.getEventLoop()
+                        .addIdle(idleHandler);
+        }
     }
 
     private void renderOn(@Nonnull final Renderer renderer) {
-        this.renderJobEvent.get()
-                           .remove();
-        this.renderJobEvent = Optional.empty();
         renderer.visit(this);
         this.display.flushClients();
+        this.rendererAvailable.set(true);
     }
 }
