@@ -3,6 +3,7 @@ package org.westmalle.wayland.html5;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.westmalle.wayland.core.JobExecutor;
@@ -55,6 +56,8 @@ public class Html5Socket implements WebSocketListener {
 
     @Override
     public void onWebSocketConnect(final Session session) {
+        session.getRemote()
+               .setBatchMode(BatchMode.OFF);
         this.jobExecutor.submit(() -> {
             this.session = Optional.of(session);
             this.html5Connector.onWebSocketConnect(this,

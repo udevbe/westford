@@ -3,6 +3,7 @@ package org.westmalle.wayland.html5;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.freedesktop.jaccall.JNI;
 import org.freedesktop.jaccall.Lng;
@@ -20,6 +21,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.freedesktop.jaccall.Pointer.malloc;
 import static org.freedesktop.jaccall.Size.sizeof;
@@ -43,6 +47,10 @@ public class Html5Connector implements Connector {
     private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
     private ByteBuffer targetPngFrame;
 
+    //FIXME busy flag granularity should be on a per websocket connection level
+    private final AtomicBoolean   commitBusy = new AtomicBoolean(false);
+    private       ExecutorService sender     = Executors.newSingleThreadExecutor();
+
     Html5Connector(@Provided @Nonnull final Libpng libpng,
                    @Nonnull final Connector connector) {
         this.libpng = libpng;
@@ -56,37 +64,57 @@ public class Html5Connector implements Connector {
     }
 
     //TODO add methods to send screen updates to all connected sockets
-    public void commitFrame(final Pointer<Byte> bufferRGBA,
-                            final boolean flipHorizontal,
-                            final int pitch,
-                            final int height) {
 
-        //TODO we could reuse the targetPngFrame and only allocate a new one if the resolution changed
-        this.targetPngFrame = ByteBuffer.allocate(maxPNGSize(pitch,
-                                                             height));
-        //this.targetPngFrame.put(red_border);
-        toPng(bufferRGBA,
-              flipHorizontal,
-              pitch,
-              height);
+    /**
+     * @param bufferRGBA
+     * @param flipHorizontal
+     * @param pitch
+     * @param height
+     *
+     * @return true if bufferRGBA will be consumed & freed.
+     */
+    public boolean commitFrame(final Pointer<Byte> bufferRGBA,
+                               final boolean flipHorizontal,
+                               final int pitch,
+                               final int height) {
+        if (this.commitBusy.compareAndSet(false,
+                                          true)) {
+            this.sender.submit(() -> {
+                //TODO we could reuse the targetPngFrame and only allocate a new one if the resolution changed
+                this.targetPngFrame = ByteBuffer.allocate(maxPNGSize(pitch,
+                                                                     height));
+                //this.targetPngFrame.put(red_border);
+                toPng(bufferRGBA,
+                      flipHorizontal,
+                      pitch,
+                      height);
 
-        this.targetPngFrame.rewind();
-        this.html5Sockets.forEach(html5Socket ->
-                                          html5Socket.getSession()
-                                                     .ifPresent(session -> {
-                                                         //TODO we should send frame where unchanged pixels have an rgba int of 0,
-                                                         //this will make the png compression much better. However this means we need
-                                                         //to resend a full frame when a delta frame was not received and as such need
-                                                         //to keep track of frame delivery per remote.
+                this.targetPngFrame.rewind();
+                this.html5Sockets.forEach(html5Socket ->
+                                                  html5Socket.getSession()
+                                                             .ifPresent(session -> {
+                                                                 //TODO we should send frame where unchanged pixels have an rgba int of 0,
+                                                                 //this will make the png compression much better. However this means we need
+                                                                 //to resend a full frame when a delta frame was not received and as such need
+                                                                 //to keep track of frame delivery per remote.
 
-                                                         //TODO we should keep track if a frame has been delivered or not and wait for delivery
-                                                         //until either a) the next frame comes in (and use that one for delivery) and b)
-                                                         //the previous send frame has been delivered
+                                                                 //we send full frames for now so we don't care about delivery state.
+                                                                 session.getRemote()
+                                                                        .sendBytesByFuture(this.targetPngFrame);
 
-                                                         //we send full frames for now so we don't care about delivery state.
-                                                         session.getRemote()
-                                                                .sendBytesByFuture(this.targetPngFrame);
-                                                     }));
+                                                             }));
+                bufferRGBA.close();
+            });
+
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public boolean getCommitBusy() {
+        return this.commitBusy.get();
     }
 
     private int maxPNGSize(final int width,
@@ -202,6 +230,10 @@ public class Html5Connector implements Connector {
                 //enable sending frames
                 this.html5Sockets.add(html5Socket);
                 break;
+            }
+            case "ack-frame": {
+                //wait until browser confirms it has rendered the frame we send.
+                this.commitBusy.set(false);
             }
             default: {
                 //TODO move to html5 seat implementation
