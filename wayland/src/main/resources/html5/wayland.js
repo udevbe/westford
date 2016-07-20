@@ -13,6 +13,12 @@ function createOutputCanvas(outputInfo){
     canvas = document.createElement('canvas');
     ctx = canvas.getContext('2d');
 
+    img = new Image();
+    img.onload = function() {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(img.src);
+    };
+
     //TODO map canvas geometry to reported server output
     canvas.id     = "output";
     canvas.width  = 800;
@@ -51,17 +57,10 @@ function createOutputCanvas(outputInfo){
 
     document.body.appendChild(canvas);
 
-    //output canvas created, switch to binary mode so we can receive output frames as blobs
-    socket.binaryType = "blob";
     //replace text handler with blob handler
     socket.onmessage = function (e) {
         //read binary data as image & put it in the canvas
-        var img = new Image();
-        img.onload = function() {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
-        var imgSrc = URL.createObjectURL(e.data);
-        img.src = imgSrc;
+        img.src = URL.createObjectURL(e.data);
     };
     //notify server we have created the output canvas and are now ready to receive binary frames
     socket.send("ack-output-info");
