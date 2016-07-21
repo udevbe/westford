@@ -32,8 +32,8 @@ public class Html5EglConnector implements EglConnector {
     private final Html5Connector html5Connector;
     private final EglConnector   eglConnector;
 
-    private final AtomicBoolean rendererAvailable = new AtomicBoolean(true);
-    private final AtomicBoolean publishPending    = new AtomicBoolean(false);
+    private boolean rendererAvailable = true;
+//    private final AtomicBoolean publishPending    = new AtomicBoolean(false);
 
     Html5EglConnector(@Nonnull @Provided final Display display,
                       @Provided @Nonnull final LibGLESv2 libGLESv2,
@@ -69,18 +69,20 @@ public class Html5EglConnector implements EglConnector {
     public void renderEndBeforeSwap() {
         this.eglConnector.renderEndBeforeSwap();
 
-        if (this.html5Connector.getCommitBusy() &&
-            this.publishPending.compareAndSet(false,
-                                              true)) {
-            this.display.getEventLoop()
-                        .addIdle(() -> {
-                            this.publishPending.set(false);
-                            publishFrame();
-                        });
-        }
-        else {
-            publishFrame();
-        }
+        //TODO if all sockets from the connector have a render pending, then we don't perform a glreadpixels now, but
+        //TODO delay it to the next idle cycle, else we risking performing multiple unused glreadpixels
+//        if (this.html5Connector.getCommitBusy() &&
+//            this.publishPending.compareAndSet(false,
+//                                              true)) {
+//            this.display.getEventLoop()
+//                        .addIdle(() -> {
+//                            this.publishPending.set(false);
+        publishFrame();
+//                        });
+//        }
+//        else {
+//            publishFrame();
+//        }
     }
 
     private void publishFrame() {
@@ -99,13 +101,10 @@ public class Html5EglConnector implements EglConnector {
                                     GL_UNSIGNED_BYTE,
                                     frameBuffer.address);
 
-        final boolean committed = this.html5Connector.commitFrame(frameBuffer,
-                                                                  true,
-                                                                  width,
-                                                                  height);
-        if (!committed) {
-            frameBuffer.close();
-        }
+        this.html5Connector.commitFrame(frameBuffer,
+                                        true,
+                                        width,
+                                        height);
     }
 
     @Override
@@ -126,8 +125,8 @@ public class Html5EglConnector implements EglConnector {
     }
 
     private void whenIdle(final EventLoop.IdleHandler idleHandler) {
-        if (this.rendererAvailable.compareAndSet(true,
-                                                 false)) {
+        if (this.rendererAvailable) {
+            this.rendererAvailable = false;
             this.display.getEventLoop()
                         .addIdle(idleHandler);
         }
@@ -136,6 +135,6 @@ public class Html5EglConnector implements EglConnector {
     private void renderOn(@Nonnull final Renderer renderer) {
         renderer.visit(this);
         this.display.flushClients();
-        this.rendererAvailable.set(true);
+        this.rendererAvailable = true;
     }
 }
