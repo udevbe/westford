@@ -8,6 +8,11 @@ import org.westmalle.wayland.protocol.WlSeat;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
+import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
+import static org.westmalle.wayland.nativ.linux.Input.BTN_SIDE;
+
 @AutoFactory(allowSubclasses = true,
              className = "PrivateHtml5SeatFactory")
 public class Html5Seat {
@@ -42,7 +47,7 @@ public class Html5Seat {
                            .getPointerDevice()
                            .button(wlPointerResources,
                                    time,
-                                   button,
+                                   toLinuxButton(button),
                                    buttonState);
                 break;
             }
@@ -60,7 +65,7 @@ public class Html5Seat {
                            .getPointerDevice()
                            .button(wlPointerResources,
                                    time,
-                                   button,
+                                   toLinuxButton(button),
                                    buttonState);
                 break;
             }
@@ -96,6 +101,25 @@ public class Html5Seat {
                 System.err.println("Unknown client message: " + message);
             }
         }
+    }
+
+    private int toLinuxButton(final int jsButton) {
+        final int button;
+        switch (jsButton) {
+            case 0:
+                button = BTN_LEFT;
+                break;
+            case 1:
+                button = BTN_MIDDLE;
+                break;
+            case 2:
+                button = BTN_RIGHT;
+                break;
+            default:
+                //TODO define more buttons
+                button = 0;
+        }
+        return button;
     }
 
 }
