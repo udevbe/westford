@@ -15,8 +15,6 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.freedesktop.jaccall.Pointer.malloc;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_RGBA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
@@ -33,7 +31,6 @@ public class Html5EglConnector implements EglConnector {
     private final EglConnector   eglConnector;
 
     private boolean rendererAvailable = true;
-//    private final AtomicBoolean publishPending    = new AtomicBoolean(false);
 
     Html5EglConnector(@Nonnull @Provided final Display display,
                       @Provided @Nonnull final LibGLESv2 libGLESv2,
@@ -69,23 +66,17 @@ public class Html5EglConnector implements EglConnector {
     public void renderEndBeforeSwap() {
         this.eglConnector.renderEndBeforeSwap();
 
-        //TODO if all sockets from the connector have a render pending, then we don't perform a glreadpixels now, but
-        //TODO delay it to the next idle cycle, else we risking performing multiple unused glreadpixels
-//        if (this.html5Connector.getCommitBusy() &&
-//            this.publishPending.compareAndSet(false,
-//                                              true)) {
-//            this.display.getEventLoop()
-//                        .addIdle(() -> {
-//                            this.publishPending.set(false);
+        //TODO we can optimize by checking if all html5 clients are busy and don't do any work until at least one client is available again.
+        //for this to work, the html5connector needs to trigger a publishFrame as soon as it sees one of it's clients is available again.
+
+        //TODO we should not publish a new frame if the html5 connector is still busy processing the previous frame. the html5 connector
+        //should therefore signal us when it is finished.
+
         publishFrame();
-//                        });
-//        }
-//        else {
-//            publishFrame();
-//        }
     }
 
     private void publishFrame() {
+
         final OutputMode mode = getWlOutput().getOutput()
                                              .getMode();
         final int width  = mode.getWidth();
