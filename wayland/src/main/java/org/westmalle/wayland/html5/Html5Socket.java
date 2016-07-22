@@ -5,7 +5,9 @@ import com.google.auto.factory.AutoFactory;
 import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.westmalle.wayland.protocol.WlSeat;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -16,7 +18,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @AutoFactory
 public class Html5Socket implements WebSocketListener {
 
+    @Nonnull
     private final Html5Connector html5Connector;
+    @Nonnull
+    private final Html5Seat      html5Seat;
 
     private Optional<Session> session = Optional.empty();
 
@@ -31,8 +36,10 @@ public class Html5Socket implements WebSocketListener {
     private long renderedBufferAge;
 
 
-    Html5Socket(final Html5Connector html5Connector) {
+    Html5Socket(@Nonnull final Html5Connector html5Connector,
+                @Nonnull final Html5Seat html5Seat) {
         this.html5Connector = html5Connector;
+        this.html5Seat = html5Seat;
     }
 
     public void handlePngBuffer(final long pngBufferAge,
@@ -107,34 +114,14 @@ public class Html5Socket implements WebSocketListener {
 
                 //request to render next frame
                 this.html5Connector.requestPngBuffer(this);
+                break;
             }
             default: {
-                //TODO move to html5 seat implementation
-                handleInput(message);
+                this.html5Seat.handle(message);
             }
         }
     }
 
-    private void handleInput(final String message) {
-        switch (message.substring(0,
-                                  4)) {
-            case "p:d:": {
-
-            }
-            case "p:u:": {
-
-            }
-            case "p:m:": {
-
-            }
-            case "k:d:": {
-
-            }
-            case "k:u:": {
-
-            }
-        }
-    }
 
     @Override
     public void onWebSocketClose(final int statusCode,
