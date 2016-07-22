@@ -55,7 +55,6 @@ public class Html5Socket implements WebSocketListener {
                     //TODO we should send frame where unchanged pixels have an rgba int of 0,
                     //this will make the png compression much better. To do this we need to compare the latest
                     //renderedBuffer with our pending buffer
-
                     session.getRemote()
                            .sendBytesByFuture(buffer);
                 });

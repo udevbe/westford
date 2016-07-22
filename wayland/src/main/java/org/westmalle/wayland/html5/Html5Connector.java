@@ -8,7 +8,6 @@ import org.freedesktop.jaccall.Lng;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
-import org.freedesktop.wayland.server.Display;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libpng.Libpng;
@@ -48,9 +47,12 @@ public class Html5Connector implements Connector {
 
     private final Set<Html5Socket> html5Sockets = new HashSet<>();
 
-    private final    Lock                 pngBufferLock = new ReentrantLock();
-    private volatile Optional<ByteBuffer> pngBuffer     = Optional.empty();
-    private volatile long                 pngBufferAge  = 0L;
+    private final Lock pngBufferSwapLock = new ReentrantLock();
+
+    private          Optional<ByteBuffer> pngWriteBuffer = Optional.empty();
+    private volatile Optional<ByteBuffer> pngReadBuffer  = Optional.empty();
+
+    private volatile long pngBufferAge = 0L;
 
 
     Html5Connector(@Provided @Nonnull final Libpng libpng,
@@ -78,23 +80,27 @@ public class Html5Connector implements Connector {
                             final int width,
                             final int height) {
         this.connectorThread.execute(() -> {
-            //we have to allocate a new buffer on each new frame as sockets might hold on to older buffers until the client acks.
-            final ByteBuffer buffer = ByteBuffer.allocate(maxPNGSize(width,
-                                                                     height));
-            this.pngBufferLock.lock();
+            //we have to allocate a new newWriteBuffer on each new frame as sockets might hold on to older buffers until the client acks.
+            final ByteBuffer newWriteBuffer = ByteBuffer.allocate(maxPNGSize(width,
+                                                                             height));
+
+            this.pngWriteBuffer = Optional.of(newWriteBuffer);
+            toPng(bufferRGBA,
+                  flipHorizontal,
+                  width,
+                  height);
+            newWriteBuffer.flip();
+
+            this.pngBufferSwapLock.lock();
             try {
                 this.pngBufferAge = System.nanoTime();
-                this.pngBuffer = Optional.of(buffer);
-                toPng(bufferRGBA,
-                      flipHorizontal,
-                      width,
-                      height);
+                this.pngReadBuffer = this.pngWriteBuffer;
             }
             finally {
-                this.pngBufferLock.unlock();
+                this.pngBufferSwapLock.unlock();
             }
+
             bufferRGBA.close();
-            buffer.rewind();
             this.html5Sockets.forEach(Html5Socket::render);
         });
 
@@ -113,8 +119,7 @@ public class Html5Connector implements Connector {
                + height //pixels
                  * (1 // filter byte for each row
                     + (width // pixels
-                       * 3 // Red, blue, green color samples
-                       * 2 // 16 bits per color sample
+                       * 4 // Red, blue, green, alpha color samples
                     )
                  )
                + 6 // zlib compression overhead
@@ -191,12 +196,11 @@ public class Html5Connector implements Connector {
     private void pngWriteCallback(@Ptr final long png_ptr,
                                   @Ptr(byte.class) final long png_bytep,
                                   @Unsigned @Lng final long png_size_t) {
-        this.pngBuffer.ifPresent(buffer -> {
-            for (int i = 0; i < png_size_t; i++) {
-                buffer.put(JNI.readByte(png_bytep,
-                                        i));
-            }
-        });
+        final ByteBuffer buffer = this.pngWriteBuffer.get();
+        for (int i = 0; i < png_size_t; i++) {
+            buffer.put(JNI.readByte(png_bytep,
+                                    i));
+        }
     }
 
     public void onWebSocketClose(final Html5Socket html5Socket) {
@@ -204,26 +208,23 @@ public class Html5Connector implements Connector {
     }
 
     public Optional<ByteBuffer> getPngBufferCopy() {
-        this.pngBufferLock.lock();
+        this.pngBufferSwapLock.lock();
         try {
-            return this.pngBuffer.map(this::clone);
+            return this.pngReadBuffer.map(ByteBuffer::duplicate);
         }
         finally {
-            this.pngBufferLock.unlock();
+            this.pngBufferSwapLock.unlock();
         }
     }
 
     public long getPngBufferAge() {
-        return this.pngBufferAge;
-    }
-
-    private ByteBuffer clone(final ByteBuffer original) {
-        final ByteBuffer clone = ByteBuffer.allocate(original.capacity());
-        original.rewind();//copy from the beginning
-        clone.put(original);
-        original.rewind();
-        clone.flip();
-        return clone;
+        this.pngBufferSwapLock.lock();
+        try {
+            return this.pngBufferAge;
+        }
+        finally {
+            this.pngBufferSwapLock.unlock();
+        }
     }
 
     @Override
