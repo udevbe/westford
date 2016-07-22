@@ -89,7 +89,6 @@ public class Boot {
                                                                    .build();
         final LifeCycle lifeCycle = html5X11EglCompositor.lifeCycle();
 
-
         //setup seat for input support
         //get the seat that listens for input on the X connection and passes it on to a wayland seat.
         final WlSeat wlSeat = html5X11EglCompositor.wlSeat();
