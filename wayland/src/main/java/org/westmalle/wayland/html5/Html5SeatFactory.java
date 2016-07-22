@@ -2,6 +2,7 @@ package org.westmalle.wayland.html5;
 
 
 import com.google.auto.factory.Provided;
+import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.input.LibinputXkbFactory;
@@ -11,6 +12,7 @@ import org.westmalle.wayland.protocol.WlSeatFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.EnumSet;
 
 public class Html5SeatFactory {
 
@@ -52,6 +54,10 @@ public class Html5SeatFactory {
                                                                                                                keyboardOptions));
         keyboardDevice.updateKeymap();
         final WlSeat wlSeat = this.wlSeatFactory.create(this.wlKeyboardFactory.create(keyboardDevice));
+        //enable pointer and keyboard for wlseat as a browser always has these.
+        wlSeat.getSeat()
+              .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
+                                          WlSeatCapability.POINTER));
         return this.privateHtml5SeatFactory.create(wlSeat);
     }
 }
