@@ -6,6 +6,7 @@ import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -34,32 +35,36 @@ public class Html5Socket implements WebSocketListener {
         this.html5Connector = html5Connector;
     }
 
-    public void render() {
-        //check if we're waiting for a frame draw ack from our client
-        if (this.renderPending.compareAndSet(false,
-                                             true)) {
-            this.socketThread.execute(() -> this.session.ifPresent(session -> {
-                //client is done drawing, query the latest available pang buffer
-                this.pendingBufferAge = this.html5Connector.getPngBufferAge();
-                this.pendingBuffer = this.html5Connector.getPngBufferCopy();
+    public void handlePngBuffer(final long pngBufferAge,
+                                final Optional<ByteBuffer> pngBuffer) {
+        this.socketThread.submit(() -> this.session.ifPresent(session -> {
+            //client is done drawing, query the latest available pang buffer
+            this.pendingBufferAge = pngBufferAge;
+            this.pendingBuffer = pngBuffer;
 
-                if (this.renderedBufferAge == this.pendingBufferAge) {
-                    //buffer was not updated, don't send it out.
-                    this.renderPending.set(false);
-                    return;
-                }
+            if (this.renderedBufferAge == this.pendingBufferAge) {
+                //buffer was not updated, don't send it out.
+                this.renderPending.set(false);
+                return;
+            }
 
-                this.pendingBuffer.ifPresent(buffer -> {
-                    //buffer is present, schedule client draw event
+            this.pendingBuffer.ifPresent(buffer -> {
+                //buffer is present, schedule client draw event
 
-                    //TODO we should send frame where unchanged pixels have an rgba int of 0,
-                    //this will make the png compression much better. To do this we need to compare the latest
-                    //renderedBuffer with our pending buffer
+                //TODO we should send frame where unchanged pixels have an rgba int of 0,
+                //this will make the png compression much better. To do this we need to compare the latest
+                //renderedBuffer with our pending buffer
+                try {
+                    //TODO use sendByFuture and use common thread pool to listen for failed futures & set render pending to false.
                     session.getRemote()
-                           .sendBytesByFuture(buffer);
-                });
-            }));
-        }
+                           .sendBytes(buffer);
+                }
+                catch (final IOException e) {
+                    this.renderPending.set(false);
+                    e.printStackTrace();
+                }
+            });
+        }));
     }
 
     //we offload all incoming events from the web server thread to our own main thread.
@@ -88,7 +93,7 @@ public class Html5Socket implements WebSocketListener {
             case "ack-output-info": {
                 this.renderPending.set(false);
                 //request to render next frame
-                render();
+                this.html5Connector.requestPngBuffer(this);
                 break;
             }
             case "ack-frame": {
@@ -101,7 +106,7 @@ public class Html5Socket implements WebSocketListener {
                 this.renderPending.set(false);
 
                 //request to render next frame
-                render();
+                this.html5Connector.requestPngBuffer(this);
             }
             default: {
                 //TODO move to html5 seat implementation
@@ -148,6 +153,11 @@ public class Html5Socket implements WebSocketListener {
 
     @Override
     public void onWebSocketError(final Throwable cause) {
+        //TODO log & handle
+        cause.printStackTrace();
+    }
 
+    public AtomicBoolean getRenderPending() {
+        return this.renderPending;
     }
 }
