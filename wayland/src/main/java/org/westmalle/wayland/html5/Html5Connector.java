@@ -43,7 +43,7 @@ public class Html5Connector implements Connector {
 
     private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
 
-    private final ExecutorService connectorThread = Executors.newSingleThreadExecutor();
+    //private final ExecutorService encoderThread = Executors.newSingleThreadExecutor();
 
     private final Set<Html5Socket> html5Sockets = new HashSet<>();
 
@@ -79,40 +79,38 @@ public class Html5Connector implements Connector {
                             final boolean flipHorizontal,
                             final int width,
                             final int height) {
-        this.connectorThread.execute(() -> {
-            //we have to allocate a new newWriteBuffer on each new frame as sockets might hold on to older buffers until the client acks.
-            final ByteBuffer newWriteBuffer = ByteBuffer.allocate(maxPNGSize(width,
-                                                                             height));
+        //FIXME disabled offloading to separate encoding thread as frame commit throttling is not yet implemented
 
-            this.pngWriteBuffer = Optional.of(newWriteBuffer);
-            toPng(bufferRGBA,
+//        this.encoderThread.submit(() -> {
+        //we have to allocate a new newWriteBuffer on each new frame as sockets might hold on to older buffers until the client acks.
+        //TODO check if we can improve performance by allocating a direct bytebuffer and do native memcopies in pngWriteCallback
+        final ByteBuffer newWriteBuffer = ByteBuffer.allocate(maxPNGSize(width,
+                                                                         height));
+
+        this.pngWriteBuffer = Optional.of(newWriteBuffer);
+        encodePng(bufferRGBA,
                   flipHorizontal,
                   width,
                   height);
-            newWriteBuffer.flip();
+        newWriteBuffer.flip();
 
-            this.pngBufferSwapLock.lock();
-            try {
-                this.pngBufferAge = System.nanoTime();
-                this.pngReadBuffer = this.pngWriteBuffer;
-            }
-            finally {
-                this.pngBufferSwapLock.unlock();
-            }
+        this.pngBufferSwapLock.lock();
+        try {
+            this.pngBufferAge = System.nanoTime();
+            this.pngReadBuffer = this.pngWriteBuffer;
+        }
+        finally {
+            this.pngBufferSwapLock.unlock();
+        }
 
-            bufferRGBA.close();
-            this.html5Sockets.forEach(Html5Socket::render);
-        });
-
-
-        //TODO/FIXME always keep the png buffer up to date unless all connected clients are busy or no clients are present
-        //TODO/FIXME only send out updated png buffers to those clients who are not busy ie have ack'ed their previous frame
-        //TODO/FIXME if a client has ack'ed it's frame and the png buffer was updated, send out a new frame to this client
-        //TODO/FIXME if a new client connects, consider it as an frame ack'ed client.
+        bufferRGBA.close();
+        this.html5Sockets.forEach(this::requestPngBuffer);
+//        });
     }
 
     private int maxPNGSize(final int width,
                            final int height) {
+        //TODO tailor this function to our own png encoding
         return 8 // PNG signature bytes
                + 25 // IHDR chunk
                + 12 // IDAT chunk (assuming only one IDAT chunk)
@@ -127,10 +125,10 @@ public class Html5Connector implements Connector {
                + 12; // IEND chunk
     }
 
-    private void toPng(final Pointer<Byte> sourceRGBA,
-                       final boolean flipHorizontal,
-                       final int pitch,
-                       final int height) {
+    private void encodePng(final Pointer<Byte> sourceRGBA,
+                           final boolean flipHorizontal,
+                           final int pitch,
+                           final int height) {
 
         final long p = this.libpng.png_create_write_struct(Pointer.nref("1.6.23+apng").address,
                                                            0L,
@@ -204,23 +202,20 @@ public class Html5Connector implements Connector {
     }
 
     public void onWebSocketClose(final Html5Socket html5Socket) {
-        this.connectorThread.submit(() -> this.html5Sockets.remove(html5Socket));
+        //this.encoderThread.submit(() ->
+        this.html5Sockets.remove(html5Socket);
+        //                        );
     }
 
-    public Optional<ByteBuffer> getPngBufferCopy() {
+    public void requestPngBuffer(final Html5Socket html5Socket) {
         this.pngBufferSwapLock.lock();
         try {
-            return this.pngReadBuffer.map(ByteBuffer::duplicate);
-        }
-        finally {
-            this.pngBufferSwapLock.unlock();
-        }
-    }
-
-    public long getPngBufferAge() {
-        this.pngBufferSwapLock.lock();
-        try {
-            return this.pngBufferAge;
+            if (html5Socket.getRenderPending()
+                           .compareAndSet(false,
+                                          true)) {
+                html5Socket.handlePngBuffer(this.pngBufferAge,
+                                            this.pngReadBuffer.map(ByteBuffer::duplicate));
+            }
         }
         finally {
             this.pngBufferSwapLock.unlock();
@@ -233,6 +228,8 @@ public class Html5Connector implements Connector {
     }
 
     public void onWebSocketConnect(final Html5Socket html5Socket) {
-        this.connectorThread.submit(() -> this.html5Sockets.add(html5Socket));
+        //this.encoderThread.submit(() ->
+        this.html5Sockets.add(html5Socket);
+        //                         );
     }
 }
