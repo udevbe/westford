@@ -1,9 +1,11 @@
 //use browser url to find socket to connect to
-
 var parser = document.createElement('a');
 parser.href = document.URL;
 
-var socket = new WebSocket("ws://" + parser.host + parser.pathname + parser.hash.substring(1));
+socket = new WebSocket("ws://" + parser.host + parser.pathname + parser.hash.substring(1));
+window.onbeforeunload = function(e) {
+    socket.close();
+};
 
 function createOutputCanvas(outputInfo){
     //make canvas & context global
@@ -77,6 +79,7 @@ socket.onopen = function () {
 
 socket.onerror = function (error) {
   //TODO show error on screen
+  console.log(error);
 };
 
 socket.onclose = function (event) {
