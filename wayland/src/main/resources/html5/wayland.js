@@ -28,12 +28,12 @@ function createOutputCanvas(outputInfo){
 
     //add canvas input listeners
     canvas.addEventListener('mousedown',function(ev){
-        //p(ointer):d(own):b(utton):xxxx:t(ime):xxxxxxx
-        socket.send("p:d:b:"+ev.button+":t:"+Date.now())
+        //p(ointer)d(own)xxxx:t(ime):xxxxxxx
+        socket.send("pd"+ev.button+"t"+Date.now())
     },false);
     canvas.addEventListener('mouseup',function(ev){
-        //p(ointer):u(p):b(utton):0:t(ime):xxxxxxx
-        socket.send("p:u:b:"+ev.button+":t:"+Date.now())
+        //p(ointer)u(p)xxxx:t(ime):xxxxxxx
+        socket.send("pu"+ev.button+"t"+Date.now())
     },false);
     canvas.addEventListener('contextmenu', function(ev) {
         ev.preventDefault();
@@ -44,15 +44,15 @@ function createOutputCanvas(outputInfo){
         var x = Math.round((ev.clientX-rect.left)/(rect.right-rect.left)*canvas.width);
         var y = Math.round((ev.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height);
         //p(ointer):m(otion):x:xxxx:y:xxxx:t(ime):xxxxxxx
-        socket.send("p:m:x:"+x+":y:"+y+":t:"+Date.now())
+        socket.send("pmx"+x+"y"+y+"t"+Date.now())
     }, false);
     canvas.addEventListener('keydown', function(ev) {
-        //k(ey):d(own):c(ode):xxxx:t(ime):xxxxxx
-        socket.send("k:d:c:"+ev.keyCode+":t:"+Date.now());
+        //k(ey)d(own)xxxx:t(ime):xxxxxx
+        socket.send("kd"+ev.keyCode+"t"+Date.now());
     }, false);
     canvas.addEventListener('keyup', function(ev) {
-        //k(ey):u(p):c(ode):xxxx:t(ime):xxxxxx
-        socket.send("k:u:c:"+ev.keyCode+":t:"+Date.now());
+        //k(ey)u(p)xxxx:t(ime):xxxxxx
+        socket.send("ku"+ev.keyCode+"t"+Date.now());
     }, false);
 
     document.body.appendChild(canvas);
