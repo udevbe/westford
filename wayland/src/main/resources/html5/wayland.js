@@ -25,6 +25,8 @@ function createOutputCanvas(outputInfo){
     canvas.height = 600;
     canvas.style.position = "absolute";
     canvas.style.border   = "1px solid";
+    canvas.setAttribute('tabindex','0');
+    canvas.focus();
 
     //add canvas input listeners
     canvas.addEventListener('mousedown',function(ev){
