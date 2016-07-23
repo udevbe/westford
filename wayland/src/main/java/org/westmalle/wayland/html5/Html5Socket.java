@@ -2,9 +2,11 @@ package org.westmalle.wayland.html5;
 
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.westmalle.wayland.core.JobExecutor;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
@@ -18,6 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @AutoFactory
 public class Html5Socket implements WebSocketListener {
 
+    @Nonnull
+    private final JobExecutor    jobExecutor;
     @Nonnull
     private final Html5Connector html5Connector;
     @Nonnull
@@ -36,8 +40,10 @@ public class Html5Socket implements WebSocketListener {
     private long renderedBufferAge;
 
 
-    Html5Socket(@Nonnull final Html5Connector html5Connector,
+    Html5Socket(@Provided @Nonnull final JobExecutor jobExecutor,
+                @Nonnull final Html5Connector html5Connector,
                 @Nonnull final Html5Seat html5Seat) {
+        this.jobExecutor = jobExecutor;
         this.html5Connector = html5Connector;
         this.html5Seat = html5Seat;
     }
@@ -117,7 +123,7 @@ public class Html5Socket implements WebSocketListener {
                 break;
             }
             default: {
-                this.html5Seat.handle(message);
+                this.jobExecutor.submit(() -> this.html5Seat.handle(message));
             }
         }
     }

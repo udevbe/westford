@@ -1,7 +1,9 @@
 package org.westmalle.wayland.html5;
 
 import com.google.auto.factory.AutoFactory;
+import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlPointerResource;
+import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.westmalle.wayland.protocol.WlSeat;
 
@@ -11,7 +13,6 @@ import java.util.Set;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_SIDE;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateHtml5SeatFactory")
@@ -34,73 +35,89 @@ public class Html5Seat {
         switch (message.substring(0,
                                   2)) {
             case POINTER_DOWN: {
-                final WlPointerButtonState buttonState = WlPointerButtonState.PRESSED;
-
-                final int t = message.indexOf('t');
-                final int button = Integer.parseInt(message.substring(2,
-                                                                      t));
-                final int time = (int) Long.parseLong(message.substring(t + 1));
-
-                final Set<WlPointerResource> wlPointerResources = this.wlSeat.getWlPointer()
-                                                                             .getResources();
-                this.wlSeat.getWlPointer()
-                           .getPointerDevice()
-                           .button(wlPointerResources,
-                                   time,
-                                   toLinuxButton(button),
-                                   buttonState);
+                handlePointerButton(message,
+                                    WlPointerButtonState.PRESSED);
                 break;
             }
             case POINTER_UP: {
-                final WlPointerButtonState buttonState = WlPointerButtonState.RELEASED;
-
-                final int t = message.indexOf('t');
-                final int button = Integer.parseInt(message.substring(2,
-                                                                      t));
-                final int time = (int) Long.parseLong(message.substring(t + 1));
-
-                final Set<WlPointerResource> wlPointerResources = this.wlSeat.getWlPointer()
-                                                                             .getResources();
-                this.wlSeat.getWlPointer()
-                           .getPointerDevice()
-                           .button(wlPointerResources,
-                                   time,
-                                   toLinuxButton(button),
-                                   buttonState);
+                handlePointerButton(message,
+                                    WlPointerButtonState.RELEASED);
                 break;
             }
             case POINTER_MOTION: {
-                final int x = message.indexOf('x');
-                final int y = message.indexOf('y');
-                final int t = message.indexOf('t');
-
-                final int xCor = Integer.parseInt(message.substring(x + 1,
-                                                                    y));
-                final int yCor = Integer.parseInt(message.substring(y + 1,
-                                                                    t));
-                final int time = (int) Long.parseLong(message.substring(t + 1));
-
-                final Set<WlPointerResource> wlPointerResources = this.wlSeat.getWlPointer()
-                                                                             .getResources();
-                this.wlSeat.getWlPointer()
-                           .getPointerDevice()
-                           .motion(wlPointerResources,
-                                   time,
-                                   xCor,
-                                   yCor);
+                handlePointerMotion(message);
                 break;
             }
             case KEY_DOWN: {
-
+                handkeKeyboardKey(message,
+                                  WlKeyboardKeyState.PRESSED);
+                break;
             }
             case KEY_UP: {
-
+                handkeKeyboardKey(message,
+                                  WlKeyboardKeyState.RELEASED);
+                break;
             }
             default: {
                 //TODO log
                 System.err.println("Unknown client message: " + message);
             }
         }
+    }
+
+    private void handkeKeyboardKey(final String message,
+                                   final WlKeyboardKeyState wlKeyboardKeyState) {
+        final int t = message.indexOf('t');
+        final int key = Integer.parseInt(message.substring(2,
+                                                           t));
+        final int time = (int) Long.parseLong(message.substring(t + 1));
+
+        final Set<WlKeyboardResource> wlKeyboardResources = this.wlSeat.getWlKeyboard()
+                                                                       .getResources();
+        this.wlSeat.getWlKeyboard()
+                   .getKeyboardDevice()
+                   .key(wlKeyboardResources,
+                        time,
+                        Html5ToLinuxKeycode.toLinuxInputEvent(key),
+                        wlKeyboardKeyState);
+    }
+
+    private void handlePointerMotion(final String message) {
+        final int x = message.indexOf('x');
+        final int y = message.indexOf('y');
+        final int t = message.indexOf('t');
+
+        final int xCor = Integer.parseInt(message.substring(x + 1,
+                                                            y));
+        final int yCor = Integer.parseInt(message.substring(y + 1,
+                                                            t));
+        final int time = (int) Long.parseLong(message.substring(t + 1));
+
+        final Set<WlPointerResource> wlPointerResources = this.wlSeat.getWlPointer()
+                                                                     .getResources();
+        this.wlSeat.getWlPointer()
+                   .getPointerDevice()
+                   .motion(wlPointerResources,
+                           time,
+                           xCor,
+                           yCor);
+    }
+
+    private void handlePointerButton(final String message,
+                                     final WlPointerButtonState buttonState) {
+        final int t = message.indexOf('t');
+        final int button = Integer.parseInt(message.substring(2,
+                                                              t));
+        final int time = (int) Long.parseLong(message.substring(t + 1));
+
+        final Set<WlPointerResource> wlPointerResources = this.wlSeat.getWlPointer()
+                                                                     .getResources();
+        this.wlSeat.getWlPointer()
+                   .getPointerDevice()
+                   .button(wlPointerResources,
+                           time,
+                           toLinuxButton(button),
+                           buttonState);
     }
 
     private int toLinuxButton(final int jsButton) {

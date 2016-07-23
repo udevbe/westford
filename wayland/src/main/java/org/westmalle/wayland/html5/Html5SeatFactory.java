@@ -5,7 +5,9 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
+import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.input.LibinputXkbFactory;
+import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
@@ -41,6 +43,7 @@ public class Html5SeatFactory {
     }
 
     public Html5Seat create() {
+        //TODO make this configurable either on server or on client side.
         final String keyboardRule    = "";
         final String keyboardModel   = "";
         final String keyboardLayout  = "";
@@ -58,6 +61,18 @@ public class Html5SeatFactory {
         wlSeat.getSeat()
               .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
                                           WlSeatCapability.POINTER));
+
+
+        //TODO make this configurable
+        //setup keyboard focus tracking to follow mouse pointer
+        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
+        final PointerDevice pointerDevice = wlSeat.getWlPointer()
+                                                  .getPointerDevice();
+        pointerDevice.getPointerFocusSignal()
+                     .connect(event -> wlKeyboard.getKeyboardDevice()
+                                                 .setFocus(wlKeyboard.getResources(),
+                                                           pointerDevice.getFocus()));
+
         return this.privateHtml5SeatFactory.create(wlSeat);
     }
 }
