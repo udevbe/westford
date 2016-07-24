@@ -51,6 +51,9 @@ function createOutputCanvas(outputInfo){
     canvas.addEventListener('keydown', function(ev) {
         //k(ey)d(own)xxxx:t(ime):xxxxxx
         socket.send("kd"+ev.keyCode+"t"+Date.now());
+        //make sure we don't loose key focus when tab is pressed
+        ev.preventDefault();
+        return false;
     }, false);
     canvas.addEventListener('keyup', function(ev) {
         //k(ey)u(p)xxxx:t(ime):xxxxxx
