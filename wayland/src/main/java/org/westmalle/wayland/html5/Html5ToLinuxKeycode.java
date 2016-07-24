@@ -11,7 +11,8 @@ public class Html5ToLinuxKeycode {
         put(8,
             14);
         //space
-        put(32,57);
+        put(32,
+            57);
         //tab
         put(9,
             15);
@@ -304,7 +305,11 @@ public class Html5ToLinuxKeycode {
             40);
     }};
 
-    public static int toLinuxInputEvent(int javaScriptKeycode) {
-        return JS_KEY_CODE_TO_LINUX.get(javaScriptKeycode);
+    public static int toLinuxInputEvent(final int javaScriptKeycode) {
+        final Integer eventCode = JS_KEY_CODE_TO_LINUX.get(javaScriptKeycode);
+        if (eventCode == null) {
+            return 0;
+        }
+        return eventCode;
     }
 }
