@@ -16,11 +16,9 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,7 +43,7 @@ public class Html5Connector implements Connector {
 
     //private final ExecutorService encoderThread = Executors.newSingleThreadExecutor();
 
-    private final Set<Html5Socket> html5Sockets = new HashSet<>();
+    private final Set<Html5Socket> html5Sockets = new CopyOnWriteArraySet<>();
 
     private final Lock pngBufferSwapLock = new ReentrantLock();
 
@@ -67,32 +65,23 @@ public class Html5Connector implements Connector {
         return this.connector.getWlOutput();
     }
 
-    //TODO add methods to send screen updates to all connected sockets
-
-    /**
-     * @param bufferRGBA
-     * @param flipHorizontal
-     * @param width
-     * @param height
-     */
     public void commitFrame(final Pointer<Byte> bufferRGBA,
                             final boolean flipHorizontal,
                             final int width,
                             final int height) {
         //FIXME disabled offloading to separate encoding thread as frame commit throttling is not yet implemented
-
 //        this.encoderThread.submit(() -> {
-        //we have to allocate a new newWriteBuffer on each new frame as sockets might hold on to older buffers until the client acks.
+        //we have to allocate a new nextPngWriteBuffer on each new frame as sockets might hold on to older buffers until the client acks.
         //TODO check if we can improve performance by allocating a direct bytebuffer and do native memcopies in pngWriteCallback
-        final ByteBuffer newWriteBuffer = ByteBuffer.allocate(maxPNGSize(width,
-                                                                         height));
+        final ByteBuffer nextPngWriteBuffer = ByteBuffer.allocate(maxPNGSize(width,
+                                                                             height));
 
-        this.pngWriteBuffer = Optional.of(newWriteBuffer);
+        this.pngWriteBuffer = Optional.of(nextPngWriteBuffer);
         encodePng(bufferRGBA,
                   flipHorizontal,
                   width,
                   height);
-        newWriteBuffer.flip();
+        nextPngWriteBuffer.flip();
 
         this.pngBufferSwapLock.lock();
         try {
@@ -202,9 +191,7 @@ public class Html5Connector implements Connector {
     }
 
     public void onWebSocketClose(final Html5Socket html5Socket) {
-        //this.encoderThread.submit(() ->
         this.html5Sockets.remove(html5Socket);
-        //                        );
     }
 
     public void requestPngBuffer(final Html5Socket html5Socket) {
@@ -228,8 +215,6 @@ public class Html5Connector implements Connector {
     }
 
     public void onWebSocketConnect(final Html5Socket html5Socket) {
-        //this.encoderThread.submit(() ->
         this.html5Sockets.add(html5Socket);
-        //                         );
     }
 }
