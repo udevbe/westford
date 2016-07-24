@@ -7,14 +7,15 @@ import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.westmalle.wayland.core.JobExecutor;
-import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @AutoFactory
@@ -29,7 +30,7 @@ public class Html5Socket implements WebSocketListener {
 
     private Optional<Session> session = Optional.empty();
 
-    private final ExecutorService socketThread = Executors.newSingleThreadExecutor();
+    private final ScheduledExecutorService socketThread = Executors.newSingleThreadScheduledExecutor();
 
     private final AtomicBoolean renderPending = new AtomicBoolean(true);
 
@@ -38,6 +39,11 @@ public class Html5Socket implements WebSocketListener {
 
     private Optional<ByteBuffer> renderedBuffer = Optional.empty();
     private long renderedBufferAge;
+
+    private long estimatedLatency = 0;
+
+    private long                         lastFrameSendTime = 0;
+    private Optional<ScheduledFuture<?>> scheduledFrame    = Optional.empty();
 
 
     Html5Socket(@Provided @Nonnull final JobExecutor jobExecutor,
@@ -71,15 +77,25 @@ public class Html5Socket implements WebSocketListener {
                     //TODO use sendByFuture and use common thread pool to listen for failed futures & set render pending to false.
                     session.getRemote()
                            .sendBytes(buffer);
+                    this.lastFrameSendTime = System.nanoTime();
                 }
                 catch (final IOException e) {
                     this.renderPending.set(false);
                     e.printStackTrace();
                 }
             });
+
+            //check if this is the first render
+            if (this.scheduledFrame.isPresent()) {
+                //schedule next frame send
+                this.scheduledFrame = Optional.of(this.socketThread.schedule(this::requestFrame,
+                                                                             this.estimatedLatency,
+                                                                             TimeUnit.NANOSECONDS));
+            }
         }));
     }
 
+    //we offload all incoming events from the web server thread to our own main thread.
     //we offload all incoming events from the web server thread to our own main thread.
     @Override
     public void onWebSocketBinary(final byte[] payload,
@@ -110,22 +126,39 @@ public class Html5Socket implements WebSocketListener {
                 break;
             }
             case "ack-frame": {
-                this.renderedBufferAge = this.pendingBufferAge;
-                this.renderedBuffer = this.pendingBuffer;
+                //use ack to estimate latency
+                this.estimatedLatency = (System.nanoTime() - this.lastFrameSendTime) / 2;
 
-                this.pendingBuffer = Optional.empty();
-                this.pendingBufferAge = 0L;
+                //check if our latency went down and adjust accordingly
+                if (this.scheduledFrame.isPresent()) {
+                    if (!this.scheduledFrame.get()
+                                            .isDone()) {
+                        this.scheduledFrame.get()
+                                           .cancel(false);
+                        requestFrame();
+                    }
+                }
+                else {
+                    requestFrame();
+                }
 
-                this.renderPending.set(false);
-
-                //request to render next frame
-                this.html5Connector.requestPngBuffer(this);
                 break;
             }
             default: {
                 this.jobExecutor.submit(() -> this.html5Seat.handle(message));
             }
         }
+    }
+
+    private void requestFrame() {
+        this.renderedBufferAge = this.pendingBufferAge;
+        this.renderedBuffer = this.pendingBuffer;
+
+        this.pendingBuffer = Optional.empty();
+        this.pendingBufferAge = 0L;
+
+        this.renderPending.set(false);
+        this.html5Connector.requestPngBuffer(this);
     }
 
 
