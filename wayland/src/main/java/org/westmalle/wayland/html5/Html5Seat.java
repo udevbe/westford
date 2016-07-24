@@ -9,6 +9,7 @@ import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
 import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
@@ -17,6 +18,8 @@ import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
 @AutoFactory(allowSubclasses = true,
              className = "PrivateHtml5SeatFactory")
 public class Html5Seat {
+
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String POINTER_DOWN   = "pd";
     private static final String POINTER_UP     = "pu";
@@ -59,8 +62,7 @@ public class Html5Seat {
                 break;
             }
             default: {
-                //TODO log
-                System.err.println("Unknown client message: " + message);
+                LOGGER.warning("Ignoring unknown client message: " + message);
             }
         }
     }
@@ -74,11 +76,18 @@ public class Html5Seat {
 
         final Set<WlKeyboardResource> wlKeyboardResources = this.wlSeat.getWlKeyboard()
                                                                        .getResources();
+
+        final int eventCode = Html5ToLinuxKeycode.toLinuxInputEvent(key);
+        if (eventCode == 0) {
+            LOGGER.warning("Not processing key input. Got unknown html5 key code: " + key);
+            return;
+        }
+
         this.wlSeat.getWlKeyboard()
                    .getKeyboardDevice()
                    .key(wlKeyboardResources,
                         time,
-                        Html5ToLinuxKeycode.toLinuxInputEvent(key),
+                        eventCode,
                         wlKeyboardKeyState);
     }
 
@@ -112,11 +121,18 @@ public class Html5Seat {
 
         final Set<WlPointerResource> wlPointerResources = this.wlSeat.getWlPointer()
                                                                      .getResources();
+
+        final int linuxButton = toLinuxButton(button);
+        if (linuxButton == 0) {
+            LOGGER.warning("Not processing pointer button input. Got unknown html5 button code: " + button);
+            return;
+        }
+
         this.wlSeat.getWlPointer()
                    .getPointerDevice()
                    .button(wlPointerResources,
                            time,
-                           toLinuxButton(button),
+                           linuxButton,
                            buttonState);
     }
 
