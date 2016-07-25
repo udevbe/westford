@@ -21,6 +21,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @AutoFactory
 public class Html5Socket implements WebSocketListener {
 
+    private static final String REQUEST_OUTPUT_INFO = "roi";
+    private static final String ACK_OUTPUT_INFO     = "aoi";
+    private static final String ACK_FRAME           = "af";
+
+
     @Nonnull
     private final JobExecutor    jobExecutor;
     @Nonnull
@@ -40,10 +45,9 @@ public class Html5Socket implements WebSocketListener {
     private Optional<ByteBuffer> renderedBuffer = Optional.empty();
     private long renderedBufferAge;
 
-    private long estimatedLatency = 0;
+    private long clientRenderInterval = 0;
 
-    private long                         lastFrameSendTime = 0;
-    private Optional<ScheduledFuture<?>> scheduledFrame    = Optional.empty();
+    private Optional<ScheduledFuture<?>> scheduledFrame = Optional.empty();
 
 
     Html5Socket(@Provided @Nonnull final JobExecutor jobExecutor,
@@ -77,7 +81,6 @@ public class Html5Socket implements WebSocketListener {
                     //TODO use sendByFuture and use common thread pool to listen for failed futures & set render pending to false.
                     session.getRemote()
                            .sendBytes(buffer);
-                    this.lastFrameSendTime = System.nanoTime();
                 }
                 catch (final IOException e) {
                     this.renderPending.set(false);
@@ -87,10 +90,12 @@ public class Html5Socket implements WebSocketListener {
 
             //check if this is the first render
             if (this.scheduledFrame.isPresent()) {
+                //TODO we should be smart and not schedule frame sending if we haven't received a frame ack in a long time
+
                 //schedule next frame send
                 this.scheduledFrame = Optional.of(this.socketThread.schedule(this::requestFrame,
-                                                                             this.estimatedLatency,
-                                                                             TimeUnit.NANOSECONDS));
+                                                                             this.clientRenderInterval,
+                                                                             TimeUnit.MILLISECONDS));
             }
         }));
     }
@@ -110,43 +115,37 @@ public class Html5Socket implements WebSocketListener {
     }
 
     private void handleWebSocketText(final String message) {
-        switch (message) {
-            case "req-output-info": {
-                this.session.ifPresent(session -> {
-                    //TODO send output info gathered from the connector
-                    session.getRemote()
-                           .sendStringByFuture("output info here");
-                });
-                break;
-            }
-            case "ack-output-info": {
-                this.renderPending.set(false);
-                //request to render next frame
-                this.html5Connector.requestPngBuffer(this);
-                break;
-            }
-            case "ack-frame": {
-                //use ack to estimate latency
-                this.estimatedLatency = (System.nanoTime() - this.lastFrameSendTime) / 2;
 
-                //check if our latency went down and adjust accordingly
-                if (this.scheduledFrame.isPresent()) {
-                    if (!this.scheduledFrame.get()
-                                            .isDone()) {
-                        this.scheduledFrame.get()
-                                           .cancel(false);
-                        requestFrame();
-                    }
-                }
-                else {
+        if (message.equals(REQUEST_OUTPUT_INFO)) {
+            this.session.ifPresent(session -> {
+                //TODO send output info gathered from the connector
+                session.getRemote()
+                       .sendStringByFuture("output info here");
+            });
+        }
+        else if (message.equals(ACK_OUTPUT_INFO)) {
+            requestFrame();
+        }
+        else if (message.startsWith(ACK_FRAME)) {
+            final String frameDrawTime = message.substring(ACK_FRAME.length());
+            //use ack to throttle frame sending to client
+            this.clientRenderInterval = Long.parseLong(frameDrawTime);
+
+            //check if our latency went down and adjust accordingly
+            if (this.scheduledFrame.isPresent()) {
+                if (!this.scheduledFrame.get()
+                                        .isDone()) {
+                    this.scheduledFrame.get()
+                                       .cancel(false);
                     requestFrame();
                 }
-
-                break;
             }
-            default: {
-                this.jobExecutor.submit(() -> this.html5Seat.handle(message));
+            else {
+                requestFrame();
             }
+        }
+        else {
+            this.jobExecutor.submit(() -> this.html5Seat.handle(message));
         }
     }
 
