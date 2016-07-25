@@ -21,7 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("udev")
+@Lib(value = "udev",
+     version = 1)
 public class Libudev {
 
     public static final String DEFAULT_SEAT = "seat0";

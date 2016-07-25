@@ -21,7 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("input")
+@Lib(value = "input",
+     version = 10)
 public class Libinput {
 
     /**

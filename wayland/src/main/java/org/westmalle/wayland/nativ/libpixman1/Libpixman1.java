@@ -19,7 +19,8 @@ import org.freedesktop.jaccall.Ptr;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("pixman-1")
+@Lib(value = "pixman-1",
+     version = 0)
 public class Libpixman1 {
 
     @Ptr

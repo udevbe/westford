@@ -18,7 +18,8 @@ import org.freedesktop.jaccall.*;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("c")
+@Lib(value = "c",
+     version = 6)
 //TODO split this class out based on the different headers implemented by (gnu) libc
 public class Libc {
 

@@ -5,7 +5,8 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 
-@Lib("png16")
+@Lib(value = "png16",
+     version = 16)
 public class Libpng {
 
     public static final int PNG_COLOR_MASK_COLOR = 2;

@@ -20,7 +20,8 @@ import javax.annotation.Nonnegative;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("xkbcommon-x11")
+@Lib(value = "xkbcommon-x11",
+     version = 0)
 public class Libxkbcommonx11 {
 
     /**
