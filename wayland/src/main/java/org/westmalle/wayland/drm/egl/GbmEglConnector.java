@@ -21,7 +21,6 @@ import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
-import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.drm.DrmConnector;
@@ -59,10 +58,11 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     private long nextGbmBo;
 
-    private Optional<EventSource>           renderJobEvent   = Optional.empty();
-    private Optional<EventLoop.IdleHandler> delayedRenderJob = Optional.empty();
+    private boolean renderPending   = false;
+    private boolean pageFlipPending = false;
 
-    private boolean pageFlipPending;
+    private Optional<Runnable> afterPageFlipRender = Optional.empty();
+
 
     GbmEglConnector(@Nonnull @Provided final Libgbm libgbm,
                     @Nonnull @Provided final Libdrm libdrm,
@@ -106,11 +106,8 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
         this.gbmBo = this.nextGbmBo;
         this.pageFlipPending = false;
 
-        this.delayedRenderJob.ifPresent(render -> {
-            assert (!this.renderJobEvent.isPresent());
-            whenIdle(render);
-            this.delayedRenderJob = Optional.empty();
-        });
+        this.afterPageFlipRender.ifPresent(Runnable::run);
+        this.afterPageFlipRender = Optional.empty();
     }
 
     public int getFbId(final long gbmBo) {
@@ -187,30 +184,27 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
     public void accept(@Nonnull final Renderer renderer) {
         //TODO unit test 3 cases here: schedule idle, no-op when already scheduled, delayed render when pageflip pending
 
+        //schedule a new render as soon as the pageflip ends, but only if we haven't scheduled one already
         if (this.pageFlipPending) {
-            if (!this.delayedRenderJob.isPresent()) {
-                whenPageFlip(() -> renderOn(renderer));
+            if (!this.afterPageFlipRender.isPresent()) {
+                this.afterPageFlipRender = Optional.of(() -> whenIdle(() -> renderOn(renderer)));
             }
         }
-        else if (!this.renderJobEvent.isPresent()) {
+        //schedule a new render but only if we haven't scheduled one already.
+        else if (!this.renderPending) {
             whenIdle(() -> renderOn(renderer));
         }
     }
 
-    private void whenPageFlip(final EventLoop.IdleHandler idleHandler) {
-        this.delayedRenderJob = Optional.of(idleHandler);
-    }
-
     private void whenIdle(final EventLoop.IdleHandler idleHandler) {
-        this.renderJobEvent = Optional.of(this.display.getEventLoop()
-                                                      .addIdle(idleHandler));
+        this.renderPending = true;
+        this.display.getEventLoop()
+                    .addIdle(idleHandler);
     }
 
     private void renderOn(@Nonnull final Renderer renderer) {
-        this.renderJobEvent.get()
-                           .remove();
-        this.renderJobEvent = Optional.empty();
         renderer.visit(this);
         this.display.flushClients();
+        this.renderPending = false;
     }
 }
