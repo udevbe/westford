@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 public class Boot {
 
     private static final Logger LOGGER   = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    private static final String BACK_END = "BACK_END";
+    private static final String BACK_END = "backEnd";
 
 
     public static void main(final String[] args) {
@@ -79,8 +79,7 @@ public class Boot {
                 break;
             default:
                 //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
-                //boot.strap(DaggerX11EglCompositor.builder());
-                boot.strap(DaggerHtml5X11EglCompositor.builder());
+                boot.strap(DaggerX11EglCompositor.builder());
         }
     }
 
