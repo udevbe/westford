@@ -19,7 +19,8 @@ import org.freedesktop.jaccall.Ptr;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("GLESv2")
+@Lib(value = "GLESv2",
+     version = 2)
 public class LibGLESv2 {
 
     public static final int GL_BGRA_EXT = 0x80E1;

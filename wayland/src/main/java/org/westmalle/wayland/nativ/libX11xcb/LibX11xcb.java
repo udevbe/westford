@@ -19,7 +19,8 @@ import org.freedesktop.jaccall.Ptr;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("X11-xcb")
+@Lib(value = "X11-xcb",
+     version = 1)
 public class LibX11xcb {
     public static final int XCBOwnsEventQueue = 1;
 

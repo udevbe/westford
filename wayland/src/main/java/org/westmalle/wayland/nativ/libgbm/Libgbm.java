@@ -4,7 +4,8 @@ import org.freedesktop.jaccall.Lib;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 
-@Lib("gbm")
+@Lib(value = "gbm",
+     version = 1)
 public class Libgbm {
 
     /**

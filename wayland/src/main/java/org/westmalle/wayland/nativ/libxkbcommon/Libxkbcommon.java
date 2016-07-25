@@ -19,7 +19,8 @@ import org.freedesktop.jaccall.Ptr;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("xkbcommon")
+@Lib(value = "xkbcommon",
+     version = 0)
 public class Libxkbcommon {
 
     /**

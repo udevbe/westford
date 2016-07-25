@@ -21,7 +21,8 @@ import javax.inject.Singleton;
 import java.util.Optional;
 
 @Singleton
-@Lib("xcb")
+@Lib(value = "xcb",
+     version = 1)
 public class Libxcb {
 
     public static final int  XCB_ATOM_ATOM                 = 4;

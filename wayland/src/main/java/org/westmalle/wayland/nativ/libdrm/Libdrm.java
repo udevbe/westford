@@ -8,7 +8,8 @@ import org.freedesktop.jaccall.Unsigned;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("drm")
+@Lib(value = "drm",
+     version = 2)
 public class Libdrm {
     public static final int DRM_MODE_PAGE_FLIP_EVENT = 0x01;
 

@@ -19,7 +19,8 @@ import org.freedesktop.jaccall.Ptr;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("EGL")
+@Lib(value = "EGL",
+     version = 1)
 public class LibEGL {
 
     public static final int EGL_WAYLAND_BUFFER_WL = 0x31D5;

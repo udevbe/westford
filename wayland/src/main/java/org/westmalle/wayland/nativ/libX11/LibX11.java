@@ -20,7 +20,8 @@ import org.freedesktop.jaccall.Ptr;
 import javax.inject.Singleton;
 
 @Singleton
-@Lib("X11")
+@Lib(value = "X11",
+     version = 6)
 public class LibX11 {
 
     @Ptr
