@@ -107,6 +107,7 @@ public class X11PlatformFactoryTest {
         when(x11ConnectorConfig.getY()).thenReturn(20);
         when(x11ConnectorConfig.getWidth()).thenReturn(100);
         when(x11ConnectorConfig.getHeight()).thenReturn(200);
+        when(x11ConnectorConfig.getName()).thenReturn("testWindow");
         when(this.x11PlatformConfig.getX11ConnectorConfigs()).thenReturn(Collections.singletonList(x11ConnectorConfig));
     }
 
