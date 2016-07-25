@@ -38,7 +38,7 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
 //TODO put all gbm/egl specifics here
 @AutoFactory(allowSubclasses = true,
              className = "GbmEglConnectorFactory")
-public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
+public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     @Nonnull
     private final Libgbm  libgbm;
@@ -64,7 +64,7 @@ public class GbmEglConnector implements EglConnector, DrmPageFlipCallback {
     private Optional<Runnable> afterPageFlipRender = Optional.empty();
 
 
-    GbmEglConnector(@Nonnull @Provided final Libgbm libgbm,
+    DrmEglConnector(@Nonnull @Provided final Libgbm libgbm,
                     @Nonnull @Provided final Libdrm libdrm,
                     @Nonnull @Provided final Display display,
                     final int drmFd,

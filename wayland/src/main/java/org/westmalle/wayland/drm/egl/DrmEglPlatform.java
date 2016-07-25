@@ -15,7 +15,6 @@ package org.westmalle.wayland.drm.egl;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.EglPlatform;
-import org.westmalle.wayland.core.Renderer;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateGbmEglPlatformFactory")
-public class GbmEglPlatform implements EglPlatform {
+public class DrmEglPlatform implements EglPlatform {
 
 
     private final long                            gbmDevice;
@@ -32,13 +31,13 @@ public class GbmEglPlatform implements EglPlatform {
     private final long                            eglContext;
     private final String                          eglExtensions;
     @Nonnull
-    private final List<Optional<GbmEglConnector>> gbmEglConnectors;
+    private final List<Optional<DrmEglConnector>> gbmEglConnectors;
 
-    GbmEglPlatform(final long gbmDevice,
+    DrmEglPlatform(final long gbmDevice,
                    final long eglDisplay,
                    final long eglContext,
                    final String eglExtensions,
-                   @Nonnull final List<Optional<GbmEglConnector>> gbmEglConnectors) {
+                   @Nonnull final List<Optional<DrmEglConnector>> gbmEglConnectors) {
         this.gbmDevice = gbmDevice;
         this.eglDisplay = eglDisplay;
         this.eglContext = eglContext;
@@ -58,7 +57,7 @@ public class GbmEglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public List<Optional<GbmEglConnector>> getConnectors() {
+    public List<Optional<DrmEglConnector>> getConnectors() {
         return this.gbmEglConnectors;
     }
 
