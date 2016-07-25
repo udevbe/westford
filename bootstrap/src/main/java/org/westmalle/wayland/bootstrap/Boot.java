@@ -79,6 +79,12 @@ public class Boot {
                 break;
             default:
                 //TODO if wayland display -> wayland else if X display -> x11 else if nothing -> kms
+                System.err.println("No back end specified. Defaulting to 'X11Egl'. Specify your back end with -DbackEnd=<value>.\n" +
+                                   "Available back ends:\n" +
+                                   "\tX11Egl\n" +
+                                   "\tDispmanxEgl\n" +
+                                   "\tDrmEgl\n" +
+                                   "\tHtml5X11Egl");
                 boot.strap(DaggerX11EglCompositor.builder());
         }
     }
