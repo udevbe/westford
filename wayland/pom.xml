@@ -15,7 +15,6 @@
 
     <properties>
         <wayland-java-bindings.version>1.4.1-SNAPSHOT</wayland-java-bindings.version>
-
         <jetty.version>9.3.7.v20160115</jetty.version>
     </properties>
 
