@@ -22,7 +22,7 @@ import org.westmalle.wayland.drm.DrmPlatformFactory;
 import javax.inject.Singleton;
 
 @Module
-public class GbmEglPlatformModule {
+public class DrmEglPlatformModule {
 
     @Provides
     @Singleton
@@ -32,7 +32,7 @@ public class GbmEglPlatformModule {
 
     @Provides
     @Singleton
-    Platform createPlatform(final GbmEglPlatformFactory gbmEglPlatformFactory) {
-        return gbmEglPlatformFactory.create();
+    Platform createPlatform(final DrmEglPlatformFactory drmEglPlatformFactory) {
+        return drmEglPlatformFactory.create();
     }
 }

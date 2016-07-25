@@ -51,7 +51,7 @@ import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
 
-public class GbmEglPlatformFactory {
+public class DrmEglPlatformFactory {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -75,7 +75,7 @@ public class GbmEglPlatformFactory {
     private final GlRenderer                   glRenderer;
 
     @Inject
-    GbmEglPlatformFactory(@Nonnull final PrivateGbmEglPlatformFactory privateGbmEglPlatformFactory,
+    DrmEglPlatformFactory(@Nonnull final PrivateGbmEglPlatformFactory privateGbmEglPlatformFactory,
                           @Nonnull final Libc libc,
                           @Nonnull final Libdrm libdrm,
                           @Nonnull final Libgbm libgbm,
@@ -95,7 +95,7 @@ public class GbmEglPlatformFactory {
         this.glRenderer = glRenderer;
     }
 
-    public GbmEglPlatform create() {
+    public DrmEglPlatform create() {
         final long gbmDevice  = this.libgbm.gbm_create_device(this.drmPlatform.getDrmFd());
         final long eglDisplay = createEglDisplay(gbmDevice);
 
@@ -132,7 +132,7 @@ public class GbmEglPlatformFactory {
                                                  eglConfig);
 
         final List<Optional<DrmConnector>>    drmConnectors    = this.drmPlatform.getConnectors();
-        final List<Optional<GbmEglConnector>> gbmEglConnectors = new ArrayList<>(drmConnectors.size());
+        final List<Optional<DrmEglConnector>> gbmEglConnectors = new ArrayList<>(drmConnectors.size());
 
         drmConnectors.forEach(drmConnectorOptional ->
                                       gbmEglConnectors.add(drmConnectorOptional.map(drmConnector ->
@@ -167,7 +167,7 @@ public class GbmEglPlatformFactory {
         return context;
     }
 
-    private GbmEglConnector createGbmEglConnector(final DrmConnector drmConnector,
+    private DrmEglConnector createGbmEglConnector(final DrmConnector drmConnector,
                                                   final long gbmDevice,
                                                   final long eglDisplay,
                                                   final long eglContext,
@@ -202,14 +202,14 @@ public class GbmEglPlatformFactory {
                                    eglSurface);
         final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
 
-        final GbmEglConnector gbmEglConnector = this.eglGbmConnectorFactory.create(this.drmPlatform.getDrmFd(),
+        final DrmEglConnector drmEglConnector = this.eglGbmConnectorFactory.create(this.drmPlatform.getDrmFd(),
                                                                                    gbmBo,
                                                                                    gbmSurface,
                                                                                    drmConnector,
                                                                                    eglSurface,
                                                                                    eglContext,
                                                                                    eglDisplay);
-        final int fbId = gbmEglConnector.getFbId(gbmBo);
+        final int fbId = drmEglConnector.getFbId(gbmBo);
         final int error = this.libdrm.drmModeSetCrtc(this.drmPlatform.getDrmFd(),
                                                      drmConnector.getCrtcId(),
                                                      fbId,
@@ -224,7 +224,7 @@ public class GbmEglPlatformFactory {
                                                      this.libc.getErrno()));
         }
 
-        return gbmEglConnector;
+        return drmEglConnector;
     }
 
     private long createEglDisplay(final long gbmDevice) {
@@ -260,9 +260,9 @@ public class GbmEglPlatformFactory {
         return eglDisplay;
     }
 
-    public long createEglSurface(final long eglDisplay,
-                                 final long config,
-                                 final long gbmSurface) {
+    private long createEglSurface(final long eglDisplay,
+                                  final long config,
+                                  final long gbmSurface) {
         final Pointer<Integer> eglSurfaceAttribs = Pointer.nref(EGL_RENDER_BUFFER,
                                                                 EGL_BACK_BUFFER,
                                                                 EGL_NONE);
