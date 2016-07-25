@@ -42,7 +42,7 @@ import static org.freedesktop.jaccall.Pointer.wrap;
 import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
 
-//TODO drm platform factory, remove all gbm dependencies
+//TODO tests tests tests!
 public class DrmPlatformFactory {
 
     @Nonnull
