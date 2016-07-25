@@ -15,7 +15,7 @@ function createOutputCanvas(outputInfo){
     img = new Image();
     img.onload = function() {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-        socket.send("ack-frame");
+        socket.send("af"+(Date.now()-frameReceived));
         URL.revokeObjectURL(img.src);
     };
 
@@ -65,10 +65,11 @@ function createOutputCanvas(outputInfo){
     //replace text handler with blob handler
     socket.onmessage = function (e) {
         //read binary data as image & put it in the canvas
+        frameReceived = Date.now();
         img.src = URL.createObjectURL(e.data);
     };
-    //notify server we have created the output canvas and are now ready to receive binary frames
-    socket.send("ack-output-info");
+    //notify server we have created the output canvas and send an ack output info
+    socket.send("aoi");
 }
 
 socket.onopen = function () {
@@ -79,7 +80,8 @@ socket.onopen = function () {
         //create canvas object based on output info reply
         createOutputCanvas(e.data);
     }
-    socket.send("req-output-info");
+    //we are open, send a request output info
+    socket.send("roi");
 };
 
 socket.onerror = function (error) {
