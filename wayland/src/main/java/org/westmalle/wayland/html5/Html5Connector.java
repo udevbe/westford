@@ -22,6 +22,9 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.JobExecutor;
+import org.westmalle.wayland.core.Output;
+import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libpng.Libpng;
 import org.westmalle.wayland.nativ.libpng.png_rw_ptr;
@@ -48,9 +51,13 @@ import static org.westmalle.wayland.nativ.libpng.Pointerpng_rw_ptr.nref;
              className = "Html5ConnectorFactory")
 public class Html5Connector implements Connector {
 
+    private static final String OUTPUT_INFO_JSON_TEMPLATE = "{\"id\":\"%s\",\"width\":%d,\"height\":%d}";
+
     @Nonnull
-    private final Libpng    libpng;
-    private final Connector connector;
+    private final Libpng      libpng;
+    @Nonnull
+    private final JobExecutor jobExecutor;
+    private final Connector   connector;
 
     private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
 
@@ -67,8 +74,10 @@ public class Html5Connector implements Connector {
 
 
     Html5Connector(@Provided @Nonnull final Libpng libpng,
+                   @Provided @Nonnull final JobExecutor jobExecutor,
                    @Nonnull final Connector connector) {
         this.libpng = libpng;
+        this.jobExecutor = jobExecutor;
         this.connector = connector;
     }
 
@@ -220,6 +229,22 @@ public class Html5Connector implements Connector {
         finally {
             this.pngBufferSwapLock.unlock();
         }
+    }
+
+    public void requestOutputInfo(final Html5Socket html5Socket) {
+        this.jobExecutor.submit(() -> {
+            final Output     output = getWlOutput().getOutput();
+            final OutputMode mode   = output.getMode();
+
+            final String id     = output.getName();
+            final int    width  = mode.getWidth();
+            final int    height = mode.getHeight();
+
+            html5Socket.handleOutputInfo(String.format(OUTPUT_INFO_JSON_TEMPLATE,
+                                                       id,
+                                                       width,
+                                                       height));
+        });
     }
 
     @Override

@@ -16,7 +16,6 @@ package org.westmalle.wayland.html5;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.westmalle.wayland.core.JobExecutor;
@@ -30,9 +29,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 
 @AutoFactory
 public class Html5Socket implements WebSocketListener {
+
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static final String REQUEST_OUTPUT_INFO = "roi";
     private static final String ACK_OUTPUT_INFO     = "aoi";
@@ -97,7 +99,10 @@ public class Html5Socket implements WebSocketListener {
                 }
                 catch (final IOException e) {
                     this.renderPending.set(false);
-                    e.printStackTrace();
+                    LOGGER.severe("Failed to send png buffer using session: " + session);
+                    LOGGER.throwing(Html5Socket.class.getSimpleName(),
+                                    "handlePngBuffer",
+                                    e);
                 }
             });
 
@@ -130,11 +135,7 @@ public class Html5Socket implements WebSocketListener {
     private void handleWebSocketText(final String message) {
 
         if (message.equals(REQUEST_OUTPUT_INFO)) {
-            this.session.ifPresent(session -> {
-                //TODO send output info gathered from the connector
-                session.getRemote()
-                       .sendStringByFuture("output info here");
-            });
+            this.html5Connector.requestOutputInfo(this);
         }
         else if (message.equals(ACK_OUTPUT_INFO)) {
             requestFrame();
@@ -183,8 +184,6 @@ public class Html5Socket implements WebSocketListener {
 
     @Override
     public void onWebSocketConnect(final Session session) {
-        session.getRemote()
-               .setBatchMode(BatchMode.OFF);
         this.session = Optional.of(session);
         this.html5Connector.onWebSocketConnect(this);
     }
@@ -197,5 +196,20 @@ public class Html5Socket implements WebSocketListener {
 
     public AtomicBoolean getRenderPending() {
         return this.renderPending;
+    }
+
+    public void handleOutputInfo(final String outputInfo) {
+        this.socketThread.submit(() -> this.session.ifPresent(socketSession -> {
+            try {
+                socketSession.getRemote()
+                             .sendString(outputInfo);
+            }
+            catch (final IOException e) {
+                LOGGER.severe("Failed to send output info using session: " + socketSession);
+                LOGGER.throwing(Html5Socket.class.getSimpleName(),
+                                "handleOutputInfo",
+                                e);
+            }
+        }));
     }
 }
