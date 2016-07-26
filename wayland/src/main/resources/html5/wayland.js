@@ -20,9 +20,9 @@ function createOutputCanvas(outputInfo){
     };
 
     //TODO map canvas geometry to reported server output
-    canvas.id     = "output";
-    canvas.width  = 800;
-    canvas.height = 600;
+    canvas.id     = outputInfo.id;
+    canvas.width  = outputInfo.width;
+    canvas.height = outputInfo.height;
     canvas.style.position = "absolute";
     canvas.style.border   = "1px solid";
     canvas.setAttribute('tabindex','0');
@@ -78,7 +78,7 @@ socket.onopen = function () {
 
         //TODO validate reply
         //create canvas object based on output info reply
-        createOutputCanvas(e.data);
+        createOutputCanvas(JSON.parse(e.data));
     }
     //we are open, send a request output info
     socket.send("roi");
