@@ -49,18 +49,19 @@ State
 =====
 [![Build Status](https://travis-ci.org/udevbe/westmalle.svg?branch=master)](https://travis-ci.org/udevbe/westmalle)
 
-| Functionality               | Implemented        |
-| :-------------------------: | :----------------: |
-| OpenGL on X                 | :heavy_check_mark: |
-| OpenGL on KMS               | :x:                |
-| Software rendering on X     | :x:                |
-| Software rendering on KMS   | :x:                |
-| Window moving               | :heavy_check_mark: |
-| Window resizing             | :heavy_check_mark: |
-| Mouse input                 | :heavy_check_mark: |
-| Keyboard input              | :heavy_check_mark: |
-| Touch input                 | :heavy_check_mark: |
-| Drag and Drop               | :x:                |
+| Functionality                  | Implemented        |
+| :-------------------------:    | :----------------: |
+| OpenGL on HTML5 (experimental) | :heavy_check_mark: |
+| OpenGL on X                    | :heavy_check_mark: |
+| OpenGL on KMS                  | :x:                |
+| Software rendering on X        | :x:                |
+| Software rendering on KMS      | :x:                |
+| Window moving                  | :heavy_check_mark: |
+| Window resizing                | :heavy_check_mark: |
+| Mouse input                    | :heavy_check_mark: |
+| Keyboard input                 | :heavy_check_mark: |
+| Touch input                    | :heavy_check_mark: |
+| Drag and Drop                  | :x:                |
 
 Known Issues
 ============
