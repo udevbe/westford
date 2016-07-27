@@ -326,4 +326,18 @@ public class Libc {
                               @Ptr(Void.class) long src,
                               int num);
 
+    public native int ioctl(int fd,
+                            @Unsigned long request,
+                            @Ptr long arg);
+
+    public native void cfmakeraw(@Ptr long termios_p);
+
+    public native int tcgetattr(int fd,
+                                @Ptr long termios_p);
+
+    public native int tcsetattr(int fd,
+                                int optional_actions,
+                                @Ptr long termios_p);
+
+    public native int fstat(int fd, @Ptr(stat.class) long buf);
 }
