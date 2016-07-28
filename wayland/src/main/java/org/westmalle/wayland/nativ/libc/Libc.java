@@ -340,5 +340,12 @@ public class Libc {
                                 int optional_actions,
                                 @Ptr long termios_p);
 
-    public native int fstat(int fd, @Ptr(stat.class) long buf);
+    public native int fstat(int fd,
+                            @Ptr(stat.class) long buf);
+
+    @Unsigned
+    public native int major(@Unsigned int dev);
+
+    @Unsigned
+    public native int minor(@Unsigned int dev);
 }
