@@ -11,9 +11,9 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_LEFT;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_RIGHT;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateHtml5SeatFactory")

@@ -26,18 +26,16 @@ import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_LEFT;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_RIGHT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11SeatTest {
