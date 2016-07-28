@@ -13,5 +13,5 @@ import org.freedesktop.jaccall.Struct;
                 @Field(name = "v_state",
                        type = CType.UNSIGNED_SHORT),
         })
-public final class vt_stat {
+public final class vt_stat extends vt_stat_Jaccall_StructType{
 }

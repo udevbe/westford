@@ -17,5 +17,4 @@ import org.freedesktop.jaccall.Struct;
                 @Field(name = "frsig",
                        type = CType.CHAR),
         })
-public final class vt_mode {
-}
+public final class vt_mode extends vt_mode_Jaccall_StructType {}
