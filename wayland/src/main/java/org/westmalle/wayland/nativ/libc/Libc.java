@@ -14,6 +14,7 @@
 package org.westmalle.wayland.nativ.libc;
 
 import org.freedesktop.jaccall.*;
+import org.westmalle.wayland.nativ.linux.stat;
 
 import javax.inject.Singleton;
 
