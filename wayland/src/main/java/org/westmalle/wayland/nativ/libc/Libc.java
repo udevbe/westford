@@ -98,6 +98,8 @@ public class Libc {
     public static final int O_WRONLY   = 0x0001;
     public static final int O_RDWR     = 0x0002;
     public static final int O_ACCMODE  = 0x0003;
+    public static final int O_CLOEXEC  = 0x80000;
+    public static final int O_NOCTTY   = 0x100;
 
     /***
      * Operation not permitted
@@ -330,6 +332,10 @@ public class Libc {
     public native int ioctl(int fd,
                             @Unsigned long request,
                             @Ptr long arg);
+    
+    public native int ioctl(int fd,
+                            @Unsigned long request,
+                            byte arg);
 
     public native void cfmakeraw(@Ptr long termios_p);
 

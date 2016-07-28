@@ -36,10 +36,10 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WIN
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
 import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_LEFT;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_RIGHT;
-import static org.westmalle.wayland.nativ.linux.Input.BTN_SIDE;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_LEFT;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_MIDDLE;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_RIGHT;
+import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_SIDE;
 
 @AutoFactory(className = "PrivateX11SeatFactory",
              allowSubclasses = true)

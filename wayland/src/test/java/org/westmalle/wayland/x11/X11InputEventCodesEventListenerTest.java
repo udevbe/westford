@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class X11InputEventListenerTest {
+public class X11InputEventCodesEventListenerTest {
 
     @Mock
     private X11XkbFactory         x11XkbFactory;

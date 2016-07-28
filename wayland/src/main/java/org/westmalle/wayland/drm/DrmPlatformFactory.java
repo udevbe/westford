@@ -90,10 +90,6 @@ public class DrmPlatformFactory {
     }
 
     public DrmPlatform create() {
-
-        //TODO tty from config
-        initTty();
-
         final long udev = this.libudev.udev_new();
         if (udev == 0L) {
             throw new RuntimeException("Failed to initialize udev");
@@ -120,74 +116,10 @@ public class DrmPlatformFactory {
                                                                               drmEventBus,
                                                                               drmConnectors);
 
-
         return drmPlatform;
     }
 
-    private void initTty() {
 
-        int tty0 = this.libc.open("/dev/tty0",
-                                  O_WRONLY | O_CLOEXEC);
-
-        if (tty0 < 0) {
-            throw new RuntimeException("could not open tty0");
-        }
-
-        Pointer<Integer> ttynr = Pointer.nref(0);
-        if (this.libc.ioctl(tty0,
-                            VT_OPENQRY,
-                            ttynr.address) < 0 || ttynr.dref() == -1) {
-            throw new RuntimeException("failed to find non-opened console");
-        }
-
-        final int ttyFd = this.libc.open("/dev/tty" + ttynr.dref(),
-                                         O_RDWR | O_NOCTTY);
-        this.libc.close(tty0);
-
-        if (ttyFd < 0) {
-            throw new RuntimeException("failed to open tty");
-        }
-
-        stat buf = new stat();
-        if (this.libc.fstat(ttyFd,
-                            Pointer.ref(buf).address) == -1 ||
-            this.libc.major(buf.st_rdev()) != TTY_MAJOR ||
-            this.libc.minor(buf.st_rdev()) == 0) {
-            throw new RuntimeException("weston-launch must be run from a virtual terminal");
-        }
-
-        if (this.libc.ioctl(ttyFd,
-                            KDGKBMODE, & wl -> kb_mode)){
-            throw new RuntimeException("failed to get current keyboard mode");
-        }
-
-        if (this.libc.ioctl(ttyFd,
-                            KDSKBMUTE,
-                            1) &&
-            this.libc.ioctl(ttyFd,
-                            KDSKBMODE,
-                            K_OFF)) {
-            throw new RuntimeException("failed to set K_OFF keyboard mode");
-        }
-
-        if (this.libc.ioctl(ttyFd,
-                            KDSETMODE,
-                            KD_GRAPHICS)) {
-            throw new RuntimeException("failed to set KD_GRAPHICS mode on tty");
-        }
-
-        vt_mode mode = new vt_mode();
-        mode.mode(VT_PROCESS);
-        mode.relsig(SIGUSR1);
-        mode.acqsig(SIGUSR2);
-        if (this.libc.ioctl(ttyFd,
-                            VT_SETMODE,
-                            Pointer.ref(mode).address) < 0) {
-            throw new RuntimeException("failed to take control of vt handling");
-        }
-
-
-    }
 
     private List<Optional<DrmConnector>> createDrmConnectors(final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
