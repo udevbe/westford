@@ -8,4 +8,6 @@ public class Vt {
     public static final byte  VT_AUTO    = 0x00;    /* auto vt switching */
     public static final byte  VT_PROCESS = 0x01;    /* process controls switching */
     public static final byte  VT_ACKACQ  = 0x02;    /* acknowledge switch */
+
+    public static final short VT_RELDISP = 0x5605;  /* release display */
 }

@@ -2,13 +2,17 @@ package org.westmalle.wayland.tty;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.linux.stat;
+import org.westmalle.wayland.nativ.linux.termios;
 import org.westmalle.wayland.nativ.linux.vt_mode;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import static org.freedesktop.wayland.server.jaccall.WaylandServerCore.WL_EVENT_READABLE;
 import static org.westmalle.wayland.nativ.libc.Libc.O_CLOEXEC;
 import static org.westmalle.wayland.nativ.libc.Libc.O_NOCTTY;
 import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
@@ -22,6 +26,9 @@ import static org.westmalle.wayland.nativ.linux.Major.TTY_MAJOR;
 import static org.westmalle.wayland.nativ.linux.Signal.SIGUSR1;
 import static org.westmalle.wayland.nativ.linux.Signal.SIGUSR2;
 import static org.westmalle.wayland.nativ.linux.Stat.KDSKBMUTE;
+import static org.westmalle.wayland.nativ.linux.TermBits.OCRNL;
+import static org.westmalle.wayland.nativ.linux.TermBits.OPOST;
+import static org.westmalle.wayland.nativ.linux.TermBits.TCSANOW;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_OPENQRY;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_PROCESS;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_SETMODE;
@@ -31,24 +38,21 @@ public class TtyFactory {
     @Nonnull
     private final Libc              libc;
     @Nonnull
+    private final Display           display;
+    @Nonnull
     private final PrivateTtyFactory privateTtyFactory;
 
     @Inject
     TtyFactory(@Nonnull final Libc libc,
+               @Nonnull final Display display,
                @Nonnull final PrivateTtyFactory privateTtyFactory) {
         this.libc = libc;
+        this.display = display;
         this.privateTtyFactory = privateTtyFactory;
     }
 
     public Tty create() {
         //TODO tty from config
-
-        final int ttyFd = initTty();
-
-        return this.privateTtyFactory.create();
-    }
-
-    private int initTty() {
 
         final int tty0 = this.libc.open(Pointer.nref("/dev/tty0").address,
                                         O_WRONLY | O_CLOEXEC);
@@ -104,6 +108,35 @@ public class TtyFactory {
             throw new RuntimeException("failed to set KD_GRAPHICS mode on tty");
         }
 
+        final termios terminal_attributes = new termios();
+
+        if (this.libc.tcgetattr(ttyFd,
+                                Pointer.ref(terminal_attributes).address) < 0) {
+            throw new RuntimeException("could not get terminal attributes");
+        }
+
+	    /* Ignore control characters and disable echo */
+        //FIXME make a shallow copy like one would expect in C.
+        final termios raw_attributes = terminal_attributes;
+        this.libc.cfmakeraw(Pointer.ref(raw_attributes).address);
+
+	    /* Fix up line endings to be normal (cfmakeraw hoses them) */
+        raw_attributes.c_oflag(raw_attributes.c_oflag() | OPOST | OCRNL);
+
+        if (this.libc.tcsetattr(ttyFd,
+                                TCSANOW,
+                                Pointer.ref(raw_attributes).address) < 0) {
+            throw new RuntimeException("could not put terminal into raw mode:");
+        }
+
+        final Tty tty = this.privateTtyFactory.create(ttyFd);
+
+        //TODO do we want to keep the event source objects for later?
+        final EventSource inputSource = this.display.getEventLoop()
+                                                    .addFileDescriptor(ttyFd,
+                                                                       WL_EVENT_READABLE,
+                                                                       tty::onTtyInput);
+
         final vt_mode mode = new vt_mode();
         mode.mode(VT_PROCESS);
         mode.relsig(SIGUSR1);
@@ -114,6 +147,10 @@ public class TtyFactory {
             throw new RuntimeException("failed to take control of vt handling");
         }
 
-        return ttyFd;
+        final EventSource vtSource = this.display.getEventLoop()
+                                                 .addSignal(SIGUSR1,
+                                                            tty::vtHandler);
+
+        return tty;
     }
 }
