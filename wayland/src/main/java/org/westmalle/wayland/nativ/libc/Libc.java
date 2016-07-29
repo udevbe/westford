@@ -332,7 +332,7 @@ public class Libc {
     public native int ioctl(int fd,
                             @Unsigned long request,
                             @Ptr long arg);
-    
+
     public native int ioctl(int fd,
                             @Unsigned long request,
                             byte arg);
@@ -345,6 +345,9 @@ public class Libc {
     public native int tcsetattr(int fd,
                                 int optional_actions,
                                 @Ptr long termios_p);
+
+    public native int tcflush(int fd,
+                              int queue_selector);
 
     public native int fstat(int fd,
                             @Ptr(stat.class) long buf);
