@@ -18,10 +18,11 @@ import dagger.Provides;
 import org.westmalle.wayland.core.Platform;
 import org.westmalle.wayland.drm.DrmPlatform;
 import org.westmalle.wayland.drm.DrmPlatformFactory;
+import org.westmalle.wayland.tty.TtyModule;
 
 import javax.inject.Singleton;
 
-@Module
+@Module(includes = {TtyModule.class})
 public class DrmEglPlatformModule {
 
     @Provides

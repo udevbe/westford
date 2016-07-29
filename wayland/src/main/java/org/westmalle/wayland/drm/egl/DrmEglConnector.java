@@ -29,6 +29,7 @@ import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;
 import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.tty.Tty;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -37,7 +38,7 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
 
 //TODO put all gbm/egl specifics here
 @AutoFactory(allowSubclasses = true,
-             className = "GbmEglConnectorFactory")
+             className = "DrmEglConnectorFactory")
 public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     @Nonnull
@@ -206,5 +207,20 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
         renderer.visit(this);
         this.display.flushClients();
         this.renderPending = false;
+    }
+
+
+    public void disableDraw() {
+        //TODO cancel any pending render jobs & disable any new ones
+
+    }
+
+    public long getGbmBo() {
+        return this.gbmBo;
+    }
+
+    public void enableDraw() {
+        //TODO redraw everything
+
     }
 }

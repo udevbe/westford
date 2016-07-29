@@ -22,7 +22,7 @@ import java.util.Optional;
 
 
 @AutoFactory(allowSubclasses = true,
-             className = "PrivateGbmEglPlatformFactory")
+             className = "PrivateDrmEglPlatformFactory")
 public class DrmEglPlatform implements EglPlatform {
 
 
