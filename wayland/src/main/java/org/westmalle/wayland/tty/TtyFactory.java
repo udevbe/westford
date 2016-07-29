@@ -116,8 +116,9 @@ public class TtyFactory {
         }
 
 	    /* Ignore control characters and disable echo */
-        //FIXME make a shallow copy like one would expect in C.
-        final termios raw_attributes = terminal_attributes;
+        final termios raw_attributes = new termios();
+        Pointer.ref(raw_attributes)
+               .write(terminal_attributes);
         this.libc.cfmakeraw(Pointer.ref(raw_attributes).address);
 
 	    /* Fix up line endings to be normal (cfmakeraw hoses them) */
@@ -132,10 +133,10 @@ public class TtyFactory {
         final Tty tty = this.privateTtyFactory.create(ttyFd);
 
         //TODO do we want to keep the event source objects for later?
-        final EventSource inputSource = this.display.getEventLoop()
-                                                    .addFileDescriptor(ttyFd,
-                                                                       WL_EVENT_READABLE,
-                                                                       tty::onTtyInput);
+        this.display.getEventLoop()
+                    .addFileDescriptor(ttyFd,
+                                       WL_EVENT_READABLE,
+                                       tty::onTtyInput);
 
         final vt_mode mode = new vt_mode();
         mode.mode(VT_PROCESS);
@@ -147,9 +148,9 @@ public class TtyFactory {
             throw new RuntimeException("failed to take control of vt handling");
         }
 
-        final EventSource vtSource = this.display.getEventLoop()
-                                                 .addSignal(SIGUSR1,
-                                                            tty::vtHandler);
+        this.display.getEventLoop()
+                    .addSignal(SIGUSR1,
+                               tty::vtHandler);
 
         return tty;
     }

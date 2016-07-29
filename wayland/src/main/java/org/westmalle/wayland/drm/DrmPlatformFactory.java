@@ -20,6 +20,7 @@ import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.drm.egl.DrmEglConnector;
 import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeEncoder;
@@ -111,14 +112,11 @@ public class DrmPlatformFactory {
                                        WaylandServerCore.WL_EVENT_READABLE,
                                        drmEventBus);
 
-        final DrmPlatform drmPlatform = this.privateDrmPlatformFactory.create(drmDevice,
-                                                                              drmFd,
-                                                                              drmEventBus,
-                                                                              drmConnectors);
-
-        return drmPlatform;
+        return this.privateDrmPlatformFactory.create(drmDevice,
+                                                     drmFd,
+                                                     drmEventBus,
+                                                     drmConnectors);
     }
-
 
 
     private List<Optional<DrmConnector>> createDrmConnectors(final int drmFd) {

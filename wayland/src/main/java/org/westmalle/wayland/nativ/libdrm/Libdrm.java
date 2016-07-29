@@ -76,5 +76,7 @@ public class Libdrm {
     public native int drmHandleEvent(int fd,
                                      @Ptr(DrmEventContext.class) long evctx);
 
+    public native int drmSetMaster(int fd);
 
+    public native int drmDropMaster(int fd);
 }
