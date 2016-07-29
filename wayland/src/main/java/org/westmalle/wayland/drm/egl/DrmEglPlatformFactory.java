@@ -170,8 +170,7 @@ public class DrmEglPlatformFactory {
 
         drmEglConnectors.forEach(optionalDrmEglConnector ->
                                          optionalDrmEglConnector.ifPresent((drmEglConnector) -> {
-                                             setMode(drmEglConnector.getDrmConnector(),
-                                                     drmEglConnector.getFbId(drmEglConnector.getFbId(drmEglConnector.getGbmBo())));
+                                             drmEglConnector.setDefaultMode();
                                              drmEglConnector.enableDraw();
                                          }));
     }
@@ -247,28 +246,9 @@ public class DrmEglPlatformFactory {
                                                                                    eglSurface,
                                                                                    eglContext,
                                                                                    eglDisplay);
-        final int fbId = drmEglConnector.getFbId(gbmBo);
-        setMode(drmConnector,
-                fbId);
+        drmEglConnector.setDefaultMode();
 
         return drmEglConnector;
-    }
-
-    private void setMode(final DrmConnector drmConnector,
-                         final int fbId) {
-        final int error = this.libdrm.drmModeSetCrtc(this.drmPlatform.getDrmFd(),
-                                                     drmConnector.getCrtcId(),
-                                                     fbId,
-                                                     0,
-                                                     0,
-                                                     Pointer.nref(drmConnector.getDrmModeConnector()
-                                                                              .connector_id()).address,
-                                                     1,
-                                                     Pointer.ref(drmConnector.getMode()).address);
-        if (error != 0) {
-            throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
-                                                     this.libc.getErrno()));
-        }
     }
 
     private long createEglDisplay(final long gbmDevice) {

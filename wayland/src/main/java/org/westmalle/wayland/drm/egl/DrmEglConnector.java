@@ -25,6 +25,7 @@ import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPageFlipCallback;
+import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;
@@ -41,6 +42,8 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
              className = "DrmEglConnectorFactory")
 public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
 
+    @Nonnull
+    private final Libc    libc;
     @Nonnull
     private final Libgbm  libgbm;
     @Nonnull
@@ -65,7 +68,8 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     private Optional<Runnable> afterPageFlipRender = Optional.empty();
 
 
-    DrmEglConnector(@Nonnull @Provided final Libgbm libgbm,
+    DrmEglConnector(@Nonnull @Provided final Libc libc,
+                    @Nonnull @Provided final Libgbm libgbm,
                     @Nonnull @Provided final Libdrm libdrm,
                     @Nonnull @Provided final Display display,
                     final int drmFd,
@@ -75,6 +79,7 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
                     final long eglSurface,
                     final long eglContext,
                     final long eglDisplay) {
+        this.libc = libc;
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.display = display;
@@ -215,12 +220,26 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     }
 
-    public long getGbmBo() {
-        return this.gbmBo;
-    }
-
     public void enableDraw() {
         //TODO redraw everything
 
+    }
+
+    public void setDefaultMode() {
+        final int fbId = getFbId(this.gbmBo);
+
+        final int error = this.libdrm.drmModeSetCrtc(this.drmFd,
+                                                     this.drmConnector.getCrtcId(),
+                                                     fbId,
+                                                     0,
+                                                     0,
+                                                     Pointer.nref(this.drmConnector.getDrmModeConnector()
+                                                                                   .connector_id()).address,
+                                                     1,
+                                                     Pointer.ref(this.drmConnector.getMode()).address);
+        if (error != 0) {
+            throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
+                                                     this.libc.getErrno()));
+        }
     }
 }
