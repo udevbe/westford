@@ -24,23 +24,18 @@ import java.util.concurrent.TimeUnit;
 public class Compositor {
 
     @Nonnull
-    private final Renderer renderer;
-    @Nonnull
     private final Platform platform;
 
     @Inject
-    Compositor(@Nonnull final Platform platform,
-               @Nonnull final Renderer renderer) {
+    Compositor(@Nonnull final Platform platform) {
         this.platform = platform;
-        this.renderer = renderer;
     }
 
     public void requestRender() {
         //TODO optimize by only requesting a render for a specific connector.
         this.platform.getConnectors()
                      .forEach(connectorOptional ->
-                                      connectorOptional.ifPresent(connector ->
-                                                                          connector.accept(this.renderer)));
+                                      connectorOptional.ifPresent(Connector::render));
     }
 
     @Nonnegative

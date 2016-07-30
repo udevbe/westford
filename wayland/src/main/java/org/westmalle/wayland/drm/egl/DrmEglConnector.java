@@ -20,7 +20,7 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.drm.DrmConnector;
@@ -30,7 +30,6 @@ import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.tty.Tty;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -51,6 +50,8 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     @Nonnull
     private final Display display;
 
+    @Nonnull
+    private final Renderer     renderer;
     private final int          drmFd;
     private       long         gbmBo;
     private final long         gbmSurface;
@@ -65,13 +66,17 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     private boolean renderPending   = false;
     private boolean pageFlipPending = false;
 
-    private Optional<Runnable> afterPageFlipRender = Optional.empty();
+    private Optional<Runnable>    afterPageFlipRender = Optional.empty();
+    private Optional<EventSource> onIdleEventSource   = Optional.empty();
+
+    private boolean enabled;
 
 
     DrmEglConnector(@Nonnull @Provided final Libc libc,
                     @Nonnull @Provided final Libgbm libgbm,
                     @Nonnull @Provided final Libdrm libdrm,
                     @Nonnull @Provided final Display display,
+                    @Nonnull @Provided final Renderer renderer,
                     final int drmFd,
                     final long gbmBo,
                     final long gbmSurface,
@@ -83,6 +88,7 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.display = display;
+        this.renderer = renderer;
         this.drmFd = drmFd;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
@@ -187,42 +193,48 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     }
 
     @Override
-    public void accept(@Nonnull final Renderer renderer) {
+    public void render() {
+        if (this.enabled) {
+            scheduleRenderOn(this.renderer);
+        }
+    }
+
+    private void scheduleRenderOn(@Nonnull final Renderer renderer) {
         //TODO unit test 3 cases here: schedule idle, no-op when already scheduled, delayed render when pageflip pending
 
         //schedule a new render as soon as the pageflip ends, but only if we haven't scheduled one already
         if (this.pageFlipPending) {
             if (!this.afterPageFlipRender.isPresent()) {
-                this.afterPageFlipRender = Optional.of(() -> whenIdle(() -> renderOn(renderer)));
+                this.afterPageFlipRender = Optional.of(this::whenIdleDoRender);
             }
         }
         //schedule a new render but only if we haven't scheduled one already.
         else if (!this.renderPending) {
-            whenIdle(() -> renderOn(renderer));
+            whenIdleDoRender();
         }
     }
 
-    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
+    private void whenIdleDoRender() {
         this.renderPending = true;
-        this.display.getEventLoop()
-                    .addIdle(idleHandler);
-    }
-
-    private void renderOn(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-        this.display.flushClients();
-        this.renderPending = false;
+        this.onIdleEventSource = Optional.of(this.display.getEventLoop()
+                                                         .addIdle(() -> {
+                                                             this.onIdleEventSource = Optional.empty();
+                                                             this.renderer.visit(this);
+                                                             this.display.flushClients();
+                                                             this.renderPending = false;
+                                                         }));
     }
 
 
     public void disableDraw() {
-        //TODO cancel any pending render jobs & disable any new ones
-
+        this.afterPageFlipRender = Optional.empty();
+        this.onIdleEventSource.ifPresent(EventSource::remove);
+        this.enabled = false;
     }
 
     public void enableDraw() {
-        //TODO redraw everything
-
+        this.enabled = true;
+        render();
     }
 
     public void setDefaultMode() {

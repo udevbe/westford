@@ -15,6 +15,7 @@ package org.westmalle.wayland.dispmanx;
 
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -27,11 +28,14 @@ public class DispmanxConnector implements Connector {
 
     private final WlOutput wlOutput;
     private final int      dispmanxElement;
+    private final Renderer renderer;
 
-    DispmanxConnector(final WlOutput wlOutput,
+    DispmanxConnector(@Nonnull @Provided final Renderer renderer,
+                      final WlOutput wlOutput,
                       final int dispmanxElement) {
         this.wlOutput = wlOutput;
         this.dispmanxElement = dispmanxElement;
+        this.renderer = renderer;
     }
 
     @Nonnull
@@ -45,7 +49,7 @@ public class DispmanxConnector implements Connector {
     }
 
     @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
+    public void render() {
+        this.renderer.visit(this);
     }
 }

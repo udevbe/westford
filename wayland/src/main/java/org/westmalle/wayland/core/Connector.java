@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 
 public interface Connector {
 
-    void accept(@Nonnull Renderer renderer);
+    void render();
 
     @Nonnull
     WlOutput getWlOutput();

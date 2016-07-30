@@ -17,21 +17,19 @@ package org.westmalle.wayland.x11.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
-import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.x11.X11Connector;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @AutoFactory(allowSubclasses = true,
              className = "X11EglConnectorFactory")
 public class X11EglConnector implements EglConnector {
 
+    @Nonnull
+    private final Renderer     renderer;
     @Nonnull
     private final X11Connector x11Connector;
     @Nonnull
@@ -40,14 +38,16 @@ public class X11EglConnector implements EglConnector {
     private final long         eglContext;
     private final long         eglDisplay;
 
-    private final AtomicBoolean rendererAvailable = new AtomicBoolean(true);
+    private boolean renderScheduled = false;
 
     X11EglConnector(@Nonnull @Provided final Display display,
+                    @Nonnull @Provided final Renderer renderer,
                     @Nonnull final X11Connector x11Connector,
                     final long eglSurface,
                     final long eglContext,
                     final long eglDisplay) {
         this.display = display;
+        this.renderer = renderer;
         this.x11Connector = x11Connector;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
@@ -81,22 +81,22 @@ public class X11EglConnector implements EglConnector {
     }
 
     @Override
-    public void accept(@Nonnull final Renderer renderer) {
+    public void render() {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
-        whenIdle(() -> renderOn(renderer));
+        whenIdleDoRender();
     }
 
-    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
-        if (this.rendererAvailable.compareAndSet(true,
-                                                 false)) {
+    private void whenIdleDoRender() {
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
             this.display.getEventLoop()
-                        .addIdle(idleHandler);
+                        .addIdle(this::doRender);
         }
     }
 
-    private void renderOn(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
+    private void doRender() {
+        this.renderer.visit(this);
         this.display.flushClients();
-        this.rendererAvailable.set(true);
+        this.renderScheduled = false;
     }
 }

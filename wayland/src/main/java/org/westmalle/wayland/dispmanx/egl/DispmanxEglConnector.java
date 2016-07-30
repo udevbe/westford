@@ -16,8 +16,6 @@ package org.westmalle.wayland.dispmanx.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
-import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.dispmanx.DispmanxConnector;
@@ -25,7 +23,6 @@ import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 @AutoFactory(className = "DispmanxEglConnectorFactory",
              allowSubclasses = true)
@@ -34,23 +31,27 @@ public class DispmanxEglConnector implements EglConnector {
     @Nonnull
     private final Display               display;
     @Nonnull
+    private final Renderer              renderer;
+    @Nonnull
     private final DispmanxConnector     dispmanxConnector;
     @Nonnull
     private final EGL_DISPMANX_WINDOW_T eglDispmanxWindow;
 
-    private Optional<EventSource> renderJobEvent = Optional.empty();
+    private boolean renderScheduled = false;
 
     private final long eglSurface;
     private final long eglContext;
     private final long eglDisplay;
 
     DispmanxEglConnector(@Nonnull @Provided final Display display,
+                         @Nonnull @Provided final Renderer renderer,
                          @Nonnull final DispmanxConnector dispmanxConnector,
                          @Nonnull final EGL_DISPMANX_WINDOW_T eglDispmanxWindow,
                          final long eglSurface,
                          final long eglContext,
                          final long eglDisplay) {
         this.display = display;
+        this.renderer = renderer;
         this.dispmanxConnector = dispmanxConnector;
         this.eglDispmanxWindow = eglDispmanxWindow;
         this.eglSurface = eglSurface;
@@ -90,23 +91,20 @@ public class DispmanxEglConnector implements EglConnector {
     }
 
     @Override
-    public void accept(@Nonnull final Renderer renderer) {
+    public void render() {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
-        if (!this.renderJobEvent.isPresent()) {
-            whenIdle(() -> renderOn(renderer));
+        if (!this.renderScheduled) {
+            this.renderScheduled = true;
+            whenIdleRender();
         }
     }
 
-    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
-        this.renderJobEvent = Optional.of(this.display.getEventLoop()
-                                                      .addIdle(idleHandler));
-    }
-
-    private void renderOn(@Nonnull final Renderer renderer) {
-        this.renderJobEvent.get()
-                           .remove();
-        this.renderJobEvent = Optional.empty();
-        renderer.visit(this);
-        this.display.flushClients();
+    private void whenIdleRender() {
+        this.display.getEventLoop()
+                    .addIdle(() -> {
+                        this.renderer.visit(this);
+                        this.display.flushClients();
+                        this.renderScheduled = false;
+                    });
     }
 }

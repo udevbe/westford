@@ -26,7 +26,14 @@ public interface Renderer {
 
     //TODO pixman sw rendering platform
     //void visit(PixmanPlatform pixmanPlatform);
-
+    
+    /**
+     * @param wlSurfaceResource
+     *
+     * @deprecated method will be removed
+     */
+    //FIXME remove this method and instead register a destroy listener in the renderer implementation
+    @Deprecated
     void onDestroy(@Nonnull WlSurfaceResource wlSurfaceResource);
 
     @Nonnull
