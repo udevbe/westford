@@ -18,7 +18,6 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Renderer;
@@ -39,17 +38,21 @@ public class Html5EglConnector implements EglConnector {
     @Nonnull
     private final Display        display;
     @Nonnull
+    private final Renderer       renderer;
+    @Nonnull
     private final LibGLESv2      libGLESv2;
     private final Html5Connector html5Connector;
     private final EglConnector   eglConnector;
 
-    private boolean rendererAvailable = true;
+    private boolean renderScheduled = true;
 
     Html5EglConnector(@Nonnull @Provided final Display display,
+                      @Nonnull @Provided final Renderer renderer,
                       @Provided @Nonnull final LibGLESv2 libGLESv2,
                       @Nonnull final Html5Connector html5Connector,
                       @Nonnull final EglConnector eglConnector) {
         this.display = display;
+        this.renderer = renderer;
         this.libGLESv2 = libGLESv2;
         this.html5Connector = html5Connector;
         this.eglConnector = eglConnector;
@@ -123,22 +126,20 @@ public class Html5EglConnector implements EglConnector {
     }
 
     @Override
-    public void accept(@Nonnull final Renderer renderer) {
+    public void render() {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
-        whenIdle(() -> renderOn(renderer));
+        whenIdleRender();
     }
 
-    private void whenIdle(final EventLoop.IdleHandler idleHandler) {
-        if (this.rendererAvailable) {
-            this.rendererAvailable = false;
+    private void whenIdleRender() {
+        if (this.renderScheduled) {
+            this.renderScheduled = true;
             this.display.getEventLoop()
-                        .addIdle(idleHandler);
+                        .addIdle(() -> {
+                            this.renderer.visit(this);
+                            this.display.flushClients();
+                            this.renderScheduled = false;
+                        });
         }
-    }
-
-    private void renderOn(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
-        this.display.flushClients();
-        this.rendererAvailable = true;
     }
 }

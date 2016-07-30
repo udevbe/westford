@@ -15,6 +15,7 @@ package org.westmalle.wayland.drm.egl;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPlatform;

@@ -34,8 +34,6 @@ import static org.mockito.Mockito.when;
 public class CompositorTest {
 
     @Mock
-    private Renderer renderer;
-    @Mock
     private Platform platform;
 
     @InjectMocks
@@ -55,7 +53,7 @@ public class CompositorTest {
         this.compositor.requestRender();
 
         //then
-        verify(connector0).accept(this.renderer);
-        verify(connector1).accept(this.renderer);
+        verify(connector0).render();
+        verify(connector1).render();
     }
 }

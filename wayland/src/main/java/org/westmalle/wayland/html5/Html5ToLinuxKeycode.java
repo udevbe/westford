@@ -19,6 +19,8 @@ import java.util.Map;
 
 public class Html5ToLinuxKeycode {
 
+    //TODO all keys are js key codes, add them to their own class
+    //TODO all values here are linux key event codes, add them to nativ/linux/
     private static final Map<Integer, Integer> JS_KEY_CODE_TO_LINUX = new HashMap<Integer, Integer>(250) {{
         //backspace
         put(8,

@@ -15,6 +15,7 @@ package org.westmalle.wayland.drm;
 
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.Connector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
@@ -31,6 +32,8 @@ import javax.annotation.Nonnull;
 public class DrmConnector implements Connector {
 
     @Nonnull
+    private final Renderer         renderer;
+    @Nonnull
     private final WlOutput         wlOutput;
     @Nonnull
     private final DrmModeRes       drmModeRes;
@@ -40,11 +43,13 @@ public class DrmConnector implements Connector {
     @Nonnull
     private final DrmModeModeInfo  mode;
 
-    DrmConnector(@Nonnull final WlOutput wlOutput,
+    DrmConnector(@Nonnull @Provided final Renderer renderer,
+                 @Nonnull final WlOutput wlOutput,
                  @Nonnull final DrmModeRes drmModeRes,
                  @Nonnull final DrmModeConnector drmModeConnector,
                  @Nonnegative final int crtcId,
                  @Nonnull final DrmModeModeInfo mode) {
+        this.renderer = renderer;
         this.wlOutput = wlOutput;
         this.drmModeRes = drmModeRes;
         this.drmModeConnector = drmModeConnector;
@@ -78,7 +83,7 @@ public class DrmConnector implements Connector {
     }
 
     @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this);
+    public void render() {
+        this.renderer.visit(this);
     }
 }

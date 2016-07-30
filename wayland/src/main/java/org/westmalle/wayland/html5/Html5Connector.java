@@ -57,6 +57,8 @@ public class Html5Connector implements Connector {
     private final Libpng      libpng;
     @Nonnull
     private final JobExecutor jobExecutor;
+    @Nonnull
+    private final Renderer    renderer;
     private final Connector   connector;
 
     private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
@@ -75,9 +77,11 @@ public class Html5Connector implements Connector {
 
     Html5Connector(@Provided @Nonnull final Libpng libpng,
                    @Provided @Nonnull final JobExecutor jobExecutor,
+                   @Provided @Nonnull final Renderer renderer,
                    @Nonnull final Connector connector) {
         this.libpng = libpng;
         this.jobExecutor = jobExecutor;
+        this.renderer = renderer;
         this.connector = connector;
     }
 
@@ -248,8 +252,8 @@ public class Html5Connector implements Connector {
     }
 
     @Override
-    public void accept(@Nonnull final Renderer renderer) {
-        renderer.visit(this.connector);
+    public void render() {
+        this.renderer.visit(this.connector);
     }
 
     public void onWebSocketConnect(final Html5Socket html5Socket) {
