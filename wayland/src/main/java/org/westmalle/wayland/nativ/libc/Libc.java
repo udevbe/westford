@@ -14,6 +14,8 @@
 package org.westmalle.wayland.nativ.libc;
 
 import org.freedesktop.jaccall.*;
+import org.westmalle.wayland.nativ.linux.Kdev_t;
+import org.westmalle.wayland.nativ.linux.Stat;
 import org.westmalle.wayland.nativ.linux.stat;
 
 import javax.inject.Singleton;
@@ -349,12 +351,24 @@ public class Libc {
     public native int tcflush(int fd,
                               int queue_selector);
 
-    public native int fstat(int fd,
-                            @Ptr(stat.class) long buf);
+    public int fstat(final int fd,
+                     @Ptr(stat.class) final long buf) {
+        return __fxstat(Stat._STAT_VER,
+                        fd,
+                        buf);
+    }
+
+    public native int __fxstat(int ver,
+                               int fd,
+                               @Ptr(stat.class) long buf);
 
     @Unsigned
-    public native int major(@Unsigned int dev);
+    public int major(@Unsigned final int dev) {
+        return Kdev_t.MAJOR(dev);
+    }
 
     @Unsigned
-    public native int minor(@Unsigned int dev);
+    public int minor(@Unsigned final int dev) {
+        return Kdev_t.MINOR(dev);
+    }
 }
