@@ -76,14 +76,6 @@ public class TtyFactory {
             throw new RuntimeException("failed to open tty");
         }
 
-        final stat buf = new stat();
-        if (this.libc.fstat(ttyFd,
-                            Pointer.ref(buf).address) == -1 ||
-            this.libc.major(buf.st_rdev()) != TTY_MAJOR ||
-            this.libc.minor(buf.st_rdev()) == 0) {
-            throw new RuntimeException("westmalle must be run from a virtual terminal");
-        }
-
         final Pointer<Integer> kbModeP = Pointer.nref(0);
         if (this.libc.ioctl(ttyFd,
                             KDGKBMODE,
