@@ -20,6 +20,7 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
@@ -63,8 +64,10 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
 
     private long nextGbmBo;
 
-    private boolean renderPending   = false;
-    private boolean pageFlipPending = false;
+    private final EventLoop.IdleHandler doRender         = this::doRender;
+    private       boolean               renderPending    = false;
+    private final Optional<Runnable>    whenIdleDoRender = Optional.of(this::whenIdleDoRender);
+    private       boolean               pageFlipPending  = false;
 
     private Optional<Runnable>    afterPageFlipRender = Optional.empty();
     private Optional<EventSource> onIdleEventSource   = Optional.empty();
@@ -195,17 +198,17 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     @Override
     public void render() {
         if (this.enabled) {
-            scheduleRenderOn(this.renderer);
+            scheduleRender();
         }
     }
 
-    private void scheduleRenderOn(@Nonnull final Renderer renderer) {
+    private void scheduleRender() {
         //TODO unit test 3 cases here: schedule idle, no-op when already scheduled, delayed render when pageflip pending
 
         //schedule a new render as soon as the pageflip ends, but only if we haven't scheduled one already
         if (this.pageFlipPending) {
             if (!this.afterPageFlipRender.isPresent()) {
-                this.afterPageFlipRender = Optional.of(this::whenIdleDoRender);
+                this.afterPageFlipRender = this.whenIdleDoRender;
             }
         }
         //schedule a new render but only if we haven't scheduled one already.
@@ -217,12 +220,14 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     private void whenIdleDoRender() {
         this.renderPending = true;
         this.onIdleEventSource = Optional.of(this.display.getEventLoop()
-                                                         .addIdle(() -> {
-                                                             this.onIdleEventSource = Optional.empty();
-                                                             this.renderer.visit(this);
-                                                             this.display.flushClients();
-                                                             this.renderPending = false;
-                                                         }));
+                                                         .addIdle(this.doRender));
+    }
+
+    private void doRender() {
+        this.onIdleEventSource = Optional.empty();
+        this.renderer.visit(this);
+        this.display.flushClients();
+        this.renderPending = false;
     }
 
 

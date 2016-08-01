@@ -18,6 +18,7 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Renderer;
@@ -44,7 +45,8 @@ public class Html5EglConnector implements EglConnector {
     private final Html5Connector html5Connector;
     private final EglConnector   eglConnector;
 
-    private boolean renderScheduled = true;
+    private       boolean               renderScheduled = false;
+    private final EventLoop.IdleHandler doRender        = this::doRender;
 
     Html5EglConnector(@Nonnull @Provided final Display display,
                       @Nonnull @Provided final Renderer renderer,
@@ -128,18 +130,20 @@ public class Html5EglConnector implements EglConnector {
     @Override
     public void render() {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
-        whenIdleRender();
+        whenIdleDoRender();
     }
 
-    private void whenIdleRender() {
-        if (this.renderScheduled) {
+    private void whenIdleDoRender() {
+        if (!this.renderScheduled) {
             this.renderScheduled = true;
             this.display.getEventLoop()
-                        .addIdle(() -> {
-                            this.renderer.visit(this);
-                            this.display.flushClients();
-                            this.renderScheduled = false;
-                        });
+                        .addIdle(this.doRender);
         }
+    }
+
+    private void doRender() {
+        this.renderer.visit(this);
+        this.display.flushClients();
+        this.renderScheduled = false;
     }
 }

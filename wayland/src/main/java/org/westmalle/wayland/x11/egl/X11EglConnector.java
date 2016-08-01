@@ -17,6 +17,7 @@ package org.westmalle.wayland.x11.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -39,6 +40,8 @@ public class X11EglConnector implements EglConnector {
     private final long         eglDisplay;
 
     private boolean renderScheduled = false;
+
+    private final EventLoop.IdleHandler doRender = this::doRender;
 
     X11EglConnector(@Nonnull @Provided final Display display,
                     @Nonnull @Provided final Renderer renderer,
@@ -90,7 +93,7 @@ public class X11EglConnector implements EglConnector {
         if (!this.renderScheduled) {
             this.renderScheduled = true;
             this.display.getEventLoop()
-                        .addIdle(this::doRender);
+                        .addIdle(this.doRender);
         }
     }
 
