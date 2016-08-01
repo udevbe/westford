@@ -55,9 +55,7 @@ public class TtyFactory {
         this.privateTtyFactory = privateTtyFactory;
     }
 
-    public Tty create() {
-        //TODO tty from config
-
+    private int getTtyFd(final Pointer<Integer> ttynr) {
         final int tty0 = this.libc.open(Pointer.nref("/dev/tty0").address,
                                         O_WRONLY | O_CLOEXEC);
 
@@ -65,7 +63,6 @@ public class TtyFactory {
             throw new RuntimeException("could not open tty0");
         }
 
-        final Pointer<Integer> ttynr = Pointer.nref(0);
         if (this.libc.ioctl(tty0,
                             VT_OPENQRY,
                             ttynr.address) < 0 || ttynr.dref() == -1) {
@@ -80,15 +77,18 @@ public class TtyFactory {
             throw new RuntimeException("failed to open tty");
         }
 
-        final Pointer<Integer> kbModeP = Pointer.nref(0);
-        if (this.libc.ioctl(ttyFd,
-                            KDGKBMODE,
-                            kbModeP.address) != 0) {
-            throw new RuntimeException("failed to get current keyboard mode");
-        }
-        //TODO do we need this?
-        final int kbMode = kbModeP.dref();
+        return ttyFd;
+    }
 
+    private void setMode(final int ttyFd) {
+        //        final Pointer<Integer> kbModeP = Pointer.nref(0);
+//        if (this.libc.ioctl(ttyFd,
+//                            KDGKBMODE,
+//                            kbModeP.address) != 0) {
+//            throw new RuntimeException("failed to get current keyboard mode");
+//        }
+//        //TODO do we need this?
+//        final int kbMode = kbModeP.dref();
         if (this.libc.ioctl(ttyFd,
                             KDSKBMUTE,
                             1) != 0 &&
@@ -103,8 +103,10 @@ public class TtyFactory {
                             KD_GRAPHICS) != 0) {
             throw new RuntimeException("failed to set KD_GRAPHICS mode on tty");
         }
+    }
 
-
+    private void activateVt(final int ttyFd,
+                            final int vt) {
         final vt_stat vts = new vt_stat();
         if (this.libc.ioctl(ttyFd,
                             VT_GETSTATE,
@@ -123,6 +125,20 @@ public class TtyFactory {
                 throw new RuntimeException("failed to switch to new vt.");
             }
         }
+    }
+
+    public Tty create() {
+        //TODO tty from config
+
+        final Pointer<Integer> ttynr = Pointer.nref(0);
+
+        final int ttyFd = getTtyFd(ttynr);
+        final int vt    = ttynr.dref();
+
+        setMode(ttyFd);
+
+        activateVt(ttyFd,
+                   vt);
 
         //TODO we also want to have tty restore logic to properly handle destruction of our compositor
 

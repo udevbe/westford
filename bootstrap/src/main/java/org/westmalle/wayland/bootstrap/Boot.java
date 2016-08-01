@@ -23,15 +23,18 @@ import org.westmalle.wayland.bootstrap.html5.Html5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.DaggerX11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.X11PlatformConfigSimple;
+import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
-import org.westmalle.wayland.html5.egl.Html5EglPlatformFactory;
+import org.westmalle.wayland.nativ.linux.InputEventCodes;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.X11PlatformModule;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -120,6 +123,7 @@ public class Boot {
          */
         final LifeCycle lifeCycle = drmEglCompositor.lifeCycle();
 
+        //create a libinput seat that will listen for native input events
         final WlSeat wlSeat = drmEglCompositor.seatFactory()
                                               .create("seat0",
                                                       "",
@@ -144,6 +148,52 @@ public class Boot {
         touchDevice.getTouchDownSignal()
                    .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
                                                              touchDevice.getGrab()));
+
+        //setup tty key bindings
+        final KeyBindingFactory keyBindingFactory = drmEglCompositor.keyBindingFactory();
+
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F1)),
+                                 () -> drmEglCompositor.tty()
+                                                       .activate(0));
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F2)),
+                                 () -> drmEglCompositor.tty()
+                                                       .activate(1));
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F3)),
+                                 () -> drmEglCompositor.tty()
+                                                       .activate(2));
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F4)),
+                                 () -> drmEglCompositor.tty()
+                                                       .activate(3));
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F5)),
+                                 () -> drmEglCompositor.tty()
+                                                       .activate(4));
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F6)),
+                                 () -> drmEglCompositor.tty()
+                                                       .activate(5));
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F7)),
+                                 () -> drmEglCompositor.tty()
+                                                       .activate(6));
 
         //start the compositor
         lifeCycle.start();
