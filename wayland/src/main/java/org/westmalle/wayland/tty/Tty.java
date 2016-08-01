@@ -8,6 +8,7 @@ import org.westmalle.wayland.nativ.libc.Libc;
 
 import static org.westmalle.wayland.nativ.linux.TermBits.TCIFLUSH;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_ACKACQ;
+import static org.westmalle.wayland.nativ.linux.Vt.VT_ACTIVATE;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_RELDISP;
 
 @AutoFactory(className = "PrivateTtyFactory",
@@ -16,6 +17,7 @@ public class Tty {
 
     private final Libc libc;
     private final int  fd;
+    private final int  vt;
 
     private final Signal<VtEnter, Slot<VtEnter>> vtEnterSignal = new Signal<>();
     private final Signal<VtLeave, Slot<VtLeave>> vtLeaveSignal = new Signal<>();
@@ -23,9 +25,21 @@ public class Tty {
     private boolean vtActive;
 
     Tty(@Provided final Libc libc,
-        final int fd) {
+        final int fd,
+        final int vt) {
         this.libc = libc;
         this.fd = fd;
+        this.vt = vt;
+    }
+
+    public void activate() {
+        activate(this.vt);
+    }
+
+    public void activate(final int vt) {
+        this.libc.ioctl(this.fd,
+                        VT_ACTIVATE,
+                        vt);
     }
 
     public int onTtyInput(final int fd,
