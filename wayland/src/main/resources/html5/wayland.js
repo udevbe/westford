@@ -2,6 +2,7 @@
 var parser = document.createElement('a');
 parser.href = document.URL;
 
+//TODO check if we're going over https and adjust the socket URL accordingly
 socket = new WebSocket("ws://" + parser.host + parser.pathname + parser.hash.substring(1));
 window.onbeforeunload = function(e) {
     socket.close();
@@ -30,10 +31,12 @@ function createOutputCanvas(outputInfo){
 
     //add canvas input listeners
     canvas.addEventListener('mousedown',function(ev){
+        //TODO we need confirmation from the server before we send new button events.
         //p(ointer)d(own)xxxx:t(ime):xxxxxxx
         socket.send("pd"+ev.button+"t"+Date.now())
     },false);
     canvas.addEventListener('mouseup',function(ev){
+        //TODO we need confirmation from the server before we send new button events.
         //p(ointer)u(p)xxxx:t(ime):xxxxxxx
         socket.send("pu"+ev.button+"t"+Date.now())
     },false);
@@ -49,6 +52,7 @@ function createOutputCanvas(outputInfo){
         socket.send("pmx"+x+"y"+y+"t"+Date.now())
     }, false);
     canvas.addEventListener('keydown', function(ev) {
+        //TODO we need confirmation from the server before we send new key events.
         //k(ey)d(own)xxxx:t(ime):xxxxxx
         socket.send("kd"+ev.keyCode+"t"+Date.now());
         //make sure we don't loose key focus when tab is pressed
@@ -56,6 +60,7 @@ function createOutputCanvas(outputInfo){
         return false;
     }, false);
     canvas.addEventListener('keyup', function(ev) {
+        //TODO we need confirmation from the server before we send new key events.
         //k(ey)u(p)xxxx:t(ime):xxxxxx
         socket.send("ku"+ev.keyCode+"t"+Date.now());
     }, false);
