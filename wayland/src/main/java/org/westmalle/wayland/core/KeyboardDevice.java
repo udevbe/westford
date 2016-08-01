@@ -86,6 +86,8 @@ public class KeyboardDevice {
 
     private int keySerial;
 
+    private boolean consumeNextKeyEvent;
+
     KeyboardDevice(@Provided @Nonnull final Display display,
                    @Provided @Nonnull final NativeFileFactory nativeFileFactory,
                    @Provided @Nonnull final Libc libc,
@@ -128,16 +130,26 @@ public class KeyboardDevice {
             }
         }
 
-        getKeySignal().emit(Key.create(time,
+        this.keySignal.emit(Key.create(time,
                                        key,
                                        wlKeyboardKeyState));
-        doKey(wlKeyboardResources,
-              time,
-              key,
-              wlKeyboardKeyState);
 
-        handleStateComponentMask(wlKeyboardResources,
-                                 stateComponentMask);
+        if (this.consumeNextKeyEvent) {
+            this.consumeNextKeyEvent = false;
+        }
+        else {
+            doKey(wlKeyboardResources,
+                  time,
+                  key,
+                  wlKeyboardKeyState);
+
+            handleStateComponentMask(wlKeyboardResources,
+                                     stateComponentMask);
+        }
+    }
+
+    public void consumeNextKeyEvent() {
+        this.consumeNextKeyEvent = true;
     }
 
     @Nonnull
