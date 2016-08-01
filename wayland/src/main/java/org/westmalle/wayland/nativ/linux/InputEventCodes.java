@@ -14,7 +14,7 @@
 package org.westmalle.wayland.nativ.linux;
 
 /**
- * input.h
+ * input-event-codes.h
  */
 public final class InputEventCodes {
     public static final int BTN_LEFT   = 0x110;
