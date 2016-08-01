@@ -8,6 +8,7 @@ import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.linux.stat;
 import org.westmalle.wayland.nativ.linux.termios;
 import org.westmalle.wayland.nativ.linux.vt_mode;
+import org.westmalle.wayland.nativ.linux.vt_stat;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -29,9 +30,12 @@ import static org.westmalle.wayland.nativ.linux.Stat.KDSKBMUTE;
 import static org.westmalle.wayland.nativ.linux.TermBits.OCRNL;
 import static org.westmalle.wayland.nativ.linux.TermBits.OPOST;
 import static org.westmalle.wayland.nativ.linux.TermBits.TCSANOW;
+import static org.westmalle.wayland.nativ.linux.Vt.VT_ACTIVATE;
+import static org.westmalle.wayland.nativ.linux.Vt.VT_GETSTATE;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_OPENQRY;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_PROCESS;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_SETMODE;
+import static org.westmalle.wayland.nativ.linux.Vt.VT_WAITACTIVE;
 
 public class TtyFactory {
 
@@ -67,8 +71,8 @@ public class TtyFactory {
                             ttynr.address) < 0 || ttynr.dref() == -1) {
             throw new RuntimeException("failed to find non-opened console");
         }
-
-        final int ttyFd = this.libc.open(Pointer.nref("/dev/tty" + ttynr.dref()).address,
+        final Integer vt = ttynr.dref();
+        final int ttyFd = this.libc.open(Pointer.nref("/dev/tty" + vt).address,
                                          O_RDWR | O_NOCTTY);
         this.libc.close(tty0);
 
@@ -100,6 +104,28 @@ public class TtyFactory {
             throw new RuntimeException("failed to set KD_GRAPHICS mode on tty");
         }
 
+
+        final vt_stat vts = new vt_stat();
+        if (this.libc.ioctl(ttyFd,
+                            VT_GETSTATE,
+                            Pointer.ref(vts).address) != 0) {
+            throw new RuntimeException("failed to get VT_GETSTATE on tty");
+        }
+        final short startingVt = vts.v_active();
+
+        if (startingVt != vt) {
+            if (this.libc.ioctl(ttyFd,
+                                VT_ACTIVATE,
+                                vt) < 0 ||
+                this.libc.ioctl(ttyFd,
+                                VT_WAITACTIVE,
+                                vt) < 0) {
+                throw new RuntimeException("failed to switch to new vt.");
+            }
+        }
+
+        //TODO we also want to have tty restore logic to properly handle destruction of our compositor
+
         final termios terminal_attributes = new termios();
 
         if (this.libc.tcgetattr(ttyFd,
@@ -122,7 +148,8 @@ public class TtyFactory {
             throw new RuntimeException("could not put terminal into raw mode:");
         }
 
-        final Tty tty = this.privateTtyFactory.create(ttyFd);
+        final Tty tty = this.privateTtyFactory.create(ttyFd,
+                                                      vt);
 
         //TODO do we want to keep the event source objects for later?
         this.display.getEventLoop()
