@@ -1,4 +1,4 @@
-package org.westmalle.wayland.nativ.linux;
+package org.westmalle.wayland.nativ.glibc;
 
 
 import org.freedesktop.jaccall.CType;
@@ -18,7 +18,7 @@ import org.freedesktop.jaccall.Struct;
                        type = CType.UNSIGNED_CHAR),
                 @Field(name = "c_cc",
                        type = CType.UNSIGNED_CHAR,
-                       cardinality = TermBits.NCCS),
+                       cardinality = Libc.NCCS),
                 @Field(name = "c_ispeed",
                        type = CType.UNSIGNED_INT),
                 @Field(name = "c_ospeed",

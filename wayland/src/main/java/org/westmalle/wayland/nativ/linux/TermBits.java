@@ -2,8 +2,6 @@ package org.westmalle.wayland.nativ.linux;
 
 
 public class TermBits {
-    public static final int NCCS = 32;
-
     public static final int OPOST = 0x1;
     public static final int OLCUC = 0x2;
     public static final int ONLCR = 0x4;

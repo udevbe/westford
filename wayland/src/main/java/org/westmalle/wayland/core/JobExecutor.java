@@ -18,7 +18,7 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

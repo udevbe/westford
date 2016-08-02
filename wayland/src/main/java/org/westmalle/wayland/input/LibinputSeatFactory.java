@@ -17,7 +17,7 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.nativ.libinput.Pointerclose_restricted;
 import org.westmalle.wayland.nativ.libinput.libinput_interface;

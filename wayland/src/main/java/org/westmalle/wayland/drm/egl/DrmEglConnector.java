@@ -26,7 +26,7 @@ import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPageFlipCallback;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;

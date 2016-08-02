@@ -26,14 +26,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.libX11.LibX11;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
-import org.westmalle.wayland.nativ.libc.Libc;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
@@ -43,12 +41,8 @@ import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 import org.westmalle.wayland.x11.config.X11ConnectorConfig;
 import org.westmalle.wayland.x11.config.X11PlatformConfig;
-import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
 
-import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.freedesktop.jaccall.Pointer.malloc;

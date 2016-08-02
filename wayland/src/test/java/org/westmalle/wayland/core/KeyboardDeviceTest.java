@@ -29,7 +29,7 @@ import org.westmalle.wayland.core.events.KeyboardFocusLost;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.NativeFileFactory;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.protocol.WlSurface;
 
