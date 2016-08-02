@@ -31,6 +31,7 @@ import org.westmalle.wayland.core.TouchDevice;
 import org.westmalle.wayland.nativ.linux.InputEventCodes;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
+import org.westmalle.wayland.tty.Tty;
 import org.westmalle.wayland.x11.X11PlatformModule;
 
 import java.util.Arrays;
@@ -118,6 +119,10 @@ public class Boot {
         final DrmEglCompositor drmEglCompositor = builder.build();
 
         /*
+         * Make sure we initialize the tty before anything else.
+         */
+        final Tty tty = drmEglCompositor.tty();
+        /*
          * Keep this first as weston demo clients *really* like their globals
          * to be initialized in a certain order, else they segfault...
          */
@@ -156,44 +161,37 @@ public class Boot {
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F1)),
-                                 () -> drmEglCompositor.tty()
-                                                       .activate(0));
+                                 () -> tty.activate(0));
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F2)),
-                                 () -> drmEglCompositor.tty()
-                                                       .activate(1));
+                                 () -> tty.activate(1));
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F3)),
-                                 () -> drmEglCompositor.tty()
-                                                       .activate(2));
+                                 () -> tty.activate(2));
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F4)),
-                                 () -> drmEglCompositor.tty()
-                                                       .activate(3));
+                                 () -> tty.activate(3));
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F5)),
-                                 () -> drmEglCompositor.tty()
-                                                       .activate(4));
+                                 () -> tty.activate(4));
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F6)),
-                                 () -> drmEglCompositor.tty()
-                                                       .activate(5));
+                                 () -> tty.activate(5));
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F7)),
-                                 () -> drmEglCompositor.tty()
-                                                       .activate(6));
+                                 () -> tty.activate(6));
 
         //start the compositor
         lifeCycle.start();
