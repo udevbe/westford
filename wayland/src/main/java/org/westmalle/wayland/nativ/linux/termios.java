@@ -18,7 +18,10 @@ import org.freedesktop.jaccall.Struct;
                        type = CType.UNSIGNED_CHAR),
                 @Field(name = "c_cc",
                        type = CType.UNSIGNED_CHAR,
-                       cardinality = TermBits.NCCS)
+                       cardinality = TermBits.NCCS),
+                @Field(name = "c_ispeed",
+                       type = CType.UNSIGNED_INT),
+                @Field(name = "c_ospeed",
+                       type = CType.UNSIGNED_INT),
         })
-public final class termios extends termios_Jaccall_StructType {
-}
+public final class termios extends termios_Jaccall_StructType {}
