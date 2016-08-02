@@ -122,6 +122,16 @@ public class Boot {
          * Make sure we initialize the tty before anything else.
          */
         final Tty tty = drmEglCompositor.tty();
+        /*
+         * Make sure we close the tty if the program exits.
+         */
+        Runtime.getRuntime()
+               .addShutdownHook(new Thread() {
+                   @Override
+                   public void run() {
+                       tty.close();
+                   }
+               });
 
         /*
          * Keep this first as weston demo clients *really* like their globals
@@ -168,43 +178,43 @@ public class Boot {
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F1)),
-                                 () -> tty.activate(0))
-                         .enable();
-        keyBindingFactory.create(keyboardDevice,
-                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
-                                                             InputEventCodes.KEY_LEFTALT,
-                                                             InputEventCodes.KEY_F2)),
                                  () -> tty.activate(1))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
-                                                             InputEventCodes.KEY_F3)),
+                                                             InputEventCodes.KEY_F2)),
                                  () -> tty.activate(2))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
-                                                             InputEventCodes.KEY_F4)),
+                                                             InputEventCodes.KEY_F3)),
                                  () -> tty.activate(3))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
-                                                             InputEventCodes.KEY_F5)),
+                                                             InputEventCodes.KEY_F4)),
                                  () -> tty.activate(4))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
-                                                             InputEventCodes.KEY_F6)),
+                                                             InputEventCodes.KEY_F5)),
                                  () -> tty.activate(5))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
-                                                             InputEventCodes.KEY_F7)),
+                                                             InputEventCodes.KEY_F6)),
                                  () -> tty.activate(6))
+                         .enable();
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F7)),
+                                 () -> tty.activate(7))
                          .enable();
 
         /*

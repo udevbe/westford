@@ -3,6 +3,7 @@ package org.westmalle.wayland.tty;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.glibc.termios;
 import org.westmalle.wayland.nativ.linux.vt_mode;
@@ -10,30 +11,35 @@ import org.westmalle.wayland.nativ.linux.vt_stat;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 import static org.freedesktop.wayland.server.jaccall.WaylandServerCore.WL_EVENT_READABLE;
 import static org.westmalle.wayland.nativ.glibc.Libc.O_CLOEXEC;
 import static org.westmalle.wayland.nativ.glibc.Libc.O_NOCTTY;
 import static org.westmalle.wayland.nativ.glibc.Libc.O_RDWR;
 import static org.westmalle.wayland.nativ.glibc.Libc.O_WRONLY;
+import static org.westmalle.wayland.nativ.linux.Kd.KDGKBMODE;
 import static org.westmalle.wayland.nativ.linux.Kd.KDSETMODE;
 import static org.westmalle.wayland.nativ.linux.Kd.KDSKBMODE;
 import static org.westmalle.wayland.nativ.linux.Kd.KD_GRAPHICS;
+import static org.westmalle.wayland.nativ.linux.Kd.KD_TEXT;
 import static org.westmalle.wayland.nativ.linux.Kd.K_OFF;
+import static org.westmalle.wayland.nativ.linux.Kd.K_RAW;
 import static org.westmalle.wayland.nativ.linux.Signal.SIGUSR1;
 import static org.westmalle.wayland.nativ.linux.Signal.SIGUSR2;
-import static org.westmalle.wayland.nativ.linux.Stat.KDSKBMUTE;
 import static org.westmalle.wayland.nativ.linux.TermBits.OCRNL;
 import static org.westmalle.wayland.nativ.linux.TermBits.OPOST;
+import static org.westmalle.wayland.nativ.linux.TermBits.TCIFLUSH;
 import static org.westmalle.wayland.nativ.linux.TermBits.TCSANOW;
-import static org.westmalle.wayland.nativ.linux.Vt.VT_ACTIVATE;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_GETSTATE;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_OPENQRY;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_PROCESS;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_SETMODE;
-import static org.westmalle.wayland.nativ.linux.Vt.VT_WAITACTIVE;
 
 public class TtyFactory {
+
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
     private final Libc              libc;
@@ -76,98 +82,130 @@ public class TtyFactory {
         return ttyFd;
     }
 
-    private void setMode(final int ttyFd) {
-        //        final Pointer<Integer> kbModeP = Pointer.nref(0);
-//        if (this.glibc.ioctl(ttyFd,
-//                            KDGKBMODE,
-//                            kbModeP.address) != 0) {
-//            throw new RuntimeException("failed to get current keyboard mode");
-//        }
-//        //TODO do we need this?
-//        final int kbMode = kbModeP.dref();
+    private Optional<EventSource> setInputMode(final int ttyFd,
+                                               final int oldkbMode,
+                                               final termios oldTerminalAttributes) {
+        final Optional<EventSource> inputSource;
         if (this.libc.ioctl(ttyFd,
-                            KDSKBMUTE,
-                            1) != 0 &&
-            this.libc.ioctl(ttyFd,
                             KDSKBMODE,
                             K_OFF) != 0) {
-            throw new RuntimeException("failed to set K_OFF keyboard mode");
+            LOGGER.warning("failed to set K_OFF keyboard mode on tty");
+
+            if (this.libc.ioctl(ttyFd,
+                                KDSKBMODE,
+                                K_RAW) != 0) {
+                this.libc.tcsetattr(ttyFd,
+                                    TCSANOW,
+                                    Pointer.ref(oldTerminalAttributes).address);
+                throw new RuntimeException("failed to set K_RAW keyboard mode on tty");
+            }
+
+            //FIXME add a way in wayland java bindings to check if adding fd failed.
+            inputSource = Optional.of(this.display.getEventLoop()
+                                                  .addFileDescriptor(ttyFd,
+                                                                     WL_EVENT_READABLE,
+                                                                     (fd, mask) -> {
+                                                                         //Ignore input to tty.  We get keyboard events from libinput
+                                                                         this.libc.tcflush(ttyFd,
+                                                                                           TCIFLUSH);
+                                                                         return 1;
+                                                                     }));
+        }
+        else {
+            inputSource = Optional.empty();
         }
 
         if (this.libc.ioctl(ttyFd,
                             KDSETMODE,
                             KD_GRAPHICS) != 0) {
+            inputSource.ifPresent(EventSource::remove);
+            this.libc.ioctl(ttyFd,
+                            KDSKBMODE,
+                            oldkbMode);
             throw new RuntimeException("failed to set KD_GRAPHICS mode on tty");
         }
+
+        return inputSource;
     }
 
-    private void activateVt(final int ttyFd,
-                            final int vt) {
+    private int getStartupVt(final int ttyFd) {
         final vt_stat vts = new vt_stat();
         if (this.libc.ioctl(ttyFd,
                             VT_GETSTATE,
                             Pointer.ref(vts).address) != 0) {
             throw new RuntimeException("failed to get VT_GETSTATE on tty");
         }
-        final short startingVt = vts.v_active();
+        return vts.v_active();
+    }
 
-        if (startingVt != vt) {
-            if (this.libc.ioctl(ttyFd,
-                                VT_ACTIVATE,
-                                vt) < 0 ||
-                this.libc.ioctl(ttyFd,
-                                VT_WAITACTIVE,
-                                vt) < 0) {
-                throw new RuntimeException("failed to switch to new vt.");
-            }
+    private int getKbMode(final int ttyFd) {
+        final Pointer<Integer> kbModeP = Pointer.nref(0);
+        if (this.libc.ioctl(ttyFd,
+                            KDGKBMODE,
+                            kbModeP.address) != 0) {
+            throw new RuntimeException("failed to get current keyboard mode");
+        }
+
+        return kbModeP.dref();
+    }
+
+    private termios getAttributes(final int ttyFd) {
+        final termios oldTerminalAttributes = new termios();
+
+        if (this.libc.tcgetattr(ttyFd,
+                                Pointer.ref(oldTerminalAttributes).address) < 0) {
+            this.libc.close(ttyFd);
+            throw new RuntimeException("could not get terminal attributes");
+        }
+        return oldTerminalAttributes;
+    }
+
+    private void setAttributes(final int ttyFd,
+                               final termios oldTerminalAttributes) {
+        //Ignore control characters and disable echo
+        final termios newRawAttributes = new termios();
+        Pointer.ref(newRawAttributes)
+               .write(oldTerminalAttributes);
+        this.libc.cfmakeraw(Pointer.ref(newRawAttributes).address);
+
+        //Fix up line endings to be normal (cfmakeraw hoses them)
+        newRawAttributes.c_oflag(newRawAttributes.c_oflag() | OPOST | OCRNL);
+
+        if (this.libc.tcsetattr(ttyFd,
+                                TCSANOW,
+                                Pointer.ref(newRawAttributes).address) < 0) {
+            LOGGER.warning("could not put terminal into raw mode:");
         }
     }
 
     public Tty create() {
         //TODO tty from config
 
-        final Pointer<Integer> ttynr = Pointer.nref(0);
+        final Pointer<Integer> vtNbr = Pointer.nref(0);
 
-        final int ttyFd = getTtyFd(ttynr);
-        final int vt    = ttynr.dref();
+        final int ttyFd = getTtyFd(vtNbr);
+        final int vt    = vtNbr.dref();
 
-        setMode(ttyFd);
+        final termios oldTerminalAttributes = getAttributes(ttyFd);
+        setAttributes(ttyFd,
+                      oldTerminalAttributes);
 
-        activateVt(ttyFd,
-                   vt);
+        final int oldKbMode = getKbMode(ttyFd);
+        final Optional<EventSource> inputSource = setInputMode(ttyFd,
+                                                               oldKbMode,
+                                                               oldTerminalAttributes);
 
-        //TODO we also want to have tty restore logic to properly handle destruction of our compositor
-
-        final termios terminal_attributes = new termios();
-
-        if (this.libc.tcgetattr(ttyFd,
-                                Pointer.ref(terminal_attributes).address) < 0) {
-            throw new RuntimeException("could not get terminal attributes");
-        }
-
-	    /* Ignore control characters and disable echo */
-        final termios raw_attributes = new termios();
-        Pointer.ref(raw_attributes)
-               .write(terminal_attributes);
-        this.libc.cfmakeraw(Pointer.ref(raw_attributes).address);
-
-	    /* Fix up line endings to be normal (cfmakeraw hoses them) */
-        raw_attributes.c_oflag(raw_attributes.c_oflag() | OPOST | OCRNL);
-
-        if (this.libc.tcsetattr(ttyFd,
-                                TCSANOW,
-                                Pointer.ref(raw_attributes).address) < 0) {
-            throw new RuntimeException("could not put terminal into raw mode:");
-        }
-
+        final int startupVt = getStartupVt(ttyFd);
         final Tty tty = this.privateTtyFactory.create(ttyFd,
-                                                      vt);
+                                                      vt,
+                                                      oldKbMode,
+                                                      oldTerminalAttributes,
+                                                      startupVt);
+        if (startupVt != vt) {
+            tty.activate();
+        }
 
-        //TODO do we want to keep the event source objects for later?
-        this.display.getEventLoop()
-                    .addFileDescriptor(ttyFd,
-                                       WL_EVENT_READABLE,
-                                       tty::onTtyInput);
+        inputSource.ifPresent(tty::setInputSource);
 
         final vt_mode mode = new vt_mode();
         mode.mode(VT_PROCESS);
@@ -176,12 +214,17 @@ public class TtyFactory {
         if (this.libc.ioctl(ttyFd,
                             VT_SETMODE,
                             Pointer.ref(mode).address) < 0) {
+            this.libc.ioctl(ttyFd,
+                            KDSETMODE,
+                            KD_TEXT);
             throw new RuntimeException("failed to take control of vt handling");
         }
 
-        this.display.getEventLoop()
-                    .addSignal(SIGUSR1,
-                               tty::vtHandler);
+        //FIXME add a way in wayland java bindings to check if adding fd failed.
+        final EventSource vtSource = this.display.getEventLoop()
+                                                 .addSignal(SIGUSR1,
+                                                            tty::vtHandler);
+        tty.setVtSource(vtSource);
 
         return tty;
     }
