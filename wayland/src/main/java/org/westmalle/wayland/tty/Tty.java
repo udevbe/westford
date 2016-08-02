@@ -4,7 +4,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 
 import static org.westmalle.wayland.nativ.linux.TermBits.TCIFLUSH;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_ACKACQ;

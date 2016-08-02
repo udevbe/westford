@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyLong;

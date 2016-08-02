@@ -11,9 +11,13 @@
 //WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,either express or implied.
 //See the License for the specific language governing permissions and
 //limitations under the License.
-package org.westmalle.wayland.nativ.libc;
+package org.westmalle.wayland.nativ.glibc;
 
-import org.freedesktop.jaccall.*;
+import org.freedesktop.jaccall.Lib;
+import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Symbol;
+import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.wayland.nativ.linux.Kdev_t;
 import org.westmalle.wayland.nativ.linux.Stat;
 import org.westmalle.wayland.nativ.linux.stat;
@@ -23,8 +27,10 @@ import javax.inject.Singleton;
 @Singleton
 @Lib(value = "c",
      version = 6)
-//TODO split this class out based on the different headers implemented by (gnu) libc
+//TODO split this class out based on the different headers implemented by (gnu) glibc
 public class Libc {
+
+    public static final int NCCS = 32;
 
     /**
      * duplicate file descriptor

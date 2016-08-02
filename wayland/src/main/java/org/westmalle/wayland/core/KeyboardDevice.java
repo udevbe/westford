@@ -30,7 +30,7 @@ import org.westmalle.wayland.core.events.KeyboardFocusLost;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.NativeFileFactory;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -42,10 +42,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.westmalle.wayland.nativ.libc.Libc.MAP_FAILED;
-import static org.westmalle.wayland.nativ.libc.Libc.MAP_SHARED;
-import static org.westmalle.wayland.nativ.libc.Libc.PROT_READ;
-import static org.westmalle.wayland.nativ.libc.Libc.PROT_WRITE;
+import static org.westmalle.wayland.nativ.glibc.Libc.MAP_FAILED;
+import static org.westmalle.wayland.nativ.glibc.Libc.MAP_SHARED;
+import static org.westmalle.wayland.nativ.glibc.Libc.PROT_READ;
+import static org.westmalle.wayland.nativ.glibc.Libc.PROT_WRITE;
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_DOWN;
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_UP;
 import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_LAYOUT_EFFECTIVE;

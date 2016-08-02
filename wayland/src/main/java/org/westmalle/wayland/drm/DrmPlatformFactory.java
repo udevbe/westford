@@ -14,22 +14,18 @@
 package org.westmalle.wayland.drm;
 
 
-import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.drm.egl.DrmEglConnector;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
 import org.westmalle.wayland.nativ.libdrm.DrmModeEncoder;
 import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libudev.Libudev;
-import org.westmalle.wayland.nativ.linux.stat;
-import org.westmalle.wayland.nativ.linux.vt_mode;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
 import javax.annotation.Nonnull;
@@ -43,8 +39,7 @@ import java.util.Set;
 
 import static org.freedesktop.jaccall.Pointer.nref;
 import static org.freedesktop.jaccall.Pointer.wrap;
-import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
-import static org.westmalle.wayland.nativ.libc.Libc.O_WRONLY;
+import static org.westmalle.wayland.nativ.glibc.Libc.O_RDWR;
 import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
 
 //TODO tests tests tests!

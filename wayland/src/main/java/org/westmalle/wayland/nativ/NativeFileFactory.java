@@ -15,7 +15,7 @@ package org.westmalle.wayland.nativ;
 
 
 import org.freedesktop.jaccall.Pointer;
-import org.westmalle.wayland.nativ.libc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

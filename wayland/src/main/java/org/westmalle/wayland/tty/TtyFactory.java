@@ -3,10 +3,8 @@ package org.westmalle.wayland.tty;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.nativ.libc.Libc;
-import org.westmalle.wayland.nativ.linux.stat;
-import org.westmalle.wayland.nativ.linux.termios;
+import org.westmalle.wayland.nativ.glibc.Libc;
+import org.westmalle.wayland.nativ.glibc.termios;
 import org.westmalle.wayland.nativ.linux.vt_mode;
 import org.westmalle.wayland.nativ.linux.vt_stat;
 
@@ -14,16 +12,14 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import static org.freedesktop.wayland.server.jaccall.WaylandServerCore.WL_EVENT_READABLE;
-import static org.westmalle.wayland.nativ.libc.Libc.O_CLOEXEC;
-import static org.westmalle.wayland.nativ.libc.Libc.O_NOCTTY;
-import static org.westmalle.wayland.nativ.libc.Libc.O_RDWR;
-import static org.westmalle.wayland.nativ.libc.Libc.O_WRONLY;
-import static org.westmalle.wayland.nativ.linux.Kd.KDGKBMODE;
+import static org.westmalle.wayland.nativ.glibc.Libc.O_CLOEXEC;
+import static org.westmalle.wayland.nativ.glibc.Libc.O_NOCTTY;
+import static org.westmalle.wayland.nativ.glibc.Libc.O_RDWR;
+import static org.westmalle.wayland.nativ.glibc.Libc.O_WRONLY;
 import static org.westmalle.wayland.nativ.linux.Kd.KDSETMODE;
 import static org.westmalle.wayland.nativ.linux.Kd.KDSKBMODE;
 import static org.westmalle.wayland.nativ.linux.Kd.KD_GRAPHICS;
 import static org.westmalle.wayland.nativ.linux.Kd.K_OFF;
-import static org.westmalle.wayland.nativ.linux.Major.TTY_MAJOR;
 import static org.westmalle.wayland.nativ.linux.Signal.SIGUSR1;
 import static org.westmalle.wayland.nativ.linux.Signal.SIGUSR2;
 import static org.westmalle.wayland.nativ.linux.Stat.KDSKBMUTE;
@@ -82,7 +78,7 @@ public class TtyFactory {
 
     private void setMode(final int ttyFd) {
         //        final Pointer<Integer> kbModeP = Pointer.nref(0);
-//        if (this.libc.ioctl(ttyFd,
+//        if (this.glibc.ioctl(ttyFd,
 //                            KDGKBMODE,
 //                            kbModeP.address) != 0) {
 //            throw new RuntimeException("failed to get current keyboard mode");

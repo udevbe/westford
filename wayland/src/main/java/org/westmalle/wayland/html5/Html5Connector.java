@@ -159,7 +159,7 @@ public class Html5Connector implements Connector {
         }
 
         //FIXME get this to work...
-//        if (0 != this.libc.setjmp(this.libpng.png_jmpbuf(p))) {
+//        if (0 != this.glibc.setjmp(this.libpng.png_jmpbuf(p))) {
 //            throw new RuntimeException("setjmp(png_jmpbuf(p) failed");
 //        }
 
