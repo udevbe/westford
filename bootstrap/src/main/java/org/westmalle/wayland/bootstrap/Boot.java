@@ -122,13 +122,16 @@ public class Boot {
          * Make sure we initialize the tty before anything else.
          */
         final Tty tty = drmEglCompositor.tty();
+
         /*
          * Keep this first as weston demo clients *really* like their globals
          * to be initialized in a certain order, else they segfault...
          */
         final LifeCycle lifeCycle = drmEglCompositor.lifeCycle();
 
-        //create a libinput seat that will listen for native input events
+        /*
+         * Create a libinput seat that will listen for native input events
+         */
         final WlSeat wlSeat = drmEglCompositor.seatFactory()
                                               .create("seat0",
                                                       "",
@@ -137,7 +140,9 @@ public class Boot {
                                                       "",
                                                       "");
 
-        //setup keyboard focus tracking to follow mouse pointer & touch
+        /*
+         * Setup keyboard focus tracking to follow mouse pointer & touch
+         */
         final PointerDevice pointerDevice = wlSeat.getWlPointer()
                                                   .getPointerDevice();
         final TouchDevice touchDevice = wlSeat.getWlTouch()
@@ -154,46 +159,57 @@ public class Boot {
                    .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
                                                              touchDevice.getGrab()));
 
-        //setup tty key bindings
+        /*
+         * setup tty switching key bindings
+         */
         final KeyBindingFactory keyBindingFactory = drmEglCompositor.keyBindingFactory();
 
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F1)),
-                                 () -> tty.activate(0));
+                                 () -> tty.activate(0))
+                         .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F2)),
-                                 () -> tty.activate(1));
+                                 () -> tty.activate(1))
+                         .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F3)),
-                                 () -> tty.activate(2));
+                                 () -> tty.activate(2))
+                         .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F4)),
-                                 () -> tty.activate(3));
+                                 () -> tty.activate(3))
+                         .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F5)),
-                                 () -> tty.activate(4));
+                                 () -> tty.activate(4))
+                         .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F6)),
-                                 () -> tty.activate(5));
+                                 () -> tty.activate(5))
+                         .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F7)),
-                                 () -> tty.activate(6));
+                                 () -> tty.activate(6))
+                         .enable();
 
-        //start the compositor
+        /*
+         * and finally, start the compositor
+         */
         lifeCycle.start();
     }
 
@@ -260,6 +276,7 @@ public class Boot {
                      .connect(event -> wlKeyboard.getKeyboardDevice()
                                                  .setFocus(wlKeyboard.getResources(),
                                                            pointerDevice.getFocus()));
+
         //start the compositor
         lifeCycle.start();
     }
