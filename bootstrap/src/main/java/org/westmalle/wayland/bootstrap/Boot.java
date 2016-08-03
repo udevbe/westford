@@ -34,10 +34,13 @@ import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.tty.Tty;
 import org.westmalle.wayland.x11.X11PlatformModule;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Boot {
 
@@ -45,7 +48,11 @@ public class Boot {
     private static final String BACK_END = "backEnd";
 
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
+
+        final FileHandler fileHandler = new FileHandler("westmalle.log");
+        fileHandler.setFormatter(new SimpleFormatter());
+        LOGGER.addHandler(fileHandler);
 
         Thread.setDefaultUncaughtExceptionHandler((thread,
                                                    throwable) -> {
