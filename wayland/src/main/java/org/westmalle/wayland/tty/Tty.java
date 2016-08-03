@@ -7,7 +7,6 @@ import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.termios;
 import org.westmalle.wayland.nativ.linux.vt_mode;
 
 import java.util.Optional;
@@ -16,13 +15,12 @@ import java.util.logging.Logger;
 import static org.westmalle.wayland.nativ.linux.Kd.KDSETMODE;
 import static org.westmalle.wayland.nativ.linux.Kd.KDSKBMODE;
 import static org.westmalle.wayland.nativ.linux.Kd.KD_TEXT;
-import static org.westmalle.wayland.nativ.linux.TermBits.TCSANOW;
+import static org.westmalle.wayland.nativ.linux.Stat.KDSKBMUTE;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_ACKACQ;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_ACTIVATE;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_AUTO;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_RELDISP;
 import static org.westmalle.wayland.nativ.linux.Vt.VT_SETMODE;
-import static org.westmalle.wayland.nativ.linux.Vt.VT_WAITACTIVE;
 
 @AutoFactory(className = "PrivateTtyFactory",
              allowSubclasses = true)
@@ -34,45 +32,33 @@ public class Tty implements AutoCloseable {
     private final int  ttyFd;
     private final int  vt;
 
-    private final int     oldKbMode;
-    private final termios oldTerminalAttributes;
-    private final int     startupVt;
+    private final int oldKbMode;
 
     private final Signal<VtEnter, Slot<VtEnter>> vtEnterSignal = new Signal<>();
     private final Signal<VtLeave, Slot<VtLeave>> vtLeaveSignal = new Signal<>();
 
-    private boolean vtActive;
-    private Optional<EventSource> inputSource = Optional.empty();
-    private Optional<EventSource> vtSource    = Optional.empty();
+    private boolean               vtActive = true;
+    private Optional<EventSource> vtSource = Optional.empty();
 
     Tty(@Provided final Libc libc,
         final int ttyFd,
         final int vt,
-        final int oldKbMode,
-        final termios oldTerminalAttributes,
-        final int startupVt) {
+        final int oldKbMode) {
 
         this.libc = libc;
         this.ttyFd = ttyFd;
         this.vt = vt;
         this.oldKbMode = oldKbMode;
-        this.oldTerminalAttributes = oldTerminalAttributes;
-        this.startupVt = startupVt;
-    }
-
-    public void activate() {
-        activate(this.vt);
     }
 
     public void activate(final int vt) {
-        LOGGER.info("Switching to vt:" + vt);
-        if (this.libc.ioctl(this.ttyFd,
-                            VT_ACTIVATE,
-                            vt) < 0 ||
-            this.libc.ioctl(this.ttyFd,
-                            VT_WAITACTIVE,
-                            vt) < 0) {
-            throw new RuntimeException("failed to switch to new vt.");
+        if (vt != this.vt || !this.vtActive) {
+            LOGGER.info("Switching to vt:" + vt);
+            if (this.libc.ioctl(this.ttyFd,
+                                VT_ACTIVATE,
+                                vt) < 0) {
+                throw new RuntimeException("failed to switch to new vt.");
+            }
         }
     }
 
@@ -101,10 +87,6 @@ public class Tty implements AutoCloseable {
         return 1;
     }
 
-    public boolean isVtActive() {
-        return this.vtActive;
-    }
-
     public Signal<VtEnter, Slot<VtEnter>> getVtEnterSignal() {
         return this.vtEnterSignal;
     }
@@ -115,51 +97,35 @@ public class Tty implements AutoCloseable {
 
     @Override
     public void close() {
-        //tear down tty
-
-        this.inputSource.ifPresent(eventSource -> {
-            eventSource.remove();
-            this.inputSource = Optional.empty();
-        });
+        //restore tty
 
         if (this.libc.ioctl(this.ttyFd,
+                            KDSKBMUTE,
+                            0) != 0 &&
+            this.libc.ioctl(this.ttyFd,
                             KDSKBMODE,
                             this.oldKbMode) != 0) {
-            LOGGER.severe("failed to restore keyboard mode");
+            LOGGER.warning("failed to restore kb mode");
         }
 
         if (this.libc.ioctl(this.ttyFd,
                             KDSETMODE,
                             KD_TEXT) != 0) {
-            LOGGER.severe("failed to set KD_TEXT mode on tty");
+            LOGGER.warning("failed to set KD_TEXT mode on tty: %m\n");
         }
 
-        if (this.libc.tcsetattr(this.ttyFd,
-                                TCSANOW,
-                                Pointer.ref(this.oldTerminalAttributes).address) < 0) {
-            LOGGER.severe("could not restore terminal to canonical mode");
-        }
+        this.vtLeaveSignal.emit(VtLeave.create());
 
         final vt_mode mode = new vt_mode();
-        mode.mode(VT_AUTO);
-        mode.waitv((byte) 0);
-        mode.relsig((byte) 0);
-        mode.acqsig((byte) 0);
         mode.frsig((byte) 0);
-
+        mode.waitv((byte) 0);
+        mode.acqsig((byte) 0);
+        mode.relsig((byte) 0);
+        mode.mode(VT_AUTO);
         if (this.libc.ioctl(this.ttyFd,
                             VT_SETMODE,
                             Pointer.ref(mode).address) < 0) {
-            LOGGER.severe("could not reset vt handling");
-        }
-
-        if (this.vtActive && this.vt != this.startupVt) {
-            this.libc.ioctl(this.ttyFd,
-                            VT_ACTIVATE,
-                            this.startupVt);
-            this.libc.ioctl(this.ttyFd,
-                            VT_WAITACTIVE,
-                            this.startupVt);
+            LOGGER.warning("could not reset vt handling\n");
         }
 
         this.vtSource.ifPresent(eventSource -> {
@@ -167,12 +133,10 @@ public class Tty implements AutoCloseable {
             this.vtSource = Optional.empty();
         });
 
-        //FIXME check close state?
-        this.libc.close(this.ttyFd);
-    }
+        //TODO switch back to old tty
 
-    void setInputSource(final EventSource inputSource) {
-        this.inputSource = Optional.of(inputSource);
+
+        this.libc.close(this.ttyFd);
     }
 
     void setVtSource(final EventSource vtSource) {
