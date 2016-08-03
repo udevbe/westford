@@ -14,9 +14,12 @@
 package org.westmalle.wayland.bootstrap.x11;
 
 import dagger.Component;
+import org.freedesktop.wayland.server.Display;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.gles2.Gles2RendererModule;
+import org.westmalle.wayland.nativ.glibc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libpthread;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.egl.X11EglPlatformModule;
 
@@ -35,4 +38,10 @@ public interface X11EglCompositor {
      * X11 egl platform provides a single seat.
      */
     WlSeat wlSeat();
+
+    Display display();
+
+    Libc libc();
+
+    Libpthread libpthread();
 }
