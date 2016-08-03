@@ -166,8 +166,6 @@ public class DrmEglPlatformFactory {
             throw new RuntimeException("failed to set drm master.");
         }
 
-        //TODO re-enable input (should probably go into seat implementation)
-
         drmEglConnectors.forEach(optionalDrmEglConnector ->
                                          optionalDrmEglConnector.ifPresent((drmEglConnector) -> {
                                              drmEglConnector.setDefaultMode();
@@ -177,8 +175,6 @@ public class DrmEglPlatformFactory {
 
     private void leaveVt(final DrmPlatform drmPlatform,
                          final List<Optional<DrmEglConnector>> drmEglConnectors) {
-        //TODO cancel input (should probably go into seat implementation)
-
         if (this.libdrm.drmDropMaster(drmPlatform.getDrmFd()) != 0) {
             throw new RuntimeException("failed to set drm master.");
         }
