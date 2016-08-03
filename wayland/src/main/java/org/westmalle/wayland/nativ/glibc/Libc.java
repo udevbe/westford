@@ -30,6 +30,9 @@ import javax.inject.Singleton;
 //TODO split this class out based on the different headers implemented by (gnu) glibc
 public class Libc {
 
+    public static final int SIGUSR1 = 10;
+    public static final int SIGUSR2 = 12;
+
     public static final int NCCS = 32;
 
     /**
@@ -281,6 +284,10 @@ public class Libc {
     //-1
     public static final long MAP_FAILED     = 0xFFFFFFFF;
 
+    //runtime constants
+    public final int SIGRTMIN() { return __libc_current_sigrtmin();}
+    public final int SIGRTMAX() { return __libc_current_sigrtmax();};
+
     @Symbol
     @Ptr
     public native long errno();
@@ -367,6 +374,10 @@ public class Libc {
     public native int __fxstat(int ver,
                                int fd,
                                @Ptr(stat.class) long buf);
+
+    public native int __libc_current_sigrtmin();
+
+    public native int __libc_current_sigrtmax();
 
     @Unsigned
     public int major(@Unsigned final int dev) {
