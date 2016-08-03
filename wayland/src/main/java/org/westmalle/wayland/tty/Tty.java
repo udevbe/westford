@@ -65,6 +65,7 @@ public class Tty implements AutoCloseable {
     }
 
     public void activate(final int vt) {
+        LOGGER.info("Switching to vt:" + vt);
         if (this.libc.ioctl(this.ttyFd,
                             VT_ACTIVATE,
                             vt) < 0 ||
@@ -77,6 +78,8 @@ public class Tty implements AutoCloseable {
 
     public int vtHandler(final int signalNumber) {
         if (this.vtActive) {
+            LOGGER.info("Leaving our vt:" + this.vt);
+
             this.vtActive = false;
             this.vtLeaveSignal.emit(VtLeave.create());
 
@@ -85,6 +88,8 @@ public class Tty implements AutoCloseable {
                             1);
         }
         else {
+            LOGGER.info("Entering our vt:" + this.vt);
+
             this.libc.ioctl(this.ttyFd,
                             VT_RELDISP,
                             VT_ACKACQ);
