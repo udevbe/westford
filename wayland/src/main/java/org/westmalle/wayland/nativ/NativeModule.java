@@ -15,6 +15,8 @@ package org.westmalle.wayland.nativ;
 
 import dagger.Module;
 import dagger.Provides;
+import org.westmalle.wayland.nativ.glibc.Libpthread;
+import org.westmalle.wayland.nativ.glibc.Libpthread_Symbols;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libEGL.LibEGL_Symbols;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
@@ -50,6 +52,13 @@ import javax.inject.Singleton;
 
 @Module
 public class NativeModule {
+
+    @Singleton
+    @Provides
+    Libpthread provideLibpthread() {
+        new Libpthread_Symbols().link();
+        return new Libpthread();
+    }
 
     @Singleton
     @Provides

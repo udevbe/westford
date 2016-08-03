@@ -30,6 +30,10 @@ import javax.inject.Singleton;
 //TODO split this class out based on the different headers implemented by (gnu) glibc
 public class Libc {
 
+    public static final int SIG_BLOCK   = 0;
+    public static final int SIG_UNBLOCK = 1;
+    public static final int SIG_SETMASK = 2;
+
     public static final int SIGUSR1 = 10;
     public static final int SIGUSR2 = 12;
 
@@ -286,7 +290,10 @@ public class Libc {
 
     //runtime constants
     public final int SIGRTMIN() { return __libc_current_sigrtmin();}
-    public final int SIGRTMAX() { return __libc_current_sigrtmax();};
+
+    public final int SIGRTMAX() { return __libc_current_sigrtmax();}
+
+    ;
 
     @Symbol
     @Ptr
