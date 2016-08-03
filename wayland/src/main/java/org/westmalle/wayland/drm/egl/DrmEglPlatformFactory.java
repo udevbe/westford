@@ -18,18 +18,17 @@ import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPlatform;
+import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
-import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -147,11 +146,11 @@ public class DrmEglPlatformFactory {
                                                                                                                   eglContext,
                                                                                                                   eglConfig))));
         this.tty.getVtEnterSignal()
-                .connect(event -> enterVt(this.drmPlatform,
-                                          drmEglConnectors));
+                .connect(event -> enterVt(drmEglConnectors));
         this.tty.getVtLeaveSignal()
-                .connect(event -> leaveVt(this.drmPlatform,
-                                          drmEglConnectors));
+                .connect(event -> leaveVt(drmEglConnectors));
+
+        setDrmMaster();
 
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,
@@ -160,12 +159,20 @@ public class DrmEglPlatformFactory {
                                                         drmEglConnectors);
     }
 
-    private void enterVt(final DrmPlatform drmPlatform,
-                         final List<Optional<DrmEglConnector>> drmEglConnectors) {
-        if (this.libdrm.drmSetMaster(drmPlatform.getDrmFd()) != 0) {
+    private void setDrmMaster() {
+        if (this.libdrm.drmSetMaster(this.drmPlatform.getDrmFd()) != 0) {
             throw new RuntimeException("failed to set drm master.");
         }
+    }
 
+    private void dropDrmMaster() {
+        if (this.libdrm.drmDropMaster(this.drmPlatform.getDrmFd()) != 0) {
+            throw new RuntimeException("failed to set drm master.");
+        }
+    }
+
+    private void enterVt(final List<Optional<DrmEglConnector>> drmEglConnectors) {
+        setDrmMaster();
         drmEglConnectors.forEach(optionalDrmEglConnector ->
                                          optionalDrmEglConnector.ifPresent((drmEglConnector) -> {
                                              drmEglConnector.setDefaultMode();
@@ -173,13 +180,9 @@ public class DrmEglPlatformFactory {
                                          }));
     }
 
-    private void leaveVt(final DrmPlatform drmPlatform,
-                         final List<Optional<DrmEglConnector>> drmEglConnectors) {
-        if (this.libdrm.drmDropMaster(drmPlatform.getDrmFd()) != 0) {
-            throw new RuntimeException("failed to set drm master.");
-        }
-
+    private void leaveVt(final List<Optional<DrmEglConnector>> drmEglConnectors) {
         drmEglConnectors.forEach(drmEglConnector -> drmEglConnector.ifPresent(DrmEglConnector::disableDraw));
+        dropDrmMaster();
     }
 
     private long createEglContext(final long eglDisplay,
