@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import static java.lang.String.format;
 import static org.freedesktop.wayland.server.jaccall.WaylandServerCore.WL_EVENT_READABLE;
 import static org.westmalle.wayland.nativ.glibc.Libc.O_CLOEXEC;
 import static org.westmalle.wayland.nativ.glibc.Libc.O_NOCTTY;
@@ -62,22 +63,27 @@ public class TtyFactory {
                                         O_WRONLY | O_CLOEXEC);
 
         if (tty0 < 0) {
-            throw new RuntimeException("could not open tty0");
+            throw new RuntimeException("Could not open /dev/tty0.");
         }
 
         if (this.libc.ioctl(tty0,
                             VT_OPENQRY,
                             ttynr.address) < 0 || ttynr.dref() == -1) {
-            throw new RuntimeException("failed to find non-opened console");
+            throw new RuntimeException("Failed to query for open vt.");
         }
         final Integer vt = ttynr.dref();
-        final int ttyFd = this.libc.open(Pointer.nref("/dev/tty" + vt).address,
+        final int ttyFd = this.libc.open(Pointer.nref(format("/dev/tty%d",
+                                                             vt)).address,
                                          O_RDWR | O_NOCTTY);
         this.libc.close(tty0);
 
         if (ttyFd < 0) {
-            throw new RuntimeException("failed to open tty");
+            throw new RuntimeException(format("Failed to open /dev/tty%d",
+                                              vt));
         }
+
+        LOGGER.info(format("Using /dev/tty%d",
+                           vt));
 
         return ttyFd;
     }
@@ -89,7 +95,7 @@ public class TtyFactory {
         if (this.libc.ioctl(ttyFd,
                             KDSKBMODE,
                             K_OFF) != 0) {
-            LOGGER.warning("failed to set K_OFF keyboard mode on tty");
+            LOGGER.warning("Failed to set K_OFF keyboard mode. Fallback to K_RAW.");
 
             if (this.libc.ioctl(ttyFd,
                                 KDSKBMODE,
@@ -97,7 +103,7 @@ public class TtyFactory {
                 this.libc.tcsetattr(ttyFd,
                                     TCSANOW,
                                     Pointer.ref(oldTerminalAttributes).address);
-                throw new RuntimeException("failed to set K_RAW keyboard mode on tty");
+                throw new RuntimeException("Failed to set K_RAW keyboard mode.");
             }
 
             //FIXME add a way in wayland java bindings to check if adding fd failed.
@@ -122,7 +128,7 @@ public class TtyFactory {
             this.libc.ioctl(ttyFd,
                             KDSKBMODE,
                             oldkbMode);
-            throw new RuntimeException("failed to set KD_GRAPHICS mode on tty");
+            throw new RuntimeException("Failed to set KD_GRAPHICS mode.");
         }
 
         return inputSource;
@@ -133,7 +139,7 @@ public class TtyFactory {
         if (this.libc.ioctl(ttyFd,
                             VT_GETSTATE,
                             Pointer.ref(vts).address) != 0) {
-            throw new RuntimeException("failed to get VT_GETSTATE on tty");
+            throw new RuntimeException("Failed to get VT_GETSTATE.");
         }
         return vts.v_active();
     }
@@ -143,7 +149,7 @@ public class TtyFactory {
         if (this.libc.ioctl(ttyFd,
                             KDGKBMODE,
                             kbModeP.address) != 0) {
-            throw new RuntimeException("failed to get current keyboard mode");
+            throw new RuntimeException("Failed to get current keyboard mode.");
         }
 
         return kbModeP.dref();
@@ -155,7 +161,7 @@ public class TtyFactory {
         if (this.libc.tcgetattr(ttyFd,
                                 Pointer.ref(oldTerminalAttributes).address) < 0) {
             this.libc.close(ttyFd);
-            throw new RuntimeException("could not get terminal attributes");
+            throw new RuntimeException("Could not get terminal attributes.");
         }
         return oldTerminalAttributes;
     }
@@ -174,7 +180,7 @@ public class TtyFactory {
         if (this.libc.tcsetattr(ttyFd,
                                 TCSANOW,
                                 Pointer.ref(newRawAttributes).address) < 0) {
-            LOGGER.warning("could not put terminal into raw mode:");
+            LOGGER.warning("Could not put terminal into raw mode.");
         }
     }
 
