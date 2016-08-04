@@ -13,9 +13,6 @@
 //limitations under the License.
 package org.westmalle.wayland.bootstrap;
 
-import org.freedesktop.jaccall.CLong;
-import org.freedesktop.jaccall.Lib;
-import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
@@ -31,8 +28,6 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.Libpthread;
 import org.westmalle.wayland.nativ.linux.InputEventCodes;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -298,25 +293,6 @@ public class Boot {
                      .connect(event -> wlKeyboard.getKeyboardDevice()
                                                  .setFocus(wlKeyboard.getResources(),
                                                            pointerDevice.getFocus()));
-
-        final Libc       libc       = x11EglCompositor.libc();
-        final Libpthread libpthread = x11EglCompositor.libpthread();
-        Pointer<Byte>    sigset     = Pointer.nref(new byte[128]);
-        libpthread.sigemptyset(sigset.address);
-        libpthread.sigaddset(sigset.address,
-                             libc.SIGRTMAX());
-        libpthread.pthread_sigmask(Libc.SIG_UNBLOCK,
-                                   sigset.address,
-                                   0L);
-
-            x11EglCompositor.display()
-                            .getEventLoop()
-                            .addSignal(libc.SIGRTMAX(),
-                                       signalNumber -> {
-                                           System.out.println("signal received: " + signalNumber);
-                                           return 0;
-                                       });
-
 
         //start the compositor
         lifeCycle.start();

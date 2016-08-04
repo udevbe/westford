@@ -83,6 +83,8 @@ public class TtyFactory {
     public Tty create() {
         //TODO tty from config
 
+        //FIXME we need to check if our sigproc mask is set to blocked for the signals we're interested in receiving. This must be done by the process that calls us.
+
         final Pointer<Integer> ttynr = Pointer.nref(0);
         final int              ttyFd = getTtyFd(ttynr);
         final int              vt    = ttynr.dref();
