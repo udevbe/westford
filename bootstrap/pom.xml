@@ -36,7 +36,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.westmalle.wayland.bootstrap.Boot</mainClass>
+                                    <mainClass>org.westmalle.wayland.bootstrap.Launcher</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
