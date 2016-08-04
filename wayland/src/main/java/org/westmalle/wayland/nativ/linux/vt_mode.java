@@ -11,10 +11,10 @@ import org.freedesktop.jaccall.Struct;
                 @Field(name = "waitv",
                        type = CType.CHAR),
                 @Field(name = "relsig",
-                       type = CType.CHAR),
+                       type = CType.SHORT),
                 @Field(name = "acqsig",
-                       type = CType.CHAR),
+                       type = CType.SHORT),
                 @Field(name = "frsig",
-                       type = CType.CHAR),
+                       type = CType.SHORT),
         })
 public final class vt_mode extends vt_mode_Jaccall_StructType {}
