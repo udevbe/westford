@@ -223,7 +223,37 @@ public class Boot {
                                                              InputEventCodes.KEY_F7)),
                                  () -> tty.activate(7))
                          .enable();
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F8)),
+                                 () -> tty.activate(8))
+                         .enable();
 
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F9)),
+                                 () -> tty.activate(9))
+                         .enable();
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F10)),
+                                 () -> tty.activate(10))
+                         .enable();
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F11)),
+                                 () -> tty.activate(11))
+                         .enable();
+        keyBindingFactory.create(keyboardDevice,
+                                 new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
+                                                             InputEventCodes.KEY_LEFTALT,
+                                                             InputEventCodes.KEY_F12)),
+                                 () -> tty.activate(12))
+                         .enable();
         /*
          * and finally, start the compositor
          */
