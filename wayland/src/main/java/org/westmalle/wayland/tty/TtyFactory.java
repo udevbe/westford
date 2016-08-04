@@ -3,6 +3,7 @@ package org.westmalle.wayland.tty;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.linux.vt_mode;
 
@@ -136,16 +137,16 @@ public class TtyFactory {
         * SIGRT* must be tested on runtime, as their exact values are not
         * known at compile-time. POSIX requires 32 of them to be available.
         */
-        if (this.libc.SIGRTMIN() + 5 > this.libc.SIGRTMAX()) {
+        if (this.libc.SIGRTMIN() > this.libc.SIGRTMAX()) {
             throw new RuntimeException(String.format("not enough RT signals available: %d-%d\n",
-                                                     this.libc.SIGRTMIN() + 5,
+                                                     this.libc.SIGRTMIN(),
                                                      this.libc.SIGRTMAX()));
         }
 
         final vt_mode mode = new vt_mode();
         mode.mode(VT_PROCESS);
-        mode.relsig((byte) (this.libc.SIGRTMIN()));
-        mode.acqsig((byte) (this.libc.SIGRTMIN()));
+        mode.relsig((byte) this.libc.SIGRTMIN());
+        mode.acqsig((byte) this.libc.SIGRTMIN());
         mode.waitv((byte) 0);
         mode.frsig((byte) 0);
         if (this.libc.ioctl(ttyFd,
@@ -158,9 +159,10 @@ public class TtyFactory {
                                                       vt,
                                                       oldKbMode);
 
-        this.display.getEventLoop()
-                    .addSignal(this.libc.SIGRTMIN(),
-                               tty::vtHandler);
+        final EventSource vtSource = this.display.getEventLoop()
+                                                 .addSignal(this.libc.SIGRTMIN(),
+                                                            tty::vtHandler);
+        tty.setVtSource(vtSource);
 
         return tty;
     }
