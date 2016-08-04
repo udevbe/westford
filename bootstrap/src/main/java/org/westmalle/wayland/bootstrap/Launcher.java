@@ -29,13 +29,13 @@ public class Launcher {
 
         if (args.length == 1 &&
             (args[0].equals("--help") || args[0].equals("-h"))) {
-            System.out.println("This program changes the native signal mask before launching a new jvm.\n" +
-                               "This ensures that we can catch the correct native signal in the child jvm thread of our choosing.\n" +
-                               "If we did not change the signal mask, any thread out of our control (like the gc thread)\n" +
-                               "could receive the native signal, and fire the default handler (which would exit the program).\n\n" +
-                               "Usage:\n" +
-                               "\t option=<arg> \t - Pass <arg> as a child jvm option, eg. option=-Dkey=value or option=-Xmx=1234m\n" +
-                               "\t <args> \t - Pass <args> as-is to the child jvm as program arguments.");
+            System.out.println("The launcher program changes the native signal masks before forking a new compositor jvm.\n" +
+                               "This ensures that the compositor jvm can catch native signals in any thread of its choosing.\n" +
+                               "If we did not change the signal masks, threads out of normal execution control (like the garbage collector thread)\n" +
+                               "could receive native signals, and fire the default handler which would exit the jvm.\n\n" +
+                               "Usage: java -jar jarfile [option=arg...] [args]\n" +
+                               "\t option=<arg> \t Pass <arg> to the compositor jvm option as an option, eg. option=-Dkey=value or option=-Xmx=1234m\n" +
+                               "\t <args> \t Pass <args> as-is to the child jvm as program arguments.");
             System.exit(0);
         }
 
