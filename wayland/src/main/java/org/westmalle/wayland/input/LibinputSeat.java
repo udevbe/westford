@@ -238,7 +238,10 @@ public class LibinputSeat {
     }
 
     public void disableInput() {
-        this.inputEventSource.ifPresent(EventSource::remove);
+        this.inputEventSource.ifPresent((eventSource) -> {
+            eventSource.remove();
+            this.inputEventSource = Optional.empty();
+        });
     }
 
     public void enableInput() {
