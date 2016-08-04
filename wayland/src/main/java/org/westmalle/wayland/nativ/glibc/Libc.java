@@ -293,8 +293,6 @@ public class Libc {
 
     public final int SIGRTMAX() { return __libc_current_sigrtmax();}
 
-    ;
-
     @Symbol
     @Ptr
     public native long errno();
