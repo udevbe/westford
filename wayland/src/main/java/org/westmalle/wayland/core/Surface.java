@@ -20,10 +20,8 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.DestroyListener;
-import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
-import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.westmalle.wayland.core.calc.Mat4;
@@ -32,7 +30,6 @@ import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.KeyboardFocusLost;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlRegion;
 
 import javax.annotation.Nonnegative;
@@ -358,7 +355,7 @@ public class Surface {
 
     @Nonnull
     public Point local(@Nonnull final Point global) {
-        final Vec4 localPoint = getInverseTransform().multiply(global.toVec4());
+        final Vec4 localPoint = this.inverseTransform.multiply(global.toVec4());
         return Point.create((int) localPoint.getX(),
                             (int) localPoint.getY());
     }
@@ -369,10 +366,10 @@ public class Surface {
     }
 
     @Nonnull
-    public Point global(@Nonnull final Point local) {
-        final Vec4 localPoint = getTransform().multiply(local.toVec4());
-        return Point.create(Math.round(localPoint.getX()),
-                            Math.round(localPoint.getY()));
+    public Point global(@Nonnull final Point surfaceLocal) {
+        final Vec4 globalPoint = this.transform.multiply(surfaceLocal.toVec4());
+        return Point.create((int) globalPoint.getX(),
+                            (int) globalPoint.getY());
     }
 
     @Nonnull
