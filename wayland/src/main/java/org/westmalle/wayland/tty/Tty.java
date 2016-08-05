@@ -114,7 +114,9 @@ public class Tty implements AutoCloseable {
             LOGGER.warning("failed to set KD_TEXT mode on tty: %m\n");
         }
 
-        this.vtLeaveSignal.emit(VtLeave.create());
+        if (this.vtActive) {
+            this.vtLeaveSignal.emit(VtLeave.create());
+        }
 
         final vt_mode mode = new vt_mode();
         mode.frsig((byte) 0);
