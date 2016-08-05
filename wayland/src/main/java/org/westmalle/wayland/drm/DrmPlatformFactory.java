@@ -27,10 +27,10 @@ import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.protocol.WlOutputFactory;
+import org.westmalle.wayland.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +63,8 @@ public class DrmPlatformFactory {
     private final WlOutputFactory           wlOutputFactory;
     @Nonnull
     private final OutputFactory             outputFactory;
+    @Nonnull
+    private final Tty                       tty;
 
     @Inject
     DrmPlatformFactory(@Nonnull final Libc libc,
@@ -73,7 +75,8 @@ public class DrmPlatformFactory {
                        @Nonnull final DrmEventBusFactory drmEventBusFactory,
                        @Nonnull final PrivateDrmPlatformFactory privateDrmPlatformFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
-                       @Nonnull final OutputFactory outputFactory) {
+                       @Nonnull final OutputFactory outputFactory,
+                       @Nonnull final Tty tty) {
         this.libudev = libudev;
         this.libc = libc;
         this.libdrm = libdrm;
@@ -83,6 +86,7 @@ public class DrmPlatformFactory {
         this.privateDrmPlatformFactory = privateDrmPlatformFactory;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
+        this.tty = tty;
     }
 
     public DrmPlatform create() {
@@ -107,10 +111,29 @@ public class DrmPlatformFactory {
                                        WaylandServerCore.WL_EVENT_READABLE,
                                        drmEventBus);
 
+        this.tty.getVtEnterSignal()
+                .connect(event -> setDrmMaster(drmFd));
+        this.tty.getVtLeaveSignal()
+                .connect(event -> dropDrmMaster(drmFd));
+
+        setDrmMaster(drmFd);
+
         return this.privateDrmPlatformFactory.create(drmDevice,
                                                      drmFd,
                                                      drmEventBus,
                                                      drmConnectors);
+    }
+
+    private void setDrmMaster(final int drmFd) {
+        if (this.libdrm.drmSetMaster(drmFd) != 0) {
+            throw new RuntimeException("failed to set drm master.");
+        }
+    }
+
+    private void dropDrmMaster(final int drmFd) {
+        if (this.libdrm.drmDropMaster(drmFd) != 0) {
+            throw new RuntimeException("failed to drop drm master.");
+        }
     }
 
 

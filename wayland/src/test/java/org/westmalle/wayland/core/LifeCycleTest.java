@@ -67,7 +67,7 @@ public class LifeCycleTest {
     public void testShutDown() throws Exception {
         //given
         //when
-        this.lifeCycle.stop();
+        this.lifeCycle.close();
         //then
         verify(this.display).terminate();
         verify(this.jobExecutor).fireFinishedEvent();
