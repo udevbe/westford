@@ -235,13 +235,15 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     }
 
 
-    public void disableDraw() {
+    @Override
+    public void disable() {
         this.afterPageFlipRender = Optional.empty();
         this.onIdleEventSource.ifPresent(EventSource::remove);
         this.enabled = false;
     }
 
-    public void enableDraw() {
+    @Override
+    public void enable() {
         this.enabled = true;
         render();
     }

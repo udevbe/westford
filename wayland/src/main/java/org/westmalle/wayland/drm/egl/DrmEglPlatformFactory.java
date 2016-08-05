@@ -165,12 +165,12 @@ public class DrmEglPlatformFactory {
         drmEglConnectors.forEach(optionalDrmEglConnector ->
                                          optionalDrmEglConnector.ifPresent((drmEglConnector) -> {
                                              drmEglConnector.setDefaultMode();
-                                             drmEglConnector.enableDraw();
+                                             drmEglConnector.enable();
                                          }));
     }
 
     private void leaveVt(final List<Optional<DrmEglConnector>> drmEglConnectors) {
-        drmEglConnectors.forEach(drmEglConnector -> drmEglConnector.ifPresent(DrmEglConnector::disableDraw));
+        drmEglConnectors.forEach(drmEglConnector -> drmEglConnector.ifPresent(DrmEglConnector::disable));
     }
 
     private long createEglContext(final long eglDisplay,
