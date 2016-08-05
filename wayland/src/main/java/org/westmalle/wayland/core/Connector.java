@@ -21,6 +21,9 @@ import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 
+/**
+ * A {@link Platform} specific drawing output for a {@link Renderer}.
+ */
 public interface Connector {
 
     /**
