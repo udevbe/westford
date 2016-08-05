@@ -22,12 +22,10 @@ import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.drm.DrmConnector;
 import org.westmalle.wayland.drm.DrmPlatform;
-import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
-import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.tty.Tty;
 
@@ -62,10 +60,6 @@ public class DrmEglPlatformFactory {
     @Nonnull
     private final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory;
     @Nonnull
-    private final Libc                         libc;
-    @Nonnull
-    private final Libdrm                       libdrm;
-    @Nonnull
     private final Libgbm                       libgbm;
     @Nonnull
     private final LibEGL                       libEGL;
@@ -82,8 +76,6 @@ public class DrmEglPlatformFactory {
 
     @Inject
     DrmEglPlatformFactory(@Nonnull final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory,
-                          @Nonnull final Libc libc,
-                          @Nonnull final Libdrm libdrm,
                           @Nonnull final Libgbm libgbm,
                           @Nonnull final LibEGL libEGL,
                           @Nonnull final LibGLESv2 libGLESv2,
@@ -92,8 +84,6 @@ public class DrmEglPlatformFactory {
                           @Nonnull final GlRenderer glRenderer,
                           @Nonnull final Tty tty) {
         this.privateDrmEglPlatformFactory = privateDrmEglPlatformFactory;
-        this.libc = libc;
-        this.libdrm = libdrm;
         this.libgbm = libgbm;
         this.libEGL = libEGL;
         this.libGLESv2 = libGLESv2;

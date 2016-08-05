@@ -30,10 +30,12 @@ import java.util.Optional;
 public class DrmEglPlatform implements EglPlatform {
 
 
-    private final long                            gbmDevice;
-    private final long                            eglDisplay;
-    private final long                            eglContext;
-    private final String                          eglExtensions;
+    private final long gbmDevice;
+
+    private final long   eglDisplay;
+    private final long   eglContext;
+    private final String eglExtensions;
+
     @Nonnull
     private final List<Optional<DrmEglConnector>> gbmEglConnectors;
 
