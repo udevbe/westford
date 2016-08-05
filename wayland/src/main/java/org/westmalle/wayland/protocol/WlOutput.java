@@ -55,8 +55,8 @@ public class WlOutput extends Global<WlOutputResource> implements WlOutputReques
         final WlOutputResource wlOutputResource = add(client,
                                                       version,
                                                       id);
-        this.output.notifyGeometry(wlOutputResource)
-                   .notifyMode(wlOutputResource);
+        this.output.notifyGeometry(wlOutputResource);
+        this.output.notifyMode(wlOutputResource);
         if (wlOutputResource.getVersion() >= 2) {
             wlOutputResource.done();
         }

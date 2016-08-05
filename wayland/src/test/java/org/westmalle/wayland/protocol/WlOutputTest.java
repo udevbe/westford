@@ -88,9 +88,6 @@ public class WlOutputTest {
     @Test
     public void testOnBindClient() throws Exception {
         //given
-        when(this.output.notifyGeometry(any())).thenReturn(this.output);
-        when(this.output.notifyMode(any())).thenReturn(this.output);
-
         //when
         final Client client = mock(Client.class);
         Whitebox.setInternalState(client,
