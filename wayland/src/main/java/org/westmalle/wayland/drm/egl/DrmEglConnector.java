@@ -56,15 +56,18 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     private final Display display;
 
     @Nonnull
-    private final Renderer     renderer;
-    private final int          drmFd;
-    private       long         gbmBo;
-    private final long         gbmSurface;
+    private final Renderer renderer;
+
+    private final int  drmFd;
+    private       long gbmBo;
+    private final long gbmSurface;
+
     @Nonnull
     private final DrmConnector drmConnector;
-    private final long         eglSurface;
-    private final long         eglContext;
-    private final long         eglDisplay;
+
+    private final long eglSurface;
+    private final long eglContext;
+    private final long eglDisplay;
 
     private long nextGbmBo;
 
