@@ -53,7 +53,7 @@ State
 | :-------------------------:    | :----------------: |
 | OpenGL on HTML5 (experimental) | :heavy_check_mark: |
 | OpenGL on X                    | :heavy_check_mark: |
-| OpenGL on KMS                  | :x:                |
+| OpenGL on KMS                  | :heavy_check_mark: |
 | Software rendering on X        | :x:                |
 | Software rendering on KMS      | :x:                |
 | Window moving                  | :heavy_check_mark: |
@@ -77,7 +77,7 @@ Roadmap
 | sw rendering  | 0%        |
 | xdg_shell     | 0%        |
 | xwayland      | 0%        |
-| DRM/KMS       | 0%        |
+| DRM/KMS       | 90%        |
 | multi seat    | 100%      |
 
 License
