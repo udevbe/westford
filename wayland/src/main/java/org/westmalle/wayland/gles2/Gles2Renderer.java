@@ -24,7 +24,20 @@ import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
-import org.westmalle.wayland.core.*;
+import org.westmalle.wayland.core.Buffer;
+import org.westmalle.wayland.core.BufferVisitor;
+import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.EglBuffer;
+import org.westmalle.wayland.core.EglConnector;
+import org.westmalle.wayland.core.GlRenderer;
+import org.westmalle.wayland.core.Output;
+import org.westmalle.wayland.core.OutputGeometry;
+import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.core.Scene;
+import org.westmalle.wayland.core.SmBuffer;
+import org.westmalle.wayland.core.Surface;
+import org.westmalle.wayland.core.Transforms;
+import org.westmalle.wayland.core.UnsupportedBuffer;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.libEGL.EglBindWaylandDisplayWL;
 import org.westmalle.wayland.nativ.libEGL.EglCreateImageKHR;
@@ -33,7 +46,6 @@ import org.westmalle.wayland.nativ.libEGL.EglQueryWaylandBufferWL;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libGLESv2.GlEGLImageTargetTexture2DOES;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
-import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
@@ -261,20 +273,20 @@ public class Gles2Renderer implements GlRenderer {
     private void destroy(final EglSurfaceRenderState eglSurfaceRenderState) {
         //delete textures & egl images
         for (final int texture : eglSurfaceRenderState.getTextures()) {
-            Gles2Renderer.this.libGLESv2.glDeleteTextures(1,
-                                                          Pointer.nref(texture).address);
+            this.libGLESv2.glDeleteTextures(1,
+                                            Pointer.nref(texture).address);
         }
 
         for (final long eglImage : eglSurfaceRenderState.getEglImages()) {
-            Gles2Renderer.this.eglDestroyImageKHR.ifPresent(eglDestroyImage -> eglDestroyImage.$(Gles2Renderer.this.eglDisplay,
-                                                                                                 eglImage));
+            this.eglDestroyImageKHR.ifPresent(eglDestroyImage -> eglDestroyImage.$(this.eglDisplay,
+                                                                                   eglImage));
         }
     }
 
     private void destroy(final ShmSurfaceRenderState shmSurfaceRenderState) {
         //delete texture
-        Gles2Renderer.this.libGLESv2.glDeleteTextures(1,
-                                                      Pointer.nref(shmSurfaceRenderState.getTexture()).address);
+        this.libGLESv2.glDeleteTextures(1,
+                                        Pointer.nref(shmSurfaceRenderState.getTexture()).address);
     }
 
     @Nonnull
@@ -484,8 +496,8 @@ public class Gles2Renderer implements GlRenderer {
                                       0,            2.0f / -height, 0,  1,
                                       0,            0,              1,  0,
                                       0,            0,              0,  1)
-                              //moving a screen to the right is the same as moving the contents to the left & top so minus x & y
-                              .multiply(Transforms.TRANSLATE(-x,-y)).toArray();
+                              //moving a screen to the right is the same as moving the contents to the left & top, so minus x & y
+                              .multiply(Transforms.TRANSLATE(-x, -y)).toArray();
         //@formatter:on
     }
 
@@ -1198,52 +1210,25 @@ public class Gles2Renderer implements GlRenderer {
 
     private Pointer<Float> vertexData(final float bufferWidth,
                                       final float bufferHeight) {
+        //first pair => attribute vec2 a_position
+        //second pair => attribute vec2 a_texCoord
         return Pointer.nref(//top left:
-                            //attribute vec2 a_position
-                            0f,
-                            0f,
-                            //attribute vec2 a_texCoord
-                            0f,
-                            0f,
-
+                            0f, 0f,
+                            0f, 0f,
                             //top right:
-                            //attribute vec2 a_position
-                            bufferWidth,
-                            0f,
-                            //attribute vec2 a_texCoord
-                            1f,
-                            0f,
-
+                            bufferWidth, 0f,
+                            1f, 0f,
                             //bottom right:
-                            //vec2 a_position
-                            bufferWidth,
-                            bufferHeight,
-                            //vec2 a_texCoord
-                            1f,
-                            1f,
-
+                            bufferWidth, bufferHeight,
+                            1f, 1f,
                             //bottom right:
-                            //vec2 a_position
-                            bufferWidth,
-                            bufferHeight,
-                            //vec2 a_texCoord
-                            1f,
-                            1f,
-
+                            bufferWidth, bufferHeight,
+                            1f, 1f,
                             //bottom left:
-                            //vec2 a_position
-                            0f,
-                            bufferHeight,
-                            //vec2 a_texCoord
-                            0f,
-                            1f,
-
+                            0f, bufferHeight,
+                            0f, 1f,
                             //top left:
-                            //attribute vec2 a_position
-                            0f,
-                            0f,
-                            //attribute vec2 a_texCoord
-                            0f,
-                            0f);
+                            0f, 0f,
+                            0f, 0f);
     }
 }
