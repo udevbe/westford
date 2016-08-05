@@ -224,11 +224,8 @@ public class Surface {
     public Surface updateTransform() {
         final SurfaceState state = getState();
 
-        //set scaling first
-        Mat4 result = Transforms.SCALE(state.getScale());
         //apply positioning
-        result = state.getPositionTransform()
-                      .multiply(result);
+        Mat4 result = state.getPositionTransform();
         //client buffer transform;
         result = state.getBufferTransform()
                       .multiply(result);
@@ -355,7 +352,9 @@ public class Surface {
 
     @Nonnull
     public Point local(@Nonnull final Point global) {
-        final Vec4 localPoint = this.inverseTransform.multiply(global.toVec4());
+        final Vec4 localPoint = this.inverseTransform.multiply(Transforms.SCALE(getState().getScale())
+                                                                         .invert())
+                                                     .multiply(global.toVec4());
         return Point.create((int) localPoint.getX(),
                             (int) localPoint.getY());
     }
@@ -367,7 +366,8 @@ public class Surface {
 
     @Nonnull
     public Point global(@Nonnull final Point surfaceLocal) {
-        final Vec4 globalPoint = this.transform.multiply(surfaceLocal.toVec4());
+        final Vec4 globalPoint = this.transform.multiply(Transforms.SCALE(getState().getScale()))
+                                               .multiply(surfaceLocal.toVec4());
         return Point.create((int) globalPoint.getX(),
                             (int) globalPoint.getY());
     }
