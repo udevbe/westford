@@ -23,17 +23,50 @@ import javax.annotation.Nonnull;
 
 public interface Connector {
 
+    /**
+     * Request a render for this {@code Connector}.
+     */
     void render();
 
+    /**
+     * The wayland output protocol object associated with this connector.
+     *
+     * @return the wayland output
+     */
     @Nonnull
     WlOutput getWlOutput();
 
-    default void renderBegin() {
-    }
+    /**
+     * Called by the @{@link Renderer} of this {@code Connector} when it starts to draw to it's back buffer.
+     * <p>
+     * A connector implementation can use this hook to perform any pre drawing actions.
+     * </p>
+     */
+    default void renderBegin() {}
 
-    default void renderEndBeforeSwap() {
-    }
+    /**
+     * Called by the @{@link Renderer} of this {@code Connector} when it has finished drawing to it's back buffer.
+     * <p>
+     * A connector implementation can use this hook to perform any post back buffer drawing actions.
+     * </p>
+     */
+    default void renderEndBeforeSwap() {}
 
-    default void renderEndAfterSwap() {
-    }
+    /**
+     * Called by the @{@link Renderer} of this {@code Connector} when it has swapped the back buffer and front buffer.
+     * <p>
+     * A connector implementation can use this hook to perform any post front/back buffer swapping actions.
+     * </p>
+     */
+    default void renderEndAfterSwap() {}
+
+    /**
+     * Disables any pending and future rendering for this connector.
+     */
+    default void disable() {}
+
+    /**
+     * Enables rendering and triggers a redraw for this {@code Connector}.
+     */
+    default void enable() {}
 }
