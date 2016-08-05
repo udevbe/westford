@@ -22,7 +22,7 @@ import org.westmalle.wayland.protocol.WlSubcompositor;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-public class LifeCycle {
+public class LifeCycle implements AutoCloseable {
 
     @Nonnull
     private final Display             display;
@@ -59,7 +59,8 @@ public class LifeCycle {
         this.display.run();
     }
 
-    public void stop() {
+    @Override
+    public void close() {
         this.wlCompositor.destroy();
         this.wlDataDeviceManager.destroy();
         this.wlShell.destroy();

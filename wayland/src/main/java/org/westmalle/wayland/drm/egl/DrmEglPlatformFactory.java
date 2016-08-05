@@ -150,8 +150,6 @@ public class DrmEglPlatformFactory {
         this.tty.getVtLeaveSignal()
                 .connect(event -> leaveVt(drmEglConnectors));
 
-        setDrmMaster();
-
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,
                                                         eglContext,
@@ -159,20 +157,7 @@ public class DrmEglPlatformFactory {
                                                         drmEglConnectors);
     }
 
-    private void setDrmMaster() {
-        if (this.libdrm.drmSetMaster(this.drmPlatform.getDrmFd()) != 0) {
-            throw new RuntimeException("failed to set drm master.");
-        }
-    }
-
-    private void dropDrmMaster() {
-        if (this.libdrm.drmDropMaster(this.drmPlatform.getDrmFd()) != 0) {
-            throw new RuntimeException("failed to set drm master.");
-        }
-    }
-
     private void enterVt(final List<Optional<DrmEglConnector>> drmEglConnectors) {
-        setDrmMaster();
         drmEglConnectors.forEach(optionalDrmEglConnector ->
                                          optionalDrmEglConnector.ifPresent((drmEglConnector) -> {
                                              drmEglConnector.setDefaultMode();
@@ -182,7 +167,6 @@ public class DrmEglPlatformFactory {
 
     private void leaveVt(final List<Optional<DrmEglConnector>> drmEglConnectors) {
         drmEglConnectors.forEach(drmEglConnector -> drmEglConnector.ifPresent(DrmEglConnector::disableDraw));
-        dropDrmMaster();
     }
 
     private long createEglContext(final long eglDisplay,
