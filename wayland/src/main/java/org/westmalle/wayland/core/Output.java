@@ -30,7 +30,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
-@AutoFactory(className = "OutputFactory",
+@AutoFactory(className = "PrivateOutputFactory",
              allowSubclasses = true)
 public class Output {
 
@@ -49,20 +49,30 @@ public class Output {
     private Mat4  inverseTransform = Mat4.IDENTITY;
 
     @Nonnull
-    private OutputGeometry outputGeometry;
+    private OutputGeometry outputGeometry = OutputGeometry.builder()
+                                                          .physicalWidth(0)
+                                                          .physicalHeight(0)
+                                                          .make("")
+                                                          .model("")
+                                                          .x(0)
+                                                          .y(0)
+                                                          .subpixel(0)
+                                                          .transform(0)
+                                                          .build();
     @Nonnull
-    private OutputMode     outputMode;
+    private OutputMode     outputMode     = OutputMode.builder()
+                                                      .width(0)
+                                                      .height(0)
+                                                      .refresh(0)
+                                                      .flags(0)
+                                                      .build();
 
-    Output(@Nonnull final String name,
-           @Nonnull final OutputGeometry outputGeometry,
-           @Nonnull final OutputMode outputMode) {
+    Output(@Nonnull final String name) {
         this.name = name;
-        this.outputGeometry = outputGeometry;
-        this.outputMode = outputMode;
     }
 
-    public Output update(@Nonnull final Set<WlOutputResource> resources,
-                         @Nonnull final OutputGeometry outputGeometry) {
+    public void update(@Nonnull final Set<WlOutputResource> resources,
+                       @Nonnull final OutputGeometry outputGeometry) {
         if (!this.outputGeometry.equals(outputGeometry)) {
             this.outputGeometry = outputGeometry;
             this.outputGeometrySignal.emit(outputGeometry);
@@ -70,7 +80,6 @@ public class Output {
         }
 
         resources.forEach(this::notifyGeometry);
-        return this;
     }
 
     private void updateOutputTransform() {
@@ -128,15 +137,14 @@ public class Output {
         return this;
     }
 
-    public Output notifyMode(@Nonnull final WlOutputResource wlOutputResource) {
+    public void notifyMode(@Nonnull final WlOutputResource wlOutputResource) {
         wlOutputResource.mode(this.outputMode.getFlags(),
                               this.outputMode.getWidth(),
                               this.outputMode.getHeight(),
                               this.outputMode.getRefresh());
-        return this;
     }
 
-    public Output notifyGeometry(@Nonnull final WlOutputResource wlOutputResource) {
+    public void notifyGeometry(@Nonnull final WlOutputResource wlOutputResource) {
         wlOutputResource.geometry(this.outputGeometry.getX(),
                                   this.outputGeometry.getY(),
                                   this.outputGeometry.getPhysicalWidth(),
@@ -145,7 +153,6 @@ public class Output {
                                   this.outputGeometry.getMake(),
                                   this.outputGeometry.getModel(),
                                   this.outputGeometry.getTransform());
-        return this;
     }
 
     @Nonnull
