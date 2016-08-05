@@ -31,12 +31,10 @@ import org.westmalle.wayland.core.EglBuffer;
 import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.core.Output;
-import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.SmBuffer;
 import org.westmalle.wayland.core.Surface;
-import org.westmalle.wayland.core.Transforms;
 import org.westmalle.wayland.core.UnsupportedBuffer;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.nativ.libEGL.EglBindWaylandDisplayWL;
@@ -464,20 +462,14 @@ public class Gles2Renderer implements GlRenderer {
                                    eglConnector.getEglSurface(),
                                    eglConnector.getEglContext());
         eglConnector.renderBegin();
-
-
         //TODO we can improve performance by keeping an output state and only trigger this logic if the output geometry & mode changes
 
         final Output output = eglConnector.getWlOutput()
                                           .getOutput();
-        final OutputMode     mode     = output.getMode();
-        final OutputGeometry geometry = output.getGeometry();
+        final OutputMode mode = output.getMode();
 
-        final int x      = geometry.getX();
-        final int y      = geometry.getY();
         final int width  = mode.getWidth();
         final int height = mode.getHeight();
-
 
         this.libGLESv2.glViewport(0,
                                   0,
@@ -496,8 +488,7 @@ public class Gles2Renderer implements GlRenderer {
                                       0,            2.0f / -height, 0,  1,
                                       0,            0,              1,  0,
                                       0,            0,              0,  1)
-                              //moving a screen to the right is the same as moving the contents to the left & top, so minus x & y
-                              .multiply(Transforms.TRANSLATE(-x, -y)).toArray();
+                              .multiply(output.getTransform()).toArray();
         //@formatter:on
     }
 
@@ -1213,22 +1204,34 @@ public class Gles2Renderer implements GlRenderer {
         //first pair => attribute vec2 a_position
         //second pair => attribute vec2 a_texCoord
         return Pointer.nref(//top left:
-                            0f, 0f,
-                            0f, 0f,
+                            0f,
+                            0f,
+                            0f,
+                            0f,
                             //top right:
-                            bufferWidth, 0f,
-                            1f, 0f,
+                            bufferWidth,
+                            0f,
+                            1f,
+                            0f,
                             //bottom right:
-                            bufferWidth, bufferHeight,
-                            1f, 1f,
+                            bufferWidth,
+                            bufferHeight,
+                            1f,
+                            1f,
                             //bottom right:
-                            bufferWidth, bufferHeight,
-                            1f, 1f,
+                            bufferWidth,
+                            bufferHeight,
+                            1f,
+                            1f,
                             //bottom left:
-                            0f, bufferHeight,
-                            0f, 1f,
+                            0f,
+                            bufferHeight,
+                            0f,
+                            1f,
                             //top left:
-                            0f, 0f,
-                            0f, 0f);
+                            0f,
+                            0f,
+                            0f,
+                            0f);
     }
 }
