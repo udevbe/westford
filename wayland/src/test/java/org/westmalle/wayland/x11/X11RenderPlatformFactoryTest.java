@@ -39,7 +39,7 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
-import org.westmalle.wayland.x11.config.X11ConnectorConfig;
+import org.westmalle.wayland.x11.config.X11RenderOutputConfig;
 import org.westmalle.wayland.x11.config.X11PlatformConfig;
 
 import java.util.Collections;
@@ -64,7 +64,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
                  OutputFactory.class,
                  X11EventBusFactory.class,
                  EventSource.class})
-public class X11PlatformFactoryTest {
+public class X11RenderPlatformFactoryTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -86,7 +86,7 @@ public class X11PlatformFactoryTest {
     @Mock
     private X11EventBusFactory        x11EventBusFactory;
     @Mock
-    private X11ConnectorFactory       x11ConnectorFactory;
+    private X11RenderOutputFactory    x11RenderOutputFactory;
     @Mock
     private X11PlatformConfig         x11PlatformConfig;
 
@@ -96,13 +96,13 @@ public class X11PlatformFactoryTest {
     @Before
     public void setUp() {
         when(this.x11PlatformConfig.getDisplay()).thenReturn(":0");
-        final X11ConnectorConfig x11ConnectorConfig = mock(X11ConnectorConfig.class);
-        when(x11ConnectorConfig.getX()).thenReturn(10);
-        when(x11ConnectorConfig.getY()).thenReturn(20);
-        when(x11ConnectorConfig.getWidth()).thenReturn(100);
-        when(x11ConnectorConfig.getHeight()).thenReturn(200);
-        when(x11ConnectorConfig.getName()).thenReturn("testWindow");
-        when(this.x11PlatformConfig.getX11ConnectorConfigs()).thenReturn(Collections.singletonList(x11ConnectorConfig));
+        final X11RenderOutputConfig x11RenderOutputConfig = mock(X11RenderOutputConfig.class);
+        when(x11RenderOutputConfig.getX()).thenReturn(10);
+        when(x11RenderOutputConfig.getY()).thenReturn(20);
+        when(x11RenderOutputConfig.getWidth()).thenReturn(100);
+        when(x11RenderOutputConfig.getHeight()).thenReturn(200);
+        when(x11RenderOutputConfig.getName()).thenReturn("testWindow");
+        when(this.x11PlatformConfig.getX11RenderOutputConfigs()).thenReturn(Collections.singletonList(x11RenderOutputConfig));
     }
 
     @Test
@@ -193,14 +193,14 @@ public class X11PlatformFactoryTest {
         final WlOutput wlOutput = mock(WlOutput.class);
         when(this.wlOutputFactory.create(output)).thenReturn(wlOutput);
 
-        final X11Connector                                                             x11Connector  = mock(X11Connector.class);
-        final EventLoop                                                                eventLoop     = mock(EventLoop.class);
-        final EventSource                                                              eventSource   = mock(EventSource.class);
-        final X11EventBus                                                              x11EventBus   = mock(X11EventBus.class);
-        final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal  = mock(Signal.class);
-        final long                                                                     xDisplay      = 1234567;
-        final long                                                                     xcbConnection = 112358;
-        final long                                                                     setup         = 473289;
+        final X11RenderOutput                                                          x11RenderOutput = mock(X11RenderOutput.class);
+        final EventLoop                                                                eventLoop       = mock(EventLoop.class);
+        final EventSource                                                              eventSource     = mock(EventSource.class);
+        final X11EventBus                                                              x11EventBus     = mock(X11EventBus.class);
+        final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal    = mock(Signal.class);
+        final long                                                                     xDisplay        = 1234567;
+        final long                                                                     xcbConnection   = 112358;
+        final long                                                                     setup           = 473289;
         final xcb_screen_t screen = malloc(xcb_screen_t.SIZE,
                                            xcb_screen_t.class).dref();
         final int cookie = 95484;
@@ -234,8 +234,8 @@ public class X11PlatformFactoryTest {
                                                cookie,
                                                0L)).thenAnswer(invocation -> malloc(xcb_intern_atom_reply_t.SIZE,
                                                                                     xcb_intern_atom_reply_t.class).address);
-        when(this.x11ConnectorFactory.create(window,
-                                             wlOutput)).thenReturn(x11Connector);
+        when(this.x11RenderOutputFactory.create(window,
+                                                wlOutput)).thenReturn(x11RenderOutput);
         //when
         this.x11PlatformFactory.create();
         //then

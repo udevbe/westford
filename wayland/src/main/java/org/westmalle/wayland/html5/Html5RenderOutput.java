@@ -25,7 +25,7 @@ import org.freedesktop.jaccall.Lng;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
-import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.JobExecutor;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
@@ -52,18 +52,18 @@ import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_TRANSFORM_IDENTITY;
 import static org.westmalle.wayland.nativ.libpng.Pointerpng_rw_ptr.nref;
 
 @AutoFactory(allowSubclasses = true,
-             className = "Html5ConnectorFactory")
-public class Html5Connector implements Connector {
+             className = "Html5RenderOutputFactory")
+public class Html5RenderOutput implements RenderOutput {
 
     private static final String OUTPUT_INFO_JSON_TEMPLATE = "{\"id\":\"%s\",\"width\":%d,\"height\":%d}";
 
     @Nonnull
-    private final Libpng      libpng;
+    private final Libpng       libpng;
     @Nonnull
-    private final JobExecutor jobExecutor;
+    private final JobExecutor  jobExecutor;
     @Nonnull
-    private final Renderer    renderer;
-    private final Connector   connector;
+    private final Renderer     renderer;
+    private final RenderOutput renderOutput;
 
     private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
 
@@ -79,20 +79,20 @@ public class Html5Connector implements Connector {
     private volatile long pngBufferAge = 0L;
 
 
-    Html5Connector(@Provided @Nonnull final Libpng libpng,
-                   @Provided @Nonnull final JobExecutor jobExecutor,
-                   @Provided @Nonnull final Renderer renderer,
-                   @Nonnull final Connector connector) {
+    Html5RenderOutput(@Provided @Nonnull final Libpng libpng,
+                      @Provided @Nonnull final JobExecutor jobExecutor,
+                      @Provided @Nonnull final Renderer renderer,
+                      @Nonnull final RenderOutput renderOutput) {
         this.libpng = libpng;
         this.jobExecutor = jobExecutor;
         this.renderer = renderer;
-        this.connector = connector;
+        this.renderOutput = renderOutput;
     }
 
     @Nonnull
     @Override
     public WlOutput getWlOutput() {
-        return this.connector.getWlOutput();
+        return this.renderOutput.getWlOutput();
     }
 
     public void commitFrame(final Pointer<Byte> bufferRGBA,
@@ -257,7 +257,7 @@ public class Html5Connector implements Connector {
 
     @Override
     public void render() {
-        this.renderer.visit(this.connector);
+        this.renderer.visit(this.renderOutput);
     }
 
     public void onWebSocketConnect(final Html5Socket html5Socket) {

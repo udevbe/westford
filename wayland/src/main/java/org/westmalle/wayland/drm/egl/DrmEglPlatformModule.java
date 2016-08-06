@@ -19,8 +19,8 @@ package org.westmalle.wayland.drm.egl;
 
 import dagger.Module;
 import dagger.Provides;
-import org.westmalle.wayland.core.Platform;
-import org.westmalle.wayland.drm.DrmPlatform;
+import org.westmalle.wayland.core.RenderPlatform;
+import org.westmalle.wayland.drm.DrmRenderPlatform;
 import org.westmalle.wayland.drm.DrmPlatformFactory;
 import org.westmalle.wayland.tty.TtyModule;
 
@@ -31,13 +31,13 @@ public class DrmEglPlatformModule {
 
     @Provides
     @Singleton
-    DrmPlatform createDrmPlatform(final DrmPlatformFactory drmPlatformFactory) {
+    DrmRenderPlatform createDrmPlatform(final DrmPlatformFactory drmPlatformFactory) {
         return drmPlatformFactory.create();
     }
 
     @Provides
     @Singleton
-    Platform createPlatform(final DrmEglPlatformFactory drmEglPlatformFactory) {
+    RenderPlatform createPlatform(final DrmEglPlatformFactory drmEglPlatformFactory) {
         return drmEglPlatformFactory.create();
     }
 }

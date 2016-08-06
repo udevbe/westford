@@ -23,10 +23,10 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
-import org.westmalle.wayland.core.EglConnector;
+import org.westmalle.wayland.core.EglRenderOutput;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.html5.Html5Connector;
+import org.westmalle.wayland.html5.Html5RenderOutput;
 import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 
@@ -37,61 +37,61 @@ import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_RGBA;
 import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 
 @AutoFactory(allowSubclasses = true,
-             className = "Html5EglConnectorFactory")
-public class Html5EglConnector implements EglConnector {
+             className = "Html5EglRenderOutputFactory")
+public class Html5EglRenderOutput implements EglRenderOutput {
 
     @Nonnull
-    private final Display        display;
+    private final Display           display;
     @Nonnull
-    private final Renderer       renderer;
+    private final Renderer          renderer;
     @Nonnull
-    private final LibGLESv2      libGLESv2;
-    private final Html5Connector html5Connector;
-    private final EglConnector   eglConnector;
+    private final LibGLESv2         libGLESv2;
+    private final Html5RenderOutput html5RenderOutput;
+    private final EglRenderOutput   eglRenderOutput;
 
     private       boolean               renderScheduled = false;
     private final EventLoop.IdleHandler doRender        = this::doRender;
 
-    Html5EglConnector(@Nonnull @Provided final Display display,
-                      @Nonnull @Provided final Renderer renderer,
-                      @Provided @Nonnull final LibGLESv2 libGLESv2,
-                      @Nonnull final Html5Connector html5Connector,
-                      @Nonnull final EglConnector eglConnector) {
+    Html5EglRenderOutput(@Nonnull @Provided final Display display,
+                         @Nonnull @Provided final Renderer renderer,
+                         @Provided @Nonnull final LibGLESv2 libGLESv2,
+                         @Nonnull final Html5RenderOutput html5RenderOutput,
+                         @Nonnull final EglRenderOutput eglRenderOutput) {
         this.display = display;
         this.renderer = renderer;
         this.libGLESv2 = libGLESv2;
-        this.html5Connector = html5Connector;
-        this.eglConnector = eglConnector;
+        this.html5RenderOutput = html5RenderOutput;
+        this.eglRenderOutput = eglRenderOutput;
     }
 
     @Override
     public long getEglSurface() {
-        return this.eglConnector.getEglSurface();
+        return this.eglRenderOutput.getEglSurface();
     }
 
     @Override
     public long getEglContext() {
-        return this.eglConnector.getEglContext();
+        return this.eglRenderOutput.getEglContext();
     }
 
     @Override
     public long getEglDisplay() {
-        return this.eglConnector.getEglDisplay();
+        return this.eglRenderOutput.getEglDisplay();
     }
 
     @Override
     public void renderBegin() {
-        this.eglConnector.renderBegin();
+        this.eglRenderOutput.renderBegin();
     }
 
     @Override
     public void renderEndBeforeSwap() {
-        this.eglConnector.renderEndBeforeSwap();
+        this.eglRenderOutput.renderEndBeforeSwap();
 
         //TODO we can optimize by checking if all html5 clients are busy and don't do any work until at least one client is available again.
-        //for this to work, the html5connector needs to trigger a publishFrame as soon as it sees one of it's clients is available again.
+        //for this to work, the html5 render output needs to trigger a publishFrame as soon as it sees one of it's clients is available again.
 
-        //TODO we should not publish a new frame if the html5 connector is still busy processing the previous frame. the html5 connector
+        //TODO we should not publish a new frame if the html5 render output is still busy processing the previous frame. the html5 render output
         //should therefore signal us when it is finished.
 
         publishFrame();
@@ -114,21 +114,21 @@ public class Html5EglConnector implements EglConnector {
                                     GL_UNSIGNED_BYTE,
                                     frameBuffer.address);
 
-        this.html5Connector.commitFrame(frameBuffer,
-                                        true,
-                                        width,
-                                        height);
+        this.html5RenderOutput.commitFrame(frameBuffer,
+                                           true,
+                                           width,
+                                           height);
     }
 
     @Override
     public void renderEndAfterSwap() {
-        this.eglConnector.renderEndAfterSwap();
+        this.eglRenderOutput.renderEndAfterSwap();
     }
 
     @Nonnull
     @Override
     public WlOutput getWlOutput() {
-        return this.eglConnector.getWlOutput();
+        return this.eglRenderOutput.getWlOutput();
     }
 
     @Override

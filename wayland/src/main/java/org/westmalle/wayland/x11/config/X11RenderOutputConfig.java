@@ -21,7 +21,7 @@ package org.westmalle.wayland.x11.config;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
-public interface X11ConnectorConfig {
+public interface X11RenderOutputConfig {
 
     @Nonnull
     String getName();

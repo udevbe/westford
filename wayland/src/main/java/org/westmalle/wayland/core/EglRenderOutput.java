@@ -18,7 +18,7 @@
 package org.westmalle.wayland.core;
 
 
-public interface EglConnector extends Connector{
+public interface EglRenderOutput extends RenderOutput {
 
     long getEglSurface();
 

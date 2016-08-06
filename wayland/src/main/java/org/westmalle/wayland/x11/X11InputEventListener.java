@@ -54,14 +54,14 @@ import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
 public class X11InputEventListener implements Slot<Pointer<xcb_generic_event_t>> {
 
     @Nonnull
-    private final X11XkbFactory x11XkbFactory;
+    private final X11XkbFactory     x11XkbFactory;
     @Nonnull
-    private final X11Platform   x11Platform;
+    private final X11RenderPlatform x11Platform;
     @Nonnull
-    private final X11Seat       x11Seat;
+    private final X11Seat           x11Seat;
 
     X11InputEventListener(@Provided @Nonnull final X11XkbFactory x11XkbFactory,
-                          @Provided @Nonnull final X11Platform x11Platform,
+                          @Provided @Nonnull final X11RenderPlatform x11Platform,
                           @Nonnull final X11Seat x11Seat) {
         this.x11XkbFactory = x11XkbFactory;
         this.x11Platform = x11Platform;

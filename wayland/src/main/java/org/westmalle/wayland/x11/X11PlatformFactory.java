@@ -34,16 +34,16 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
-import org.westmalle.wayland.x11.config.X11ConnectorConfig;
+import org.westmalle.wayland.x11.config.X11RenderOutputConfig;
 import org.westmalle.wayland.x11.config.X11PlatformConfig;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -83,7 +83,7 @@ public class X11PlatformFactory {
     @Nonnull
     private final OutputFactory             outputFactory;
     @Nonnull
-    private final X11ConnectorFactory       x11ConnectorFactory;
+    private final X11RenderOutputFactory    x11RenderOutputFactory;
     @Nonnull
     private final X11EventBusFactory        x11EventBusFactory;
     @Nonnull
@@ -97,7 +97,7 @@ public class X11PlatformFactory {
                        @Nonnull final PrivateX11PlatformFactory privateX11PlatformFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
                        @Nonnull final OutputFactory outputFactory,
-                       @Nonnull final X11ConnectorFactory x11ConnectorFactory,
+                       @Nonnull final X11RenderOutputFactory x11RenderOutputFactory,
                        @Nonnull final X11EventBusFactory x11EventBusFactory,
                        @Nonnull final X11PlatformConfig x11PlatformConfig) {
         this.display = display;
@@ -107,12 +107,12 @@ public class X11PlatformFactory {
         this.privateX11PlatformFactory = privateX11PlatformFactory;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
-        this.x11ConnectorFactory = x11ConnectorFactory;
+        this.x11RenderOutputFactory = x11RenderOutputFactory;
         this.x11EventBusFactory = x11EventBusFactory;
         this.x11PlatformConfig = x11PlatformConfig;
     }
 
-    public X11Platform create() {
+    public X11RenderPlatform create() {
         final String xDisplayName = this.x11PlatformConfig.getDisplay();
 
         LOGGER.info(format("Creating X11 platform:\n"
@@ -131,27 +131,27 @@ public class X11PlatformFactory {
             throw new RuntimeException("error occurred while connecting to X server");
         }
 
-        final X11Platform x11Platform = createX11Platform(xDisplay,
-                                                          xcbConnection);
+        final X11RenderPlatform x11Platform = createX11Platform(xDisplay,
+                                                                xcbConnection);
 
         this.libxcb.xcb_flush(xcbConnection);
         return x11Platform;
     }
 
-    private X11Platform createX11Platform(final long xDisplay,
-                                          final long xcbConnection) {
+    private X11RenderPlatform createX11Platform(final long xDisplay,
+                                                final long xcbConnection) {
         final X11EventBus          x11EventBus = this.x11EventBusFactory.create(xcbConnection);
         final Map<String, Integer> x11Atoms    = internX11Atoms(xcbConnection);
 
-        final Iterable<X11ConnectorConfig> x11ConnectorConfigs   = this.x11PlatformConfig.getX11ConnectorConfigs();
-        final List<Optional<X11Connector>> optionalX11Connectors = new LinkedList<>();
+        final Iterable<X11RenderOutputConfig> x11RenderOutputConfigs = this.x11PlatformConfig.getX11RenderOutputConfigs();
+        final List<X11RenderOutput>           x11RenderOutputs       = new LinkedList<>();
 
-        x11ConnectorConfigs.forEach(x11ConnectorConfig ->
-                                            addX11Connector(optionalX11Connectors,
-                                                            xcbConnection,
-                                                            x11Atoms,
-                                                            x11EventBus,
-                                                            x11ConnectorConfig));
+        x11RenderOutputConfigs.forEach(x11RenderOutputConfig ->
+                                               addX11RenderOutput(x11RenderOutputs,
+                                                                  xcbConnection,
+                                                                  x11Atoms,
+                                                                  x11EventBus,
+                                                                  x11RenderOutputConfig));
 
         this.display.getEventLoop()
                     .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(xcbConnection),
@@ -159,7 +159,7 @@ public class X11PlatformFactory {
                                        x11EventBus)
                     .check();
 
-        return this.privateX11PlatformFactory.create(optionalX11Connectors,
+        return this.privateX11PlatformFactory.create(x11RenderOutputs,
                                                      x11EventBus,
                                                      xcbConnection,
                                                      xDisplay,
@@ -207,16 +207,16 @@ public class X11PlatformFactory {
         return x11Atoms;
     }
 
-    private void addX11Connector(final List<Optional<X11Connector>> optionalX11Connectors,
-                                 final long xcbConnection,
-                                 final Map<String, Integer> x11Atoms,
-                                 final X11EventBus x11EventBus,
-                                 final X11ConnectorConfig x11ConnectorConfig) {
+    private void addX11RenderOutput(final List<X11RenderOutput> x11RenderOutputs,
+                                    final long xcbConnection,
+                                    final Map<String, Integer> x11Atoms,
+                                    final X11EventBus x11EventBus,
+                                    final X11RenderOutputConfig x11RenderOutputConfig) {
 
-        final int x      = x11ConnectorConfig.getX();
-        final int y      = x11ConnectorConfig.getY();
-        final int width  = x11ConnectorConfig.getWidth();
-        final int height = x11ConnectorConfig.getHeight();
+        final int x      = x11RenderOutputConfig.getX();
+        final int y      = x11RenderOutputConfig.getY();
+        final int width  = x11RenderOutputConfig.getWidth();
+        final int height = x11RenderOutputConfig.getHeight();
 
         if (width < 0 || height < 0) {
             throw new IllegalArgumentException("Got negative width or height");
@@ -264,7 +264,7 @@ public class X11PlatformFactory {
                       window,
                       x11Atoms.get("WM_PROTOCOLS"),
                       x11Atoms.get("WM_DELETE_WINDOW"));
-        setName(x11ConnectorConfig,
+        setName(x11RenderOutputConfig,
                 xcbConnection,
                 window,
                 x11Atoms);
@@ -272,12 +272,12 @@ public class X11PlatformFactory {
         this.libxcb.xcb_map_window(xcbConnection,
                                    window);
 
-        final Output output = createOutput(x11ConnectorConfig,
+        final Output output = createOutput(x11RenderOutputConfig,
                                            screen);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
-        final X11Connector x11Connector = this.x11ConnectorFactory.create(window,
-                                                                          wlOutput);
+        final X11RenderOutput x11RenderOutput = this.x11RenderOutputFactory.create(window,
+                                                                                   wlOutput);
 
         x11EventBus.getXEventSignal()
                    .connect(event -> {
@@ -288,25 +288,25 @@ public class X11PlatformFactory {
                                handle(xcbConnection,
                                       event.castp(xcb_client_message_event_t.class),
                                       x11Atoms,
-                                      optionalX11Connectors);
+                                      x11RenderOutputs);
 
                                break;
                            }
                        }
                    });
 
-        optionalX11Connectors.add(Optional.of(x11Connector));
+        x11RenderOutputs.add(x11RenderOutput);
     }
 
-    private Output createOutput(final X11ConnectorConfig x11ConnectorConfig,
+    private Output createOutput(final X11RenderOutputConfig x11RenderOutputConfig,
                                 final xcb_screen_t screen) {
 
-        final int width  = x11ConnectorConfig.getWidth();
-        final int height = x11ConnectorConfig.getHeight();
+        final int width  = x11RenderOutputConfig.getWidth();
+        final int height = x11RenderOutputConfig.getHeight();
 
         final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(x11ConnectorConfig.getX())
-                                                            .y(x11ConnectorConfig.getY())
+                                                            .x(x11RenderOutputConfig.getX())
+                                                            .y(x11RenderOutputConfig.getY())
                                                             .subpixel(0)
                                                             .make("Westmalle xcb")
                                                             .model("X11")
@@ -322,7 +322,7 @@ public class X11PlatformFactory {
                                                 .height(height)
                                                 .refresh(60)
                                                 .build();
-        return this.outputFactory.create(x11ConnectorConfig.getName(),
+        return this.outputFactory.create(x11RenderOutputConfig.getName(),
                                          outputGeometry,
                                          outputMode);
     }
@@ -341,11 +341,11 @@ public class X11PlatformFactory {
                                         Pointer.nref(wmDeleteWindow).address);
     }
 
-    private void setName(final X11ConnectorConfig x11ConnectorConfig,
+    private void setName(final X11RenderOutputConfig x11RenderOutputConfig,
                          final long connection,
                          final int window,
                          final Map<String, Integer> x11Atoms) {
-        final String name       = x11ConnectorConfig.getName();
+        final String name       = x11RenderOutputConfig.getName();
         final int    nameLength = name.length();
         final long   nameNative = Pointer.nref(name).address;
 
@@ -370,7 +370,7 @@ public class X11PlatformFactory {
     private void handle(final long connection,
                         final Pointer<xcb_client_message_event_t> event,
                         final Map<String, Integer> x11Atoms,
-                        final List<Optional<X11Connector>> optionalX11Connectors) {
+                        final List<X11RenderOutput> x11RenderOutputs) {
         final int atom = event.dref()
                               .data()
                               .data32()
@@ -379,15 +379,16 @@ public class X11PlatformFactory {
                                       .window();
 
         if (atom == x11Atoms.get("WM_DELETE_WINDOW")) {
-            optionalX11Connectors.replaceAll(x11ConnectorOptional -> {
-                if (x11ConnectorOptional.isPresent() && x11ConnectorOptional.get()
-                                                                            .getXWindow() == sourceWindow) {
+            final Iterator<X11RenderOutput> x11RenderOutputIterator = x11RenderOutputs.iterator();
+            while (x11RenderOutputIterator.hasNext()) {
+                final X11RenderOutput x11RenderOutput = x11RenderOutputIterator.next();
+                if (x11RenderOutput.getXWindow() == sourceWindow) {
                     this.libxcb.xcb_destroy_window(connection,
                                                    sourceWindow);
-                    return Optional.empty();
+                    x11RenderOutputIterator.remove();
+                    return;
                 }
-                return x11ConnectorOptional;
-            });
+            }
         }
     }
 }

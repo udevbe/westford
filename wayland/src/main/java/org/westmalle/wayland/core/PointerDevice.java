@@ -96,7 +96,6 @@ public class PointerDevice implements Role {
 
     @Inject
     PointerDevice(@Nonnull final Display display,
-                  @Nonnull final InfiniteRegion infiniteRegion,
                   @Nonnull final NullRegion nullRegion,
                   @Nonnull final CursorFactory cursorFactory,
                   @Nonnull final JobExecutor jobExecutor,

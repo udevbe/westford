@@ -14,7 +14,6 @@
 package org.westmalle.wayland.x11;
 
 import org.freedesktop.jaccall.Pointer;
-import org.freedesktop.jaccall.Size;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,16 +23,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libEGL.PointerEglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.PointerEglGetPlatformDisplayEXT;
 import org.westmalle.wayland.x11.egl.PrivateX11EglPlatformFactory;
-import org.westmalle.wayland.x11.egl.X11EglConnectorFactory;
 import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
-
-import javax.annotation.Nonnull;
+import org.westmalle.wayland.x11.egl.X11EglRenderOutputFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -50,13 +46,12 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class X11EglPlatformFactoryTest {
+public class X11EglRenderPlatformFactoryTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -65,20 +60,20 @@ public class X11EglPlatformFactoryTest {
     @Mock
     private PrivateX11EglPlatformFactory privateX11EglPlatformFactory;
     @Mock
-    private X11Platform                  x11Platform;
+    private X11RenderPlatform            x11Platform;
     @Mock
     private GlRenderer                   glRenderer;
     @Mock
-    private X11EglConnectorFactory       x11EglConnectorFactory;
+    private X11EglRenderOutputFactory    x11EglRenderOutputFactory;
     @InjectMocks
     private X11EglPlatformFactory        x11EglPlatformFactory;
 
     @Before
     public void setUp() {
-        final X11Connector                 x11Connector  = mock(X11Connector.class);
-        final List<Optional<X11Connector>> x11Connectors = new LinkedList<>();
-        x11Connectors.add(Optional.of(x11Connector));
-        when(this.x11Platform.getConnectors()).thenReturn(x11Connectors);
+        final X11RenderOutput       x11RenderOutput  = mock(X11RenderOutput.class);
+        final List<X11RenderOutput> x11RenderOutputs = new LinkedList<>();
+        x11RenderOutputs.add(x11RenderOutput);
+        when(this.x11Platform.getRenderOutputs()).thenReturn(x11RenderOutputs);
     }
 
     @Test

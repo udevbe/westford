@@ -46,11 +46,11 @@ public class Html5Socket implements WebSocketListener {
 
 
     @Nonnull
-    private final JobExecutor    jobExecutor;
+    private final JobExecutor       jobExecutor;
     @Nonnull
-    private final Html5Connector html5Connector;
+    private final Html5RenderOutput html5RenderOutput;
     @Nonnull
-    private final Html5Seat      html5Seat;
+    private final Html5Seat         html5Seat;
 
     private Optional<Session> session = Optional.empty();
 
@@ -70,10 +70,10 @@ public class Html5Socket implements WebSocketListener {
 
 
     Html5Socket(@Provided @Nonnull final JobExecutor jobExecutor,
-                @Nonnull final Html5Connector html5Connector,
+                @Nonnull final Html5RenderOutput html5RenderOutput,
                 @Nonnull final Html5Seat html5Seat) {
         this.jobExecutor = jobExecutor;
-        this.html5Connector = html5Connector;
+        this.html5RenderOutput = html5RenderOutput;
         this.html5Seat = html5Seat;
     }
 
@@ -139,7 +139,7 @@ public class Html5Socket implements WebSocketListener {
     private void handleWebSocketText(final String message) {
 
         if (message.equals(REQUEST_OUTPUT_INFO)) {
-            this.html5Connector.requestOutputInfo(this);
+            this.html5RenderOutput.requestOutputInfo(this);
         }
         else if (message.equals(ACK_OUTPUT_INFO)) {
             requestFrame();
@@ -175,7 +175,7 @@ public class Html5Socket implements WebSocketListener {
         this.pendingBufferAge = 0L;
 
         this.renderPending.set(false);
-        this.html5Connector.requestPngBuffer(this);
+        this.html5RenderOutput.requestPngBuffer(this);
     }
 
 
@@ -183,13 +183,13 @@ public class Html5Socket implements WebSocketListener {
     public void onWebSocketClose(final int statusCode,
                                  final String reason) {
         this.session = Optional.empty();
-        this.html5Connector.onWebSocketClose(this);
+        this.html5RenderOutput.onWebSocketClose(this);
     }
 
     @Override
     public void onWebSocketConnect(final Session session) {
         this.session = Optional.of(session);
-        this.html5Connector.onWebSocketConnect(this);
+        this.html5RenderOutput.onWebSocketConnect(this);
     }
 
     @Override

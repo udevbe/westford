@@ -18,35 +18,31 @@
 package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.core.Connector;
-import org.westmalle.wayland.core.Platform;
-import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.protocol.WlOutput;
+import org.westmalle.wayland.core.RenderPlatform;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @AutoFactory(className = "PrivateX11PlatformFactory",
              allowSubclasses = true)
-public class X11Platform implements Platform {
+public class X11RenderPlatform implements RenderPlatform {
 
     @Nonnull
-    private final List<Optional<X11Connector>> connectors;
+    private final List<X11RenderOutput> x11RenderOutputs;
     @Nonnull
-    private final X11EventBus                  x11EventBus;
-    private final long                         xcbConnection;
-    private final long                         xDisplay;
+    private final X11EventBus           x11EventBus;
+    private final long                  xcbConnection;
+    private final long                  xDisplay;
     @Nonnull
-    private final Map<String, Integer>         atoms;
+    private final Map<String, Integer>  atoms;
 
-    X11Platform(@Nonnull final List<Optional<X11Connector>> connectors,
-                @Nonnull final X11EventBus x11EventBus,
-                final long xcbConnection,
-                final long xDisplay,
-                @Nonnull final Map<String, Integer> x11Atoms) {
-        this.connectors = connectors;
+    X11RenderPlatform(@Nonnull final List<X11RenderOutput> x11RenderOutputs,
+                      @Nonnull final X11EventBus x11EventBus,
+                      final long xcbConnection,
+                      final long xDisplay,
+                      @Nonnull final Map<String, Integer> x11Atoms) {
+        this.x11RenderOutputs = x11RenderOutputs;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xDisplay = xDisplay;
@@ -73,7 +69,7 @@ public class X11Platform implements Platform {
 
     @Nonnull
     @Override
-    public List<Optional<X11Connector>> getConnectors() {
-        return this.connectors;
+    public List<X11RenderOutput> getRenderOutputs() {
+        return this.x11RenderOutputs;
     }
 }

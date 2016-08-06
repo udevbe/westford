@@ -18,35 +18,33 @@
 package org.westmalle.wayland.dispmanx.egl;
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.core.EglPlatform;
-import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.dispmanx.DispmanxPlatform;
+import org.westmalle.wayland.core.EglRenderPlatform;
+import org.westmalle.wayland.dispmanx.DispmanxRenderPlatform;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Optional;
 
 @AutoFactory(className = "PrivateDispmanxEglPlatformFactory",
              allowSubclasses = true)
 //TODO unit tests
-public class DispmanxEglPlatform implements EglPlatform {
+public class DispmanxEglRenderPlatform implements EglRenderPlatform {
 
     @Nonnull
-    private final DispmanxPlatform                     dispmanxPlatform;
+    private final DispmanxRenderPlatform        dispmanxPlatform;
     @Nonnull
-    private final List<Optional<DispmanxEglConnector>> dispmanxEglConnectors;
-    private final long                                 eglDisplay;
-    private final long                                 eglContext;
+    private final List<DispmanxEglRenderOutput> dispmanxEglRenderOutputs;
+    private final long                          eglDisplay;
+    private final long                          eglContext;
     @Nonnull
-    private final String                               eglExtensions;
+    private final String                        eglExtensions;
 
-    DispmanxEglPlatform(@Nonnull final DispmanxPlatform dispmanxPlatform,
-                        @Nonnull final List<Optional<DispmanxEglConnector>> dispmanxEglConnectors,
-                        final long eglDisplay,
-                        final long eglContext,
-                        @Nonnull final String eglExtensions) {
+    DispmanxEglRenderPlatform(@Nonnull final DispmanxRenderPlatform dispmanxPlatform,
+                              @Nonnull final List<DispmanxEglRenderOutput> dispmanxEglRenderOutputs,
+                              final long eglDisplay,
+                              final long eglContext,
+                              @Nonnull final String eglExtensions) {
         this.dispmanxPlatform = dispmanxPlatform;
-        this.dispmanxEglConnectors = dispmanxEglConnectors;
+        this.dispmanxEglRenderOutputs = dispmanxEglRenderOutputs;
         this.eglDisplay = eglDisplay;
         this.eglContext = eglContext;
         this.eglExtensions = eglExtensions;
@@ -64,12 +62,12 @@ public class DispmanxEglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public List<Optional<DispmanxEglConnector>> getConnectors() {
-        return this.dispmanxEglConnectors;
+    public List<DispmanxEglRenderOutput> getRenderOutputs() {
+        return this.dispmanxEglRenderOutputs;
     }
 
     @Nonnull
-    public DispmanxPlatform getDispmanxPlatform() {
+    public DispmanxRenderPlatform getDispmanxPlatform() {
         return this.dispmanxPlatform;
     }
 

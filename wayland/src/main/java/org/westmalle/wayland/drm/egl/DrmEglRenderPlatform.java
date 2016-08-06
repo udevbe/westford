@@ -15,38 +15,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.x11.egl;
+package org.westmalle.wayland.drm.egl;
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.core.EglPlatform;
-import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.x11.X11Platform;
+import org.westmalle.wayland.core.EglRenderPlatform;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Optional;
 
-@AutoFactory(className = "PrivateX11EglPlatformFactory",
-             allowSubclasses = true)
-public class X11EglPlatform implements EglPlatform {
 
-    @Nonnull
-    private final List<Optional<X11EglConnector>> eglConnectors;
+@AutoFactory(allowSubclasses = true,
+             className = "PrivateDrmEglPlatformFactory")
+public class DrmEglRenderPlatform implements EglRenderPlatform {
 
-    private final long eglDisplay;
-    private final long eglContext;
 
-    @Nonnull
+    private final long gbmDevice;
+
+    private final long   eglDisplay;
+    private final long   eglContext;
     private final String eglExtensions;
 
-    X11EglPlatform(@Nonnull final List<Optional<X11EglConnector>> eglConnectors,
-                   final long eglDisplay,
-                   final long eglContext,
-                   @Nonnull final String eglExtensions) {
-        this.eglConnectors = eglConnectors;
+    @Nonnull
+    private final List<DrmEglRenderOutput> drmEglRenderOutputs;
+
+    DrmEglRenderPlatform(final long gbmDevice,
+                         final long eglDisplay,
+                         final long eglContext,
+                         final String eglExtensions,
+                         @Nonnull final List<DrmEglRenderOutput> drmEglRenderOutputs) {
+        this.gbmDevice = gbmDevice;
         this.eglDisplay = eglDisplay;
         this.eglContext = eglContext;
         this.eglExtensions = eglExtensions;
+        this.drmEglRenderOutputs = drmEglRenderOutputs;
     }
 
     @Override
@@ -61,13 +62,17 @@ public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public List<Optional<X11EglConnector>> getConnectors() {
-        return this.eglConnectors;
+    public List<DrmEglRenderOutput> getRenderOutputs() {
+        return this.drmEglRenderOutputs;
     }
 
     @Nonnull
     @Override
     public String getEglExtensions() {
         return this.eglExtensions;
+    }
+
+    public long getGbmDevice() {
+        return this.gbmDevice;
     }
 }

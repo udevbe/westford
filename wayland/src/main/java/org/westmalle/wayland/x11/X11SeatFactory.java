@@ -32,7 +32,7 @@ import java.util.EnumSet;
 public class X11SeatFactory {
 
     @Nonnull
-    private final X11Platform                  x11Platform;
+    private final X11RenderPlatform            x11Platform;
     @Nonnull
     private final X11XkbFactory                x11XkbFactory;
     @Nonnull
@@ -48,7 +48,7 @@ public class X11SeatFactory {
 
     @Inject
     X11SeatFactory(@Nonnull final PrivateX11SeatFactory privateX11SeatFactory,
-                   @Nonnull final X11Platform x11Platform,
+                   @Nonnull final X11RenderPlatform x11Platform,
                    @Nonnull final X11XkbFactory x11XkbFactory,
                    @Nonnull final X11InputEventListenerFactory x11InputEventListenerFactory,
                    @Nonnull final WlSeatFactory wlSeatFactory,

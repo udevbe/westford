@@ -28,18 +28,17 @@ import java.util.concurrent.TimeUnit;
 public class Compositor {
 
     @Nonnull
-    private final Platform platform;
+    private final RenderPlatform renderPlatform;
 
     @Inject
-    Compositor(@Nonnull final Platform platform) {
-        this.platform = platform;
+    Compositor(@Nonnull final RenderPlatform renderPlatform) {
+        this.renderPlatform = renderPlatform;
     }
 
     public void requestRender() {
-        //TODO optimize by only requesting a render for a specific connector.
-        this.platform.getConnectors()
-                     .forEach(connectorOptional ->
-                                      connectorOptional.ifPresent(Connector::render));
+        //TODO optimize by only requesting a render for specific damaged render outputs
+        this.renderPlatform.getRenderOutputs()
+                           .forEach(RenderOutput::render);
     }
 
     @Nonnegative

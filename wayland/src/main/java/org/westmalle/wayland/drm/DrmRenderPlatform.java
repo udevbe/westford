@@ -18,39 +18,36 @@
 package org.westmalle.wayland.drm;
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.core.Platform;
-import org.westmalle.wayland.core.Renderer;
+import org.westmalle.wayland.core.RenderPlatform;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Optional;
 
 //TODO drm platform, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "PrivateDrmPlatformFactory")
-public class DrmPlatform implements Platform {
+public class DrmRenderPlatform implements RenderPlatform {
 
-    private final long                         drmDevice;
-    private final int                          drmFd;
+    private final long                  drmDevice;
+    private final int                   drmFd;
     @Nonnull
-    private final DrmEventBus                  drmEventBus;
+    private final DrmEventBus           drmEventBus;
     @Nonnull
-    private final List<Optional<DrmConnector>> drmConnectors;
+    private final List<DrmRenderOutput> drmRenderOutputs;
 
-    DrmPlatform(final long drmDevice,
-                final int drmFd,
-                @Nonnull final DrmEventBus drmEventBus,
-                @Nonnull final List<Optional<DrmConnector>> drmConnectors) {
+    DrmRenderPlatform(final long drmDevice,
+                      final int drmFd,
+                      @Nonnull final DrmEventBus drmEventBus,
+                      @Nonnull final List<DrmRenderOutput> drmRenderOutputs) {
         this.drmDevice = drmDevice;
         this.drmFd = drmFd;
         this.drmEventBus = drmEventBus;
-        this.drmConnectors = drmConnectors;
+        this.drmRenderOutputs = drmRenderOutputs;
     }
 
     @Nonnull
-    @Override
-    public List<Optional<DrmConnector>> getConnectors() {
-        return this.drmConnectors;
+    public List<DrmRenderOutput> getRenderOutputs() {
+        return this.drmRenderOutputs;
     }
 
     @Nonnull

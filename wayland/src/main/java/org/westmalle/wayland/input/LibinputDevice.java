@@ -25,12 +25,11 @@ import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.shared.WlSeatCapability;
-import org.westmalle.wayland.core.Compositor;
-import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.core.Platform;
+import org.westmalle.wayland.core.RenderPlatform;
 import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
@@ -42,7 +41,6 @@ import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_PRESSED;
 import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_RELEASED;
@@ -61,19 +59,19 @@ public class LibinputDevice {
     private final Libinput                  libinput;
     private final long                      device;
     @Nonnull
-    private final Platform                  platform;
+    private final RenderPlatform            renderPlatform;
     @Nonnull
     private final WlSeat                    wlSeat;
     @Nonnull
     private final EnumSet<WlSeatCapability> deviceCapabilities;
 
     public LibinputDevice(@Provided @Nonnull final Libinput libinput,
-                          @Provided @Nonnull final Platform platform,
+                          @Provided @Nonnull final RenderPlatform renderPlatform,
                           @Nonnull final WlSeat wlSeat,
                           final long device,
                           @Nonnull final EnumSet<WlSeatCapability> deviceCapabilities) {
         this.libinput = libinput;
-        this.platform = platform;
+        this.renderPlatform = renderPlatform;
         this.wlSeat = wlSeat;
         this.device = device;
         this.deviceCapabilities = deviceCapabilities;
@@ -89,11 +87,11 @@ public class LibinputDevice {
 
         final long outputNamePointer = this.libinput.libinput_device_get_output_name(this.device);
         if (outputNamePointer == 0L) {
-            final Iterator<? extends Optional<? extends Connector>> iterator = this.platform.getConnectors()
-                                                                                            .iterator();
+            final Iterator<? extends RenderOutput> iterator = this.renderPlatform.getRenderOutputs()
+                                                                                 .iterator();
             if (iterator.hasNext()) {
-                final Optional<? extends Connector> connector = iterator.next();
-                return connector.map(Connector::getWlOutput);
+                return Optional.of(iterator.next()
+                                           .getWlOutput());
             }
             else {
                 return Optional.empty();
@@ -103,14 +101,13 @@ public class LibinputDevice {
         final String deviceOutputName = Pointer.wrap(String.class,
                                                      outputNamePointer)
                                                .dref();
-//        for (final WlOutput wlOutput : this.platform.getWlOutput()) {
+//        for (final WlOutput wlOutput : this.renderPlatform.getWlOutput()) {
         //FIXME give outputs a name, iterate them and match
-//            if (deviceOutputName.equals(platform.getOutput()
+//            if (deviceOutputName.equals(renderPlatform.getOutput()
 //                                                .getName())) {
-        return Optional.of(this.platform.getConnectors()
-                                        .get(0)
-                                        .get()
-                                        .getWlOutput());
+        return Optional.of(this.renderPlatform.getRenderOutputs()
+                                              .get(0)
+                                              .getWlOutput());
 //            }
         //     }
 

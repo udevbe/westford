@@ -19,26 +19,24 @@ package org.westmalle.wayland.html5;
 
 import com.google.auto.factory.AutoFactory;
 import org.eclipse.jetty.server.Server;
-import org.westmalle.wayland.core.Platform;
-import org.westmalle.wayland.core.Renderer;
+import org.westmalle.wayland.core.RenderPlatform;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateHtml5PlatformFactory")
-public class Html5Platform implements Platform {
+public class Html5RenderPlatform implements RenderPlatform {
 
-    private final Server                         server;
-    private final List<Optional<Html5Connector>> connectors;
+    private final Server                  server;
+    private final List<Html5RenderOutput> html5RenderOutputs;
 
     @Inject
-    Html5Platform(final Server server,
-                  final List<Optional<Html5Connector>> connectors) {
+    Html5RenderPlatform(final Server server,
+                        final List<Html5RenderOutput> html5RenderOutputs) {
         this.server = server;
-        this.connectors = connectors;
+        this.html5RenderOutputs = html5RenderOutputs;
     }
 
     public Server getServer() {
@@ -47,7 +45,7 @@ public class Html5Platform implements Platform {
 
     @Nonnull
     @Override
-    public List<Optional<Html5Connector>> getConnectors() {
-        return this.connectors;
+    public List<Html5RenderOutput> getRenderOutputs() {
+        return this.html5RenderOutputs;
     }
 }

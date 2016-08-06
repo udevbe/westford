@@ -22,40 +22,40 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
-import org.westmalle.wayland.core.EglConnector;
+import org.westmalle.wayland.core.EglRenderOutput;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.x11.X11Connector;
+import org.westmalle.wayland.x11.X11RenderOutput;
 
 import javax.annotation.Nonnull;
 
 @AutoFactory(allowSubclasses = true,
-             className = "X11EglConnectorFactory")
-public class X11EglConnector implements EglConnector {
+             className = "X11EglRenderOutputFactory")
+public class X11EglRenderOutput implements EglRenderOutput {
 
     @Nonnull
-    private final Renderer     renderer;
+    private final Renderer        renderer;
     @Nonnull
-    private final X11Connector x11Connector;
+    private final X11RenderOutput x11RenderOutput;
     @Nonnull
-    private final Display      display;
-    private final long         eglSurface;
-    private final long         eglContext;
-    private final long         eglDisplay;
+    private final Display         display;
+    private final long            eglSurface;
+    private final long            eglContext;
+    private final long            eglDisplay;
 
     private boolean renderScheduled = false;
 
     private final EventLoop.IdleHandler doRender = this::doRender;
 
-    X11EglConnector(@Nonnull @Provided final Display display,
-                    @Nonnull @Provided final Renderer renderer,
-                    @Nonnull final X11Connector x11Connector,
-                    final long eglSurface,
-                    final long eglContext,
-                    final long eglDisplay) {
+    X11EglRenderOutput(@Nonnull @Provided final Display display,
+                       @Nonnull @Provided final Renderer renderer,
+                       @Nonnull final X11RenderOutput x11RenderOutput,
+                       final long eglSurface,
+                       final long eglContext,
+                       final long eglDisplay) {
         this.display = display;
         this.renderer = renderer;
-        this.x11Connector = x11Connector;
+        this.x11RenderOutput = x11RenderOutput;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
         this.eglDisplay = eglDisplay;
@@ -79,12 +79,12 @@ public class X11EglConnector implements EglConnector {
     @Nonnull
     @Override
     public WlOutput getWlOutput() {
-        return this.x11Connector.getWlOutput();
+        return this.x11RenderOutput.getWlOutput();
     }
 
     @Nonnull
-    public X11Connector getX11Connector() {
-        return this.x11Connector;
+    public X11RenderOutput getX11RenderOutput() {
+        return this.x11RenderOutput;
     }
 
     @Override
