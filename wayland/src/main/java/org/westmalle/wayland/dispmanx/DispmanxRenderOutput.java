@@ -19,39 +19,41 @@ package org.westmalle.wayland.dispmanx;
 
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.core.Connector;
-import org.westmalle.wayland.core.Platform;
+import com.google.auto.factory.Provided;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
+import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Optional;
 
-@AutoFactory(className = "PrivateDispmanxPlatformFactory",
-             allowSubclasses = true)
-public class DispmanxPlatform implements Platform {
+@AutoFactory(allowSubclasses = true,
+             className = "DispmanxRenderOutputFactory")
+public class DispmanxRenderOutput implements RenderOutput {
 
-    @Nonnull
-    private final DISPMANX_MODEINFO_T modeinfo;
+    private final WlOutput wlOutput;
+    private final int      dispmanxElement;
+    private final Renderer renderer;
 
-    @Nonnull
-    private final List<Optional<DispmanxConnector>> dispmanxConnectors;
-
-    DispmanxPlatform(@Nonnull final DISPMANX_MODEINFO_T modeinfo,
-                     @Nonnull final List<Optional<DispmanxConnector>> dispmanxConnectors) {
-        this.modeinfo = modeinfo;
-        this.dispmanxConnectors = dispmanxConnectors;
-    }
-
-    @Nonnull
-    public DISPMANX_MODEINFO_T getModeinfo() {
-        return this.modeinfo;
+    DispmanxRenderOutput(@Nonnull @Provided final Renderer renderer,
+                         final WlOutput wlOutput,
+                         final int dispmanxElement) {
+        this.wlOutput = wlOutput;
+        this.dispmanxElement = dispmanxElement;
+        this.renderer = renderer;
     }
 
     @Nonnull
     @Override
-    public List<Optional<DispmanxConnector>> getConnectors() {
-        return this.dispmanxConnectors;
+    public WlOutput getWlOutput() {
+        return this.wlOutput;
+    }
+
+    public int getDispmanxElement() {
+        return this.dispmanxElement;
+    }
+
+    @Override
+    public void render() {
+        this.renderer.visit(this);
     }
 }

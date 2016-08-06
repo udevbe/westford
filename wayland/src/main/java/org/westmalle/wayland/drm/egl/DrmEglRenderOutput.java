@@ -26,9 +26,9 @@ import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.core.EglConnector;
+import org.westmalle.wayland.core.EglRenderOutput;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.drm.DrmConnector;
+import org.westmalle.wayland.drm.DrmRenderOutput;
 import org.westmalle.wayland.drm.DrmPageFlipCallback;
 import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
@@ -43,8 +43,8 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
 
 //TODO put all gbm/egl specifics here
 @AutoFactory(allowSubclasses = true,
-             className = "DrmEglConnectorFactory")
-public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
+             className = "DrmEglRenderOutputFactory")
+public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback {
 
     @Nonnull
     private final Libc    libc;
@@ -63,7 +63,7 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     private final long gbmSurface;
 
     @Nonnull
-    private final DrmConnector drmConnector;
+    private final DrmRenderOutput drmRenderOutput;
 
     private final long eglSurface;
     private final long eglContext;
@@ -82,18 +82,18 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     private boolean enabled;
 
 
-    DrmEglConnector(@Nonnull @Provided final Libc libc,
-                    @Nonnull @Provided final Libgbm libgbm,
-                    @Nonnull @Provided final Libdrm libdrm,
-                    @Nonnull @Provided final Display display,
-                    @Nonnull @Provided final Renderer renderer,
-                    final int drmFd,
-                    final long gbmBo,
-                    final long gbmSurface,
-                    @Nonnull final DrmConnector drmConnector,
-                    final long eglSurface,
-                    final long eglContext,
-                    final long eglDisplay) {
+    DrmEglRenderOutput(@Nonnull @Provided final Libc libc,
+                       @Nonnull @Provided final Libgbm libgbm,
+                       @Nonnull @Provided final Libdrm libdrm,
+                       @Nonnull @Provided final Display display,
+                       @Nonnull @Provided final Renderer renderer,
+                       final int drmFd,
+                       final long gbmBo,
+                       final long gbmSurface,
+                       @Nonnull final DrmRenderOutput drmRenderOutput,
+                       final long eglSurface,
+                       final long eglContext,
+                       final long eglDisplay) {
         this.libc = libc;
         this.libgbm = libgbm;
         this.libdrm = libdrm;
@@ -102,7 +102,7 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
         this.drmFd = drmFd;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
-        this.drmConnector = drmConnector;
+        this.drmRenderOutput = drmRenderOutput;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
         this.eglDisplay = eglDisplay;
@@ -112,7 +112,7 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     public void renderEndAfterSwap() {
         this.nextGbmBo = this.libgbm.gbm_surface_lock_front_buffer(this.gbmSurface);
         this.libdrm.drmModePageFlip(this.drmFd,
-                                    this.drmConnector.getCrtcId(),
+                                    this.drmRenderOutput.getCrtcId(),
                                     getFbId(this.nextGbmBo),
                                     DRM_MODE_PAGE_FLIP_EVENT,
                                     Pointer.from(this).address);
@@ -194,12 +194,12 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
     @Nonnull
     @Override
     public WlOutput getWlOutput() {
-        return this.drmConnector.getWlOutput();
+        return this.drmRenderOutput.getWlOutput();
     }
 
     @Nonnull
-    public DrmConnector getDrmConnector() {
-        return this.drmConnector;
+    public DrmRenderOutput getDrmRenderOutput() {
+        return this.drmRenderOutput;
     }
 
     @Override
@@ -255,14 +255,14 @@ public class DrmEglConnector implements EglConnector, DrmPageFlipCallback {
         final int fbId = getFbId(this.gbmBo);
 
         final int error = this.libdrm.drmModeSetCrtc(this.drmFd,
-                                                     this.drmConnector.getCrtcId(),
+                                                     this.drmRenderOutput.getCrtcId(),
                                                      fbId,
                                                      0,
                                                      0,
-                                                     Pointer.nref(this.drmConnector.getDrmModeConnector()
-                                                                                   .connector_id()).address,
+                                                     Pointer.nref(this.drmRenderOutput.getDrmModeConnector()
+                                                                                      .connector_id()).address,
                                                      1,
-                                                     Pointer.ref(this.drmConnector.getMode()).address);
+                                                     Pointer.ref(this.drmRenderOutput.getMode()).address);
         if (error != 0) {
             throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
                                                      this.libc.getErrno()));

@@ -22,12 +22,12 @@ import org.westmalle.wayland.protocol.WlOutput;
 import javax.annotation.Nonnull;
 
 /**
- * A {@link Platform} specific drawing output for a {@link Renderer}.
+ * A {@link RenderPlatform} specific drawing output for a {@link Renderer}.
  */
-public interface Connector {
+public interface RenderOutput {
 
     /**
-     * Request a render for this {@code Connector}.
+     * Request a render for this {@code RenderOutput}.
      */
     void render();
 
@@ -40,7 +40,7 @@ public interface Connector {
     WlOutput getWlOutput();
 
     /**
-     * Called by the @{@link Renderer} of this {@code Connector} when it starts to draw to it's back buffer.
+     * Called by the @{@link Renderer} of this {@code RenderOutput} when it starts to draw to it's back buffer.
      * <p>
      * A connector implementation can use this hook to perform any pre drawing actions.
      * </p>
@@ -48,7 +48,7 @@ public interface Connector {
     default void renderBegin() {}
 
     /**
-     * Called by the @{@link Renderer} of this {@code Connector} when it has finished drawing to it's back buffer.
+     * Called by the @{@link Renderer} of this {@code RenderOutput} when it has finished drawing to it's back buffer.
      * <p>
      * A connector implementation can use this hook to perform any post back buffer drawing actions.
      * </p>
@@ -56,7 +56,7 @@ public interface Connector {
     default void renderEndBeforeSwap() {}
 
     /**
-     * Called by the @{@link Renderer} of this {@code Connector} when it has swapped the back buffer and front buffer.
+     * Called by the @{@link Renderer} of this {@code RenderOutput} when it has swapped the back buffer and front buffer.
      * <p>
      * A connector implementation can use this hook to perform any post front/back buffer swapping actions.
      * </p>
@@ -69,7 +69,7 @@ public interface Connector {
     default void disable() {}
 
     /**
-     * Enables rendering and triggers a redraw for this {@code Connector}.
+     * Enables rendering and triggers a redraw for this {@code RenderOutput}.
      */
     default void enable() {}
 }

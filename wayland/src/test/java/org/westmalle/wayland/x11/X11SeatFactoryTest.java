@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
@@ -36,9 +35,7 @@ import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
-import org.westmalle.wayland.protocol.WlTouch;
 
-import javax.annotation.Nonnull;
 import java.util.EnumSet;
 
 import static org.mockito.Mockito.mock;
@@ -49,7 +46,7 @@ import static org.mockito.Mockito.when;
 public class X11SeatFactoryTest {
 
     @Mock
-    private X11Platform                  x11Platform;
+    private X11RenderPlatform            x11Platform;
     @Mock
     private X11XkbFactory                x11XkbFactory;
     @Mock

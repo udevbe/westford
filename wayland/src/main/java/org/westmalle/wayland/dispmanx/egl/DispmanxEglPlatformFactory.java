@@ -19,8 +19,8 @@ package org.westmalle.wayland.dispmanx.egl;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.dispmanx.DispmanxConnector;
-import org.westmalle.wayland.dispmanx.DispmanxPlatform;
+import org.westmalle.wayland.dispmanx.DispmanxRenderOutput;
+import org.westmalle.wayland.dispmanx.DispmanxRenderPlatform;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -40,7 +39,6 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_SURFACE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 
@@ -53,26 +51,26 @@ public class DispmanxEglPlatformFactory {
     @Nonnull
     private final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory;
     @Nonnull
-    private final DispmanxEglConnectorFactory       dispmanxEglConnectorFactory;
+    private final DispmanxEglRenderOutputFactory    dispmanxEglRenderOutputFactory;
     @Nonnull
-    private final DispmanxPlatform                  dispmanxPlatform;
+    private final DispmanxRenderPlatform            dispmanxPlatform;
     @Nonnull
     private final GlRenderer                        glRenderer;
 
     @Inject
     DispmanxEglPlatformFactory(@Nonnull final LibEGL libEGL,
                                @Nonnull final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory,
-                               @Nonnull final DispmanxEglConnectorFactory dispmanxEglConnectorFactory,
-                               @Nonnull final DispmanxPlatform dispmanxPlatform,
+                               @Nonnull final DispmanxEglRenderOutputFactory dispmanxEglRenderOutputFactory,
+                               @Nonnull final DispmanxRenderPlatform dispmanxPlatform,
                                @Nonnull final GlRenderer glRenderer) {
         this.libEGL = libEGL;
         this.privateDispmanxEglOutputFactory = privateDispmanxEglOutputFactory;
-        this.dispmanxEglConnectorFactory = dispmanxEglConnectorFactory;
+        this.dispmanxEglRenderOutputFactory = dispmanxEglRenderOutputFactory;
         this.dispmanxPlatform = dispmanxPlatform;
         this.glRenderer = glRenderer;
     }
 
-    public DispmanxEglPlatform create() {
+    public DispmanxEglRenderPlatform create() {
 
         final DISPMANX_MODEINFO_T modeinfo = this.dispmanxPlatform.getModeinfo();
 
@@ -112,33 +110,30 @@ public class DispmanxEglPlatformFactory {
         final long eglContext = getContext(eglDisplay,
                                            config);
 
-        final List<Optional<DispmanxConnector>>    dispmanxConnectors    = this.dispmanxPlatform.getConnectors();
-        final List<Optional<DispmanxEglConnector>> dispmanxEglConnectors = new ArrayList<>(dispmanxConnectors.size());
+        final List<DispmanxRenderOutput>    dispmanxRenderOutputs    = this.dispmanxPlatform.getRenderOutputs();
+        final List<DispmanxEglRenderOutput> dispmanxEglRenderOutputs = new ArrayList<>(dispmanxRenderOutputs.size());
 
-        dispmanxConnectors.forEach(dispmanxConnectorOptional -> {
-            final Optional<DispmanxEglConnector> dispmanxEglConnector = dispmanxConnectorOptional.map(dispmanxConnector -> {
-                final int                   dispmanxElement   = dispmanxConnector.getDispmanxElement();
-                final EGL_DISPMANX_WINDOW_T eglDispmanxWindow = new EGL_DISPMANX_WINDOW_T();
-                eglDispmanxWindow.element(dispmanxElement);
-                eglDispmanxWindow.width(modeinfo.width());
-                eglDispmanxWindow.height(modeinfo.height());
+        dispmanxRenderOutputs.forEach(dispmanxRenderOutput -> {
+            final int                   dispmanxElement   = dispmanxRenderOutput.getDispmanxElement();
+            final EGL_DISPMANX_WINDOW_T eglDispmanxWindow = new EGL_DISPMANX_WINDOW_T();
+            eglDispmanxWindow.element(dispmanxElement);
+            eglDispmanxWindow.width(modeinfo.width());
+            eglDispmanxWindow.height(modeinfo.height());
 
-                final long eglSurface = createEglSurface(Pointer.ref(eglDispmanxWindow).address,
-                                                         eglDisplay,
-                                                         config,
-                                                         eglContext);
+            final long eglSurface = createEglSurface(Pointer.ref(eglDispmanxWindow).address,
+                                                     eglDisplay,
+                                                     config,
+                                                     eglContext);
 
-                return this.dispmanxEglConnectorFactory.create(dispmanxConnector,
-                                                               eglDispmanxWindow,
-                                                               eglSurface,
-                                                               eglContext,
-                                                               eglDisplay);
-            });
-            dispmanxEglConnectors.add(dispmanxEglConnector);
+            dispmanxEglRenderOutputs.add(this.dispmanxEglRenderOutputFactory.create(dispmanxRenderOutput,
+                                                                                    eglDispmanxWindow,
+                                                                                    eglSurface,
+                                                                                    eglContext,
+                                                                                    eglDisplay));
         });
 
         return this.privateDispmanxEglOutputFactory.create(this.dispmanxPlatform,
-                                                           dispmanxEglConnectors,
+                                                           dispmanxEglRenderOutputs,
                                                            eglDisplay,
                                                            eglContext,
                                                            eglExtensions);

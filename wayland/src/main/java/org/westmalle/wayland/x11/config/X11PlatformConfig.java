@@ -24,5 +24,5 @@ public interface X11PlatformConfig {
     String getDisplay();
 
     @Nonnull
-    Iterable<X11ConnectorConfig> getX11ConnectorConfigs();
+    Iterable<X11RenderOutputConfig> getX11RenderOutputConfigs();
 }

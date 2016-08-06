@@ -19,7 +19,7 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.Renderer;
@@ -28,8 +28,8 @@ import org.westmalle.wayland.protocol.WlOutput;
 import javax.annotation.Nonnull;
 
 @AutoFactory(allowSubclasses = true,
-             className = "X11ConnectorFactory")
-public class X11Connector implements Connector {
+             className = "X11RenderOutputFactory")
+public class X11RenderOutput implements RenderOutput {
 
     @Nonnull
     private final Renderer renderer;
@@ -37,9 +37,9 @@ public class X11Connector implements Connector {
     @Nonnull
     private final WlOutput wlOutput;
 
-    X11Connector(@Nonnull @Provided final Renderer renderer,
-                 final int xWindow,
-                 @Nonnull final WlOutput wlOutput) {
+    X11RenderOutput(@Nonnull @Provided final Renderer renderer,
+                    final int xWindow,
+                    @Nonnull final WlOutput wlOutput) {
         this.renderer = renderer;
         this.xWindow = xWindow;
         this.wlOutput = wlOutput;

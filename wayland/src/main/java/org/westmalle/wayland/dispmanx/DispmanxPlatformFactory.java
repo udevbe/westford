@@ -36,7 +36,6 @@ import javax.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_NO_ROTATE;
 import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
@@ -54,22 +53,22 @@ public class DispmanxPlatformFactory {
     @Nonnull
     private final PrivateDispmanxPlatformFactory privateDispmanxPlatformFactory;
     @Nonnull
-    private final DispmanxConnectorFactory       dispmanxConnectorFactory;
+    private final DispmanxRenderOutputFactory    dispmanxRenderOutputFactory;
 
     @Inject
     DispmanxPlatformFactory(@Nonnull final Libbcm_host libbcm_host,
                             @Nonnull final WlOutputFactory wlOutputFactory,
                             @Nonnull final OutputFactory outputFactory,
                             @Nonnull final PrivateDispmanxPlatformFactory privateDispmanxPlatformFactory,
-                            @Nonnull final DispmanxConnectorFactory dispmanxConnectorFactory) {
+                            @Nonnull final DispmanxRenderOutputFactory dispmanxRenderOutputFactory) {
         this.libbcm_host = libbcm_host;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
         this.privateDispmanxPlatformFactory = privateDispmanxPlatformFactory;
-        this.dispmanxConnectorFactory = dispmanxConnectorFactory;
+        this.dispmanxRenderOutputFactory = dispmanxRenderOutputFactory;
     }
 
-    public DispmanxPlatform create(final int device) {
+    public DispmanxRenderPlatform create(final int device) {
 
         final int display = this.libbcm_host.vc_dispmanx_display_open(device);
         if (display == 0) {
@@ -83,19 +82,18 @@ public class DispmanxPlatformFactory {
         }
 
         //TODO from config
-        final List<Optional<DispmanxConnector>> dispmanxConnectors = new ArrayList<>(1);
+        final List<DispmanxRenderOutput> dispmanxRenderOutputs = new ArrayList<>(1);
         final int dispmanxElement = createDispmanxWindow(display,
                                                          modeinfo);
         final Output output = createOutput(device,
                                            modeinfo);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
-        final DispmanxConnector dispmanxConnector = this.dispmanxConnectorFactory.create(wlOutput,
-                                                                                         dispmanxElement);
-        dispmanxConnectors.add(Optional.of(dispmanxConnector));
+        dispmanxRenderOutputs.add(this.dispmanxRenderOutputFactory.create(wlOutput,
+                                                                          dispmanxElement));
 
         return this.privateDispmanxPlatformFactory.create(modeinfo,
-                                                          dispmanxConnectors);
+                                                          dispmanxRenderOutputs);
     }
 
 

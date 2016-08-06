@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 public class CompositorTest {
 
     @Mock
-    private Platform platform;
+    private RenderPlatform renderPlatform;
 
     @InjectMocks
     private Compositor compositor;
@@ -42,18 +42,17 @@ public class CompositorTest {
     @Test
     public void testRequestRender() throws Exception {
         //given
-        Connector connector0 = mock(Connector.class);
-        Connector connector1 = mock(Connector.class);
-        final List<? extends Optional<? extends Connector>> connectors = Arrays.asList(Optional.of(connector0),
-                                                                                       Optional.empty(),
-                                                                                       Optional.of(connector1));
-        when(platform.getConnectors()).thenReturn((List) connectors);
+        final RenderOutput renderOutput0 = mock(RenderOutput.class);
+        final RenderOutput renderOutput1 = mock(RenderOutput.class);
+        final List<? extends RenderOutput> renderOutputs = Arrays.asList(renderOutput0,
+                                                                         renderOutput1);
+        when(this.renderPlatform.getRenderOutputs()).thenReturn((List) renderOutputs);
 
         //when
         this.compositor.requestRender();
 
         //then
-        verify(connector0).render();
-        verify(connector1).render();
+        verify(renderOutput0).render();
+        verify(renderOutput1).render();
     }
 }

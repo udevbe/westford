@@ -58,7 +58,7 @@ public class DrmPlatformFactory {
     @Nonnull
     private final Display                   display;
     @Nonnull
-    private final DrmConnectorFactory       drmConnectorFactory;
+    private final DrmRenderOutputFactory    drmRenderOutputFactory;
     @Nonnull
     private final DrmEventBusFactory        drmEventBusFactory;
     @Nonnull
@@ -75,7 +75,7 @@ public class DrmPlatformFactory {
                        @Nonnull final Libudev libudev,
                        @Nonnull final Libdrm libdrm,
                        @Nonnull final Display display,
-                       @Nonnull final DrmConnectorFactory drmConnectorFactory,
+                       @Nonnull final DrmRenderOutputFactory drmRenderOutputFactory,
                        @Nonnull final DrmEventBusFactory drmEventBusFactory,
                        @Nonnull final PrivateDrmPlatformFactory privateDrmPlatformFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
@@ -85,7 +85,7 @@ public class DrmPlatformFactory {
         this.libc = libc;
         this.libdrm = libdrm;
         this.display = display;
-        this.drmConnectorFactory = drmConnectorFactory;
+        this.drmRenderOutputFactory = drmRenderOutputFactory;
         this.drmEventBusFactory = drmEventBusFactory;
         this.privateDrmPlatformFactory = privateDrmPlatformFactory;
         this.wlOutputFactory = wlOutputFactory;
@@ -93,7 +93,7 @@ public class DrmPlatformFactory {
         this.tty = tty;
     }
 
-    public DrmPlatform create() {
+    public DrmRenderPlatform create() {
         final long udev = this.libudev.udev_new();
         if (udev == 0L) {
             throw new RuntimeException("Failed to initialize udev");
@@ -107,7 +107,7 @@ public class DrmPlatformFactory {
 
         final int drmFd = initDrm(drmDevice);
 
-        final List<Optional<DrmConnector>> drmConnectors = createDrmConnectors(drmFd);
+        final List<DrmRenderOutput> drmRenderOutputs = createDrmRenderOutputs(drmFd);
 
         final DrmEventBus drmEventBus = this.drmEventBusFactory.create(drmFd);
         this.display.getEventLoop()
@@ -125,7 +125,7 @@ public class DrmPlatformFactory {
         return this.privateDrmPlatformFactory.create(drmDevice,
                                                      drmFd,
                                                      drmEventBus,
-                                                     drmConnectors);
+                                                     drmRenderOutputs);
     }
 
     private void setDrmMaster(final int drmFd) {
@@ -141,7 +141,7 @@ public class DrmPlatformFactory {
     }
 
 
-    private List<Optional<DrmConnector>> createDrmConnectors(final int drmFd) {
+    private List<DrmRenderOutput> createDrmRenderOutputs(final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
         if (resources == 0L) {
             throw new RuntimeException("Getting drm resources failed.");
@@ -150,9 +150,9 @@ public class DrmPlatformFactory {
         final DrmModeRes drmModeRes = wrap(DrmModeRes.class,
                                            resources).dref();
 
-        final int                          countConnectors = drmModeRes.count_connectors();
-        final List<Optional<DrmConnector>> drmConnectors   = new ArrayList<>(countConnectors);
-        final Set<Integer>                 usedCrtcs       = new HashSet<>();
+        final int                   countConnectors  = drmModeRes.count_connectors();
+        final List<DrmRenderOutput> drmRenderOutputs = new ArrayList<>(countConnectors);
+        final Set<Integer>          usedCrtcs        = new HashSet<>();
 
         for (int i = 0; i < countConnectors; i++) {
             final long connector = this.libdrm.drmModeGetConnector(drmFd,
@@ -164,33 +164,18 @@ public class DrmPlatformFactory {
 
             final DrmModeConnector drmModeConnector = wrap(DrmModeConnector.class,
                                                            connector).dref();
-            final Optional<DrmConnector> drmConnector;
-            if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
-                drmConnector = createDrmConnector(drmFd,
-                                                  drmModeRes,
-                                                  drmModeConnector,
-                                                  usedCrtcs);
-            }
-            else {
-                drmConnector = Optional.empty();
-            }
 
-            drmConnectors.add(drmConnector);
+            if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
+                findCrtcIdForConnector(drmFd,
+                                       drmModeRes,
+                                       drmModeConnector,
+                                       usedCrtcs).ifPresent(crtcId -> drmRenderOutputs.add(createDrmRenderOutput(drmModeRes,
+                                                                                                                 drmModeConnector,
+                                                                                                                 crtcId)));
+            }
         }
 
-        return drmConnectors;
-    }
-
-    private Optional<DrmConnector> createDrmConnector(final int drmFd,
-                                                      final DrmModeRes drmModeRes,
-                                                      final DrmModeConnector drmModeConnector,
-                                                      final Set<Integer> crtcAllocations) {
-        return findCrtcIdForConnector(drmFd,
-                                      drmModeRes,
-                                      drmModeConnector,
-                                      crtcAllocations).flatMap(crtcId -> createDrmConnector(drmModeRes,
-                                                                                            drmModeConnector,
-                                                                                            crtcId));
+        return drmRenderOutputs;
     }
 
     private Optional<Integer> findCrtcIdForConnector(final int drmFd,
@@ -225,9 +210,9 @@ public class DrmPlatformFactory {
         return Optional.empty();
     }
 
-    private Optional<DrmConnector> createDrmConnector(final DrmModeRes drmModeRes,
-                                                      final DrmModeConnector drmModeConnector,
-                                                      final int crtcId) {
+    private DrmRenderOutput createDrmRenderOutput(final DrmModeRes drmModeRes,
+                                                  final DrmModeConnector drmModeConnector,
+                                                  final int crtcId) {
         /* find highest resolution mode: */
         int             area = 0;
         DrmModeModeInfo mode = null;
@@ -278,13 +263,13 @@ public class DrmPlatformFactory {
                                                 .build();
 
         //FIXME decuse an output name from the drm connector
-        return Optional.of(this.drmConnectorFactory.create(this.wlOutputFactory.create(this.outputFactory.create("dummy",
-                                                                                                                 outputGeometry,
-                                                                                                                 outputMode)),
-                                                           drmModeRes,
-                                                           drmModeConnector,
-                                                           crtcId,
-                                                           mode));
+        return this.drmRenderOutputFactory.create(this.wlOutputFactory.create(this.outputFactory.create("dummy",
+                                                                                                        outputGeometry,
+                                                                                                        outputMode)),
+                                                  drmModeRes,
+                                                  drmModeConnector,
+                                                  crtcId,
+                                                  mode);
     }
 
 

@@ -33,16 +33,16 @@ public class Html5SocketServlet extends WebSocketServlet implements WebSocketCre
 
     private final Html5SocketFactory html5SocketFactory;
 
-    private final Html5SeatFactory html5SeatFactory;
+    private final Html5SeatFactory  html5SeatFactory;
     @Nonnull
-    private final Html5Connector   html5Connector;
+    private final Html5RenderOutput html5RenderOutput;
 
     Html5SocketServlet(@Provided final Html5SocketFactory html5SocketFactory,
                        @Provided final Html5SeatFactory html5SeatFactory,
-                       @Nonnull final Html5Connector html5Connector) {
+                       @Nonnull final Html5RenderOutput html5RenderOutput) {
         this.html5SocketFactory = html5SocketFactory;
         this.html5SeatFactory = html5SeatFactory;
-        this.html5Connector = html5Connector;
+        this.html5RenderOutput = html5RenderOutput;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class Html5SocketServlet extends WebSocketServlet implements WebSocketCre
     public Object createWebSocket(final ServletUpgradeRequest req,
                                   final ServletUpgradeResponse resp) {
         //TODO move seat creation to a separate seat event coming from the client so we can properly configure the seat
-        return this.html5SocketFactory.create(this.html5Connector,
+        return this.html5SocketFactory.create(this.html5RenderOutput,
                                               this.html5SeatFactory.create());
     }
 }

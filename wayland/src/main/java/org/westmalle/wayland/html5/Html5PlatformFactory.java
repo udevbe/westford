@@ -22,34 +22,32 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.resource.Resource;
-import org.westmalle.wayland.core.Connector;
-import org.westmalle.wayland.core.Platform;
+import org.westmalle.wayland.core.RenderOutput;
+import org.westmalle.wayland.core.RenderPlatform;
 
 import javax.inject.Inject;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 //TODO tests tests tests!
 public class Html5PlatformFactory {
 
     private final Html5SocketServletFactory   html5SocketServletFactory;
-    private final Html5ConnectorFactory       html5ConnectorFactory;
+    private final Html5RenderOutputFactory    html5RenderOutputFactory;
     private final PrivateHtml5PlatformFactory privateHtml5PlatformFactory;
 
     @Inject
     Html5PlatformFactory(final Html5SocketServletFactory html5SocketServletFactory,
-                         final Html5ConnectorFactory html5ConnectorFactory,
+                         final Html5RenderOutputFactory html5RenderOutputFactory,
                          final PrivateHtml5PlatformFactory privateHtml5PlatformFactory) {
         this.html5SocketServletFactory = html5SocketServletFactory;
-        this.html5ConnectorFactory = html5ConnectorFactory;
+        this.html5RenderOutputFactory = html5RenderOutputFactory;
         this.privateHtml5PlatformFactory = privateHtml5PlatformFactory;
     }
 
-    public Html5Platform create(final Platform platform) {
+    public Html5RenderPlatform create(final RenderPlatform renderPlatform) {
         //TODO from configuration
 
         final Server server = new Server(8080);
@@ -58,11 +56,11 @@ public class Html5PlatformFactory {
         context.setContextPath("/wayland");
         server.setHandler(context);
 
-        final List<Optional<Html5Connector>> html5Connectors = new ArrayList<>();
-        for (final Optional<? extends Connector> connectorOptional : platform.getConnectors()) {
-            html5Connectors.add(connectorOptional.flatMap(connector -> createHtml5Connector(context,
-                                                                                            connector)));
-        }
+        final List<Html5RenderOutput> html5RenderOutputs = new ArrayList<>();
+        renderPlatform.getRenderOutputs()
+                      .forEach(renderOutput ->
+                                       html5RenderOutputs.add(createHtml5RenderOutput(context,
+                                                                                      renderOutput)));
 
         // Add default servlet (to serve the html/css/js)
         // Figure out where the static files are stored.
@@ -87,21 +85,21 @@ public class Html5PlatformFactory {
         }
 
         return this.privateHtml5PlatformFactory.create(server,
-                                                       html5Connectors);
+                                                       html5RenderOutputs);
     }
 
-    private Optional<Html5Connector> createHtml5Connector(final ServletContextHandler context,
-                                                          final Connector connector) {
+    private Html5RenderOutput createHtml5RenderOutput(final ServletContextHandler context,
+                                                      final RenderOutput renderOutput) {
 
-        final Html5Connector html5Connector = this.html5ConnectorFactory.create(connector);
+        final Html5RenderOutput html5RenderOutput = this.html5RenderOutputFactory.create(renderOutput);
 
         // Add websocket servlet
-        final String connectorId = connector.getWlOutput()
-                                            .getOutput()
-                                            .getName();
-        context.addServlet(new ServletHolder(connectorId,
-                                             this.html5SocketServletFactory.create(html5Connector)),
-                           "/" + connectorId);
-        return Optional.of(html5Connector);
+        final String renderOutputName = renderOutput.getWlOutput()
+                                                    .getOutput()
+                                                    .getName();
+        context.addServlet(new ServletHolder(renderOutputName,
+                                             this.html5SocketServletFactory.create(html5RenderOutput)),
+                           "/" + renderOutputName);
+        return html5RenderOutput;
     }
 }

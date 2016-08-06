@@ -52,14 +52,14 @@ public class X11Seat {
     private static final float DEFAULT_AXIS_STEP_DISTANCE = 10.0f;
 
     @Nonnull
-    private final Libxcb      libxcb;
+    private final Libxcb            libxcb;
     @Nonnull
-    private final X11Platform x11Platform;
+    private final X11RenderPlatform x11Platform;
     @Nonnull
-    private final WlSeat      wlSeat;
+    private final WlSeat            wlSeat;
 
     X11Seat(@Provided @Nonnull final Libxcb libxcb,
-            @Provided @Nonnull final X11Platform x11Platform,
+            @Provided @Nonnull final X11RenderPlatform x11Platform,
             @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
         this.x11Platform = x11Platform;
@@ -208,24 +208,23 @@ public class X11Seat {
                               final int x,
                               final int y) {
 
-        this.x11Platform.getConnectors()
-                        .forEach(x11ConnectorOptional ->
-                                         x11ConnectorOptional.ifPresent(x11Connector -> {
-                                             if (x11Connector.getXWindow() == windowId) {
+        this.x11Platform.getRenderOutputs()
+                        .forEach(x11RenderOutput -> {
+                            if (x11RenderOutput.getXWindow() == windowId) {
 
-                                                 final Point point = x11Connector.toGlobal(x,
-                                                                                           y);
+                                final Point point = x11RenderOutput.toGlobal(x,
+                                                                             y);
 
-                                                 final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
-                                                 final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+                                final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+                                final PointerDevice pointerDevice = wlPointer.getPointerDevice();
 
-                                                 pointerDevice.motion(wlPointer.getResources(),
-                                                                      time,
-                                                                      point.getX(),
-                                                                      point.getY());
-                                                 pointerDevice.frame(wlPointer.getResources());
-                                             }
-                                         }));
+                                pointerDevice.motion(wlPointer.getResources(),
+                                                     time,
+                                                     point.getX(),
+                                                     point.getY());
+                                pointerDevice.frame(wlPointer.getResources());
+                            }
+                        });
     }
 
     @Nonnull

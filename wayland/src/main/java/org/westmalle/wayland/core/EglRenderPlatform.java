@@ -21,8 +21,15 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
-public interface Platform {
+public interface EglRenderPlatform extends RenderPlatform {
+
+    long getEglDisplay();
+
+    long getEglContext();
 
     @Nonnull
-    List<? extends Optional<? extends Connector>> getConnectors();
+    List<? extends EglRenderOutput> getRenderOutputs();
+
+    @Nonnull
+    String getEglExtensions();
 }

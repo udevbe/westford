@@ -26,9 +26,9 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
 import org.westmalle.wayland.core.Buffer;
 import org.westmalle.wayland.core.BufferVisitor;
-import org.westmalle.wayland.core.Connector;
+import org.westmalle.wayland.core.EglRenderOutput;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.EglBuffer;
-import org.westmalle.wayland.core.EglConnector;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
@@ -426,46 +426,46 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     @Override
-    public void visit(@Nonnull final Connector connector) {
-        throw new UnsupportedOperationException(String.format("Need an egl capable connector. Got %s",
-                                                              connector));
+    public void visit(@Nonnull final RenderOutput renderOutput) {
+        throw new UnsupportedOperationException(String.format("Need an egl capable renderOutput. Got %s",
+                                                              renderOutput));
     }
 
     @Override
-    public void visit(@Nonnull final EglConnector eglConnector) {
-        render(eglConnector);
+    public void visit(@Nonnull final EglRenderOutput eglRenderOutput) {
+        render(eglRenderOutput);
     }
 
-    private void render(@Nonnull final EglConnector eglConnector) {
-        updateRenderState(eglConnector);
+    private void render(@Nonnull final EglRenderOutput eglRenderOutput) {
+        updateRenderState(eglRenderOutput);
         if (!this.init) {
             //one time init because we need a current context
-            assert (eglConnector.getEglContext() != EGL_NO_CONTEXT);
+            assert (eglRenderOutput.getEglContext() != EGL_NO_CONTEXT);
             initRenderer();
         }
         //naive single pass, bottom to top overdraw rendering.
         this.scene.getSurfacesStack()
                   .forEach(this::draw);
-        flushRenderState(eglConnector);
+        flushRenderState(eglRenderOutput);
     }
 
-    private void flushRenderState(final EglConnector eglConnector) {
-        eglConnector.renderEndBeforeSwap();
+    private void flushRenderState(final EglRenderOutput eglRenderOutput) {
+        eglRenderOutput.renderEndBeforeSwap();
         this.libEGL.eglSwapBuffers(this.eglDisplay,
-                                   eglConnector.getEglSurface());
-        eglConnector.renderEndAfterSwap();
+                                   eglRenderOutput.getEglSurface());
+        eglRenderOutput.renderEndAfterSwap();
     }
 
-    private void updateRenderState(final EglConnector eglConnector) {
+    private void updateRenderState(final EglRenderOutput eglRenderOutput) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
-                                   eglConnector.getEglSurface(),
-                                   eglConnector.getEglSurface(),
-                                   eglConnector.getEglContext());
-        eglConnector.renderBegin();
+                                   eglRenderOutput.getEglSurface(),
+                                   eglRenderOutput.getEglSurface(),
+                                   eglRenderOutput.getEglContext());
+        eglRenderOutput.renderBegin();
         //TODO we can improve performance by keeping an output state and only trigger this logic if the output geometry & mode changes
 
-        final Output output = eglConnector.getWlOutput()
-                                          .getOutput();
+        final Output output = eglRenderOutput.getWlOutput()
+                                             .getOutput();
         final OutputMode mode = output.getMode();
 
         final int width  = mode.getWidth();

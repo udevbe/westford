@@ -22,14 +22,13 @@ import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
-import org.westmalle.wayland.x11.X11Connector;
-import org.westmalle.wayland.x11.X11Platform;
+import org.westmalle.wayland.x11.X11RenderOutput;
+import org.westmalle.wayland.x11.X11RenderPlatform;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -54,27 +53,27 @@ public class X11EglPlatformFactory {
     @Nonnull
     private final PrivateX11EglPlatformFactory privateX11EglPlatformFactory;
     @Nonnull
-    private final X11Platform                  x11Platform;
+    private final X11RenderPlatform            x11Platform;
     @Nonnull
     private final GlRenderer                   glRenderer;
     @Nonnull
-    private final X11EglConnectorFactory       x11EglConnectorFactory;
+    private final X11EglRenderOutputFactory    x11EglRenderOutputFactory;
 
     @Inject
     X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
                           @Nonnull final PrivateX11EglPlatformFactory privateX11EglPlatformFactory,
-                          @Nonnull final X11Platform x11Platform,
+                          @Nonnull final X11RenderPlatform x11Platform,
                           @Nonnull final GlRenderer glRenderer,
-                          @Nonnull final X11EglConnectorFactory x11EglConnectorFactory) {
+                          @Nonnull final X11EglRenderOutputFactory x11EglRenderOutputFactory) {
         this.libEGL = libEGL;
         this.privateX11EglPlatformFactory = privateX11EglPlatformFactory;
         this.x11Platform = x11Platform;
         this.glRenderer = glRenderer;
-        this.x11EglConnectorFactory = x11EglConnectorFactory;
+        this.x11EglRenderOutputFactory = x11EglRenderOutputFactory;
     }
 
     @Nonnull
-    public X11EglPlatform create() {
+    public X11EglRenderPlatform create() {
 
         final long eglDisplay = createEglDisplay(this.x11Platform.getxDisplay());
 
@@ -110,24 +109,21 @@ public class X11EglPlatformFactory {
         final long eglContext = createEglContext(eglDisplay,
                                                  eglConfig);
 
-        final List<Optional<X11Connector>>    x11Connectors    = this.x11Platform.getConnectors();
-        final List<Optional<X11EglConnector>> x11EglConnectors = new ArrayList<>(x11Connectors.size());
+        final List<X11RenderOutput>    x11RenderOutputs    = this.x11Platform.getRenderOutputs();
+        final List<X11EglRenderOutput> x11EglRenderOutputs = new ArrayList<>(x11RenderOutputs.size());
 
-        x11Connectors.forEach(optionalX11Connector -> {
-            final Optional<X11EglConnector> optionalX11EglConnector = optionalX11Connector.map(x11Connector -> {
-                final long eglSurface = createEglSurface(eglDisplay,
-                                                         eglConfig,
-                                                         x11Connector.getXWindow());
-                return this.x11EglConnectorFactory.create(x11Connector,
-                                                          eglSurface,
-                                                          eglContext,
-                                                          eglDisplay);
-            });
 
-            x11EglConnectors.add(optionalX11EglConnector);
+        x11RenderOutputs.forEach(x11RenderOutput -> {
+            final long eglSurface = createEglSurface(eglDisplay,
+                                                     eglConfig,
+                                                     x11RenderOutput.getXWindow());
+            x11EglRenderOutputs.add(this.x11EglRenderOutputFactory.create(x11RenderOutput,
+                                                                          eglSurface,
+                                                                          eglContext,
+                                                                          eglDisplay));
         });
 
-        return this.privateX11EglPlatformFactory.create(x11EglConnectors,
+        return this.privateX11EglPlatformFactory.create(x11EglRenderOutputs,
                                                         eglDisplay,
                                                         eglContext,
                                                         eglExtensions);

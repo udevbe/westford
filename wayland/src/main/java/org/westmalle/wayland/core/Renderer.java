@@ -21,12 +21,11 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 public interface Renderer {
-    void visit(@Nonnull Connector connector);
+    void visit(@Nonnull RenderOutput renderOutput);
 
-    void visit(@Nonnull EglConnector eglConnector);
+    void visit(@Nonnull EglRenderOutput eglConnector);
 
     //TODO pixman sw rendering platform
     //void visit(PixmanPlatform pixmanPlatform);
