@@ -49,9 +49,7 @@ import org.westmalle.wayland.protocol.WlSurface;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -208,9 +206,6 @@ public class Gles2Renderer implements GlRenderer {
     private Optional<GlEGLImageTargetTexture2DOES> glEGLImageTargetTexture2DOES = Optional.empty();
 
     @Nonnull
-    private final Map<WlSurfaceResource, SurfaceRenderState> surfaceRenderStates = new HashMap<>();
-
-    @Nonnull
     private float[] projection = Mat4.IDENTITY.toArray();
 
     //shader programs
@@ -250,22 +245,23 @@ public class Gles2Renderer implements GlRenderer {
 
     @Override
     public void onDestroy(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        Optional.ofNullable(this.surfaceRenderStates.remove(wlSurfaceResource))
-                .ifPresent(surfaceRenderState -> {
-                    surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
-                        @Override
-                        public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
-                            destroy(shmSurfaceRenderState);
-                            return Optional.empty();
-                        }
 
-                        @Override
-                        public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
-                            destroy(eglSurfaceRenderState);
-                            return Optional.empty();
-                        }
-                    });
-                });
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        wlSurface.getSurface()
+                 .getRenderState()
+                 .ifPresent(surfaceRenderState -> surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+                     @Override
+                     public Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) {
+                         destroy(shmSurfaceRenderState);
+                         return Optional.empty();
+                     }
+
+                     @Override
+                     public Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) {
+                         destroy(eglSurfaceRenderState);
+                         return Optional.empty();
+                     }
+                 }));
     }
 
     private void destroy(final EglSurfaceRenderState eglSurfaceRenderState) {
@@ -699,8 +695,10 @@ public class Gles2Renderer implements GlRenderer {
 
     private Optional<SurfaceRenderState> queryShmSurfaceRenderState(final WlSurfaceResource wlSurfaceResource,
                                                                     final ShmBuffer shmBuffer) {
-        @Nonnull
-        Optional<SurfaceRenderState> surfaceRenderState = Optional.ofNullable(this.surfaceRenderStates.get(wlSurfaceResource));
+
+        final WlSurface              wlSurface          = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface                surface            = wlSurface.getSurface();
+        Optional<SurfaceRenderState> surfaceRenderState = surface.getRenderState();
 
         if (surfaceRenderState.isPresent()) {
             surfaceRenderState = surfaceRenderState.get()
@@ -732,8 +730,8 @@ public class Gles2Renderer implements GlRenderer {
         }
 
         if (surfaceRenderState.isPresent()) {
-            this.surfaceRenderStates.put(wlSurfaceResource,
-                                         surfaceRenderState.get());
+            surface
+                    .setRenderState(surfaceRenderState.get());
         }
         else {
             onDestroy(wlSurfaceResource);
@@ -894,8 +892,10 @@ public class Gles2Renderer implements GlRenderer {
 
     private Optional<SurfaceRenderState> queryEglSurfaceRenderState(final WlSurfaceResource wlSurfaceResource,
                                                                     final EglBuffer eglBuffer) {
-        @Nonnull
-        Optional<SurfaceRenderState> surfaceRenderState = Optional.ofNullable(this.surfaceRenderStates.get(wlSurfaceResource));
+
+        final WlSurface              wlSurface          = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface                surface            = wlSurface.getSurface();
+        Optional<SurfaceRenderState> surfaceRenderState = surface.getRenderState();
 
         if (surfaceRenderState.isPresent()) {
             surfaceRenderState = surfaceRenderState.get()
@@ -924,8 +924,7 @@ public class Gles2Renderer implements GlRenderer {
         }
 
         if (surfaceRenderState.isPresent()) {
-            this.surfaceRenderStates.put(wlSurfaceResource,
-                                         surfaceRenderState.get());
+            surface.setRenderState(surfaceRenderState.get());
         }
         else {
             onDestroy(wlSurfaceResource);
