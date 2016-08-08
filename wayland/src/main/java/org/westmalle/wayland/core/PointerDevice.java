@@ -17,6 +17,8 @@
  */
 package org.westmalle.wayland.core;
 
+import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
@@ -45,6 +47,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@AutoFactory(allowSubclasses = true,
+             className = "PrivatePointerDeviceFactory")
 public class PointerDevice implements Role {
 
     @Nonnull
@@ -97,11 +101,11 @@ public class PointerDevice implements Role {
     private int buttonsPressed;
 
     @Inject
-    PointerDevice(@Nonnull final Display display,
-                  @Nonnull final NullRegion nullRegion,
-                  @Nonnull final CursorFactory cursorFactory,
-                  @Nonnull final JobExecutor jobExecutor,
-                  @Nonnull final Scene scene,
+    PointerDevice(@Provided @Nonnull final Display display,
+                  @Provided @Nonnull final NullRegion nullRegion,
+                  @Provided @Nonnull final CursorFactory cursorFactory,
+                  @Provided @Nonnull final JobExecutor jobExecutor,
+                  @Provided @Nonnull final Scene scene,
                   @Nonnull final Region region) {
         this.display = display;
         this.nullRegion = nullRegion;
@@ -682,6 +686,7 @@ public class PointerDevice implements Role {
     }
 
     //TODO unit test
+
     /**
      * Limit the pointer position to the clamp region.
      *

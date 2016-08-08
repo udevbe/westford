@@ -30,7 +30,7 @@ import javax.inject.Singleton;
 public class CoreModule {
 
     @Provides
-    Region provideRegion(final FiniteRegionFactory finiteRegionFactory) {
+    FiniteRegion provideFiniteRegion(final FiniteRegionFactory finiteRegionFactory) {
         return finiteRegionFactory.create();
     }
 
@@ -38,6 +38,11 @@ public class CoreModule {
     @Singleton
     InfiniteRegion provideInfiniteRegion(final FiniteRegionFactory finiteRegionFactory) {
         return new InfiniteRegion(finiteRegionFactory);
+    }
+
+    @Provides
+    PointerDevice providePointerDevice(final PointerDeviceFactory pointerDeviceFactory) {
+        return pointerDeviceFactory.create();
     }
 
     @Provides

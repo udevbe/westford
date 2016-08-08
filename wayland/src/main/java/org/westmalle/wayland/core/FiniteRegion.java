@@ -97,22 +97,24 @@ public class FiniteRegion implements Region {
                 && asList().containsAll(region.asList()));
     }
 
-    @Nonnull
+    public void add(@Nonnull final FiniteRegion region) {
+        this.libpixman1.pixman_region32_union(this.pixman_region32Pointer.address,
+                                              this.pixman_region32Pointer.address,
+                                              region.getPixmanRegion32().address);
+    }
+
     @Override
-    public Region add(@Nonnull final Rectangle rectangle) {
+    public void add(@Nonnull final Rectangle rectangle) {
         this.libpixman1.pixman_region32_union_rect(this.pixman_region32Pointer.address,
                                                    this.pixman_region32Pointer.address,
                                                    rectangle.getX(),
                                                    rectangle.getY(),
                                                    rectangle.getWidth(),
                                                    rectangle.getHeight());
-
-        return this;
     }
 
-    @Nonnull
     @Override
-    public Region subtract(@Nonnull final Rectangle rectangle) {
+    public void subtract(@Nonnull final Rectangle rectangle) {
         final Pointer<pixman_region32> delta_pixman_region32 = Pointer.ref(new pixman_region32());
         this.libpixman1.pixman_region32_init_rect(delta_pixman_region32.address,
                                                   rectangle.getX(),
@@ -122,7 +124,6 @@ public class FiniteRegion implements Region {
         this.libpixman1.pixman_region32_subtract(this.pixman_region32Pointer.address,
                                                  this.pixman_region32Pointer.address,
                                                  delta_pixman_region32.address);
-        return this;
     }
 
     @Override
@@ -156,5 +157,11 @@ public class FiniteRegion implements Region {
     protected void finalize() throws Throwable {
         super.finalize();
         this.pixman_region32Pointer.close();
+    }
+
+    public void remove(final FiniteRegion region) {
+        this.libpixman1.pixman_region32_subtract(this.pixman_region32Pointer.address,
+                                                 this.pixman_region32Pointer.address,
+                                                 region.getPixmanRegion32().address);
     }
 }

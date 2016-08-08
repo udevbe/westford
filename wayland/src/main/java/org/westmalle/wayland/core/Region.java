@@ -26,11 +26,9 @@ public interface Region {
     @Nonnull
     List<Rectangle> asList();
 
-    @Nonnull
-    Region add(@Nonnull Rectangle rectangle);
+    void add(@Nonnull Rectangle rectangle);
 
-    @Nonnull
-    Region subtract(@Nonnull Rectangle rectangle);
+    void subtract(@Nonnull Rectangle rectangle);
 
     boolean contains(@Nonnull Point point);
 

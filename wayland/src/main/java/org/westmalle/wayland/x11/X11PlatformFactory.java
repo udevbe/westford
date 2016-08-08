@@ -25,6 +25,7 @@ import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
 import org.westmalle.wayland.nativ.libX11.LibX11;
 import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
 import org.westmalle.wayland.nativ.libxcb.Libxcb;
@@ -146,10 +147,17 @@ public class X11PlatformFactory {
         final Iterable<X11OutputConfig> x11OutputConfigs = this.x11PlatformConfig.getX11RenderOutputConfigs();
         final List<X11Output>           x11Outputs       = new LinkedList<>();
 
+        final X11Platform x11Platform = this.privateX11PlatformFactory.create(x11Outputs,
+                                                                              x11EventBus,
+                                                                              xcbConnection,
+                                                                              xDisplay,
+                                                                              x11Atoms);
+
         int       x = 0;
         final int y = 0;
         for (final X11OutputConfig x11OutputConfig : x11OutputConfigs) {
-            addX11RenderOutput(x11Outputs,
+            addX11RenderOutput(x11Platform,
+                               x11Outputs,
                                xcbConnection,
                                x11Atoms,
                                x11EventBus,
@@ -167,11 +175,7 @@ public class X11PlatformFactory {
                                        x11EventBus)
                     .check();
 
-        return this.privateX11PlatformFactory.create(x11Outputs,
-                                                     x11EventBus,
-                                                     xcbConnection,
-                                                     xDisplay,
-                                                     x11Atoms);
+        return x11Platform;
     }
 
     private Map<String, Integer> internX11Atoms(final long connection) {
@@ -215,7 +219,8 @@ public class X11PlatformFactory {
         return x11Atoms;
     }
 
-    private void addX11RenderOutput(final List<X11Output> x11Outputs,
+    private void addX11RenderOutput(final X11Platform x11Platform,
+                                    final List<X11Output> x11Outputs,
                                     final long xcbConnection,
                                     final Map<String, Integer> x11Atoms,
                                     final X11EventBus x11EventBus,
@@ -297,7 +302,8 @@ public class X11PlatformFactory {
                                handle(xcbConnection,
                                       event.castp(xcb_client_message_event_t.class),
                                       x11Atoms,
-                                      x11Outputs);
+                                      x11Outputs,
+                                      x11Platform);
 
                                break;
                            }
@@ -381,7 +387,8 @@ public class X11PlatformFactory {
     private void handle(final long connection,
                         final Pointer<xcb_client_message_event_t> event,
                         final Map<String, Integer> x11Atoms,
-                        final List<X11Output> x11Outputs) {
+                        final List<X11Output> x11Outputs,
+                        final X11Platform x11Platform) {
         final int atom = event.dref()
                               .data()
                               .data32()
@@ -397,6 +404,8 @@ public class X11PlatformFactory {
                     this.libxcb.xcb_destroy_window(connection,
                                                    sourceWindow);
                     x11RenderOutputIterator.remove();
+                    x11Platform.getRenderOutputDestroyedSignal()
+                               .emit(RenderOutputDestroyed.create(x11Output));
                     return;
                 }
             }

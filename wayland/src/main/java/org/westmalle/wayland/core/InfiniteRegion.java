@@ -52,15 +52,11 @@ public class InfiniteRegion implements Region {
 
     @Nonnull
     @Override
-    public Region add(@Nonnull final Rectangle rectangle) {
-        return this;
-    }
+    public void add(@Nonnull final Rectangle rectangle) {}
 
     @Nonnull
     @Override
-    public Region subtract(@Nonnull final Rectangle rectangle) {
-        return this;
-    }
+    public void subtract(@Nonnull final Rectangle rectangle) {}
 
     @Override
     public boolean contains(@Nonnull final Point point) {
@@ -70,8 +66,8 @@ public class InfiniteRegion implements Region {
     @Override
     public boolean contains(@Nonnull final Rectangle clipping,
                             @Nonnull final Point point) {
-        return this.finiteRegionFactory.create()
-                                       .add(clipping)
-                                       .contains(point);
+        final FiniteRegion finiteRegion = this.finiteRegionFactory.create();
+        finiteRegion.add(clipping);
+        return finiteRegion.contains(point);
     }
 }

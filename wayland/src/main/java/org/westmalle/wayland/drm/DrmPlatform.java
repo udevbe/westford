@@ -19,6 +19,10 @@ package org.westmalle.wayland.drm;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.RenderPlatform;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -34,6 +38,8 @@ public class DrmPlatform implements RenderPlatform {
     private final DrmEventBus     drmEventBus;
     @Nonnull
     private final List<DrmOutput> drmOutputs;
+    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
+    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
     DrmPlatform(final long drmDevice,
                 final int drmFd,
@@ -48,6 +54,16 @@ public class DrmPlatform implements RenderPlatform {
     @Nonnull
     public List<DrmOutput> getRenderOutputs() {
         return this.drmOutputs;
+    }
+
+    @Override
+    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
+        return this.renderOutputNewSignal;
+    }
+
+    @Override
+    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
+        return this.renderOutputDestroyedSignal;
     }
 
     @Nonnull

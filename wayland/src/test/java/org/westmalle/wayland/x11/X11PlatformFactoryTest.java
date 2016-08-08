@@ -96,8 +96,6 @@ public class X11PlatformFactoryTest {
     public void setUp() {
         when(this.x11PlatformConfig.getDisplay()).thenReturn(":0");
         final X11OutputConfig x11OutputConfig = mock(X11OutputConfig.class);
-        when(x11OutputConfig.getX()).thenReturn(10);
-        when(x11OutputConfig.getY()).thenReturn(20);
         when(x11OutputConfig.getWidth()).thenReturn(100);
         when(x11OutputConfig.getHeight()).thenReturn(200);
         when(x11OutputConfig.getName()).thenReturn("testWindow");

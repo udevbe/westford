@@ -20,6 +20,10 @@ package org.westmalle.wayland.dispmanx;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.RenderPlatform;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 
 import javax.annotation.Nonnull;
@@ -34,6 +38,8 @@ public class DispmanxPlatform implements RenderPlatform {
 
     @Nonnull
     private final List<DispmanxOutput> dispmanxOutputs;
+    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
+    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
     DispmanxPlatform(@Nonnull final DISPMANX_MODEINFO_T modeinfo,
                      @Nonnull final List<DispmanxOutput> dispmanxOutputs) {
@@ -49,5 +55,15 @@ public class DispmanxPlatform implements RenderPlatform {
     @Nonnull
     public List<DispmanxOutput> getRenderOutputs() {
         return this.dispmanxOutputs;
+    }
+
+    @Override
+    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
+        return this.renderOutputNewSignal;
+    }
+
+    @Override
+    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
+        return this.renderOutputDestroyedSignal;
     }
 }

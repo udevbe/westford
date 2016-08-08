@@ -35,9 +35,8 @@ import java.util.Set;
              allowSubclasses = true)
 public class Output {
 
-    private final Signal<OutputTransform, Slot<OutputTransform>> transformSignal      = new Signal<>();
-    private final Signal<OutputGeometry, Slot<OutputGeometry>>   outputGeometrySignal = new Signal<>();
-    private final Signal<OutputMode, Slot<OutputMode>>           outputModeSignal     = new Signal<>();
+    private final Signal<OutputTransform, Slot<OutputTransform>> transformSignal  = new Signal<>();
+    private final Signal<OutputMode, Slot<OutputMode>>           outputModeSignal = new Signal<>();
 
     @Nonnull
     private final FiniteRegionFactory finiteRegionFactory;
@@ -53,7 +52,7 @@ public class Output {
 
 
     @Nonnull
-    private Region region;
+    private FiniteRegion region;
 
     @Nonnull
     private OutputGeometry outputGeometry = OutputGeometry.builder()
@@ -75,10 +74,10 @@ public class Output {
                                                       .build();
 
     Output(@Provided @Nonnull final FiniteRegionFactory finiteRegionFactory,
-           @Provided @Nonnull final NullRegion nullRegion,
+           @Provided @Nonnull final FiniteRegion finiteRegion,
            @Nonnull final String name) {
         this.finiteRegionFactory = finiteRegionFactory;
-        this.region = nullRegion;
+        this.region = finiteRegion;
         this.name = name;
     }
 
@@ -86,7 +85,6 @@ public class Output {
                        @Nonnull final OutputGeometry outputGeometry) {
         if (!this.outputGeometry.equals(outputGeometry)) {
             this.outputGeometry = outputGeometry;
-            this.outputGeometrySignal.emit(outputGeometry);
             updateOutputTransform();
         }
 
@@ -98,8 +96,8 @@ public class Output {
         final Mat4 scaleMat = Transforms.SCALE(this.scale);
         final int  x        = this.outputGeometry.getX();
         final int  y        = this.outputGeometry.getY();
-        final Mat4 moveMat = Transforms.TRANSLATE(-x,
-                                                  -y);
+        final Mat4 moveMat = Transforms.TRANSLATE(x,
+                                                  y);
         final Mat4 transformMat;
         final int  transformNr = this.outputGeometry.getTransform();
         if (transformNr == WlOutputTransform.NORMAL.value) {
@@ -142,16 +140,20 @@ public class Output {
 
     private void updateRegion() {
         //FIXME compensate for position offset
-        final Vec4 compositorDimensions = this.transform.multiply(Vec4.create(this.outputMode.getWidth(),
-                                                                              this.outputMode.getHeight(),
-                                                                              1,
-                                                                              1));
+        final Vec4 regionTopLeft = this.transform.multiply(Vec4.create(0,
+                                                                       0,
+                                                                       1,
+                                                                       1));
+        final Vec4 regionBottomRight = this.transform.multiply(Vec4.create(this.outputMode.getWidth(),
+                                                                           this.outputMode.getHeight(),
+                                                                           1,
+                                                                           1));
         //TODO fire region event?
         this.region = this.finiteRegionFactory.create();
-        this.region.add(Rectangle.create(this.outputGeometry.getX(),
-                                         this.outputGeometry.getY(),
-                                         (int) compositorDimensions.getX(),
-                                         (int) compositorDimensions.getY()));
+        this.region.add(Rectangle.create((int) regionTopLeft.getX(),
+                                         (int) regionTopLeft.getY(),
+                                         (int) regionBottomRight.getX() - (int) regionTopLeft.getX(),
+                                         (int) regionBottomRight.getY() - (int) regionTopLeft.getY()));
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
@@ -205,11 +207,21 @@ public class Output {
                             (int) localPoint.getY());
     }
 
+    /**
+     * translate from compositor space to output space
+     *
+     * @return
+     */
     @Nonnull
     public Mat4 getInverseTransform() {
         return this.inverseTransform;
     }
 
+    /**
+     * translate from output space to compositor space
+     *
+     * @return
+     */
     @Nonnull
     public Mat4 getTransform() {
         return this.transform;
@@ -226,10 +238,6 @@ public class Output {
         return this.transformSignal;
     }
 
-    public Signal<OutputGeometry, Slot<OutputGeometry>> getGeometrySignal() {
-        return this.outputGeometrySignal;
-    }
-
     public Signal<OutputMode, Slot<OutputMode>> getModeSignal() {
         return this.outputModeSignal;
     }
@@ -242,5 +250,10 @@ public class Output {
     public void setScale(@Nonnegative final float scale) {
         this.scale = scale;
         updateOutputTransform();
+    }
+
+    @Nonnull
+    public FiniteRegion getRegion() {
+        return this.region;
     }
 }

@@ -20,6 +20,10 @@ package org.westmalle.wayland.html5;
 import com.google.auto.factory.AutoFactory;
 import org.eclipse.jetty.server.Server;
 import org.westmalle.wayland.core.RenderPlatform;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -31,6 +35,8 @@ public class Html5RenderPlatform implements RenderPlatform {
 
     private final Server                  server;
     private final List<Html5RenderOutput> html5RenderOutputs;
+    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
+    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
     @Inject
     Html5RenderPlatform(final Server server,
@@ -47,5 +53,15 @@ public class Html5RenderPlatform implements RenderPlatform {
     @Override
     public List<Html5RenderOutput> getRenderOutputs() {
         return this.html5RenderOutputs;
+    }
+
+    @Override
+    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
+        return this.renderOutputNewSignal;
+    }
+
+    @Override
+    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
+        return this.renderOutputDestroyedSignal;
     }
 }

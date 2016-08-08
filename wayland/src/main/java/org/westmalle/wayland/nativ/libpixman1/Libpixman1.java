@@ -38,6 +38,10 @@ public class Libpixman1 {
                                                  int width,
                                                  int height);
 
+    public native int pixman_region32_union(@Ptr long new_reg,
+                                            @Ptr long reg1,
+                                            @Ptr long reg2);
+
 
     public native void pixman_region32_init_rect(@Ptr long region,
                                                  int x,
