@@ -26,23 +26,23 @@ import java.util.Map;
 
 @AutoFactory(className = "PrivateX11PlatformFactory",
              allowSubclasses = true)
-public class X11RenderPlatform implements RenderPlatform {
+public class X11Platform implements RenderPlatform {
 
     @Nonnull
-    private final List<X11RenderOutput> x11RenderOutputs;
+    private final List<X11Output>      x11Outputs;
     @Nonnull
-    private final X11EventBus           x11EventBus;
-    private final long                  xcbConnection;
-    private final long                  xDisplay;
+    private final X11EventBus          x11EventBus;
+    private final long                 xcbConnection;
+    private final long                 xDisplay;
     @Nonnull
-    private final Map<String, Integer>  atoms;
+    private final Map<String, Integer> atoms;
 
-    X11RenderPlatform(@Nonnull final List<X11RenderOutput> x11RenderOutputs,
-                      @Nonnull final X11EventBus x11EventBus,
-                      final long xcbConnection,
-                      final long xDisplay,
-                      @Nonnull final Map<String, Integer> x11Atoms) {
-        this.x11RenderOutputs = x11RenderOutputs;
+    X11Platform(@Nonnull final List<X11Output> x11Outputs,
+                @Nonnull final X11EventBus x11EventBus,
+                final long xcbConnection,
+                final long xDisplay,
+                @Nonnull final Map<String, Integer> x11Atoms) {
+        this.x11Outputs = x11Outputs;
         this.x11EventBus = x11EventBus;
         this.xcbConnection = xcbConnection;
         this.xDisplay = xDisplay;
@@ -69,7 +69,7 @@ public class X11RenderPlatform implements RenderPlatform {
 
     @Nonnull
     @Override
-    public List<X11RenderOutput> getRenderOutputs() {
-        return this.x11RenderOutputs;
+    public List<X11Output> getRenderOutputs() {
+        return this.x11Outputs;
     }
 }

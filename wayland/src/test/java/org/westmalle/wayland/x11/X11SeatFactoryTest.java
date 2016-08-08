@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 public class X11SeatFactoryTest {
 
     @Mock
-    private X11RenderPlatform            x11Platform;
+    private X11Platform                  x11Platform;
     @Mock
     private X11XkbFactory                x11XkbFactory;
     @Mock

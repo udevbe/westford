@@ -19,8 +19,8 @@ package org.westmalle.wayland.dispmanx.egl;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.dispmanx.DispmanxRenderOutput;
-import org.westmalle.wayland.dispmanx.DispmanxRenderPlatform;
+import org.westmalle.wayland.dispmanx.DispmanxOutput;
+import org.westmalle.wayland.dispmanx.DispmanxPlatform;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
@@ -51,17 +51,17 @@ public class DispmanxEglPlatformFactory {
     @Nonnull
     private final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory;
     @Nonnull
-    private final DispmanxEglRenderOutputFactory    dispmanxEglRenderOutputFactory;
+    private final DispmanxEglOutputFactory          dispmanxEglRenderOutputFactory;
     @Nonnull
-    private final DispmanxRenderPlatform            dispmanxPlatform;
+    private final DispmanxPlatform                  dispmanxPlatform;
     @Nonnull
     private final GlRenderer                        glRenderer;
 
     @Inject
     DispmanxEglPlatformFactory(@Nonnull final LibEGL libEGL,
                                @Nonnull final PrivateDispmanxEglPlatformFactory privateDispmanxEglOutputFactory,
-                               @Nonnull final DispmanxEglRenderOutputFactory dispmanxEglRenderOutputFactory,
-                               @Nonnull final DispmanxRenderPlatform dispmanxPlatform,
+                               @Nonnull final DispmanxEglOutputFactory dispmanxEglRenderOutputFactory,
+                               @Nonnull final DispmanxPlatform dispmanxPlatform,
                                @Nonnull final GlRenderer glRenderer) {
         this.libEGL = libEGL;
         this.privateDispmanxEglOutputFactory = privateDispmanxEglOutputFactory;
@@ -70,7 +70,7 @@ public class DispmanxEglPlatformFactory {
         this.glRenderer = glRenderer;
     }
 
-    public DispmanxEglRenderPlatform create() {
+    public DispmanxEglPlatform create() {
 
         final DISPMANX_MODEINFO_T modeinfo = this.dispmanxPlatform.getModeinfo();
 
@@ -110,11 +110,11 @@ public class DispmanxEglPlatformFactory {
         final long eglContext = getContext(eglDisplay,
                                            config);
 
-        final List<DispmanxRenderOutput>    dispmanxRenderOutputs    = this.dispmanxPlatform.getRenderOutputs();
-        final List<DispmanxEglRenderOutput> dispmanxEglRenderOutputs = new ArrayList<>(dispmanxRenderOutputs.size());
+        final List<DispmanxOutput>    dispmanxOutputs          = this.dispmanxPlatform.getRenderOutputs();
+        final List<DispmanxEglOutput> dispmanxEglRenderOutputs = new ArrayList<>(dispmanxOutputs.size());
 
-        dispmanxRenderOutputs.forEach(dispmanxRenderOutput -> {
-            final int                   dispmanxElement   = dispmanxRenderOutput.getDispmanxElement();
+        dispmanxOutputs.forEach(dispmanxOutput -> {
+            final int                   dispmanxElement   = dispmanxOutput.getDispmanxElement();
             final EGL_DISPMANX_WINDOW_T eglDispmanxWindow = new EGL_DISPMANX_WINDOW_T();
             eglDispmanxWindow.element(dispmanxElement);
             eglDispmanxWindow.width(modeinfo.width());
@@ -125,7 +125,7 @@ public class DispmanxEglPlatformFactory {
                                                      config,
                                                      eglContext);
 
-            dispmanxEglRenderOutputs.add(this.dispmanxEglRenderOutputFactory.create(dispmanxRenderOutput,
+            dispmanxEglRenderOutputs.add(this.dispmanxEglRenderOutputFactory.create(dispmanxOutput,
                                                                                     eglDispmanxWindow,
                                                                                     eglSurface,
                                                                                     eglContext,

@@ -20,24 +20,26 @@ package org.westmalle.wayland.dispmanx.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.core.EglRenderOutput;
+import org.westmalle.wayland.core.EglOutput;
+import org.westmalle.wayland.core.EglOutputState;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.dispmanx.DispmanxRenderOutput;
+import org.westmalle.wayland.dispmanx.DispmanxOutput;
 import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
-@AutoFactory(className = "DispmanxEglRenderOutputFactory",
+@AutoFactory(className = "DispmanxEglOutputFactory",
              allowSubclasses = true)
-public class DispmanxEglRenderOutput implements EglRenderOutput {
+public class DispmanxEglOutput implements EglOutput {
 
     @Nonnull
     private final Display               display;
     @Nonnull
     private final Renderer              renderer;
     @Nonnull
-    private final DispmanxRenderOutput  dispmanxRenderOutput;
+    private final DispmanxOutput        dispmanxOutput;
     @Nonnull
     private final EGL_DISPMANX_WINDOW_T eglDispmanxWindow;
 
@@ -47,16 +49,18 @@ public class DispmanxEglRenderOutput implements EglRenderOutput {
     private final long eglContext;
     private final long eglDisplay;
 
-    DispmanxEglRenderOutput(@Nonnull @Provided final Display display,
-                            @Nonnull @Provided final Renderer renderer,
-                            @Nonnull final DispmanxRenderOutput dispmanxRenderOutput,
-                            @Nonnull final EGL_DISPMANX_WINDOW_T eglDispmanxWindow,
-                            final long eglSurface,
-                            final long eglContext,
-                            final long eglDisplay) {
+    private Optional<EglOutputState> state = Optional.empty();
+
+    DispmanxEglOutput(@Nonnull @Provided final Display display,
+                      @Nonnull @Provided final Renderer renderer,
+                      @Nonnull final DispmanxOutput dispmanxOutput,
+                      @Nonnull final EGL_DISPMANX_WINDOW_T eglDispmanxWindow,
+                      final long eglSurface,
+                      final long eglContext,
+                      final long eglDisplay) {
         this.display = display;
         this.renderer = renderer;
-        this.dispmanxRenderOutput = dispmanxRenderOutput;
+        this.dispmanxOutput = dispmanxOutput;
         this.eglDispmanxWindow = eglDispmanxWindow;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
@@ -64,8 +68,8 @@ public class DispmanxEglRenderOutput implements EglRenderOutput {
     }
 
     @Nonnull
-    public DispmanxRenderOutput getDispmanxRenderOutput() {
-        return this.dispmanxRenderOutput;
+    public DispmanxOutput getDispmanxOutput() {
+        return this.dispmanxOutput;
     }
 
     @Override
@@ -84,6 +88,17 @@ public class DispmanxEglRenderOutput implements EglRenderOutput {
     }
 
     @Nonnull
+    @Override
+    public Optional<EglOutputState> getState() {
+        return this.state;
+    }
+
+    @Override
+    public void updateState(@Nonnull final EglOutputState eglOutputState) {
+        this.state = Optional.of(eglOutputState);
+    }
+
+    @Nonnull
     public EGL_DISPMANX_WINDOW_T getEglDispmanxWindow() {
         return this.eglDispmanxWindow;
     }
@@ -91,7 +106,7 @@ public class DispmanxEglRenderOutput implements EglRenderOutput {
     @Nonnull
     @Override
     public WlOutput getWlOutput() {
-        return this.dispmanxRenderOutput.getWlOutput();
+        return this.dispmanxOutput.getWlOutput();
     }
 
     @Override

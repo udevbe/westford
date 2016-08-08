@@ -39,12 +39,11 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
-import org.westmalle.wayland.x11.config.X11RenderOutputConfig;
 import org.westmalle.wayland.x11.config.X11PlatformConfig;
+import org.westmalle.wayland.x11.config.X11RenderOutputConfig;
 
 import java.util.Collections;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.freedesktop.jaccall.Pointer.malloc;
 import static org.freedesktop.jaccall.Pointer.ref;
 import static org.mockito.Matchers.any;
@@ -64,7 +63,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
                  OutputFactory.class,
                  X11EventBusFactory.class,
                  EventSource.class})
-public class X11RenderPlatformFactoryTest {
+public class X11PlatformFactoryTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -86,7 +85,7 @@ public class X11RenderPlatformFactoryTest {
     @Mock
     private X11EventBusFactory        x11EventBusFactory;
     @Mock
-    private X11RenderOutputFactory    x11RenderOutputFactory;
+    private X11OutputFactory          x11OutputFactory;
     @Mock
     private X11PlatformConfig         x11PlatformConfig;
 
@@ -193,14 +192,14 @@ public class X11RenderPlatformFactoryTest {
         final WlOutput wlOutput = mock(WlOutput.class);
         when(this.wlOutputFactory.create(output)).thenReturn(wlOutput);
 
-        final X11RenderOutput                                                          x11RenderOutput = mock(X11RenderOutput.class);
-        final EventLoop                                                                eventLoop       = mock(EventLoop.class);
-        final EventSource                                                              eventSource     = mock(EventSource.class);
-        final X11EventBus                                                              x11EventBus     = mock(X11EventBus.class);
-        final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal    = mock(Signal.class);
-        final long                                                                     xDisplay        = 1234567;
-        final long                                                                     xcbConnection   = 112358;
-        final long                                                                     setup           = 473289;
+        final X11Output                                                                x11Output     = mock(X11Output.class);
+        final EventLoop                                                                eventLoop     = mock(EventLoop.class);
+        final EventSource                                                              eventSource   = mock(EventSource.class);
+        final X11EventBus                                                              x11EventBus   = mock(X11EventBus.class);
+        final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal  = mock(Signal.class);
+        final long                                                                     xDisplay      = 1234567;
+        final long                                                                     xcbConnection = 112358;
+        final long                                                                     setup         = 473289;
         final xcb_screen_t screen = malloc(xcb_screen_t.SIZE,
                                            xcb_screen_t.class).dref();
         final int cookie = 95484;
@@ -234,8 +233,8 @@ public class X11RenderPlatformFactoryTest {
                                                cookie,
                                                0L)).thenAnswer(invocation -> malloc(xcb_intern_atom_reply_t.SIZE,
                                                                                     xcb_intern_atom_reply_t.class).address);
-        when(this.x11RenderOutputFactory.create(window,
-                                                wlOutput)).thenReturn(x11RenderOutput);
+        when(this.x11OutputFactory.create(window,
+                                          wlOutput)).thenReturn(x11Output);
         //when
         this.x11PlatformFactory.create();
         //then

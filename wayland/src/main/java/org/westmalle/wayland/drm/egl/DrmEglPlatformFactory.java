@@ -20,8 +20,8 @@ package org.westmalle.wayland.drm.egl;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.drm.DrmRenderOutput;
-import org.westmalle.wayland.drm.DrmRenderPlatform;
+import org.westmalle.wayland.drm.DrmOutput;
+import org.westmalle.wayland.drm.DrmPlatform;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
@@ -65,9 +65,9 @@ public class DrmEglPlatformFactory {
     @Nonnull
     private final LibGLESv2                    libGLESv2;
     @Nonnull
-    private final DrmRenderPlatform            drmPlatform;
+    private final DrmPlatform                  drmPlatform;
     @Nonnull
-    private final DrmEglRenderOutputFactory    drmEglRenderOutputFactory;
+    private final DrmEglOutputFactory          drmEglOutputFactory;
     @Nonnull
     private final GlRenderer                   glRenderer;
     @Nonnull
@@ -78,8 +78,8 @@ public class DrmEglPlatformFactory {
                           @Nonnull final Libgbm libgbm,
                           @Nonnull final LibEGL libEGL,
                           @Nonnull final LibGLESv2 libGLESv2,
-                          @Nonnull final DrmRenderPlatform drmPlatform,
-                          @Nonnull final DrmEglRenderOutputFactory drmEglRenderOutputFactory,
+                          @Nonnull final DrmPlatform drmPlatform,
+                          @Nonnull final DrmEglOutputFactory drmEglOutputFactory,
                           @Nonnull final GlRenderer glRenderer,
                           @Nonnull final Tty tty) {
         this.privateDrmEglPlatformFactory = privateDrmEglPlatformFactory;
@@ -87,12 +87,12 @@ public class DrmEglPlatformFactory {
         this.libEGL = libEGL;
         this.libGLESv2 = libGLESv2;
         this.drmPlatform = drmPlatform;
-        this.drmEglRenderOutputFactory = drmEglRenderOutputFactory;
+        this.drmEglOutputFactory = drmEglOutputFactory;
         this.glRenderer = glRenderer;
         this.tty = tty;
     }
 
-    public DrmEglRenderPlatform create() {
+    public DrmEglPlatform create() {
         final long gbmDevice  = this.libgbm.gbm_create_device(this.drmPlatform.getDrmFd());
         final long eglDisplay = createEglDisplay(gbmDevice);
 
@@ -128,15 +128,15 @@ public class DrmEglPlatformFactory {
         final long eglContext = createEglContext(eglDisplay,
                                                  eglConfig);
 
-        final List<DrmRenderOutput>    drmRenderOutputs    = this.drmPlatform.getRenderOutputs();
-        final List<DrmEglRenderOutput> drmEglRenderOutputs = new ArrayList<>(drmRenderOutputs.size());
+        final List<DrmOutput>    drmOutputs          = this.drmPlatform.getRenderOutputs();
+        final List<DrmEglOutput> drmEglRenderOutputs = new ArrayList<>(drmOutputs.size());
 
-        drmRenderOutputs.forEach(drmRenderOutput ->
-                                         drmEglRenderOutputs.add(createDrmEglRenderOutput(drmRenderOutput,
-                                                                                          gbmDevice,
-                                                                                          eglDisplay,
-                                                                                          eglContext,
-                                                                                          eglConfig)));
+        drmOutputs.forEach(drmOutput ->
+                                   drmEglRenderOutputs.add(createDrmEglRenderOutput(drmOutput,
+                                                                                    gbmDevice,
+                                                                                    eglDisplay,
+                                                                                    eglContext,
+                                                                                    eglConfig)));
         this.tty.getVtEnterSignal()
                 .connect(event -> enterVt(drmEglRenderOutputs));
         this.tty.getVtLeaveSignal()
@@ -149,15 +149,15 @@ public class DrmEglPlatformFactory {
                                                         drmEglRenderOutputs);
     }
 
-    private void enterVt(final List<DrmEglRenderOutput> drmEglRenderOutputs) {
+    private void enterVt(final List<DrmEglOutput> drmEglRenderOutputs) {
         drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
             drmEglRenderOutput.setDefaultMode();
             drmEglRenderOutput.enable();
         });
     }
 
-    private void leaveVt(final List<DrmEglRenderOutput> drmEglRenderOutputs) {
-        drmEglRenderOutputs.forEach(DrmEglRenderOutput::disable);
+    private void leaveVt(final List<DrmEglOutput> drmEglRenderOutputs) {
+        drmEglRenderOutputs.forEach(DrmEglOutput::disable);
     }
 
     private long createEglContext(final long eglDisplay,
@@ -178,17 +178,17 @@ public class DrmEglPlatformFactory {
         return context;
     }
 
-    private DrmEglRenderOutput createDrmEglRenderOutput(final DrmRenderOutput drmRenderOutput,
-                                                        final long gbmDevice,
-                                                        final long eglDisplay,
-                                                        final long eglContext,
-                                                        final long eglConfig) {
+    private DrmEglOutput createDrmEglRenderOutput(final DrmOutput drmOutput,
+                                                  final long gbmDevice,
+                                                  final long eglDisplay,
+                                                  final long eglContext,
+                                                  final long eglConfig) {
 
         final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
-                                                               drmRenderOutput.getMode()
-                                                                              .hdisplay(),
-                                                               drmRenderOutput.getMode()
-                                                                              .vdisplay(),
+                                                               drmOutput.getMode()
+                                                                        .hdisplay(),
+                                                               drmOutput.getMode()
+                                                                        .vdisplay(),
                                                                GBM_FORMAT_XRGB8888,
                                                                GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
 
@@ -213,13 +213,13 @@ public class DrmEglPlatformFactory {
                                    eglSurface);
         final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
 
-        final DrmEglRenderOutput drmEglRenderOutput = this.drmEglRenderOutputFactory.create(this.drmPlatform.getDrmFd(),
-                                                                                            gbmBo,
-                                                                                            gbmSurface,
-                                                                                            drmRenderOutput,
-                                                                                            eglSurface,
-                                                                                            eglContext,
-                                                                                            eglDisplay);
+        final DrmEglOutput drmEglRenderOutput = this.drmEglOutputFactory.create(this.drmPlatform.getDrmFd(),
+                                                                                gbmBo,
+                                                                                gbmSurface,
+                                                                                drmOutput,
+                                                                                eglSurface,
+                                                                                eglContext,
+                                                                                eglDisplay);
         drmEglRenderOutput.setDefaultMode();
 
         return drmEglRenderOutput;

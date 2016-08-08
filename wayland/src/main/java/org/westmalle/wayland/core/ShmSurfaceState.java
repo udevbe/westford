@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.gles2;
+package org.westmalle.wayland.core;
 
 import com.google.auto.value.AutoValue;
 
@@ -23,22 +23,22 @@ import javax.annotation.Nonnegative;
 import java.util.Optional;
 
 @AutoValue
-public abstract class ShmSurfaceRenderState implements SurfaceRenderState {
+public abstract class ShmSurfaceState implements SurfaceRenderState {
 
-    public static ShmSurfaceRenderState create(@Nonnegative final int pitch,
-                                               @Nonnegative final int height,
-                                               final int target,
-                                               final int shaderProgram,
-                                               final int glFormat,
-                                               final int glPixelType,
-                                               final int texture) {
-        return new AutoValue_ShmSurfaceRenderState(pitch,
-                                                   height,
-                                                   target,
-                                                   shaderProgram,
-                                                   glFormat,
-                                                   glPixelType,
-                                                   texture);
+    public static ShmSurfaceState create(@Nonnegative final int pitch,
+                                         @Nonnegative final int height,
+                                         final int target,
+                                         final int shaderProgram,
+                                         final int glFormat,
+                                         final int glPixelType,
+                                         final int texture) {
+        return new AutoValue_ShmSurfaceState(pitch,
+                                             height,
+                                             target,
+                                             shaderProgram,
+                                             glFormat,
+                                             glPixelType,
+                                             texture);
     }
 
     @Nonnegative

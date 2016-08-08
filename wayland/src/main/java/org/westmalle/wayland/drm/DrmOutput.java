@@ -32,8 +32,8 @@ import javax.annotation.Nonnull;
 
 //TODO drm connector, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
-             className = "DrmRenderOutputFactory")
-public class DrmRenderOutput implements RenderOutput {
+             className = "DrmOutputFactory")
+public class DrmOutput implements RenderOutput {
 
     @Nonnull
     private final Renderer         renderer;
@@ -47,12 +47,12 @@ public class DrmRenderOutput implements RenderOutput {
     @Nonnull
     private final DrmModeModeInfo  mode;
 
-    DrmRenderOutput(@Nonnull @Provided final Renderer renderer,
-                    @Nonnull final WlOutput wlOutput,
-                    @Nonnull final DrmModeRes drmModeRes,
-                    @Nonnull final DrmModeConnector drmModeConnector,
-                    @Nonnegative final int crtcId,
-                    @Nonnull final DrmModeModeInfo mode) {
+    DrmOutput(@Nonnull @Provided final Renderer renderer,
+              @Nonnull final WlOutput wlOutput,
+              @Nonnull final DrmModeRes drmModeRes,
+              @Nonnull final DrmModeConnector drmModeConnector,
+              @Nonnegative final int crtcId,
+              @Nonnull final DrmModeModeInfo mode) {
         this.renderer = renderer;
         this.wlOutput = wlOutput;
         this.drmModeRes = drmModeRes;

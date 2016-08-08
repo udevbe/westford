@@ -17,28 +17,20 @@
  */
 package org.westmalle.wayland.core;
 
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
-public interface Renderer {
-    void visit(@Nonnull RenderOutput renderOutput);
+public interface EglOutput extends RenderOutput {
 
-    void visit(@Nonnull EglOutput eglConnector);
+    long getEglSurface();
 
-    //TODO pixman sw rendering platform
-    //void visit(PixmanPlatform pixmanPlatform);
-    
-    /**
-     * @param wlSurfaceResource
-     *
-     * @deprecated method will be removed
-     */
-    //FIXME remove this method and instead register a destroy listener in the renderer implementation
-    @Deprecated
-    void onDestroy(@Nonnull WlSurfaceResource wlSurfaceResource);
+    long getEglContext();
+
+    long getEglDisplay();
 
     @Nonnull
-    Buffer queryBuffer(@Nonnull WlBufferResource wlBufferResource);
+    Optional<EglOutputState> getState();
+
+    void updateState(@Nonnull EglOutputState eglOutputState);
 }

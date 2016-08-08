@@ -27,7 +27,6 @@ import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
@@ -41,11 +40,11 @@ import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_RIGHT;
 public class X11SeatTest {
 
     @Mock
-    private Libxcb            libxcb;
+    private Libxcb      libxcb;
     @Mock
-    private X11RenderPlatform x11Platform;
+    private X11Platform x11Platform;
     @Mock
-    private WlSeat            wlSeat;
+    private WlSeat      wlSeat;
 
     @InjectMocks
     private X11Seat x11Seat;
@@ -140,12 +139,12 @@ public class X11SeatTest {
     @Test
     public void testHandleMotion() throws Exception {
         //given
-        final X11RenderOutput x11RenderOutput = mock(X11RenderOutput.class);
-        when(x11RenderOutput.getXWindow()).thenReturn(12345);
-        when(x11RenderOutput.toGlobal(80,
-                                      -120)).thenReturn(Point.create(10,
+        final X11Output x11Output = mock(X11Output.class);
+        when(x11Output.getXWindow()).thenReturn(12345);
+        when(x11Output.toGlobal(80,
+                                -120)).thenReturn(Point.create(10,
                                                                      20));
-        when(this.x11Platform.getRenderOutputs()).thenReturn(Collections.singletonList(x11RenderOutput));
+        when(this.x11Platform.getRenderOutputs()).thenReturn(Collections.singletonList(x11Output));
 
         final WlPointer wlPointer = mock(WlPointer.class);
         when(this.wlSeat.getWlPointer()).thenReturn(wlPointer);

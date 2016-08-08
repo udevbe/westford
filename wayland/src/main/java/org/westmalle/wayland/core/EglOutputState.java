@@ -17,19 +17,29 @@
  */
 package org.westmalle.wayland.core;
 
+import com.google.auto.value.AutoValue;
+import org.westmalle.wayland.core.calc.Mat4;
+
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Optional;
 
-public interface EglRenderPlatform extends RenderPlatform {
-
-    long getEglDisplay();
-
-    long getEglContext();
+@AutoValue
+public abstract class EglOutputState {
 
     @Nonnull
-    List<? extends EglRenderOutput> getRenderOutputs();
+    public abstract Mat4 getGlTransform();
+    //TODO damage
 
-    @Nonnull
-    String getEglExtensions();
+    public static Builder builder() {
+        return new AutoValue_EglOutputState.Builder();
+    }
+
+    public abstract Builder toBuilder();
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder glTransform(Mat4 glTransform);
+
+        EglOutputState build();
+    }
 }

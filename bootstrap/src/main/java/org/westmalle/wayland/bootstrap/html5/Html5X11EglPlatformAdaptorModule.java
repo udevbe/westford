@@ -21,7 +21,7 @@ import dagger.Module;
 import dagger.Provides;
 import org.westmalle.wayland.core.RenderPlatform;
 import org.westmalle.wayland.html5.egl.Html5EglPlatformFactory;
-import org.westmalle.wayland.x11.egl.X11EglRenderPlatform;
+import org.westmalle.wayland.x11.egl.X11EglPlatform;
 
 import javax.inject.Singleton;
 
@@ -30,7 +30,7 @@ public class Html5X11EglPlatformAdaptorModule {
     @Provides
     @Singleton
     RenderPlatform providePlatform(final Html5EglPlatformFactory x11EglPlatformFactory,
-                                   final X11EglRenderPlatform x11EglPlatform) {
+                                   final X11EglPlatform x11EglPlatform) {
         return x11EglPlatformFactory.create(x11EglPlatform);
     }
 }

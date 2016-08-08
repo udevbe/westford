@@ -15,11 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.gles2;
+package org.westmalle.wayland.core;
+
 
 import java.util.Optional;
 
-@FunctionalInterface
-public interface SurfaceRenderState {
-    Optional<SurfaceRenderState> accept(SurfaceRenderStateVisitor surfaceRenderStateVisitor);
+public interface SurfaceRenderStateVisitor {
+    default Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) { return Optional.of(shmSurfaceState); }
+
+    default Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) { return Optional.of(eglSurfaceState); }
 }

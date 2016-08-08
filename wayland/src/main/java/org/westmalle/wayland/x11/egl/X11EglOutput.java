@@ -22,40 +22,44 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
-import org.westmalle.wayland.core.EglRenderOutput;
+import org.westmalle.wayland.core.EglOutput;
+import org.westmalle.wayland.core.EglOutputState;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.protocol.WlOutput;
-import org.westmalle.wayland.x11.X11RenderOutput;
+import org.westmalle.wayland.x11.X11Output;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
-             className = "X11EglRenderOutputFactory")
-public class X11EglRenderOutput implements EglRenderOutput {
+             className = "X11EglOutputFactory")
+public class X11EglOutput implements EglOutput {
 
     @Nonnull
-    private final Renderer        renderer;
+    private final Renderer  renderer;
     @Nonnull
-    private final X11RenderOutput x11RenderOutput;
+    private final X11Output x11Output;
     @Nonnull
-    private final Display         display;
-    private final long            eglSurface;
-    private final long            eglContext;
-    private final long            eglDisplay;
+    private final Display   display;
+    private final long      eglSurface;
+    private final long      eglContext;
+    private final long      eglDisplay;
 
     private boolean renderScheduled = false;
 
     private final EventLoop.IdleHandler doRender = this::doRender;
 
-    X11EglRenderOutput(@Nonnull @Provided final Display display,
-                       @Nonnull @Provided final Renderer renderer,
-                       @Nonnull final X11RenderOutput x11RenderOutput,
-                       final long eglSurface,
-                       final long eglContext,
-                       final long eglDisplay) {
+    private Optional<EglOutputState> state = Optional.empty();
+
+    X11EglOutput(@Nonnull @Provided final Display display,
+                 @Nonnull @Provided final Renderer renderer,
+                 @Nonnull final X11Output x11Output,
+                 final long eglSurface,
+                 final long eglContext,
+                 final long eglDisplay) {
         this.display = display;
         this.renderer = renderer;
-        this.x11RenderOutput = x11RenderOutput;
+        this.x11Output = x11Output;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
         this.eglDisplay = eglDisplay;
@@ -78,13 +82,24 @@ public class X11EglRenderOutput implements EglRenderOutput {
 
     @Nonnull
     @Override
-    public WlOutput getWlOutput() {
-        return this.x11RenderOutput.getWlOutput();
+    public Optional<EglOutputState> getState() {
+        return this.state;
+    }
+
+    @Override
+    public void updateState(@Nonnull final EglOutputState eglOutputState) {
+        this.state = Optional.of(eglOutputState);
     }
 
     @Nonnull
-    public X11RenderOutput getX11RenderOutput() {
-        return this.x11RenderOutput;
+    @Override
+    public WlOutput getWlOutput() {
+        return this.x11Output.getWlOutput();
+    }
+
+    @Nonnull
+    public X11Output getX11Output() {
+        return this.x11Output;
     }
 
     @Override

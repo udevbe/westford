@@ -18,8 +18,8 @@
 package org.westmalle.wayland.html5.egl;
 
 
-import org.westmalle.wayland.core.EglRenderOutput;
-import org.westmalle.wayland.core.EglRenderPlatform;
+import org.westmalle.wayland.core.EglOutput;
+import org.westmalle.wayland.core.EglPlatform;
 import org.westmalle.wayland.html5.Html5RenderOutput;
 import org.westmalle.wayland.html5.Html5RenderPlatform;
 import org.westmalle.wayland.html5.Html5PlatformFactory;
@@ -48,26 +48,26 @@ public class Html5EglPlatformFactory {
         this.html5EglRenderOutputFactory = html5EglRenderOutputFactory;
     }
 
-    public Html5EglRenderPlatform create(@Nonnull final EglRenderPlatform eglPlatform) {
+    public Html5EglPlatform create(@Nonnull final EglPlatform eglPlatform) {
 
         final Html5RenderPlatform html5Platform = this.html5PlatformFactory.create(eglPlatform);
 
-        final List<? extends EglRenderOutput> eglRenderOutputs   = eglPlatform.getRenderOutputs();
-        final List<Html5RenderOutput>         html5RenderOutputs = html5Platform.getRenderOutputs();
+        final List<? extends EglOutput> eglRenderOutputs   = eglPlatform.getRenderOutputs();
+        final List<Html5RenderOutput>   html5RenderOutputs = html5Platform.getRenderOutputs();
 
-        final Iterator<? extends EglRenderOutput> eglRenderOutputIterator   = eglRenderOutputs.iterator();
-        final Iterator<Html5RenderOutput>         html5RenderOutputIterator = html5RenderOutputs.iterator();
+        final Iterator<? extends EglOutput> eglRenderOutputIterator   = eglRenderOutputs.iterator();
+        final Iterator<Html5RenderOutput>   html5RenderOutputIterator = html5RenderOutputs.iterator();
 
-        final List<Html5EglRenderOutput> html5EglRenderOutputs = new LinkedList<>();
+        final List<Html5EglOutput> html5EglRenderOutputs = new LinkedList<>();
 
         while (eglRenderOutputIterator.hasNext() &&
                html5RenderOutputIterator.hasNext()) {
 
-            final EglRenderOutput   eglRenderOutput   = eglRenderOutputIterator.next();
+            final EglOutput         eglOutput         = eglRenderOutputIterator.next();
             final Html5RenderOutput html5RenderOutput = html5RenderOutputIterator.next();
 
             html5EglRenderOutputs.add(this.html5EglRenderOutputFactory.create(html5RenderOutput,
-                                                                              eglRenderOutput));
+                                                                              eglOutput));
         }
 
         return this.privateHtml5EglPlatformFactory.create(eglPlatform,

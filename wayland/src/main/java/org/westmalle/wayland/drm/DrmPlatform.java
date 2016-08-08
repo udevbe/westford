@@ -26,28 +26,28 @@ import java.util.List;
 //TODO drm platform, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "PrivateDrmPlatformFactory")
-public class DrmRenderPlatform implements RenderPlatform {
+public class DrmPlatform implements RenderPlatform {
 
-    private final long                  drmDevice;
-    private final int                   drmFd;
+    private final long            drmDevice;
+    private final int             drmFd;
     @Nonnull
-    private final DrmEventBus           drmEventBus;
+    private final DrmEventBus     drmEventBus;
     @Nonnull
-    private final List<DrmRenderOutput> drmRenderOutputs;
+    private final List<DrmOutput> drmOutputs;
 
-    DrmRenderPlatform(final long drmDevice,
-                      final int drmFd,
-                      @Nonnull final DrmEventBus drmEventBus,
-                      @Nonnull final List<DrmRenderOutput> drmRenderOutputs) {
+    DrmPlatform(final long drmDevice,
+                final int drmFd,
+                @Nonnull final DrmEventBus drmEventBus,
+                @Nonnull final List<DrmOutput> drmOutputs) {
         this.drmDevice = drmDevice;
         this.drmFd = drmFd;
         this.drmEventBus = drmEventBus;
-        this.drmRenderOutputs = drmRenderOutputs;
+        this.drmOutputs = drmOutputs;
     }
 
     @Nonnull
-    public List<DrmRenderOutput> getRenderOutputs() {
-        return this.drmRenderOutputs;
+    public List<DrmOutput> getRenderOutputs() {
+        return this.drmOutputs;
     }
 
     @Nonnull

@@ -58,7 +58,7 @@ public class DrmPlatformFactory {
     @Nonnull
     private final Display                   display;
     @Nonnull
-    private final DrmRenderOutputFactory    drmRenderOutputFactory;
+    private final DrmOutputFactory          drmOutputFactory;
     @Nonnull
     private final DrmEventBusFactory        drmEventBusFactory;
     @Nonnull
@@ -75,7 +75,7 @@ public class DrmPlatformFactory {
                        @Nonnull final Libudev libudev,
                        @Nonnull final Libdrm libdrm,
                        @Nonnull final Display display,
-                       @Nonnull final DrmRenderOutputFactory drmRenderOutputFactory,
+                       @Nonnull final DrmOutputFactory drmOutputFactory,
                        @Nonnull final DrmEventBusFactory drmEventBusFactory,
                        @Nonnull final PrivateDrmPlatformFactory privateDrmPlatformFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
@@ -85,7 +85,7 @@ public class DrmPlatformFactory {
         this.libc = libc;
         this.libdrm = libdrm;
         this.display = display;
-        this.drmRenderOutputFactory = drmRenderOutputFactory;
+        this.drmOutputFactory = drmOutputFactory;
         this.drmEventBusFactory = drmEventBusFactory;
         this.privateDrmPlatformFactory = privateDrmPlatformFactory;
         this.wlOutputFactory = wlOutputFactory;
@@ -93,7 +93,7 @@ public class DrmPlatformFactory {
         this.tty = tty;
     }
 
-    public DrmRenderPlatform create() {
+    public DrmPlatform create() {
         final long udev = this.libudev.udev_new();
         if (udev == 0L) {
             throw new RuntimeException("Failed to initialize udev");
@@ -107,7 +107,7 @@ public class DrmPlatformFactory {
 
         final int drmFd = initDrm(drmDevice);
 
-        final List<DrmRenderOutput> drmRenderOutputs = createDrmRenderOutputs(drmFd);
+        final List<DrmOutput> drmOutputs = createDrmRenderOutputs(drmFd);
 
         final DrmEventBus drmEventBus = this.drmEventBusFactory.create(drmFd);
         this.display.getEventLoop()
@@ -125,7 +125,7 @@ public class DrmPlatformFactory {
         return this.privateDrmPlatformFactory.create(drmDevice,
                                                      drmFd,
                                                      drmEventBus,
-                                                     drmRenderOutputs);
+                                                     drmOutputs);
     }
 
     private void setDrmMaster(final int drmFd) {
@@ -141,7 +141,7 @@ public class DrmPlatformFactory {
     }
 
 
-    private List<DrmRenderOutput> createDrmRenderOutputs(final int drmFd) {
+    private List<DrmOutput> createDrmRenderOutputs(final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
         if (resources == 0L) {
             throw new RuntimeException("Getting drm resources failed.");
@@ -150,9 +150,9 @@ public class DrmPlatformFactory {
         final DrmModeRes drmModeRes = wrap(DrmModeRes.class,
                                            resources).dref();
 
-        final int                   countConnectors  = drmModeRes.count_connectors();
-        final List<DrmRenderOutput> drmRenderOutputs = new ArrayList<>(countConnectors);
-        final Set<Integer>          usedCrtcs        = new HashSet<>();
+        final int             countConnectors = drmModeRes.count_connectors();
+        final List<DrmOutput> drmOutputs      = new ArrayList<>(countConnectors);
+        final Set<Integer>    usedCrtcs       = new HashSet<>();
 
         for (int i = 0; i < countConnectors; i++) {
             final long connector = this.libdrm.drmModeGetConnector(drmFd,
@@ -169,13 +169,13 @@ public class DrmPlatformFactory {
                 findCrtcIdForConnector(drmFd,
                                        drmModeRes,
                                        drmModeConnector,
-                                       usedCrtcs).ifPresent(crtcId -> drmRenderOutputs.add(createDrmRenderOutput(drmModeRes,
-                                                                                                                 drmModeConnector,
-                                                                                                                 crtcId)));
+                                       usedCrtcs).ifPresent(crtcId -> drmOutputs.add(createDrmRenderOutput(drmModeRes,
+                                                                                                           drmModeConnector,
+                                                                                                           crtcId)));
             }
         }
 
-        return drmRenderOutputs;
+        return drmOutputs;
     }
 
     private Optional<Integer> findCrtcIdForConnector(final int drmFd,
@@ -210,9 +210,9 @@ public class DrmPlatformFactory {
         return Optional.empty();
     }
 
-    private DrmRenderOutput createDrmRenderOutput(final DrmModeRes drmModeRes,
-                                                  final DrmModeConnector drmModeConnector,
-                                                  final int crtcId) {
+    private DrmOutput createDrmRenderOutput(final DrmModeRes drmModeRes,
+                                            final DrmModeConnector drmModeConnector,
+                                            final int crtcId) {
         /* find highest resolution mode: */
         int             area = 0;
         DrmModeModeInfo mode = null;
@@ -263,13 +263,13 @@ public class DrmPlatformFactory {
                                                 .build();
 
         //FIXME decuse an output name from the drm connector
-        return this.drmRenderOutputFactory.create(this.wlOutputFactory.create(this.outputFactory.create("dummy",
-                                                                                                        outputGeometry,
-                                                                                                        outputMode)),
-                                                  drmModeRes,
-                                                  drmModeConnector,
-                                                  crtcId,
-                                                  mode);
+        return this.drmOutputFactory.create(this.wlOutputFactory.create(this.outputFactory.create("dummy",
+                                                                                                  outputGeometry,
+                                                                                                  outputMode)),
+                                            drmModeRes,
+                                            drmModeConnector,
+                                            crtcId,
+                                            mode);
     }
 
 
