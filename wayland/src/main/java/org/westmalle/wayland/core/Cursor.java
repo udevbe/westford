@@ -18,7 +18,6 @@
 package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
-import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westmalle.wayland.protocol.WlSurface;
 
@@ -62,9 +61,8 @@ public class Cursor {
 
         surface.setState(surface.getState()
                                 .toBuilder()
-                                .buffer(Optional.<WlBufferResource>empty())
+                                .buffer(Optional.empty())
                                 .build());
-        surface.setPosition(Point.ZERO);
 
         this.hidden = true;
     }
