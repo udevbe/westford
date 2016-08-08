@@ -39,6 +39,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -85,6 +86,8 @@ public class PointerDevice implements Role {
     @Nonnull
     private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
 
+    private final Region clampRegion;
+
     private int buttonPressSerial;
     private int buttonReleaseSerial;
     private int enterSerial;
@@ -98,12 +101,14 @@ public class PointerDevice implements Role {
                   @Nonnull final NullRegion nullRegion,
                   @Nonnull final CursorFactory cursorFactory,
                   @Nonnull final JobExecutor jobExecutor,
-                  @Nonnull final Scene scene) {
+                  @Nonnull final Scene scene,
+                  @Nonnull final FiniteRegionFactory finiteRegionFactory) {
         this.display = display;
         this.nullRegion = nullRegion;
         this.cursorFactory = cursorFactory;
         this.jobExecutor = jobExecutor;
         this.scene = scene;
+        this.clampRegion = finiteRegionFactory.create();
     }
 
     //TODO unit test
@@ -214,8 +219,14 @@ public class PointerDevice implements Role {
                        final int time,
                        final int x,
                        final int y) {
-        this.position = Point.create(x,
-                                     y);
+
+        final Point clampPosition = clamp(Point.create(x,
+                                                       y));
+        if (clampPosition.equals(this.position)) {
+            return;
+        }
+
+        this.position = clampPosition;
 
         if (!getGrab().isPresent()) {
             calculateFocus(wlPointerResources);
@@ -225,6 +236,7 @@ public class PointerDevice implements Role {
                                      reportMotion(wlPointerResources,
                                                   time,
                                                   wlSurfaceResource));
+
         this.motionSignal.emit(PointerMotion.create(time,
                                                     getPosition()));
     }
@@ -573,9 +585,12 @@ public class PointerDevice implements Role {
 
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
-        surface.setState(updateCursorSurfaceState(wlSurfaceResource,
-                                                  surface.getState()
-                                                         .toBuilder()).build());
+
+        final SurfaceState.Builder stateBuilder = surface.getState()
+                                                         .toBuilder();
+        updateCursorSurfaceState(wlSurfaceResource,
+                                 stateBuilder);
+        surface.setState(stateBuilder.build());
     }
 
     private void updateActiveCursor(final WlPointerResource wlPointerResource) {
@@ -591,28 +606,27 @@ public class PointerDevice implements Role {
         }
     }
 
-    private SurfaceState.Builder updateCursorSurfaceState(final WlSurfaceResource wlSurfaceResource,
-                                                          final SurfaceState.Builder surfaceStateBuilder) {
+    private void updateCursorSurfaceState(final WlSurfaceResource wlSurfaceResource,
+                                          final SurfaceState.Builder surfaceStateBuilder) {
 
         surfaceStateBuilder.inputRegion(Optional.of(this.nullRegion));
-        surfaceStateBuilder.buffer(Optional.empty());
-
-        this.activeCursor.ifPresent(clientCursor -> {
+        if (this.activeCursor.isPresent()) {
+            final Cursor clientCursor = this.activeCursor.get();
             if (clientCursor.getWlSurfaceResource()
                             .equals(wlSurfaceResource) &&
                 !clientCursor.isHidden()) {
-                //set back the buffer we cleared.
-                surfaceStateBuilder.buffer(surfaceStateBuilder.build()
-                                                              .getBuffer());
+
+                //TODO put cursor surfaces in a separate list in the scene.
                 //move visible cursor to top of surface stack
                 this.scene.getSurfacesStack()
                           .remove(wlSurfaceResource);
                 this.scene.getSurfacesStack()
                           .addLast(wlSurfaceResource);
             }
-        });
-
-        return surfaceStateBuilder;
+        }
+        else {
+            surfaceStateBuilder.buffer(Optional.empty());
+        }
     }
 
     @Nonnull
@@ -642,5 +656,54 @@ public class PointerDevice implements Role {
                             return false;
                         }
                     });
+    }
+
+    private Point clamp(final Point newPosition) {
+
+        //avoid double checking old position
+        if (!newPosition.equals(this.position) && this.clampRegion.contains(newPosition)) {
+            return newPosition;
+        }
+
+        if (this.clampRegion.contains(this.position)) {
+            return this.position;
+        }
+
+        //neither new or old position is within bounds. return position of first clamp region rectangle
+        final List<Rectangle> clampRectangles = this.clampRegion.asList();
+        if (clampRectangles.isEmpty()) {
+            //empty region default to zero
+            return Point.ZERO;
+        }
+        else {
+            return clampRectangles.get(0)
+                                  .getPosition();
+        }
+    }
+
+    //TODO unit test
+    /**
+     * Limit the pointer position to the given clamp regions.
+     *
+     * @see #getClampRegion()
+     */
+    public void clamp(@Nonnull final Set<WlPointerResource> wlPointerResources) {
+        final Point clampPosition = clamp(this.position);
+        warp(wlPointerResources,
+             clampPosition);
+    }
+
+    //TODO unit test
+    public void warp(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                     final Point position) {
+        ungrab();
+        updateFocus(wlPointerResources,
+                    getFocus(),
+                    Optional.empty());
+        this.position = position;
+    }
+
+    public Region getClampRegion() {
+        return this.clampRegion;
     }
 }
