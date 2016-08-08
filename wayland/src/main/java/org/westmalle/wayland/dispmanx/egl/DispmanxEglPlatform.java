@@ -19,6 +19,10 @@ package org.westmalle.wayland.dispmanx.egl;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.EglPlatform;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.dispmanx.DispmanxPlatform;
 
 import javax.annotation.Nonnull;
@@ -33,10 +37,13 @@ public class DispmanxEglPlatform implements EglPlatform {
     private final DispmanxPlatform        dispmanxPlatform;
     @Nonnull
     private final List<DispmanxEglOutput> dispmanxEglOutputs;
-    private final long                    eglDisplay;
-    private final long                    eglContext;
+    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
+    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
+
+    private final long   eglDisplay;
+    private final long   eglContext;
     @Nonnull
-    private final String                  eglExtensions;
+    private final String eglExtensions;
 
     DispmanxEglPlatform(@Nonnull final DispmanxPlatform dispmanxPlatform,
                         @Nonnull final List<DispmanxEglOutput> dispmanxEglOutputs,
@@ -64,6 +71,16 @@ public class DispmanxEglPlatform implements EglPlatform {
     @Override
     public List<DispmanxEglOutput> getRenderOutputs() {
         return this.dispmanxEglOutputs;
+    }
+
+    @Override
+    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
+        return this.renderOutputNewSignal;
+    }
+
+    @Override
+    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
+        return this.renderOutputDestroyedSignal;
     }
 
     @Nonnull

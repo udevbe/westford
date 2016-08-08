@@ -32,17 +32,11 @@ public class NullRegion implements Region {
         return Collections.emptyList();
     }
 
-    @Nonnull
     @Override
-    public Region add(@Nonnull final Rectangle rectangle) {
-        return this;
-    }
+    public void add(@Nonnull final Rectangle rectangle) {}
 
-    @Nonnull
     @Override
-    public Region subtract(@Nonnull final Rectangle rectangle) {
-        return this;
-    }
+    public void subtract(@Nonnull final Rectangle rectangle) {}
 
     @Override
     public boolean contains(@Nonnull final Point point) {

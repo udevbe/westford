@@ -19,6 +19,10 @@ package org.westmalle.wayland.drm.egl;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.EglPlatform;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -37,6 +41,8 @@ public class DrmEglPlatform implements EglPlatform {
 
     @Nonnull
     private final List<DrmEglOutput> drmEglRenderOutputs;
+    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
+    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
     DrmEglPlatform(final long gbmDevice,
                    final long eglDisplay,
@@ -64,6 +70,16 @@ public class DrmEglPlatform implements EglPlatform {
     @Override
     public List<DrmEglOutput> getRenderOutputs() {
         return this.drmEglRenderOutputs;
+    }
+
+    @Override
+    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
+        return this.renderOutputNewSignal;
+    }
+
+    @Override
+    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
+        return this.renderOutputDestroyedSignal;
     }
 
     @Nonnull

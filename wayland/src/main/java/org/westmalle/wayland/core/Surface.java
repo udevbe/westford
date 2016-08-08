@@ -129,11 +129,12 @@ public class Surface {
 
     @Nonnull
     public Surface markDamaged(@Nonnull final Rectangle damage) {
-        final Region newDamage = this.pendingState.build()
-                                                  .getDamage()
-                                                  .orElseGet(this.finiteRegionFactory::create)
-                                                  .add(damage);
-        this.pendingState.damage(Optional.of(newDamage));
+
+        final Region damageRegion = this.pendingState.build()
+                                                     .getDamage()
+                                                     .orElseGet(this.finiteRegionFactory::create);
+        damageRegion.add(damage);
+        this.pendingState.damage(Optional.of(damageRegion));
         return this;
     }
 

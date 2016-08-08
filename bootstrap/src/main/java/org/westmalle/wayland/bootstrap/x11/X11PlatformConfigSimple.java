@@ -51,15 +51,22 @@ public class X11PlatformConfigSimple implements X11PlatformConfig {
                                  public int getHeight() {
                                      return 768;
                                  }
-
+                             },
+                             new X11OutputConfig() {
+                                 @Nonnull
                                  @Override
-                                 public int getX() {
-                                     return 0;
+                                 public String getName() {
+                                     return "window1";
                                  }
 
                                  @Override
-                                 public int getY() {
-                                     return 0;
+                                 public int getWidth() {
+                                     return 1024;
+                                 }
+
+                                 @Override
+                                 public int getHeight() {
+                                     return 768;
                                  }
                              }
                             );

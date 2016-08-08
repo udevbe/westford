@@ -19,6 +19,10 @@ package org.westmalle.wayland.x11.egl;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.EglPlatform;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -29,6 +33,8 @@ public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
     private final List<X11EglOutput> x11EglRenderOutputs;
+    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
+    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
     private final long eglDisplay;
     private final long eglContext;
@@ -60,6 +66,16 @@ public class X11EglPlatform implements EglPlatform {
     @Override
     public List<X11EglOutput> getRenderOutputs() {
         return this.x11EglRenderOutputs;
+    }
+
+    @Override
+    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
+        return this.renderOutputNewSignal;
+    }
+
+    @Override
+    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
+        return this.renderOutputDestroyedSignal;
     }
 
     @Nonnull

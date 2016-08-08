@@ -19,6 +19,10 @@ package org.westmalle.wayland.x11;
 
 import com.google.auto.factory.AutoFactory;
 import org.westmalle.wayland.core.RenderPlatform;
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -29,7 +33,10 @@ import java.util.Map;
 public class X11Platform implements RenderPlatform {
 
     @Nonnull
-    private final List<X11Output>      x11Outputs;
+    private final List<X11Output> x11Outputs;
+    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
+    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
+
     @Nonnull
     private final X11EventBus          x11EventBus;
     private final long                 xcbConnection;
@@ -71,5 +78,15 @@ public class X11Platform implements RenderPlatform {
     @Override
     public List<X11Output> getRenderOutputs() {
         return this.x11Outputs;
+    }
+
+    @Override
+    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
+        return this.renderOutputNewSignal;
+    }
+
+    @Override
+    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
+        return this.renderOutputDestroyedSignal;
     }
 }

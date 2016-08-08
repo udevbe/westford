@@ -17,6 +17,11 @@
  */
 package org.westmalle.wayland.core;
 
+import org.westmalle.wayland.core.events.RenderOutputDestroyed;
+import org.westmalle.wayland.core.events.RenderOutputNew;
+import org.westmalle.wayland.core.events.Signal;
+import org.westmalle.wayland.core.events.Slot;
+
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +30,8 @@ public interface RenderPlatform {
 
     @Nonnull
     List<? extends RenderOutput> getRenderOutputs();
+
+    Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal();
+
+    Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal();
 }

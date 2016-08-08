@@ -27,7 +27,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.westmalle.wayland.protocol.WlRegion;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,7 +59,6 @@ public class SurfaceTest {
     public void testMarkDamaged() throws Exception {
         //given
         final FiniteRegion region = mock(FiniteRegion.class);
-        when(region.add(any())).thenReturn(region);
         when(this.finiteRegionFactory.create()).thenReturn(region);
         final Rectangle damage = Rectangle.create(100,
                                                   100,
@@ -79,8 +77,8 @@ public class SurfaceTest {
         final Integer          relX             = -10;
         final Integer          relY             = 200;
 
-        final Buffer buffer = mock(Buffer.class);
-        final int bufferWidth = 200;
+        final Buffer buffer      = mock(Buffer.class);
+        final int    bufferWidth = 200;
         when(buffer.getWidth()).thenReturn(bufferWidth);
         final int bufferHeight = 300;
         when(buffer.getHeight()).thenReturn(bufferHeight);
@@ -109,8 +107,8 @@ public class SurfaceTest {
         final Integer          relX             = -10;
         final Integer          relY             = 200;
 
-        final Buffer buffer = mock(Buffer.class);
-        final int bufferWidth = 200;
+        final Buffer buffer      = mock(Buffer.class);
+        final int    bufferWidth = 200;
         when(buffer.getWidth()).thenReturn(bufferWidth);
         final int bufferHeight = 300;
         when(buffer.getHeight()).thenReturn(bufferHeight);
@@ -205,8 +203,8 @@ public class SurfaceTest {
         final Integer          relX             = -10;
         final Integer          relY             = 200;
 
-        final Buffer buffer = mock(Buffer.class);
-        final int bufferWidth = 200;
+        final Buffer buffer      = mock(Buffer.class);
+        final int    bufferWidth = 200;
         when(buffer.getWidth()).thenReturn(bufferWidth);
         final int bufferHeight = 300;
         when(buffer.getHeight()).thenReturn(bufferHeight);
@@ -302,8 +300,8 @@ public class SurfaceTest {
         //given
         final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
 
-        final Buffer buffer = mock(Buffer.class);
-        final int bufferWidth = 100;
+        final Buffer buffer      = mock(Buffer.class);
+        final int    bufferWidth = 100;
         when(buffer.getWidth()).thenReturn(bufferWidth);
         final int bufferHeight = 100;
         when(buffer.getHeight()).thenReturn(bufferHeight);
@@ -337,8 +335,8 @@ public class SurfaceTest {
         //given
         final WlBufferResource wlBufferResource = mock(WlBufferResource.class);
 
-        final Buffer buffer = mock(Buffer.class);
-        final int bufferWidth = 100;
+        final Buffer buffer      = mock(Buffer.class);
+        final int    bufferWidth = 100;
         when(buffer.getWidth()).thenReturn(bufferWidth);
         final int bufferHeight = 100;
         when(buffer.getHeight()).thenReturn(bufferHeight);
