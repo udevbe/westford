@@ -21,7 +21,7 @@ package org.westmalle.wayland.x11.config;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
-public interface X11RenderOutputConfig {
+public interface X11OutputConfig {
 
     @Nonnull
     String getName();
@@ -31,8 +31,4 @@ public interface X11RenderOutputConfig {
 
     @Nonnegative
     int getHeight();
-
-    int getX();
-
-    int getY();
 }
