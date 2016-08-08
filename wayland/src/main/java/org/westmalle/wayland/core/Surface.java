@@ -76,14 +76,13 @@ public class Surface {
      * pending state
      */
     @Nonnull
-    private SurfaceState pendingState = SurfaceState.builder()
-                                                    .build();
+    private final SurfaceState.Builder pendingState = SurfaceState.builder();
     /*
      * committed state
      */
     @Nonnull
-    private SurfaceState state        = SurfaceState.builder()
-                                                    .build();
+    private       SurfaceState         state        = SurfaceState.builder()
+                                                                  .build();
     /*
      * committed derived states
      */
@@ -130,40 +129,32 @@ public class Surface {
 
     @Nonnull
     public Surface markDamaged(@Nonnull final Rectangle damage) {
-        final Region newDamage = getPendingState().getDamage()
+        final Region newDamage = this.pendingState.build()
+                                                  .getDamage()
                                                   .orElseGet(this.finiteRegionFactory::create)
                                                   .add(damage);
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .damage(Optional.of(newDamage))
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        this.pendingState.damage(Optional.of(newDamage));
         return this;
     }
 
     @Nonnull
-    public SurfaceState getPendingState() {
+    public SurfaceState.Builder getPendingState() {
         return this.pendingState;
-    }
-
-    public void setPendingState(@Nonnull final SurfaceState pendingState) {
-        this.pendingState = pendingState;
     }
 
     @Nonnull
     public Surface attachBuffer(@Nonnull final WlBufferResource wlBufferResource,
                                 final int dx,
                                 final int dy) {
-        getPendingState().getBuffer()
+        getPendingState().build()
+                         .getBuffer()
                          .ifPresent(previousWlBufferResource -> previousWlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
         this.pendingBufferDestroyListener = Optional.of(this::detachBuffer);
         wlBufferResource.register(this.pendingBufferDestroyListener.get());
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .buffer(Optional.of(wlBufferResource))
-                                                                  .positionTransform(Transforms.TRANSLATE(dx,
-                                                                                                          dy)
-                                                                                               .multiply(getState().getPositionTransform()))
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        getPendingState().buffer(Optional.of(wlBufferResource))
+                         .positionTransform(Transforms.TRANSLATE(dx,
+                                                                 dy)
+                                                      .multiply(getState().getPositionTransform()));
         return this;
     }
 
@@ -196,7 +187,7 @@ public class Surface {
         }
 
         //flush states
-        apply(getPendingState());
+        apply(this.pendingState.build());
 
         //reset pending buffer state
         detachBuffer();
@@ -214,14 +205,12 @@ public class Surface {
 
     @Nonnull
     public Surface detachBuffer() {
-        getPendingState().getBuffer()
+        getPendingState().build()
+                         .getBuffer()
                          .ifPresent(wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
         this.pendingBufferDestroyListener = Optional.empty();
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .buffer(Optional.<WlBufferResource>empty())
-                                                                  .damage(Optional.<Region>empty())
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        getPendingState().buffer(Optional.empty())
+                         .damage(Optional.empty());
         return this;
     }
 
@@ -280,10 +269,7 @@ public class Surface {
 
     @Nonnull
     public Surface removeOpaqueRegion() {
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .opaqueRegion(Optional.<Region>empty())
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        this.pendingState.opaqueRegion(Optional.empty());
         return this;
     }
 
@@ -291,19 +277,13 @@ public class Surface {
     public Surface setOpaqueRegion(@Nonnull final WlRegionResource wlRegionResource) {
         final WlRegion wlRegion = (WlRegion) wlRegionResource.getImplementation();
         final Region   region   = wlRegion.getRegion();
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .opaqueRegion(Optional.of(region))
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        this.pendingState.opaqueRegion(Optional.of(region));
         return this;
     }
 
     @Nonnull
     public Surface removeInputRegion() {
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .inputRegion(Optional.<Region>empty())
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        this.pendingState.inputRegion(Optional.empty());
         return this;
     }
 
@@ -311,10 +291,7 @@ public class Surface {
     public Surface setInputRegion(@Nonnull final WlRegionResource wlRegionResource) {
         final WlRegion wlRegion = (WlRegion) wlRegionResource.getImplementation();
         final Region   region   = wlRegion.getRegion();
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .inputRegion(Optional.of(region))
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        getPendingState().inputRegion(Optional.of(region));
         return this;
     }
 
@@ -325,9 +302,7 @@ public class Surface {
                         .positionTransform(Transforms.TRANSLATE(global.getX(),
                                                                 global.getY()))
                         .build());
-        setPendingState(getPendingState().toBuilder()
-                                         .positionTransform(getState().getPositionTransform())
-                                         .build());
+        getPendingState().positionTransform(getState().getPositionTransform());
 
         getPositionSignal().emit(global);
 
@@ -383,19 +358,13 @@ public class Surface {
     }
 
     public Surface setScale(@Nonnegative final int scale) {
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .scale(scale)
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        getPendingState().scale(scale);
         return this;
     }
 
     @Nonnull
     public Surface setBufferTransform(@Nonnull final Mat4 bufferTransform) {
-        final SurfaceState pendingSurfaceState = getPendingState().toBuilder()
-                                                                  .bufferTransform(bufferTransform)
-                                                                  .build();
-        setPendingState(pendingSurfaceState);
+        getPendingState().bufferTransform(bufferTransform);
         return this;
     }
 

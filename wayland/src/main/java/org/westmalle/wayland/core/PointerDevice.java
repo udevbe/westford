@@ -20,7 +20,6 @@ package org.westmalle.wayland.core;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlPointerResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlPointerAxis;
@@ -28,9 +27,9 @@ import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
 import org.westmalle.wayland.core.events.Button;
-import org.westmalle.wayland.core.events.PointerMotion;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
+import org.westmalle.wayland.core.events.PointerMotion;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -575,7 +574,8 @@ public class PointerDevice implements Role {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
         surface.setState(updateCursorSurfaceState(wlSurfaceResource,
-                                                  surface.getState()));
+                                                  surface.getState()
+                                                         .toBuilder()).build());
     }
 
     private void updateActiveCursor(final WlPointerResource wlPointerResource) {
@@ -591,19 +591,19 @@ public class PointerDevice implements Role {
         }
     }
 
-    private SurfaceState updateCursorSurfaceState(final WlSurfaceResource wlSurfaceResource,
-                                                  final SurfaceState surfaceState) {
-        final SurfaceState.Builder surfaceStateBuilder = surfaceState.toBuilder();
+    private SurfaceState.Builder updateCursorSurfaceState(final WlSurfaceResource wlSurfaceResource,
+                                                          final SurfaceState.Builder surfaceStateBuilder) {
 
         surfaceStateBuilder.inputRegion(Optional.of(this.nullRegion));
-        surfaceStateBuilder.buffer(Optional.<WlBufferResource>empty());
+        surfaceStateBuilder.buffer(Optional.empty());
 
         this.activeCursor.ifPresent(clientCursor -> {
             if (clientCursor.getWlSurfaceResource()
                             .equals(wlSurfaceResource) &&
                 !clientCursor.isHidden()) {
                 //set back the buffer we cleared.
-                surfaceStateBuilder.buffer(surfaceState.getBuffer());
+                surfaceStateBuilder.buffer(surfaceStateBuilder.build()
+                                                              .getBuffer());
                 //move visible cursor to top of surface stack
                 this.scene.getSurfacesStack()
                           .remove(wlSurfaceResource);
@@ -612,7 +612,7 @@ public class PointerDevice implements Role {
             }
         });
 
-        return surfaceStateBuilder.build();
+        return surfaceStateBuilder;
     }
 
     @Nonnull
@@ -625,8 +625,8 @@ public class PointerDevice implements Role {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
-        surface.setPendingState(updateCursorSurfaceState(wlSurfaceResource,
-                                                         surface.getPendingState()));
+        updateCursorSurfaceState(wlSurfaceResource,
+                                 surface.getPendingState());
     }
 
     @Override
