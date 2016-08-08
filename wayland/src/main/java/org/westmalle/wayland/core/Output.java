@@ -40,7 +40,9 @@ public class Output {
     private final Signal<OutputMode, Slot<OutputMode>>           outputModeSignal     = new Signal<>();
 
     @Nonnull
-    private final String name;
+    private final FiniteRegionFactory finiteRegionFactory;
+    @Nonnull
+    private final String              name;
 
     @Nonnegative
     private float scale            = 1f;
@@ -48,6 +50,8 @@ public class Output {
     private Mat4  transform        = Mat4.IDENTITY;
     @Nonnull
     private Mat4  inverseTransform = Mat4.IDENTITY;
+
+
     @Nonnull
     private Region region;
 
@@ -70,9 +74,11 @@ public class Output {
                                                       .flags(0)
                                                       .build();
 
-    Output(@Provided @Nonnull final Region region,
+    Output(@Provided @Nonnull final FiniteRegionFactory finiteRegionFactory,
+           @Provided @Nonnull final NullRegion nullRegion,
            @Nonnull final String name) {
-        this.region = region;
+        this.finiteRegionFactory = finiteRegionFactory;
+        this.region = nullRegion;
         this.name = name;
     }
 
@@ -90,8 +96,10 @@ public class Output {
     private void updateOutputTransform() {
 
         final Mat4 scaleMat = Transforms.SCALE(this.scale);
-        final Mat4 moveMat = Transforms.TRANSLATE(-this.outputGeometry.getX(),
-                                                  -this.outputGeometry.getY());
+        final int  x        = this.outputGeometry.getX();
+        final int  y        = this.outputGeometry.getY();
+        final Mat4 moveMat = Transforms.TRANSLATE(-x,
+                                                  -y);
         final Mat4 transformMat;
         final int  transformNr = this.outputGeometry.getTransform();
         if (transformNr == WlOutputTransform.NORMAL.value) {
@@ -127,16 +135,30 @@ public class Output {
         if (!this.transform.equals(newTransform)) {
             this.transform = newTransform;
             this.inverseTransform = this.transform.invert();
-
+            updateRegion();
             this.transformSignal.emit(OutputTransform.create());
         }
+    }
+
+    private void updateRegion() {
+        //FIXME compensate for position offset
+        final Vec4 compositorDimensions = this.transform.multiply(Vec4.create(this.outputMode.getWidth(),
+                                                                              this.outputMode.getHeight(),
+                                                                              1,
+                                                                              1));
+        //TODO fire region event?
+        this.region = this.finiteRegionFactory.create();
+        this.region.add(Rectangle.create(this.outputGeometry.getX(),
+                                         this.outputGeometry.getY(),
+                                         (int) compositorDimensions.getX(),
+                                         (int) compositorDimensions.getY()));
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,
                          @Nonnull final OutputMode outputMode) {
         if (!this.outputMode.equals(outputMode)) {
             this.outputMode = outputMode;
-
+            updateRegion();
             this.outputModeSignal.emit(outputMode);
         }
         resources.forEach(this::notifyMode);
