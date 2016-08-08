@@ -18,7 +18,7 @@
 package org.westmalle.wayland.bootstrap.x11;
 
 
-import org.westmalle.wayland.x11.config.X11RenderOutputConfig;
+import org.westmalle.wayland.x11.config.X11OutputConfig;
 import org.westmalle.wayland.x11.config.X11PlatformConfig;
 
 import javax.annotation.Nonnull;
@@ -34,8 +34,8 @@ public class X11PlatformConfigSimple implements X11PlatformConfig {
 
     @Nonnull
     @Override
-    public Iterable<X11RenderOutputConfig> getX11RenderOutputConfigs() {
-        return Arrays.asList(new X11RenderOutputConfig() {
+    public Iterable<X11OutputConfig> getX11RenderOutputConfigs() {
+        return Arrays.asList(new X11OutputConfig() {
                                  @Nonnull
                                  @Override
                                  public String getName() {

@@ -34,8 +34,8 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
+import org.westmalle.wayland.x11.config.X11OutputConfig;
 import org.westmalle.wayland.x11.config.X11PlatformConfig;
-import org.westmalle.wayland.x11.config.X11RenderOutputConfig;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -143,15 +143,23 @@ public class X11PlatformFactory {
         final X11EventBus          x11EventBus = this.x11EventBusFactory.create(xcbConnection);
         final Map<String, Integer> x11Atoms    = internX11Atoms(xcbConnection);
 
-        final Iterable<X11RenderOutputConfig> x11RenderOutputConfigs = this.x11PlatformConfig.getX11RenderOutputConfigs();
-        final List<X11Output>                 x11Outputs             = new LinkedList<>();
+        final Iterable<X11OutputConfig> x11OutputConfigs = this.x11PlatformConfig.getX11RenderOutputConfigs();
+        final List<X11Output>           x11Outputs       = new LinkedList<>();
 
-        x11RenderOutputConfigs.forEach(x11RenderOutputConfig ->
-                                               addX11RenderOutput(x11Outputs,
-                                                                  xcbConnection,
-                                                                  x11Atoms,
-                                                                  x11EventBus,
-                                                                  x11RenderOutputConfig));
+        int       x = 0;
+        final int y = 0;
+        for (final X11OutputConfig x11OutputConfig : x11OutputConfigs) {
+            addX11RenderOutput(x11Outputs,
+                               xcbConnection,
+                               x11Atoms,
+                               x11EventBus,
+                               x11OutputConfig,
+                               x,
+                               y);
+            //TODO Add a layout hint. For now, layout from left to right.
+            x += x11OutputConfig.getWidth();
+        }
+
 
         this.display.getEventLoop()
                     .addFileDescriptor(this.libxcb.xcb_get_file_descriptor(xcbConnection),
@@ -211,12 +219,12 @@ public class X11PlatformFactory {
                                     final long xcbConnection,
                                     final Map<String, Integer> x11Atoms,
                                     final X11EventBus x11EventBus,
-                                    final X11RenderOutputConfig x11RenderOutputConfig) {
+                                    final X11OutputConfig x11OutputConfig,
+                                    final int x,
+                                    final int y) {
 
-        final int x      = x11RenderOutputConfig.getX();
-        final int y      = x11RenderOutputConfig.getY();
-        final int width  = x11RenderOutputConfig.getWidth();
-        final int height = x11RenderOutputConfig.getHeight();
+        final int width  = x11OutputConfig.getWidth();
+        final int height = x11OutputConfig.getHeight();
 
         if (width < 0 || height < 0) {
             throw new IllegalArgumentException("Got negative width or height");
@@ -236,7 +244,6 @@ public class X11PlatformFactory {
             throw new RuntimeException("failed to generate X window id");
         }
 
-        final int mask = XCB_CW_EVENT_MASK;
         final Pointer<Integer> values = Pointer.nref(XCB_EVENT_MASK_KEY_PRESS |
                                                      XCB_EVENT_MASK_KEY_RELEASE |
                                                      XCB_EVENT_MASK_BUTTON_PRESS |
@@ -257,14 +264,14 @@ public class X11PlatformFactory {
                                       (short) 0,
                                       (short) XCB_WINDOW_CLASS_INPUT_OUTPUT,
                                       screen.root_visual(),
-                                      mask,
+                                      XCB_CW_EVENT_MASK,
                                       values.address);
 
         setWmProtocol(xcbConnection,
                       window,
                       x11Atoms.get("WM_PROTOCOLS"),
                       x11Atoms.get("WM_DELETE_WINDOW"));
-        setName(x11RenderOutputConfig,
+        setName(x11OutputConfig,
                 xcbConnection,
                 window,
                 x11Atoms);
@@ -272,8 +279,10 @@ public class X11PlatformFactory {
         this.libxcb.xcb_map_window(xcbConnection,
                                    window);
 
-        final Output output = createOutput(x11RenderOutputConfig,
-                                           screen);
+        final Output output = createOutput(x11OutputConfig,
+                                           screen,
+                                           x,
+                                           y);
         final WlOutput wlOutput = this.wlOutputFactory.create(output);
 
         final X11Output x11Output = this.x11OutputFactory.create(window,
@@ -298,15 +307,17 @@ public class X11PlatformFactory {
         x11Outputs.add(x11Output);
     }
 
-    private Output createOutput(final X11RenderOutputConfig x11RenderOutputConfig,
-                                final xcb_screen_t screen) {
+    private Output createOutput(final X11OutputConfig x11OutputConfig,
+                                final xcb_screen_t screen,
+                                final int x,
+                                final int y) {
 
-        final int width  = x11RenderOutputConfig.getWidth();
-        final int height = x11RenderOutputConfig.getHeight();
+        final int width  = x11OutputConfig.getWidth();
+        final int height = x11OutputConfig.getHeight();
 
         final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(x11RenderOutputConfig.getX())
-                                                            .y(x11RenderOutputConfig.getY())
+                                                            .x(x)
+                                                            .y(y)
                                                             .subpixel(0)
                                                             .make("Westmalle xcb")
                                                             .model("X11")
@@ -322,7 +333,7 @@ public class X11PlatformFactory {
                                                 .height(height)
                                                 .refresh(60)
                                                 .build();
-        return this.outputFactory.create(x11RenderOutputConfig.getName(),
+        return this.outputFactory.create(x11OutputConfig.getName(),
                                          outputGeometry,
                                          outputMode);
     }
@@ -341,11 +352,11 @@ public class X11PlatformFactory {
                                         Pointer.nref(wmDeleteWindow).address);
     }
 
-    private void setName(final X11RenderOutputConfig x11RenderOutputConfig,
+    private void setName(final X11OutputConfig x11OutputConfig,
                          final long connection,
                          final int window,
                          final Map<String, Integer> x11Atoms) {
-        final String name       = x11RenderOutputConfig.getName();
+        final String name       = x11OutputConfig.getName();
         final int    nameLength = name.length();
         final long   nameNative = Pointer.nref(name).address;
 
