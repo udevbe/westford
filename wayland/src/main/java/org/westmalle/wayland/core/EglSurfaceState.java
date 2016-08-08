@@ -15,32 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.gles2;
+package org.westmalle.wayland.core;
 
 import com.google.auto.value.AutoValue;
-import org.freedesktop.jaccall.Pointer;
 
 import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.Optional;
 
 @AutoValue
-public abstract class EglSurfaceRenderState implements SurfaceRenderState {
+public abstract class EglSurfaceState implements SurfaceRenderState {
 
-    public static EglSurfaceRenderState create(@Nonnegative final int pitch,
-                                               @Nonnegative final int height,
-                                               final int target,
-                                               final int shaderProgram,
-                                               final boolean yInverted,
-                                               final int[] textures,
-                                               final long[] eglImages) {
-        return new AutoValue_EglSurfaceRenderState(pitch,
-                                                   height,
-                                                   target,
-                                                   shaderProgram,
-                                                   yInverted,
-                                                   textures,
-                                                   eglImages);
+    public static EglSurfaceState create(@Nonnegative final int pitch,
+                                         @Nonnegative final int height,
+                                         final int target,
+                                         final int shaderProgram,
+                                         final boolean yInverted,
+                                         final int[] textures,
+                                         final long[] eglImages) {
+        return new AutoValue_EglSurfaceState(pitch,
+                                             height,
+                                             target,
+                                             shaderProgram,
+                                             yInverted,
+                                             textures,
+                                             eglImages);
     }
 
     @Nonnegative

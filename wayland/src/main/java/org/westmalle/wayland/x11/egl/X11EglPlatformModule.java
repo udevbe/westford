@@ -27,7 +27,7 @@ import javax.inject.Singleton;
 public class X11EglPlatformModule {
     @Provides
     @Singleton
-    X11EglRenderPlatform provideX11EglPlatform(final X11EglPlatformFactory x11EglPlatformFactory) {
+    X11EglPlatform provideX11EglPlatform(final X11EglPlatformFactory x11EglPlatformFactory) {
         return x11EglPlatformFactory.create();
     }
 }

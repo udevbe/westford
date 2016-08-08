@@ -15,13 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.gles2;
+package org.westmalle.wayland.core;
 
+import javax.annotation.Nonnull;
+import java.util.List;
 
-import java.util.Optional;
+public interface EglPlatform extends RenderPlatform {
 
-public interface SurfaceRenderStateVisitor {
-    default Optional<SurfaceRenderState> visit(final ShmSurfaceRenderState shmSurfaceRenderState) { return Optional.of(shmSurfaceRenderState); }
+    long getEglDisplay();
 
-    default Optional<SurfaceRenderState> visit(final EglSurfaceRenderState eglSurfaceRenderState) { return Optional.of(eglSurfaceRenderState); }
+    long getEglContext();
+
+    @Nonnull
+    List<? extends EglOutput> getRenderOutputs();
+
+    @Nonnull
+    String getEglExtensions();
 }

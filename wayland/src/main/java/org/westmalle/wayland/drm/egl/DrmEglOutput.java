@@ -26,10 +26,11 @@ import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
-import org.westmalle.wayland.core.EglRenderOutput;
+import org.westmalle.wayland.core.EglOutput;
+import org.westmalle.wayland.core.EglOutputState;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.drm.DrmRenderOutput;
 import org.westmalle.wayland.drm.DrmPageFlipCallback;
+import org.westmalle.wayland.drm.DrmOutput;
 import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.libdrm.Libdrm;
 import org.westmalle.wayland.nativ.libgbm.Libgbm;
@@ -43,8 +44,8 @@ import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT
 
 //TODO put all gbm/egl specifics here
 @AutoFactory(allowSubclasses = true,
-             className = "DrmEglRenderOutputFactory")
-public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback {
+             className = "DrmEglOutputFactory")
+public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
 
     @Nonnull
     private final Libc    libc;
@@ -63,7 +64,7 @@ public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback 
     private final long gbmSurface;
 
     @Nonnull
-    private final DrmRenderOutput drmRenderOutput;
+    private final DrmOutput drmOutput;
 
     private final long eglSurface;
     private final long eglContext;
@@ -80,20 +81,21 @@ public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback 
     private Optional<EventSource> onIdleEventSource   = Optional.empty();
 
     private boolean enabled;
+    private Optional<EglOutputState> state = Optional.empty();
 
 
-    DrmEglRenderOutput(@Nonnull @Provided final Libc libc,
-                       @Nonnull @Provided final Libgbm libgbm,
-                       @Nonnull @Provided final Libdrm libdrm,
-                       @Nonnull @Provided final Display display,
-                       @Nonnull @Provided final Renderer renderer,
-                       final int drmFd,
-                       final long gbmBo,
-                       final long gbmSurface,
-                       @Nonnull final DrmRenderOutput drmRenderOutput,
-                       final long eglSurface,
-                       final long eglContext,
-                       final long eglDisplay) {
+    DrmEglOutput(@Nonnull @Provided final Libc libc,
+                 @Nonnull @Provided final Libgbm libgbm,
+                 @Nonnull @Provided final Libdrm libdrm,
+                 @Nonnull @Provided final Display display,
+                 @Nonnull @Provided final Renderer renderer,
+                 final int drmFd,
+                 final long gbmBo,
+                 final long gbmSurface,
+                 @Nonnull final DrmOutput drmOutput,
+                 final long eglSurface,
+                 final long eglContext,
+                 final long eglDisplay) {
         this.libc = libc;
         this.libgbm = libgbm;
         this.libdrm = libdrm;
@@ -102,7 +104,7 @@ public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback 
         this.drmFd = drmFd;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
-        this.drmRenderOutput = drmRenderOutput;
+        this.drmOutput = drmOutput;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
         this.eglDisplay = eglDisplay;
@@ -112,7 +114,7 @@ public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback 
     public void renderEndAfterSwap() {
         this.nextGbmBo = this.libgbm.gbm_surface_lock_front_buffer(this.gbmSurface);
         this.libdrm.drmModePageFlip(this.drmFd,
-                                    this.drmRenderOutput.getCrtcId(),
+                                    this.drmOutput.getCrtcId(),
                                     getFbId(this.nextGbmBo),
                                     DRM_MODE_PAGE_FLIP_EVENT,
                                     Pointer.from(this).address);
@@ -193,13 +195,24 @@ public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback 
 
     @Nonnull
     @Override
-    public WlOutput getWlOutput() {
-        return this.drmRenderOutput.getWlOutput();
+    public Optional<EglOutputState> getState() {
+        return this.state;
+    }
+
+    @Override
+    public void updateState(@Nonnull final EglOutputState eglOutputState) {
+        this.state = Optional.of(eglOutputState);
     }
 
     @Nonnull
-    public DrmRenderOutput getDrmRenderOutput() {
-        return this.drmRenderOutput;
+    @Override
+    public WlOutput getWlOutput() {
+        return this.drmOutput.getWlOutput();
+    }
+
+    @Nonnull
+    public DrmOutput getDrmOutput() {
+        return this.drmOutput;
     }
 
     @Override
@@ -255,14 +268,14 @@ public class DrmEglRenderOutput implements EglRenderOutput, DrmPageFlipCallback 
         final int fbId = getFbId(this.gbmBo);
 
         final int error = this.libdrm.drmModeSetCrtc(this.drmFd,
-                                                     this.drmRenderOutput.getCrtcId(),
+                                                     this.drmOutput.getCrtcId(),
                                                      fbId,
                                                      0,
                                                      0,
-                                                     Pointer.nref(this.drmRenderOutput.getDrmModeConnector()
-                                                                                      .connector_id()).address,
+                                                     Pointer.nref(this.drmOutput.getDrmModeConnector()
+                                                                                .connector_id()).address,
                                                      1,
-                                                     Pointer.ref(this.drmRenderOutput.getMode()).address);
+                                                     Pointer.ref(this.drmOutput.getMode()).address);
         if (error != 0) {
             throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
                                                      this.libc.getErrno()));

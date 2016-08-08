@@ -52,14 +52,14 @@ public class X11Seat {
     private static final float DEFAULT_AXIS_STEP_DISTANCE = 10.0f;
 
     @Nonnull
-    private final Libxcb            libxcb;
+    private final Libxcb      libxcb;
     @Nonnull
-    private final X11RenderPlatform x11Platform;
+    private final X11Platform x11Platform;
     @Nonnull
-    private final WlSeat            wlSeat;
+    private final WlSeat      wlSeat;
 
     X11Seat(@Provided @Nonnull final Libxcb libxcb,
-            @Provided @Nonnull final X11RenderPlatform x11Platform,
+            @Provided @Nonnull final X11Platform x11Platform,
             @Nonnull final WlSeat wlSeat) {
         this.libxcb = libxcb;
         this.x11Platform = x11Platform;

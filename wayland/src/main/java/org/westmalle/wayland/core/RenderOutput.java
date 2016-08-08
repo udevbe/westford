@@ -72,4 +72,6 @@ public interface RenderOutput {
      * Enables rendering and triggers a redraw for this {@code RenderOutput}.
      */
     default void enable() {}
+
+
 }

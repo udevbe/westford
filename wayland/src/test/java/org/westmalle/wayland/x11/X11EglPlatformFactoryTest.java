@@ -28,12 +28,11 @@ import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libEGL.PointerEglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.PointerEglGetPlatformDisplayEXT;
 import org.westmalle.wayland.x11.egl.PrivateX11EglPlatformFactory;
+import org.westmalle.wayland.x11.egl.X11EglOutputFactory;
 import org.westmalle.wayland.x11.egl.X11EglPlatformFactory;
-import org.westmalle.wayland.x11.egl.X11EglRenderOutputFactory;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
@@ -51,7 +50,7 @@ import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
 import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class X11EglRenderPlatformFactoryTest {
+public class X11EglPlatformFactoryTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -60,20 +59,20 @@ public class X11EglRenderPlatformFactoryTest {
     @Mock
     private PrivateX11EglPlatformFactory privateX11EglPlatformFactory;
     @Mock
-    private X11RenderPlatform            x11Platform;
+    private X11Platform                  x11Platform;
     @Mock
     private GlRenderer                   glRenderer;
     @Mock
-    private X11EglRenderOutputFactory    x11EglRenderOutputFactory;
+    private X11EglOutputFactory          x11EglOutputFactory;
     @InjectMocks
     private X11EglPlatformFactory        x11EglPlatformFactory;
 
     @Before
     public void setUp() {
-        final X11RenderOutput       x11RenderOutput  = mock(X11RenderOutput.class);
-        final List<X11RenderOutput> x11RenderOutputs = new LinkedList<>();
-        x11RenderOutputs.add(x11RenderOutput);
-        when(this.x11Platform.getRenderOutputs()).thenReturn(x11RenderOutputs);
+        final X11Output       x11Output  = mock(X11Output.class);
+        final List<X11Output> x11Outputs = new LinkedList<>();
+        x11Outputs.add(x11Output);
+        when(this.x11Platform.getRenderOutputs()).thenReturn(x11Outputs);
     }
 
     @Test

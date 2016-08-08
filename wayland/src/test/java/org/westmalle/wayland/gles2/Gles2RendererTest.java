@@ -119,7 +119,7 @@ public class Gles2RendererTest {
 //        final WlOutput    wlOutput      = mock(WlOutput.class);
 //        final Output      output        = mock(Output.class);
 //        final OutputMode  mode          = mock(OutputMode.class);
-//        final EglRenderPlatform platform      = mock(EglRenderPlatform.class);
+//        final EglPlatform platform      = mock(EglPlatform.class);
 //        final int         width         = 640;
 //        final int         height        = 480;
 //        final Integer     shaderProgram = 12346;
@@ -160,7 +160,7 @@ public class Gles2RendererTest {
 //        final WlOutput    wlOutput = mock(WlOutput.class);
 //        final Output      output   = mock(Output.class);
 //        final OutputMode  mode     = mock(OutputMode.class);
-//        final EglRenderPlatform platform = mock(EglRenderPlatform.class);
+//        final EglPlatform platform = mock(EglPlatform.class);
 //        final int         width    = 640;
 //        final int         height   = 480;
 //
@@ -220,7 +220,7 @@ public class Gles2RendererTest {
 //        surfaceStack.add(wlSurfaceResource);
 //        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
 //
-//        final EglRenderPlatform eglPlatform = mock(EglRenderPlatform.class);
+//        final EglPlatform eglPlatform = mock(EglPlatform.class);
 //
 //        //when
 //        this.eglGles2RenderEngine.render(eglPlatform);
@@ -259,7 +259,7 @@ public class Gles2RendererTest {
 //        surfaceStack.add(wlSurfaceResource);
 //        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
 //
-//        final EglRenderPlatform eglPlatform = mock(EglRenderPlatform.class);
+//        final EglPlatform eglPlatform = mock(EglPlatform.class);
 //
 //        //when
 //        this.eglGles2RenderEngine.render(eglPlatform);
@@ -309,7 +309,7 @@ public class Gles2RendererTest {
 //        surfaceStack.add(wlSurfaceResource);
 //        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
 //
-//        final EglRenderPlatform eglPlatform = mock(EglRenderPlatform.class);
+//        final EglPlatform eglPlatform = mock(EglPlatform.class);
 //
 //        //when
 //        this.eglGles2RenderEngine.render(eglPlatform);
@@ -380,7 +380,7 @@ public class Gles2RendererTest {
 //        surfaceStack.add(wlSurfaceResource);
 //        when(this.scene.getSurfacesStack()).thenReturn(surfaceStack);
 //
-//        final EglRenderPlatform eglPlatform = mock(EglRenderPlatform.class);
+//        final EglPlatform eglPlatform = mock(EglPlatform.class);
 //
 //        //when
 //        this.eglGles2RenderEngine.render(eglPlatform);

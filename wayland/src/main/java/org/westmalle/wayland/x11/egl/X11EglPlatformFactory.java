@@ -22,8 +22,8 @@ import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.wayland.nativ.libEGL.LibEGL;
-import org.westmalle.wayland.x11.X11RenderOutput;
-import org.westmalle.wayland.x11.X11RenderPlatform;
+import org.westmalle.wayland.x11.X11Output;
+import org.westmalle.wayland.x11.X11Platform;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -53,27 +53,27 @@ public class X11EglPlatformFactory {
     @Nonnull
     private final PrivateX11EglPlatformFactory privateX11EglPlatformFactory;
     @Nonnull
-    private final X11RenderPlatform            x11Platform;
+    private final X11Platform                  x11Platform;
     @Nonnull
     private final GlRenderer                   glRenderer;
     @Nonnull
-    private final X11EglRenderOutputFactory    x11EglRenderOutputFactory;
+    private final X11EglOutputFactory          x11EglOutputFactory;
 
     @Inject
     X11EglPlatformFactory(@Nonnull final LibEGL libEGL,
                           @Nonnull final PrivateX11EglPlatformFactory privateX11EglPlatformFactory,
-                          @Nonnull final X11RenderPlatform x11Platform,
+                          @Nonnull final X11Platform x11Platform,
                           @Nonnull final GlRenderer glRenderer,
-                          @Nonnull final X11EglRenderOutputFactory x11EglRenderOutputFactory) {
+                          @Nonnull final X11EglOutputFactory x11EglOutputFactory) {
         this.libEGL = libEGL;
         this.privateX11EglPlatformFactory = privateX11EglPlatformFactory;
         this.x11Platform = x11Platform;
         this.glRenderer = glRenderer;
-        this.x11EglRenderOutputFactory = x11EglRenderOutputFactory;
+        this.x11EglOutputFactory = x11EglOutputFactory;
     }
 
     @Nonnull
-    public X11EglRenderPlatform create() {
+    public X11EglPlatform create() {
 
         final long eglDisplay = createEglDisplay(this.x11Platform.getxDisplay());
 
@@ -109,18 +109,18 @@ public class X11EglPlatformFactory {
         final long eglContext = createEglContext(eglDisplay,
                                                  eglConfig);
 
-        final List<X11RenderOutput>    x11RenderOutputs    = this.x11Platform.getRenderOutputs();
-        final List<X11EglRenderOutput> x11EglRenderOutputs = new ArrayList<>(x11RenderOutputs.size());
+        final List<X11Output>    x11Outputs          = this.x11Platform.getRenderOutputs();
+        final List<X11EglOutput> x11EglRenderOutputs = new ArrayList<>(x11Outputs.size());
 
 
-        x11RenderOutputs.forEach(x11RenderOutput -> {
+        x11Outputs.forEach(x11RenderOutput -> {
             final long eglSurface = createEglSurface(eglDisplay,
                                                      eglConfig,
                                                      x11RenderOutput.getXWindow());
-            x11EglRenderOutputs.add(this.x11EglRenderOutputFactory.create(x11RenderOutput,
-                                                                          eglSurface,
-                                                                          eglContext,
-                                                                          eglDisplay));
+            x11EglRenderOutputs.add(this.x11EglOutputFactory.create(x11RenderOutput,
+                                                                    eglSurface,
+                                                                    eglContext,
+                                                                    eglDisplay));
         });
 
         return this.privateX11EglPlatformFactory.create(x11EglRenderOutputs,

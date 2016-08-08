@@ -30,7 +30,6 @@ import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.KeyboardFocusLost;
 import org.westmalle.wayland.core.events.Signal;
 import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.gles2.SurfaceRenderState;
 import org.westmalle.wayland.protocol.WlRegion;
 
 import javax.annotation.Nonnegative;

@@ -27,16 +27,16 @@ import org.westmalle.wayland.protocol.WlOutput;
 import javax.annotation.Nonnull;
 
 @AutoFactory(allowSubclasses = true,
-             className = "DispmanxRenderOutputFactory")
-public class DispmanxRenderOutput implements RenderOutput {
+             className = "DispmanxOutputFactory")
+public class DispmanxOutput implements RenderOutput {
 
     private final WlOutput wlOutput;
     private final int      dispmanxElement;
     private final Renderer renderer;
 
-    DispmanxRenderOutput(@Nonnull @Provided final Renderer renderer,
-                         final WlOutput wlOutput,
-                         final int dispmanxElement) {
+    DispmanxOutput(@Nonnull @Provided final Renderer renderer,
+                   final WlOutput wlOutput,
+                   final int dispmanxElement) {
         this.wlOutput = wlOutput;
         this.dispmanxElement = dispmanxElement;
         this.renderer = renderer;

@@ -20,7 +20,7 @@ package org.westmalle.wayland.bootstrap.x11;
 import dagger.Module;
 import dagger.Provides;
 import org.westmalle.wayland.core.RenderPlatform;
-import org.westmalle.wayland.x11.egl.X11EglRenderPlatform;
+import org.westmalle.wayland.x11.egl.X11EglPlatform;
 
 import javax.inject.Singleton;
 
@@ -29,7 +29,7 @@ public class X11EglPlatformAdaptorModule {
 
     @Provides
     @Singleton
-    RenderPlatform providePlatform(final X11EglRenderPlatform x11EglPlatform) {
+    RenderPlatform providePlatform(final X11EglPlatform x11EglPlatform) {
         return x11EglPlatform;
     }
 }

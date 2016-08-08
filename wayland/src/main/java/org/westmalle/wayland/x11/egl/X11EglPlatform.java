@@ -15,50 +15,56 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.html5.egl;
+package org.westmalle.wayland.x11.egl;
 
 import com.google.auto.factory.AutoFactory;
-import org.westmalle.wayland.core.EglRenderPlatform;
+import org.westmalle.wayland.core.EglPlatform;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.util.List;
 
-@AutoFactory(allowSubclasses = true,
-             className = "PrivateHtml5EglPlatformFactory")
-public class Html5EglRenderPlatform implements EglRenderPlatform {
+@AutoFactory(className = "PrivateX11EglPlatformFactory",
+             allowSubclasses = true)
+public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final EglRenderPlatform          eglPlatform;
-    @Nonnull
-    private final List<Html5EglRenderOutput> html5EglRenderOutputs;
+    private final List<X11EglOutput> x11EglRenderOutputs;
 
-    @Inject
-    Html5EglRenderPlatform(@Nonnull final EglRenderPlatform eglPlatform,
-                           @Nonnull final List<Html5EglRenderOutput> html5EglRenderOutputs) {
-        this.eglPlatform = eglPlatform;
-        this.html5EglRenderOutputs = html5EglRenderOutputs;
+    private final long eglDisplay;
+    private final long eglContext;
+
+    @Nonnull
+    private final String eglExtensions;
+
+    X11EglPlatform(@Nonnull final List<X11EglOutput> x11EglRenderOutputs,
+                   final long eglDisplay,
+                   final long eglContext,
+                   @Nonnull final String eglExtensions) {
+        this.x11EglRenderOutputs = x11EglRenderOutputs;
+        this.eglDisplay = eglDisplay;
+        this.eglContext = eglContext;
+        this.eglExtensions = eglExtensions;
     }
 
     @Override
     public long getEglDisplay() {
-        return this.eglPlatform.getEglDisplay();
+        return this.eglDisplay;
     }
 
     @Override
     public long getEglContext() {
-        return this.eglPlatform.getEglContext();
+        return this.eglContext;
     }
 
     @Nonnull
     @Override
-    public List<Html5EglRenderOutput> getRenderOutputs() {
-        return this.html5EglRenderOutputs;
+    public List<X11EglOutput> getRenderOutputs() {
+        return this.x11EglRenderOutputs;
     }
 
     @Nonnull
     @Override
     public String getEglExtensions() {
-        return this.eglPlatform.getEglExtensions();
+        return this.eglExtensions;
     }
 }

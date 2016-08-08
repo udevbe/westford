@@ -17,12 +17,9 @@
  */
 package org.westmalle.wayland.core;
 
+import java.util.Optional;
 
-public interface EglRenderOutput extends RenderOutput {
-
-    long getEglSurface();
-
-    long getEglContext();
-
-    long getEglDisplay();
+@FunctionalInterface
+public interface SurfaceRenderState {
+    Optional<SurfaceRenderState> accept(SurfaceRenderStateVisitor surfaceRenderStateVisitor);
 }

@@ -27,18 +27,18 @@ import java.util.List;
 
 @AutoFactory(className = "PrivateDispmanxPlatformFactory",
              allowSubclasses = true)
-public class DispmanxRenderPlatform implements RenderPlatform {
+public class DispmanxPlatform implements RenderPlatform {
 
     @Nonnull
     private final DISPMANX_MODEINFO_T modeinfo;
 
     @Nonnull
-    private final List<DispmanxRenderOutput> dispmanxRenderOutputs;
+    private final List<DispmanxOutput> dispmanxOutputs;
 
-    DispmanxRenderPlatform(@Nonnull final DISPMANX_MODEINFO_T modeinfo,
-                           @Nonnull final List<DispmanxRenderOutput> dispmanxRenderOutputs) {
+    DispmanxPlatform(@Nonnull final DISPMANX_MODEINFO_T modeinfo,
+                     @Nonnull final List<DispmanxOutput> dispmanxOutputs) {
         this.modeinfo = modeinfo;
-        this.dispmanxRenderOutputs = dispmanxRenderOutputs;
+        this.dispmanxOutputs = dispmanxOutputs;
     }
 
     @Nonnull
@@ -47,7 +47,7 @@ public class DispmanxRenderPlatform implements RenderPlatform {
     }
 
     @Nonnull
-    public List<DispmanxRenderOutput> getRenderOutputs() {
-        return this.dispmanxRenderOutputs;
+    public List<DispmanxOutput> getRenderOutputs() {
+        return this.dispmanxOutputs;
     }
 }
