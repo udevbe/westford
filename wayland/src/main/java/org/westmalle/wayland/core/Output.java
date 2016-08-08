@@ -18,6 +18,7 @@
 package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.WlOutputResource;
 import org.freedesktop.wayland.shared.WlOutputTransform;
 import org.westmalle.wayland.core.calc.Mat4;
@@ -47,6 +48,8 @@ public class Output {
     private Mat4  transform        = Mat4.IDENTITY;
     @Nonnull
     private Mat4  inverseTransform = Mat4.IDENTITY;
+    @Nonnull
+    private Region region;
 
     @Nonnull
     private OutputGeometry outputGeometry = OutputGeometry.builder()
@@ -67,7 +70,9 @@ public class Output {
                                                       .flags(0)
                                                       .build();
 
-    Output(@Nonnull final String name) {
+    Output(@Provided @Nonnull final Region region,
+           @Nonnull final String name) {
+        this.region = region;
         this.name = name;
     }
 
@@ -131,6 +136,7 @@ public class Output {
                          @Nonnull final OutputMode outputMode) {
         if (!this.outputMode.equals(outputMode)) {
             this.outputMode = outputMode;
+
             this.outputModeSignal.emit(outputMode);
         }
         resources.forEach(this::notifyMode);
