@@ -17,9 +17,9 @@
  */
 package org.westmalle.wayland.core;
 
-import org.freedesktop.jaccall.Pointer;
 import dagger.Module;
 import dagger.Provides;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.westmalle.wayland.nativ.NativeModule;
 import org.westmalle.wayland.nativ.glibc.Libc;
@@ -28,6 +28,11 @@ import javax.inject.Singleton;
 
 @Module(includes = NativeModule.class)
 public class CoreModule {
+
+    @Provides
+    Region provideRegion(final FiniteRegionFactory finiteRegionFactory) {
+        return finiteRegionFactory.create();
+    }
 
     @Provides
     @Singleton

@@ -85,7 +85,7 @@ public class PointerDevice implements Role {
     private Optional<WlSurfaceResource> focus                = Optional.empty();
     @Nonnull
     private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
-
+    @Nonnull
     private final Region clampRegion;
 
     private int buttonPressSerial;
@@ -102,13 +102,13 @@ public class PointerDevice implements Role {
                   @Nonnull final CursorFactory cursorFactory,
                   @Nonnull final JobExecutor jobExecutor,
                   @Nonnull final Scene scene,
-                  @Nonnull final FiniteRegionFactory finiteRegionFactory) {
+                  @Nonnull final Region region) {
         this.display = display;
         this.nullRegion = nullRegion;
         this.cursorFactory = cursorFactory;
         this.jobExecutor = jobExecutor;
         this.scene = scene;
-        this.clampRegion = finiteRegionFactory.create();
+        this.clampRegion = region;
     }
 
     //TODO unit test
@@ -683,7 +683,7 @@ public class PointerDevice implements Role {
 
     //TODO unit test
     /**
-     * Limit the pointer position to the given clamp regions.
+     * Limit the pointer position to the clamp region.
      *
      * @see #getClampRegion()
      */
