@@ -50,11 +50,9 @@ public class InfiniteRegion implements Region {
         return INFINITE_RECT;
     }
 
-    @Nonnull
     @Override
     public void add(@Nonnull final Rectangle rectangle) {}
 
-    @Nonnull
     @Override
     public void subtract(@Nonnull final Rectangle rectangle) {}
 
@@ -69,5 +67,10 @@ public class InfiniteRegion implements Region {
         final FiniteRegion finiteRegion = this.finiteRegionFactory.create();
         finiteRegion.add(clipping);
         return finiteRegion.contains(point);
+    }
+
+    @Override
+    public Region intersect(@Nonnull final Rectangle rectangle) {
+        return this;
     }
 }
