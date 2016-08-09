@@ -17,9 +17,9 @@
  */
 package org.westmalle.wayland.core;
 
-import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.freedesktop.jaccall.Pointer;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libpixman1.pixman_box32;
 import org.westmalle.wayland.nativ.libpixman1.pixman_region32;
@@ -36,10 +36,13 @@ import static org.freedesktop.jaccall.Pointer.malloc;
 public class FiniteRegion implements Region {
 
     private final Libpixman1               libpixman1;
+    private final FiniteRegionFactory      finiteRegionFactory;
     private final Pointer<pixman_region32> pixman_region32Pointer;
 
-    FiniteRegion(@Provided final Libpixman1 libpixman1) {
+    FiniteRegion(@Provided final Libpixman1 libpixman1,
+                 @Provided final FiniteRegionFactory finiteRegionFactory) {
         this.libpixman1 = libpixman1;
+        this.finiteRegionFactory = finiteRegionFactory;
         this.pixman_region32Pointer = malloc(pixman_region32.SIZE,
                                              pixman_region32.class);
         this.libpixman1.pixman_region32_init(this.pixman_region32Pointer.address);
@@ -151,6 +154,20 @@ public class FiniteRegion implements Region {
                                                               point.getX(),
                                                               point.getY(),
                                                               0L) != 0;
+    }
+
+    @Override
+    public Region intersect(@Nonnull final Rectangle rectangle) {
+        final FiniteRegion region = this.finiteRegionFactory.create();
+
+        this.libpixman1.pixman_region32_intersect_rect(region.pixman_region32Pointer.address,
+                                                       this.pixman_region32Pointer.address,
+                                                       rectangle.getX(),
+                                                       rectangle.getY(),
+                                                       rectangle.getWidth(),
+                                                       rectangle.getHeight());
+
+        return region;
     }
 
     @Override

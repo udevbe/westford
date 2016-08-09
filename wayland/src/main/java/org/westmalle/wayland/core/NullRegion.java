@@ -48,4 +48,9 @@ public class NullRegion implements Region {
                             @Nonnull final Point point) {
         return false;
     }
+
+    @Override
+    public Region intersect(@Nonnull final Rectangle rectangle) {
+        return this;
+    }
 }
