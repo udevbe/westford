@@ -228,13 +228,8 @@ public class PointerDevice implements Role {
                        final int x,
                        final int y) {
 
-        final Point clampPosition = clamp(Point.create(x,
-                                                       y));
-        if (clampPosition.equals(this.position)) {
-            return;
-        }
-
-        this.position = clampPosition;
+        this.position = clamp(Point.create(x,
+                                           y));
 
         if (!getGrab().isPresent()) {
             calculateFocus(wlPointerResources);
@@ -618,19 +613,19 @@ public class PointerDevice implements Role {
                                           final SurfaceState.Builder surfaceStateBuilder) {
 
         surfaceStateBuilder.inputRegion(Optional.of(this.nullRegion));
-        if (this.activeCursor.isPresent()) {
-            final Cursor clientCursor = this.activeCursor.get();
-            if (clientCursor.getWlSurfaceResource()
-                            .equals(wlSurfaceResource) &&
-                !clientCursor.isHidden()) {
+        if (this.activeCursor.isPresent() &&
+            this.activeCursor.get()
+                             .getWlSurfaceResource()
+                             .equals(wlSurfaceResource) &&
+            !this.activeCursor.get()
+                              .isHidden()) {
 
-                //TODO put cursor surfaces in a separate list in the scene.
-                //move visible cursor to top of surface stack
-                this.scene.getSurfacesStack()
-                          .remove(wlSurfaceResource);
-                this.scene.getSurfacesStack()
-                          .addLast(wlSurfaceResource);
-            }
+            //TODO put cursor surfaces in a separate list in the scene.
+            //move visible cursor to top of surface stack
+            this.scene.getSurfacesStack()
+                      .remove(wlSurfaceResource);
+            this.scene.getSurfacesStack()
+                      .addLast(wlSurfaceResource);
         }
         else {
             surfaceStateBuilder.buffer(Optional.empty());
