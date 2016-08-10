@@ -139,21 +139,17 @@ public class Output {
     }
 
     private void updateRegion() {
-        //FIXME compensate for position offset
-        final Vec4 regionTopLeft = this.transform.multiply(Vec4.create(0,
-                                                                       0,
-                                                                       1,
-                                                                       1));
-        final Vec4 regionBottomRight = this.transform.multiply(Vec4.create(this.outputMode.getWidth(),
-                                                                           this.outputMode.getHeight(),
-                                                                           1,
-                                                                           1));
+        final Point regionTopLeft = this.transform.multiply(Point.ZERO.toVec4())
+                                                  .toPoint();
+        final Point regionBottomRight = this.transform.multiply(Point.create(this.outputMode.getWidth(),
+                                                                             this.outputMode.getHeight())
+                                                                     .toVec4())
+                                                      .toPoint();
         //TODO fire region event?
         this.region = this.finiteRegionFactory.create();
-        this.region.add(Rectangle.create((int) regionTopLeft.getX(),
-                                         (int) regionTopLeft.getY(),
-                                         (int) regionBottomRight.getX() - (int) regionTopLeft.getX(),
-                                         (int) regionBottomRight.getY() - (int) regionTopLeft.getY()));
+        this.region.add(Rectangle.create(regionTopLeft,
+                                         regionBottomRight.getX() - regionTopLeft.getX(),
+                                         regionBottomRight.getY() - regionTopLeft.getY()));
     }
 
     public Output update(@Nonnull final Set<WlOutputResource> resources,

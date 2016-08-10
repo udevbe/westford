@@ -18,6 +18,7 @@
 package org.westmalle.wayland.core.calc;
 
 import com.google.auto.value.AutoValue;
+import org.westmalle.wayland.core.Point;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -84,6 +85,11 @@ public abstract class Vec4 {
                            getY() - right.getY(),
                            getZ() - right.getZ(),
                            getW() - right.getW());
+    }
+
+    public Point toPoint() {
+        return Point.create((int) getX(),
+                            (int) getY());
     }
 
     @AutoValue.Builder

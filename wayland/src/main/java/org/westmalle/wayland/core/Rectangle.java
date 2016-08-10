@@ -38,6 +38,46 @@ public abstract class Rectangle {
                         .build();
     }
 
+    public static Rectangle create(@Nonnull final Point position,
+                                   @Nonnegative final int width,
+                                   @Nonnegative final int height) {
+        return create(position.getX(),
+                      position.getY(),
+                      width,
+                      height);
+    }
+
+    public static Rectangle create(@Nonnull final Point a,
+                                   @Nonnull final Point b) {
+
+        final int width;
+        final int x;
+        if (a.getX() > b.getX()) {
+            width = a.getX() - b.getX();
+            x = b.getX();
+        }
+        else {
+            width = b.getX() - a.getX();
+            x = a.getX();
+        }
+
+        final int height;
+        final int y;
+        if (a.getX() > b.getY()) {
+            height = a.getY() - b.getY();
+            y = b.getY();
+        }
+        else {
+            height = b.getY() - a.getY();
+            y = a.getY();
+        }
+
+        return create(x,
+                      y,
+                      width,
+                      height);
+    }
+
     public static Builder builder() {
         return new AutoValue_Rectangle.Builder().x(0)
                                                 .y(0)
