@@ -63,7 +63,7 @@ public class WlSeat extends Global<WlSeatResource> implements WlSeatRequestsV5, 
     WlSeat(@Provided @Nonnull final Display display,
            @Provided @Nonnull final WlDataDevice wlDataDevice,
            @Provided @Nonnull final Seat seat,
-           @Provided @Nonnull final WlPointer wlPointer,
+           @Nonnull final WlPointer wlPointer,
            @Nonnull final WlKeyboard wlKeyboard,
            @Provided @Nonnull final WlTouch wlTouch) {
         super(display,

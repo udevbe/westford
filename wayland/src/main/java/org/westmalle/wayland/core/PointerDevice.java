@@ -92,7 +92,7 @@ public class PointerDevice implements Role {
     @Nonnull
     private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
     @Nonnull
-    private final Region clampRegion;
+    private final FiniteRegion clampRegion;
 
     private int buttonPressSerial;
     private int buttonReleaseSerial;
@@ -109,7 +109,7 @@ public class PointerDevice implements Role {
                   @Provided @Nonnull final CursorFactory cursorFactory,
                   @Provided @Nonnull final JobExecutor jobExecutor,
                   @Provided @Nonnull final Scene scene,
-                  @Nonnull final Region region) {
+                  @Nonnull final FiniteRegion region) {
         this.geo = geo;
         this.display = display;
         this.nullRegion = nullRegion;
@@ -667,7 +667,6 @@ public class PointerDevice implements Role {
                               this.clampRegion);
     }
 
-
     //TODO unit test
 
     /**
@@ -691,7 +690,8 @@ public class PointerDevice implements Role {
         this.position = position;
     }
 
-    public Region getClampRegion() {
+    @Nonnull
+    public FiniteRegion getClampRegion() {
         return this.clampRegion;
     }
 }

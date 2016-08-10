@@ -22,6 +22,7 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
+import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
 
@@ -40,6 +41,8 @@ public class X11SeatFactory {
     @Nonnull
     private final WlSeatFactory                wlSeatFactory;
     @Nonnull
+    private final WlPointerFactory             wlPointerFactory;
+    @Nonnull
     private final WlKeyboardFactory            wlKeyboardFactory;
     @Nonnull
     private final KeyboardDeviceFactory        keyboardDeviceFactory;
@@ -52,6 +55,7 @@ public class X11SeatFactory {
                    @Nonnull final X11XkbFactory x11XkbFactory,
                    @Nonnull final X11InputEventListenerFactory x11InputEventListenerFactory,
                    @Nonnull final WlSeatFactory wlSeatFactory,
+                   @Nonnull final WlPointerFactory wlPointerFactory,
                    @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                    @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory) {
         this.privateX11SeatFactory = privateX11SeatFactory;
@@ -59,6 +63,7 @@ public class X11SeatFactory {
         this.x11XkbFactory = x11XkbFactory;
         this.x11InputEventListenerFactory = x11InputEventListenerFactory;
         this.wlSeatFactory = wlSeatFactory;
+        this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.keyboardDeviceFactory = keyboardDeviceFactory;
     }
@@ -70,7 +75,8 @@ public class X11SeatFactory {
         final KeyboardDevice keyboardDevice = this.keyboardDeviceFactory.create(xkb);
         keyboardDevice.updateKeymap();
 
-        final WlSeat wlSeat = this.wlSeatFactory.create(this.wlKeyboardFactory.create(keyboardDevice));
+        final WlSeat wlSeat = this.wlSeatFactory.create(this.wlPointerFactory.create(),
+                                                        this.wlKeyboardFactory.create(keyboardDevice));
 
         this.x11Platform.getX11EventBus()
                         .getXEventSignal()
