@@ -39,9 +39,7 @@ public class Output {
     private final Signal<OutputMode, Slot<OutputMode>>           outputModeSignal = new Signal<>();
 
     @Nonnull
-    private final FiniteRegionFactory finiteRegionFactory;
-    @Nonnull
-    private final String              name;
+    private final String name;
 
     @Nonnegative
     private float scale            = 1f;
@@ -52,7 +50,7 @@ public class Output {
 
 
     @Nonnull
-    private FiniteRegion region;
+    private final FiniteRegion region;
 
     @Nonnull
     private OutputGeometry outputGeometry = OutputGeometry.builder()
@@ -73,10 +71,8 @@ public class Output {
                                                       .flags(0)
                                                       .build();
 
-    Output(@Provided @Nonnull final FiniteRegionFactory finiteRegionFactory,
-           @Provided @Nonnull final FiniteRegion finiteRegion,
+    Output(@Provided @Nonnull final FiniteRegion finiteRegion,
            @Nonnull final String name) {
-        this.finiteRegionFactory = finiteRegionFactory;
         this.region = finiteRegion;
         this.name = name;
     }
@@ -146,7 +142,8 @@ public class Output {
                                                                      .toVec4())
                                                       .toPoint();
         //TODO fire region event?
-        this.region = this.finiteRegionFactory.create();
+        this.region.clear();
+        //TODO check if the region is properly updated in the unit tests
         this.region.add(Rectangle.create(regionTopLeft,
                                          regionBottomRight.getX() - regionTopLeft.getX(),
                                          regionBottomRight.getY() - regionTopLeft.getY()));
