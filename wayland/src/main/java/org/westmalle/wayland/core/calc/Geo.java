@@ -59,35 +59,34 @@ public class Geo {
 
         final int rectWidth;
         if (outsideX > insideX) {
-            rectWidth = outsideX - insideX;
             //compensate for libpixman considering edge points not being inside, so we move the (potential) edge point a bit inside
             insideX--;
+            rectWidth = outsideX - insideX;
         }
         else {
-            rectWidth = insideX - outsideX;
             insideX++;
+            rectWidth = insideX - outsideX;
         }
 
         final int rectHeight;
 
         if (outsideY > insideY) {
-            rectHeight = outsideY - insideY;
             //compensate for libpixman considering edge points not being inside, so we move the (potential) edge point a bit inside
             insideY--;
+            rectHeight = outsideY - insideY;
         }
         else {
-            rectHeight = insideY - outsideY;
             insideY++;
+            rectHeight = insideY - outsideY;
         }
 
         final int rectX = outsideX > insideX ? insideX : outsideX;
         final int rectY = outsideY > insideY ? insideY : outsideY;
 
-        //we moved a bit more inside, so increase the width & height
         final Region intersect = region.intersect(Rectangle.create(rectX,
                                                                    rectY,
-                                                                   rectWidth + 1,
-                                                                   rectHeight + 1));
+                                                                   rectWidth,
+                                                                   rectHeight));
         List<Rectangle> intersectionRects = intersect.asList();
         if (intersectionRects.isEmpty()) {
             //Both points fall completely outside the region. make the entire clamp region the intersection.
@@ -119,7 +118,61 @@ public class Geo {
             }
         }
 
-        return clampPoint;
+        //compensate for libpixman return rectangles whose edge points fall outside the clamp region
+        return compensateEdge(clampPoint,
+                              insideX,
+                              insideY,
+                              outsideX,
+                              outsideY);
+    }
+
+    private Point compensateEdge(final Point clampPoint,
+                                 final int insideX,
+                                 final int insideY,
+                                 final int outsideX,
+                                 final int outsideY) {
+        final Point.Builder builder = clampPoint.toBuilder();
+
+        final boolean right  = outsideX > insideX;
+        final boolean bottom = outsideY > insideY;
+
+        if (clampPoint.getY() == outsideY) {
+            //left-right edge
+
+            if (right) {
+                //right edge
+                builder.x(clampPoint.getX() - 1);
+            }
+        }
+        else if (clampPoint.getX() == outsideX) {
+            //top-bottom edge
+
+            if (bottom) {
+                //bottom edge
+                builder.y(clampPoint.getY() - 1);
+            }
+        }
+        else if (clampPoint.getX() != outsideX &&
+                 clampPoint.getY() != outsideY) {
+            //corner point
+
+            if (right &&
+                bottom) {
+                //bottom-right corner
+                builder.x(clampPoint.getX() - 1);
+                builder.y(clampPoint.getY() - 1);
+            }
+            else if (right) {
+                //top-right corner
+                builder.x(clampPoint.getX() - 1);
+            }
+            else if (bottom) {
+                //bottom-left corner
+                builder.y(clampPoint.getY() - 1);
+            }
+        }
+
+        return builder.build();
     }
 
     public double distance(final Point a,
