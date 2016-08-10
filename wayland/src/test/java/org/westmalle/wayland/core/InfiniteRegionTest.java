@@ -46,20 +46,6 @@ public class InfiniteRegionTest {
     }
 
     @Test
-    public void testAdd() throws Exception {
-        //given
-        final Rectangle rectangle = Rectangle.create(123,
-                                                     456,
-                                                     789,
-                                                     12);
-        //when
-        this.region.add(rectangle);
-        //then
-        assertThat(this.region.asList()
-                              .get(0)).isEqualTo(rectangle);
-    }
-
-    @Test
     public void testSubtract() throws Exception {
         //given
         final Rectangle rectangle = Rectangle.create(123,
@@ -68,9 +54,10 @@ public class InfiniteRegionTest {
                                                      12);
         //when
         this.region.subtract(rectangle);
+
         //then
-        //FIXME
-        //assertThat(subtract).isEqualTo(this.region);
+        assertThat(this.region.contains(Point.create(150,
+                                                     460))).isTrue();
     }
 
     @Test

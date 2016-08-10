@@ -39,8 +39,8 @@ import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
 import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
-import org.westmalle.wayland.x11.config.X11PlatformConfig;
 import org.westmalle.wayland.x11.config.X11OutputConfig;
+import org.westmalle.wayland.x11.config.X11PlatformConfig;
 
 import java.util.Collections;
 
@@ -267,8 +267,8 @@ public class X11PlatformFactoryTest {
                                               anyByte(),
                                               eq(window),
                                               eq(screen.root()),
-                                              eq((short) 10),
-                                              eq((short) 20),
+                                              eq((short) 0),
+                                              eq((short) 0),
                                               eq((short) 100),
                                               eq((short) 200),
                                               anyShort(),
