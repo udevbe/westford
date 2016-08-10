@@ -28,6 +28,7 @@ import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
+import org.westmalle.wayland.core.calc.Geo;
 import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
@@ -41,7 +42,6 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -73,6 +73,8 @@ public class PointerDevice implements Role {
     @Nonnull
     private final Scene         scene;
     @Nonnull
+    private final Geo           geo;
+    @Nonnull
     private final Display       display;
 
     @Nonnull
@@ -101,12 +103,14 @@ public class PointerDevice implements Role {
     private int buttonsPressed;
 
     @Inject
-    PointerDevice(@Provided @Nonnull final Display display,
+    PointerDevice(@Provided @Nonnull final Geo geo,
+                  @Provided @Nonnull final Display display,
                   @Provided @Nonnull final NullRegion nullRegion,
                   @Provided @Nonnull final CursorFactory cursorFactory,
                   @Provided @Nonnull final JobExecutor jobExecutor,
                   @Provided @Nonnull final Scene scene,
                   @Nonnull final Region region) {
+        this.geo = geo;
         this.display = display;
         this.nullRegion = nullRegion;
         this.cursorFactory = cursorFactory;
@@ -663,106 +667,11 @@ public class PointerDevice implements Role {
     }
 
     private Point clamp(final Point newPosition) {
-
-        //avoid double checking old position
-        if (!newPosition.equals(this.position) && this.clampRegion.contains(newPosition)) {
-            return newPosition;
-        }
-
-        if (this.clampRegion.contains(this.position)) {
-            //find a point inside the clamp region, nearest to the newPosition
-            return edge(newPosition);
-        }
-
-        //neither new or old position is within bounds. return position of first clamp region rectangle
-        final List<Rectangle> clampRectangles = this.clampRegion.asList();
-        if (clampRectangles.isEmpty()) {
-            //empty region default to zero
-            return Point.ZERO;
-        }
-        else {
-            return clampRectangles.get(0)
-                                  .getPosition();
-        }
+        return this.geo.clamp(this.position,
+                              newPosition,
+                              this.clampRegion);
     }
 
-    //TODO move to calc package
-    //naive implementation to find the edge point of a region, given a line between between 2 points, one inside the region, the other outside.
-    private Point edge(final Point newPosition) {
-
-        //FIXME
-
-        final int newX = newPosition.getX();
-        final int oldX = this.position.getX();
-        final int newY = newPosition.getY();
-        final int oldY = this.position.getY();
-
-        final int rectWidth  = newX > oldX ? newX - oldX : oldX - newX;
-        final int rectHeight = newY > oldY ? newY - oldY : oldY - newY;
-
-        final int rectX = newX >= oldX ? (oldX - 1) : newX;
-        final int rectY = newY >= oldY ? (oldY - 1) : newY;
-
-        final Region intersect = this.clampRegion.intersect(Rectangle.create(rectX,
-                                                                             rectY,
-                                                                             rectWidth,
-                                                                             rectHeight));
-        final List<Rectangle> intersectionRects = intersect.asList();
-        //if no intersection then our old position is against an edge.
-        if (intersectionRects.isEmpty()) {
-            final Point newXPoint = Point.create(newX,
-                                                 newY);
-            if (this.clampRegion.contains(newXPoint)) {
-                return newXPoint;
-            }
-
-            final Point newYPoint = Point.create(oldX,
-                                                 oldY);
-            if (this.clampRegion.contains(newYPoint)) {
-                return newYPoint;
-            }
-
-            return this.position;
-        }
-        else {
-
-            final Rectangle intersectRect = intersectionRects.get(0);
-
-            //find the corner closest to the newPosition
-            //list points in clockwise order
-            final Point[] points = new Point[4];
-            points[0] = Point.create(intersectRect.getX(),
-                                     intersectRect.getY());
-            points[1] = Point.create(intersectRect.getX() + intersectRect.getWidth(),
-                                     intersectRect.getY());
-            points[2] = Point.create(intersectRect.getX() + intersectRect.getWidth(),
-                                     intersectRect.getY() + intersectRect.getHeight());
-            points[3] = Point.create(intersectRect.getX(),
-                                     intersectRect.getY() + intersectRect.getHeight());
-
-            Point clampPoint = this.position;
-
-            double clampDistance = 65535;
-            for (final Point point : points) {
-                final double distance = distance(newPosition,
-                                                 point);
-                if (distance < clampDistance) {
-                    clampDistance = distance;
-                    clampPoint = point;
-                }
-            }
-
-            return clampPoint;
-        }
-    }
-
-    //TODO move to calc package
-    private double distance(final Point a,
-                            final Point b) {
-        return Math.sqrt(Math.pow(a.getX() - b.getX(),
-                                  2) + Math.pow(a.getY() - b.getY(),
-                                                2));
-    }
 
     //TODO unit test
 

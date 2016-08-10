@@ -39,7 +39,7 @@ public class FiniteRegion implements Region {
     private final FiniteRegionFactory      finiteRegionFactory;
     private final Pointer<pixman_region32> pixman_region32Pointer;
 
-    FiniteRegion(@Provided final Libpixman1 libpixman1,
+    public FiniteRegion(@Provided final Libpixman1 libpixman1,
                  @Provided final FiniteRegionFactory finiteRegionFactory) {
         this.libpixman1 = libpixman1;
         this.finiteRegionFactory = finiteRegionFactory;
