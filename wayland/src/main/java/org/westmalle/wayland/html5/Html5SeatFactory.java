@@ -25,6 +25,7 @@ import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.input.LibinputXkbFactory;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
+import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
 
@@ -39,6 +40,8 @@ public class Html5SeatFactory {
     @Nonnull
     private final WlSeatFactory           wlSeatFactory;
     @Nonnull
+    private final WlPointerFactory        wlPointerFactory;
+    @Nonnull
     private final WlKeyboardFactory       wlKeyboardFactory;
     @Nonnull
     private final KeyboardDeviceFactory   keyboardDeviceFactory;
@@ -48,11 +51,13 @@ public class Html5SeatFactory {
     @Inject
     Html5SeatFactory(@Nonnull final PrivateHtml5SeatFactory privateHtml5SeatFactory,
                      @Nonnull final WlSeatFactory wlSeatFactory,
+                     @Nonnull final WlPointerFactory wlPointerFactory,
                      @Nonnull final WlKeyboardFactory wlKeyboardFactory,
                      @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory,
                      @Nonnull final LibinputXkbFactory libinputXkbFactory) {
         this.privateHtml5SeatFactory = privateHtml5SeatFactory;
         this.wlSeatFactory = wlSeatFactory;
+        this.wlPointerFactory = wlPointerFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.keyboardDeviceFactory = keyboardDeviceFactory;
         this.libinputXkbFactory = libinputXkbFactory;
@@ -72,7 +77,8 @@ public class Html5SeatFactory {
                                                                                                                keyboardVariant,
                                                                                                                keyboardOptions));
         keyboardDevice.updateKeymap();
-        final WlSeat wlSeat = this.wlSeatFactory.create(this.wlKeyboardFactory.create(keyboardDevice));
+        final WlSeat wlSeat = this.wlSeatFactory.create(this.wlPointerFactory.create(),
+                                                        this.wlKeyboardFactory.create(keyboardDevice));
         //enable pointer and keyboard for wlseat as a browser always has these.
         wlSeat.getSeat()
               .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,

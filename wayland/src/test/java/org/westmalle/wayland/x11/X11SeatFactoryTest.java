@@ -33,6 +33,7 @@ import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlPointer;
+import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
 
@@ -53,6 +54,8 @@ public class X11SeatFactoryTest {
     private X11InputEventListenerFactory x11InputEventListenerFactory;
     @Mock
     private WlSeatFactory                wlSeatFactory;
+    @Mock
+    private WlPointerFactory             wlPointerFactory;
     @Mock
     private WlKeyboardFactory            wlKeyboardFactory;
     @Mock
@@ -95,12 +98,14 @@ public class X11SeatFactoryTest {
         when(wlSeat.getWlKeyboard()).thenReturn(wlKeyboard);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         when(wlKeyboard.getKeyboardDevice()).thenReturn(keyboardDevice);
-        when(this.wlSeatFactory.create(wlKeyboard)).thenReturn(wlSeat);
+        when(this.wlSeatFactory.create(wlPointer,
+                                       wlKeyboard)).thenReturn(wlSeat);
         when(this.privateX11SeatFactory.create(wlSeat)).thenReturn(x11Seat);
         when(this.x11InputEventListenerFactory.create(x11Seat)).thenReturn(x11InputEventListener);
         when(this.x11XkbFactory.create(xcbConnection)).thenReturn(xkb);
         when(this.keyboardDeviceFactory.create(xkb)).thenReturn(keyboardDevice);
         when(this.wlKeyboardFactory.create(keyboardDevice)).thenReturn(wlKeyboard);
+        when(this.wlPointerFactory.create()).thenReturn(wlPointer);
 
         //when
         this.x11SeatFactory.create();

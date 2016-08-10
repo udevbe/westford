@@ -22,7 +22,7 @@ public class PointerDeviceFactory {
         this.finiteRegionFactory = finiteRegionFactory;
     }
 
-    PointerDevice create() {
+    public PointerDevice create() {
         final FiniteRegion  outputsRegion = this.finiteRegionFactory.create();
         final PointerDevice pointerDevice = this.privatePointerDeviceFactory.create(outputsRegion);
 
@@ -31,22 +31,6 @@ public class PointerDeviceFactory {
                                             outputsRegion.add(renderOutput.getWlOutput()
                                                                           .getOutput()
                                                                           .getRegion()));
-
-        //FIXME we need to add these listeners in a (new) wlpointer factory, as removal of an output requires warping
-        //the pointer, which in turns requires wl pointer resources.
-        this.renderPlatform.getRenderOutputNewSignal()
-                           .connect(event ->
-                                            outputsRegion.add(event.getRenderOutput()
-                                                                   .getWlOutput()
-                                                                   .getOutput()
-                                                                   .getRegion()));
-        this.renderPlatform.getRenderOutputDestroyedSignal()
-                           .connect(event ->
-                                            outputsRegion.remove(event.getRenderOutput()
-                                                                      .getWlOutput()
-                                                                      .getOutput()
-                                                                      .getRegion()));
-
         return pointerDevice;
     }
 }

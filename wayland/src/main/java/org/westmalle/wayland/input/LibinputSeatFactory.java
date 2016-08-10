@@ -27,6 +27,8 @@ import org.westmalle.wayland.nativ.libinput.Pointerclose_restricted;
 import org.westmalle.wayland.nativ.libinput.libinput_interface;
 import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
+import org.westmalle.wayland.protocol.WlPointer;
+import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
 import org.westmalle.wayland.tty.Tty;
@@ -43,6 +45,8 @@ public class LibinputSeatFactory {
     private final WlSeatFactory              wlSeatFactory;
     @Nonnull
     private final WlKeyboardFactory          wlKeyboardFactory;
+    @Nonnull
+    private final WlPointerFactory           wlPointerFactory;
     @Nonnull
     private final PrivateLibinputSeatFactory privateLibinputSeatFactory;
     @Nonnull
@@ -61,6 +65,7 @@ public class LibinputSeatFactory {
     @Inject
     LibinputSeatFactory(@Nonnull final WlSeatFactory wlSeatFactory,
                         @Nonnull final WlKeyboardFactory wlKeyboardFactory,
+                        @Nonnull final WlPointerFactory wlPointerFactory,
                         @Nonnull final PrivateLibinputSeatFactory privateLibinputSeatFactory,
                         @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory,
                         @Nonnull final LibinputXkbFactory libinputXkbFactory,
@@ -70,6 +75,7 @@ public class LibinputSeatFactory {
                         @Nonnull final Libc libc) {
         this.wlSeatFactory = wlSeatFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
+        this.wlPointerFactory = wlPointerFactory;
         this.privateLibinputSeatFactory = privateLibinputSeatFactory;
         this.keyboardDeviceFactory = keyboardDeviceFactory;
         this.libinputXkbFactory = libinputXkbFactory;
@@ -92,8 +98,8 @@ public class LibinputSeatFactory {
                                                                                                                keyboardOptions));
         keyboardDevice.updateKeymap();
 
-
-        final WlSeat wlSeat = this.wlSeatFactory.create(this.wlKeyboardFactory.create(keyboardDevice));
+        final WlSeat wlSeat = this.wlSeatFactory.create(this.wlPointerFactory.create(),
+                                                        this.wlKeyboardFactory.create(keyboardDevice));
 
         final LibinputSeat libinputSeat = this.privateLibinputSeatFactory.create(createUdevContext(seatId),
                                                                                  wlSeat);
