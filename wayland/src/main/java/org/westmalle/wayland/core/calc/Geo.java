@@ -36,52 +36,52 @@ public class Geo {
      * Given: A line between between 2 points, one inside the region, the other outside.
      * Finds the point closest to the outside point, clamped by the given region, between the inside & outside point.
      *
-     * @param inside  point inside the region
-     * @param outside point outside the region
-     * @param region  the clamp region
+     * @param source point inside the region
+     * @param target point outside the region
+     * @param region the clamp region
      *
      * @return a clamped point
      */
-    public Point clamp(final Point inside,
-                       final Point outside,
+    public Point clamp(final Point source,
+                       final Point target,
                        final Region region) {
 
-        if (region.contains(outside)) {
-            //outside is actually inside, so no need to clamp it.
-            return outside;
+        if (region.contains(target)) {
+            //target is inside, so no need to clamp it.
+            return target;
         }
 
-        final int outsideX = outside.getX();
-        final int outsideY = outside.getY();
+        final int targetX = target.getX();
+        final int targetY = target.getY();
 
-        int insideX = inside.getX();
-        int insideY = inside.getY();
+        int sourceX = source.getX();
+        int sourceY = source.getY();
 
         final int rectWidth;
-        if (outsideX > insideX) {
+        if (targetX > sourceX) {
             //compensate for libpixman considering edge points not being inside, so we move the (potential) edge point a bit inside
-            insideX--;
-            rectWidth = outsideX - insideX;
+            sourceX--;
+            rectWidth = targetX - sourceX;
         }
         else {
-            insideX++;
-            rectWidth = insideX - outsideX;
+            sourceX++;
+            rectWidth = sourceX - targetX;
         }
 
         final int rectHeight;
 
-        if (outsideY > insideY) {
+        if (targetY > sourceY) {
             //compensate for libpixman considering edge points not being inside, so we move the (potential) edge point a bit inside
-            insideY--;
-            rectHeight = outsideY - insideY;
+            sourceY--;
+            rectHeight = targetY - sourceY;
         }
         else {
-            insideY++;
-            rectHeight = insideY - outsideY;
+            sourceY++;
+            rectHeight = sourceY - targetY;
         }
 
-        final int rectX = outsideX > insideX ? insideX : outsideX;
-        final int rectY = outsideY > insideY ? insideY : outsideY;
+        final int rectX = targetX > sourceX ? sourceX : targetX;
+        final int rectY = targetY > sourceY ? sourceY : targetY;
 
         final Region intersect = region.intersect(Rectangle.create(rectX,
                                                                    rectY,
@@ -106,11 +106,11 @@ public class Geo {
                                     intersectRect.getY() + intersectRect.getHeight()));
         }
 
-        Point  clampPoint    = inside;
+        Point  clampPoint    = source;
         double clampDistance = 65535;
 
         for (final Point point : points) {
-            final double distance = distance(outside,
+            final double distance = distance(target,
                                              point);
             if (distance < clampDistance) {
                 clampDistance = distance;
@@ -120,23 +120,24 @@ public class Geo {
 
         //compensate for libpixman return rectangles whose edge points fall outside the clamp region
         return compensateEdge(clampPoint,
-                              insideX,
-                              insideY,
-                              outsideX,
-                              outsideY);
+                              sourceX,
+                              sourceY,
+                              targetX,
+                              targetY);
     }
 
     private Point compensateEdge(final Point clampPoint,
-                                 final int insideX,
-                                 final int insideY,
-                                 final int outsideX,
-                                 final int outsideY) {
+                                 final int sourceX,
+                                 final int sourceY,
+                                 final int targetX,
+                                 final int targetY) {
         final Point.Builder builder = clampPoint.toBuilder();
 
-        final boolean right  = outsideX > insideX;
-        final boolean bottom = outsideY > insideY;
+        //direction of the vector
+        final boolean right  = targetX > sourceX;
+        final boolean bottom = targetY > sourceY;
 
-        if (clampPoint.getY() == outsideY) {
+        if (clampPoint.getY() == targetY) {
             //left-right edge
 
             if (right) {
@@ -144,7 +145,7 @@ public class Geo {
                 builder.x(clampPoint.getX() - 1);
             }
         }
-        else if (clampPoint.getX() == outsideX) {
+        else if (clampPoint.getX() == targetX) {
             //top-bottom edge
 
             if (bottom) {
@@ -152,8 +153,8 @@ public class Geo {
                 builder.y(clampPoint.getY() - 1);
             }
         }
-        else if (clampPoint.getX() != outsideX &&
-                 clampPoint.getY() != outsideY) {
+        else if (clampPoint.getX() != targetX &&
+                 clampPoint.getY() != targetY) {
             //corner point
 
             if (right &&
