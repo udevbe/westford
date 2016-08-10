@@ -20,12 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.annotation.Nonnull;
-
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +30,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class OutputTest {
 
+    @Mock
+    private FiniteRegion   finiteRegion;
     @Mock
     private OutputGeometry outputGeometry;
     @Mock

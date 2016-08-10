@@ -40,7 +40,7 @@ public class FiniteRegion implements Region {
     private final Pointer<pixman_region32> pixman_region32Pointer;
 
     public FiniteRegion(@Provided final Libpixman1 libpixman1,
-                 @Provided final FiniteRegionFactory finiteRegionFactory) {
+                        @Provided final FiniteRegionFactory finiteRegionFactory) {
         this.libpixman1 = libpixman1;
         this.finiteRegionFactory = finiteRegionFactory;
         this.pixman_region32Pointer = malloc(pixman_region32.SIZE,
@@ -180,5 +180,9 @@ public class FiniteRegion implements Region {
         this.libpixman1.pixman_region32_subtract(this.pixman_region32Pointer.address,
                                                  this.pixman_region32Pointer.address,
                                                  region.getPixmanRegion32().address);
+    }
+
+    public void clear() {
+        this.libpixman1.pixman_region32_clear(this.pixman_region32Pointer.address);
     }
 }

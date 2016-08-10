@@ -66,4 +66,6 @@ public class Libpixman1 {
                                                      int height);
 
     public native void pixman_region32_init(@Ptr long region);
+
+    public native void pixman_region32_clear(@Ptr long region);
 }
