@@ -64,54 +64,83 @@ public class GeoTest {
         final Point oNorth = Point.create(55,
                                           -10);
 
-        final Point iEast = Point.create(100,
+        final Point iNorthEast = Point.create(99,
+                                              0);
+        final Point oNorthEast = Point.create(105,
+                                              -5);
+
+        final Point iEast = Point.create(99,
                                          50);
         final Point oEast = Point.create(105,
                                          60);
 
+        final Point iSouthEast = Point.create(99,
+                                              99);
+        final Point oSouthEast = Point.create(105,
+                                              105);
+
         final Point iSouth = Point.create(50,
-                                          100);
+                                          99);
         final Point oSouth = Point.create(45,
                                           105);
+
+        final Point iSouthWest = Point.create(0,
+                                              99);
+        final Point oSouthWest = Point.create(-10,
+                                              105);
 
         final Point iWest = Point.create(0,
                                          50);
         final Point oWest = Point.create(-5,
                                          40);
-
-        final Point iSouthEast = Point.create(100,
-                                              100);
-        final Point oSouthEast = Point.create(105,
-                                              105);
+        final Point iNorthWest = Point.create(0,
+                                              0);
+        final Point oNorthWest = Point.create(-5,
+                                              -10);
 
         //when
-        final Point clampEast = this.geo.clamp(iEast,
-                                               oEast,
-                                               clampRegion);
         final Point clampNorth = this.geo.clamp(iNorth,
                                                 oNorth,
                                                 clampRegion);
-        final Point clampSouth = this.geo.clamp(iSouth,
-                                                oSouth,
-                                                clampRegion);
-        final Point clampWest = this.geo.clamp(iWest,
-                                               oWest,
+        final Point clampNorthEast = this.geo.clamp(iNorthEast,
+                                                    oNorthEast,
+                                                    clampRegion);
+        final Point clampEast = this.geo.clamp(iEast,
+                                               oEast,
                                                clampRegion);
         final Point clampSoutEast = this.geo.clamp(iSouthEast,
                                                    oSouthEast,
                                                    clampRegion);
+        final Point clampSouth = this.geo.clamp(iSouth,
+                                                oSouth,
+                                                clampRegion);
+        final Point clampSouthWest = this.geo.clamp(iSouthWest,
+                                                    oSouthWest,
+                                                    clampRegion);
+        final Point clampWest = this.geo.clamp(iWest,
+                                               oWest,
+                                               clampRegion);
+        final Point clampNorthWest = this.geo.clamp(iNorthWest,
+                                                    oNorthWest,
+                                                    clampRegion);
 
         //then
-        assertThat(clampEast).isEqualTo(Point.create(100,
-                                                     60));
         assertThat(clampNorth).isEqualTo(Point.create(55,
                                                       0));
+        assertThat(clampNorthEast).isEqualTo(Point.create(99,
+                                                          0));
+        assertThat(clampEast).isEqualTo(Point.create(99,
+                                                     60));
+        assertThat(clampSoutEast).isEqualTo(Point.create(99,
+                                                         99));
         assertThat(clampSouth).isEqualTo(Point.create(45,
-                                                      100));
+                                                      99));
+        assertThat(clampSouthWest).isEqualTo(Point.create(0,
+                                                          99));
         assertThat(clampWest).isEqualTo(Point.create(0,
                                                      40));
-        assertThat(clampSoutEast).isEqualTo(Point.create(100,
-                                                         100));
+        assertThat(clampNorthWest).isEqualTo(Point.create(0,
+                                                          0));
     }
 
     @Test
