@@ -228,12 +228,9 @@ public class PointerDevice implements Role {
                        final int x,
                        final int y) {
 
-        this.position = clamp(Point.create(x,
-                                           y));
-
-        if (!getGrab().isPresent()) {
-            calculateFocus(wlPointerResources);
-        }
+        clamp(wlPointerResources,
+              Point.create(x,
+                           y));
 
         getFocus().ifPresent(wlSurfaceResource ->
                                      reportMotion(wlPointerResources,
@@ -661,33 +658,30 @@ public class PointerDevice implements Role {
                     });
     }
 
-    private Point clamp(final Point newPosition) {
-        return this.geo.clamp(this.position,
-                              newPosition,
-                              this.clampRegion);
-    }
-
     //TODO unit test
 
     /**
-     * Limit the pointer position to the clamp region.
+     * Limit the pointer new position to the clamp region.
+     *
+     * @param newPosition the desired new position
      *
      * @see #getClampRegion()
      */
-    public void clamp(@Nonnull final Set<WlPointerResource> wlPointerResources) {
-        final Point clampPosition = clamp(this.position);
+    public void clamp(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                      final Point newPosition) {
         warp(wlPointerResources,
-             clampPosition);
+             this.geo.clamp(this.position,
+                            newPosition,
+                            this.clampRegion));
     }
 
     //TODO unit test
     public void warp(@Nonnull final Set<WlPointerResource> wlPointerResources,
                      final Point position) {
-        ungrab();
-        updateFocus(wlPointerResources,
-                    getFocus(),
-                    Optional.empty());
         this.position = position;
+        if (!getGrab().isPresent()) {
+            calculateFocus(wlPointerResources);
+        }
     }
 
     @Nonnull
