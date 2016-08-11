@@ -37,6 +37,7 @@ public class WlPointerFactory {
                                                                    .getWlOutput()
                                                                    .getOutput()
                                                                    .getRegion()));
+        //TODO unit test
         this.renderPlatform.getRenderOutputDestroyedSignal()
                            .connect(event -> {
                                pointerDevice.getClampRegion()
@@ -44,7 +45,8 @@ public class WlPointerFactory {
                                                          .getWlOutput()
                                                          .getOutput()
                                                          .getRegion());
-                               pointerDevice.clamp(wlPointer.getResources());
+                               pointerDevice.clamp(wlPointer.getResources(),
+                                                   pointerDevice.getPosition());
                            });
 
         return wlPointer;
