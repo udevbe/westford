@@ -397,4 +397,21 @@ public class Libc {
     public int minor(@Unsigned final int dev) {
         return Kdev_t.MINOR(dev);
     }
+
+
+    @Ptr(String.class)
+    public native long getlogin();
+
+    @Unsigned
+    public native int geteuid();
+
+    @Unsigned
+    public native int getuid();
+
+    @Unsigned
+    public native int getgid();
+
+    public native int setgid(@Unsigned int gid);
+
+    public native int setuid(@Unsigned int getuid);
 }
