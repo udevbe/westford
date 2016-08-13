@@ -19,7 +19,6 @@ package org.westmalle.wayland.tty;
 
 
 import org.freedesktop.jaccall.Pointer;
-import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.linux.vt_mode;
@@ -54,16 +53,12 @@ public class TtyFactory {
     @Nonnull
     private final Libc              libc;
     @Nonnull
-    private final Display           display;
-    @Nonnull
     private final PrivateTtyFactory privateTtyFactory;
 
     @Inject
     TtyFactory(@Nonnull final Libc libc,
-               @Nonnull final Display display,
                @Nonnull final PrivateTtyFactory privateTtyFactory) {
         this.libc = libc;
-        this.display = display;
         this.privateTtyFactory = privateTtyFactory;
     }
 
@@ -100,9 +95,6 @@ public class TtyFactory {
 
     public Tty create() {
         //TODO tty from config
-
-        //FIXME we need to check if our sigproc mask is set to blocked for the signals we're interested in receiving. This must be done by the process that calls us.
-
         final Pointer<Integer> ttynr = Pointer.nref(0);
         final int              ttyFd = getTtyFd(ttynr);
         final int              vt    = ttynr.dref();
@@ -119,12 +111,21 @@ public class TtyFactory {
             throw new RuntimeException("Already in graphics mode, is another display server running?");
         }
 
-        this.libc.ioctl(ttyFd,
-                        VT_ACTIVATE,
-                        vt);
-        this.libc.ioctl(ttyFd,
-                        VT_WAITACTIVE,
-                        vt);
+        if (-1 == this.libc.ioctl(ttyFd,
+                                  VT_ACTIVATE,
+                                  vt)) {
+            throw new Error(String.format("ioctl[VT_ACTIVATE, %d] failed: %d",
+                                          vt,
+                                          this.libc.getErrno()));
+        }
+
+        if (-1 == this.libc.ioctl(ttyFd,
+                                  VT_WAITACTIVE,
+                                  vt)) {
+            throw new Error(String.format("ioctl[VT_WAITACTIVE, %d] failed: %d",
+                                          vt,
+                                          this.libc.getErrno()));
+        }
 
         final Pointer<Integer> kb_mode = Pointer.nref(0);
         if (this.libc.ioctl(ttyFd,
@@ -160,10 +161,13 @@ public class TtyFactory {
                                                      this.libc.SIGRTMAX()));
         }
 
+        final short relSig = (short) this.libc.SIGRTMIN();
+        final short acqSig = (short) this.libc.SIGRTMIN();
+
         final vt_mode mode = new vt_mode();
         mode.mode(VT_PROCESS);
-        mode.relsig((byte) this.libc.SIGRTMIN());
-        mode.acqsig((byte) this.libc.SIGRTMIN());
+        mode.relsig(relSig);
+        mode.acqsig(acqSig);
         mode.waitv((byte) 0);
         mode.frsig((byte) 0);
         if (this.libc.ioctl(ttyFd,
@@ -172,15 +176,10 @@ public class TtyFactory {
             throw new RuntimeException("failed to take control of vt handling");
         }
 
-        final Tty tty = this.privateTtyFactory.create(ttyFd,
-                                                      vt,
-                                                      oldKbMode);
-
-        final EventSource vtSource = this.display.getEventLoop()
-                                                 .addSignal(this.libc.SIGRTMIN(),
-                                                            tty::vtHandler);
-        tty.setVtSource(vtSource);
-
-        return tty;
+        return this.privateTtyFactory.create(ttyFd,
+                                             vt,
+                                             oldKbMode,
+                                             relSig,
+                                             acqSig);
     }
 }

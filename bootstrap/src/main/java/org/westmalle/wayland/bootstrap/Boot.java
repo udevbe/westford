@@ -17,11 +17,10 @@
  */
 package org.westmalle.wayland.bootstrap;
 
-import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
-import org.westmalle.wayland.bootstrap.drm.DrmBoot;
+import org.westmalle.wayland.bootstrap.drm.launcher.DrmBootLauncher;
 import org.westmalle.wayland.bootstrap.html5.DaggerHtml5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.html5.Html5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.DaggerX11EglCompositor;
@@ -31,29 +30,17 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.Libc_Symbols;
-import org.westmalle.wayland.nativ.glibc.Libpthread;
-import org.westmalle.wayland.nativ.glibc.Libpthread_Symbols;
-import org.westmalle.wayland.nativ.glibc.sigset_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.X11PlatformModule;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 public class Boot {
-
-    private static final String optionPrefix = "option=";
 
     private static final Logger LOGGER   = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private static final String BACK_END = "backEnd";
@@ -107,7 +94,7 @@ public class Boot {
                 break;
             case "DrmEgl":
                 LOGGER.info("Detected DrmEgl backend.");
-                boot.strap(args);
+                new DrmBootLauncher().launch(args);
                 break;
             case "Html5X11Egl":
                 LOGGER.info("Detected Html5X11Egl backend.");
@@ -120,90 +107,6 @@ public class Boot {
                               "\tDrmEgl\n" +
                               "\tHtml5X11Egl");
         }
-    }
-
-    private void strap(final String[] args) throws IOException, InterruptedException {
-
-        if (args.length == 1 &&
-            (args[0].equals("--help") || args[0].equals("-h"))) {
-            System.out.println("The drm launcher program changes the native signal masks before forking a new compositor jvm.\n" +
-                               "This ensures that the compositor jvm can catch native signals in any thread of its choosing.\n" +
-                               "If we did not change the signal masks, threads out of normal execution control (like the garbage collector thread)\n" +
-                               "could receive native signals, and fire the default handler which would exit the jvm.\n\n" +
-                               "Usage: java -DbackEnd=DrmEgl -jar jarfile [option=arg...] [args]\n" +
-                               "\t option=<arg> \t Pass <arg> to the compositor jvm option as an option, eg. option=-Dkey=value or option=-Xmx=1234m\n" +
-                               "\t <args> \t Pass <args> as-is to the child jvm as program arguments.");
-            System.exit(0);
-        }
-
-        new Libc_Symbols().link();
-        new Libpthread_Symbols().link();
-
-        final Libc       libc       = new Libc();
-        final Libpthread libpthread = new Libpthread();
-
-        /*
-         * Block the signals that we want to catch in our child process.
-         */
-        final sigset_t sigset = new sigset_t();
-        libpthread.sigemptyset(Pointer.ref(sigset).address);
-        libpthread.sigaddset(Pointer.ref(sigset).address,
-                             libc.SIGRTMIN());
-        libpthread.pthread_sigmask(Libc.SIG_BLOCK,
-                                   Pointer.ref(sigset).address,
-                                   0L);
-
-        final List<String> options     = new LinkedList<>();
-        final List<String> programArgs = new LinkedList<>();
-
-        for (final String arg : args) {
-            if (arg.startsWith(optionPrefix)) {
-                options.add(arg.substring(optionPrefix.length()));
-            }
-            else {
-                programArgs.add(arg);
-            }
-        }
-
-        /*
-         * Fork new jvm.
-         */
-        System.exit(startNewJavaProcess(options,
-                                        DrmBoot.class.getName(),
-                                        programArgs).waitFor());
-    }
-
-    private Process startNewJavaProcess(final List<String> options,
-                                        final String mainClass,
-                                        final List<String> arguments) throws IOException {
-        final ProcessBuilder processBuilder = createProcess(options,
-                                                            mainClass,
-                                                            arguments);
-        processBuilder.inheritIO();
-        return processBuilder.start();
-    }
-
-    private ProcessBuilder createProcess(final List<String> options,
-                                         final String mainClass,
-                                         final List<String> arguments) {
-        final String jvm       = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        final String classpath = System.getProperty("java.class.path");
-
-        final List<String> command = new ArrayList<>();
-        command.add(jvm);
-        if (!options.isEmpty()) {
-            command.addAll(options);
-        }
-        command.add(mainClass);
-        if (!arguments.isEmpty()) {
-            command.addAll(arguments);
-        }
-
-        final ProcessBuilder      processBuilder = new ProcessBuilder(command);
-        final Map<String, String> environment    = processBuilder.environment();
-        environment.put("CLASSPATH",
-                        classpath);
-        return processBuilder;
     }
 
     private void strap(final DaggerHtml5X11EglCompositor.Builder builder) {

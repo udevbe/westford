@@ -23,6 +23,7 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
+import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.linux.InputEventCodes;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -31,6 +32,7 @@ import org.westmalle.wayland.tty.Tty;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class DrmBoot {
 
@@ -42,25 +44,8 @@ public class DrmBoot {
         final DaggerDrmEglCompositor.Builder builder          = DaggerDrmEglCompositor.builder();
         final DrmEglCompositor               drmEglCompositor = builder.build();
 
-        /*
-         * Make sure we initialize the tty before anything else.
-         * Keep lifecycle at top as weston demo clients *really* like their globals
-         * to be initialized in a certain order, else they segfault...
-         */
-        final Tty       tty       = drmEglCompositor.tty();
-        final LifeCycle lifeCycle = drmEglCompositor.lifeCycle();
 
-        /*
-         * Make sure we cleanup nicely if the program stops.
-         */
-        final Thread shutdownHook = new Thread() {
-            @Override
-            public void run() {
-                tty.close();
-            }
-        };
-        Runtime.getRuntime()
-               .addShutdownHook(shutdownHook);
+        final LifeCycle lifeCycle = drmEglCompositor.lifeCycle();
 
         /*
          * Create a libinput seat that will listen for native input events on seat0.
@@ -96,8 +81,7 @@ public class DrmBoot {
          * setup tty switching key bindings
          */
         addTtyKeyBindings(drmEglCompositor,
-                          keyboardDevice,
-                          tty);
+                          keyboardDevice);
 
         /*
          * and finally, start the compositor
@@ -106,8 +90,9 @@ public class DrmBoot {
     }
 
     private void addTtyKeyBindings(final DrmEglCompositor drmEglCompositor,
-                                   final KeyboardDevice keyboardDevice,
-                                   final Tty tty) {
+                                   final KeyboardDevice keyboardDevice) {
+        //TODO we don't want to switch the tty ourselves directly but instead signal our parent launcher to do the switch.
+
         final KeyBindingFactory keyBindingFactory = drmEglCompositor.keyBindingFactory();
 
         keyBindingFactory.create(keyboardDevice,
