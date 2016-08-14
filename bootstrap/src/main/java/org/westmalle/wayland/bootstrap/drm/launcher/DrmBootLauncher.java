@@ -2,57 +2,19 @@ package org.westmalle.wayland.bootstrap.drm.launcher;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.wayland.bootstrap.JvmLauncher;
 import org.westmalle.wayland.bootstrap.drm.DrmBoot;
 import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.glibc.Libpthread;
 import org.westmalle.wayland.nativ.glibc.sigset_t;
 import org.westmalle.wayland.tty.Tty;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class DrmBootLauncher {
 
-    private static final Logger LOGGER        = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    private static final String OPTION_PREFIX = "option=";
-
-    private Process startNewJavaProcess(final List<String> options,
-                                        final String mainClass,
-                                        final List<String> arguments) throws IOException {
-        final ProcessBuilder processBuilder = createProcess(options,
-                                                            mainClass,
-                                                            arguments);
-        processBuilder.inheritIO();
-        return processBuilder.start();
-    }
-
-    private ProcessBuilder createProcess(final List<String> options,
-                                         final String mainClass,
-                                         final List<String> arguments) {
-        final String jvm       = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        final String classpath = System.getProperty("java.class.path");
-
-        final List<String> command = new ArrayList<>();
-        command.add(jvm);
-        if (!options.isEmpty()) {
-            command.addAll(options);
-        }
-        command.add(mainClass);
-        if (!arguments.isEmpty()) {
-            command.addAll(arguments);
-        }
-
-        final ProcessBuilder      processBuilder = new ProcessBuilder(command);
-        final Map<String, String> environment    = processBuilder.environment();
-        environment.put("CLASSPATH",
-                        classpath);
-        return processBuilder;
-    }
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private void showHelp() {
         System.out.println("The drm launcher program changes the native signal masks before forking a new compositor jvm.\n" +
@@ -64,25 +26,29 @@ public class DrmBootLauncher {
                            "\t <args> \t Pass <args> as-is to the child jvm as program arguments.");
     }
 
-    private void blockSignals(final Libc libc,
-                              final Libpthread libpthread) {
-        /*
-         * Block the signals that we want to catch in our child process.
+
+    private void setupTty(final DrmLauncher drmLauncher) {
+
+        final Libpthread libpthread = drmLauncher.libpthread();
+        final Tty        tty        = drmLauncher.tty();
+
+        final short acqSig = tty.getAcqSig();
+        final short relSig = tty.getRelSig();
+
+        /* Block the signals that we want to catch. Do this here again in case we are started in a special single
+         * threaded jvm environment.
          */
         final sigset_t sigset = new sigset_t();
         libpthread.sigemptyset(Pointer.ref(sigset).address);
         libpthread.sigaddset(Pointer.ref(sigset).address,
-                             libc.SIGRTMIN());
+                             acqSig);
+        libpthread.sigaddset(Pointer.ref(sigset).address,
+                             relSig);
         libpthread.pthread_sigmask(Libc.SIG_BLOCK,
                                    Pointer.ref(sigset).address,
                                    0L);
-    }
-
-    private void setup(final Tty tty) {
 
         //TODO listen for tty rel & acq signals & handle them
-        final short acqSig = tty.getAcqSig();
-        final short relSig = tty.getRelSig();
 
 
         /*
@@ -98,9 +64,13 @@ public class DrmBootLauncher {
                .addShutdownHook(shutdownHook);
     }
 
-    private void dropPrivileges(final Libc libc) {
+    private void dropPrivileges(final DrmLauncher drmLauncher) {
+        final Libc libc = drmLauncher.libc();
+
         if (libc.geteuid() == 0) {
             LOGGER.info("Effective user id is 0 (root), trying to drop privileges.");
+
+            //check if we're running in a sudo environment and get the real uid & gid from env vars.
             final String sudo_uid = System.getenv("SUDO_UID");
             final int    uid      = sudo_uid != null ? Integer.parseInt(sudo_uid) : libc.getgid();
 
@@ -118,27 +88,6 @@ public class DrmBootLauncher {
         }
     }
 
-    private void launchCompositor(final String[] args) throws IOException, InterruptedException {
-        final List<String> options     = new LinkedList<>();
-        final List<String> programArgs = new LinkedList<>();
-
-        for (final String arg : args) {
-            if (arg.startsWith(OPTION_PREFIX)) {
-                options.add(arg.substring(OPTION_PREFIX.length()));
-            }
-            else {
-                programArgs.add(arg);
-            }
-        }
-
-        /*
-         * Fork new jvm.
-         */
-        System.exit(startNewJavaProcess(options,
-                                        DrmBoot.class.getName(),
-                                        programArgs).waitFor());
-    }
-
     public void launch(final String[] args) throws IOException, InterruptedException {
         if (args.length == 1 &&
             (args[0].equals("--help") || args[0].equals("-h"))) {
@@ -149,15 +98,16 @@ public class DrmBootLauncher {
         final DrmLauncher drmLauncher = DaggerDrmLauncher.builder()
                                                          .build();
 
-        final Libc       libc       = drmLauncher.libc();
-        final Libpthread libpthread = drmLauncher.libpthread();
-        final Tty        tty        = drmLauncher.tty();
+        setupTty(drmLauncher);
+        dropPrivileges(drmLauncher);
 
-        setup(tty);
-        blockSignals(libc,
-                     libpthread);
+        //start our actual compositor
+        System.exit(new JvmLauncher().fork(args,
+                                           DrmBoot.class.getName())
+                                     .waitFor());
+    }
 
-        dropPrivileges(libc);
-        launchCompositor(args);
+    public static void main(final String[] args) throws IOException, InterruptedException {
+        new DrmBootLauncher().launch(args);
     }
 }
