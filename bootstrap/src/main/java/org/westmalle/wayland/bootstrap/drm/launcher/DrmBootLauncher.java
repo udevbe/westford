@@ -6,11 +6,15 @@ import org.westmalle.wayland.bootstrap.JvmLauncher;
 import org.westmalle.wayland.bootstrap.drm.DrmBoot;
 import org.westmalle.wayland.nativ.glibc.Libc;
 import org.westmalle.wayland.nativ.glibc.Libpthread;
+import org.westmalle.wayland.nativ.glibc.pollfd;
 import org.westmalle.wayland.nativ.glibc.sigset_t;
 import org.westmalle.wayland.tty.Tty;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+
+import static org.westmalle.wayland.nativ.glibc.Libc.SFD_CLOEXEC;
+import static org.westmalle.wayland.nativ.glibc.Libc.SFD_NONBLOCK;
 
 public class DrmBootLauncher {
 
@@ -26,10 +30,23 @@ public class DrmBootLauncher {
                            "\t <args> \t Pass <args> as-is to the child jvm as program arguments.");
     }
 
+    private int setupSocket(final DrmLauncher drmLauncher) {
+        //TODO
+//        if (socketpair(AF_LOCAL, SOCK_SEQPACKET, 0, wl->sock) < 0)
+//                error(1, errno, "socketpair failed");
+//
+//        if (fcntl(wl->sock[0], F_SETFD, FD_CLOEXEC) < 0)
+//                error(1, errno, "fcntl failed");
+//
 
-    private void setupTty(final DrmLauncher drmLauncher) {
+        return 0;
+    }
+
+
+    private int setupTty(final DrmLauncher drmLauncher) {
 
         final Libpthread libpthread = drmLauncher.libpthread();
+        final Libc       libc       = drmLauncher.libc();
         final Tty        tty        = drmLauncher.tty();
 
         final short acqSig = tty.getAcqSig();
@@ -48,8 +65,14 @@ public class DrmBootLauncher {
                                    Pointer.ref(sigset).address,
                                    0L);
 
-        //TODO listen for tty rel & acq signals & handle them
+        final int signalFd = libc.signalfd(-1,
+                                           Pointer.ref(sigset).address,
+                                           SFD_NONBLOCK | SFD_CLOEXEC);
+        if (signalFd < 0) {
+            throw new Error("Could not create signal file descriptor.");
+        }
 
+        //TODO listen for tty rel & acq signals & handle them
 
         /*
          * Make sure we cleanup nicely if the program stops.
@@ -62,6 +85,8 @@ public class DrmBootLauncher {
         };
         Runtime.getRuntime()
                .addShutdownHook(shutdownHook);
+
+        return signalFd;
     }
 
     private void dropPrivileges(final DrmLauncher drmLauncher) {
@@ -88,6 +113,65 @@ public class DrmBootLauncher {
         }
     }
 
+    private void pollEvents(final DrmLauncher drmLauncher,
+                            final int socketFd,
+                            final int signalFd) {
+
+        final Libc libc = drmLauncher.libc();
+
+        while (true) {
+            final Pointer<pollfd> pollfds = Pointer.malloc(2 * pollfd.SIZE,
+                                                           pollfd.class);
+
+            final pollfd pollSocket = pollfds.dref(0);
+            final pollfd pollSignal = pollfds.dref(1);
+
+            pollSocket.fd(socketFd);
+            pollSocket.events((short) Libc.POLLIN);
+
+            pollSignal.fd(signalFd);
+            pollSignal.events((short) Libc.POLLIN);
+
+            final int n = libc.poll(pollfds.address,
+                                    2,
+                                    -1);
+            if (n < 0) {
+                //TODO errno
+                LOGGER.severe("poll failed");
+            }
+            if ((pollSocket.revents() & Libc.POLLIN) != 0) {
+                handleSocketMsg();
+            }
+            if (pollSignal.revents() != 0) {
+                handleSignal(drmLauncher,
+                             signalFd);
+            }
+
+            pollfds.close();
+        }
+    }
+
+    private void handleSocketMsg() {
+        //TODO
+    }
+
+    private void handleSignal(DrmLauncher drmLauncher,
+                              final int signalFd) {
+        final Libc libc = drmLauncher.libc();
+
+//        struct signalfd_siginfo sig;
+//        int pid, status, ret;
+//
+//        if (libc.read(signalFd, & sig,sizeof sig) !=sizeof sig){
+//            error(0,
+//                  errno,
+//                  "reading signalfd failed");
+//            return -1;
+//        }
+
+        //TODO
+    }
+
     public void launch(final String[] args) throws IOException, InterruptedException {
         if (args.length == 1 &&
             (args[0].equals("--help") || args[0].equals("-h"))) {
@@ -98,13 +182,17 @@ public class DrmBootLauncher {
         final DrmLauncher drmLauncher = DaggerDrmLauncher.builder()
                                                          .build();
 
-        setupTty(drmLauncher);
-        dropPrivileges(drmLauncher);
+        final int signalFd = setupTty(drmLauncher);
+        final int socketFd = setupSocket(drmLauncher);
 
+        dropPrivileges(drmLauncher);
         //start our actual compositor
-        System.exit(new JvmLauncher().fork(args,
-                                           DrmBoot.class.getName())
-                                     .waitFor());
+        new JvmLauncher().fork(args,
+                               DrmBoot.class.getName());
+
+        pollEvents(drmLauncher,
+                   socketFd,
+                   signalFd);
     }
 
     public static void main(final String[] args) throws IOException, InterruptedException {

@@ -18,6 +18,7 @@
 package org.westmalle.wayland.nativ.glibc;
 
 import org.freedesktop.jaccall.Lib;
+import org.freedesktop.jaccall.Lng;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Symbol;
@@ -42,6 +43,14 @@ public class Libc {
     public static final int SIGUSR2 = 12;
 
     public static final int NCCS = 32;
+
+    public static final int POLLIN   = 0x0001;
+    public static final int POLLPRI  = 0x0002;
+    public static final int POLLOUT  = 0x0004;
+    public static final int POLLERR  = 0x0008;
+    public static final int POLLHUP  = 0x0010;
+    public static final int POLLNVAL = 0x0020;
+
 
     /**
      * duplicate file descriptor
@@ -119,6 +128,10 @@ public class Libc {
     public static final int O_ACCMODE  = 0x0003;
     public static final int O_CLOEXEC  = 0x80000;
     public static final int O_NOCTTY   = 0x100;
+    public static final int O_NONBLOCK = 0x800;
+
+    public static final int SFD_NONBLOCK = O_NONBLOCK;
+    public static final int SFD_CLOEXEC  = O_CLOEXEC;
 
     /***
      * Operation not permitted
@@ -414,4 +427,18 @@ public class Libc {
     public native int setgid(@Unsigned int gid);
 
     public native int setuid(@Unsigned int getuid);
+
+    public native int setenv(@Ptr(String.class) long name,
+                             @Ptr(String.class) long value,
+                             int overwrite);
+
+    public native int unsetenv(@Ptr(String.class) long name);
+
+    public native int poll(@Ptr(pollfd.class) long fds,
+                           @Lng long nfds,
+                           int timeout);
+
+    public native int signalfd(int fd,
+                               @Ptr(sigset_t.class) long mask,
+                               int flags);
 }
