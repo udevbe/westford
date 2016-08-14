@@ -17,6 +17,7 @@
  */
 package org.westmalle.wayland.bootstrap;
 
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
@@ -30,6 +31,11 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
+import org.westmalle.wayland.nativ.glibc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc_Symbols;
+import org.westmalle.wayland.nativ.glibc.Libpthread;
+import org.westmalle.wayland.nativ.glibc.Libpthread_Symbols;
+import org.westmalle.wayland.nativ.glibc.sigset_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.X11PlatformModule;
@@ -94,7 +100,11 @@ public class Boot {
                 break;
             case "DrmEgl":
                 LOGGER.info("Detected DrmEgl backend.");
-                new DrmBootLauncher().launch(args);
+                prepareDrmEnvironment();
+                //TODO use embed instead of fork
+                System.exit(new JvmLauncher().fork(args,
+                                                   DrmBootLauncher.class.getName())
+                                             .waitFor());
                 break;
             case "Html5X11Egl":
                 LOGGER.info("Detected Html5X11Egl backend.");
@@ -107,6 +117,28 @@ public class Boot {
                               "\tDrmEgl\n" +
                               "\tHtml5X11Egl");
         }
+    }
+
+    private static void prepareDrmEnvironment() {
+        new Libc_Symbols().link();
+        new Libpthread_Symbols().link();
+
+        final Libc       libc       = new Libc();
+        final Libpthread libpthread = new Libpthread();
+
+        /* We need this hack because of linux signal semantics.
+         * tl;dr:
+         * We block the signals that we want to catch in our child process (required for tty switching).
+         * We can not do this in our child process as blocking signals only works for the current thread
+         * or any of it's children. Hence we do it here so all child jvm threads inherit the blocking signals.
+         */
+        final sigset_t sigset = new sigset_t();
+        libpthread.sigemptyset(Pointer.ref(sigset).address);
+        libpthread.sigaddset(Pointer.ref(sigset).address,
+                             libc.SIGRTMIN());
+        libpthread.pthread_sigmask(Libc.SIG_BLOCK,
+                                   Pointer.ref(sigset).address,
+                                   0L);
     }
 
     private void strap(final DaggerHtml5X11EglCompositor.Builder builder) {
