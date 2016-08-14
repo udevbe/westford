@@ -171,4 +171,8 @@ public class Tty implements AutoCloseable {
     public short getRelSig() {
         return this.relSig;
     }
+
+    public int getTtyFd() {
+        return this.ttyFd;
+    }
 }

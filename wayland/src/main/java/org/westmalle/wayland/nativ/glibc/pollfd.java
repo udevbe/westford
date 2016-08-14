@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct;
         @Field(name = "events",type = CType.SHORT),
         @Field(name = "revents", type=CType.SHORT)
 })
-public final class pollfds extends pollfds_Jaccall_StructType {}
+public final class pollfd extends pollfd_Jaccall_StructType {}
