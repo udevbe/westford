@@ -105,11 +105,6 @@ public class LibinputSeatFactory {
                                                                                  wlSeat);
         libinputSeat.enableInput();
 
-        this.tty.getVtEnterSignal()
-                .connect(event -> libinputSeat.enableInput());
-        this.tty.getVtLeaveSignal()
-                .connect(event -> libinputSeat.disableInput());
-
         return wlSeat;
     }
 
