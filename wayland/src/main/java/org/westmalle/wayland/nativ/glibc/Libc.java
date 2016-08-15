@@ -27,6 +27,7 @@ import org.westmalle.wayland.nativ.linux.Kdev_t;
 import org.westmalle.wayland.nativ.linux.Stat;
 import org.westmalle.wayland.nativ.linux.stat;
 
+import javax.annotation.Signed;
 import javax.inject.Singleton;
 
 @Singleton
@@ -441,4 +442,7 @@ public class Libc {
     public native int signalfd(int fd,
                                @Ptr(sigset_t.class) long mask,
                                int flags);
+
+    @Signed
+    public native int fork();
 }
