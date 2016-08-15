@@ -18,12 +18,14 @@
 package org.westmalle.wayland.bootstrap.drm;
 
 import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.westmalle.wayland.bootstrap.drm.launcher.DrmLauncher;
 import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
 import org.westmalle.wayland.nativ.glibc.Libc;
+import org.westmalle.wayland.nativ.glibc.Libc_Symbols;
 import org.westmalle.wayland.nativ.linux.InputEventCodes;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -36,11 +38,41 @@ import java.util.logging.Logger;
 
 public class DrmBoot {
 
+    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+    private static void dropPrivileges() {
+        new Libc_Symbols().link();
+        final Libc libc = new Libc();
+
+        if (libc.geteuid() == 0) {
+            LOGGER.info("Effective user id is 0 (root), trying to drop privileges.");
+
+            //check if we're running in a sudo environment and get the real uid & gid from env vars.
+            final String sudo_uid = System.getenv("SUDO_UID");
+            final int    uid      = sudo_uid != null ? Integer.parseInt(sudo_uid) : libc.getgid();
+
+            final String sudo_gid = System.getenv("SUDO_GID");
+            final int    gid      = sudo_gid != null ? Integer.parseInt(sudo_gid) : libc.getuid();
+
+            LOGGER.info(String.format("Real user id is %d. Real group id is %d.",
+                                      uid,
+                                      gid));
+
+            if (libc.setgid(gid) < 0 ||
+                libc.setuid(uid) < 0) {
+                throw new Error("dropping privileges failed.");
+            }
+        }
+    }
+
     public static void main(final String[] args) {
+        dropPrivileges();
         new DrmBoot().strap();
     }
 
     private void strap() {
+        //TODO listen for socket events (tty leave/enter) and act on them
+
         final DaggerDrmEglCompositor.Builder builder          = DaggerDrmEglCompositor.builder();
         final DrmEglCompositor               drmEglCompositor = builder.build();
 

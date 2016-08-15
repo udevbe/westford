@@ -51,6 +51,8 @@ public class Libc {
     public static final int POLLHUP  = 0x0010;
     public static final int POLLNVAL = 0x0020;
 
+    public static final int AF_LOCAL       = 1;
+    public static final int SOCK_SEQPACKET = 5;
 
     /**
      * duplicate file descriptor
@@ -330,7 +332,8 @@ public class Libc {
 
     public native int close(int fd);
 
-    public native void read(int fd,
+    @Lng
+    public native long read(int fd,
                             @Ptr long buffer,
                             int n_byte);
 
@@ -441,4 +444,10 @@ public class Libc {
     public native int signalfd(int fd,
                                @Ptr(sigset_t.class) long mask,
                                int flags);
+
+    public native int socketpair(int domain,
+                                 int type,
+                                 int protocol,
+                                 @Ptr(int.class) long sv);
+
 }

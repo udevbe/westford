@@ -101,7 +101,6 @@ public class Boot {
             case "DrmEgl":
                 LOGGER.info("Detected DrmEgl backend.");
                 prepareDrmEnvironment();
-                //TODO use embed instead of fork
                 System.exit(new JvmLauncher().fork(args,
                                                    DrmBootLauncher.class.getName())
                                              .waitFor());
@@ -126,23 +125,30 @@ public class Boot {
         final Libc       libc       = new Libc();
         final Libpthread libpthread = new Libpthread();
 
-        /* We need this hack because of linux signal semantics.
+        //JVM WORKAROUND aka HACK
+        /*
+         * We need this hack because of linux signal semantics.
          * tl;dr:
-         * We block the signals that we want to catch in our child process (required for tty switching).
-         * We can not do this in our child process as blocking signals only works for the current thread
-         * or any of it's children. Hence we do it here so all child jvm threads inherit the blocking signals.
+         * We need to block certain signals used by tty switching in our child jvm.
+         * We can not do this in our child process itself as blocking signals only works for the current thread.
+         * Since the jvm is multithreaded and we can not access things like gc thread, blocking signals in the
+         * java main thread alone will not work.
+         * Blocking a signal is however inherited by child processes.
+         * Hence we do it here so all child jvm threads inherit the blocking signals.
          */
         final sigset_t sigset = new sigset_t();
         libpthread.sigemptyset(Pointer.ref(sigset).address);
         libpthread.sigaddset(Pointer.ref(sigset).address,
                              libc.SIGRTMIN());
+        libpthread.sigaddset(Pointer.ref(sigset).address,
+                             libc.SIGRTMIN() + 1);
         libpthread.pthread_sigmask(Libc.SIG_BLOCK,
                                    Pointer.ref(sigset).address,
                                    0L);
     }
 
     private void strap(final DaggerHtml5X11EglCompositor.Builder builder) {
-        /**
+        /*
          * Create an X11 compositor with X11 config and wrap it in a html5 compositor.
          */
         final Html5X11EglCompositor html5X11EglCompositor = builder.x11PlatformModule(new X11PlatformModule(new X11PlatformConfigSimple()))

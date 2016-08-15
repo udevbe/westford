@@ -137,10 +137,6 @@ public class DrmEglPlatformFactory {
                                                                                     eglDisplay,
                                                                                     eglContext,
                                                                                     eglConfig)));
-        this.tty.getVtEnterSignal()
-                .connect(event -> enterVt(drmEglRenderOutputs));
-        this.tty.getVtLeaveSignal()
-                .connect(event -> leaveVt(drmEglRenderOutputs));
 
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,

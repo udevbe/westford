@@ -155,14 +155,15 @@ public class TtyFactory {
         * SIGRT* must be tested on runtime, as their exact values are not
         * known at compile-time. POSIX requires 32 of them to be available.
         */
-        if (this.libc.SIGRTMIN() > this.libc.SIGRTMAX()) {
+        if (this.libc.SIGRTMIN() > this.libc.SIGRTMAX() ||
+            this.libc.SIGRTMIN() + 1 > this.libc.SIGRTMAX()) {
             throw new RuntimeException(String.format("not enough RT signals available: %d-%d\n",
                                                      this.libc.SIGRTMIN(),
                                                      this.libc.SIGRTMAX()));
         }
 
         final short relSig = (short) this.libc.SIGRTMIN();
-        final short acqSig = (short) this.libc.SIGRTMIN();
+        final short acqSig = (short) (this.libc.SIGRTMIN() + 1);
 
         final vt_mode mode = new vt_mode();
         mode.mode(VT_PROCESS);

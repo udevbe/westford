@@ -115,11 +115,6 @@ public class DrmPlatformFactory {
                                        WaylandServerCore.WL_EVENT_READABLE,
                                        drmEventBus);
 
-        this.tty.getVtEnterSignal()
-                .connect(event -> setDrmMaster(drmFd));
-        this.tty.getVtLeaveSignal()
-                .connect(event -> dropDrmMaster(drmFd));
-
         setDrmMaster(drmFd);
 
         return this.privateDrmPlatformFactory.create(drmDevice,
