@@ -2,9 +2,9 @@ package org.westmalle.wayland.bootstrap.drm.launcher;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.wayland.bootstrap.JvmLauncher;
 import org.westmalle.wayland.bootstrap.drm.DrmBoot;
 import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.Libc_Symbols;
 import org.westmalle.wayland.nativ.glibc.Libpthread;
 import org.westmalle.wayland.nativ.glibc.pollfd;
 import org.westmalle.wayland.nativ.glibc.sigset_t;
@@ -89,6 +89,30 @@ public class DrmBootLauncher {
         return signalFd;
     }
 
+    private void dropPrivileges(final DrmLauncher drmLauncher) {
+        final Libc libc = drmLauncher.libc();
+
+        if (libc.geteuid() == 0) {
+            LOGGER.info("Effective user id is 0 (root), trying to drop privileges.");
+
+            //check if we're running in a sudo environment and get the real uid & gid from env vars.
+            final String sudo_uid = System.getenv("SUDO_UID");
+            final int    uid      = sudo_uid != null ? Integer.parseInt(sudo_uid) : libc.getgid();
+
+            final String sudo_gid = System.getenv("SUDO_GID");
+            final int    gid      = sudo_gid != null ? Integer.parseInt(sudo_gid) : libc.getuid();
+
+            LOGGER.info(String.format("Real user id is %d. Real group id is %d.",
+                                      uid,
+                                      gid));
+
+            if (libc.setgid(gid) < 0 ||
+                libc.setuid(uid) < 0) {
+                throw new Error("dropping privileges failed.");
+            }
+        }
+    }
+
     private void pollEvents(final DrmLauncher drmLauncher,
                             final int socketFd,
                             final int signalFd) {
@@ -131,7 +155,7 @@ public class DrmBootLauncher {
         //TODO
     }
 
-    private void handleSignal(final DrmLauncher drmLauncher,
+    private void handleSignal(DrmLauncher drmLauncher,
                               final int signalFd) {
         final Libc libc = drmLauncher.libc();
 
@@ -148,30 +172,6 @@ public class DrmBootLauncher {
         //TODO
     }
 
-    private static void dropPrivileges(final DrmLauncher drmLauncher) {
-        final Libc libc = drmLauncher.libc();
-
-        if (libc.geteuid() == 0) {
-            LOGGER.info("Effective user id is 0 (root), trying to drop privileges.");
-
-            //check if we're running in a sudo environment and get the real uid & gid from env vars.
-            final String sudo_uid = System.getenv("SUDO_UID");
-            final int    uid      = sudo_uid != null ? Integer.parseInt(sudo_uid) : libc.getgid();
-
-            final String sudo_gid = System.getenv("SUDO_GID");
-            final int    gid      = sudo_gid != null ? Integer.parseInt(sudo_gid) : libc.getuid();
-
-            LOGGER.info(String.format("Real user id is %d. Real group id is %d.",
-                                      uid,
-                                      gid));
-
-            if (libc.setgid(gid) < 0 ||
-                libc.setuid(uid) < 0) {
-                throw new Error("dropping privileges failed.");
-            }
-        }
-    }
-
     public void launch(final String[] args) throws IOException, InterruptedException {
         if (args.length == 1 &&
             (args[0].equals("--help") || args[0].equals("-h"))) {
@@ -185,18 +185,14 @@ public class DrmBootLauncher {
         final int signalFd = setupTty(drmLauncher);
         final int socketFd = setupSocket(drmLauncher);
 
-        final int pid = drmLauncher.libc()
-                                   .fork();
-        if (pid == 0) {
-            //start our actual compositor
-            dropPrivileges(drmLauncher);
-            new DrmBoot().strap();
-        }
-        else {
-            pollEvents(drmLauncher,
-                       socketFd,
-                       signalFd);
-        }
+        dropPrivileges(drmLauncher);
+        //start our actual compositor
+        new JvmLauncher().fork(args,
+                               DrmBoot.class.getName());
+
+        pollEvents(drmLauncher,
+                   socketFd,
+                   signalFd);
     }
 
     public static void main(final String[] args) throws IOException, InterruptedException {
