@@ -18,14 +18,12 @@
 package org.westmalle.wayland.bootstrap.drm;
 
 import org.freedesktop.wayland.server.WlKeyboardResource;
-import org.westmalle.wayland.bootstrap.drm.launcher.DrmLauncher;
 import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
 import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.Libc_Symbols;
 import org.westmalle.wayland.nativ.linux.InputEventCodes;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -38,7 +36,11 @@ import java.util.logging.Logger;
 
 public class DrmBoot {
 
-    public void strap() {
+    public static void main(final String[] args) {
+        new DrmBoot().strap();
+    }
+
+    private void strap() {
         final DaggerDrmEglCompositor.Builder builder          = DaggerDrmEglCompositor.builder();
         final DrmEglCompositor               drmEglCompositor = builder.build();
 
