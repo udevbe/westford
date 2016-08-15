@@ -100,11 +100,7 @@ public class Boot {
                 break;
             case "DrmEgl":
                 LOGGER.info("Detected DrmEgl backend.");
-                prepareDrmEnvironment();
-                //TODO use embed instead of fork
-                System.exit(new JvmLauncher().fork(args,
-                                                   DrmBootLauncher.class.getName())
-                                             .waitFor());
+                forkDrmBootLauncher(args);
                 break;
             case "Html5X11Egl":
                 LOGGER.info("Detected Html5X11Egl backend.");
@@ -119,7 +115,7 @@ public class Boot {
         }
     }
 
-    private static void prepareDrmEnvironment() {
+    private static void forkDrmBootLauncher(final String[] args) throws IOException, InterruptedException {
         new Libc_Symbols().link();
         new Libpthread_Symbols().link();
 
@@ -139,6 +135,16 @@ public class Boot {
         libpthread.pthread_sigmask(Libc.SIG_BLOCK,
                                    Pointer.ref(sigset).address,
                                    0L);
+
+        final int pid = libc.fork();
+        if (pid == 0) {
+            //in child process
+            DrmBootLauncher.main(args);
+        }
+        else {
+            //in parent. nothing left to do. exit.
+            System.exit(0);
+        }
     }
 
     private void strap(final DaggerHtml5X11EglCompositor.Builder builder) {
