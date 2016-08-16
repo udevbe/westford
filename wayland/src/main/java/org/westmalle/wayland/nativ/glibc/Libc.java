@@ -450,4 +450,10 @@ public class Libc {
                                  int protocol,
                                  @Ptr(int.class) long sv);
 
+    @Lng
+    public native long send(int sockfd,
+                            @Ptr long buf,
+                            @Lng long len,
+                            int flags);
+
 }

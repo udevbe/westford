@@ -2,6 +2,7 @@ package org.westmalle.wayland.bootstrap.drm.launcher;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Size;
 import org.westmalle.wayland.bootstrap.JvmLauncher;
 import org.westmalle.wayland.bootstrap.drm.DrmBoot;
 import org.westmalle.wayland.nativ.glibc.Libc;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import static org.westmalle.wayland.nativ.glibc.Libc.AF_LOCAL;
+import static org.westmalle.wayland.nativ.glibc.Libc.EINTR;
 import static org.westmalle.wayland.nativ.glibc.Libc.FD_CLOEXEC;
 import static org.westmalle.wayland.nativ.glibc.Libc.F_SETFD;
 import static org.westmalle.wayland.nativ.glibc.Libc.SFD_CLOEXEC;
@@ -24,6 +26,10 @@ import static org.westmalle.wayland.nativ.glibc.Libc.SOCK_SEQPACKET;
 public class DrmBootLauncher {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+    public static final int ACTIVATE = 1;
+    public static final int DEACTIVATE = 2;
+
     private Libc             libc;
     private Libpthread       libpthread;
     private Tty              tty;
@@ -138,6 +144,18 @@ public class DrmBootLauncher {
         }
     }
 
+    private void sendReply(final int reply) {
+        long len;
+
+        do {
+            len = this.libc.send(this.sock.dref(0),
+                                 Pointer.nref(reply).address,
+                                 Size.sizeof((Integer) null),
+                                 0);
+        } while (len < 0 && this.libc.getErrno() == EINTR);
+    }
+
+
     private void handleSocketMsg() {
         //TODO
     }
@@ -155,14 +173,10 @@ public class DrmBootLauncher {
 
         if (sig.ssi_signo() == this.tty.getAcqSig()) {
             this.tty.handleVtEnter();
-            //TODO
-//            send_reply(wl,
-//                       WESTON_LAUNCHER_ACTIVATE);
+            sendReply(ACTIVATE);
         }
         else if (sig.ssi_signo() == this.tty.getRelSig()) {
-            //TODO
-//            send_reply(wl,
-//                       WESTON_LAUNCHER_DEACTIVATE);
+            sendReply(DEACTIVATE);
             this.tty.handleVtLeave();
         }
         else {
