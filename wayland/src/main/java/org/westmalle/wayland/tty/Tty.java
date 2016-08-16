@@ -110,7 +110,6 @@ public class Tty implements AutoCloseable {
     @Override
     public void close() {
         //restore tty
-
         if (this.libc.ioctl(this.ttyFd,
                             KDSKBMUTE,
                             0) != 0 &&
