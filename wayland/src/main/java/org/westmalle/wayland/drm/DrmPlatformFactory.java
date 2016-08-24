@@ -20,6 +20,7 @@ package org.westmalle.wayland.drm;
 
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
+import org.westmalle.launcher.DrmLauncher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libdrm.DrmModeConnector;
 import org.westmalle.nativ.libdrm.DrmModeEncoder;
@@ -27,7 +28,6 @@ import org.westmalle.nativ.libdrm.DrmModeModeInfo;
 import org.westmalle.nativ.libdrm.DrmModeRes;
 import org.westmalle.nativ.libdrm.Libdrm;
 import org.westmalle.nativ.libudev.Libudev;
-import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
@@ -68,7 +68,7 @@ public class DrmPlatformFactory {
     @Nonnull
     private final OutputFactory             outputFactory;
     @Nonnull
-    private final Tty                       tty;
+    private final DrmLauncher               drmLauncher;
 
     @Inject
     DrmPlatformFactory(@Nonnull final Libc libc,
@@ -80,7 +80,7 @@ public class DrmPlatformFactory {
                        @Nonnull final PrivateDrmPlatformFactory privateDrmPlatformFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
                        @Nonnull final OutputFactory outputFactory,
-                       @Nonnull final Tty tty) {
+                       @Nonnull final DrmLauncher drmLauncher) {
         this.libudev = libudev;
         this.libc = libc;
         this.libdrm = libdrm;
@@ -90,7 +90,7 @@ public class DrmPlatformFactory {
         this.privateDrmPlatformFactory = privateDrmPlatformFactory;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
-        this.tty = tty;
+        this.drmLauncher = drmLauncher;
     }
 
     public DrmPlatform create() {
@@ -216,6 +216,7 @@ public class DrmPlatformFactory {
         }
 
         final long filename = this.libudev.udev_device_get_devnode(device);
+        //FIXME use drmLauncher?
         final int fd = this.libc.open(filename,
                                       O_RDWR);
         if (fd < 0) {
@@ -262,6 +263,7 @@ public class DrmPlatformFactory {
         return drmOutputs;
     }
 
+    //FIXME move to master?
     private void setDrmMaster(final int drmFd) {
         if (this.libdrm.drmSetMaster(drmFd) != 0) {
             throw new RuntimeException("failed to set drm master.");
@@ -362,6 +364,7 @@ public class DrmPlatformFactory {
                                             mode);
     }
 
+    //FIXME move to launcher?
     private void dropDrmMaster(final int drmFd) {
         if (this.libdrm.drmDropMaster(drmFd) != 0) {
             throw new RuntimeException("failed to drop drm master.");

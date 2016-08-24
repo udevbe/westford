@@ -19,12 +19,12 @@ package org.westmalle.wayland.drm.egl;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.launcher.DrmLauncher;
 import org.westmalle.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.nativ.libEGL.LibEGL;
 import org.westmalle.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.nativ.libgbm.Libgbm;
-import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.drm.DrmOutput;
 import org.westmalle.wayland.drm.DrmPlatform;
@@ -71,7 +71,7 @@ public class DrmEglPlatformFactory {
     @Nonnull
     private final GlRenderer                   glRenderer;
     @Nonnull
-    private final Tty                          tty;
+    private final DrmLauncher                  drmLauncher;
 
     @Inject
     DrmEglPlatformFactory(@Nonnull final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory,
@@ -81,7 +81,7 @@ public class DrmEglPlatformFactory {
                           @Nonnull final DrmPlatform drmPlatform,
                           @Nonnull final DrmEglOutputFactory drmEglOutputFactory,
                           @Nonnull final GlRenderer glRenderer,
-                          @Nonnull final Tty tty) {
+                          @Nonnull final DrmLauncher drmLauncher) {
         this.privateDrmEglPlatformFactory = privateDrmEglPlatformFactory;
         this.libgbm = libgbm;
         this.libEGL = libEGL;
@@ -89,7 +89,7 @@ public class DrmEglPlatformFactory {
         this.drmPlatform = drmPlatform;
         this.drmEglOutputFactory = drmEglOutputFactory;
         this.glRenderer = glRenderer;
-        this.tty = tty;
+        this.drmLauncher = drmLauncher;
     }
 
     public DrmEglPlatform create() {
@@ -264,6 +264,7 @@ public class DrmEglPlatformFactory {
         return eglSurface;
     }
 
+    //FIXME listen for launcher activate events
     private void enterVt(final List<DrmEglOutput> drmEglRenderOutputs) {
         drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
             drmEglRenderOutput.setDefaultMode();
@@ -271,6 +272,7 @@ public class DrmEglPlatformFactory {
         });
     }
 
+    //FIXME listen for launcher deactivate events
     private void leaveVt(final List<DrmEglOutput> drmEglRenderOutputs) {
         drmEglRenderOutputs.forEach(DrmEglOutput::disable);
     }
