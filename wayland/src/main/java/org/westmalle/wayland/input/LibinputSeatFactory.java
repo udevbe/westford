@@ -19,12 +19,12 @@ package org.westmalle.wayland.input;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
+import org.westmalle.launcher.DrmLauncher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libinput.Libinput;
 import org.westmalle.nativ.libinput.Pointerclose_restricted;
 import org.westmalle.nativ.libinput.libinput_interface;
 import org.westmalle.nativ.libudev.Libudev;
-import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
@@ -53,13 +53,13 @@ public class LibinputSeatFactory {
     @Nonnull
     private final LibinputXkbFactory         libinputXkbFactory;
     @Nonnull
-    private final Tty                        tty;
-    @Nonnull
     private final Libinput                   libinput;
     @Nonnull
     private final Libudev                    libudev;
     @Nonnull
     private final Libc                       libc;
+    @Nonnull
+    private final DrmLauncher                drmLauncher;
 
     @Inject
     LibinputSeatFactory(@Nonnull final WlSeatFactory wlSeatFactory,
@@ -68,20 +68,20 @@ public class LibinputSeatFactory {
                         @Nonnull final PrivateLibinputSeatFactory privateLibinputSeatFactory,
                         @Nonnull final KeyboardDeviceFactory keyboardDeviceFactory,
                         @Nonnull final LibinputXkbFactory libinputXkbFactory,
-                        @Nonnull final Tty tty,
                         @Nonnull final Libinput libinput,
                         @Nonnull final Libudev libudev,
-                        @Nonnull final Libc libc) {
+                        @Nonnull final Libc libc,
+                        @Nonnull final DrmLauncher drmLauncher) {
         this.wlSeatFactory = wlSeatFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.wlPointerFactory = wlPointerFactory;
         this.privateLibinputSeatFactory = privateLibinputSeatFactory;
         this.keyboardDeviceFactory = keyboardDeviceFactory;
         this.libinputXkbFactory = libinputXkbFactory;
-        this.tty = tty;
         this.libinput = libinput;
         this.libudev = libudev;
         this.libc = libc;
+        this.drmLauncher = drmLauncher;
     }
 
     public WlSeat create(@Nonnull final String seatId,
@@ -103,6 +103,8 @@ public class LibinputSeatFactory {
         final LibinputSeat libinputSeat = this.privateLibinputSeatFactory.create(createUdevContext(seatId),
                                                                                  wlSeat);
         libinputSeat.enableInput();
+
+        //FIXME enable/disable input based on launcher activate/deactivate signal
 
         return wlSeat;
     }
