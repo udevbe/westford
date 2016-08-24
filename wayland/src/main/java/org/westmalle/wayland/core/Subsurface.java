@@ -19,11 +19,9 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.protocol.WlCompositor;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
@@ -63,34 +61,6 @@ public class Subsurface implements Role {
         this.cachedSurfaceState = surfaceState;
     }
 
-    public void setPosition(@Nonnull final Point position) {
-        if (isInert()) {
-            return;
-        }
-
-        this.position = position;
-    }
-
-    @Nonnull
-    public Point getPosition() {
-        return this.position;
-    }
-
-    public void applyPosition() {
-        if (isInert()) {
-            return;
-        }
-
-        final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
-        final WlSurface wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
-
-        final Surface parentSurface = parentWlSurface.getSurface();
-        final Point   global        = parentSurface.global(getPosition());
-
-        wlSurface.getSurface()
-                 .setPosition(global);
-    }
-
     @Override
     public void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {
         if (isInert()) {
@@ -99,11 +69,41 @@ public class Subsurface implements Role {
 
         if (isEffectiveSync()) {
             final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Surface surface = wlSurface.getSurface();
+            final Surface   surface   = wlSurface.getSurface();
 
             //set back cached state so surface can do eg. buffer release
             surface.setState(getCachedSurfaceState());
         }
+    }
+
+    public boolean isEffectiveSync() {
+        return this.effectiveSync;
+    }
+
+    @Nonnull
+    public SurfaceState getCachedSurfaceState() {
+        return this.cachedSurfaceState;
+    }
+
+    public void onParentApply() {
+        if (isInert()) {
+            return;
+        }
+
+        final SurfaceState cachedSurfaceState = getCachedSurfaceState();
+        if (isEffectiveSync() &&
+            !getSurfaceState().equals(cachedSurfaceState)) {
+            //sync mode. update old state with cached state
+            this.surfaceState = cachedSurfaceState;
+            apply(cachedSurfaceState);
+        }
+
+        applyPosition();
+    }
+
+    @Nonnull
+    public SurfaceState getSurfaceState() {
+        return this.surfaceState;
     }
 
     public void apply(final SurfaceState surfaceState) {
@@ -129,20 +129,50 @@ public class Subsurface implements Role {
         }
     }
 
-    public void onParentApply() {
+    public void applyPosition() {
         if (isInert()) {
             return;
         }
 
-        final SurfaceState cachedSurfaceState = getCachedSurfaceState();
-        if (isEffectiveSync() &&
-            !getSurfaceState().equals(cachedSurfaceState)) {
-            //sync mode. update old state with cached state
-            this.surfaceState = cachedSurfaceState;
-            apply(cachedSurfaceState);
+        final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
+        final WlSurface wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
+
+        final Surface parentSurface = parentWlSurface.getSurface();
+        final Point   global        = parentSurface.global(getPosition());
+
+        wlSurface.getSurface()
+                 .setPosition(global);
+    }
+
+    @Nonnull
+    public WlSurfaceResource getWlSurfaceResource() {
+        return this.wlSurfaceResource;
+    }
+
+    @Nonnull
+    public WlSurfaceResource getParentWlSurfaceResource() {
+        return this.parentWlSurfaceResource;
+    }
+
+    @Nonnull
+    public Point getPosition() {
+        return this.position;
+    }
+
+    public void setPosition(@Nonnull final Point position) {
+        if (isInert()) {
+            return;
         }
 
-        applyPosition();
+        this.position = position;
+    }
+
+    public boolean isInert() {
+        return this.inert;
+    }
+
+    public void setInert(final boolean inert) {
+        this.inert = inert;
     }
 
     public void setSync(final boolean sync) {
@@ -167,10 +197,6 @@ public class Subsurface implements Role {
                        });
     }
 
-    public boolean isEffectiveSync() {
-        return this.effectiveSync;
-    }
-
     public void updateEffectiveSync(final boolean parentEffectiveSync) {
         final boolean oldEffectiveSync = this.effectiveSync;
         this.effectiveSync = this.sync || parentEffectiveSync;
@@ -191,21 +217,16 @@ public class Subsurface implements Role {
         }
     }
 
+    public Signal<Boolean, Slot<Boolean>> getEffectiveSyncSignal() {
+        return this.effectiveSyncSignal;
+    }
+
     public void above(@Nonnull final WlSurfaceResource sibling) {
         if (isInert()) {
             return;
         }
 
         placement(false,
-                  sibling);
-    }
-
-    public void below(@Nonnull final WlSurfaceResource sibling) {
-        if (isInert()) {
-            return;
-        }
-
-        placement(true,
                   sibling);
     }
 
@@ -221,35 +242,12 @@ public class Subsurface implements Role {
         //Note: committing the subsurface stack happens in WlCompositor.
     }
 
-    @Nonnull
-    public SurfaceState getSurfaceState() {
-        return this.surfaceState;
-    }
+    public void below(@Nonnull final WlSurfaceResource sibling) {
+        if (isInert()) {
+            return;
+        }
 
-    @Nonnull
-    public SurfaceState getCachedSurfaceState() {
-        return this.cachedSurfaceState;
-    }
-
-    @Nonnull
-    public WlSurfaceResource getWlSurfaceResource() {
-        return this.wlSurfaceResource;
-    }
-
-    @Nonnull
-    public WlSurfaceResource getParentWlSurfaceResource() {
-        return this.parentWlSurfaceResource;
-    }
-
-    public boolean isInert() {
-        return this.inert;
-    }
-
-    public void setInert(final boolean inert) {
-        this.inert = inert;
-    }
-
-    public Signal<Boolean, Slot<Boolean>> getEffectiveSyncSignal() {
-        return this.effectiveSyncSignal;
+        placement(true,
+                  sibling);
     }
 }

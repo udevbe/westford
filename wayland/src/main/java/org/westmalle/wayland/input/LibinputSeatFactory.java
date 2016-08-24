@@ -19,25 +19,24 @@ package org.westmalle.wayland.input;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.libinput.Libinput;
+import org.westmalle.nativ.libinput.Pointerclose_restricted;
+import org.westmalle.nativ.libinput.libinput_interface;
+import org.westmalle.nativ.libudev.Libudev;
+import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.libinput.Libinput;
-import org.westmalle.wayland.nativ.libinput.Pointerclose_restricted;
-import org.westmalle.wayland.nativ.libinput.libinput_interface;
-import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
-import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.protocol.WlSeatFactory;
-import org.westmalle.wayland.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import static org.freedesktop.jaccall.Pointer.malloc;
-import static org.westmalle.wayland.nativ.libinput.Pointeropen_restricted.nref;
+import static org.westmalle.nativ.libinput.Pointeropen_restricted.nref;
 
 public class LibinputSeatFactory {
 

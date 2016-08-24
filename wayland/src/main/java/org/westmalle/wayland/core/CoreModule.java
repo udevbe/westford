@@ -21,8 +21,8 @@ import dagger.Module;
 import dagger.Provides;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.nativ.NativeModule;
-import org.westmalle.wayland.nativ.glibc.Libc;
+import org.westmalle.nativ.NativeModule;
+import org.westmalle.nativ.glibc.Libc;
 
 import javax.inject.Singleton;
 

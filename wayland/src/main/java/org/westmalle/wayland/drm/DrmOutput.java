@@ -20,11 +20,11 @@ package org.westmalle.wayland.drm;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.westmalle.nativ.libdrm.DrmModeConnector;
+import org.westmalle.nativ.libdrm.DrmModeModeInfo;
+import org.westmalle.nativ.libdrm.DrmModeRes;
 import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
-import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
-import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnegative;

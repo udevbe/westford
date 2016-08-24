@@ -19,15 +19,15 @@ package org.westmalle.wayland.drm.egl;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
+import org.westmalle.nativ.libEGL.EglGetPlatformDisplayEXT;
+import org.westmalle.nativ.libEGL.LibEGL;
+import org.westmalle.nativ.libGLESv2.LibGLESv2;
+import org.westmalle.nativ.libgbm.Libgbm;
+import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.drm.DrmOutput;
 import org.westmalle.wayland.drm.DrmPlatform;
-import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
-import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
-import org.westmalle.wayland.nativ.libEGL.LibEGL;
-import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
-import org.westmalle.wayland.nativ.libgbm.Libgbm;
-import org.westmalle.wayland.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -36,21 +36,21 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_GBM_KHR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
-import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
-import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
-import static org.westmalle.wayland.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NONE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_PLATFORM_GBM_KHR;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VENDOR;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VERSION;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_COLOR_BUFFER_BIT;
+import static org.westmalle.nativ.libgbm.Libgbm.GBM_BO_USE_RENDERING;
+import static org.westmalle.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
+import static org.westmalle.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
 
 public class DrmEglPlatformFactory {
 
@@ -145,15 +145,37 @@ public class DrmEglPlatformFactory {
                                                         drmEglRenderOutputs);
     }
 
-    private void enterVt(final List<DrmEglOutput> drmEglRenderOutputs) {
-        drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
-            drmEglRenderOutput.setDefaultMode();
-            drmEglRenderOutput.enable();
-        });
-    }
+    private long createEglDisplay(final long gbmDevice) {
 
-    private void leaveVt(final List<DrmEglOutput> drmEglRenderOutputs) {
-        drmEglRenderOutputs.forEach(DrmEglOutput::disable);
+        final Pointer<String> noDisplayExtensions = Pointer.wrap(String.class,
+                                                                 this.libEGL.eglQueryString(EGL_NO_DISPLAY,
+                                                                                            EGL_EXTENSIONS));
+        if (noDisplayExtensions.address == 0L) {
+            throw new RuntimeException("Could not query egl extensions.");
+        }
+        final String extensions = noDisplayExtensions.dref();
+
+        if (!extensions.contains("EGL_MESA_platform_gbm")) {
+            throw new RuntimeException("Required extension EGL_MESA_platform_gbm not available.");
+        }
+
+        final Pointer<EglGetPlatformDisplayEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglGetPlatformDisplayEXT.class,
+                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("eglGetPlatformDisplayEXT").address));
+
+        final long eglDisplay = eglGetPlatformDisplayEXT.dref()
+                                                        .$(EGL_PLATFORM_GBM_KHR,
+                                                           gbmDevice,
+                                                           0L);
+        if (eglDisplay == 0L) {
+            throw new RuntimeException("eglGetDisplay() failed");
+        }
+        if (this.libEGL.eglInitialize(eglDisplay,
+                                      0L,
+                                      0L) == 0) {
+            throw new RuntimeException("eglInitialize() failed");
+        }
+
+        return eglDisplay;
     }
 
     private long createEglContext(final long eglDisplay,
@@ -221,39 +243,6 @@ public class DrmEglPlatformFactory {
         return drmEglRenderOutput;
     }
 
-    private long createEglDisplay(final long gbmDevice) {
-
-        final Pointer<String> noDisplayExtensions = Pointer.wrap(String.class,
-                                                                 this.libEGL.eglQueryString(EGL_NO_DISPLAY,
-                                                                                            EGL_EXTENSIONS));
-        if (noDisplayExtensions.address == 0L) {
-            throw new RuntimeException("Could not query egl extensions.");
-        }
-        final String extensions = noDisplayExtensions.dref();
-
-        if (!extensions.contains("EGL_MESA_platform_gbm")) {
-            throw new RuntimeException("Required extension EGL_MESA_platform_gbm not available.");
-        }
-
-        final Pointer<EglGetPlatformDisplayEXT> eglGetPlatformDisplayEXT = Pointer.wrap(EglGetPlatformDisplayEXT.class,
-                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("eglGetPlatformDisplayEXT").address));
-
-        final long eglDisplay = eglGetPlatformDisplayEXT.dref()
-                                                        .$(EGL_PLATFORM_GBM_KHR,
-                                                           gbmDevice,
-                                                           0L);
-        if (eglDisplay == 0L) {
-            throw new RuntimeException("eglGetDisplay() failed");
-        }
-        if (this.libEGL.eglInitialize(eglDisplay,
-                                      0L,
-                                      0L) == 0) {
-            throw new RuntimeException("eglInitialize() failed");
-        }
-
-        return eglDisplay;
-    }
-
     private long createEglSurface(final long eglDisplay,
                                   final long config,
                                   final long gbmSurface) {
@@ -273,5 +262,16 @@ public class DrmEglPlatformFactory {
         }
 
         return eglSurface;
+    }
+
+    private void enterVt(final List<DrmEglOutput> drmEglRenderOutputs) {
+        drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
+            drmEglRenderOutput.setDefaultMode();
+            drmEglRenderOutput.enable();
+        });
+    }
+
+    private void leaveVt(final List<DrmEglOutput> drmEglRenderOutputs) {
+        drmEglRenderOutputs.forEach(DrmEglOutput::disable);
     }
 }

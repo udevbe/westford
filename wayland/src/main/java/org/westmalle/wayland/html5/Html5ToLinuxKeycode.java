@@ -18,7 +18,7 @@
 package org.westmalle.wayland.html5;
 
 
-import org.westmalle.wayland.nativ.linux.InputEventCodes;
+import org.westmalle.nativ.linux.InputEventCodes;
 
 import java.util.HashMap;
 import java.util.Map;

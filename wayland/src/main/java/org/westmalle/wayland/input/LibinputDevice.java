@@ -25,12 +25,12 @@ import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.shared.WlSeatCapability;
-import org.westmalle.wayland.core.RenderOutput;
+import org.westmalle.nativ.libinput.Libinput;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.RenderPlatform;
-import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlPointer;
@@ -42,15 +42,15 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_PRESSED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_RELEASED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_PRESSED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_RELEASED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_FINGER;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_WHEEL;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_PRESSED;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_BUTTON_STATE_RELEASED;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_PRESSED;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_KEY_STATE_RELEASED;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_FINGER;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_POINTER_AXIS_SOURCE_WHEEL;
 
 @AutoFactory(className = "LibinputDeviceFactory",
              allowSubclasses = true)
@@ -80,38 +80,6 @@ public class LibinputDevice {
     @Nonnull
     public EnumSet<WlSeatCapability> getDeviceCapabilities() {
         return this.deviceCapabilities;
-    }
-
-    public Optional<WlOutput> findBoundOutput() {
-        //TODO we can cache the output that is mapped to this device and listen for output detsruction/addition so we save a few nanoseconds
-
-        final long outputNamePointer = this.libinput.libinput_device_get_output_name(this.device);
-        if (outputNamePointer == 0L) {
-            final Iterator<? extends RenderOutput> iterator = this.renderPlatform.getRenderOutputs()
-                                                                                 .iterator();
-            if (iterator.hasNext()) {
-                return Optional.of(iterator.next()
-                                           .getWlOutput());
-            }
-            else {
-                return Optional.empty();
-            }
-        }
-
-        final String deviceOutputName = Pointer.wrap(String.class,
-                                                     outputNamePointer)
-                                               .dref();
-//        for (final WlOutput wlOutput : this.renderPlatform.getWlOutput()) {
-        //FIXME give outputs a name, iterate them and match
-//            if (deviceOutputName.equals(renderPlatform.getOutput()
-//                                                .getName())) {
-        return Optional.of(this.renderPlatform.getRenderOutputs()
-                                              .get(0)
-                                              .getWlOutput());
-//            }
-        //     }
-
-        //      return Optional.empty();
     }
 
     public void handleKeyboardKey(final long keyboardEvent) {
@@ -189,6 +157,38 @@ public class LibinputDevice {
                                  (int) y);
             pointerDevice.frame(wlPointer.getResources());
         });
+    }
+
+    public Optional<WlOutput> findBoundOutput() {
+        //TODO we can cache the output that is mapped to this device and listen for output detsruction/addition so we save a few nanoseconds
+
+        final long outputNamePointer = this.libinput.libinput_device_get_output_name(this.device);
+        if (outputNamePointer == 0L) {
+            final Iterator<? extends RenderOutput> iterator = this.renderPlatform.getRenderOutputs()
+                                                                                 .iterator();
+            if (iterator.hasNext()) {
+                return Optional.of(iterator.next()
+                                           .getWlOutput());
+            }
+            else {
+                return Optional.empty();
+            }
+        }
+
+        final String deviceOutputName = Pointer.wrap(String.class,
+                                                     outputNamePointer)
+                                               .dref();
+//        for (final WlOutput wlOutput : this.renderPlatform.getWlOutput()) {
+        //FIXME give outputs a name, iterate them and match
+//            if (deviceOutputName.equals(renderPlatform.getOutput()
+//                                                .getName())) {
+        return Optional.of(this.renderPlatform.getRenderOutputs()
+                                              .get(0)
+                                              .getWlOutput());
+//            }
+        //     }
+
+        //      return Optional.empty();
     }
 
     public void handlePointerButton(final long pointerEvent) {

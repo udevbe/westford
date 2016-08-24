@@ -23,7 +23,7 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.EventLoop;
-import org.westmalle.wayland.nativ.libdrm.Libdrm;
+import org.westmalle.nativ.libdrm.Libdrm;
 
 import javax.annotation.Nonnull;
 

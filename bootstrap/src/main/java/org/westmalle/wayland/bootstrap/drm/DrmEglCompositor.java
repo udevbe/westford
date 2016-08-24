@@ -24,8 +24,6 @@ import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.drm.egl.DrmEglPlatformModule;
 import org.westmalle.wayland.gles2.Gles2RendererModule;
 import org.westmalle.wayland.input.LibinputSeatFactory;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.tty.Tty;
 
 import javax.inject.Singleton;
 

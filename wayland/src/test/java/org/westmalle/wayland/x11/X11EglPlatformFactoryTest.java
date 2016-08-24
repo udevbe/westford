@@ -22,9 +22,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
+import org.westmalle.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
-import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.nativ.libEGL.PointerEglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.wayland.nativ.libEGL.PointerEglGetPlatformDisplayEXT;
 import org.westmalle.wayland.x11.egl.PrivateX11EglPlatformFactory;
@@ -41,13 +41,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VENDOR;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VERSION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11EglPlatformFactoryTest {

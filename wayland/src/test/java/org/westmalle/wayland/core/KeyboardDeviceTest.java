@@ -24,13 +24,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
+import org.westmalle.nativ.NativeFileFactory;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.KeyboardFocusLost;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.NativeFileFactory;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import java.util.Collections;
@@ -46,11 +46,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_DOWN;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_LAYOUT_EFFECTIVE;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_DEPRESSED;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LATCHED;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LOCKED;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_DOWN;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_LAYOUT_EFFECTIVE;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_DEPRESSED;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LATCHED;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LOCKED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KeyboardDeviceTest {
@@ -190,7 +190,7 @@ public class KeyboardDeviceTest {
                                 wlKeyboardKeyStatePressed);
 
         //then
-        assertThat((Iterable<Integer>) this.keyboardDevice.getPressedKeys()).contains(key);
+        assertThat(this.keyboardDevice.getPressedKeys()).contains(key);
         verify(wlKeyboardResource0).key(serial0,
                                         time0,
                                         key,

@@ -3,38 +3,65 @@ package org.westmalle.wayland.bootstrap.drm.launcher;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Size;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.glibc.Libpthread;
+import org.westmalle.nativ.glibc.pollfd;
+import org.westmalle.nativ.glibc.sigset_t;
+import org.westmalle.nativ.linux.signalfd_siginfo;
+import org.westmalle.tty.Tty;
 import org.westmalle.wayland.bootstrap.JvmLauncher;
 import org.westmalle.wayland.bootstrap.drm.DrmBoot;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.Libpthread;
-import org.westmalle.wayland.nativ.glibc.pollfd;
-import org.westmalle.wayland.nativ.glibc.sigset_t;
-import org.westmalle.wayland.nativ.linux.signalfd_siginfo;
-import org.westmalle.wayland.tty.Tty;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import static org.westmalle.wayland.nativ.glibc.Libc.AF_LOCAL;
-import static org.westmalle.wayland.nativ.glibc.Libc.EINTR;
-import static org.westmalle.wayland.nativ.glibc.Libc.FD_CLOEXEC;
-import static org.westmalle.wayland.nativ.glibc.Libc.F_SETFD;
-import static org.westmalle.wayland.nativ.glibc.Libc.SFD_CLOEXEC;
-import static org.westmalle.wayland.nativ.glibc.Libc.SFD_NONBLOCK;
-import static org.westmalle.wayland.nativ.glibc.Libc.SOCK_SEQPACKET;
+import static org.westmalle.nativ.glibc.Libc.AF_LOCAL;
+import static org.westmalle.nativ.glibc.Libc.EINTR;
+import static org.westmalle.nativ.glibc.Libc.FD_CLOEXEC;
+import static org.westmalle.nativ.glibc.Libc.F_SETFD;
+import static org.westmalle.nativ.glibc.Libc.SFD_CLOEXEC;
+import static org.westmalle.nativ.glibc.Libc.SFD_NONBLOCK;
+import static org.westmalle.nativ.glibc.Libc.SOCK_SEQPACKET;
 
 public class DrmBootLauncher {
 
-    private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-
-    public static final int ACTIVATE = 1;
-    public static final int DEACTIVATE = 2;
-
+    public static final  int    ACTIVATE   = 1;
+    public static final  int    DEACTIVATE = 2;
+    private static final Logger LOGGER     = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private Libc             libc;
     private Libpthread       libpthread;
     private Tty              tty;
     private int              signalFd;
     private Pointer<Integer> sock;
+
+    public static void main(final String[] args) throws IOException, InterruptedException {
+        new DrmBootLauncher().launch(args);
+    }
+
+    public void launch(final String[] args) throws IOException, InterruptedException {
+        if (args.length == 1 &&
+            (args[0].equals("--help") || args[0].equals("-h"))) {
+            showHelp();
+            System.exit(0);
+        }
+
+        final DrmLauncher drmLauncher = DaggerDrmLauncher.builder()
+                                                         .build();
+        this.libc = drmLauncher.libc();
+        this.libpthread = drmLauncher.libpthread();
+        this.tty = drmLauncher.tty();
+
+        this.signalFd = setupTty();
+        this.sock = setupSocket();
+
+        //start our actual compositor
+        new JvmLauncher().fork(args,
+                               DrmBoot.class.getName());
+
+        this.libc.close(this.sock.dref(1));
+
+        pollEvents();
+    }
 
     private void showHelp() {
         System.out.println("The drm launcher program changes the native signal masks before forking a new compositor jvm.\n" +
@@ -45,29 +72,6 @@ public class DrmBootLauncher {
                            "\t option=<arg> \t Pass <arg> to the compositor jvm option as an option, eg. option=-Dkey=value or option=-Xmx=1234m\n" +
                            "\t <args> \t Pass <args> as-is to the child jvm as program arguments.");
     }
-
-    private Pointer<Integer> setupSocket() {
-        final Pointer<Integer> sock = Pointer.nref(0,
-                                                   0);
-
-        if (this.libc.socketpair(AF_LOCAL,
-                                 SOCK_SEQPACKET,
-                                 0,
-                                 sock.address) < 0) {
-            //TODO errno
-            throw new Error("socketpair failed");
-        }
-
-        if (this.libc.fcntl(sock.dref(0),
-                            F_SETFD,
-                            FD_CLOEXEC) < 0) {
-            //TODO errno
-            throw new Error("fcntl failed");
-        }
-
-        return sock;
-    }
-
 
     private int setupTty() {
 
@@ -111,6 +115,28 @@ public class DrmBootLauncher {
         return signalFd;
     }
 
+    private Pointer<Integer> setupSocket() {
+        final Pointer<Integer> sock = Pointer.nref(0,
+                                                   0);
+
+        if (this.libc.socketpair(AF_LOCAL,
+                                 SOCK_SEQPACKET,
+                                 0,
+                                 sock.address) < 0) {
+            //TODO errno
+            throw new Error("socketpair failed");
+        }
+
+        if (this.libc.fcntl(sock.dref(0),
+                            F_SETFD,
+                            FD_CLOEXEC) < 0) {
+            //TODO errno
+            throw new Error("fcntl failed");
+        }
+
+        return sock;
+    }
+
     private void pollEvents() {
 
         while (true) {
@@ -144,18 +170,6 @@ public class DrmBootLauncher {
         }
     }
 
-    private void sendReply(final int reply) {
-        long len;
-
-        do {
-            len = this.libc.send(this.sock.dref(0),
-                                 Pointer.nref(reply).address,
-                                 Size.sizeof((Integer) null),
-                                 0);
-        } while (len < 0 && this.libc.getErrno() == EINTR);
-    }
-
-
     private void handleSocketMsg() {
         //TODO
     }
@@ -184,32 +198,14 @@ public class DrmBootLauncher {
         }
     }
 
-    public void launch(final String[] args) throws IOException, InterruptedException {
-        if (args.length == 1 &&
-            (args[0].equals("--help") || args[0].equals("-h"))) {
-            showHelp();
-            System.exit(0);
-        }
+    private void sendReply(final int reply) {
+        long len;
 
-        final DrmLauncher drmLauncher = DaggerDrmLauncher.builder()
-                                                         .build();
-        this.libc = drmLauncher.libc();
-        this.libpthread = drmLauncher.libpthread();
-        this.tty = drmLauncher.tty();
-
-        this.signalFd = setupTty();
-        this.sock = setupSocket();
-
-        //start our actual compositor
-        new JvmLauncher().fork(args,
-                               DrmBoot.class.getName());
-
-        this.libc.close(this.sock.dref(1));
-
-        pollEvents();
-    }
-
-    public static void main(final String[] args) throws IOException, InterruptedException {
-        new DrmBootLauncher().launch(args);
+        do {
+            len = this.libc.send(this.sock.dref(0),
+                                 Pointer.nref(reply).address,
+                                 Size.sizeof((Integer) null),
+                                 0);
+        } while (len < 0 && this.libc.getErrno() == EINTR);
     }
 }

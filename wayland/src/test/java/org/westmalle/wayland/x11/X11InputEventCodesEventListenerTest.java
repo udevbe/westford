@@ -6,12 +6,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.nativ.libxcb.Libxcb;
+import org.westmalle.nativ.libxcb.xcb_button_press_event_t;
+import org.westmalle.nativ.libxcb.xcb_generic_event_t;
+import org.westmalle.nativ.libxcb.xcb_key_press_event_t;
+import org.westmalle.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.core.Seat;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import static org.mockito.Matchers.anyInt;

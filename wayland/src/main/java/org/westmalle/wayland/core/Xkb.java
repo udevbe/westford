@@ -17,14 +17,14 @@
  */
 package org.westmalle.wayland.core;
 
-import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
+import org.freedesktop.jaccall.Pointer;
+import org.westmalle.nativ.libxkbcommon.Libxkbcommon;
 
 import javax.annotation.Nonnull;
 
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_FORMAT_TEXT_V1;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_KEYMAP_FORMAT_TEXT_V1;
 
 @AutoFactory(className = "XkbFactory",
              allowSubclasses = true)

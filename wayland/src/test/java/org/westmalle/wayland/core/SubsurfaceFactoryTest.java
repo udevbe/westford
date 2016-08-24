@@ -22,12 +22,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlSurface;
 
-import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -82,9 +81,9 @@ public class SubsurfaceFactoryTest {
         when(surface.getState()).thenReturn(oldSurfaceState);
         when(surface.getApplySurfaceStateSignal()).thenReturn(applySurfaceStateSignal);
         when(wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
-        when(scene.getSurfacesStack()).thenReturn(surfacesStack);
-        when(scene.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
-        when(scene.getPendingSubsurfaceStack(parentWlSurfaceResource)).thenReturn(pendingSubsurfacesStack);
+        when(this.scene.getSurfacesStack()).thenReturn(surfacesStack);
+        when(this.scene.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
+        when(this.scene.getPendingSubsurfaceStack(parentWlSurfaceResource)).thenReturn(pendingSubsurfacesStack);
 
         final Subsurface subsurface = mock(Subsurface.class);
 

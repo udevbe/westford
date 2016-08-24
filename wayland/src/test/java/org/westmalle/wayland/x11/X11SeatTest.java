@@ -20,9 +20,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
 
@@ -32,9 +32,9 @@ import java.util.Set;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_LEFT;
-import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_RIGHT;
+import static org.westmalle.nativ.linux.InputEventCodes.BTN_LEFT;
+import static org.westmalle.nativ.linux.InputEventCodes.BTN_MIDDLE;
+import static org.westmalle.nativ.linux.InputEventCodes.BTN_RIGHT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class X11SeatTest {

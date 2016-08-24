@@ -26,7 +26,7 @@ import org.westmalle.wayland.dispmanx.DispmanxPlatformFactory;
 import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 
-import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
+import static org.westmalle.nativ.libbcm_host.Libbcm_host.DISPMANX_ID_HDMI;
 
 @Module
 public class DispmanxEglPlatformModule {

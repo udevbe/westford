@@ -26,21 +26,21 @@ import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.libdrm.Libdrm;
+import org.westmalle.nativ.libgbm.Libgbm;
+import org.westmalle.nativ.libgbm.Pointerdestroy_user_data;
 import org.westmalle.wayland.core.EglOutput;
 import org.westmalle.wayland.core.EglOutputState;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.drm.DrmPageFlipCallback;
 import org.westmalle.wayland.drm.DrmOutput;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.libdrm.Libdrm;
-import org.westmalle.wayland.nativ.libgbm.Libgbm;
-import org.westmalle.wayland.nativ.libgbm.Pointerdestroy_user_data;
+import org.westmalle.wayland.drm.DrmPageFlipCallback;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
+import static org.westmalle.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
 
 //TODO put all gbm/egl specifics here
 @AutoFactory(allowSubclasses = true,
@@ -59,27 +59,21 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     @Nonnull
     private final Renderer renderer;
 
-    private final int  drmFd;
-    private       long gbmBo;
-    private final long gbmSurface;
-
+    private final int       drmFd;
+    private final long      gbmSurface;
     @Nonnull
     private final DrmOutput drmOutput;
-
-    private final long eglSurface;
-    private final long eglContext;
-    private final long eglDisplay;
-
-    private long nextGbmBo;
-
-    private final EventLoop.IdleHandler doRender         = this::doRender;
-    private       boolean               renderPending    = false;
-    private final Optional<Runnable>    whenIdleDoRender = Optional.of(this::whenIdleDoRender);
-    private       boolean               pageFlipPending  = false;
-
-    private Optional<Runnable>    afterPageFlipRender = Optional.empty();
-    private Optional<EventSource> onIdleEventSource   = Optional.empty();
-
+    private final long      eglSurface;
+    private final long      eglContext;
+    private final long      eglDisplay;
+    private       long      gbmBo;
+    private       long      nextGbmBo;
+    private       boolean               renderPending       = false;
+    private       boolean               pageFlipPending     = false;
+    private       Optional<Runnable>    afterPageFlipRender = Optional.empty();
+    private       Optional<EventSource> onIdleEventSource   = Optional.empty();
+    private final EventLoop.IdleHandler doRender            = this::doRender;
+    private final Optional<Runnable>    whenIdleDoRender    = Optional.of(this::whenIdleDoRender);
     private boolean enabled;
     private Optional<EglOutputState> state = Optional.empty();
 
@@ -121,19 +115,6 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.pageFlipPending = true;
     }
 
-    @Override
-    public void onPageFlip(@Unsigned final int sequence,
-                           @Unsigned final int tv_sec,
-                           @Unsigned final int tv_usec) {
-        this.libgbm.gbm_surface_release_buffer(this.gbmSurface,
-                                               this.gbmBo);
-        this.gbmBo = this.nextGbmBo;
-        this.pageFlipPending = false;
-
-        this.afterPageFlipRender.ifPresent(Runnable::run);
-        this.afterPageFlipRender = Optional.empty();
-    }
-
     public int getFbId(final long gbmBo) {
         final long fbIdP = this.libgbm.gbm_bo_get_user_data(gbmBo);
         if (fbIdP != 0L) {
@@ -166,6 +147,19 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
                                          Pointerdestroy_user_data.nref(this::destroyUserData).address);
 
         return fb.dref();
+    }
+
+    @Override
+    public void onPageFlip(@Unsigned final int sequence,
+                           @Unsigned final int tv_sec,
+                           @Unsigned final int tv_usec) {
+        this.libgbm.gbm_surface_release_buffer(this.gbmSurface,
+                                               this.gbmBo);
+        this.gbmBo = this.nextGbmBo;
+        this.pageFlipPending = false;
+
+        this.afterPageFlipRender.ifPresent(Runnable::run);
+        this.afterPageFlipRender = Optional.empty();
     }
 
     private void destroyUserData(@Ptr final long bo,
@@ -215,6 +209,26 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         return this.drmOutput;
     }
 
+    private void doRender() {
+        this.onIdleEventSource = Optional.empty();
+        this.renderer.visit(this);
+        this.display.flushClients();
+        this.renderPending = false;
+    }
+
+    @Override
+    public void disable() {
+        this.afterPageFlipRender = Optional.empty();
+        this.onIdleEventSource.ifPresent(EventSource::remove);
+        this.enabled = false;
+    }
+
+    @Override
+    public void enable() {
+        this.enabled = true;
+        render();
+    }
+
     @Override
     public void render() {
         if (this.enabled) {
@@ -241,27 +255,6 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.renderPending = true;
         this.onIdleEventSource = Optional.of(this.display.getEventLoop()
                                                          .addIdle(this.doRender));
-    }
-
-    private void doRender() {
-        this.onIdleEventSource = Optional.empty();
-        this.renderer.visit(this);
-        this.display.flushClients();
-        this.renderPending = false;
-    }
-
-
-    @Override
-    public void disable() {
-        this.afterPageFlipRender = Optional.empty();
-        this.onIdleEventSource.ifPresent(EventSource::remove);
-        this.enabled = false;
-    }
-
-    @Override
-    public void enable() {
-        this.enabled = true;
-        render();
     }
 
     public void setDefaultMode() {

@@ -23,20 +23,20 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
+import org.westmalle.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.core.EglOutput;
 import org.westmalle.wayland.core.EglOutputState;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.html5.Html5RenderOutput;
-import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
 import static org.freedesktop.jaccall.Pointer.malloc;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_RGBA;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_RGBA;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
 
 @AutoFactory(allowSubclasses = true,
              className = "Html5EglRenderOutputFactory")
@@ -133,15 +133,15 @@ public class Html5EglOutput implements EglOutput {
                                            height);
     }
 
-    @Override
-    public void renderEndAfterSwap() {
-        this.eglOutput.renderEndAfterSwap();
-    }
-
     @Nonnull
     @Override
     public WlOutput getWlOutput() {
         return this.eglOutput.getWlOutput();
+    }
+
+    @Override
+    public void renderEndAfterSwap() {
+        this.eglOutput.renderEndAfterSwap();
     }
 
     @Override

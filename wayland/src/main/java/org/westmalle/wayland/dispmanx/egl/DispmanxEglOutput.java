@@ -20,11 +20,11 @@ package org.westmalle.wayland.dispmanx.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
+import org.westmalle.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.core.EglOutput;
 import org.westmalle.wayland.core.EglOutputState;
 import org.westmalle.wayland.core.Renderer;
 import org.westmalle.wayland.dispmanx.DispmanxOutput;
-import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
@@ -42,14 +42,11 @@ public class DispmanxEglOutput implements EglOutput {
     private final DispmanxOutput        dispmanxOutput;
     @Nonnull
     private final EGL_DISPMANX_WINDOW_T eglDispmanxWindow;
-
-    private boolean renderScheduled = false;
-
     private final long eglSurface;
     private final long eglContext;
     private final long eglDisplay;
-
-    private Optional<EglOutputState> state = Optional.empty();
+    private boolean                  renderScheduled = false;
+    private Optional<EglOutputState> state           = Optional.empty();
 
     DispmanxEglOutput(@Nonnull @Provided final Display display,
                       @Nonnull @Provided final Renderer renderer,

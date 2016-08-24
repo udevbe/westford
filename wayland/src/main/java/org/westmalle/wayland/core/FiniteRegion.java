@@ -20,9 +20,9 @@ package org.westmalle.wayland.core;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.Pointer;
-import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
-import org.westmalle.wayland.nativ.libpixman1.pixman_box32;
-import org.westmalle.wayland.nativ.libpixman1.pixman_region32;
+import org.westmalle.nativ.libpixman1.Libpixman1;
+import org.westmalle.nativ.libpixman1.pixman_box32;
+import org.westmalle.nativ.libpixman1.pixman_region32;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -78,11 +78,6 @@ public class FiniteRegion implements Region {
         return boxes;
     }
 
-    @Nonnull
-    public Pointer<pixman_region32> getPixmanRegion32() {
-        return this.pixman_region32Pointer;
-    }
-
     //TODO unit test equals
     @Override
     public boolean equals(final Object o) {
@@ -104,6 +99,11 @@ public class FiniteRegion implements Region {
         this.libpixman1.pixman_region32_union(this.pixman_region32Pointer.address,
                                               this.pixman_region32Pointer.address,
                                               region.getPixmanRegion32().address);
+    }
+
+    @Nonnull
+    public Pointer<pixman_region32> getPixmanRegion32() {
+        return this.pixman_region32Pointer;
     }
 
     @Override

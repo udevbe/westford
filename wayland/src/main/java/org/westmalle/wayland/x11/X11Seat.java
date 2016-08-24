@@ -22,9 +22,9 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
+import org.westmalle.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.PointerDevice;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -33,17 +33,17 @@ import javax.annotation.Nonnull;
 
 import static org.freedesktop.wayland.shared.WlPointerAxis.HORIZONTAL_SCROLL;
 import static org.freedesktop.wayland.shared.WlPointerAxis.VERTICAL_SCROLL;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CURSOR_NONE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
-import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_LEFT;
-import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_MIDDLE;
-import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_RIGHT;
-import static org.westmalle.wayland.nativ.linux.InputEventCodes.BTN_SIDE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_CURSOR_NONE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_GRAB_MODE_ASYNC;
+import static org.westmalle.nativ.linux.InputEventCodes.BTN_LEFT;
+import static org.westmalle.nativ.linux.InputEventCodes.BTN_MIDDLE;
+import static org.westmalle.nativ.linux.InputEventCodes.BTN_RIGHT;
+import static org.westmalle.nativ.linux.InputEventCodes.BTN_SIDE;
 
 @AutoFactory(className = "PrivateX11SeatFactory",
              allowSubclasses = true)
@@ -121,35 +121,6 @@ public class X11Seat {
         }
     }
 
-    private void handleScroll(final int buttonTime,
-                              final short eventDetail) {
-
-        final WlPointerAxis wlPointerAxis;
-        final float         value;
-        final int           discreteValue;
-
-        if (eventDetail == 4 || eventDetail == 5) {
-            wlPointerAxis = VERTICAL_SCROLL;
-            value = eventDetail == 4 ? -DEFAULT_AXIS_STEP_DISTANCE : DEFAULT_AXIS_STEP_DISTANCE;
-            discreteValue = eventDetail == 4 ? -1 : 1;
-        }
-        else {
-            wlPointerAxis = HORIZONTAL_SCROLL;
-            value = eventDetail == 6 ? -DEFAULT_AXIS_STEP_DISTANCE : DEFAULT_AXIS_STEP_DISTANCE;
-            discreteValue = eventDetail == 6 ? -1 : 1;
-        }
-
-        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
-        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
-
-        pointerDevice.axisDiscrete(wlPointer.getResources(),
-                                   wlPointerAxis,
-                                   buttonTime,
-                                   discreteValue,
-                                   value);
-        pointerDevice.frame(wlPointer.getResources());
-    }
-
     private WlPointerButtonState wlPointerButtonState(final int window,
                                                       final int buttonTime,
                                                       final boolean pressed) {
@@ -201,6 +172,35 @@ public class X11Seat {
                 button = eventDetail + BTN_SIDE - 8;
         }
         return button;
+    }
+
+    private void handleScroll(final int buttonTime,
+                              final short eventDetail) {
+
+        final WlPointerAxis wlPointerAxis;
+        final float         value;
+        final int           discreteValue;
+
+        if (eventDetail == 4 || eventDetail == 5) {
+            wlPointerAxis = VERTICAL_SCROLL;
+            value = eventDetail == 4 ? -DEFAULT_AXIS_STEP_DISTANCE : DEFAULT_AXIS_STEP_DISTANCE;
+            discreteValue = eventDetail == 4 ? -1 : 1;
+        }
+        else {
+            wlPointerAxis = HORIZONTAL_SCROLL;
+            value = eventDetail == 6 ? -DEFAULT_AXIS_STEP_DISTANCE : DEFAULT_AXIS_STEP_DISTANCE;
+            discreteValue = eventDetail == 6 ? -1 : 1;
+        }
+
+        final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
+        final PointerDevice pointerDevice = wlPointer.getPointerDevice();
+
+        pointerDevice.axisDiscrete(wlPointer.getResources(),
+                                   wlPointerAxis,
+                                   buttonTime,
+                                   discreteValue,
+                                   value);
+        pointerDevice.frame(wlPointer.getResources());
     }
 
     public void deliverMotion(final int windowId,

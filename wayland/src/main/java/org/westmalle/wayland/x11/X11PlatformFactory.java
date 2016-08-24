@@ -21,18 +21,18 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.westmalle.nativ.libX11.LibX11;
+import org.westmalle.nativ.libX11xcb.LibX11xcb;
+import org.westmalle.nativ.libxcb.Libxcb;
+import org.westmalle.nativ.libxcb.xcb_client_message_event_t;
+import org.westmalle.nativ.libxcb.xcb_intern_atom_reply_t;
+import org.westmalle.nativ.libxcb.xcb_screen_iterator_t;
+import org.westmalle.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
 import org.westmalle.wayland.core.events.RenderOutputDestroyed;
-import org.westmalle.wayland.nativ.libX11.LibX11;
-import org.westmalle.wayland.nativ.libX11xcb.LibX11xcb;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxcb.xcb_client_message_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_intern_atom_reply_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_screen_iterator_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_screen_t;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 import org.westmalle.wayland.x11.config.X11OutputConfig;
@@ -48,22 +48,22 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
-import static org.westmalle.wayland.nativ.libX11xcb.LibX11xcb.XCBOwnsEventQueue;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_ATOM_ATOM;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CLIENT_MESSAGE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_COPY_FROM_PARENT;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_CW_EVENT_MASK;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_FOCUS_CHANGE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEYMAP_STATE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEY_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEY_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_PROP_MODE_REPLACE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
+import static org.westmalle.nativ.libX11xcb.LibX11xcb.XCBOwnsEventQueue;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_ATOM_ATOM;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_CLIENT_MESSAGE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_COPY_FROM_PARENT;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_CW_EVENT_MASK;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_PRESS;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_BUTTON_RELEASE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_ENTER_WINDOW;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_FOCUS_CHANGE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEYMAP_STATE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEY_PRESS;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_KEY_RELEASE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_LEAVE_WINDOW;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EVENT_MASK_POINTER_MOTION;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_PROP_MODE_REPLACE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_WINDOW_CLASS_INPUT_OUTPUT;
 
 public class X11PlatformFactory {
 
@@ -313,37 +313,6 @@ public class X11PlatformFactory {
         x11Outputs.add(x11Output);
     }
 
-    private Output createOutput(final X11OutputConfig x11OutputConfig,
-                                final xcb_screen_t screen,
-                                final int x,
-                                final int y) {
-
-        final int width  = x11OutputConfig.getWidth();
-        final int height = x11OutputConfig.getHeight();
-
-        final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(x)
-                                                            .y(y)
-                                                            .subpixel(0)
-                                                            .make("Westmalle xcb")
-                                                            .model("X11")
-                                                            .physicalWidth((width / screen.width_in_pixels())
-                                                                           * screen.width_in_millimeters())
-                                                            .physicalHeight((height / screen.height_in_pixels())
-                                                                            * screen.height_in_millimeters())
-                                                            .transform(WlOutputTransform.NORMAL.value)
-                                                            .build();
-        final OutputMode outputMode = OutputMode.builder()
-                                                .flags(0)
-                                                .width(width)
-                                                .height(height)
-                                                .refresh(60)
-                                                .build();
-        return this.outputFactory.create(x11OutputConfig.getName(),
-                                         outputGeometry,
-                                         outputMode);
-    }
-
     private void setWmProtocol(final long connection,
                                final int window,
                                final int wmProtocols,
@@ -382,6 +351,37 @@ public class X11PlatformFactory {
                                         (byte) 8,
                                         nameLength,
                                         nameNative);
+    }
+
+    private Output createOutput(final X11OutputConfig x11OutputConfig,
+                                final xcb_screen_t screen,
+                                final int x,
+                                final int y) {
+
+        final int width  = x11OutputConfig.getWidth();
+        final int height = x11OutputConfig.getHeight();
+
+        final OutputGeometry outputGeometry = OutputGeometry.builder()
+                                                            .x(x)
+                                                            .y(y)
+                                                            .subpixel(0)
+                                                            .make("Westmalle xcb")
+                                                            .model("X11")
+                                                            .physicalWidth((width / screen.width_in_pixels())
+                                                                           * screen.width_in_millimeters())
+                                                            .physicalHeight((height / screen.height_in_pixels())
+                                                                            * screen.height_in_millimeters())
+                                                            .transform(WlOutputTransform.NORMAL.value)
+                                                            .build();
+        final OutputMode outputMode = OutputMode.builder()
+                                                .flags(0)
+                                                .width(width)
+                                                .height(height)
+                                                .refresh(60)
+                                                .build();
+        return this.outputFactory.create(x11OutputConfig.getName(),
+                                         outputGeometry,
+                                         outputMode);
     }
 
     private void handle(final long connection,

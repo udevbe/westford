@@ -18,11 +18,11 @@
 package org.westmalle.wayland.html5.egl;
 
 import com.google.auto.factory.AutoFactory;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.EglPlatform;
 import org.westmalle.wayland.core.events.RenderOutputDestroyed;
 import org.westmalle.wayland.core.events.RenderOutputNew;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

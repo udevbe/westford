@@ -17,14 +17,13 @@
  */
 package org.westmalle.wayland.core;
 
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.events.RenderOutputDestroyed;
 import org.westmalle.wayland.core.events.RenderOutputNew;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Optional;
 
 public interface RenderPlatform {
 

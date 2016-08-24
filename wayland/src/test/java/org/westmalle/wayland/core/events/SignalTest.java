@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doAnswer;
