@@ -19,11 +19,11 @@ package org.westmalle.wayland.html5;
 
 import com.google.auto.factory.AutoFactory;
 import org.eclipse.jetty.server.Server;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.RenderPlatform;
 import org.westmalle.wayland.core.events.RenderOutputDestroyed;
 import org.westmalle.wayland.core.events.RenderOutputNew;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

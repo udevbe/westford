@@ -20,18 +20,18 @@ package org.westmalle.wayland.drm;
 
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.libdrm.DrmModeConnector;
+import org.westmalle.nativ.libdrm.DrmModeEncoder;
+import org.westmalle.nativ.libdrm.DrmModeModeInfo;
+import org.westmalle.nativ.libdrm.DrmModeRes;
+import org.westmalle.nativ.libdrm.Libdrm;
+import org.westmalle.nativ.libudev.Libudev;
+import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.libdrm.DrmModeConnector;
-import org.westmalle.wayland.nativ.libdrm.DrmModeEncoder;
-import org.westmalle.wayland.nativ.libdrm.DrmModeModeInfo;
-import org.westmalle.wayland.nativ.libdrm.DrmModeRes;
-import org.westmalle.wayland.nativ.libdrm.Libdrm;
-import org.westmalle.wayland.nativ.libudev.Libudev;
 import org.westmalle.wayland.protocol.WlOutputFactory;
-import org.westmalle.wayland.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -43,8 +43,8 @@ import java.util.Set;
 
 import static org.freedesktop.jaccall.Pointer.nref;
 import static org.freedesktop.jaccall.Pointer.wrap;
-import static org.westmalle.wayland.nativ.glibc.Libc.O_RDWR;
-import static org.westmalle.wayland.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
+import static org.westmalle.nativ.glibc.Libc.O_RDWR;
+import static org.westmalle.nativ.libdrm.Libdrm.DRM_MODE_CONNECTED;
 
 //TODO tests tests tests!
 public class DrmPlatformFactory {
@@ -123,18 +123,107 @@ public class DrmPlatformFactory {
                                                      drmOutputs);
     }
 
-    private void setDrmMaster(final int drmFd) {
-        if (this.libdrm.drmSetMaster(drmFd) != 0) {
-            throw new RuntimeException("failed to set drm master.");
+    /*
+     * Find primary GPU
+     * Some systems may have multiple DRM devices attached to a single seat. This
+     * function loops over all devices and tries to find a PCI device with the
+     * boot_vga sysfs attribute set to 1.
+     * If no such device is found, the first DRM device reported by udev is used.
+     */
+    private long findPrimaryGpu(final long udev,
+                                final String seat) {
+
+        final long udevEnumerate = this.libudev.udev_enumerate_new(udev);
+        this.libudev.udev_enumerate_add_match_subsystem(udevEnumerate,
+                                                        nref("drm").address);
+        this.libudev.udev_enumerate_add_match_sysname(udevEnumerate,
+                                                      nref("card[0-9]*").address);
+
+        this.libudev.udev_enumerate_scan_devices(udevEnumerate);
+        long drmDevice = 0L;
+
+        for (long entry = this.libudev.udev_enumerate_get_list_entry(udevEnumerate);
+             entry != 0L;
+             entry = this.libudev.udev_list_entry_get_next(entry)) {
+
+            final long path = this.libudev.udev_list_entry_get_name(entry);
+            final long device = this.libudev.udev_device_new_from_syspath(udev,
+                                                                          path);
+            if (device == 0) {
+                //no device, process next entry
+                continue;
+
+            }
+            final String deviceSeat;
+            final long seatId = this.libudev.udev_device_get_property_value(device,
+                                                                            nref("ID_SEAT").address);
+            if (seatId == 0) {
+                //device does not have a seat, assign it a default one.
+                deviceSeat = Libudev.DEFAULT_SEAT;
+            }
+            else {
+                deviceSeat = wrap(String.class,
+                                  seatId).dref();
+            }
+            if (!deviceSeat.equals(seat)) {
+                //device has a seat, but not the one we want, process next entry
+                this.libudev.udev_device_unref(device);
+                continue;
+            }
+
+            final long pci = this.libudev.udev_device_get_parent_with_subsystem_devtype(device,
+                                                                                        nref("pci").address,
+                                                                                        0L);
+            if (pci != 0) {
+                final long id = this.libudev.udev_device_get_sysattr_value(pci,
+                                                                           nref("boot_vga").address);
+                if (id != 0L && wrap(String.class,
+                                     id).dref()
+                                        .equals("1")) {
+                    if (drmDevice != 0L) {
+                        this.libudev.udev_device_unref(drmDevice);
+                    }
+                    drmDevice = device;
+                    break;
+                }
+            }
+
+            if (drmDevice == 0L) {
+                drmDevice = device;
+            }
+            else {
+                this.libudev.udev_device_unref(device);
+            }
         }
+
+        this.libudev.udev_enumerate_unref(udevEnumerate);
+        return drmDevice;
     }
 
-    private void dropDrmMaster(final int drmFd) {
-        if (this.libdrm.drmDropMaster(drmFd) != 0) {
-            throw new RuntimeException("failed to drop drm master.");
+    private int initDrm(final long device) {
+        final long sysnum = this.libudev.udev_device_get_sysnum(device);
+        final int  drmId;
+        if (sysnum != 0) {
+            drmId = Integer.parseInt(wrap(String.class,
+                                          sysnum)
+                                             .dref());
         }
-    }
+        else {
+            drmId = 0;
+        }
+        if (sysnum == 0 || drmId < 0) {
+            throw new RuntimeException("Failed to open drm device.");
+        }
 
+        final long filename = this.libudev.udev_device_get_devnode(device);
+        final int fd = this.libc.open(filename,
+                                      O_RDWR);
+        if (fd < 0) {
+            throw new RuntimeException("Failed to open drm device.");
+        }
+
+        return fd;
+    }
 
     private List<DrmOutput> createDrmRenderOutputs(final int drmFd) {
         final long resources = this.libdrm.drmModeGetResources(drmFd);
@@ -171,6 +260,12 @@ public class DrmPlatformFactory {
         }
 
         return drmOutputs;
+    }
+
+    private void setDrmMaster(final int drmFd) {
+        if (this.libdrm.drmSetMaster(drmFd) != 0) {
+            throw new RuntimeException("failed to set drm master.");
+        }
     }
 
     private Optional<Integer> findCrtcIdForConnector(final int drmFd,
@@ -267,107 +362,10 @@ public class DrmPlatformFactory {
                                             mode);
     }
 
-
-    private int initDrm(final long device) {
-        final long sysnum = this.libudev.udev_device_get_sysnum(device);
-        final int  drmId;
-        if (sysnum != 0) {
-            drmId = Integer.parseInt(wrap(String.class,
-                                          sysnum)
-                                             .dref());
+    private void dropDrmMaster(final int drmFd) {
+        if (this.libdrm.drmDropMaster(drmFd) != 0) {
+            throw new RuntimeException("failed to drop drm master.");
         }
-        else {
-            drmId = 0;
-        }
-        if (sysnum == 0 || drmId < 0) {
-            throw new RuntimeException("Failed to open drm device.");
-        }
-
-        final long filename = this.libudev.udev_device_get_devnode(device);
-        final int fd = this.libc.open(filename,
-                                      O_RDWR);
-        if (fd < 0) {
-            throw new RuntimeException("Failed to open drm device.");
-        }
-
-        return fd;
-    }
-
-    /*
-     * Find primary GPU
-     * Some systems may have multiple DRM devices attached to a single seat. This
-     * function loops over all devices and tries to find a PCI device with the
-     * boot_vga sysfs attribute set to 1.
-     * If no such device is found, the first DRM device reported by udev is used.
-     */
-    private long findPrimaryGpu(final long udev,
-                                final String seat) {
-
-        final long udevEnumerate = this.libudev.udev_enumerate_new(udev);
-        this.libudev.udev_enumerate_add_match_subsystem(udevEnumerate,
-                                                        nref("drm").address);
-        this.libudev.udev_enumerate_add_match_sysname(udevEnumerate,
-                                                      nref("card[0-9]*").address);
-
-        this.libudev.udev_enumerate_scan_devices(udevEnumerate);
-        long drmDevice = 0L;
-
-        for (long entry = this.libudev.udev_enumerate_get_list_entry(udevEnumerate);
-             entry != 0L;
-             entry = this.libudev.udev_list_entry_get_next(entry)) {
-
-            final long path = this.libudev.udev_list_entry_get_name(entry);
-            final long device = this.libudev.udev_device_new_from_syspath(udev,
-                                                                          path);
-            if (device == 0) {
-                //no device, process next entry
-                continue;
-
-            }
-            final String deviceSeat;
-            final long seatId = this.libudev.udev_device_get_property_value(device,
-                                                                            nref("ID_SEAT").address);
-            if (seatId == 0) {
-                //device does not have a seat, assign it a default one.
-                deviceSeat = Libudev.DEFAULT_SEAT;
-            }
-            else {
-                deviceSeat = wrap(String.class,
-                                  seatId).dref();
-            }
-            if (!deviceSeat.equals(seat)) {
-                //device has a seat, but not the one we want, process next entry
-                this.libudev.udev_device_unref(device);
-                continue;
-            }
-
-            final long pci = this.libudev.udev_device_get_parent_with_subsystem_devtype(device,
-                                                                                        nref("pci").address,
-                                                                                        0L);
-            if (pci != 0) {
-                final long id = this.libudev.udev_device_get_sysattr_value(pci,
-                                                                           nref("boot_vga").address);
-                if (id != 0L && wrap(String.class,
-                                     id).dref()
-                                        .equals("1")) {
-                    if (drmDevice != 0L) {
-                        this.libudev.udev_device_unref(drmDevice);
-                    }
-                    drmDevice = device;
-                    break;
-                }
-            }
-
-            if (drmDevice == 0L) {
-                drmDevice = device;
-            }
-            else {
-                this.libudev.udev_device_unref(device);
-            }
-        }
-
-        this.libudev.udev_enumerate_unref(udevEnumerate);
-        return drmDevice;
     }
 
 }

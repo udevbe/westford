@@ -24,17 +24,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.westmalle.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.core.Scene;
-import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ShmBuffer.class})

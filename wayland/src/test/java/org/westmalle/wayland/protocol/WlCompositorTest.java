@@ -31,6 +31,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.Compositor;
 import org.westmalle.wayland.core.FiniteRegion;
 import org.westmalle.wayland.core.FiniteRegionFactory;
@@ -39,8 +41,6 @@ import org.westmalle.wayland.core.Scene;
 import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.SurfaceFactory;
 import org.westmalle.wayland.core.SurfaceState;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 
 import java.util.LinkedList;
 

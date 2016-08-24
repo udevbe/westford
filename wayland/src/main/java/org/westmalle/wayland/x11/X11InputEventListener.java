@@ -18,36 +18,36 @@
 package org.westmalle.wayland.x11;
 
 
-import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.freedesktop.jaccall.Pointer;
+import org.westmalle.Slot;
+import org.westmalle.nativ.libxcb.xcb_button_press_event_t;
+import org.westmalle.nativ.libxcb.xcb_button_release_event_t;
+import org.westmalle.nativ.libxcb.xcb_generic_event_t;
+import org.westmalle.nativ.libxcb.xcb_key_press_event_t;
+import org.westmalle.nativ.libxcb.xcb_key_release_event_t;
+import org.westmalle.nativ.libxcb.xcb_mapping_notify_event_t;
+import org.westmalle.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.Xkb;
-import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_button_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_key_press_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_key_release_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_mapping_notify_event_t;
-import org.westmalle.wayland.nativ.libxcb.xcb_motion_notify_event_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
 
 import javax.annotation.Nonnull;
 
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_BUTTON_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_BUTTON_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_ENTER_NOTIFY;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_EXPOSE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_FOCUS_IN;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_FOCUS_OUT;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEYMAP_NOTIFY;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_PRESS;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_KEY_RELEASE;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_LEAVE_NOTIFY;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MAPPING_KEYBOARD;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MAPPING_NOTIFY;
-import static org.westmalle.wayland.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_BUTTON_PRESS;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_BUTTON_RELEASE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_ENTER_NOTIFY;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_EXPOSE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_FOCUS_IN;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_FOCUS_OUT;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_KEYMAP_NOTIFY;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_KEY_PRESS;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_KEY_RELEASE;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_LEAVE_NOTIFY;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_MAPPING_KEYBOARD;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_MAPPING_NOTIFY;
+import static org.westmalle.nativ.libxcb.Libxcb.XCB_MOTION_NOTIFY;
 
 @AutoFactory(className = "X11InputEventListenerFactory",
              allowSubclasses = true)

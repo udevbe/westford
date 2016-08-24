@@ -20,14 +20,14 @@ package org.westmalle.wayland.dispmanx;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.westmalle.nativ.libbcm_host.DISPMANX_MODEINFO_T;
+import org.westmalle.nativ.libbcm_host.Libbcm_host;
+import org.westmalle.nativ.libbcm_host.VC_DISPMANX_ALPHA_T;
+import org.westmalle.nativ.libbcm_host.VC_RECT_T;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputFactory;
 import org.westmalle.wayland.core.OutputGeometry;
 import org.westmalle.wayland.core.OutputMode;
-import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
-import org.westmalle.wayland.nativ.libbcm_host.Libbcm_host;
-import org.westmalle.wayland.nativ.libbcm_host.VC_DISPMANX_ALPHA_T;
-import org.westmalle.wayland.nativ.libbcm_host.VC_RECT_T;
 import org.westmalle.wayland.protocol.WlOutput;
 import org.westmalle.wayland.protocol.WlOutputFactory;
 
@@ -36,8 +36,8 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_NO_ROTATE;
-import static org.westmalle.wayland.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
+import static org.westmalle.nativ.libbcm_host.Libbcm_host.DISPMANX_NO_ROTATE;
+import static org.westmalle.nativ.libbcm_host.Libbcm_host.DISPMANX_PROTECTION_NONE;
 
 //TODO unit test
 //TODO refactor once we get all of this working
@@ -95,34 +95,6 @@ public class DispmanxPlatformFactory {
                                                           dispmanxOutputs);
     }
 
-
-    private Output createOutput(final int device,
-                                final DISPMANX_MODEINFO_T modeinfo) {
-        //TODO this is all guessing. Does dispmanx expose actual values?
-
-        //TODO assume 96dpi for physical width(?)
-        final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .x(0)
-                                                            .y(0)
-                                                            .subpixel(0)
-                                                            .make("Westmalle bcm_host")
-                                                            .model("dispmanx")
-                                                            .physicalWidth(0)
-                                                            .physicalHeight(0)
-                                                            .transform(WlOutputTransform.NORMAL.value)
-                                                            .build();
-        final OutputMode outputMode = OutputMode.builder()
-                                                .flags(0)
-                                                .height(modeinfo.height())
-                                                .width(modeinfo.width())
-                                                .refresh(60)
-                                                .build();
-        //TODO translate dispmanx output number to udev readable nam
-        return this.outputFactory.create("" + device,
-                                         outputGeometry,
-                                         outputMode);
-    }
-
     private int createDispmanxWindow(final int display,
                                      final DISPMANX_MODEINFO_T modeinfo) {
 
@@ -160,5 +132,32 @@ public class DispmanxPlatformFactory {
         this.libbcm_host.vc_dispmanx_update_submit_sync(update);
 
         return dispmanxElement;
+    }
+
+    private Output createOutput(final int device,
+                                final DISPMANX_MODEINFO_T modeinfo) {
+        //TODO this is all guessing. Does dispmanx expose actual values?
+
+        //TODO assume 96dpi for physical width(?)
+        final OutputGeometry outputGeometry = OutputGeometry.builder()
+                                                            .x(0)
+                                                            .y(0)
+                                                            .subpixel(0)
+                                                            .make("Westmalle bcm_host")
+                                                            .model("dispmanx")
+                                                            .physicalWidth(0)
+                                                            .physicalHeight(0)
+                                                            .transform(WlOutputTransform.NORMAL.value)
+                                                            .build();
+        final OutputMode outputMode = OutputMode.builder()
+                                                .flags(0)
+                                                .height(modeinfo.height())
+                                                .width(modeinfo.width())
+                                                .refresh(60)
+                                                .build();
+        //TODO translate dispmanx output number to udev readable nam
+        return this.outputFactory.create("" + device,
+                                         outputGeometry,
+                                         outputMode);
     }
 }

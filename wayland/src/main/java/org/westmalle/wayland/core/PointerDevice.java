@@ -28,13 +28,13 @@ import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerAxisSource;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
 import org.freedesktop.wayland.util.Fixed;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.calc.Geo;
 import org.westmalle.wayland.core.events.Button;
 import org.westmalle.wayland.core.events.PointerFocus;
 import org.westmalle.wayland.core.events.PointerGrab;
 import org.westmalle.wayland.core.events.PointerMotion;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
@@ -76,24 +76,20 @@ public class PointerDevice implements Role {
     private final Geo           geo;
     @Nonnull
     private final Display       display;
-
+    @Nonnull
+    private final FiniteRegion  clampRegion;
     @Nonnull
     private Point            position     = Point.ZERO;
     @Nonnull
     private Optional<Cursor> activeCursor = Optional.empty();
-
     @Nonnull
     private Optional<DestroyListener>   grabDestroyListener = Optional.empty();
     @Nonnull
     private Optional<WlSurfaceResource> grab                = Optional.empty();
-
     @Nonnull
     private Optional<WlSurfaceResource> focus                = Optional.empty();
     @Nonnull
     private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
-    @Nonnull
-    private final FiniteRegion clampRegion;
-
     private int buttonPressSerial;
     private int buttonReleaseSerial;
     private int enterSerial;
@@ -129,6 +125,20 @@ public class PointerDevice implements Role {
             }
         }));
         //TODO emit event?
+    }
+
+    @Nonnull
+    public Optional<WlSurfaceResource> getFocus() {
+        return this.focus;
+    }
+
+    private Set<WlPointerResource> filter(final Set<WlPointerResource> wlPointerResources,
+                                          final Client client) {
+        //filter out pointer resources that do not belong to the given client.
+        return wlPointerResources.stream()
+                                 .filter(wlPointerResource -> wlPointerResource.getClient()
+                                                                               .equals(client))
+                                 .collect(Collectors.toSet());
     }
 
     //TODO unit test
@@ -188,19 +198,6 @@ public class PointerDevice implements Role {
         //TODO emit event?
     }
 
-    //TODO unit test
-    public void axisContinuous(@Nonnull final Set<WlPointerResource> wlPointerResources,
-                               final int time,
-                               final WlPointerAxis wlPointerAxis,
-                               final float value) {
-        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
-                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> axisOrStop(wlPointerResource,
-                                                                                                                                time,
-                                                                                                                                wlPointerAxis,
-                                                                                                                                value)));
-        //TODO emit event?
-    }
-
     private void axisOrStop(final WlPointerResource wlPointerResource,
                             final int time,
                             final WlPointerAxis wlPointerAxis,
@@ -214,6 +211,19 @@ public class PointerDevice implements Role {
             wlPointerResource.axisStop(time,
                                        wlPointerAxis.value);
         }
+    }
+
+    //TODO unit test
+    public void axisContinuous(@Nonnull final Set<WlPointerResource> wlPointerResources,
+                               final int time,
+                               final WlPointerAxis wlPointerAxis,
+                               final float value) {
+        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
+                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> axisOrStop(wlPointerResource,
+                                                                                                                                time,
+                                                                                                                                wlPointerAxis,
+                                                                                                                                value)));
+        //TODO emit event?
     }
 
     /**
@@ -397,20 +407,6 @@ public class PointerDevice implements Role {
         this.grabDestroyListener = Optional.empty();
         this.grab = Optional.empty();
         this.pointerGrabSignal.emit(PointerGrab.create(getGrab()));
-    }
-
-    @Nonnull
-    public Optional<WlSurfaceResource> getFocus() {
-        return this.focus;
-    }
-
-    private Set<WlPointerResource> filter(final Set<WlPointerResource> wlPointerResources,
-                                          final Client client) {
-        //filter out pointer resources that do not belong to the given client.
-        return wlPointerResources.stream()
-                                 .filter(wlPointerResource -> wlPointerResource.getClient()
-                                                                               .equals(client))
-                                 .collect(Collectors.toSet());
     }
 
     public int nextButtonPressSerial() {

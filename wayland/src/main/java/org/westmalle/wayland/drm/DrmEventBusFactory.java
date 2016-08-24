@@ -19,10 +19,10 @@ package org.westmalle.wayland.drm;
 
 
 import org.freedesktop.jaccall.Pointer;
-import org.westmalle.wayland.nativ.libdrm.DrmEventContext;
-import org.westmalle.wayland.nativ.libdrm.Libdrm;
-import org.westmalle.wayland.nativ.libdrm.Pointerpage_flip_handler;
-import org.westmalle.wayland.nativ.libdrm.Pointervblank_handler;
+import org.westmalle.nativ.libdrm.DrmEventContext;
+import org.westmalle.nativ.libdrm.Libdrm;
+import org.westmalle.nativ.libdrm.Pointerpage_flip_handler;
+import org.westmalle.nativ.libdrm.Pointervblank_handler;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

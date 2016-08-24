@@ -19,6 +19,11 @@ package org.westmalle.wayland.bootstrap;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.glibc.Libc_Symbols;
+import org.westmalle.nativ.glibc.Libpthread;
+import org.westmalle.nativ.glibc.Libpthread_Symbols;
+import org.westmalle.nativ.glibc.sigset_t;
 import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.drm.launcher.DrmBootLauncher;
@@ -31,11 +36,6 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.Libc_Symbols;
-import org.westmalle.wayland.nativ.glibc.Libpthread;
-import org.westmalle.wayland.nativ.glibc.Libpthread_Symbols;
-import org.westmalle.wayland.nativ.glibc.sigset_t;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 import org.westmalle.wayland.x11.X11PlatformModule;
@@ -71,21 +71,6 @@ public class Boot {
         });
     }
 
-    private static String parseBackend() {
-        String backEnd = System.getProperty(BACK_END);
-        if (backEnd == null) {
-            LOGGER.warning("No back end specified. Defaulting to 'X11Egl'. Specify your back end with -DbackEnd=<value>.\n" +
-                           "Available back ends:\n" +
-                           "\tX11Egl\n" +
-                           "\tDispmanxEgl\n" +
-                           "\tDrmEgl\n" +
-                           "\tHtml5X11Egl");
-            backEnd = "X11Egl";
-        }
-
-        return backEnd;
-    }
-
     private static void initBackEnd(final String[] args) throws IOException, InterruptedException {
         final Boot boot = new Boot();
 
@@ -116,6 +101,97 @@ public class Boot {
                               "\tDrmEgl\n" +
                               "\tHtml5X11Egl");
         }
+    }
+
+    private static String parseBackend() {
+        String backEnd = System.getProperty(BACK_END);
+        if (backEnd == null) {
+            LOGGER.warning("No back end specified. Defaulting to 'X11Egl'. Specify your back end with -DbackEnd=<value>.\n" +
+                           "Available back ends:\n" +
+                           "\tX11Egl\n" +
+                           "\tDispmanxEgl\n" +
+                           "\tDrmEgl\n" +
+                           "\tHtml5X11Egl");
+            backEnd = "X11Egl";
+        }
+
+        return backEnd;
+    }
+
+    private void strap(final DaggerX11EglCompositor.Builder builder) {
+
+        /*
+         * Inject X11 config.
+         */
+        final X11EglCompositor x11EglCompositor = builder.x11PlatformModule(new X11PlatformModule(new X11PlatformConfigSimple()))
+                                                         .build();
+
+        /*
+         * Keep this first as weston demo clients *really* like their globals
+         * to be initialized in a certain order, else they segfault...
+         */
+        final LifeCycle lifeCycle = x11EglCompositor.lifeCycle();
+
+        /*Get the seat that listens for input on the X connection and passes it on to a wayland seat.
+         */
+        final WlSeat wlSeat = x11EglCompositor.wlSeat();
+
+        /*
+         * Setup keyboard focus tracking to follow mouse pointer.
+         */
+        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
+        final PointerDevice pointerDevice = wlSeat.getWlPointer()
+                                                  .getPointerDevice();
+        pointerDevice.getPointerFocusSignal()
+                     .connect(event -> wlKeyboard.getKeyboardDevice()
+                                                 .setFocus(wlKeyboard.getResources(),
+                                                           pointerDevice.getFocus()));
+        /*
+         * Start the compositor.
+         */
+        lifeCycle.start();
+    }
+
+    private void strap(final DaggerDispmanxEglCompositor.Builder builder) {
+
+        final DispmanxEglCompositor dispmanxEglCompositor = builder.build();
+
+        /*
+         * Keep this first as weston demo clients *really* like their globals
+         * to be initialized in a certain order, else they segfault...
+         */
+        final LifeCycle lifeCycle = dispmanxEglCompositor.lifeCycle();
+
+        final WlSeat wlSeat = dispmanxEglCompositor.seatFactory()
+                                                   .create("seat0",
+                                                           "",
+                                                           "",
+                                                           "",
+                                                           "",
+                                                           "");
+
+        /*
+         * Setup keyboard focus tracking to follow mouse pointer & touch.
+         */
+        final PointerDevice pointerDevice = wlSeat.getWlPointer()
+                                                  .getPointerDevice();
+        final TouchDevice touchDevice = wlSeat.getWlTouch()
+                                              .getTouchDevice();
+
+        final WlKeyboard              wlKeyboard          = wlSeat.getWlKeyboard();
+        final KeyboardDevice          keyboardDevice      = wlKeyboard.getKeyboardDevice();
+        final Set<WlKeyboardResource> wlKeyboardResources = wlKeyboard.getResources();
+
+        pointerDevice.getPointerFocusSignal()
+                     .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
+                                                               pointerDevice.getFocus()));
+        touchDevice.getTouchDownSignal()
+                   .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
+                                                             touchDevice.getGrab()));
+        /*
+         * Start the compositor.
+         */
+        lifeCycle.start();
     }
 
     private static void prepareDrmEnvironment() {
@@ -177,82 +253,6 @@ public class Boot {
                                                  .setFocus(wlKeyboard.getResources(),
                                                            pointerDevice.getFocus()));
 
-        lifeCycle.start();
-    }
-
-    private void strap(final DaggerDispmanxEglCompositor.Builder builder) {
-
-        final DispmanxEglCompositor dispmanxEglCompositor = builder.build();
-
-        /*
-         * Keep this first as weston demo clients *really* like their globals
-         * to be initialized in a certain order, else they segfault...
-         */
-        final LifeCycle lifeCycle = dispmanxEglCompositor.lifeCycle();
-
-        final WlSeat wlSeat = dispmanxEglCompositor.seatFactory()
-                                                   .create("seat0",
-                                                           "",
-                                                           "",
-                                                           "",
-                                                           "",
-                                                           "");
-
-        /*
-         * Setup keyboard focus tracking to follow mouse pointer & touch.
-         */
-        final PointerDevice pointerDevice = wlSeat.getWlPointer()
-                                                  .getPointerDevice();
-        final TouchDevice touchDevice = wlSeat.getWlTouch()
-                                              .getTouchDevice();
-
-        final WlKeyboard              wlKeyboard          = wlSeat.getWlKeyboard();
-        final KeyboardDevice          keyboardDevice      = wlKeyboard.getKeyboardDevice();
-        final Set<WlKeyboardResource> wlKeyboardResources = wlKeyboard.getResources();
-
-        pointerDevice.getPointerFocusSignal()
-                     .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
-                                                               pointerDevice.getFocus()));
-        touchDevice.getTouchDownSignal()
-                   .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
-                                                             touchDevice.getGrab()));
-        /*
-         * Start the compositor.
-         */
-        lifeCycle.start();
-    }
-
-    private void strap(final DaggerX11EglCompositor.Builder builder) {
-
-        /*
-         * Inject X11 config.
-         */
-        final X11EglCompositor x11EglCompositor = builder.x11PlatformModule(new X11PlatformModule(new X11PlatformConfigSimple()))
-                                                         .build();
-
-        /*
-         * Keep this first as weston demo clients *really* like their globals
-         * to be initialized in a certain order, else they segfault...
-         */
-        final LifeCycle lifeCycle = x11EglCompositor.lifeCycle();
-
-        /*Get the seat that listens for input on the X connection and passes it on to a wayland seat.
-         */
-        final WlSeat wlSeat = x11EglCompositor.wlSeat();
-
-        /*
-         * Setup keyboard focus tracking to follow mouse pointer.
-         */
-        final WlKeyboard wlKeyboard = wlSeat.getWlKeyboard();
-        final PointerDevice pointerDevice = wlSeat.getWlPointer()
-                                                  .getPointerDevice();
-        pointerDevice.getPointerFocusSignal()
-                     .connect(event -> wlKeyboard.getKeyboardDevice()
-                                                 .setFocus(wlKeyboard.getResources(),
-                                                           pointerDevice.getFocus()));
-        /*
-         * Start the compositor.
-         */
         lifeCycle.start();
     }
 }

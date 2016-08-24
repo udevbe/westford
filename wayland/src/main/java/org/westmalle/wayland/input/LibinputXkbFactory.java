@@ -19,15 +19,15 @@ package org.westmalle.wayland.input;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.nativ.libxkbcommon.Libxkbcommon;
+import org.westmalle.nativ.libxkbcommon.xkb_rule_names;
 import org.westmalle.wayland.core.Xkb;
 import org.westmalle.wayland.core.XkbFactory;
-import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
-import org.westmalle.wayland.nativ.libxkbcommon.xkb_rule_names;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_CONTEXT_NO_FLAGS;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_CONTEXT_NO_FLAGS;
 
 public class LibinputXkbFactory {
 

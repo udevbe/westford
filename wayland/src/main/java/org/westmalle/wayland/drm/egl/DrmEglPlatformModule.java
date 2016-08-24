@@ -19,10 +19,10 @@ package org.westmalle.wayland.drm.egl;
 
 import dagger.Module;
 import dagger.Provides;
+import org.westmalle.tty.TtyModule;
 import org.westmalle.wayland.core.RenderPlatform;
 import org.westmalle.wayland.drm.DrmPlatform;
 import org.westmalle.wayland.drm.DrmPlatformFactory;
-import org.westmalle.wayland.tty.TtyModule;
 
 import javax.inject.Singleton;
 

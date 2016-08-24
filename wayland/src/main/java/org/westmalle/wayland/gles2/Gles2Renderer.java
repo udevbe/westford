@@ -24,6 +24,13 @@ import org.freedesktop.wayland.server.ShmBuffer;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShmFormat;
+import org.westmalle.nativ.libEGL.EglBindWaylandDisplayWL;
+import org.westmalle.nativ.libEGL.EglCreateImageKHR;
+import org.westmalle.nativ.libEGL.EglDestroyImageKHR;
+import org.westmalle.nativ.libEGL.EglQueryWaylandBufferWL;
+import org.westmalle.nativ.libEGL.LibEGL;
+import org.westmalle.nativ.libGLESv2.GlEGLImageTargetTexture2DOES;
+import org.westmalle.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.core.Buffer;
 import org.westmalle.wayland.core.BufferVisitor;
 import org.westmalle.wayland.core.EglBuffer;
@@ -42,13 +49,6 @@ import org.westmalle.wayland.core.SurfaceRenderState;
 import org.westmalle.wayland.core.SurfaceRenderStateVisitor;
 import org.westmalle.wayland.core.UnsupportedBuffer;
 import org.westmalle.wayland.core.calc.Mat4;
-import org.westmalle.wayland.nativ.libEGL.EglBindWaylandDisplayWL;
-import org.westmalle.wayland.nativ.libEGL.EglCreateImageKHR;
-import org.westmalle.wayland.nativ.libEGL.EglDestroyImageKHR;
-import org.westmalle.wayland.nativ.libEGL.EglQueryWaylandBufferWL;
-import org.westmalle.wayland.nativ.libEGL.LibEGL;
-import org.westmalle.wayland.nativ.libGLESv2.GlEGLImageTargetTexture2DOES;
-import org.westmalle.wayland.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
@@ -62,53 +62,53 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.freedesktop.jaccall.Pointer.malloc;
 import static org.freedesktop.jaccall.Pointer.wrap;
 import static org.freedesktop.jaccall.Size.sizeof;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_HEIGHT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_IMAGE_KHR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RED_SIZE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_EXTERNAL_WL;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_FORMAT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGB;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_RGBA;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_UV_WL;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_U_V_WL;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_XUXV_WL;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_BUFFER_WL;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_PLANE_WL;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WAYLAND_Y_INVERTED_WL;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WIDTH;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BGRA_EXT;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_BLEND;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_CLAMP_TO_EDGE;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_ONE_MINUS_SRC_ALPHA;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE0;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_EXTERNAL_OES;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_S;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_T;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
-import static org.westmalle.wayland.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_ALPHA_SIZE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_BLUE_SIZE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_GREEN_SIZE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_HEIGHT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NONE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_IMAGE_KHR;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_OPENGL_ES2_BIT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_OPENGL_ES_API;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_RED_SIZE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_RENDERABLE_TYPE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_SURFACE_TYPE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_TEXTURE_EXTERNAL_WL;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_TEXTURE_FORMAT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_TEXTURE_RGB;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_TEXTURE_RGBA;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_UV_WL;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_U_V_WL;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_TEXTURE_Y_XUXV_WL;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_WAYLAND_BUFFER_WL;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_WAYLAND_PLANE_WL;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_WAYLAND_Y_INVERTED_WL;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_WIDTH;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_BGRA_EXT;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_BLEND;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_CLAMP_TO_EDGE;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_COMPILE_STATUS;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_EXTENSIONS;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_FLOAT;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_FRAGMENT_SHADER;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_INFO_LOG_LENGTH;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_LINK_STATUS;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_NEAREST;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_ONE;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_ONE_MINUS_SRC_ALPHA;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TEXTURE0;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_2D;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_EXTERNAL_OES;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MAG_FILTER;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_MIN_FILTER;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_S;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TEXTURE_WRAP_T;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_TRIANGLES;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_UNSIGNED_BYTE;
+import static org.westmalle.nativ.libGLESv2.LibGLESv2.GL_VERTEX_SHADER;
 
 @Singleton
 public class Gles2Renderer implements GlRenderer {
@@ -200,16 +200,15 @@ public class Gles2Renderer implements GlRenderer {
     private final Display   display;
     @Nonnull
     private final Scene     scene;
-
+    private final int[]                                  textureArgs                  = new int[3];
     @Nonnull
-    private Optional<EglQueryWaylandBufferWL>      eglQueryWaylandBufferWL      = Optional.empty();
+    private       Optional<EglQueryWaylandBufferWL>      eglQueryWaylandBufferWL      = Optional.empty();
     @Nonnull
-    private Optional<EglCreateImageKHR>            eglCreateImageKHR            = Optional.empty();
+    private       Optional<EglCreateImageKHR>            eglCreateImageKHR            = Optional.empty();
     @Nonnull
-    private Optional<EglDestroyImageKHR>           eglDestroyImageKHR           = Optional.empty();
+    private       Optional<EglDestroyImageKHR>           eglDestroyImageKHR           = Optional.empty();
     @Nonnull
-    private Optional<GlEGLImageTargetTexture2DOES> glEGLImageTargetTexture2DOES = Optional.empty();
-
+    private       Optional<GlEGLImageTargetTexture2DOES> glEGLImageTargetTexture2DOES = Optional.empty();
     //shader programs
     //used by shm & egl
     private int argb8888ShaderProgram;
@@ -220,15 +219,12 @@ public class Gles2Renderer implements GlRenderer {
     private int y_uvShaderProgram;
     private int y_xuxvShaderProgram;
     private int externalImageShaderProgram;
-
     //shader args:
     //used by shm & egl
     private int projectionArg;
     private int transformArg;
     private int positionArg;
     private int textureCoordinateArg;
-    private final int[] textureArgs = new int[3];
-
     private long    eglDisplay      = EGL_NO_DISPLAY;
     private boolean hasWlEglDisplay = false;
     private boolean init            = false;
@@ -466,93 +462,6 @@ public class Gles2Renderer implements GlRenderer {
         flushRenderState(eglOutput);
     }
 
-    private void setupEglOutputState(@Nonnull final EglOutput eglOutput) {
-        //to be used state
-        this.eglOutputState = eglOutput.getState()
-                                       .orElseGet(() -> initOutputRenderState(eglOutput));
-        //updates to state are registered with the builder
-        this.newEglOutputState = this.eglOutputState.toBuilder();
-    }
-
-    private void flushRenderState(final EglOutput eglOutput) {
-        eglOutput.updateState(this.newEglOutputState.build());
-        eglOutput.renderEndBeforeSwap();
-        this.libEGL.eglSwapBuffers(this.eglDisplay,
-                                   eglOutput.getEglSurface());
-        eglOutput.renderEndAfterSwap();
-    }
-
-    private EglOutputState initOutputRenderState(final EglOutput eglOutput) {
-
-        final EglOutputState.Builder builder = EglOutputState.builder();
-        final Output output = eglOutput.getWlOutput()
-                                       .getOutput();
-        updateTransform(builder,
-                        output);
-
-        final EglOutputState eglOutputState = builder.build();
-        eglOutput.updateState(eglOutputState);
-
-        //listen for external updates
-        output.getTransformSignal()
-              .connect(event -> handleOutputUpdate(eglOutput,
-                                                   output));
-        output.getModeSignal()
-              .connect(event -> handleOutputUpdate(eglOutput,
-                                                   output));
-
-        return eglOutputState;
-    }
-
-    private void handleOutputUpdate(final EglOutput eglOutput,
-                                    final Output output) {
-        eglOutput.getState()
-                 .ifPresent(eglOutputState -> {
-                     final EglOutputState.Builder stateBuilder = eglOutputState.toBuilder();
-                     updateTransform(stateBuilder,
-                                     output);
-                     eglOutput.updateState(stateBuilder.build());
-                     //schedule new render
-                     eglOutput.render();
-                 });
-    }
-
-    private void updateTransform(final EglOutputState.Builder eglOutputStateBuilder,
-                                 final Output output) {
-
-        final OutputMode mode   = output.getMode();
-        final int        width  = mode.getWidth();
-        final int        height = mode.getHeight();
-
-        //first time render for this output, clear it.
-        this.libGLESv2.glViewport(0,
-                                  0,
-                                  width,
-                                  height);
-        this.libGLESv2.glClearColor(1.0f,
-                                    1.0f,
-                                    1.0f,
-                                    1.0f);
-        this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
-
-        eglOutputStateBuilder.glTransform(createGlTransform(output));
-    }
-
-    private Mat4 createGlTransform(final Output output) {
-
-        final OutputMode mode = output.getMode();
-
-        final int width  = mode.getWidth();
-        final int height = mode.getHeight();
-
-        //@formatter:off
-        return Mat4.create(2.0f / width, 0,              0, -1,
-                           0,            2.0f / -height, 0,  1,
-                           0,            0,              1,  0,
-                           0,            0,              0,  1).multiply(output.getInverseTransform());
-        //@formatter:on
-    }
-
     private void initRenderer() {
         //check for required texture glExtensions
         final String glExtensions = wrap(String.class,
@@ -598,6 +507,22 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glBlendFunc(GL_ONE,
                                    GL_ONE_MINUS_SRC_ALPHA);
         this.init = true;
+    }
+
+    private void setupEglOutputState(@Nonnull final EglOutput eglOutput) {
+        //to be used state
+        this.eglOutputState = eglOutput.getState()
+                                       .orElseGet(() -> initOutputRenderState(eglOutput));
+        //updates to state are registered with the builder
+        this.newEglOutputState = this.eglOutputState.toBuilder();
+    }
+
+    private void flushRenderState(final EglOutput eglOutput) {
+        eglOutput.updateState(this.newEglOutputState.build());
+        eglOutput.renderEndBeforeSwap();
+        this.libEGL.eglSwapBuffers(this.eglDisplay,
+                                   eglOutput.getEglSurface());
+        eglOutput.renderEndAfterSwap();
     }
 
     private int createShaderProgram(final String vertexShaderSource,
@@ -662,6 +587,28 @@ public class Gles2Renderer implements GlRenderer {
         return shaderProgram;
     }
 
+    private EglOutputState initOutputRenderState(final EglOutput eglOutput) {
+
+        final EglOutputState.Builder builder = EglOutputState.builder();
+        final Output output = eglOutput.getWlOutput()
+                                       .getOutput();
+        updateTransform(builder,
+                        output);
+
+        final EglOutputState eglOutputState = builder.build();
+        eglOutput.updateState(eglOutputState);
+
+        //listen for external updates
+        output.getTransformSignal()
+              .connect(event -> handleOutputUpdate(eglOutput,
+                                                   output));
+        output.getModeSignal()
+              .connect(event -> handleOutputUpdate(eglOutput,
+                                                   output));
+
+        return eglOutputState;
+    }
+
     private int compileShader(final String shaderSource,
                               final int shaderType) {
         final int                      shader  = this.libGLESv2.glCreateShader(shaderType);
@@ -674,6 +621,40 @@ public class Gles2Renderer implements GlRenderer {
 
         checkShaderCompilation(shader);
         return shader;
+    }
+
+    private void updateTransform(final EglOutputState.Builder eglOutputStateBuilder,
+                                 final Output output) {
+
+        final OutputMode mode   = output.getMode();
+        final int        width  = mode.getWidth();
+        final int        height = mode.getHeight();
+
+        //first time render for this output, clear it.
+        this.libGLESv2.glViewport(0,
+                                  0,
+                                  width,
+                                  height);
+        this.libGLESv2.glClearColor(1.0f,
+                                    1.0f,
+                                    1.0f,
+                                    1.0f);
+        this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
+
+        eglOutputStateBuilder.glTransform(createGlTransform(output));
+    }
+
+    private void handleOutputUpdate(final EglOutput eglOutput,
+                                    final Output output) {
+        eglOutput.getState()
+                 .ifPresent(eglOutputState -> {
+                     final EglOutputState.Builder stateBuilder = eglOutputState.toBuilder();
+                     updateTransform(stateBuilder,
+                                     output);
+                     eglOutput.updateState(stateBuilder.build());
+                     //schedule new render
+                     eglOutput.render();
+                 });
     }
 
     private void checkShaderCompilation(final int shader) {
@@ -702,6 +683,21 @@ public class Gles2Renderer implements GlRenderer {
             System.err.println("Error compiling the vertex shader: " + log.dref());
             System.exit(1);
         }
+    }
+
+    private Mat4 createGlTransform(final Output output) {
+
+        final OutputMode mode = output.getMode();
+
+        final int width  = mode.getWidth();
+        final int height = mode.getHeight();
+
+        //@formatter:off
+        return Mat4.create(2.0f / width, 0,              0, -1,
+                           0,            2.0f / -height, 0,  1,
+                           0,            0,              1,  0,
+                           0,            0,              0,  1).multiply(output.getInverseTransform());
+        //@formatter:on
     }
 
     private void draw(final WlSurfaceResource wlSurfaceResource) {

@@ -18,12 +18,12 @@
 package org.westmalle.wayland.dispmanx.egl;
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.nativ.libEGL.LibEGL;
+import org.westmalle.nativ.libbcm_host.DISPMANX_MODEINFO_T;
+import org.westmalle.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 import org.westmalle.wayland.core.GlRenderer;
 import org.westmalle.wayland.dispmanx.DispmanxOutput;
 import org.westmalle.wayland.dispmanx.DispmanxPlatform;
-import org.westmalle.wayland.nativ.libEGL.LibEGL;
-import org.westmalle.wayland.nativ.libbcm_host.DISPMANX_MODEINFO_T;
-import org.westmalle.wayland.nativ.libbcm_host.EGL_DISPMANX_WINDOW_T;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -32,15 +32,15 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_SURFACE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NONE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_SURFACE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VENDOR;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VERSION;
 
 public class DispmanxEglPlatformFactory {
 
@@ -139,6 +139,36 @@ public class DispmanxEglPlatformFactory {
                                                            eglExtensions);
     }
 
+    private long createEglDisplay(final long nativeDisplay) {
+        final long display = this.libEGL.eglGetDisplay(nativeDisplay);
+        if (display == EGL_NO_DISPLAY) {
+            this.libEGL.throwError("eglGetDisplay");
+        }
+
+        // initialize the EGL display connection
+        if (this.libEGL.eglInitialize(display,
+                                      0L,
+                                      0L) != 0) {
+            this.libEGL.throwError("eglInitialize");
+        }
+
+        return display;
+    }
+
+    private long getContext(final long display,
+                            final long config) {
+        final long context = this.libEGL.eglCreateContext(display,
+                                                          config,
+                                                          EGL_NO_CONTEXT,
+                                                          Pointer.nref(EGL_CONTEXT_CLIENT_VERSION,
+                                                                       2,
+                                                                       EGL_NONE).address);
+        if (context == EGL_NO_CONTEXT) {
+            this.libEGL.throwError("eglCreateContext");
+        }
+        return context;
+    }
+
     private long createEglSurface(final long nativewindow,
                                   final long display,
                                   final long config,
@@ -161,35 +191,5 @@ public class DispmanxEglPlatformFactory {
         }
 
         return surface;
-    }
-
-    private long getContext(final long display,
-                            final long config) {
-        final long context = this.libEGL.eglCreateContext(display,
-                                                          config,
-                                                          EGL_NO_CONTEXT,
-                                                          Pointer.nref(EGL_CONTEXT_CLIENT_VERSION,
-                                                                       2,
-                                                                       EGL_NONE).address);
-        if (context == EGL_NO_CONTEXT) {
-            this.libEGL.throwError("eglCreateContext");
-        }
-        return context;
-    }
-
-    private long createEglDisplay(final long nativeDisplay) {
-        final long display = this.libEGL.eglGetDisplay(nativeDisplay);
-        if (display == EGL_NO_DISPLAY) {
-            this.libEGL.throwError("eglGetDisplay");
-        }
-
-        // initialize the EGL display connection
-        if (this.libEGL.eglInitialize(display,
-                                      0L,
-                                      0L) != 0) {
-            this.libEGL.throwError("eglInitialize");
-        }
-
-        return display;
     }
 }

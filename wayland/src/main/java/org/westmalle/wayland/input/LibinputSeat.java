@@ -24,8 +24,8 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
 import org.freedesktop.wayland.shared.WlSeatCapability;
+import org.westmalle.nativ.libinput.Libinput;
 import org.westmalle.wayland.core.Seat;
-import org.westmalle.wayland.nativ.libinput.Libinput;
 import org.westmalle.wayland.protocol.WlSeat;
 
 import javax.annotation.Nonnull;
@@ -38,21 +38,21 @@ import static org.freedesktop.jaccall.Pointer.wrap;
 import static org.freedesktop.wayland.shared.WlSeatCapability.KEYBOARD;
 import static org.freedesktop.wayland.shared.WlSeatCapability.POINTER;
 import static org.freedesktop.wayland.shared.WlSeatCapability.TOUCH;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_KEYBOARD;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_POINTER;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_TOUCH;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_ADDED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_REMOVED;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_KEYBOARD_KEY;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_NONE;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_AXIS;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_BUTTON;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_MOTION;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_DOWN;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_FRAME;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_MOTION;
-import static org.westmalle.wayland.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_UP;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_KEYBOARD;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_POINTER;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_DEVICE_CAP_TOUCH;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_ADDED;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_DEVICE_REMOVED;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_KEYBOARD_KEY;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_NONE;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_AXIS;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_BUTTON;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_MOTION;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_DOWN;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_FRAME;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_MOTION;
+import static org.westmalle.nativ.libinput.Libinput.LIBINPUT_EVENT_TOUCH_UP;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateLibinputSeatFactory")
@@ -81,6 +81,17 @@ public class LibinputSeat {
         this.libinputDeviceFactory = libinputDeviceFactory;
         this.libinputContext = libinputContext;
         this.wlSeat = wlSeat;
+    }
+
+    public void disableInput() {
+        this.inputEventSource.ifPresent((eventSource) -> {
+            eventSource.remove();
+            this.inputEventSource = Optional.empty();
+        });
+    }
+
+    public void enableInput() {
+        loop(this.libinputContext);
     }
 
     private void loop(final long libinput) {
@@ -128,51 +139,6 @@ public class LibinputSeat {
                 processDeviceEvent(event,
                                    eventType,
                                    device);
-                break;
-        }
-    }
-
-    private void processDeviceEvent(final long event,
-                                    final int eventType,
-                                    final long device) {
-        final long deviceData = this.libinput.libinput_device_get_user_data(device);
-        if (deviceData == 0L) {
-            //device was not mapped to a device we can handle
-            return;
-        }
-        final LibinputDevice libinputDevice = (LibinputDevice) wrap(Object.class,
-                                                                    deviceData).dref();
-
-        switch (eventType) {
-            case LIBINPUT_EVENT_KEYBOARD_KEY:
-                libinputDevice.handleKeyboardKey(this.libinput.libinput_event_get_keyboard_event(event));
-                break;
-            case LIBINPUT_EVENT_POINTER_MOTION:
-                libinputDevice.handlePointerMotion(this.libinput.libinput_event_get_pointer_event(event));
-                break;
-            case LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE:
-                libinputDevice.handlePointerMotionAbsolute(this.libinput.libinput_event_get_pointer_event(event));
-                break;
-            case LIBINPUT_EVENT_POINTER_BUTTON:
-                libinputDevice.handlePointerButton(this.libinput.libinput_event_get_pointer_event(event));
-                break;
-            case LIBINPUT_EVENT_POINTER_AXIS:
-                libinputDevice.handlePointerAxis(this.libinput.libinput_event_get_pointer_event(event));
-                break;
-            case LIBINPUT_EVENT_TOUCH_DOWN:
-                libinputDevice.handleTouchDown(this.libinput.libinput_event_get_touch_event(event));
-                break;
-            case LIBINPUT_EVENT_TOUCH_MOTION:
-                libinputDevice.handleTouchMotion(this.libinput.libinput_event_get_touch_event(event));
-                break;
-            case LIBINPUT_EVENT_TOUCH_UP:
-                libinputDevice.handleTouchUp(this.libinput.libinput_event_get_touch_event(event));
-                break;
-            case LIBINPUT_EVENT_TOUCH_FRAME:
-                libinputDevice.handleTouchFrame(this.libinput.libinput_event_get_touch_event(event));
-                break;
-            default:
-                //unsupported libinput event
                 break;
         }
     }
@@ -228,6 +194,51 @@ public class LibinputSeat {
         emitSeatCapabilities();
     }
 
+    private void processDeviceEvent(final long event,
+                                    final int eventType,
+                                    final long device) {
+        final long deviceData = this.libinput.libinput_device_get_user_data(device);
+        if (deviceData == 0L) {
+            //device was not mapped to a device we can handle
+            return;
+        }
+        final LibinputDevice libinputDevice = (LibinputDevice) wrap(Object.class,
+                                                                    deviceData).dref();
+
+        switch (eventType) {
+            case LIBINPUT_EVENT_KEYBOARD_KEY:
+                libinputDevice.handleKeyboardKey(this.libinput.libinput_event_get_keyboard_event(event));
+                break;
+            case LIBINPUT_EVENT_POINTER_MOTION:
+                libinputDevice.handlePointerMotion(this.libinput.libinput_event_get_pointer_event(event));
+                break;
+            case LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE:
+                libinputDevice.handlePointerMotionAbsolute(this.libinput.libinput_event_get_pointer_event(event));
+                break;
+            case LIBINPUT_EVENT_POINTER_BUTTON:
+                libinputDevice.handlePointerButton(this.libinput.libinput_event_get_pointer_event(event));
+                break;
+            case LIBINPUT_EVENT_POINTER_AXIS:
+                libinputDevice.handlePointerAxis(this.libinput.libinput_event_get_pointer_event(event));
+                break;
+            case LIBINPUT_EVENT_TOUCH_DOWN:
+                libinputDevice.handleTouchDown(this.libinput.libinput_event_get_touch_event(event));
+                break;
+            case LIBINPUT_EVENT_TOUCH_MOTION:
+                libinputDevice.handleTouchMotion(this.libinput.libinput_event_get_touch_event(event));
+                break;
+            case LIBINPUT_EVENT_TOUCH_UP:
+                libinputDevice.handleTouchUp(this.libinput.libinput_event_get_touch_event(event));
+                break;
+            case LIBINPUT_EVENT_TOUCH_FRAME:
+                libinputDevice.handleTouchFrame(this.libinput.libinput_event_get_touch_event(event));
+                break;
+            default:
+                //unsupported libinput event
+                break;
+        }
+    }
+
     private void emitSeatCapabilities() {
 
         final EnumSet<WlSeatCapability> seatCapabilities = EnumSet.noneOf(WlSeatCapability.class);
@@ -239,16 +250,5 @@ public class LibinputSeat {
         final Seat seat = this.wlSeat.getSeat();
         seat.setCapabilities(seatCapabilities);
         seat.emitCapabilities(this.wlSeat.getResources());
-    }
-
-    public void disableInput() {
-        this.inputEventSource.ifPresent((eventSource) -> {
-            eventSource.remove();
-            this.inputEventSource = Optional.empty();
-        });
-    }
-
-    public void enableInput() {
-        loop(this.libinputContext);
     }
 }

@@ -29,13 +29,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.westmalle.wayland.core.*;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
+import org.westmalle.wayland.core.Compositor;
+import org.westmalle.wayland.core.KeyboardDevice;
+import org.westmalle.wayland.core.Point;
+import org.westmalle.wayland.core.PointerDevice;
+import org.westmalle.wayland.core.PointerGrabMotion;
+import org.westmalle.wayland.core.Rectangle;
+import org.westmalle.wayland.core.Scene;
+import org.westmalle.wayland.core.Surface;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.PointerMotion;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlPointer;
 import org.westmalle.wayland.protocol.WlSurface;
@@ -678,7 +685,7 @@ public class ShellSurfaceTest {
                                                            12345);
 
         final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-        when(scene.getSurfacesStack()).thenReturn(surfacesStack);
+        when(this.scene.getSurfacesStack()).thenReturn(surfacesStack);
 
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);

@@ -4,12 +4,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.core.FiniteRegion;
 import org.westmalle.wayland.core.FiniteRegionFactory;
 import org.westmalle.wayland.core.Point;
 import org.westmalle.wayland.core.Rectangle;
 import org.westmalle.wayland.core.Region;
-import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
 import org.westmalle.wayland.nativ.libpixman1.Libpixman1_Symbols;
 
 import javax.inject.Provider;

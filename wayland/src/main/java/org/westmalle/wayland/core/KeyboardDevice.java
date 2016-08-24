@@ -17,9 +17,9 @@
  */
 package org.westmalle.wayland.core;
 
-import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Display;
@@ -27,15 +27,15 @@ import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
+import org.westmalle.nativ.NativeFileFactory;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.core.events.Key;
 import org.westmalle.wayland.core.events.KeyboardFocus;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.KeyboardFocusLost;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.NativeFileFactory;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon;
 import org.westmalle.wayland.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
@@ -46,16 +46,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.westmalle.wayland.nativ.glibc.Libc.MAP_FAILED;
-import static org.westmalle.wayland.nativ.glibc.Libc.MAP_SHARED;
-import static org.westmalle.wayland.nativ.glibc.Libc.PROT_READ;
-import static org.westmalle.wayland.nativ.glibc.Libc.PROT_WRITE;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_DOWN;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_UP;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_LAYOUT_EFFECTIVE;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_DEPRESSED;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LATCHED;
-import static org.westmalle.wayland.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LOCKED;
+import static org.westmalle.nativ.glibc.Libc.MAP_FAILED;
+import static org.westmalle.nativ.glibc.Libc.MAP_SHARED;
+import static org.westmalle.nativ.glibc.Libc.PROT_READ;
+import static org.westmalle.nativ.glibc.Libc.PROT_WRITE;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_DOWN;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_KEY_UP;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_LAYOUT_EFFECTIVE;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_DEPRESSED;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LATCHED;
+import static org.westmalle.nativ.libxkbcommon.Libxkbcommon.XKB_STATE_MODS_LOCKED;
 
 @AutoFactory(className = "KeyboardDeviceFactory",
              allowSubclasses = true)
@@ -152,10 +152,6 @@ public class KeyboardDevice {
         }
     }
 
-    public void consumeNextKeyEvent() {
-        this.consumeNextKeyEvent = true;
-    }
-
     @Nonnull
     public Xkb getXkb() {
         return this.xkb;
@@ -164,11 +160,6 @@ public class KeyboardDevice {
     @Nonnull
     public Set<Integer> getPressedKeys() {
         return this.pressedKeys;
-    }
-
-    @Nonnull
-    public Signal<Key, Slot<Key>> getKeySignal() {
-        return this.keySignal;
     }
 
     private void doKey(final Set<WlKeyboardResource> wlKeyboardResources,
@@ -233,6 +224,15 @@ public class KeyboardDevice {
         this.xkb = xkb;
     }
 
+    public void consumeNextKeyEvent() {
+        this.consumeNextKeyEvent = true;
+    }
+
+    @Nonnull
+    public Signal<Key, Slot<Key>> getKeySignal() {
+        return this.keySignal;
+    }
+
     @Nonnull
     public Signal<KeyboardFocus, Slot<KeyboardFocus>> getKeyboardFocusSignal() {
         return this.keyboardFocusSignal;
@@ -287,7 +287,7 @@ public class KeyboardDevice {
         newFocus.ifPresent(newFocusResource -> {
             this.focusDestroyListener = Optional.of(() -> updateFocus(wlKeyboardResources,
                                                                       newFocus,
-                                                                      Optional.<WlSurfaceResource>empty()));
+                                                                      Optional.empty()));
             newFocusResource.register(this.focusDestroyListener.get());
 
             final WlSurface wlSurface = (WlSurface) newFocusResource.getImplementation();

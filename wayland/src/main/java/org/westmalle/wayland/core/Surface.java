@@ -24,12 +24,12 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlRegionResource;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.KeyboardFocusGained;
 import org.westmalle.wayland.core.events.KeyboardFocusLost;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 import org.westmalle.wayland.protocol.WlRegion;
 
 import javax.annotation.Nonnegative;
@@ -67,16 +67,15 @@ public class Surface {
     private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
     @Nonnull
     private final Set<WlKeyboardResource>   keyboardFocuses              = new HashSet<>();
-    @Nonnull
-    private       Optional<Role>            surfaceRole                  = Optional.empty();
-    @Nonnull
-    private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
-
     /*
      * pending state
      */
     @Nonnull
     private final SurfaceState.Builder pendingState = SurfaceState.builder();
+    @Nonnull
+    private       Optional<Role>            surfaceRole                  = Optional.empty();
+    @Nonnull
+    private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
     /*
      * committed state
      */
@@ -139,11 +138,6 @@ public class Surface {
     }
 
     @Nonnull
-    public SurfaceState.Builder getPendingState() {
-        return this.pendingState;
-    }
-
-    @Nonnull
     public Surface attachBuffer(@Nonnull final WlBufferResource wlBufferResource,
                                 final int dx,
                                 final int dy) {
@@ -157,6 +151,11 @@ public class Surface {
                                                                  dy)
                                                       .multiply(getState().getPositionTransform()));
         return this;
+    }
+
+    @Nonnull
+    public SurfaceState.Builder getPendingState() {
+        return this.pendingState;
     }
 
     @Nonnull

@@ -19,7 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.nativ.libpixman1.Libpixman1;
+import org.westmalle.nativ.libpixman1.Libpixman1;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;

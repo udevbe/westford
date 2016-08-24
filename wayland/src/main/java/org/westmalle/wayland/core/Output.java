@@ -21,11 +21,11 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.WlOutputResource;
 import org.freedesktop.wayland.shared.WlOutputTransform;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.calc.Mat4;
 import org.westmalle.wayland.core.calc.Vec4;
 import org.westmalle.wayland.core.events.OutputTransform;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -40,18 +40,14 @@ public class Output {
 
     @Nonnull
     private final String name;
-
+    @Nonnull
+    private final FiniteRegion region;
     @Nonnegative
     private float scale            = 1f;
     @Nonnull
     private Mat4  transform        = Mat4.IDENTITY;
     @Nonnull
     private Mat4  inverseTransform = Mat4.IDENTITY;
-
-
-    @Nonnull
-    private final FiniteRegion region;
-
     @Nonnull
     private OutputGeometry outputGeometry = OutputGeometry.builder()
                                                           .physicalWidth(0)

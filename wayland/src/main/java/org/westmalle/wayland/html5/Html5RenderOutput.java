@@ -25,13 +25,13 @@ import org.freedesktop.jaccall.Lng;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Unsigned;
-import org.westmalle.wayland.core.RenderOutput;
+import org.westmalle.nativ.libpng.Libpng;
+import org.westmalle.nativ.libpng.png_rw_ptr;
 import org.westmalle.wayland.core.JobExecutor;
 import org.westmalle.wayland.core.Output;
 import org.westmalle.wayland.core.OutputMode;
+import org.westmalle.wayland.core.RenderOutput;
 import org.westmalle.wayland.core.Renderer;
-import org.westmalle.wayland.nativ.libpng.Libpng;
-import org.westmalle.wayland.nativ.libpng.png_rw_ptr;
 import org.westmalle.wayland.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
@@ -44,12 +44,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static org.freedesktop.jaccall.Pointer.malloc;
 import static org.freedesktop.jaccall.Size.sizeof;
-import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_COLOR_TYPE_RGBA;
-import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_COMPRESSION_TYPE_DEFAULT;
-import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_FILTER_TYPE_DEFAULT;
-import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_INTERLACE_NONE;
-import static org.westmalle.wayland.nativ.libpng.Libpng.PNG_TRANSFORM_IDENTITY;
-import static org.westmalle.wayland.nativ.libpng.Pointerpng_rw_ptr.nref;
+import static org.westmalle.nativ.libpng.Libpng.PNG_COLOR_TYPE_RGBA;
+import static org.westmalle.nativ.libpng.Libpng.PNG_COMPRESSION_TYPE_DEFAULT;
+import static org.westmalle.nativ.libpng.Libpng.PNG_FILTER_TYPE_DEFAULT;
+import static org.westmalle.nativ.libpng.Libpng.PNG_INTERLACE_NONE;
+import static org.westmalle.nativ.libpng.Libpng.PNG_TRANSFORM_IDENTITY;
+import static org.westmalle.nativ.libpng.Pointerpng_rw_ptr.nref;
 
 @AutoFactory(allowSubclasses = true,
              className = "Html5RenderOutputFactory")
@@ -64,17 +64,13 @@ public class Html5RenderOutput implements RenderOutput {
     @Nonnull
     private final Renderer     renderer;
     private final RenderOutput renderOutput;
-
-    private final Pointer<png_rw_ptr> pngWriteCallback = nref(this::pngWriteCallback);
-
-    //private final ExecutorService encoderThread = Executors.newSingleThreadExecutor();
-
     private final Set<Html5Socket> html5Sockets = new CopyOnWriteArraySet<>();
 
-    private final Lock pngBufferSwapLock = new ReentrantLock();
-
-    private          Optional<ByteBuffer> pngWriteBuffer = Optional.empty();
-    private volatile Optional<ByteBuffer> pngReadBuffer  = Optional.empty();
+    //private final ExecutorService encoderThread = Executors.newSingleThreadExecutor();
+    private final    Lock                 pngBufferSwapLock = new ReentrantLock();
+    private          Optional<ByteBuffer> pngWriteBuffer    = Optional.empty();
+    private final    Pointer<png_rw_ptr>  pngWriteCallback  = nref(this::pngWriteCallback);
+    private volatile Optional<ByteBuffer> pngReadBuffer     = Optional.empty();
 
     private volatile long pngBufferAge = 0L;
 
@@ -87,12 +83,6 @@ public class Html5RenderOutput implements RenderOutput {
         this.jobExecutor = jobExecutor;
         this.renderer = renderer;
         this.renderOutput = renderOutput;
-    }
-
-    @Nonnull
-    @Override
-    public WlOutput getWlOutput() {
-        return this.renderOutput.getWlOutput();
     }
 
     public void commitFrame(final Pointer<Byte> bufferRGBA,
@@ -253,6 +243,12 @@ public class Html5RenderOutput implements RenderOutput {
                                                        width,
                                                        height));
         });
+    }
+
+    @Nonnull
+    @Override
+    public WlOutput getWlOutput() {
+        return this.renderOutput.getWlOutput();
     }
 
     @Override

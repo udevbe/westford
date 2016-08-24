@@ -17,14 +17,14 @@
  */
 package org.westmalle.wayland.x11;
 
-import org.freedesktop.jaccall.Pointer;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.EventLoop;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
+import org.westmalle.nativ.libxcb.Libxcb;
+import org.westmalle.nativ.libxcb.xcb_generic_event_t;
 
 import javax.annotation.Nonnull;
 

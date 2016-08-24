@@ -19,8 +19,8 @@ package org.westmalle.wayland.core;
 
 import com.google.auto.factory.AutoFactory;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.events.Key;
-import org.westmalle.wayland.core.events.Slot;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -30,13 +30,12 @@ import java.util.Set;
              className = "KeyBindingFactory")
 public class KeyBinding {
 
-    private final Slot<Key> handleKey = this::handleKey;
-
     @Nonnull
     private final KeyboardDevice keyboardDevice;
     private final Set<Integer>   keys;
     private final Runnable       binding;
-    private Optional<Integer> triggerKey = Optional.empty();
+    private       Optional<Integer> triggerKey = Optional.empty();
+    private final Slot<Key>         handleKey  = this::handleKey;
 
     KeyBinding(@Nonnull final KeyboardDevice keyboardDevice,
                final Set<Integer> keys,

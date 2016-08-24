@@ -19,9 +19,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.westmalle.wayland.core.events.Slot;
-import org.westmalle.wayland.nativ.libxcb.Libxcb;
-import org.westmalle.wayland.nativ.libxcb.xcb_generic_event_t;
+import org.westmalle.Slot;
+import org.westmalle.nativ.libxcb.Libxcb;
+import org.westmalle.nativ.libxcb.xcb_generic_event_t;
 
 import java.util.List;
 
@@ -43,7 +43,7 @@ public class X11EventBusTest {
     public void testHandle() throws Exception {
         //given
         final long xcbConnection = 123456;
-        this.x11EventBus = new X11EventBus(libxcb,
+        this.x11EventBus = new X11EventBus(this.libxcb,
                                            xcbConnection);
 
         final int     fd                    = 0;

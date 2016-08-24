@@ -2,11 +2,11 @@ package org.westmalle.wayland.bootstrap.drm.launcher;
 
 
 import dagger.Component;
-import org.westmalle.wayland.nativ.NativeModule;
-import org.westmalle.wayland.nativ.glibc.Libc;
-import org.westmalle.wayland.nativ.glibc.Libpthread;
-import org.westmalle.wayland.tty.Tty;
-import org.westmalle.wayland.tty.TtyModule;
+import org.westmalle.nativ.NativeModule;
+import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.glibc.Libpthread;
+import org.westmalle.tty.Tty;
+import org.westmalle.tty.TtyModule;
 
 import javax.inject.Singleton;
 

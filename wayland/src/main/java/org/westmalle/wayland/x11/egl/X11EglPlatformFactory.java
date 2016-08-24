@@ -18,10 +18,10 @@
 package org.westmalle.wayland.x11.egl;
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
+import org.westmalle.nativ.libEGL.EglGetPlatformDisplayEXT;
+import org.westmalle.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
-import org.westmalle.wayland.nativ.libEGL.EglGetPlatformDisplayEXT;
-import org.westmalle.wayland.nativ.libEGL.LibEGL;
 import org.westmalle.wayland.x11.X11Output;
 import org.westmalle.wayland.x11.X11Platform;
 
@@ -32,17 +32,17 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NONE;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_PLATFORM_X11_KHR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VENDOR;
-import static org.westmalle.wayland.nativ.libEGL.LibEGL.EGL_VERSION;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_BACK_BUFFER;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_CLIENT_APIS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_CONTEXT_CLIENT_VERSION;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_EXTENSIONS;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NONE;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_CONTEXT;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_NO_DISPLAY;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_PLATFORM_X11_KHR;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_RENDER_BUFFER;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VENDOR;
+import static org.westmalle.nativ.libEGL.LibEGL.EGL_VERSION;
 
 public class X11EglPlatformFactory {
 

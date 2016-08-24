@@ -22,8 +22,8 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.WlTouchResource;
 import org.freedesktop.wayland.util.Fixed;
-import org.westmalle.wayland.core.events.Signal;
-import org.westmalle.wayland.core.events.Slot;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 import org.westmalle.wayland.core.events.TouchDown;
 import org.westmalle.wayland.core.events.TouchGrab;
 import org.westmalle.wayland.core.events.TouchMotion;
@@ -76,6 +76,20 @@ public class TouchDevice {
         this.touchCount = 0;
 
         //TODO send event(s)?
+    }
+
+    @Nonnull
+    public Optional<WlSurfaceResource> getGrab() {
+        return this.grab;
+    }
+
+    private Set<WlTouchResource> filter(final Set<WlTouchResource> wlTouchResources,
+                                        final Client client) {
+        //filter out touch resources that do not belong to the given client.
+        return wlTouchResources.stream()
+                               .filter(wlPointerResource -> wlPointerResource.getClient()
+                                                                             .equals(client))
+                               .collect(Collectors.toSet());
     }
 
     //TODO unit test
@@ -153,6 +167,11 @@ public class TouchDevice {
         this.touchUpSignal.emit(TouchUp.create());
     }
 
+    private int nextUpSerial() {
+        this.upSerial = this.display.nextSerial();
+        return this.upSerial;
+    }
+
     //TODO unit test
     public void motion(final Set<WlTouchResource> wlTouchResources,
                        final int id,
@@ -174,27 +193,8 @@ public class TouchDevice {
         this.touchMotionSignal.emit(TouchMotion.create());
     }
 
-    private int nextUpSerial() {
-        this.upSerial = this.display.nextSerial();
-        return this.upSerial;
-    }
-
     public int getUpSerial() {
         return this.upSerial;
-    }
-
-    @Nonnull
-    public Optional<WlSurfaceResource> getGrab() {
-        return this.grab;
-    }
-
-    private Set<WlTouchResource> filter(final Set<WlTouchResource> wlTouchResources,
-                                        final Client client) {
-        //filter out touch resources that do not belong to the given client.
-        return wlTouchResources.stream()
-                               .filter(wlPointerResource -> wlPointerResource.getClient()
-                                                                             .equals(client))
-                               .collect(Collectors.toSet());
     }
 
     public int getTouchCount() {
