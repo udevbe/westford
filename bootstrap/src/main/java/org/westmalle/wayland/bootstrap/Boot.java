@@ -19,6 +19,8 @@ package org.westmalle.wayland.bootstrap;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.westmalle.launcher.JvmLauncher;
+import org.westmalle.launcher.indirect.DrmBootLauncher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.glibc.Libc_Symbols;
 import org.westmalle.nativ.glibc.Libpthread;
@@ -26,7 +28,6 @@ import org.westmalle.nativ.glibc.Libpthread_Symbols;
 import org.westmalle.nativ.glibc.sigset_t;
 import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
-import org.westmalle.wayland.bootstrap.drm.launcher.DrmBootLauncher;
 import org.westmalle.wayland.bootstrap.html5.DaggerHtml5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.html5.Html5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.DaggerX11EglCompositor;

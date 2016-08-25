@@ -19,7 +19,7 @@ package org.westmalle.wayland.input;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
-import org.westmalle.launcher.DrmLauncher;
+import org.westmalle.launcher.Launcher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libinput.Libinput;
 import org.westmalle.nativ.libinput.Pointerclose_restricted;
@@ -59,7 +59,7 @@ public class LibinputSeatFactory {
     @Nonnull
     private final Libc                       libc;
     @Nonnull
-    private final DrmLauncher                drmLauncher;
+    private final Launcher                   launcher;
 
     @Inject
     LibinputSeatFactory(@Nonnull final WlSeatFactory wlSeatFactory,
@@ -71,7 +71,7 @@ public class LibinputSeatFactory {
                         @Nonnull final Libinput libinput,
                         @Nonnull final Libudev libudev,
                         @Nonnull final Libc libc,
-                        @Nonnull final DrmLauncher drmLauncher) {
+                        @Nonnull final Launcher launcher) {
         this.wlSeatFactory = wlSeatFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.wlPointerFactory = wlPointerFactory;
@@ -81,7 +81,7 @@ public class LibinputSeatFactory {
         this.libinput = libinput;
         this.libudev = libudev;
         this.libc = libc;
-        this.drmLauncher = drmLauncher;
+        this.launcher = launcher;
     }
 
     public WlSeat create(@Nonnull final String seatId,
@@ -104,10 +104,10 @@ public class LibinputSeatFactory {
                                                                                  wlSeat);
         libinputSeat.enableInput();
 
-        this.drmLauncher.getActivateSignal()
-                        .connect(event -> libinputSeat.enableInput());
-        this.drmLauncher.getDeactivateSignal()
-                        .connect(event -> libinputSeat.disableInput());
+        this.launcher.getActivateSignal()
+                     .connect(event -> libinputSeat.enableInput());
+        this.launcher.getDeactivateSignal()
+                     .connect(event -> libinputSeat.disableInput());
 
         return wlSeat;
     }

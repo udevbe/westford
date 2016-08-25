@@ -4,7 +4,7 @@ import org.freedesktop.jaccall.Ptr;
 import org.westmalle.Signal;
 import org.westmalle.Slot;
 
-public interface DrmLauncher {
+public interface Launcher {
 
     void switchTty(int vt);
 
