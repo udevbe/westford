@@ -18,6 +18,7 @@
 package org.westmalle.wayland.bootstrap.drm;
 
 import dagger.Component;
+import org.westmalle.launcher.DrmLauncherDirectModule;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.LifeCycle;
@@ -30,7 +31,8 @@ import javax.inject.Singleton;
 @Singleton
 @Component(modules = {CoreModule.class,
                       Gles2RendererModule.class,
-                      DrmEglPlatformModule.class})
+                      DrmEglPlatformModule.class,
+                      DrmLauncherDirectModule.class})
 public interface DrmEglCompositor {
 
     LifeCycle lifeCycle();
