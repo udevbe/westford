@@ -115,7 +115,12 @@ public class DrmPlatformFactory {
                                        WaylandServerCore.WL_EVENT_READABLE,
                                        drmEventBus);
 
-        setDrmMaster(drmFd);
+        this.drmLauncher.setDrmMaster(drmFd);
+
+        this.drmLauncher.getActivateSignal()
+                        .connect(event -> this.drmLauncher.setDrmMaster(drmFd));
+        this.drmLauncher.getDeactivateSignal()
+                        .connect(event -> this.drmLauncher.dropDrmMaster(drmFd));
 
         return this.privateDrmPlatformFactory.create(drmDevice,
                                                      drmFd,
@@ -216,7 +221,9 @@ public class DrmPlatformFactory {
         }
 
         final long filename = this.libudev.udev_device_get_devnode(device);
-        //FIXME use drmLauncher?
+
+        this.drmLauncher.open(filename,
+                              O_RDWR);
         final int fd = this.libc.open(filename,
                                       O_RDWR);
         if (fd < 0) {
@@ -261,13 +268,6 @@ public class DrmPlatformFactory {
         }
 
         return drmOutputs;
-    }
-
-    //FIXME move to master?
-    private void setDrmMaster(final int drmFd) {
-        if (this.libdrm.drmSetMaster(drmFd) != 0) {
-            throw new RuntimeException("failed to set drm master.");
-        }
     }
 
     private Optional<Integer> findCrtcIdForConnector(final int drmFd,
@@ -354,7 +354,7 @@ public class DrmPlatformFactory {
                                                 .flags(mode.flags())
                                                 .build();
 
-        //FIXME decuse an output name from the drm connector
+        //FIXME deduce an output name from the drm connector
         return this.drmOutputFactory.create(this.wlOutputFactory.create(this.outputFactory.create("dummy",
                                                                                                   outputGeometry,
                                                                                                   outputMode)),
@@ -363,12 +363,4 @@ public class DrmPlatformFactory {
                                             crtcId,
                                             mode);
     }
-
-    //FIXME move to launcher?
-    private void dropDrmMaster(final int drmFd) {
-        if (this.libdrm.drmDropMaster(drmFd) != 0) {
-            throw new RuntimeException("failed to drop drm master.");
-        }
-    }
-
 }

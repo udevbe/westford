@@ -4,9 +4,11 @@ package org.westmalle.launcher;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.jaccall.Ptr;
 import org.westmalle.Signal;
 import org.westmalle.Slot;
 import org.westmalle.nativ.glibc.Libc;
+import org.westmalle.nativ.libdrm.Libdrm;
 import org.westmalle.tty.Tty;
 
 import javax.annotation.Nonnull;
@@ -19,13 +21,17 @@ public class DrmLauncherDirect implements DrmLauncher {
     private final Signal<Object, Slot<Object>> deactivateSignal = new Signal<>();
 
     @Nonnull
-    private final Libc libc;
+    private final Libc   libc;
     @Nonnull
-    private final Tty  tty;
+    private final Libdrm libdrm;
+    @Nonnull
+    private final Tty    tty;
 
     DrmLauncherDirect(@Provided @Nonnull final Libc libc,
+                      @Provided @Nonnull final Libdrm libdrm,
                       @Provided @Nonnull final Tty tty) {
         this.libc = libc;
+        this.libdrm = libdrm;
         this.tty = tty;
     }
 
@@ -35,10 +41,24 @@ public class DrmLauncherDirect implements DrmLauncher {
     }
 
     @Override
-    public int openPrivileged(final String path,
-                              final int flags) {
+    public int open(@Ptr(String.class) final long path,
+                    final int flags) {
         return this.libc.open(Pointer.nref(path).address,
                               flags);
+    }
+
+    @Override
+    public void setDrmMaster(final int fd) {
+        if (this.libdrm.drmSetMaster(fd) != 0) {
+            throw new RuntimeException("failed to set drm master.");
+        }
+    }
+
+    @Override
+    public void dropDrmMaster(final int fd) {
+        if (this.libdrm.drmDropMaster(fd) != 0) {
+            throw new RuntimeException("failed to drop drm master.");
+        }
     }
 
     @Override

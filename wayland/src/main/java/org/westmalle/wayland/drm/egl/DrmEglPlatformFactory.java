@@ -138,6 +138,15 @@ public class DrmEglPlatformFactory {
                                                                                     eglContext,
                                                                                     eglConfig)));
 
+        this.drmLauncher.getActivateSignal()
+                        .connect(event ->
+                                         drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
+                                             drmEglRenderOutput.setDefaultMode();
+                                             drmEglRenderOutput.enable();
+                                         }));
+        this.drmLauncher.getDeactivateSignal()
+                        .connect(event -> drmEglRenderOutputs.forEach(DrmEglOutput::disable));
+
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,
                                                         eglContext,
@@ -262,18 +271,5 @@ public class DrmEglPlatformFactory {
         }
 
         return eglSurface;
-    }
-
-    //FIXME listen for launcher activate events
-    private void enterVt(final List<DrmEglOutput> drmEglRenderOutputs) {
-        drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
-            drmEglRenderOutput.setDefaultMode();
-            drmEglRenderOutput.enable();
-        });
-    }
-
-    //FIXME listen for launcher deactivate events
-    private void leaveVt(final List<DrmEglOutput> drmEglRenderOutputs) {
-        drmEglRenderOutputs.forEach(DrmEglOutput::disable);
     }
 }

@@ -104,7 +104,10 @@ public class LibinputSeatFactory {
                                                                                  wlSeat);
         libinputSeat.enableInput();
 
-        //FIXME enable/disable input based on launcher activate/deactivate signal
+        this.drmLauncher.getActivateSignal()
+                        .connect(event -> libinputSeat.enableInput());
+        this.drmLauncher.getDeactivateSignal()
+                        .connect(event -> libinputSeat.disableInput());
 
         return wlSeat;
     }
