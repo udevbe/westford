@@ -1,5 +1,6 @@
-package org.westmalle.wayland.bootstrap;
+package org.westmalle.launcher;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +11,29 @@ import java.util.Map;
 public class JvmLauncher {
 
     public static final String OPTION_PREFIX = "option=";
+
+    @Inject
+    JvmLauncher() {
+    }
+
+    public Process fork(final String[] args,
+                        final String mainClassName) throws IOException, InterruptedException {
+        final List<String> options     = new LinkedList<>();
+        final List<String> programArgs = new LinkedList<>();
+
+        for (final String arg : args) {
+            if (arg.startsWith(OPTION_PREFIX)) {
+                options.add(arg.substring(OPTION_PREFIX.length()));
+            }
+            else {
+                programArgs.add(arg);
+            }
+        }
+
+        return startNewJavaProcess(options,
+                                   mainClassName,
+                                   programArgs);
+    }
 
     private Process startNewJavaProcess(final List<String> options,
                                         final String mainClass,
@@ -44,26 +68,7 @@ public class JvmLauncher {
         return processBuilder;
     }
 
-    public Process fork(final String[] args,
-                        final String mainClassName) throws IOException, InterruptedException {
-        final List<String> options     = new LinkedList<>();
-        final List<String> programArgs = new LinkedList<>();
-
-        for (final String arg : args) {
-            if (arg.startsWith(OPTION_PREFIX)) {
-                options.add(arg.substring(OPTION_PREFIX.length()));
-            }
-            else {
-                programArgs.add(arg);
-            }
-        }
-
-        return startNewJavaProcess(options,
-                                   mainClassName,
-                                   programArgs);
-    }
-
-    //TODO embed: init a jvm in the current process)
+    //TODO embed: init a jvm in the current process using jni api
 //    public void embed(final String[] args,
 //                      final String mainClassName) {
 //    }

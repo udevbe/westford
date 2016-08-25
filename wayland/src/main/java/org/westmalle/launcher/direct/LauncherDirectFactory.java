@@ -1,12 +1,13 @@
-package org.westmalle.launcher;
+package org.westmalle.launcher.direct;
 
 
+import org.westmalle.launcher.Launcher;
 import org.westmalle.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-public class DrmLauncherDirectFactory {
+public class LauncherDirectFactory {
 
     @Nonnull
     private final Tty                             tty;
@@ -14,14 +15,14 @@ public class DrmLauncherDirectFactory {
     private final PrivateDrmLauncherDirectFactory privateDrmLauncherDirectFactory;
 
     @Inject
-    DrmLauncherDirectFactory(@Nonnull final Tty tty,
-                             @Nonnull final PrivateDrmLauncherDirectFactory privateDrmLauncherDirectFactory) {
+    LauncherDirectFactory(@Nonnull final Tty tty,
+                          @Nonnull final PrivateDrmLauncherDirectFactory privateDrmLauncherDirectFactory) {
         this.tty = tty;
         this.privateDrmLauncherDirectFactory = privateDrmLauncherDirectFactory;
     }
 
-    public DrmLauncher create() {
-        final DrmLauncherDirect drmLauncherDirect = this.privateDrmLauncherDirectFactory.create();
+    public Launcher create() {
+        final LauncherDirect drmLauncherDirect = this.privateDrmLauncherDirectFactory.create();
         this.tty.getVtEnterSignal()
                 .connect(event -> drmLauncherDirect.getActivateSignal()
                                                    .emit(event));

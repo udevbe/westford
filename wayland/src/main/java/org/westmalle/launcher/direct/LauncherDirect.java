@@ -1,4 +1,4 @@
-package org.westmalle.launcher;
+package org.westmalle.launcher.direct;
 
 
 import com.google.auto.factory.AutoFactory;
@@ -7,6 +7,7 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.westmalle.Signal;
 import org.westmalle.Slot;
+import org.westmalle.launcher.Launcher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libdrm.Libdrm;
 import org.westmalle.tty.Tty;
@@ -15,7 +16,7 @@ import javax.annotation.Nonnull;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateDrmLauncherDirectFactory")
-public class DrmLauncherDirect implements DrmLauncher {
+public class LauncherDirect implements Launcher {
 
     private final Signal<Object, Slot<Object>> activateSignal   = new Signal<>();
     private final Signal<Object, Slot<Object>> deactivateSignal = new Signal<>();
@@ -27,9 +28,9 @@ public class DrmLauncherDirect implements DrmLauncher {
     @Nonnull
     private final Tty    tty;
 
-    DrmLauncherDirect(@Provided @Nonnull final Libc libc,
-                      @Provided @Nonnull final Libdrm libdrm,
-                      @Provided @Nonnull final Tty tty) {
+    LauncherDirect(@Provided @Nonnull final Libc libc,
+                   @Provided @Nonnull final Libdrm libdrm,
+                   @Provided @Nonnull final Tty tty) {
         this.libc = libc;
         this.libdrm = libdrm;
         this.tty = tty;
