@@ -2,10 +2,11 @@ package org.westmalle.launcher;
 
 import dagger.Module;
 import dagger.Provides;
+import org.westmalle.tty.TtyModule;
 
 import javax.inject.Singleton;
 
-@Module
+@Module(includes = {TtyModule.class})
 public class DrmLauncherDirectModule {
 
     @Provides
