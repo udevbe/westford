@@ -19,7 +19,7 @@ package org.westmalle.wayland.drm.egl;
 
 
 import org.freedesktop.jaccall.Pointer;
-import org.westmalle.launcher.Launcher;
+import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westmalle.nativ.libEGL.LibEGL;
@@ -71,7 +71,7 @@ public class DrmEglPlatformFactory {
     @Nonnull
     private final GlRenderer                   glRenderer;
     @Nonnull
-    private final Launcher                     launcher;
+    private final Privileges                   privileges;
 
     @Inject
     DrmEglPlatformFactory(@Nonnull final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory,
@@ -81,7 +81,7 @@ public class DrmEglPlatformFactory {
                           @Nonnull final DrmPlatform drmPlatform,
                           @Nonnull final DrmEglOutputFactory drmEglOutputFactory,
                           @Nonnull final GlRenderer glRenderer,
-                          @Nonnull final Launcher launcher) {
+                          @Nonnull final Privileges privileges) {
         this.privateDrmEglPlatformFactory = privateDrmEglPlatformFactory;
         this.libgbm = libgbm;
         this.libEGL = libEGL;
@@ -89,7 +89,7 @@ public class DrmEglPlatformFactory {
         this.drmPlatform = drmPlatform;
         this.drmEglOutputFactory = drmEglOutputFactory;
         this.glRenderer = glRenderer;
-        this.launcher = launcher;
+        this.privileges = privileges;
     }
 
     public DrmEglPlatform create() {
@@ -138,14 +138,14 @@ public class DrmEglPlatformFactory {
                                                                                     eglContext,
                                                                                     eglConfig)));
 
-        this.launcher.getActivateSignal()
-                     .connect(event ->
-                                         drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
-                                             drmEglRenderOutput.setDefaultMode();
-                                             drmEglRenderOutput.enable();
-                                         }));
-        this.launcher.getDeactivateSignal()
-                     .connect(event -> drmEglRenderOutputs.forEach(DrmEglOutput::disable));
+        this.privileges.getActivateSignal()
+                       .connect(event ->
+                                        drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
+                                            drmEglRenderOutput.setDefaultMode();
+                                            drmEglRenderOutput.enable();
+                                        }));
+        this.privileges.getDeactivateSignal()
+                       .connect(event -> drmEglRenderOutputs.forEach(DrmEglOutput::disable));
 
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,

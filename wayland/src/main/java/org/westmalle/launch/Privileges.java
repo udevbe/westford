@@ -1,11 +1,11 @@
-package org.westmalle.launcher;
+package org.westmalle.launch;
+
 
 import org.freedesktop.jaccall.Ptr;
 import org.westmalle.Signal;
 import org.westmalle.Slot;
 
-public interface Launcher {
-
+public interface Privileges {
     void switchTty(int vt);
 
     int open(@Ptr(String.class) long path,
