@@ -1,5 +1,6 @@
-package org.westmalle.launcher;
+package org.westmalle.launch;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -16,9 +17,11 @@ public class JvmLauncher {
     JvmLauncher() {
     }
 
-    public Process fork(final String[] args,
-                        final String mainClassName) throws IOException, InterruptedException {
-        final List<String> options     = new LinkedList<>();
+    @Nonnull
+    public Process fork(@Nonnull final List<String> options,
+                        @Nonnull final String[] args,
+                        @Nonnull final String mainClassName) throws IOException, InterruptedException {
+
         final List<String> programArgs = new LinkedList<>();
 
         for (final String arg : args) {
@@ -66,6 +69,26 @@ public class JvmLauncher {
         environment.put("CLASSPATH",
                         classpath);
         return processBuilder;
+    }
+
+    @Nonnull
+    public Process fork(@Nonnull final String[] args,
+                        @Nonnull final String mainClassName) throws IOException, InterruptedException {
+        final List<String> options     = new LinkedList<>();
+        final List<String> programArgs = new LinkedList<>();
+
+        for (final String arg : args) {
+            if (arg.startsWith(OPTION_PREFIX)) {
+                options.add(arg.substring(OPTION_PREFIX.length()));
+            }
+            else {
+                programArgs.add(arg);
+            }
+        }
+
+        return startNewJavaProcess(options,
+                                   mainClassName,
+                                   programArgs);
     }
 
     //TODO embed: init a jvm in the current process using jni api

@@ -20,7 +20,7 @@ package org.westmalle.wayland.drm;
 
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
-import org.westmalle.launcher.Launcher;
+import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libdrm.DrmModeConnector;
 import org.westmalle.nativ.libdrm.DrmModeEncoder;
@@ -68,7 +68,7 @@ public class DrmPlatformFactory {
     @Nonnull
     private final OutputFactory             outputFactory;
     @Nonnull
-    private final Launcher                  launcher;
+    private final Privileges                privileges;
 
     @Inject
     DrmPlatformFactory(@Nonnull final Libc libc,
@@ -80,7 +80,7 @@ public class DrmPlatformFactory {
                        @Nonnull final PrivateDrmPlatformFactory privateDrmPlatformFactory,
                        @Nonnull final WlOutputFactory wlOutputFactory,
                        @Nonnull final OutputFactory outputFactory,
-                       @Nonnull final Launcher launcher) {
+                       @Nonnull final Privileges privileges) {
         this.libudev = libudev;
         this.libc = libc;
         this.libdrm = libdrm;
@@ -90,7 +90,7 @@ public class DrmPlatformFactory {
         this.privateDrmPlatformFactory = privateDrmPlatformFactory;
         this.wlOutputFactory = wlOutputFactory;
         this.outputFactory = outputFactory;
-        this.launcher = launcher;
+        this.privileges = privileges;
     }
 
     public DrmPlatform create() {
@@ -115,12 +115,12 @@ public class DrmPlatformFactory {
                                        WaylandServerCore.WL_EVENT_READABLE,
                                        drmEventBus);
 
-        this.launcher.setDrmMaster(drmFd);
+        this.privileges.setDrmMaster(drmFd);
 
-        this.launcher.getActivateSignal()
-                     .connect(event -> this.launcher.setDrmMaster(drmFd));
-        this.launcher.getDeactivateSignal()
-                     .connect(event -> this.launcher.dropDrmMaster(drmFd));
+        this.privileges.getActivateSignal()
+                       .connect(event -> this.privileges.setDrmMaster(drmFd));
+        this.privileges.getDeactivateSignal()
+                       .connect(event -> this.privileges.dropDrmMaster(drmFd));
 
         return this.privateDrmPlatformFactory.create(drmDevice,
                                                      drmFd,
@@ -222,8 +222,8 @@ public class DrmPlatformFactory {
 
         final long filename = this.libudev.udev_device_get_devnode(device);
 
-        this.launcher.open(filename,
-                           O_RDWR);
+        this.privileges.open(filename,
+                             O_RDWR);
         final int fd = this.libc.open(filename,
                                       O_RDWR);
         if (fd < 0) {

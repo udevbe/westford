@@ -1,4 +1,4 @@
-package org.westmalle.launcher.indirect;
+package org.westmalle.launch.indirect;
 
 
 import org.freedesktop.jaccall.Pointer;
@@ -17,37 +17,37 @@ import static org.westmalle.nativ.glibc.Libc.SFD_CLOEXEC;
 import static org.westmalle.nativ.glibc.Libc.SFD_NONBLOCK;
 import static org.westmalle.nativ.glibc.Libc.SOCK_SEQPACKET;
 
-public class LauncherIndirectParentFactory {
+public class IndirectLauncherFactory {
 
-
     @Nonnull
-    private final Libpthread                              libpthread;
+    private final Libpthread                     libpthread;
     @Nonnull
-    private final Libc                                    libc;
+    private final Libc                           libc;
     @Nonnull
-    private final Tty                                     tty;
+    private final Tty                            tty;
     @Nonnull
-    private final PrivateDrmLauncherIndirectParentFactory privateDrmLauncherIndirectParentFactory;
+    private final PrivateIndirectLauncherFactory privateIndirectLauncherFactory;
 
     @Inject
-    LauncherIndirectParentFactory(@Nonnull final Libpthread libpthread,
-                                  @Nonnull final Libc libc,
-                                  @Nonnull final Tty tty,
-                                  @Nonnull final PrivateDrmLauncherIndirectParentFactory privateDrmLauncherIndirectParentFactory) {
+    IndirectLauncherFactory(@Nonnull final Libpthread libpthread,
+                            @Nonnull final Libc libc,
+                            @Nonnull final Tty tty,
+                            @Nonnull final PrivateIndirectLauncherFactory privateIndirectLauncherFactory) {
         this.libpthread = libpthread;
         this.libc = libc;
         this.tty = tty;
-        this.privateDrmLauncherIndirectParentFactory = privateDrmLauncherIndirectParentFactory;
+        this.privateIndirectLauncherFactory = privateIndirectLauncherFactory;
     }
 
-    public LauncherIndirectParent create() {
+    public IndirectLauncher create() {
         final int              signalFd = setupTty();
         final Pointer<Integer> sock     = setupSocket();
 
+        final IndirectLauncher indirectLauncher = this.privateIndirectLauncherFactory.create(sock,
+                                                                                             signalFd);
         this.libc.close(sock.dref(1));
 
-        return this.privateDrmLauncherIndirectParentFactory.create(signalFd,
-                                                                   sock);
+        return indirectLauncher;
     }
 
     private int setupTty() {
@@ -83,7 +83,7 @@ public class LauncherIndirectParentFactory {
         final Thread shutdownHook = new Thread() {
             @Override
             public void run() {
-                LauncherIndirectParentFactory.this.tty.close();
+                IndirectLauncherFactory.this.tty.close();
             }
         };
         Runtime.getRuntime()
