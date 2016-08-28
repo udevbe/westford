@@ -275,19 +275,19 @@ public class Libc {
     /**
      * Page can be read.
      */
-    public static final int  PROT_READ      = 0x1;
+    public static final int              PROT_READ      = 0x1;
     /**
      * Page can be written.
      */
-    public static final int  PROT_WRITE     = 0x2;
+    public static final int              PROT_WRITE     = 0x2;
     /**
      * Page can be executed.
      */
-    public static final int  PROT_EXEC      = 0x4;
+    public static final int              PROT_EXEC      = 0x4;
     /**
      * Page can not be accessed.
      */
-    public static final int  PROT_NONE      = 0x0;
+    public static final int              PROT_NONE      = 0x0;
     /**
      * Extend change to start of  growsdown vma (mprotect only).
      */
@@ -322,8 +322,21 @@ public class Libc {
     @Ptr
     public native long errno();
 
+    public String getStrError() {
+        return Pointer.wrap(String.class,
+                            strerror(getErrno()))
+                      .dref();
+    }
+
+    @Ptr(String.class)
+    public native long strerror(int errnum);
+
     public int getErrno() {
         return this.errno_p.dref();
+    }
+
+    public void setErrno(final int errno) {
+        this.errno_p.write(errno);
     }
 
     public native int write(int fd,
