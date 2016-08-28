@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 public interface LauncherComponent {
     JvmLauncher jvmLauncher();
 
-    DirectLauncherComponent direct();
+    DirectLauncherSubcomponent direct();
 
-    IndirectLauncherComponent indirect();
+    IndirectLauncherSubcomponent indirect();
 }
