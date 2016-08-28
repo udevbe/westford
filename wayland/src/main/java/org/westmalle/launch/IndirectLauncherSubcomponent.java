@@ -9,6 +9,6 @@ import javax.inject.Singleton;
 @Subcomponent(modules = {
         IndirectLauncherModule.class
 })
-public interface IndirectLauncherComponent {
+public interface IndirectLauncherSubcomponent {
     Launcher launcher();
 }

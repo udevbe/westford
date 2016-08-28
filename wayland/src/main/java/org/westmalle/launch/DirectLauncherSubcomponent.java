@@ -6,6 +6,6 @@ import org.westmalle.launch.direct.DirectLauncherModule;
 @Subcomponent(modules = {
         DirectLauncherModule.class
 })
-public interface DirectLauncherComponent {
+public interface DirectLauncherSubcomponent {
     Launcher launcher();
 }

@@ -49,15 +49,17 @@ public class DirectPrivileges implements Privileges {
 
     @Override
     public void setDrmMaster(final int fd) {
+        this.libc.setErrno(0);
         if (this.libdrm.drmSetMaster(fd) != 0) {
-            throw new RuntimeException("failed to set drm master.");
+            throw new RuntimeException("failed to set drm master: " + this.libc.getStrError());
         }
     }
 
     @Override
     public void dropDrmMaster(final int fd) {
+        this.libc.setErrno(0);
         if (this.libdrm.drmDropMaster(fd) != 0) {
-            throw new RuntimeException("failed to drop drm master.");
+            throw new RuntimeException("failed to drop drm master: " + this.libc.getStrError());
         }
     }
 

@@ -83,6 +83,10 @@ public class Tty implements AutoCloseable {
     }
 
     public void handleVtLeave() {
+        if (!this.vtActive) {
+            return;
+        }
+
         LOGGER.info("Leaving our vt:" + this.vt);
 
         this.vtActive = false;
@@ -91,19 +95,23 @@ public class Tty implements AutoCloseable {
         if (-1 == this.libc.ioctl(this.ttyFd,
                                   VT_RELDISP,
                                   1)) {
-            throw new Error(String.format("ioctl[VT_RELDISP, 1] failed: %d",
-                                          this.libc.getErrno()));
+            throw new Error(String.format("ioctl[VT_RELDISP, 1] failed: %s",
+                                          this.libc.getStrError()));
         }
     }
 
     public void handleVtEnter() {
+        if (this.vtActive) {
+            return;
+        }
+
         LOGGER.info("Entering our vt:" + this.vt);
 
         if (-1 == this.libc.ioctl(this.ttyFd,
                                   VT_RELDISP,
                                   VT_ACKACQ)) {
-            throw new Error(String.format("ioctl[VT_RELDISP, VT_ACKACQ] failed: %d",
-                                          this.libc.getErrno()));
+            throw new Error(String.format("ioctl[VT_RELDISP, VT_ACKACQ] failed: %s",
+                                          this.libc.getStrError()));
         }
 
         this.vtActive = true;
