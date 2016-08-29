@@ -1,8 +1,9 @@
 package org.westmalle.launch.direct;
 
+
 import dagger.Module;
 import dagger.Provides;
-import org.westmalle.launch.Launcher;
+import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.NativeModule;
 import org.westmalle.tty.TtyModule;
 
@@ -10,10 +11,10 @@ import org.westmalle.tty.TtyModule;
         TtyModule.class,
         NativeModule.class
 })
-public class DirectLauncherModule {
+public class DirectModule {
 
     @Provides
-    Launcher providesDirectLauncher() {
-        return new DirectLauncher();
+    Privileges providePrivileges(final DirectPrivilegesFactory directPrivilegesFactory) {
+        return directPrivilegesFactory.create();
     }
 }

@@ -17,23 +17,11 @@
  */
 package org.westmalle.wayland.bootstrap.drm;
 
-import dagger.Component;
 import org.westmalle.launch.Privileges;
-import org.westmalle.launch.direct.DirectPrivilegesModule;
-import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.LifeCycle;
-import org.westmalle.wayland.drm.egl.DrmEglPlatformModule;
-import org.westmalle.wayland.gles2.Gles2RendererModule;
 import org.westmalle.wayland.input.LibinputSeatFactory;
 
-import javax.inject.Singleton;
-
-@Singleton
-@Component(modules = {CoreModule.class,
-                      Gles2RendererModule.class,
-                      DrmEglPlatformModule.class,
-                      DirectPrivilegesModule.class})
 public interface DrmEglCompositor {
 
     LifeCycle lifeCycle();

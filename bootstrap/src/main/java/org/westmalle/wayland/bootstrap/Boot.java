@@ -19,8 +19,7 @@ package org.westmalle.wayland.bootstrap;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.WlKeyboardResource;
-import org.westmalle.launch.DaggerLauncherComponent;
-import org.westmalle.launch.LauncherComponent;
+import org.westmalle.launch.JvmLauncher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.glibc.Libc_Symbols;
 import org.westmalle.nativ.glibc.Libpthread;
@@ -28,7 +27,7 @@ import org.westmalle.nativ.glibc.Libpthread_Symbols;
 import org.westmalle.nativ.glibc.sigset_t;
 import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
-import org.westmalle.wayland.bootstrap.drm.DrmLauncher;
+import org.westmalle.wayland.bootstrap.drm.DirectDrmLaunch;
 import org.westmalle.wayland.bootstrap.html5.DaggerHtml5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.html5.Html5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.DaggerX11EglCompositor;
@@ -52,7 +51,6 @@ public class Boot {
 
     private static final Logger LOGGER   = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private static final String BACK_END = "backEnd";
-
 
     public static void main(final String[] args) throws IOException, InterruptedException {
         configureLogger();
@@ -88,11 +86,8 @@ public class Boot {
             case "DrmEgl":
                 LOGGER.info("Detected DrmEgl backend.");
                 prepareDrmEnvironment();
-                final LauncherComponent launcherComponent = DaggerLauncherComponent.builder()
-                                                                                   .build();
-                System.exit(launcherComponent.jvmLauncher()
-                                             .fork(args,
-                                                   DrmLauncher.class.getName())
+                System.exit(new JvmLauncher().fork(args,
+                                                   DirectDrmLaunch.class.getName())
                                              .waitFor());
                 break;
             case "Html5X11Egl":
@@ -206,19 +201,20 @@ public class Boot {
         final Libc       libc       = new Libc();
         final Libpthread libpthread = new Libpthread();
 
-        //JVM WORKAROUND aka HACK
+        //JVM WORKAROUND
         /*
-         * We need this hack because of linux signal semantics.
-         * tl;dr:
          * We need to block certain signals used by tty switching in our child jvm.
          * We can not do this in our child process itself as blocking signals only works for the current thread.
          * Since the jvm is multithreaded and we can not access things like gc thread, blocking signals in the
          * java main thread alone will not work.
          * Blocking a signal is however inherited by child processes.
          * Hence we do it here so all child jvm threads inherit the blocking signals.
+         * tl;dr:
+         * We need this hack because of linux signal semantics.
          */
         final sigset_t sigset = new sigset_t();
         libpthread.sigemptyset(Pointer.ref(sigset).address);
+        //the signals being blocked here must the same signals defined in the org.westmalle.tty.Tty class.
         libpthread.sigaddset(Pointer.ref(sigset).address,
                              libc.SIGRTMIN());
         libpthread.sigaddset(Pointer.ref(sigset).address,

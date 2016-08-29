@@ -34,12 +34,7 @@ import java.util.Set;
 
 public class DrmBoot {
 
-    public static void main(final String[] args) {
-        new DrmBoot().strap(DaggerDrmEglCompositor.builder()
-                                                  .build());
-    }
-
-    private void strap(final DrmEglCompositor drmEglCompositor) {
+    public void strap(final DrmEglCompositor drmEglCompositor) {
 
         final LifeCycle lifeCycle = drmEglCompositor.lifeCycle();
 

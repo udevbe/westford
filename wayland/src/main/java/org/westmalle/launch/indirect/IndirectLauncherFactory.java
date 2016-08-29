@@ -43,11 +43,11 @@ public class IndirectLauncherFactory {
         final int              signalFd = setupTty();
         final Pointer<Integer> sock     = setupSocket();
 
-        final IndirectLauncher indirectLauncher = this.privateIndirectLauncherFactory.create(sock,
-                                                                                             signalFd);
+        final IndirectLauncher indirectLaunchable = this.privateIndirectLauncherFactory.create(sock,
+                                                                                               signalFd);
         this.libc.close(sock.dref(1));
 
-        return indirectLauncher;
+        return indirectLaunchable;
     }
 
     private int setupTty() {
