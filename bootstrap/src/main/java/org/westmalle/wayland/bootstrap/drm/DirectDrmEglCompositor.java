@@ -15,25 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.bootstrap.dispmanx;
+package org.westmalle.wayland.bootstrap.drm;
 
 import dagger.Component;
 import org.westmalle.launch.direct.DirectModule;
 import org.westmalle.wayland.core.CoreModule;
-import org.westmalle.wayland.core.LifeCycle;
-import org.westmalle.wayland.dispmanx.egl.DispmanxEglPlatformModule;
+import org.westmalle.wayland.drm.egl.DrmEglPlatformModule;
 import org.westmalle.wayland.gles2.Gles2RendererModule;
-import org.westmalle.wayland.input.LibinputSeatFactory;
 
 import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = {CoreModule.class,
                       Gles2RendererModule.class,
-                      DispmanxEglPlatformModule.class,
+                      DrmEglPlatformModule.class,
                       DirectModule.class})
-public interface DispmanxEglCompositor {
-    LifeCycle lifeCycle();
-
-    LibinputSeatFactory seatFactory();
+public interface DirectDrmEglCompositor extends DrmEglCompositor {
 }

@@ -1,7 +1,6 @@
 package org.westmalle.launch;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,10 +11,6 @@ import java.util.Map;
 public class JvmLauncher {
 
     public static final String OPTION_PREFIX = "option=";
-
-    @Inject
-    JvmLauncher() {
-    }
 
     @Nonnull
     public Process fork(@Nonnull final List<String> options,
