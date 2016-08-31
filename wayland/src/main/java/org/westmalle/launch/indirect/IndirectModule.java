@@ -9,21 +9,26 @@ import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.NativeModule;
 import org.westmalle.tty.TtyModule;
 
+import javax.inject.Singleton;
+
 @Module(includes = {
         TtyModule.class,
         NativeModule.class
 })
 public class IndirectModule {
+    @Singleton
     @Provides
     Launcher provideIndirectLauncher(final IndirectLauncherFactory indirectLauncherFactory) {
         return indirectLauncherFactory.create();
     }
 
+    @Singleton
     @Provides
     Privileges provideIndirectPrivileges(final IndirectPrivilegesFactory indirectPrivilegesFactory) {
         return indirectPrivilegesFactory.create();
     }
 
+    @Singleton
     @Provides
     JvmLauncher provideJvmLauncher() {
         return new JvmLauncher();
