@@ -14,14 +14,14 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <wayland-java-bindings.version>1.4.1</wayland-java-bindings.version>
+        <wayland-java-bindings.version>1.5.0-SNAPSHOT</wayland-java-bindings.version>
         <jetty.version>9.3.7.v20160115</jetty.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.freedesktop</groupId>
-            <artifactId>wayland</artifactId>
+            <artifactId>wayland-server</artifactId>
             <version>${wayland-java-bindings.version}</version>
         </dependency>
 
