@@ -83,9 +83,6 @@ public class Tty implements AutoCloseable {
     }
 
     public void handleVtLeave() {
-        if (!this.vtActive) {
-            return;
-        }
 
         LOGGER.info("Leaving our vt:" + this.vt);
 
@@ -101,9 +98,6 @@ public class Tty implements AutoCloseable {
     }
 
     public void handleVtEnter() {
-        if (this.vtActive) {
-            return;
-        }
 
         LOGGER.info("Entering our vt:" + this.vt);
 
