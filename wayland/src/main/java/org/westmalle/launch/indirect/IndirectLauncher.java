@@ -135,7 +135,7 @@ public class IndirectLauncher implements Launcher {
             return fork.waitFor();
         }
         catch (final InterruptedException e) {
-            //TODO log warning
+            LOGGER.warning("Waiting for child was interrupted. Will wait again.");
             return waitForChild(fork);
         }
     }
@@ -158,8 +158,7 @@ public class IndirectLauncher implements Launcher {
                                          2,
                                          -1);
             if (n < 0) {
-                //TODO errno
-                LOGGER.severe("poll failed");
+                LOGGER.severe("poll failed: " + this.libc.getStrError());
             }
             if ((pollSocket.revents() & Libc.POLLIN) != 0) {
                 handleSocketMsg();
@@ -183,8 +182,7 @@ public class IndirectLauncher implements Launcher {
         if (this.libc.read(this.signalFd,
                            Pointer.ref(sig).address,
                            signalfd_siginfo.SIZE) != signalfd_siginfo.SIZE) {
-            //TODO errno
-            throw new Error("reading signalfd failed");
+            throw new Error("reading signalfd failed: " + this.libc.getStrError());
         }
 
         if (sig.ssi_signo() == this.tty.getAcqSig()) {

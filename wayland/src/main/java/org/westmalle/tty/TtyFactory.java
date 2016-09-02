@@ -68,10 +68,10 @@ public class TtyFactory {
         final int              vt    = ttynr.dref();
 
         final Pointer<Integer> kd_mode = Pointer.nref(0);
-        if (this.libc.ioctl(ttyFd,
-                            KDGETMODE,
-                            kd_mode.address) != 0) {
-            throw new RuntimeException("failed to get VT mode: %m\n");
+        if (-1 == this.libc.ioctl(ttyFd,
+                                  KDGETMODE,
+                                  kd_mode.address)) {
+            throw new RuntimeException("Failed to get VT mode: " + this.libc.getStrError());
         }
         final int oldKdMode = kd_mode.dref();
 
@@ -82,40 +82,40 @@ public class TtyFactory {
         if (-1 == this.libc.ioctl(ttyFd,
                                   VT_ACTIVATE,
                                   vt)) {
-            throw new Error(String.format("ioctl[VT_ACTIVATE, %d] failed: %d",
+            throw new Error(String.format("ioctl[VT_ACTIVATE, %d] failed: %s",
                                           vt,
-                                          this.libc.getErrno()));
+                                          this.libc.getStrError()));
         }
 
         if (-1 == this.libc.ioctl(ttyFd,
                                   VT_WAITACTIVE,
                                   vt)) {
-            throw new Error(String.format("ioctl[VT_WAITACTIVE, %d] failed: %d",
+            throw new Error(String.format("ioctl[VT_WAITACTIVE, %d] failed: %s",
                                           vt,
-                                          this.libc.getErrno()));
+                                          this.libc.getStrError()));
         }
 
         final Pointer<Integer> kb_mode = Pointer.nref(0);
-        if (this.libc.ioctl(ttyFd,
-                            KDGKBMODE,
-                            kb_mode.address) != 0) {
-            throw new RuntimeException("failed to read keyboard mode");
+        if (-1 == this.libc.ioctl(ttyFd,
+                                  KDGKBMODE,
+                                  kb_mode.address)) {
+            throw new RuntimeException("Failed to read keyboard mode: " + this.libc.getStrError());
         }
         final int oldKbMode = kb_mode.dref();
 
-        if (this.libc.ioctl(ttyFd,
-                            KDSKBMUTE,
-                            1) != 0 &&
-            this.libc.ioctl(ttyFd,
-                            KDSKBMODE,
-                            K_OFF) != 0) {
-            throw new RuntimeException("failed to set K_OFF keyboard mode");
+        if (-1 == this.libc.ioctl(ttyFd,
+                                  KDSKBMUTE,
+                                  1) &&
+            -1 == this.libc.ioctl(ttyFd,
+                                  KDSKBMODE,
+                                  K_OFF)) {
+            throw new RuntimeException("Failed to set K_OFF keyboard mode: " + this.libc.getStrError());
         }
 
-        if (this.libc.ioctl(ttyFd,
-                            KDSETMODE,
-                            KD_GRAPHICS) != 0) {
-            throw new RuntimeException("failed to set KD_GRAPHICS mode on tty");
+        if (-1 == this.libc.ioctl(ttyFd,
+                                  KDSETMODE,
+                                  KD_GRAPHICS)) {
+            throw new RuntimeException("Failed to set KD_GRAPHICS mode on tty: " + this.libc.getStrError());
         }
 
         /*
@@ -139,10 +139,10 @@ public class TtyFactory {
         mode.acqsig(acqSig);
         mode.waitv((byte) 0);
         mode.frsig((byte) 0);
-        if (this.libc.ioctl(ttyFd,
-                            VT_SETMODE,
-                            Pointer.ref(mode).address) < 0) {
-            throw new RuntimeException("failed to take control of vt handling");
+        if (-1 == this.libc.ioctl(ttyFd,
+                                  VT_SETMODE,
+                                  Pointer.ref(mode).address)) {
+            throw new RuntimeException("Failed to take control of vt handling: " + this.libc.getStrError());
         }
 
         return this.privateTtyFactory.create(ttyFd,
@@ -156,14 +156,14 @@ public class TtyFactory {
         final int tty0 = this.libc.open(Pointer.nref("/dev/tty0").address,
                                         O_WRONLY | O_CLOEXEC);
 
-        if (tty0 < 0) {
-            throw new RuntimeException("Could not open /dev/tty0.");
+        if (-1 == tty0) {
+            throw new RuntimeException("Could not open /dev/tty0 : " + this.libc.getStrError());
         }
 
-        if (this.libc.ioctl(tty0,
-                            VT_OPENQRY,
-                            ttynr.address) < 0 || ttynr.dref() == -1) {
-            throw new RuntimeException("Failed to query for open vt.");
+        if (-1 == this.libc.ioctl(tty0,
+                                  VT_OPENQRY,
+                                  ttynr.address) || -1 == ttynr.dref()) {
+            throw new RuntimeException("Failed to query for open vt: " + this.libc.getStrError());
         }
         final Integer vt = ttynr.dref();
         final int ttyFd = this.libc.open(Pointer.nref(format("/dev/tty%d",
@@ -171,8 +171,8 @@ public class TtyFactory {
                                          O_RDWR | O_NOCTTY);
         this.libc.close(tty0);
 
-        if (ttyFd < 0) {
-            throw new RuntimeException(format("Failed to open /dev/tty%d",
+        if (-1 == ttyFd) {
+            throw new RuntimeException(format("Failed to open /dev/tty%d : " + this.libc.getStrError(),
                                               vt));
         }
 
