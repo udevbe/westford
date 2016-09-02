@@ -137,15 +137,19 @@ public class DrmEglPlatformFactory {
                                                                                     eglDisplay,
                                                                                     eglContext,
                                                                                     eglConfig)));
-
         this.privileges.getActivateSignal()
-                       .connect(event ->
-                                        drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
-                                            drmEglRenderOutput.setDefaultMode();
-                                            drmEglRenderOutput.enable();
-                                        }));
+                       .connect(event -> {
+                           this.privileges.setDrmMaster(this.drmPlatform.getDrmFd());
+                           drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
+                               drmEglRenderOutput.setDefaultMode();
+                               drmEglRenderOutput.enable();
+                           });
+                       });
         this.privileges.getDeactivateSignal()
-                       .connect(event -> drmEglRenderOutputs.forEach(DrmEglOutput::disable));
+                       .connect(event -> {
+                           drmEglRenderOutputs.forEach(DrmEglOutput::disable);
+                           this.privileges.dropDrmMaster(this.drmPlatform.getDrmFd());
+                       });
 
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,

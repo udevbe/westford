@@ -117,11 +117,6 @@ public class DrmPlatformFactory {
 
         this.privileges.setDrmMaster(drmFd);
 
-        this.privileges.getActivateSignal()
-                       .connect(event -> this.privileges.setDrmMaster(drmFd));
-        this.privileges.getDeactivateSignal()
-                       .connect(event -> this.privileges.dropDrmMaster(drmFd));
-
         return this.privateDrmPlatformFactory.create(drmDevice,
                                                      drmFd,
                                                      drmEventBus,
