@@ -51,14 +51,10 @@ public class Html5Socket implements WebSocketListener {
     private final Html5RenderOutput html5RenderOutput;
     @Nonnull
     private final Html5Seat         html5Seat;
-
-    private Optional<Session> session = Optional.empty();
-
-    private final ScheduledExecutorService socketThread = Executors.newSingleThreadScheduledExecutor();
-
-    private final AtomicBoolean renderPending = new AtomicBoolean(true);
-
-    private Optional<ByteBuffer> pendingBuffer = Optional.empty();
+    private final ScheduledExecutorService socketThread  = Executors.newSingleThreadScheduledExecutor();
+    private final AtomicBoolean            renderPending = new AtomicBoolean(true);
+    private       Optional<Session>        session       = Optional.empty();
+    private       Optional<ByteBuffer>     pendingBuffer = Optional.empty();
     private long pendingBufferAge;
 
     private Optional<ByteBuffer> renderedBuffer = Optional.empty();
@@ -194,8 +190,11 @@ public class Html5Socket implements WebSocketListener {
 
     @Override
     public void onWebSocketError(final Throwable cause) {
-        //TODO log & handle
-        cause.printStackTrace();
+        LOGGER.warning("Got web socket error: " + cause.getMessage());
+        LOGGER.throwing(Html5Socket.class.getName(),
+                        "onWebSocketError",
+                        cause);
+        //TODO handle (remove wayland seat, reset all state)
     }
 
     public AtomicBoolean getRenderPending() {

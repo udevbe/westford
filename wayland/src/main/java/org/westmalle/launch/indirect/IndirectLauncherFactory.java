@@ -9,6 +9,8 @@ import org.westmalle.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import static org.westmalle.nativ.glibc.Libc.AF_LOCAL;
 import static org.westmalle.nativ.glibc.Libc.FD_CLOEXEC;
@@ -50,7 +52,7 @@ public class IndirectLauncherFactory {
         return indirectLaunchable;
     }
 
-    private int setupTty() {
+    private int setupTty() throws UncheckedIOException {
 
         final short acqSig = this.tty.getAcqSig();
         final short relSig = this.tty.getRelSig();
@@ -72,7 +74,7 @@ public class IndirectLauncherFactory {
                                                 Pointer.ref(sigset).address,
                                                 SFD_NONBLOCK | SFD_CLOEXEC);
         if (signalFd < 0) {
-            throw new Error("Could not create signal file descriptor.");
+            throw new UncheckedIOException(new IOException("Failed to create signal file descriptor: " + this.libc.getStrError()));
         }
 
         //TODO listen for tty rel & acq signals & handle them
@@ -92,7 +94,7 @@ public class IndirectLauncherFactory {
         return signalFd;
     }
 
-    private Pointer<Integer> setupSocket() {
+    private Pointer<Integer> setupSocket() throws UncheckedIOException {
         final Pointer<Integer> sock = Pointer.nref(0,
                                                    0);
 
@@ -100,15 +102,13 @@ public class IndirectLauncherFactory {
                                  SOCK_SEQPACKET,
                                  0,
                                  sock.address) < 0) {
-            //TODO errno
-            throw new Error("socketpair failed");
+            throw new UncheckedIOException(new IOException("Failed to create socket pair: " + this.libc.getStrError()));
         }
 
         if (this.libc.fcntl(sock.dref(0),
                             F_SETFD,
                             FD_CLOEXEC) < 0) {
-            //TODO errno
-            throw new Error("fcntl failed");
+            throw new UncheckedIOException(new IOException("fcntl failed"));
         }
 
         return sock;

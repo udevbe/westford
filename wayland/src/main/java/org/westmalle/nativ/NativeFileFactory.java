@@ -25,6 +25,8 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 @Singleton
 public class NativeFileFactory {
@@ -51,7 +53,7 @@ public class NativeFileFactory {
      * The file is suitable for buffer sharing between processes by transmitting the file descriptor over Unix sockets
      * using the SCM_RIGHTS methods.
      */
-    public int createAnonymousFile(@Nonnegative final int size) {
+    public int createAnonymousFile(@Nonnegative final int size) throws UncheckedIOException {
 
         final String path = System.getenv("XDG_RUNTIME_DIR");
         if (path == null) {
@@ -60,22 +62,35 @@ public class NativeFileFactory {
 
         final long name = Pointer.nref(path + TEMPLATE).address;
         final int  fd   = this.libc.mkstemp(name);
+        if (-1 == fd) {
+            throw new UncheckedIOException(new IOException("Failed to create temporary file: " + this.libc.getStrError()));
+        }
 
-        //TODO check errno
         int flags = this.libc.fcntl(fd,
                                     Libc.F_GETFD,
                                     0);
+        if (-1 == flags) {
+            throw new UncheckedIOException(new IOException("Failed to query file flags: " + this.libc.getStrError()));
+        }
 
         flags |= Libc.FD_CLOEXEC;
-        //TODO check errno
-        this.libc.fcntl(fd,
-                        Libc.F_SETFD,
-                        flags);
-        //TODO check errno
-        this.libc.ftruncate(fd,
-                            size);
-        //TODO check errno
-        this.libc.unlink(name);
+        final int ret = this.libc.fcntl(fd,
+                                        Libc.F_SETFD,
+                                        flags);
+        if (-1 == ret) {
+            throw new UncheckedIOException(new IOException("Failed to set file flags: " + this.libc.getStrError()));
+        }
+
+        final int ftruncate = this.libc.ftruncate(fd,
+                                                  size);
+        if (-1 == ftruncate) {
+            throw new UncheckedIOException(new IOException("Failed to truncate file: " + this.libc.getStrError()));
+        }
+
+        final int unlink = this.libc.unlink(name);
+        if (-1 == unlink) {
+            throw new UncheckedIOException(new IOException("Failed to unlink file: " + this.libc.getStrError()));
+        }
 
         return fd;
     }
