@@ -50,9 +50,11 @@ public class Html5Socket implements WebSocketListener {
     @Nonnull
     private final Html5RenderOutput html5RenderOutput;
     @Nonnull
-    private final Html5Seat         html5Seat;
+    private final Html5SeatFactory  html5SeatFactory;
     private final ScheduledExecutorService socketThread  = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean            renderPending = new AtomicBoolean(true);
+    @Nonnull
+    private       Optional<Html5Seat>      html5SeatOptional = Optional.empty();
     private       Optional<Session>        session       = Optional.empty();
     private       Optional<ByteBuffer>     pendingBuffer = Optional.empty();
     private long pendingBufferAge;
@@ -66,11 +68,11 @@ public class Html5Socket implements WebSocketListener {
 
 
     Html5Socket(@Provided @Nonnull final JobExecutor jobExecutor,
-                @Nonnull final Html5RenderOutput html5RenderOutput,
-                @Nonnull final Html5Seat html5Seat) {
+                @Provided @Nonnull final Html5SeatFactory html5SeatFactory,
+                @Nonnull final Html5RenderOutput html5RenderOutput) {
         this.jobExecutor = jobExecutor;
+        this.html5SeatFactory = html5SeatFactory;
         this.html5RenderOutput = html5RenderOutput;
-        this.html5Seat = html5Seat;
     }
 
     public void handlePngBuffer(final long pngBufferAge,
@@ -138,6 +140,10 @@ public class Html5Socket implements WebSocketListener {
             this.html5RenderOutput.requestOutputInfo(this);
         }
         else if (message.equals(ACK_OUTPUT_INFO)) {
+
+            //TODO create seat based on authorized seat request (separate message)
+            this.html5SeatOptional = Optional.of(this.html5SeatFactory.create());
+
             requestFrame();
         }
         else if (message.startsWith(ACK_FRAME)) {
@@ -159,7 +165,7 @@ public class Html5Socket implements WebSocketListener {
             }
         }
         else {
-            this.jobExecutor.submit(() -> this.html5Seat.handle(message));
+            this.jobExecutor.submit(() -> this.html5SeatOptional.ifPresent(html5Seat -> html5Seat.handle(message)));
         }
     }
 
