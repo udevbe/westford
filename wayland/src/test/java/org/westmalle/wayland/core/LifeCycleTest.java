@@ -15,17 +15,20 @@ package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.shared.WlShmFormat;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westmalle.Signal;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlDataDeviceManager;
 import org.westmalle.wayland.protocol.WlShell;
 import org.westmalle.wayland.protocol.WlSubcompositor;
 
 import static org.mockito.Matchers.startsWith;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,9 +47,17 @@ public class LifeCycleTest {
     private WlShell             wlShell;
     @Mock
     private WlSubcompositor     wlSubcompositor;
+    @Mock
+    private LifeCycleSignals    lifeCycleSignals;
 
     @InjectMocks
     private LifeCycle lifeCycle;
+
+    @Before
+    public void setUp() throws Exception {
+        when(this.lifeCycleSignals.getStartSignal()).thenReturn(mock(Signal.class));
+        when(this.lifeCycleSignals.getStopSignal()).thenReturn(mock(Signal.class));
+    }
 
     @Test
     public void testRun() throws Exception {
