@@ -19,5 +19,8 @@ import javax.inject.Singleton;
                       TtyModule.class,
                       IndirectModule.class})
 public interface IndirectDrmEglCompositor extends DrmEglCompositor {
+
+    IndirectDrmEglCompositor INSTANCE = DaggerIndirectDrmEglCompositor.create();
+
     Launcher launcher();
 }
