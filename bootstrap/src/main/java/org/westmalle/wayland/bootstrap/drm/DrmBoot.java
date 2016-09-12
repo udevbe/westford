@@ -18,8 +18,8 @@
 package org.westmalle.wayland.bootstrap.drm;
 
 import org.freedesktop.wayland.server.WlKeyboardResource;
-import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.linux.InputEventCodes;
+import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
@@ -71,10 +71,10 @@ public class DrmBoot {
         /*
          * setup tty switching key bindings
          */
-        final Privileges privileges = drmEglCompositor.privileges();
+        final Tty tty = drmEglCompositor.tty();
         addTtyKeyBindings(drmEglCompositor,
                           keyboardDevice,
-                          privileges);
+                          tty);
 
         /*
          * and finally, start the compositor
@@ -84,7 +84,7 @@ public class DrmBoot {
 
     private void addTtyKeyBindings(final DrmEglCompositor drmEglCompositor,
                                    final KeyboardDevice keyboardDevice,
-                                   final Privileges privileges) {
+                                   final Tty tty) {
         //TODO we don't want to switch the tty ourselves directly but instead signal our parent launch to do the switch.
 
         final KeyBindingFactory keyBindingFactory = drmEglCompositor.keyBindingFactory();
@@ -93,74 +93,74 @@ public class DrmBoot {
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F1)),
-                                 () -> privileges.switchTty(1))
+                                 () -> tty.activate(1))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F2)),
-                                 () -> privileges.switchTty(2))
+                                 () -> tty.activate(2))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F3)),
-                                 () -> privileges.switchTty(3))
+                                 () -> tty.activate(3))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F4)),
-                                 () -> privileges.switchTty(4))
+                                 () -> tty.activate(4))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F5)),
-                                 () -> privileges.switchTty(5))
+                                 () -> tty.activate(5))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F6)),
-                                 () -> privileges.switchTty(6))
+                                 () -> tty.activate(6))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F7)),
-                                 () -> privileges.switchTty(7))
+                                 () -> tty.activate(7))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F8)),
-                                 () -> privileges.switchTty(8))
+                                 () -> tty.activate(8))
                          .enable();
 
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F9)),
-                                 () -> privileges.switchTty(9))
+                                 () -> tty.activate(9))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F10)),
-                                 () -> privileges.switchTty(10))
+                                 () -> tty.activate(10))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F11)),
-                                 () -> privileges.switchTty(11))
+                                 () -> tty.activate(11))
                          .enable();
         keyBindingFactory.create(keyboardDevice,
                                  new HashSet<>(Arrays.asList(InputEventCodes.KEY_LEFTCTRL,
                                                              InputEventCodes.KEY_LEFTALT,
                                                              InputEventCodes.KEY_F12)),
-                                 () -> privileges.switchTty(12))
+                                 () -> tty.activate(12))
                          .enable();
     }
 }

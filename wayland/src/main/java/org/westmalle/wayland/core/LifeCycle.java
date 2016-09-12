@@ -18,59 +18,59 @@
 package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Display;
-import org.westmalle.wayland.protocol.WlCompositor;
-import org.westmalle.wayland.protocol.WlDataDeviceManager;
-import org.westmalle.wayland.protocol.WlShell;
-import org.westmalle.wayland.protocol.WlSubcompositor;
+import org.westmalle.Signal;
+import org.westmalle.Slot;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 public class LifeCycle implements AutoCloseable {
 
+    private final Signal<Object, Slot<Object>> activateSignal   = new Signal<>();
+    private final Signal<Object, Slot<Object>> deactivateSignal = new Signal<>();
+    private final Signal<Object, Slot<Object>> startSignal      = new Signal<>();
+    private final Signal<Object, Slot<Object>> stopSignal       = new Signal<>();
+
     @Nonnull
-    private final Display             display;
+    private final Display     display;
     @Nonnull
-    private final JobExecutor         jobExecutor;
-    @Nonnull
-    private final WlCompositor        wlCompositor;
-    @Nonnull
-    private final WlDataDeviceManager wlDataDeviceManager;
-    @Nonnull
-    private final WlShell             wlShell;
-    @Nonnull
-    private final WlSubcompositor     wlSubcompositor;
+    private final JobExecutor jobExecutor;
 
     @Inject
     LifeCycle(@Nonnull final Display display,
-              @Nonnull final JobExecutor jobExecutor,
-              @Nonnull final WlCompositor wlCompositor,
-              @Nonnull final WlDataDeviceManager wlDataDeviceManager,
-              @Nonnull final WlShell wlShell,
-              @Nonnull final WlSubcompositor wlSubcompositor) {
+              @Nonnull final JobExecutor jobExecutor) {
         this.display = display;
         this.jobExecutor = jobExecutor;
-        this.wlCompositor = wlCompositor;
-        this.wlDataDeviceManager = wlDataDeviceManager;
-        this.wlShell = wlShell;
-        this.wlSubcompositor = wlSubcompositor;
     }
 
     public void start() {
         this.jobExecutor.start();
         this.display.initShm();
         this.display.addSocket("wayland-0");
+        this.startSignal.emit("START");
         this.display.run();
     }
 
     @Override
     public void close() {
-        this.wlCompositor.destroy();
-        this.wlDataDeviceManager.destroy();
-        this.wlShell.destroy();
-        this.wlSubcompositor.destroy();
-
+        this.stopSignal.emit("CLOSE");
         this.jobExecutor.fireFinishedEvent();
         this.display.terminate();
+    }
+
+    public Signal<Object, Slot<Object>> getActivateSignal() {
+        return this.activateSignal;
+    }
+
+    public Signal<Object, Slot<Object>> getDeactivateSignal() {
+        return this.deactivateSignal;
+    }
+
+    public Signal<Object, Slot<Object>> getStartSignal() {
+        return this.startSignal;
+    }
+
+    public Signal<Object, Slot<Object>> getStopSignal() {
+        return this.stopSignal;
     }
 }

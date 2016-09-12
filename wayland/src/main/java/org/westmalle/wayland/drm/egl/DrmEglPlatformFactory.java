@@ -26,6 +26,7 @@ import org.westmalle.nativ.libEGL.LibEGL;
 import org.westmalle.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.core.GlRenderer;
+import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.drm.DrmOutput;
 import org.westmalle.wayland.drm.DrmPlatform;
 
@@ -71,6 +72,8 @@ public class DrmEglPlatformFactory {
     @Nonnull
     private final GlRenderer                   glRenderer;
     @Nonnull
+    private final LifeCycle                    lifeCycle;
+    @Nonnull
     private final Privileges                   privileges;
 
     @Inject
@@ -81,6 +84,7 @@ public class DrmEglPlatformFactory {
                           @Nonnull final DrmPlatform drmPlatform,
                           @Nonnull final DrmEglOutputFactory drmEglOutputFactory,
                           @Nonnull final GlRenderer glRenderer,
+                          @Nonnull final LifeCycle lifeCycle,
                           @Nonnull final Privileges privileges) {
         this.privateDrmEglPlatformFactory = privateDrmEglPlatformFactory;
         this.libgbm = libgbm;
@@ -89,6 +93,7 @@ public class DrmEglPlatformFactory {
         this.drmPlatform = drmPlatform;
         this.drmEglOutputFactory = drmEglOutputFactory;
         this.glRenderer = glRenderer;
+        this.lifeCycle = lifeCycle;
         this.privileges = privileges;
     }
 
@@ -137,19 +142,19 @@ public class DrmEglPlatformFactory {
                                                                                     eglDisplay,
                                                                                     eglContext,
                                                                                     eglConfig)));
-        this.privileges.getActivateSignal()
-                       .connect(event -> {
-                           this.privileges.setDrmMaster(this.drmPlatform.getDrmFd());
-                           drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
-                               drmEglRenderOutput.setDefaultMode();
-                               drmEglRenderOutput.enable();
-                           });
-                       });
-        this.privileges.getDeactivateSignal()
-                       .connect(event -> {
-                           drmEglRenderOutputs.forEach(DrmEglOutput::disable);
-                           this.privileges.dropDrmMaster(this.drmPlatform.getDrmFd());
-                       });
+        this.lifeCycle.getActivateSignal()
+                      .connect(event -> {
+                          this.privileges.setDrmMaster(this.drmPlatform.getDrmFd());
+                          drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
+                              drmEglRenderOutput.setDefaultMode();
+                              drmEglRenderOutput.enable();
+                          });
+                      });
+        this.lifeCycle.getDeactivateSignal()
+                      .connect(event -> {
+                          drmEglRenderOutputs.forEach(DrmEglOutput::disable);
+                          this.privileges.dropDrmMaster(this.drmPlatform.getDrmFd());
+                      });
 
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,

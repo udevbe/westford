@@ -19,6 +19,7 @@ package org.westmalle.wayland.bootstrap.dispmanx;
 
 import dagger.Component;
 import org.westmalle.launch.direct.DirectModule;
+import org.westmalle.tty.TtyModule;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.dispmanx.egl.DispmanxEglPlatformModule;
@@ -31,7 +32,8 @@ import javax.inject.Singleton;
 @Component(modules = {CoreModule.class,
                       Gles2RendererModule.class,
                       DispmanxEglPlatformModule.class,
-                      DirectModule.class})
+                      DirectModule.class,
+                      TtyModule.class})
 public interface DispmanxEglCompositor {
     LifeCycle lifeCycle();
 
