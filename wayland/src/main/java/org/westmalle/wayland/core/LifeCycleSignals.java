@@ -20,8 +20,6 @@ package org.westmalle.wayland.core;
 import org.westmalle.Signal;
 import org.westmalle.Slot;
 
-import javax.inject.Inject;
-
 public class LifeCycleSignals {
 
     private final Signal<Object, Slot<Object>> activateSignal   = new Signal<>();
@@ -29,7 +27,6 @@ public class LifeCycleSignals {
     private final Signal<Object, Slot<Object>> startSignal      = new Signal<>();
     private final Signal<Object, Slot<Object>> stopSignal       = new Signal<>();
 
-    @Inject
     LifeCycleSignals() {
     }
 
