@@ -19,7 +19,6 @@ package org.westmalle.wayland.input;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
-import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libinput.Libinput;
 import org.westmalle.nativ.libinput.Pointerclose_restricted;
@@ -27,6 +26,7 @@ import org.westmalle.nativ.libinput.libinput_interface;
 import org.westmalle.nativ.libudev.Libudev;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
+import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -41,25 +41,25 @@ import static org.westmalle.nativ.libinput.Pointeropen_restricted.nref;
 public class LibinputSeatFactory {
 
     @Nonnull
-    private final WlSeatFactory              wlSeatFactory;
+    private final     WlSeatFactory              wlSeatFactory;
     @Nonnull
     private final WlKeyboardFactory          wlKeyboardFactory;
     @Nonnull
     private final WlPointerFactory           wlPointerFactory;
     @Nonnull
-    private final PrivateLibinputSeatFactory privateLibinputSeatFactory;
+    private final     PrivateLibinputSeatFactory privateLibinputSeatFactory;
     @Nonnull
-    private final KeyboardDeviceFactory      keyboardDeviceFactory;
+    private final     KeyboardDeviceFactory      keyboardDeviceFactory;
     @Nonnull
-    private final LibinputXkbFactory         libinputXkbFactory;
+    private final     LibinputXkbFactory         libinputXkbFactory;
     @Nonnull
-    private final Libinput                   libinput;
+    private final     Libinput                   libinput;
     @Nonnull
-    private final Libudev                    libudev;
+    private final     Libudev                    libudev;
     @Nonnull
-    private final Libc                       libc;
+    private final     Libc                       libc;
     @Nonnull
-    private final Privileges                 privileges;
+    private final     LifeCycle                  lifeCycle;
 
     @Inject
     LibinputSeatFactory(@Nonnull final WlSeatFactory wlSeatFactory,
@@ -71,7 +71,7 @@ public class LibinputSeatFactory {
                         @Nonnull final Libinput libinput,
                         @Nonnull final Libudev libudev,
                         @Nonnull final Libc libc,
-                        @Nonnull final Privileges privileges) {
+                        @Nonnull final LifeCycle lifeCycle) {
         this.wlSeatFactory = wlSeatFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.wlPointerFactory = wlPointerFactory;
@@ -81,7 +81,7 @@ public class LibinputSeatFactory {
         this.libinput = libinput;
         this.libudev = libudev;
         this.libc = libc;
-        this.privileges = privileges;
+        this.lifeCycle = lifeCycle;
     }
 
     public WlSeat create(@Nonnull final String seatId,
@@ -104,10 +104,10 @@ public class LibinputSeatFactory {
                                                                                  wlSeat);
         libinputSeat.enableInput();
 
-        this.privileges.getActivateSignal()
-                       .connect(event -> libinputSeat.enableInput());
-        this.privileges.getDeactivateSignal()
-                       .connect(event -> libinputSeat.disableInput());
+        this.lifeCycle.getActivateSignal()
+                      .connect(event -> libinputSeat.enableInput());
+        this.lifeCycle.getDeactivateSignal()
+                      .connect(event -> libinputSeat.disableInput());
 
         return wlSeat;
     }

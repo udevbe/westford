@@ -1,43 +1,27 @@
 package org.westmalle.launch.direct;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
-import org.westmalle.Signal;
-import org.westmalle.Slot;
 import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libdrm.Libdrm;
-import org.westmalle.tty.Tty;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
-@AutoFactory(allowSubclasses = true,
-             className = "PrivateDirectPrivilegesFactory")
 public class DirectPrivileges implements Privileges {
 
-    private final Signal<Object, Slot<Object>> activateSignal   = new Signal<>();
-    private final Signal<Object, Slot<Object>> deactivateSignal = new Signal<>();
 
     @Nonnull
     private final Libc   libc;
     @Nonnull
     private final Libdrm libdrm;
-    @Nonnull
-    private final Tty    tty;
 
-    DirectPrivileges(@Provided @Nonnull final Libc libc,
-                     @Provided @Nonnull final Libdrm libdrm,
-                     @Provided @Nonnull final Tty tty) {
+    @Inject
+    DirectPrivileges(@Nonnull final Libc libc,
+                     @Nonnull final Libdrm libdrm) {
         this.libc = libc;
         this.libdrm = libdrm;
-        this.tty = tty;
-    }
-
-    @Override
-    public void switchTty(final int vt) {
-        this.tty.activate(vt);
     }
 
     @Override
@@ -59,15 +43,5 @@ public class DirectPrivileges implements Privileges {
         if (this.libdrm.drmDropMaster(fd) != 0) {
             throw new RuntimeException("failed to drop drm master: " + this.libc.getStrError());
         }
-    }
-
-    @Override
-    public Signal<Object, Slot<Object>> getActivateSignal() {
-        return this.activateSignal;
-    }
-
-    @Override
-    public Signal<Object, Slot<Object>> getDeactivateSignal() {
-        return this.deactivateSignal;
     }
 }

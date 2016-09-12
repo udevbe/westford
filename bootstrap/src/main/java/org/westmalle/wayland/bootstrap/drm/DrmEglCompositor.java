@@ -17,7 +17,8 @@
  */
 package org.westmalle.wayland.bootstrap.drm;
 
-import org.westmalle.launch.Privileges;
+import org.westmalle.launch.Launcher;
+import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.input.LibinputSeatFactory;
@@ -30,5 +31,7 @@ public interface DrmEglCompositor {
 
     KeyBindingFactory keyBindingFactory();
 
-    Privileges privileges();
+    Tty tty();
+
+    Launcher launcher();
 }

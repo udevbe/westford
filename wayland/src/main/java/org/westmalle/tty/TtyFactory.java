@@ -19,6 +19,7 @@ package org.westmalle.tty;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.linux.vt_mode;
 
@@ -52,12 +53,16 @@ public class TtyFactory {
     @Nonnull
     private final Libc              libc;
     @Nonnull
+    private final Privileges        privileges;
+    @Nonnull
     private final PrivateTtyFactory privateTtyFactory;
 
     @Inject
     TtyFactory(@Nonnull final Libc libc,
+               @Nonnull final Privileges privileges,
                @Nonnull final PrivateTtyFactory privateTtyFactory) {
         this.libc = libc;
+        this.privileges = privileges;
         this.privateTtyFactory = privateTtyFactory;
     }
 
@@ -153,8 +158,8 @@ public class TtyFactory {
     }
 
     private int getTtyFd(final Pointer<Integer> ttynr) {
-        final int tty0 = this.libc.open(Pointer.nref("/dev/tty0").address,
-                                        O_WRONLY | O_CLOEXEC);
+        final int tty0 = this.privileges.open(Pointer.nref("/dev/tty0").address,
+                                              O_WRONLY | O_CLOEXEC);
 
         if (-1 == tty0) {
             throw new RuntimeException("Could not open /dev/tty0 : " + this.libc.getStrError());
@@ -166,9 +171,9 @@ public class TtyFactory {
             throw new RuntimeException("Failed to query for open vt: " + this.libc.getStrError());
         }
         final Integer vt = ttynr.dref();
-        final int ttyFd = this.libc.open(Pointer.nref(format("/dev/tty%d",
-                                                             vt)).address,
-                                         O_RDWR | O_NOCTTY);
+        final int ttyFd = this.privileges.open(Pointer.nref(format("/dev/tty%d",
+                                                                   vt)).address,
+                                               O_RDWR | O_NOCTTY);
         this.libc.close(tty0);
 
         if (-1 == ttyFd) {

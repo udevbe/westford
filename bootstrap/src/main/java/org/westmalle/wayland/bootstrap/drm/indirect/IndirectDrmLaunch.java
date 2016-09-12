@@ -1,5 +1,4 @@
-package org.westmalle.wayland.bootstrap.drm;
-
+package org.westmalle.wayland.bootstrap.drm.indirect;
 
 public class IndirectDrmLaunch {
     public static void main(final String[] args) throws Exception {

@@ -26,13 +26,7 @@ public class IndirectLauncher implements Launcher {
 
     public static final byte ACTIVATE   = 0;
     public static final byte DEACTIVATE = 1;
-
-    public static final byte SWITCH_VT = 2;
-
-    public static final byte DRM_SET_MASTER  = 3;
-    public static final byte DRM_DROP_MASTER = 4;
-
-    public static final byte OPEN_FILE = 5;
+    public static final byte OPEN       = 3;
 
     public static final String SOCKETFD_0 = "SOCKETFD_0=%d";
     public static final String SOCKETFD_1 = "SOCKETFD_1=%d";
@@ -112,6 +106,7 @@ public class IndirectLauncher implements Launcher {
     @Override
     public void launch(final Class<?> main,
                        final String[] args) throws Exception {
+        //fork ourselves
         final Process fork = this.jvmLauncher.fork(Arrays.asList(String.format(SOCKETFD_0,
                                                                                this.sock.dref(0)),
                                                                  String.format(SOCKETFD_1,
@@ -140,7 +135,7 @@ public class IndirectLauncher implements Launcher {
         }
     }
 
-    public void pollEvents() {
+    private void pollEvents() {
         while (true) {
             final Pointer<pollfd> pollfds = Pointer.malloc(2 * pollfd.SIZE,
                                                            pollfd.class);
@@ -187,10 +182,12 @@ public class IndirectLauncher implements Launcher {
 
         if (sig.ssi_signo() == this.tty.getAcqSig()) {
             this.tty.handleVtEnter();
+            //TODO setDrmMaster if an open of a drm fd was received
             sendReply(ACTIVATE);
         }
         else if (sig.ssi_signo() == this.tty.getRelSig()) {
             sendReply(DEACTIVATE);
+            //TODO dropDrmMaster if an open of a drm fd was received
             this.tty.handleVtLeave();
         }
         //else {

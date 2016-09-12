@@ -15,10 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.bootstrap.drm;
+package org.westmalle.wayland.bootstrap.drm.direct;
 
 import dagger.Component;
 import org.westmalle.launch.direct.DirectModule;
+import org.westmalle.tty.TtyModule;
+import org.westmalle.wayland.bootstrap.drm.DrmEglCompositor;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.drm.egl.DrmEglPlatformModule;
 import org.westmalle.wayland.gles2.Gles2RendererModule;
@@ -29,6 +31,8 @@ import javax.inject.Singleton;
 @Component(modules = {CoreModule.class,
                       Gles2RendererModule.class,
                       DrmEglPlatformModule.class,
+                      TtyModule.class,
                       DirectModule.class})
 public interface DirectDrmEglCompositor extends DrmEglCompositor {
+
 }
