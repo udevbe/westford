@@ -1,6 +1,5 @@
 package org.westmalle.launch.direct;
 
-import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.glibc.Libc;
@@ -27,7 +26,7 @@ public class DirectPrivileges implements Privileges {
     @Override
     public int open(@Ptr(String.class) final long path,
                     final int flags) {
-        return this.libc.open(Pointer.nref(path).address,
+        return this.libc.open(path,
                               flags);
     }
 
