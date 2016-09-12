@@ -216,11 +216,8 @@ public class DrmPlatformFactory {
         }
 
         final long filename = this.libudev.udev_device_get_devnode(device);
-
-        this.privileges.open(filename,
-                             O_RDWR);
-        final int fd = this.libc.open(filename,
-                                      O_RDWR);
+        final int fd = this.privileges.open(filename,
+                                            O_RDWR);
         if (fd < 0) {
             throw new RuntimeException("Failed to open drm device.");
         }
