@@ -4,7 +4,7 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.westmalle.launch.Launcher;
 import org.westmalle.tty.Tty;
-import org.westmalle.wayland.core.LifeCycle;
+import org.westmalle.wayland.core.LifeCycleSignals;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -14,18 +14,18 @@ public class DirectLauncher implements Launcher {
 
 
     @Nonnull
-    private final Display   display;
+    private final Display          display;
     @Nonnull
-    private final LifeCycle lifeCycle;
+    private final LifeCycleSignals lifeCycleSignals;
     @Nonnull
-    private final Tty       tty;
+    private final Tty              tty;
 
     @Inject
     DirectLauncher(@Nonnull final Display display,
-                   @Nonnull final LifeCycle lifeCycle,
+                   @Nonnull final LifeCycleSignals lifeCycleSignals,
                    @Nonnull final Tty tty) {
         this.display = display;
-        this.lifeCycle = lifeCycle;
+        this.lifeCycleSignals = lifeCycleSignals;
         this.tty = tty;
     }
 
@@ -34,11 +34,11 @@ public class DirectLauncher implements Launcher {
                        final String[] args) throws Exception {
 
         this.tty.getVtEnterSignal()
-                .connect(event -> this.lifeCycle.getActivateSignal()
-                                                .emit(event));
+                .connect(event -> this.lifeCycleSignals.getActivateSignal()
+                                                       .emit(event));
         this.tty.getVtLeaveSignal()
-                .connect(event -> this.lifeCycle.getDeactivateSignal()
-                                                .emit(event));
+                .connect(event -> this.lifeCycleSignals.getDeactivateSignal()
+                                                       .emit(event));
 
         final short relSig = this.tty.getRelSig();
         final short acqSig = this.tty.getAcqSig();
