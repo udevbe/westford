@@ -26,7 +26,7 @@ import org.westmalle.nativ.libinput.libinput_interface;
 import org.westmalle.nativ.libudev.Libudev;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
-import org.westmalle.wayland.core.LifeCycle;
+import org.westmalle.wayland.core.LifeCycleSignals;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -59,7 +59,7 @@ public class LibinputSeatFactory {
     @Nonnull
     private final     Libc                       libc;
     @Nonnull
-    private final     LifeCycle                  lifeCycle;
+    private final     LifeCycleSignals           lifeCycleSignals;
 
     @Inject
     LibinputSeatFactory(@Nonnull final WlSeatFactory wlSeatFactory,
@@ -71,7 +71,7 @@ public class LibinputSeatFactory {
                         @Nonnull final Libinput libinput,
                         @Nonnull final Libudev libudev,
                         @Nonnull final Libc libc,
-                        @Nonnull final LifeCycle lifeCycle) {
+                        @Nonnull final LifeCycleSignals lifeCycleSignals) {
         this.wlSeatFactory = wlSeatFactory;
         this.wlKeyboardFactory = wlKeyboardFactory;
         this.wlPointerFactory = wlPointerFactory;
@@ -81,7 +81,7 @@ public class LibinputSeatFactory {
         this.libinput = libinput;
         this.libudev = libudev;
         this.libc = libc;
-        this.lifeCycle = lifeCycle;
+        this.lifeCycleSignals = lifeCycleSignals;
     }
 
     public WlSeat create(@Nonnull final String seatId,
@@ -104,10 +104,10 @@ public class LibinputSeatFactory {
                                                                                  wlSeat);
         libinputSeat.enableInput();
 
-        this.lifeCycle.getActivateSignal()
-                      .connect(event -> libinputSeat.enableInput());
-        this.lifeCycle.getDeactivateSignal()
-                      .connect(event -> libinputSeat.disableInput());
+        this.lifeCycleSignals.getActivateSignal()
+                             .connect(event -> libinputSeat.enableInput());
+        this.lifeCycleSignals.getDeactivateSignal()
+                             .connect(event -> libinputSeat.disableInput());
 
         return wlSeat;
     }
