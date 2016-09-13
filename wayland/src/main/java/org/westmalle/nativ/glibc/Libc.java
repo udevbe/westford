@@ -318,6 +318,12 @@ public class Libc {
 
     public native int __libc_current_sigrtmax();
 
+//    #define CMSG_ALIGN(len) (((len) + sizeof (size_t) - 1) \
+//271              & (size_t) ~(sizeof (size_t) - 1))
+//272 #define CMSG_SPACE(len) (CMSG_ALIGN (len) \
+//273              + CMSG_ALIGN (sizeof (struct cmsghdr)))
+
+
     @Symbol
     @Ptr
     public native long errno();
