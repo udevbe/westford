@@ -168,6 +168,38 @@ public class IndirectLauncher implements Launcher {
 
     private void handleSocketMsg() {
         //TODO
+//        char control[CMSG_SPACE(sizeof(int))];
+//	char buf[BUFSIZ];
+//	struct msghdr msg;
+//	struct iovec iov;
+//	int ret = -1;
+//	ssize_t len;
+//	struct weston_launcher_message *message;
+//
+//	memset(&msg, 0, sizeof(msg));
+//	iov.iov_base = buf;
+//	iov.iov_len  = sizeof buf;
+//	msg.msg_iov = &iov;
+//	msg.msg_iovlen = 1;
+//	msg.msg_control = control;
+//	msg.msg_controllen = sizeof control;
+//
+//	do {
+//		len = recvmsg(wl->sock[0], &msg, 0);
+//	} while (len < 0 && errno == EINTR);
+//
+//	if (len < 1)
+//		return -1;
+//
+//	message = (void *) buf;
+//	switch (message->opcode) {
+//	case WESTON_LAUNCHER_OPEN:
+//		ret = handle_open(wl, &msg, len);
+//		break;
+//	}
+//
+//	return ret;
+
     }
 
     private void handleSignal() {
