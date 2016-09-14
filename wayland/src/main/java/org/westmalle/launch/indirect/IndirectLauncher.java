@@ -2,18 +2,23 @@ package org.westmalle.launch.indirect;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import org.freedesktop.jaccall.CLong;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Size;
 import org.westmalle.launch.JvmLauncher;
 import org.westmalle.launch.Launcher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.glibc.Libc_Symbols;
+import org.westmalle.nativ.glibc.iovec;
+import org.westmalle.nativ.glibc.msghdr;
 import org.westmalle.nativ.glibc.pollfd;
 import org.westmalle.nativ.linux.signalfd_siginfo;
 import org.westmalle.tty.Tty;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.logging.Logger;
@@ -24,9 +29,9 @@ import static org.westmalle.nativ.glibc.Libc.EINTR;
              className = "PrivateIndirectLauncherFactory")
 public class IndirectLauncher implements Launcher {
 
-    public static final byte ACTIVATE   = 0;
-    public static final byte DEACTIVATE = 1;
-    public static final byte OPEN       = 3;
+    public static final int ACTIVATE   = 0;
+    public static final int DEACTIVATE = 1;
+    public static final int OPEN       = 3;
 
     public static final String SOCKETFD_0 = "SOCKETFD_0=%d";
     public static final String SOCKETFD_1 = "SOCKETFD_1=%d";
@@ -167,39 +172,44 @@ public class IndirectLauncher implements Launcher {
     }
 
     private void handleSocketMsg() {
-        //TODO
-//        char control[CMSG_SPACE(sizeof(int))];
-//	char buf[BUFSIZ];
-//	struct msghdr msg;
-//	struct iovec iov;
-//	int ret = -1;
-//	ssize_t len;
-//	struct weston_launcher_message *message;
-//
-//	memset(&msg, 0, sizeof(msg));
-//	iov.iov_base = buf;
-//	iov.iov_len  = sizeof buf;
-//	msg.msg_iov = &iov;
-//	msg.msg_iovlen = 1;
-//	msg.msg_control = control;
-//	msg.msg_controllen = sizeof control;
-//
-//	do {
-//		len = recvmsg(wl->sock[0], &msg, 0);
-//	} while (len < 0 && errno == EINTR);
-//
-//	if (len < 1)
-//		return -1;
-//
-//	message = (void *) buf;
-//	switch (message->opcode) {
-//	case WESTON_LAUNCHER_OPEN:
-//		ret = handle_open(wl, &msg, len);
-//		break;
-//	}
-//
-//	return ret;
+        final byte[]        controlBytes = new byte[(int) this.libc.CMSG_SPACE(Size.sizeof((Integer) null))];
+        final Pointer<Byte> control      = Pointer.nref(controlBytes);
+        final byte[]        bufBytes     = new byte[256];
+        final Pointer<Byte> buf          = Pointer.nref(bufBytes);
 
+        try (final Pointer<msghdr> msghdrPointer = Pointer.calloc(1,
+                                                                  msghdr.SIZE,
+                                                                  msghdr.class)) {
+
+            final msghdr msg = msghdrPointer.dref();
+            final iovec  iov = new iovec();
+            long         len;
+
+            iov.iov_base(buf.castp(Void.class));
+            iov.iov_len(new CLong(bufBytes.length));
+            msg.msg_iov(Pointer.ref(iov));
+            msg.msg_iovlen(new CLong(1));
+            msg.msg_control(control.castp(Void.class));
+            msg.msg_controllen(new CLong(controlBytes.length));
+
+            do {
+                len = this.libc.recvmsg(this.sock.dref(0),
+                                        Pointer.ref(msg).address,
+                                        0);
+            } while (len < 0 && this.libc.getErrno() == EINTR);
+
+            if (len < 1) {
+                throw new UncheckedIOException(new IOException("Launched failed to receive message from child process: " + this.libc.getStrError()));
+            }
+
+            final Pointer<privilege_req> message = buf.castp(privilege_req.class);
+            switch (message.dref()
+                           .opcode()) {
+                case OPEN:
+                    //TODO handle open
+                    break;
+            }
+        }
     }
 
     private void handleSignal() {
