@@ -23,5 +23,4 @@ import org.freedesktop.jaccall.Struct;
                 @Field(name = "msg_flags",
                        type = CType.INT)
         })
-public final class msghdr extends msghdr_Jaccall_StructType {
-}
+public final class msghdr extends msghdr_Jaccall_StructType {}

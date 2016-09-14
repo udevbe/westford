@@ -17,10 +17,12 @@
  */
 package org.westmalle.nativ.glibc;
 
+import org.freedesktop.jaccall.CLong;
 import org.freedesktop.jaccall.Lib;
 import org.freedesktop.jaccall.Lng;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
+import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Symbol;
 import org.freedesktop.jaccall.Unsigned;
 import org.westmalle.nativ.linux.Kdev_t;
@@ -318,11 +320,13 @@ public class Libc {
 
     public native int __libc_current_sigrtmax();
 
-//    #define CMSG_ALIGN(len) (((len) + sizeof (size_t) - 1) \
-//271              & (size_t) ~(sizeof (size_t) - 1))
-//272 #define CMSG_SPACE(len) (CMSG_ALIGN (len) \
-//273              + CMSG_ALIGN (sizeof (struct cmsghdr)))
+    public long CMSG_SPACE(final long len) {
+        return (CMSG_ALIGN(len) + CMSG_ALIGN(cmsghdr.SIZE));
+    }
 
+    public long CMSG_ALIGN(final long len) {
+        return (((len) + Size.sizeof((CLong) null) - 1) & (long) ~(Size.sizeof((CLong) null) - 1));
+    }
 
     @Symbol
     @Ptr
@@ -473,5 +477,10 @@ public class Libc {
                             @Ptr long buf,
                             @Lng long len,
                             int flags);
+
+    @Lng
+    public native long recvmsg(int sockfd,
+                               @Ptr(msghdr.class) long msg,
+                               int flags);
 
 }

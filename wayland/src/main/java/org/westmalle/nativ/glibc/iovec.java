@@ -11,5 +11,4 @@ import org.freedesktop.jaccall.Struct;
         @Field(name = "iov_len",
                type = CType.UNSIGNED_LONG)
 })
-public final class iovec extends iovec_Jaccall_StructType {
-}
+public final class iovec extends iovec_Jaccall_StructType {}
