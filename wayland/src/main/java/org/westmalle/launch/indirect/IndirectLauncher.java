@@ -4,7 +4,6 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.jaccall.CLong;
 import org.freedesktop.jaccall.Pointer;
-import org.freedesktop.jaccall.Size;
 import org.westmalle.launch.JvmLauncher;
 import org.westmalle.launch.Launcher;
 import org.westmalle.nativ.glibc.Libc;
@@ -23,6 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import static org.freedesktop.jaccall.Pointer.calloc;
+import static org.freedesktop.jaccall.Size.sizeof;
 import static org.westmalle.nativ.glibc.Libc.EINTR;
 
 @AutoFactory(allowSubclasses = true,
@@ -172,25 +173,28 @@ public class IndirectLauncher implements Launcher {
     }
 
     private void handleSocketMsg() {
-        final byte[]        controlBytes = new byte[(int) this.libc.CMSG_SPACE(Size.sizeof((Integer) null))];
-        final Pointer<Byte> control      = Pointer.nref(controlBytes);
-        final byte[]        bufBytes     = new byte[256];
-        final Pointer<Byte> buf          = Pointer.nref(bufBytes);
 
-        try (final Pointer<msghdr> msghdrPointer = Pointer.calloc(1,
-                                                                  msghdr.SIZE,
-                                                                  msghdr.class)) {
+        final int nroControlBytes = (int) this.libc.CMSG_SPACE(sizeof((Integer) null));
+        final int nroBufBytes     = 256;
+
+        try (final Pointer<msghdr> msghdrPointer = calloc(1,
+                                                          msghdr.SIZE,
+                                                          msghdr.class);
+             final Pointer<Void> control = calloc(1,
+                                                  nroControlBytes);
+             final Pointer<Void> buf = calloc(1,
+                                              nroBufBytes)) {
 
             final msghdr msg = msghdrPointer.dref();
             final iovec  iov = new iovec();
             long         len;
 
-            iov.iov_base(buf.castp(Void.class));
-            iov.iov_len(new CLong(bufBytes.length));
+            iov.iov_base(buf);
+            iov.iov_len(new CLong(nroBufBytes));
             msg.msg_iov(Pointer.ref(iov));
             msg.msg_iovlen(new CLong(1));
-            msg.msg_control(control.castp(Void.class));
-            msg.msg_controllen(new CLong(controlBytes.length));
+            msg.msg_control(control);
+            msg.msg_controllen(new CLong(nroControlBytes));
 
             do {
                 len = this.libc.recvmsg(this.sock.dref(0),
@@ -202,14 +206,107 @@ public class IndirectLauncher implements Launcher {
                 throw new UncheckedIOException(new IOException("Launched failed to receive message from child process: " + this.libc.getStrError()));
             }
 
-            final Pointer<privilege_req> message = buf.castp(privilege_req.class);
-            switch (message.dref()
-                           .opcode()) {
+            final privilege_req message = buf.castp(privilege_req.class)
+                                             .dref();
+            switch (message.opcode()) {
                 case OPEN:
-                    //TODO handle open
+                    handleOpen(message,
+                               len);
                     break;
             }
         }
+    }
+
+    private void handleOpen(final privilege_req message,
+                            long len) {
+//        int  fd = -1, ret = -1;
+//        char control[ CMSG_SPACE(sizeof(fd))];
+//        struct cmsghdr *cmsg;
+//        struct stat s;
+//        struct msghdr nmsg;
+//        struct iovec iov;
+//        struct weston_launcher_open *message;
+//        union cmsg_data *data;
+//
+//
+//        final int payloadSize = message.payload_size()
+//                                       .intValue();
+//        if (len < privilege_req.SIZE + payloadSize) {
+//            //TODO handle error
+//        }
+//
+//	    /* Ensure path is null-terminated */
+//
+//
+//        message.payload()
+//               .writei(payloadSize - 1,
+//                       (byte) 0);
+//
+//        fd = open(message -> path,
+//                  message -> flags);
+//        if (fd < 0) {
+//            fprintf(stderr,
+//                    "Error opening device %s: %m\n",
+//                    message -> path);
+//        goto err0;
+//        }
+//
+//        if (fstat(fd, & s) <0){
+//            close(fd);
+//            fd = -1;
+//            fprintf(stderr,
+//                    "Failed to stat %s\n",
+//                    message -> path);
+//        goto err0;
+//        }
+//
+//        if (major(s.st_rdev) != INPUT_MAJOR &&
+//            major(s.st_rdev) != DRM_MAJOR) {
+//            close(fd);
+//            fd = -1;
+//            fprintf(stderr,
+//                    "Device %s is not an input or drm device\n",
+//                    message -> path);
+//        goto err0;
+//        }
+//
+//        err0:
+//        memset( & nmsg, 0, sizeof nmsg);
+//        nmsg.msg_iov = &iov;
+//        nmsg.msg_iovlen = 1;
+//        if (fd != -1) {
+//            nmsg.msg_control = control;
+//            nmsg.msg_controllen = sizeof control;
+//            cmsg = CMSG_FIRSTHDR( & nmsg);
+//            cmsg -> cmsg_level = SOL_SOCKET;
+//            cmsg -> cmsg_type = SCM_RIGHTS;
+//            cmsg -> cmsg_len = CMSG_LEN(sizeof(fd));
+//            data = (union cmsg_data *)CMSG_DATA(cmsg);
+//            data -> fd = fd;
+//            nmsg.msg_controllen = cmsg -> cmsg_len;
+//            ret = 0;
+//        }
+//        iov.iov_base = &ret;
+//        iov.iov_len = sizeof ret;
+//
+//        if (wl -> verbose) {
+//            fprintf(stderr,
+//                    "weston-launch: opened %s: ret: %d, fd: %d\n",
+//                    message -> path,
+//                    ret,
+//                    fd);
+//        }
+//        do {
+//            len = sendmsg(wl -> sock[0], & nmsg, 0);
+//        } while (len < 0 && errno == EINTR);
+//
+//        if (len < 0) { return -1; }
+//
+//        if (fd != -1 && major(s.st_rdev) == DRM_MAJOR) { wl -> drm_fd = fd; }
+//        if (fd != -1 && major(s.st_rdev) == INPUT_MAJOR &&
+//            wl -> last_input_fd < fd) { wl -> last_input_fd = fd; }
+//
+//        return 0;
     }
 
     private void handleSignal() {
@@ -243,7 +340,7 @@ public class IndirectLauncher implements Launcher {
         do {
             len = this.libc.send(this.sock.dref(0),
                                  Pointer.nref(reply).address,
-                                 Size.sizeof((Integer) null),
+                                 sizeof((Integer) null),
                                  0);
         } while (len < 0 && this.libc.getErrno() == EINTR);
     }
