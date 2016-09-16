@@ -19,5 +19,7 @@ package org.westmalle.nativ.linux;
 
 
 public class Major {
-    public static final int   TTY_MAJOR  = 4;
+    public static final int TTY_MAJOR   = 4;
+    public static final int INPUT_MAJOR = 13;
+    public static final int DRM_MAJOR   = 226;
 }
