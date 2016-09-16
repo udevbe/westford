@@ -23,7 +23,7 @@ import org.freedesktop.jaccall.Struct;
 
 @Struct({
                 @Field(name = "st_dev",
-                       type = CType.UNSIGNED_INT),
+                       type = CType.UNSIGNED_LONG_LONG),
                 @Field(name = "st_ino",
                        type = CType.UNSIGNED_LONG),
                 @Field(name = "st_mode",
