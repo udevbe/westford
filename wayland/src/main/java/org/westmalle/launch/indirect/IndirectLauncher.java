@@ -53,6 +53,9 @@ public class IndirectLauncher implements Launcher {
     private final Pointer<Integer> sock;
     private final int              signalFd;
 
+    private int drmFd;
+    private int lastInputFd;
+
     @Inject
     IndirectLauncher(@Provided @Nonnull final JvmLauncher jvmLauncher,
                      @Provided @Nonnull final Libc libc,
@@ -212,17 +215,33 @@ public class IndirectLauncher implements Launcher {
             final privilege_req message = buf.castp(privilege_req.class)
                                              .dref();
             switch (message.opcode()) {
-                case OPEN:
-                    handleOpen(message,
-                               len);
+                case OPEN: {
+                    try {
+                        final stat s = new stat();
+                        final int fd = handleOpenRequest(s,
+                                                         message,
+                                                         len);
+                        sendOpenReply(fd);
+                        if (this.libc.major(s.st_rdev()) == INPUT_MAJOR) {
+                            this.drmFd = fd;
+                        }
+                        else if (this.libc.major(s.st_rdev()) == DRM_MAJOR &&
+                                 this.lastInputFd < fd) {
+                            this.lastInputFd = fd;
+                        }
+                    }
+                    catch (final IOException e) {
+                        LOGGER.throwing(IndirectLauncher.class.getName(),
+                                        "sendOpenReply",
+                                        e);
+                    }
                     break;
+                }
             }
         }
     }
 
-    private void handleOpen(final privilege_req message,
-                            final long len) {
-//        int  fd = -1, ret = -1;
+    private void sendOpenReply(final int fd) throws IOException {
 //        char control[ CMSG_SPACE(sizeof(fd))];
 //        struct cmsghdr *cmsg;
 //        struct stat s;
@@ -230,60 +249,10 @@ public class IndirectLauncher implements Launcher {
 //        struct iovec iov;
 //        struct weston_launcher_open *message;
 //        union cmsg_data *data;
-//
-//
 
-        try {
-            final int payloadSize = message.payload_size()
-                                           .intValue();
-            if (len < privilege_req.SIZE + payloadSize) {
-                throw new IOException("Received request open message whose received size is smaller than it's self described size.");
-            }
-
-	    /* Ensure path is null-terminated */
-            final privilege_req_open privilegeReqOpen = message.payload()
-                                                               .castp(privilege_req_open.class)
-                                                               .dref();
-            privilegeReqOpen.path()
-                            .writei(payloadSize - 1,
-                                    (byte) 0);
-
-            int fd = this.libc.open(privilegeReqOpen.path().address,
-                                    privilegeReqOpen.flags());
-            if (fd < 0) {
-                throw new IOException(String.format("Error opening path %s : %s",
-                                                    privilegeReqOpen.path()
-                                                                    .castp(String.class)
-                                                                    .dref(),
-                                                    this.libc.getStrError()));
-            }
-
-            stat s = new stat();
-            if (this.libc.fstat(fd,
-                                Pointer.ref(s).address) < 0) {
-                this.libc.close(fd);
-                fd = -1;
-                throw new IOException(String.format("Failed to stat %s",
-                                                    privilegeReqOpen.path()
-                                                                    .castp(String.class)
-                                                                    .dref()));
-            }
-
-            if (this.libc.major(s.st_rdev()) != INPUT_MAJOR &&
-                this.libc.major(s.st_rdev()) != DRM_MAJOR) {
-                this.libc.close(fd);
-                fd = -1;
-                throw new IOException(String.format("Device %s is not an input or drm device",
-                                                    privilegeReqOpen.path()
-                                                                    .castp(String.class)
-                                                                    .dref()));
-            }
-//
-//        err0:
 //        memset( & nmsg, 0, sizeof nmsg);
 //        nmsg.msg_iov = &iov;
 //        nmsg.msg_iovlen = 1;
-//        if (fd != -1) {
 //            nmsg.msg_control = control;
 //            nmsg.msg_controllen = sizeof control;
 //            cmsg = CMSG_FIRSTHDR( & nmsg);
@@ -293,53 +262,66 @@ public class IndirectLauncher implements Launcher {
 //            data = (union cmsg_data *)CMSG_DATA(cmsg);
 //            data -> fd = fd;
 //            nmsg.msg_controllen = cmsg -> cmsg_len;
-//            ret = 0;
-//        }
+
 //        iov.iov_base = &ret;
 //        iov.iov_len = sizeof ret;
-//
-//        if (wl -> verbose) {
-//            fprintf(stderr,
-//                    "weston-launch: opened %s: ret: %d, fd: %d\n",
-//                    message -> path,
-//                    ret,
-//                    fd);
-//        }
 //        do {
 //            len = sendmsg(wl -> sock[0], & nmsg, 0);
 //        } while (len < 0 && errno == EINTR);
 //
 //        if (len < 0) { return -1; }
-//
-//        if (fd != -1 && major(s.st_rdev) == DRM_MAJOR) { wl -> drm_fd = fd; }
-//        if (fd != -1 && major(s.st_rdev) == INPUT_MAJOR &&
-//            wl -> last_input_fd < fd) { wl -> last_input_fd = fd; }
-//
-//        return 0;
+    }
+
+    private int handleOpenRequest(final stat s,
+                                  final privilege_req message,
+                                  final long len) {
+        final int payloadSize = message.payload_size()
+                                       .intValue();
+        if (len < privilege_req.SIZE + payloadSize) {
+            LOGGER.severe("Received request open message whose received size is smaller than it's self described size.");
+            return -1;
         }
-        catch (final IOException e) {
-            //TODO handle
-            LOGGER.throwing(IndirectLauncher.class.getName(),
-                            "handleOpen",
-                            e);
-//        memset( & nmsg, 0, sizeof nmsg);
-//        nmsg.msg_iov = &iov;
-//        nmsg.msg_iovlen = 1;
-//        if (fd != -1) {
-//            nmsg.msg_control = control;
-//            nmsg.msg_controllen = sizeof control;
-//            cmsg = CMSG_FIRSTHDR( & nmsg);
-//            cmsg -> cmsg_level = SOL_SOCKET;
-//            cmsg -> cmsg_type = SCM_RIGHTS;
-//            cmsg -> cmsg_len = CMSG_LEN(sizeof(fd));
-//            data = (union cmsg_data *)CMSG_DATA(cmsg);
-//            data -> fd = fd;
-//            nmsg.msg_controllen = cmsg -> cmsg_len;
-//            ret = 0;
-//        }
-//        iov.iov_base = &ret;
-//        iov.iov_len = sizeof ret;
+
+        //Ensure path is null-terminated
+        final privilege_req_open privilegeReqOpen = message.payload()
+                                                           .castp(privilege_req_open.class)
+                                                           .dref();
+        privilegeReqOpen.path()
+                        .writei(payloadSize - 1,
+                                (byte) 0);
+
+        final int fd = this.libc.open(privilegeReqOpen.path().address,
+                                      privilegeReqOpen.flags());
+        if (fd < 0) {
+            LOGGER.severe(String.format("Error opening device %s : %s",
+                                        privilegeReqOpen.path()
+                                                        .castp(String.class)
+                                                        .dref(),
+                                        this.libc.getStrError()));
+            return -1;
         }
+
+        if (this.libc.fstat(fd,
+                            Pointer.ref(s).address) < 0) {
+            this.libc.close(fd);
+            LOGGER.severe(String.format("Failed to stat %s",
+                                        privilegeReqOpen.path()
+                                                        .castp(String.class)
+                                                        .dref()));
+            return -1;
+        }
+
+        if (this.libc.major(s.st_rdev()) != INPUT_MAJOR ||
+            this.libc.major(s.st_rdev()) != DRM_MAJOR) {
+            this.libc.close(fd);
+            LOGGER.severe(String.format("Device %s is not an input or drm device",
+                                        privilegeReqOpen.path()
+                                                        .castp(String.class)
+                                                        .dref()));
+            return -1;
+        }
+
+        return fd;
     }
 
     private void handleSignal() {
