@@ -8,6 +8,7 @@ import org.westmalle.launch.JvmLauncher;
 import org.westmalle.launch.Launcher;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.glibc.Libc_Symbols;
+import org.westmalle.nativ.glibc.cmsghdr;
 import org.westmalle.nativ.glibc.iovec;
 import org.westmalle.nativ.glibc.msghdr;
 import org.westmalle.nativ.glibc.pollfd;
@@ -24,10 +25,13 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import static org.freedesktop.jaccall.Pointer.calloc;
+import static org.freedesktop.jaccall.Pointer.ref;
 import static org.freedesktop.jaccall.Size.sizeof;
 import static org.westmalle.nativ.glibc.Libc.EINTR;
 import static org.westmalle.nativ.linux.Major.DRM_MAJOR;
 import static org.westmalle.nativ.linux.Major.INPUT_MAJOR;
+import static org.westmalle.nativ.linux.Socket.SCM_RIGHTS;
+import static org.westmalle.nativ.linux.Socket.SOL_SOCKET;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateIndirectLauncherFactory")
@@ -197,14 +201,14 @@ public class IndirectLauncher implements Launcher {
 
             iov.iov_base(buf);
             iov.iov_len(new CLong(nroBufBytes));
-            msg.msg_iov(Pointer.ref(iov));
+            msg.msg_iov(ref(iov));
             msg.msg_iovlen(new CLong(1));
             msg.msg_control(control);
             msg.msg_controllen(new CLong(nroControlBytes));
 
             do {
                 len = this.libc.recvmsg(this.sock.dref(0),
-                                        Pointer.ref(msg).address,
+                                        ref(msg).address,
                                         0);
             } while (len < 0 && this.libc.getErrno() == EINTR);
 
@@ -242,34 +246,57 @@ public class IndirectLauncher implements Launcher {
     }
 
     private void sendOpenReply(final int fd) throws IOException {
-//        char control[ CMSG_SPACE(sizeof(fd))];
-//        struct cmsghdr *cmsg;
-//        struct stat s;
-//        struct msghdr nmsg;
-//        struct iovec iov;
-//        struct weston_launcher_open *message;
-//        union cmsg_data *data;
 
-//        memset( & nmsg, 0, sizeof nmsg);
-//        nmsg.msg_iov = &iov;
-//        nmsg.msg_iovlen = 1;
-//            nmsg.msg_control = control;
-//            nmsg.msg_controllen = sizeof control;
-//            cmsg = CMSG_FIRSTHDR( & nmsg);
-//            cmsg -> cmsg_level = SOL_SOCKET;
-//            cmsg -> cmsg_type = SCM_RIGHTS;
-//            cmsg -> cmsg_len = CMSG_LEN(sizeof(fd));
-//            data = (union cmsg_data *)CMSG_DATA(cmsg);
-//            data -> fd = fd;
-//            nmsg.msg_controllen = cmsg -> cmsg_len;
+        final int nroControlBytes = (int) this.libc.CMSG_SPACE(sizeof((Integer) null));
 
-//        iov.iov_base = &ret;
-//        iov.iov_len = sizeof ret;
-//        do {
-//            len = sendmsg(wl -> sock[0], & nmsg, 0);
-//        } while (len < 0 && errno == EINTR);
-//
-//        if (len < 0) { return -1; }
+        try (final Pointer<msghdr> nmsghdrPointer = calloc(1,
+                                                           msghdr.SIZE,
+                                                           msghdr.class);
+             final Pointer<Void> control = calloc(1,
+                                                  nroControlBytes)) {
+
+            final msghdr nmsg = nmsghdrPointer.dref();
+            final iovec  iov  = new iovec();
+            nmsg.msg_iov(ref(iov));
+            nmsg.msg_iovlen(new CLong(1));
+
+            final int ret;
+            if (fd == -1) {
+                ret = -1;
+            }
+            else {
+                nmsg.msg_control(control);
+                nmsg.msg_controllen(new CLong(nroControlBytes));
+                final Pointer<cmsghdr> cmsg = this.libc.CMSG_FIRSTHDR(nmsg);
+                cmsg.dref()
+                    .cmsg_level(SOL_SOCKET);
+                cmsg.dref()
+                    .cmsg_type(SCM_RIGHTS);
+                cmsg.dref()
+                    .cmsg_len(new CLong(this.libc.CMSG_LEN(sizeof(fd))));
+                final Pointer<Integer> data = this.libc.CMSG_DATA(cmsg)
+                                                       .castp(Integer.class);
+                data.write(fd);
+                nmsg.msg_controllen(cmsg.dref()
+                                        .cmsg_len());
+                ret = 0;
+            }
+            iov.iov_base(Pointer.nref(ret)
+                                .castp(Void.class));
+            iov.iov_len(new CLong(sizeof(ret)));
+
+
+            long len;
+            do {
+                len = this.libc.sendmsg(this.sock.dref(0),
+                                        nmsghdrPointer.address,
+                                        0);
+            } while (len < 0 && this.libc.getErrno() == EINTR);
+
+            if (len < 0) {
+                throw new IOException("Failed to send open reply: " + this.libc.getStrError());
+            }
+        }
     }
 
     private int handleOpenRequest(final stat s,
@@ -302,7 +329,7 @@ public class IndirectLauncher implements Launcher {
         }
 
         if (this.libc.fstat(fd,
-                            Pointer.ref(s).address) < 0) {
+                            ref(s).address) < 0) {
             this.libc.close(fd);
             LOGGER.severe(String.format("Failed to stat %s",
                                         privilegeReqOpen.path()
@@ -329,7 +356,7 @@ public class IndirectLauncher implements Launcher {
         final signalfd_siginfo sig = new signalfd_siginfo();
 
         if (this.libc.read(this.signalFd,
-                           Pointer.ref(sig).address,
+                           ref(sig).address,
                            signalfd_siginfo.SIZE) != signalfd_siginfo.SIZE) {
             throw new Error("reading signalfd failed: " + this.libc.getStrError());
         }
