@@ -328,6 +328,25 @@ public class Libc {
         return (((len) + Size.sizeof((CLong) null) - 1) & (long) ~(Size.sizeof((CLong) null) - 1));
     }
 
+    public long CMSG_LEN(final long len) {
+        return CMSG_ALIGN(cmsghdr.SIZE + len);
+    }
+
+    public Pointer<Byte> CMSG_DATA(final Pointer<cmsghdr> cmsg) {
+        return cmsg.offset(1)
+                   .castp(Byte.class);
+    }
+
+    public Pointer<cmsghdr> CMSG_FIRSTHDR(final msghdr mhdr) {
+        return mhdr.msg_controllen()
+                   .intValue() >= cmsghdr.SIZE ?
+               mhdr.msg_control()
+                   .castp(cmsghdr.class) :
+               Pointer.wrap(cmsghdr.class,
+                            0L);
+    }
+
+
     @Symbol
     @Ptr
     public native long errno();
@@ -480,6 +499,11 @@ public class Libc {
 
     @Lng
     public native long recvmsg(int sockfd,
+                               @Ptr(msghdr.class) long msg,
+                               int flags);
+
+    @Lng
+    public native long sendmsg(int sockfd,
                                @Ptr(msghdr.class) long msg,
                                int flags);
 
