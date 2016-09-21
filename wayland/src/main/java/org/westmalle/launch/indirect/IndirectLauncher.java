@@ -227,11 +227,11 @@ public class IndirectLauncher implements Launcher {
                                                          len);
                         sendOpenReply(fd);
                         if (this.libc.major(s.st_rdev()) == INPUT_MAJOR) {
-                            this.drmFd = fd;
+                            this.lastInputFd = fd;
                         }
                         else if (this.libc.major(s.st_rdev()) == DRM_MAJOR &&
                                  this.lastInputFd < fd) {
-                            this.lastInputFd = fd;
+                            this.drmFd = fd;
                         }
                     }
                     catch (final IOException e) {
