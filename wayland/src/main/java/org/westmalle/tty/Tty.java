@@ -45,7 +45,6 @@ public class Tty implements AutoCloseable {
 
     private final Libc libc;
     private final int  ttyFd;
-    private final int  vt;
 
     private final int   oldKbMode;
     private final short relSig;
@@ -58,22 +57,19 @@ public class Tty implements AutoCloseable {
 
     Tty(@Provided final Libc libc,
         final int ttyFd,
-        final int vt,
         final int oldKbMode,
         final short relSig,
         final short acqSig) {
 
         this.libc = libc;
         this.ttyFd = ttyFd;
-        this.vt = vt;
         this.oldKbMode = oldKbMode;
         this.relSig = relSig;
         this.acqSig = acqSig;
     }
 
     public void activate(final int vt) {
-        if (vt != this.vt || !this.vtActive) {
-            LOGGER.info("Switching to vt:" + vt);
+        if (!this.vtActive) {
             if (this.libc.ioctl(this.ttyFd,
                                 VT_ACTIVATE,
                                 vt) < 0) {
@@ -83,8 +79,6 @@ public class Tty implements AutoCloseable {
     }
 
     public void handleVtLeave() {
-
-        LOGGER.info("Leaving our vt:" + this.vt);
 
         this.vtActive = false;
         this.vtLeaveSignal.emit(VtLeave.create());
@@ -98,8 +92,6 @@ public class Tty implements AutoCloseable {
     }
 
     public void handleVtEnter() {
-
-        LOGGER.info("Entering our vt:" + this.vt);
 
         if (-1 == this.libc.ioctl(this.ttyFd,
                                   VT_RELDISP,

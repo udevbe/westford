@@ -19,7 +19,6 @@ package org.westmalle.tty;
 
 
 import org.freedesktop.jaccall.Pointer;
-import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.linux.vt_mode;
 
@@ -39,6 +38,7 @@ import static org.westmalle.nativ.linux.Kd.KDSKBMODE;
 import static org.westmalle.nativ.linux.Kd.KD_GRAPHICS;
 import static org.westmalle.nativ.linux.Kd.KD_TEXT;
 import static org.westmalle.nativ.linux.Kd.K_OFF;
+import static org.westmalle.nativ.linux.Kd.K_UNICODE;
 import static org.westmalle.nativ.linux.Stat.KDSKBMUTE;
 import static org.westmalle.nativ.linux.Vt.VT_ACTIVATE;
 import static org.westmalle.nativ.linux.Vt.VT_OPENQRY;
@@ -53,24 +53,54 @@ public class TtyFactory {
     @Nonnull
     private final Libc              libc;
     @Nonnull
-    private final Privileges        privileges;
-    @Nonnull
     private final PrivateTtyFactory privateTtyFactory;
 
     @Inject
     TtyFactory(@Nonnull final Libc libc,
-               @Nonnull final Privileges privileges,
                @Nonnull final PrivateTtyFactory privateTtyFactory) {
         this.libc = libc;
-        this.privileges = privileges;
         this.privateTtyFactory = privateTtyFactory;
     }
 
+    public Tty create(final int ttyFd) {
+        final short relSig = (short) this.libc.SIGRTMIN();
+        final short acqSig = (short) (this.libc.SIGRTMIN() + 1);
+
+        return this.privateTtyFactory.create(ttyFd,
+                                             K_UNICODE,
+                                             relSig,
+                                             acqSig);
+    }
+
     public Tty create() {
-        //TODO tty from config
+        //TODO tty from config?
         final Pointer<Integer> ttynr = Pointer.nref(0);
-        final int              ttyFd = getTtyFd(ttynr);
-        final int              vt    = ttynr.dref();
+
+        final int tty0 = this.libc.open(Pointer.nref("/dev/tty0").address,
+                                        O_WRONLY | O_CLOEXEC);
+
+        if (-1 == tty0) {
+            throw new RuntimeException("Could not open /dev/tty0 : " + this.libc.getStrError());
+        }
+
+        if (-1 == this.libc.ioctl(tty0,
+                                  VT_OPENQRY,
+                                  ttynr.address) || -1 == ttynr.dref()) {
+            throw new RuntimeException("Failed to query for open vt: " + this.libc.getStrError());
+        }
+        final Integer vt = ttynr.dref();
+        final int ttyFd = this.libc.open(Pointer.nref(format("/dev/tty%d",
+                                                             vt)).address,
+                                         O_RDWR | O_NOCTTY);
+        this.libc.close(tty0);
+
+        if (-1 == ttyFd) {
+            throw new RuntimeException(format("Failed to open /dev/tty%d : " + this.libc.getStrError(),
+                                              vt));
+        }
+
+        LOGGER.info(format("Using /dev/tty%d",
+                           vt));
 
         final Pointer<Integer> kd_mode = Pointer.nref(0);
         if (-1 == this.libc.ioctl(ttyFd,
@@ -150,40 +180,10 @@ public class TtyFactory {
             throw new RuntimeException("Failed to take control of vt handling: " + this.libc.getStrError());
         }
 
+
         return this.privateTtyFactory.create(ttyFd,
-                                             vt,
                                              oldKbMode,
                                              relSig,
                                              acqSig);
-    }
-
-    private int getTtyFd(final Pointer<Integer> ttynr) {
-        final int tty0 = this.privileges.open(Pointer.nref("/dev/tty0").address,
-                                              O_WRONLY | O_CLOEXEC);
-
-        if (-1 == tty0) {
-            throw new RuntimeException("Could not open /dev/tty0 : " + this.libc.getStrError());
-        }
-
-        if (-1 == this.libc.ioctl(tty0,
-                                  VT_OPENQRY,
-                                  ttynr.address) || -1 == ttynr.dref()) {
-            throw new RuntimeException("Failed to query for open vt: " + this.libc.getStrError());
-        }
-        final Integer vt = ttynr.dref();
-        final int ttyFd = this.privileges.open(Pointer.nref(format("/dev/tty%d",
-                                                                   vt)).address,
-                                               O_RDWR | O_NOCTTY);
-        this.libc.close(tty0);
-
-        if (-1 == ttyFd) {
-            throw new RuntimeException(format("Failed to open /dev/tty%d : " + this.libc.getStrError(),
-                                              vt));
-        }
-
-        LOGGER.info(format("Using /dev/tty%d",
-                           vt));
-
-        return ttyFd;
     }
 }
