@@ -507,4 +507,7 @@ public class Libc {
                                @Ptr(msghdr.class) long msg,
                                int flags);
 
+    @Lng
+    public native long strlen(@Ptr(String.class) long s);
+
 }
