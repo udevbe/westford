@@ -18,6 +18,7 @@
 package org.westmalle.wayland.bootstrap.html5;
 
 import dagger.Component;
+import org.westmalle.launch.direct.DirectModule;
 import org.westmalle.wayland.core.CoreModule;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.gles2.Gles2RendererModule;
@@ -27,7 +28,8 @@ import org.westmalle.wayland.x11.egl.X11EglPlatformModule;
 import javax.inject.Singleton;
 
 @Singleton
-@Component(modules = {CoreModule.class,
+@Component(modules = {DirectModule.class,
+                      CoreModule.class,
                       Gles2RendererModule.class,
                       X11EglPlatformModule.class,
                       Html5X11EglPlatformAdaptorModule.class})

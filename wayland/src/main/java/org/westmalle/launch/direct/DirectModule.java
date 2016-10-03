@@ -4,6 +4,7 @@ package org.westmalle.launch.direct;
 import dagger.Module;
 import dagger.Provides;
 import org.westmalle.launch.Launcher;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.NativeModule;
 
@@ -13,6 +14,12 @@ import javax.inject.Singleton;
         NativeModule.class
 })
 public class DirectModule {
+
+    @Singleton
+    @Provides
+    LifeCycleSignals provideLifeCycleSignals() {
+        return new DirectLifeCycleSignals();
+    }
 
     @Singleton
     @Provides

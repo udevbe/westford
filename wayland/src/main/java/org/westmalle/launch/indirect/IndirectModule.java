@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import org.westmalle.launch.JvmLauncher;
 import org.westmalle.launch.Launcher;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.NativeModule;
 
@@ -14,6 +15,14 @@ import javax.inject.Singleton;
         NativeModule.class
 })
 public class IndirectModule {
+
+    @Singleton
+    @Provides
+    LifeCycleSignals provideIndirectLifeCycleSignals(final IndirectLifeCycleSignalsFactory indirectLifeCycleSignalsFactory) {
+        return indirectLifeCycleSignalsFactory.create();
+    }
+
+
     @Singleton
     @Provides
     Launcher provideIndirectLauncher(final IndirectLauncherFactory indirectLauncherFactory) {

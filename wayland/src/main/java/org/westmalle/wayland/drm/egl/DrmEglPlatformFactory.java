@@ -19,6 +19,7 @@ package org.westmalle.wayland.drm.egl;
 
 
 import org.freedesktop.jaccall.Pointer;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westmalle.nativ.libEGL.EglGetPlatformDisplayEXT;
@@ -26,7 +27,6 @@ import org.westmalle.nativ.libEGL.LibEGL;
 import org.westmalle.nativ.libGLESv2.LibGLESv2;
 import org.westmalle.nativ.libgbm.Libgbm;
 import org.westmalle.wayland.core.GlRenderer;
-import org.westmalle.wayland.core.LifeCycleSignals;
 import org.westmalle.wayland.drm.DrmOutput;
 import org.westmalle.wayland.drm.DrmPlatform;
 

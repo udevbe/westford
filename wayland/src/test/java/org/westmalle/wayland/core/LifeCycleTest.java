@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westmalle.Signal;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.wayland.protocol.WlCompositor;
 import org.westmalle.wayland.protocol.WlDataDeviceManager;
 import org.westmalle.wayland.protocol.WlShell;

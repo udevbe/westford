@@ -15,19 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.westmalle.wayland.core;
+package org.westmalle.launch.direct;
 
 import org.westmalle.Signal;
 import org.westmalle.Slot;
+import org.westmalle.launch.LifeCycleSignals;
 
-public class LifeCycleSignals {
+public class DirectLifeCycleSignals implements LifeCycleSignals {
 
     private final Signal<Object, Slot<Object>> activateSignal   = new Signal<>();
     private final Signal<Object, Slot<Object>> deactivateSignal = new Signal<>();
     private final Signal<Object, Slot<Object>> startSignal      = new Signal<>();
     private final Signal<Object, Slot<Object>> stopSignal       = new Signal<>();
 
-    LifeCycleSignals() {
+    DirectLifeCycleSignals() {
     }
 
     public Signal<Object, Slot<Object>> getActivateSignal() {

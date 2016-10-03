@@ -498,6 +498,12 @@ public class Libc {
                             int flags);
 
     @Lng
+    public native long recv(int sockfd,
+                            @Ptr long buf,
+                            @Lng long len,
+                            int flags);
+
+    @Lng
     public native long recvmsg(int sockfd,
                                @Ptr(msghdr.class) long msg,
                                int flags);
