@@ -19,6 +19,7 @@ package org.westmalle.wayland.bootstrap.x11;
 
 import dagger.Component;
 import org.freedesktop.wayland.server.Display;
+import org.westmalle.launch.direct.DirectModule;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.glibc.Libpthread;
 import org.westmalle.wayland.core.CoreModule;
@@ -30,7 +31,8 @@ import org.westmalle.wayland.x11.egl.X11EglPlatformModule;
 import javax.inject.Singleton;
 
 @Singleton
-@Component(modules = {CoreModule.class,
+@Component(modules = {DirectModule.class,
+                      CoreModule.class,
                       Gles2RendererModule.class,
                       X11EglPlatformModule.class,
                       X11EglPlatformAdaptorModule.class})

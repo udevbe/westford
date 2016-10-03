@@ -3,8 +3,8 @@ package org.westmalle.launch.direct;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
 import org.westmalle.launch.Launcher;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.tty.Tty;
-import org.westmalle.wayland.core.LifeCycleSignals;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

@@ -1,6 +1,5 @@
 package org.westmalle.launch.indirect;
 
-
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
@@ -15,11 +14,7 @@ public class IndirectPrivilegesFactory {
     }
 
     public IndirectPrivileges create() {
-
-        final int socketFd0 = Integer.parseInt(System.getProperty(IndirectLauncher.SOCKETFD_0));
-        final int socketFd1 = Integer.parseInt(System.getProperty(IndirectLauncher.SOCKETFD_0));
-
-        return this.privatePrivilegesProxyFactory.create(socketFd0,
-                                                         socketFd1);
+        final int socketFd1 = Integer.parseInt(System.getProperty(IndirectLauncher.SOCKETFD_1));
+        return this.privatePrivilegesProxyFactory.create(socketFd1);
     }
 }

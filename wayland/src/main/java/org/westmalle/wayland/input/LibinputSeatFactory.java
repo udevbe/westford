@@ -19,6 +19,7 @@ package org.westmalle.wayland.input;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.libinput.Libinput;
 import org.westmalle.nativ.libinput.Pointerclose_restricted;
@@ -26,7 +27,6 @@ import org.westmalle.nativ.libinput.libinput_interface;
 import org.westmalle.nativ.libudev.Libudev;
 import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.KeyboardDeviceFactory;
-import org.westmalle.wayland.core.LifeCycleSignals;
 import org.westmalle.wayland.protocol.WlKeyboardFactory;
 import org.westmalle.wayland.protocol.WlPointerFactory;
 import org.westmalle.wayland.protocol.WlSeat;
@@ -41,25 +41,25 @@ import static org.westmalle.nativ.libinput.Pointeropen_restricted.nref;
 public class LibinputSeatFactory {
 
     @Nonnull
-    private final     WlSeatFactory              wlSeatFactory;
+    private final WlSeatFactory              wlSeatFactory;
     @Nonnull
     private final WlKeyboardFactory          wlKeyboardFactory;
     @Nonnull
     private final WlPointerFactory           wlPointerFactory;
     @Nonnull
-    private final     PrivateLibinputSeatFactory privateLibinputSeatFactory;
+    private final PrivateLibinputSeatFactory privateLibinputSeatFactory;
     @Nonnull
-    private final     KeyboardDeviceFactory      keyboardDeviceFactory;
+    private final KeyboardDeviceFactory      keyboardDeviceFactory;
     @Nonnull
-    private final     LibinputXkbFactory         libinputXkbFactory;
+    private final LibinputXkbFactory         libinputXkbFactory;
     @Nonnull
-    private final     Libinput                   libinput;
+    private final Libinput                   libinput;
     @Nonnull
-    private final     Libudev                    libudev;
+    private final Libudev                    libudev;
     @Nonnull
-    private final     Libc                       libc;
+    private final Libc                       libc;
     @Nonnull
-    private final     LifeCycleSignals           lifeCycleSignals;
+    private final LifeCycleSignals           lifeCycleSignals;
 
     @Inject
     LibinputSeatFactory(@Nonnull final WlSeatFactory wlSeatFactory,

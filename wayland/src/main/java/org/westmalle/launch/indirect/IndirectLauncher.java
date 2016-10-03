@@ -12,6 +12,7 @@ import org.westmalle.nativ.glibc.cmsghdr;
 import org.westmalle.nativ.glibc.iovec;
 import org.westmalle.nativ.glibc.msghdr;
 import org.westmalle.nativ.glibc.pollfd;
+import org.westmalle.nativ.libdrm.Libdrm;
 import org.westmalle.nativ.linux.signalfd_siginfo;
 import org.westmalle.nativ.linux.stat;
 import org.westmalle.tty.Tty;
@@ -39,9 +40,8 @@ public class IndirectLauncher implements Launcher {
 
     public static final int ACTIVATE   = 0;
     public static final int DEACTIVATE = 1;
-    public static final int OPEN       = 3;
+    public static final int OPEN       = 2;
 
-    public static final String SOCKETFD_0 = "SOCKETFD_0=%d";
     public static final String SOCKETFD_1 = "SOCKETFD_1=%d";
     public static final String TTYFD      = "TTYFD=%d";
     public static final String CHILD_MAIN = "CHILD_MAIN=%s";
@@ -52,6 +52,8 @@ public class IndirectLauncher implements Launcher {
     private final JvmLauncher      jvmLauncher;
     @Nonnull
     private final Libc             libc;
+    @Nonnull
+    private final Libdrm           libdrm;
     @Nonnull
     private final Tty              tty;
     @Nonnull
@@ -64,11 +66,13 @@ public class IndirectLauncher implements Launcher {
     @Inject
     IndirectLauncher(@Provided @Nonnull final JvmLauncher jvmLauncher,
                      @Provided @Nonnull final Libc libc,
+                     @Provided @Nonnull final Libdrm libdrm,
                      @Provided @Nonnull final Tty tty,
                      @Nonnull final Pointer<Integer> sock,
                      final int signalFd) {
         this.jvmLauncher = jvmLauncher;
         this.libc = libc;
+        this.libdrm = libdrm;
         this.tty = tty;
         this.sock = sock;
         this.signalFd = signalFd;
@@ -81,8 +85,7 @@ public class IndirectLauncher implements Launcher {
                                                         IllegalAccessException {
         dropPrivileges();
 
-        if (System.getProperty(SOCKETFD_0) == null ||
-            System.getProperty(SOCKETFD_1) == null ||
+        if (System.getProperty(SOCKETFD_1) == null ||
             System.getProperty(CHILD_MAIN) == null) {
             throw new IllegalStateException("Not all required system properties have been set. Note that this program is not meant to be ran directly.");
         }
@@ -124,9 +127,7 @@ public class IndirectLauncher implements Launcher {
     public void launch(final Class<?> main,
                        final String[] args) throws Exception {
         //fork ourselves
-        final Process fork = this.jvmLauncher.fork(Arrays.asList(String.format(SOCKETFD_0,
-                                                                               this.sock.dref(0)),
-                                                                 String.format(SOCKETFD_1,
+        final Process fork = this.jvmLauncher.fork(Arrays.asList(String.format(SOCKETFD_1,
                                                                                this.sock.dref(1)),
                                                                  String.format(TTYFD,
                                                                                this.tty.getTtyFd()),
@@ -366,12 +367,12 @@ public class IndirectLauncher implements Launcher {
 
         if (sig.ssi_signo() == this.tty.getAcqSig()) {
             this.tty.handleVtEnter();
-            //TODO setDrmMaster if an open of a drm fd was received
+            this.libdrm.drmSetMaster(this.drmFd);
             sendReply(ACTIVATE);
         }
         else if (sig.ssi_signo() == this.tty.getRelSig()) {
             sendReply(DEACTIVATE);
-            //TODO dropDrmMaster if an open of a drm fd was received
+            this.libdrm.drmDropMaster(this.drmFd);
             this.tty.handleVtLeave();
         }
         //else {

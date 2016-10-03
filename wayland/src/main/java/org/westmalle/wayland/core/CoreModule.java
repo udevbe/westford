@@ -30,12 +30,6 @@ import javax.inject.Singleton;
 public class CoreModule {
 
     @Provides
-    @Singleton
-    LifeCycleSignals provideLifeCycleSignals() {
-        return new LifeCycleSignals();
-    }
-
-    @Provides
     FiniteRegion provideFiniteRegion(final FiniteRegionFactory finiteRegionFactory) {
         return finiteRegionFactory.create();
     }
