@@ -27,7 +27,7 @@ import org.westmalle.nativ.glibc.Libpthread_Symbols;
 import org.westmalle.nativ.glibc.sigset_t;
 import org.westmalle.wayland.bootstrap.dispmanx.DaggerDispmanxEglCompositor;
 import org.westmalle.wayland.bootstrap.dispmanx.DispmanxEglCompositor;
-import org.westmalle.wayland.bootstrap.drm.direct.DirectDrmLaunch;
+import org.westmalle.wayland.bootstrap.drm.indirect.IndirectDrmLaunch;
 import org.westmalle.wayland.bootstrap.html5.DaggerHtml5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.html5.Html5X11EglCompositor;
 import org.westmalle.wayland.bootstrap.x11.DaggerX11EglCompositor;
@@ -86,8 +86,7 @@ public class Boot {
             case "DrmEgl":
                 LOGGER.info("Detected DrmEgl backend.");
                 prepareDrmEnvironment();
-                System.exit(new JvmLauncher().fork(args,
-                                                   DirectDrmLaunch.class.getName())
+                System.exit(new JvmLauncher().fork(IndirectDrmLaunch.class.getName())
                                              .waitFor());
                 break;
             case "Html5X11Egl":

@@ -42,9 +42,9 @@ public class IndirectLauncher implements Launcher {
     public static final int DEACTIVATE = 1;
     public static final int OPEN       = 2;
 
-    public static final String SOCKETFD_1 = "SOCKETFD_1=%d";
-    public static final String TTYFD      = "TTYFD=%d";
-    public static final String CHILD_MAIN = "CHILD_MAIN=%s";
+    public static final String SOCKETFD_1 = "-DSOCKETFD_1=%d";
+    public static final String TTYFD      = "-DTTYFD=%d";
+    public static final String CHILD_MAIN = "-DCHILD_MAIN=%s";
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -133,7 +133,6 @@ public class IndirectLauncher implements Launcher {
                                                                                this.tty.getTtyFd()),
                                                                  String.format(CHILD_MAIN,
                                                                                main.getName())),
-                                                   args,
                                                    IndirectLauncher.class.getName());
         new Thread() {
             @Override
