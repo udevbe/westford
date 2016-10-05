@@ -22,7 +22,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static org.freedesktop.jaccall.Pointer.calloc;
@@ -42,9 +43,9 @@ public class IndirectLauncher implements Launcher {
     public static final int DEACTIVATE = 1;
     public static final int OPEN       = 2;
 
-    public static final String SOCKETFD_1 = "-DSOCKETFD_1=%d";
-    public static final String TTYFD      = "-DTTYFD=%d";
-    public static final String CHILD_MAIN = "-DCHILD_MAIN=%s";
+    public static final String SOCKETFD_1 = "SOCKETFD_1";
+    public static final String TTYFD      = "TTYFD";
+    public static final String CHILD_MAIN = "CHILD_MAIN";
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -85,12 +86,13 @@ public class IndirectLauncher implements Launcher {
                                                         IllegalAccessException {
         dropPrivileges();
 
-        if (System.getProperty(SOCKETFD_1) == null ||
-            System.getProperty(CHILD_MAIN) == null) {
+        if (System.getenv(SOCKETFD_1) == null ||
+            System.getenv(TTYFD) == null ||
+            System.getenv(CHILD_MAIN) == null) {
             throw new IllegalStateException("Not all required system properties have been set. Note that this program is not meant to be ran directly.");
         }
 
-        final String   childMain = System.getProperty(CHILD_MAIN);
+        final String   childMain = System.getenv(CHILD_MAIN);
         final Class<?> main      = Class.forName(childMain);
         main.getMethod("main",
                        String[].class)
@@ -127,12 +129,15 @@ public class IndirectLauncher implements Launcher {
     public void launch(final Class<?> main,
                        final String[] args) throws Exception {
         //fork ourselves
-        final Process fork = this.jvmLauncher.fork(Arrays.asList(String.format(SOCKETFD_1,
-                                                                               this.sock.dref(1)),
-                                                                 String.format(TTYFD,
-                                                                               this.tty.getTtyFd()),
-                                                                 String.format(CHILD_MAIN,
-                                                                               main.getName())),
+        final Map<String, String> environment = new HashMap<>();
+        environment.put(SOCKETFD_1,
+                        this.sock.dref(1)
+                                 .toString());
+        environment.put(TTYFD,
+                        Integer.toString(this.tty.getTtyFd()));
+        environment.put(CHILD_MAIN,
+                        main.getName());
+        final Process fork = this.jvmLauncher.fork(environment,
                                                    IndirectLauncher.class.getName());
         new Thread() {
             @Override
