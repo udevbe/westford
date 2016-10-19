@@ -47,8 +47,6 @@ public class IndirectLauncherFactory {
 
         final IndirectLauncher indirectLaunchable = this.privateIndirectLauncherFactory.create(sock,
                                                                                                signalFd);
-        this.libc.close(sock.dref(1));
-
         return indirectLaunchable;
     }
 
