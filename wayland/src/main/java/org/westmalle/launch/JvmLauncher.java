@@ -16,26 +16,30 @@ public class JvmLauncher {
     @Nonnull
     public Process fork(@Nonnull final String mainClassName) throws IOException, InterruptedException {
         return startNewJavaProcess(Collections.emptyMap(),
-                                   mainClassName);
+                                   mainClassName,
+                                   1);
     }
 
     private Process startNewJavaProcess(final Map<String, String> environment,
-                                        final String mainClass) throws IOException {
+                                        final String mainClass,
+                                        final int debugOffset) throws IOException {
         final ProcessBuilder processBuilder = createProcess(environment,
-                                                            mainClass);
+                                                            mainClass,
+                                                            debugOffset);
         processBuilder.inheritIO();
         return processBuilder.start();
     }
 
     private ProcessBuilder createProcess(final Map<String, String> environmentExtra,
-                                         final String mainClass) {
+                                         final String mainClass,
+                                         final int debugOffset) {
         final String jvm       = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
         final String classpath = System.getProperty("java.class.path");
 
         final List<String> command = new ArrayList<>();
         command.add(jvm);
         command.add(String.format(DEBUG_COMMAND,
-                                  ++DEBUG_PORT));
+                                  DEBUG_PORT + debugOffset));
         command.add(mainClass);
 
         final ProcessBuilder      processBuilder = new ProcessBuilder(command);
@@ -50,7 +54,8 @@ public class JvmLauncher {
     public Process fork(@Nonnull final Map<String, String> environmentExtra,
                         @Nonnull final String mainClassName) throws IOException, InterruptedException {
         return startNewJavaProcess(environmentExtra,
-                                   mainClassName);
+                                   mainClassName,
+                                   2);
     }
 
     //TODO embed: init a jvm in the current process using jni api
