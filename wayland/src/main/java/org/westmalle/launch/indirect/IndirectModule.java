@@ -3,8 +3,6 @@ package org.westmalle.launch.indirect;
 
 import dagger.Module;
 import dagger.Provides;
-import org.westmalle.launch.JvmLauncher;
-import org.westmalle.launch.Launcher;
 import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.launch.Privileges;
 import org.westmalle.nativ.NativeModule;
@@ -22,22 +20,9 @@ public class IndirectModule {
         return indirectLifeCycleSignalsFactory.create();
     }
 
-
-    @Singleton
-    @Provides
-    Launcher provideIndirectLauncher(final IndirectLauncherFactory indirectLauncherFactory) {
-        return indirectLauncherFactory.create();
-    }
-
     @Singleton
     @Provides
     Privileges provideIndirectPrivileges(final IndirectPrivilegesFactory indirectPrivilegesFactory) {
         return indirectPrivilegesFactory.create();
-    }
-
-    @Singleton
-    @Provides
-    JvmLauncher provideJvmLauncher() {
-        return new JvmLauncher();
     }
 }
