@@ -9,9 +9,8 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>bootstrap</artifactId>
-    <name>Westmalle Bootstrap</name>
-    <packaging>pom</packaging>
+    <artifactId>x11.html5</artifactId>
+    <name>Westmalle X11 Html5 Bootstrap</name>
 
     <dependencies>
         <dependency>
@@ -20,14 +19,6 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
-    <modules>
-        <module>x11</module>
-        <module>drm.direct</module>
-        <module>drm.indirect</module>
-        <module>dispmanx</module>
-        <module>x11.html5</module>
-    </modules>
 
     <build>
         <plugins>
