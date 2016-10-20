@@ -55,7 +55,7 @@ public class IndirectPrivileges implements Privileges {
             }
 
             message.dref()
-                   .opcode(IndirectLauncher.OPEN);
+                   .opcode(NativeConstants.OPCODE_OPEN);
             message.dref()
                    .payload_size(new CLong(payloadSize));
             message.dref()
