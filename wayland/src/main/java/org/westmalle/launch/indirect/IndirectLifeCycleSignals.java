@@ -16,6 +16,8 @@ import javax.annotation.Nonnull;
 
 import static org.freedesktop.wayland.server.jaccall.WaylandServerCore.WL_EVENT_ERROR;
 import static org.freedesktop.wayland.server.jaccall.WaylandServerCore.WL_EVENT_HANGUP;
+import static org.westmalle.launch.indirect.NativeConstants.EVENT_WESTMALLE_LAUNCHER_ACTIVATE;
+import static org.westmalle.launch.indirect.NativeConstants.EVENT_WESTMALLE_LAUNCHER_DEACTIVATE;
 import static org.westmalle.nativ.glibc.Libc.EINTR;
 
 @AutoFactory(allowSubclasses = true,
@@ -69,10 +71,10 @@ public class IndirectLifeCycleSignals implements LifeCycleSignals {
         } while (len < 0 && this.libc.getErrno() == EINTR);
 
         switch (ret.dref()) {
-            case IndirectLauncher.ACTIVATE:
+            case EVENT_WESTMALLE_LAUNCHER_ACTIVATE:
                 getActivateSignal().emit(Activate.create());
                 break;
-            case IndirectLauncher.DEACTIVATE:
+            case EVENT_WESTMALLE_LAUNCHER_DEACTIVATE:
                 getDeactivateSignal().emit(Deactivate.create());
                 break;
             default:

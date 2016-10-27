@@ -14,6 +14,7 @@ import org.westmalle.nativ.glibc.msghdr;
 import javax.annotation.Nonnull;
 
 import static org.freedesktop.jaccall.Size.sizeof;
+import static org.westmalle.launch.indirect.NativeConstants.OPCODE_WESTMALLE_LAUNCHER_OPEN;
 import static org.westmalle.nativ.glibc.Libc.EINTR;
 import static org.westmalle.nativ.linux.Socket.MSG_CMSG_CLOEXEC;
 import static org.westmalle.nativ.linux.Socket.SCM_RIGHTS;
@@ -44,29 +45,21 @@ public class IndirectPrivileges implements Privileges {
 
     private void sendOpenRequest(@Ptr(String.class) final long path,
                                  final int flags) {
-        final long payloadSize = privilege_req_open.SIZE + this.libc.strlen(path) + 1;
-        final int  messageSize = (int) (privilege_req.SIZE + payloadSize);
-        try (final Pointer<privilege_req> message = Pointer.calloc(1,
-                                                                   messageSize)
-                                                           .castp(privilege_req.class)) {
+        final long payloadSize = westmalle_launcher_open.SIZE + this.libc.strlen(path) + 1;
+        final int  messageSize = (int) (westmalle_launcher_open.SIZE + payloadSize);
+        try (final Pointer<westmalle_launcher_open> message = Pointer.calloc(1,
+                                                                             messageSize)
+                                                                     .castp(westmalle_launcher_open.class)) {
             if (message.address == 0L) {
                 throw new RuntimeException(String.format("Unable to allocate %d bytes. Memory full?",
                                                          messageSize));
             }
 
             message.dref()
-                   .opcode(NativeConstants.OPCODE_OPEN);
+                   .opcode(OPCODE_WESTMALLE_LAUNCHER_OPEN);
             message.dref()
-                   .payload_size(new CLong(payloadSize));
-            message.dref()
-                   .payload()
-                   .castp(privilege_req_open.class)
-                   .dref()
                    .flags(flags);
             this.libc.strcpy(message.dref()
-                                    .payload()
-                                    .castp(privilege_req_open.class)
-                                    .dref()
                                     .path().address,
                              path);
 

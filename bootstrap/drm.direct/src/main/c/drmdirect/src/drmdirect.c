@@ -8,8 +8,8 @@ static void
 setup_signals(void){
     sigset_t sigset;
     sigemptyset(&sigset);
-    //the signals being blocked here must the same signals defined in the org.westmalle.tty.Tty class.
 
+    //the signals being blocked here must the same signals defined in the org.westmalle.tty.Tty class.
     sigaddset(&sigset,
               SIGRTMIN);
     sigaddset(&sigset,

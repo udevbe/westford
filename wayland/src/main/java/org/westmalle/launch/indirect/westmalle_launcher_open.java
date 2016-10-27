@@ -6,9 +6,9 @@ import org.freedesktop.jaccall.Struct;
 
 @Struct(value = {@Field(name = "opcode",
                         type = CType.INT),
-                 @Field(name = "payload_size",
-                        type = CType.UNSIGNED_LONG),
-                 @Field(name = "payload",
+                 @Field(name = "flags",
+                        type = CType.INT),
+                 @Field(name = "path",
                         cardinality = 0,
-                        type = CType.UNSIGNED_CHAR)})
-public final class privilege_req extends privilege_req_Jaccall_StructType {}
+                        type = CType.CHAR)})
+public final class westmalle_launcher_open extends westmalle_launcher_open_Jaccall_StructType {}
