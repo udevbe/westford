@@ -19,6 +19,7 @@ package org.westmalle.tty;
 
 import dagger.Module;
 import dagger.Provides;
+import org.westmalle.launch.indirect.NativeConstants;
 
 import javax.inject.Singleton;
 
@@ -27,6 +28,13 @@ public class TtyModule {
     @Provides
     @Singleton
     Tty provideTty(final TtyFactory ttyFactory) {
-        return ttyFactory.create();
+        final String westmalleTtyFd = NativeConstants.ENV_WESTMALLE_TTY_FD;
+        if (westmalleTtyFd == null) {
+            return ttyFactory.create();
+        }
+        else {
+            final int ttyFd = Integer.parseInt(System.getenv(westmalleTtyFd));
+            return ttyFactory.create(ttyFd);
+        }
     }
 }

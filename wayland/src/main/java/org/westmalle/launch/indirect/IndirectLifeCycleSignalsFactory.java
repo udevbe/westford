@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import static org.freedesktop.wayland.server.jaccall.WaylandServerCore.WL_EVENT_READABLE;
+import static org.westmalle.launch.indirect.NativeConstants.ENV_WESTMALLE_LAUNCHER_SOCK;
 
 public class IndirectLifeCycleSignalsFactory {
 
@@ -23,7 +24,7 @@ public class IndirectLifeCycleSignalsFactory {
     }
 
     public IndirectLifeCycleSignals create() {
-        final int socketFd1 = Integer.parseInt(System.getenv(IndirectLauncher.SOCKETFD_1));
+        final int socketFd1 = Integer.parseInt(System.getenv(ENV_WESTMALLE_LAUNCHER_SOCK));
 
         final IndirectLifeCycleSignals indirectLifeCycleSignals = this.privateIndirectLifeCycleSignalsFactory.create(socketFd1);
         this.display.getEventLoop()
