@@ -4,7 +4,8 @@
 
 #include <jni.h>
 
-void setup_signals(void){
+static void
+setup_signals(void){
     sigset_t sigset;
     sigemptyset(&sigset);
     //the signals being blocked here must the same signals defined in the org.westmalle.tty.Tty class.
@@ -21,7 +22,8 @@ void setup_signals(void){
     }
 }
 
-JNIEnv* create_vm(int argc, char **argv) {
+static JNIEnv*
+create_vm(int argc, char **argv) {
 	JavaVM* jvm;
 	JNIEnv* env;
 	JavaVMInitArgs args;
@@ -50,7 +52,8 @@ JNIEnv* create_vm(int argc, char **argv) {
 	return env;
 }
 
-void invoke_class(JNIEnv* env) {
+static void
+invoke_class(JNIEnv* env) {
 	jclass bootClass;
 	jmethodID mainMethod;
 	const char* cls = "org/westmalle/wayland/bootstrap/drm/direct/Boot";
