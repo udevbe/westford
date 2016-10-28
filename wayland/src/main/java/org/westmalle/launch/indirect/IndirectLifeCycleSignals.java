@@ -11,6 +11,8 @@ import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.wayland.core.events.Activate;
 import org.westmalle.wayland.core.events.Deactivate;
+import org.westmalle.wayland.core.events.Start;
+import org.westmalle.wayland.core.events.Stop;
 
 import javax.annotation.Nonnull;
 
@@ -24,10 +26,10 @@ import static org.westmalle.nativ.glibc.Libc.EINTR;
              className = "PrivateIndirectLifeCycleSignalsFactory")
 public class IndirectLifeCycleSignals implements LifeCycleSignals {
 
-    private final Signal<Object, Slot<Object>> activateSignal   = new Signal<>();
-    private final Signal<Object, Slot<Object>> deactivateSignal = new Signal<>();
-    private final Signal<Object, Slot<Object>> startSignal      = new Signal<>();
-    private final Signal<Object, Slot<Object>> stopSignal       = new Signal<>();
+    private final Signal<Activate, Slot<Activate>>     activateSignal   = new Signal<>();
+    private final Signal<Deactivate, Slot<Deactivate>> deactivateSignal = new Signal<>();
+    private final Signal<Start, Slot<Start>>           startSignal      = new Signal<>();
+    private final Signal<Stop, Slot<Stop>>             stopSignal       = new Signal<>();
 
     @Nonnull
     private final Libc libc;
@@ -40,12 +42,12 @@ public class IndirectLifeCycleSignals implements LifeCycleSignals {
     }
 
     @Override
-    public Signal<Object, Slot<Object>> getStartSignal() {
+    public Signal<Start, Slot<Start>> getStartSignal() {
         return this.startSignal;
     }
 
     @Override
-    public Signal<Object, Slot<Object>> getStopSignal() {
+    public Signal<Stop, Slot<Stop>> getStopSignal() {
         return this.stopSignal;
     }
 
@@ -87,12 +89,12 @@ public class IndirectLifeCycleSignals implements LifeCycleSignals {
     }
 
     @Override
-    public Signal<Object, Slot<Object>> getActivateSignal() {
+    public Signal<Activate, Slot<Activate>> getActivateSignal() {
         return this.activateSignal;
     }
 
     @Override
-    public Signal<Object, Slot<Object>> getDeactivateSignal() {
+    public Signal<Deactivate, Slot<Deactivate>> getDeactivateSignal() {
         return this.deactivateSignal;
     }
 }
