@@ -3,13 +3,17 @@ package org.westmalle.launch;
 
 import org.westmalle.Signal;
 import org.westmalle.Slot;
+import org.westmalle.wayland.core.events.Activate;
+import org.westmalle.wayland.core.events.Deactivate;
+import org.westmalle.wayland.core.events.Start;
+import org.westmalle.wayland.core.events.Stop;
 
 public interface LifeCycleSignals {
-    Signal<Object, Slot<Object>> getActivateSignal();
+    Signal<Activate, Slot<Activate>> getActivateSignal();
 
-    Signal<Object, Slot<Object>> getDeactivateSignal();
+    Signal<Deactivate, Slot<Deactivate>> getDeactivateSignal();
 
-    Signal<Object, Slot<Object>> getStartSignal();
+    Signal<Start, Slot<Start>> getStartSignal();
 
-    Signal<Object, Slot<Object>> getStopSignal();
+    Signal<Stop, Slot<Stop>> getStopSignal();
 }

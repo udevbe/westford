@@ -3,6 +3,8 @@ package org.westmalle.wayland.core;
 
 import org.freedesktop.wayland.server.Display;
 import org.westmalle.launch.LifeCycleSignals;
+import org.westmalle.wayland.core.events.Activate;
+import org.westmalle.wayland.core.events.Deactivate;
 import org.westmalle.wayland.core.events.Start;
 import org.westmalle.wayland.core.events.Stop;
 import org.westmalle.wayland.protocol.WlCompositor;
@@ -54,6 +56,8 @@ public class LifeCycle {
         this.display.addSocket("wayland-0");
         this.lifeCycleSignals.getStartSignal()
                              .emit(Start.create());
+        this.lifeCycleSignals.getActivateSignal()
+                             .emit(Activate.create());
         this.display.run();
     }
 
@@ -63,9 +67,12 @@ public class LifeCycle {
         this.wlShell.destroy();
         this.wlSubcompositor.destroy();
 
+        this.lifeCycleSignals.getDeactivateSignal()
+                             .emit(Deactivate.create());
         this.lifeCycleSignals.getStopSignal()
                              .emit(Stop.create());
         this.jobExecutor.fireFinishedEvent();
+
         this.display.terminate();
     }
 }
