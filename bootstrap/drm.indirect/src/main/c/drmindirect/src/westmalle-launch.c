@@ -673,7 +673,6 @@ static void
 help(const char *name)
 {
 	fprintf(stderr, "Usage: %s [args...] [-- [westmalle args..]]\n", name);
-	fprintf(stderr, "  -u, --user      Start session as specified username\n");
 	fprintf(stderr, "  -t, --tty       Start session on alternative tty\n");
 	fprintf(stderr, "  -v, --verbose   Be verbose\n");
 	fprintf(stderr, "  -h, --help      Display this help message\n");
@@ -694,13 +693,8 @@ main(int argc, char *argv[])
 
 	memset(&wl, 0, sizeof wl);
 
-	while ((c = getopt_long(argc, argv, "u:t::vh", opts, &i)) != -1) {
+	while ((c = getopt_long(argc, argv, "t::vh", opts, &i)) != -1) {
 		switch (c) {
-		case 'u':
-			wl.new_user = optarg;
-			if (getuid() != 0)
-				error(1, 0, "Permission denied. -u allowed for root only");
-			break;
 		case 't':
 			tty = optarg;
 			break;
@@ -715,7 +709,7 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if ((argc - optind) > (MAX_ARGV_SIZE - 6))
+	if ((argc - optind) > (MAX_ARGV_SIZE - 5))
 		error(1, E2BIG, "Too many arguments to pass to westmalle");
 
 	if (wl.new_user)
