@@ -58,6 +58,8 @@ public class LifeCycleTest {
     public void setUp() throws Exception {
         when(this.lifeCycleSignals.getStartSignal()).thenReturn(mock(Signal.class));
         when(this.lifeCycleSignals.getStopSignal()).thenReturn(mock(Signal.class));
+        when(this.lifeCycleSignals.getActivateSignal()).thenReturn(mock(Signal.class));
+        when(this.lifeCycleSignals.getDeactivateSignal()).thenReturn(mock(Signal.class));
     }
 
     @Test
