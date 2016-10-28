@@ -28,7 +28,7 @@ public class TtyModule {
     @Provides
     @Singleton
     Tty provideTty(final TtyFactory ttyFactory) {
-        final String westmalleTtyFd = NativeConstants.ENV_WESTMALLE_TTY_FD;
+        final String westmalleTtyFd = System.getenv(NativeConstants.ENV_WESTMALLE_TTY_FD);
         if (westmalleTtyFd == null) {
             return ttyFactory.create();
         }
