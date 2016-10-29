@@ -41,14 +41,21 @@ public class Boot {
     private static final Logger LOGGER   = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private static final String BACK_END = "backEnd";
 
-    public static void main_from_native(final String[] args) throws IOException, InterruptedException {
-        //this main is not launched directly, but instead from native code that invokes the jvm after
-        //it has properly configured user rights, OS signals used for tty switching etc.
+    public static void main_from_native(final String[] args) {
+        try {
+            //this main is not launched directly, but instead from native code that invokes the jvm after
+            //it has properly configured user rights, OS signals used for tty switching etc.
 
-        configureLogger();
-        LOGGER.info("Starting Westmalle");
+            configureLogger();
+            LOGGER.info("Starting Westmalle");
 
-        initBackEnd(args);
+            initBackEnd(args);
+        }
+        catch (final Throwable t) {
+            LOGGER.throwing(Boot.class.getName(),
+                            "main_from_native",
+                            t);
+        }
     }
 
     private static void configureLogger() throws IOException {
