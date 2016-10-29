@@ -4,6 +4,8 @@
 
 #include <jni.h>
 
+#include "Config.h"
+
 static void
 setup_signals(void)
 {
@@ -35,7 +37,8 @@ create_vm(int argc, char **argv)
 	args.version = JNI_VERSION_1_6;
 	args.nOptions = argc;
 
-	options[0].optionString = "-Djava.class.path=drm.direct.jar";
+    //TODO use config file to reference installed jar file directly
+	options[0].optionString = "-Djava.class.path=drm.direct-"VERSION_MAJOR"."VERSION_MINOR"."VERSION_PATCH"-"VERSION_EXT".jar";
     fprintf(stdout, "INFO: Adding JVM option %s.\n", options[0].optionString);
 
     for(i = 1; i < argc; i++) {
