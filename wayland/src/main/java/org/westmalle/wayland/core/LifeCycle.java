@@ -62,6 +62,8 @@ public class LifeCycle {
     }
 
     public void stop() {
+        //FIXME let globals listen for stop signal and cleanup themself, this way we don't have to split this class
+        //into LifeCycle (this class) and LifeCycleSignals (which we do to avoid cyclic dependencies).
         this.wlCompositor.destroy();
         this.wlDataDeviceManager.destroy();
         this.wlShell.destroy();
