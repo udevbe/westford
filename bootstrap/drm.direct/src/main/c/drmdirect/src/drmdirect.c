@@ -17,9 +17,9 @@ setup_signals(void)
               SIGRTMIN);
     sigaddset(&sigset,
               SIGRTMIN + 1);
-    if(-1 == sigprocmask(SIG_BLOCK,
-                         &sigset,
-                         NULL)){
+    if(0 != pthread_sigmask(SIG_BLOCK,
+                            &sigset,
+                            NULL)){
         fprintf(stderr, "ERROR: Failed to block SIGRTMIN and SIGRTMIN+1 signals.\n");
 	    exit(1);
     }

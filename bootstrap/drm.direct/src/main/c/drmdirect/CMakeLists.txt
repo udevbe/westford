@@ -20,11 +20,11 @@ configure_file (
 # add the binary tree to the search path for include files
 # so that we will find Config.h
 include_directories("${PROJECT_BINARY_DIR}")
-
+find_package (Threads)
 find_package(JNI REQUIRED)
 
 # generate drmdirect
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 add_executable(drmdirect src/drmdirect.c)
-target_link_libraries(drmdirect ${JAVA_JVM_LIBRARY})
+target_link_libraries(drmdirect ${JAVA_JVM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
