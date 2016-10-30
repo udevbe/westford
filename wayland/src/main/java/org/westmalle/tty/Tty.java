@@ -69,6 +69,9 @@ public class Tty implements AutoCloseable {
     }
 
     public void activate(final int vt) {
+        LOGGER.info(String.format("Activating vt %d.",
+                                  vt));
+
         if (!this.vtActive) {
             if (this.libc.ioctl(this.ttyFd,
                                 VT_ACTIVATE,
@@ -79,6 +82,7 @@ public class Tty implements AutoCloseable {
     }
 
     public void handleVtLeave() {
+        LOGGER.info("Handling vt leave.");
 
         this.vtActive = false;
         this.vtLeaveSignal.emit(VtLeave.create());
@@ -92,6 +96,7 @@ public class Tty implements AutoCloseable {
     }
 
     public void handleVtEnter() {
+        LOGGER.info("Handling vt enter.");
 
         if (-1 == this.libc.ioctl(this.ttyFd,
                                   VT_RELDISP,
