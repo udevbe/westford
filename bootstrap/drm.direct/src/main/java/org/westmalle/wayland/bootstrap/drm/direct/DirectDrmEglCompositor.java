@@ -19,6 +19,7 @@ package org.westmalle.wayland.bootstrap.drm.direct;
 
 import dagger.Component;
 import org.freedesktop.wayland.server.Display;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.launch.direct.DirectModule;
 import org.westmalle.tty.Tty;
 import org.westmalle.tty.TtyModule;
@@ -42,6 +43,8 @@ public interface DirectDrmEglCompositor {
     Display display();
 
     LifeCycle lifeCycle();
+
+    LifeCycleSignals lifeCycleSignals();
 
     LibinputSeatFactory seatFactory();
 

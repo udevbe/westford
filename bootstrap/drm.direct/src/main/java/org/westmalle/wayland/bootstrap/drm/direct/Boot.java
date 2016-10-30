@@ -18,7 +18,9 @@
 package org.westmalle.wayland.bootstrap.drm.direct;
 
 import org.freedesktop.wayland.server.Display;
+import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.WlKeyboardResource;
+import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.nativ.linux.InputEventCodes;
 import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.KeyBindingFactory;
@@ -26,6 +28,8 @@ import org.westmalle.wayland.core.KeyboardDevice;
 import org.westmalle.wayland.core.LifeCycle;
 import org.westmalle.wayland.core.PointerDevice;
 import org.westmalle.wayland.core.TouchDevice;
+import org.westmalle.wayland.core.events.Activate;
+import org.westmalle.wayland.core.events.Deactivate;
 import org.westmalle.wayland.protocol.WlKeyboard;
 import org.westmalle.wayland.protocol.WlSeat;
 
@@ -112,19 +116,29 @@ public class Boot {
         final Tty tty = drmEglCompositor.tty();
 
         //listen for tty switching signals
-        final Display display = drmEglCompositor.display();
-        display.getEventLoop()
-               .addSignal(tty.getRelSig(),
-                          signalNumber -> {
-                              tty.handleVtLeave();
-                              return 0;
-                          });
-        display.getEventLoop()
-               .addSignal(tty.getAcqSig(),
-                          signalNumber -> {
-                              tty.handleVtEnter();
-                              return 0;
-                          });
+        final Display          display          = drmEglCompositor.display();
+        final LifeCycleSignals lifeCycleSignals = drmEglCompositor.lifeCycleSignals();
+        tty.getVtEnterSignal()
+           .connect(event -> lifeCycleSignals.getActivateSignal()
+                                             .emit(Activate.create()));
+        tty.getVtLeaveSignal()
+           .connect(event -> lifeCycleSignals.getDeactivateSignal()
+                                             .emit(Deactivate.create()));
+
+        final short relSig = tty.getRelSig();
+        final short acqSig = tty.getAcqSig();
+
+        final EventLoop eventLoop = display.getEventLoop();
+        eventLoop.addSignal(relSig,
+                            signalNumber -> {
+                                tty.handleVtLeave();
+                                return 0;
+                            });
+        eventLoop.addSignal(acqSig,
+                            signalNumber -> {
+                                tty.handleVtEnter();
+                                return 0;
+                            });
 
         addTtyKeyBindings(drmEglCompositor,
                           keyboardDevice,
