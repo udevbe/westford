@@ -17,6 +17,7 @@
  */
 package org.westmalle.wayland.bootstrap.drm.direct;
 
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.westmalle.nativ.linux.InputEventCodes;
 import org.westmalle.tty.Tty;
@@ -109,6 +110,22 @@ public class Boot {
          * setup tty switching key bindings
          */
         final Tty tty = drmEglCompositor.tty();
+
+        //listen for tty switching signals
+        final Display display = drmEglCompositor.display();
+        display.getEventLoop()
+               .addSignal(tty.getRelSig(),
+                          signalNumber -> {
+                              tty.handleVtLeave();
+                              return 0;
+                          });
+        display.getEventLoop()
+               .addSignal(tty.getAcqSig(),
+                          signalNumber -> {
+                              tty.handleVtEnter();
+                              return 0;
+                          });
+
         addTtyKeyBindings(drmEglCompositor,
                           keyboardDevice,
                           tty);
