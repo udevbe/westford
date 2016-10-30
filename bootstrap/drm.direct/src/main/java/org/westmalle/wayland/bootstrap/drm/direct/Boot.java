@@ -19,7 +19,6 @@ package org.westmalle.wayland.bootstrap.drm.direct;
 
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.westmalle.launch.LifeCycleSignals;
@@ -168,9 +167,9 @@ public class Boot {
            .connect(event -> lifeCycleSignals.getDeactivateSignal()
                                              .emit(Deactivate.create()));
 
-        final EventLoop eventLoop = display.getEventLoop();
-        final EventSource vtSource = eventLoop.addSignal(libc.SIGRTMIN(),
-                                                         tty::handleVtSignal);
+        final EventSource vtSource = display.getEventLoop()
+                                            .addSignal(libc.SIGRTMIN(),
+                                                       tty::handleVtSignal);
         lifeCycleSignals.getStopSignal()
                         .connect(event -> vtSource.remove());
 
