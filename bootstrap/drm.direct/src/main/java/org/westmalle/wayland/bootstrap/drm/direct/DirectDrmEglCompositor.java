@@ -21,6 +21,7 @@ import dagger.Component;
 import org.freedesktop.wayland.server.Display;
 import org.westmalle.launch.LifeCycleSignals;
 import org.westmalle.launch.direct.DirectModule;
+import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.tty.Tty;
 import org.westmalle.tty.TtyModule;
 import org.westmalle.wayland.core.CoreModule;
@@ -45,6 +46,8 @@ public interface DirectDrmEglCompositor {
     LifeCycle lifeCycle();
 
     LifeCycleSignals lifeCycleSignals();
+
+    Libc libc();
 
     LibinputSeatFactory seatFactory();
 
