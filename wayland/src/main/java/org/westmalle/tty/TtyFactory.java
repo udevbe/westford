@@ -20,7 +20,6 @@ package org.westmalle.tty;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westmalle.nativ.glibc.Libc;
-import org.westmalle.nativ.linux.vt_mode;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -42,8 +41,6 @@ import static org.westmalle.nativ.linux.Kd.K_UNICODE;
 import static org.westmalle.nativ.linux.Stat.KDSKBMUTE;
 import static org.westmalle.nativ.linux.Vt.VT_ACTIVATE;
 import static org.westmalle.nativ.linux.Vt.VT_OPENQRY;
-import static org.westmalle.nativ.linux.Vt.VT_PROCESS;
-import static org.westmalle.nativ.linux.Vt.VT_SETMODE;
 import static org.westmalle.nativ.linux.Vt.VT_WAITACTIVE;
 
 public class TtyFactory {
@@ -55,36 +52,16 @@ public class TtyFactory {
     @Nonnull
     private final PrivateTtyFactory privateTtyFactory;
 
-    private final short relSig;
-    private final short acqSig;
-
     @Inject
     TtyFactory(@Nonnull final Libc libc,
                @Nonnull final PrivateTtyFactory privateTtyFactory) {
         this.libc = libc;
         this.privateTtyFactory = privateTtyFactory;
-
-        /*
-        * SIGRTMIN is used as global VT-acquire+release signal. Note that
-        * SIGRT* must be tested on runtime, as their exact values are not
-        * known at compile-time. POSIX requires 32 of them to be available.
-        */
-        if (this.libc.SIGRTMIN() > this.libc.SIGRTMAX() ||
-            this.libc.SIGRTMIN() + 1 > this.libc.SIGRTMAX()) {
-            throw new RuntimeException(String.format("not enough RT signals available: %d-%d\n",
-                                                     this.libc.SIGRTMIN(),
-                                                     this.libc.SIGRTMAX()));
-        }
-
-        this.relSig = (short) this.libc.SIGRTMIN();
-        this.acqSig = (short) (this.libc.SIGRTMIN() + 1);
     }
 
     public Tty create(final int ttyFd) {
         return this.privateTtyFactory.create(ttyFd,
-                                             K_UNICODE,
-                                             this.relSig,
-                                             this.acqSig);
+                                             K_UNICODE);
     }
 
     public Tty create() {
@@ -168,22 +145,7 @@ public class TtyFactory {
             throw new RuntimeException("Failed to set KD_GRAPHICS mode on tty: " + this.libc.getStrError());
         }
 
-        final vt_mode mode = new vt_mode();
-        mode.mode(VT_PROCESS);
-        mode.relsig(this.relSig);
-        mode.acqsig(this.acqSig);
-        mode.waitv((byte) 0);
-        mode.frsig((byte) 0);
-        if (-1 == this.libc.ioctl(ttyFd,
-                                  VT_SETMODE,
-                                  Pointer.ref(mode).address)) {
-            throw new RuntimeException("Failed to take control of vt handling: " + this.libc.getStrError());
-        }
-
-
         return this.privateTtyFactory.create(ttyFd,
-                                             oldKbMode,
-                                             this.relSig,
-                                             this.acqSig);
+                                             oldKbMode);
     }
 }

@@ -17,11 +17,15 @@
  */
 package org.westmalle.wayland.bootstrap.drm.direct;
 
+import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventLoop;
+import org.freedesktop.wayland.server.EventSource;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.westmalle.launch.LifeCycleSignals;
+import org.westmalle.nativ.glibc.Libc;
 import org.westmalle.nativ.linux.InputEventCodes;
+import org.westmalle.nativ.linux.vt_mode;
 import org.westmalle.tty.Tty;
 import org.westmalle.wayland.core.KeyBindingFactory;
 import org.westmalle.wayland.core.KeyboardDevice;
@@ -40,6 +44,9 @@ import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
+import static org.westmalle.nativ.linux.Vt.VT_PROCESS;
+import static org.westmalle.nativ.linux.Vt.VT_SETMODE;
 
 public class Boot {
 
@@ -113,9 +120,45 @@ public class Boot {
         /*
          * setup tty switching key bindings
          */
-        final Tty tty = drmEglCompositor.tty();
+        setupTtySwitching(drmEglCompositor,
+                          keyboardDevice);
+
+        /*
+         * and finally, start the compositor
+         */
+        lifeCycle.start();
+    }
+
+    private void setupTtySwitching(final DirectDrmEglCompositor drmEglCompositor,
+                                   final KeyboardDevice keyboardDevice) {
+        final Tty  tty  = drmEglCompositor.tty();
+        final Libc libc = drmEglCompositor.libc();
 
         //listen for tty switching signals
+       /*
+        * SIGRTMIN is used as global VT-acquire+release signal. Note that
+        * SIGRT* must be tested on runtime, as their exact values are not
+        * known at compile-time. POSIX requires 32 of them to be available.
+        */
+        if (libc.SIGRTMIN() > libc.SIGRTMAX() ||
+            libc.SIGRTMIN() + 1 > libc.SIGRTMAX()) {
+            throw new RuntimeException(String.format("not enough RT signals available: %d-%d\n",
+                                                     libc.SIGRTMIN(),
+                                                     libc.SIGRTMAX()));
+        }
+
+        final vt_mode mode = new vt_mode();
+        mode.mode(VT_PROCESS);
+        mode.relsig((short) libc.SIGRTMIN());
+        mode.acqsig((short) libc.SIGRTMIN());
+        mode.waitv((byte) 0);
+        mode.frsig((byte) 0);
+        if (-1 == libc.ioctl(tty.getTtyFd(),
+                             VT_SETMODE,
+                             Pointer.ref(mode).address)) {
+            throw new RuntimeException("Failed to take control of vt handling: " + libc.getStrError());
+        }
+
         final Display          display          = drmEglCompositor.display();
         final LifeCycleSignals lifeCycleSignals = drmEglCompositor.lifeCycleSignals();
         tty.getVtEnterSignal()
@@ -125,29 +168,15 @@ public class Boot {
            .connect(event -> lifeCycleSignals.getDeactivateSignal()
                                              .emit(Deactivate.create()));
 
-        final short relSig = tty.getRelSig();
-        final short acqSig = tty.getAcqSig();
-
         final EventLoop eventLoop = display.getEventLoop();
-        eventLoop.addSignal(relSig,
-                            signalNumber -> {
-                                tty.handleVtLeave();
-                                return 0;
-                            });
-        eventLoop.addSignal(acqSig,
-                            signalNumber -> {
-                                tty.handleVtEnter();
-                                return 0;
-                            });
+        final EventSource vtSource = eventLoop.addSignal(libc.SIGRTMIN(),
+                                                         tty::handleVtSignal);
+        lifeCycleSignals.getStopSignal()
+                        .connect(event -> vtSource.remove());
 
         addTtyKeyBindings(drmEglCompositor,
                           keyboardDevice,
                           tty);
-
-        /*
-         * and finally, start the compositor
-         */
-        lifeCycle.start();
     }
 
     private void addTtyKeyBindings(final DirectDrmEglCompositor drmEglCompositor,

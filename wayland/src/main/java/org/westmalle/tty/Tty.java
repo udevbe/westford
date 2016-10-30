@@ -47,8 +47,6 @@ public class Tty implements AutoCloseable {
     private final int  ttyFd;
 
     private final int   oldKbMode;
-    private final short relSig;
-    private final short acqSig;
 
     private final Signal<VtEnter, Slot<VtEnter>> vtEnterSignal = new Signal<>();
     private final Signal<VtLeave, Slot<VtLeave>> vtLeaveSignal = new Signal<>();
@@ -57,15 +55,11 @@ public class Tty implements AutoCloseable {
 
     Tty(@Provided final Libc libc,
         final int ttyFd,
-        final int oldKbMode,
-        final short relSig,
-        final short acqSig) {
+        final int oldKbMode) {
 
         this.libc = libc;
         this.ttyFd = ttyFd;
         this.oldKbMode = oldKbMode;
-        this.relSig = relSig;
-        this.acqSig = acqSig;
     }
 
     public void activate(final int vt) {
@@ -81,32 +75,35 @@ public class Tty implements AutoCloseable {
         }
     }
 
-    public void handleVtLeave() {
-        LOGGER.info("Handling vt leave.");
+    public int handleVtSignal(final int signalNumber) {
+        if (this.vtActive) {
+            LOGGER.info("Leaving our vt.");
 
-        this.vtActive = false;
-        this.vtLeaveSignal.emit(VtLeave.create());
+            this.vtActive = false;
+            this.vtLeaveSignal.emit(VtLeave.create());
 
-        if (-1 == this.libc.ioctl(this.ttyFd,
-                                  VT_RELDISP,
-                                  1)) {
-            throw new Error(String.format("ioctl[VT_RELDISP, 1] failed: %s",
-                                          this.libc.getStrError()));
+            if (-1 == this.libc.ioctl(this.ttyFd,
+                                      VT_RELDISP,
+                                      1)) {
+                throw new Error(String.format("ioctl[VT_RELDISP, 1] failed: %d",
+                                              this.libc.getErrno()));
+            }
         }
-    }
+        else {
+            LOGGER.info("Entering our vt.");
 
-    public void handleVtEnter() {
-        LOGGER.info("Handling vt enter.");
+            if (-1 == this.libc.ioctl(this.ttyFd,
+                                      VT_RELDISP,
+                                      VT_ACKACQ)) {
+                throw new Error(String.format("ioctl[VT_RELDISP, VT_ACKACQ] failed: %d",
+                                              this.libc.getErrno()));
+            }
 
-        if (-1 == this.libc.ioctl(this.ttyFd,
-                                  VT_RELDISP,
-                                  VT_ACKACQ)) {
-            throw new Error(String.format("ioctl[VT_RELDISP, VT_ACKACQ] failed: %s",
-                                          this.libc.getStrError()));
+            this.vtActive = true;
+            this.vtEnterSignal.emit(VtEnter.create());
         }
 
-        this.vtActive = true;
-        this.vtEnterSignal.emit(VtEnter.create());
+        return 1;
     }
 
     @Override
@@ -155,14 +152,6 @@ public class Tty implements AutoCloseable {
 
     public Signal<VtLeave, Slot<VtLeave>> getVtLeaveSignal() {
         return this.vtLeaveSignal;
-    }
-
-    public short getAcqSig() {
-        return this.acqSig;
-    }
-
-    public short getRelSig() {
-        return this.relSig;
     }
 
     public int getTtyFd() {
