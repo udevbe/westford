@@ -46,7 +46,7 @@ public class Tty implements AutoCloseable {
     private final Libc libc;
     private final int  ttyFd;
 
-    private final int   oldKbMode;
+    private final int oldKbMode;
 
     private final Signal<VtEnter, Slot<VtEnter>> vtEnterSignal = new Signal<>();
     private final Signal<VtLeave, Slot<VtLeave>> vtLeaveSignal = new Signal<>();
@@ -66,12 +66,10 @@ public class Tty implements AutoCloseable {
         LOGGER.info(String.format("Activating vt %d.",
                                   vt));
 
-        if (!this.vtActive) {
-            if (this.libc.ioctl(this.ttyFd,
-                                VT_ACTIVATE,
-                                vt) < 0) {
-                throw new RuntimeException("failed to switch to new vt.");
-            }
+        if (this.libc.ioctl(this.ttyFd,
+                            VT_ACTIVATE,
+                            vt) < 0) {
+            throw new RuntimeException("failed to switch to new vt.");
         }
     }
 
