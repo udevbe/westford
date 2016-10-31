@@ -40,7 +40,7 @@ public class Launcher {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    public static void main_from_native(final String[] args) {
+    public static void main_from_native() {
         try {
             //this main is not launched directly, but instead from native code that invokes the jvm after
             //it has properly configured user rights, OS signals used for tty switching etc.
