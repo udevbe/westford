@@ -4,13 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.westmalle</groupId>
-        <artifactId>westmalle</artifactId>
+        <groupId>org.westford</groupId>
+        <artifactId>westford</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>compositor</artifactId>
-    <name>Westmalle Wayland Implementation</name>
+    <name>Westford Compositor Library</name>
     <packaging>bundle</packaging>
 
     <properties>

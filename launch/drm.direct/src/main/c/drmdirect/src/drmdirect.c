@@ -12,7 +12,7 @@ setup_signals(void)
     sigset_t sigset;
     sigemptyset(&sigset);
 
-    //the signals being blocked here must the same signals defined in the org.westmalle.tty.Tty class.
+    //the signals being blocked here must the same signals defined in the org.westford.tty.Tty class.
     sigaddset(&sigset,
               SIGRTMIN);
     sigaddset(&sigset,
@@ -62,7 +62,7 @@ invoke_class(JNIEnv* env)
 {
 	jclass bootClass;
 	jmethodID mainMethod;
-	const char* cls = "org/westmalle/wayland/bootstrap/drm/direct/Boot";
+	const char* cls = "org/westford/wayland/bootstrap/drm/direct/Boot";
 	const char* entry = "main_from_native";
 
 	bootClass = (*env)->FindClass(env, cls);
