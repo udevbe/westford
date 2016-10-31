@@ -26,22 +26,22 @@
 #ifndef _WESTMALLE_LAUNCH_H_
 #define _WESTMALLE_LAUNCH_H_
 
-enum westmalle_launcher_opcode {
+enum westford_launcher_opcode {
 	WESTMALLE_LAUNCHER_OPEN,
 };
 
-enum westmalle_launcher_event {
+enum westford_launcher_event {
 	WESTMALLE_LAUNCHER_SUCCESS,
 	WESTMALLE_LAUNCHER_ACTIVATE,
 	WESTMALLE_LAUNCHER_DEACTIVATE
 };
 
-struct westmalle_launcher_message {
+struct westford_launcher_message {
 	int opcode;
 };
 
-struct westmalle_launcher_open {
-	struct westmalle_launcher_message header;
+struct westford_launcher_open {
+	struct westford_launcher_message header;
 	int flags;
 	char path[0];
 };

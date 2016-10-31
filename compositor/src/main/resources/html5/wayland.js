@@ -3,7 +3,7 @@
  * @licstart  The following is the entire license notice for the
  *  JavaScript code in this page.
  *
- * Westmalle Wayland Compositor.
+ * Westford Wayland Compositor.
  * Copyright (C) 2016  Erik De Rijcke
  *
  * This program is free software: you can redistribute it and/or modify

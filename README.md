@@ -1,7 +1,7 @@
-Westmalle
+Westford
 =====================
 
-A Wayland OpenGL compositor written in pure Java.
+A Wayland OpenGL compositor written in Java.
 This is a work in progress and not ready for day to day use, however
 certain features like client movement and render output on X are considered ready.
 
@@ -18,7 +18,7 @@ Running
 Go in the `bootstrap/target` folder. Type `java -jar bootstrap-1.0.0-SNAPSHOT.jar`.
 Next fire up some test clients from the Weston compositor (eg `weston-terminal`). 
 Make sure you use Weston 1.4 as more recent versions depend on xdg-shell which is not 
-yet implemented by Westmalle.
+yet implemented by Westford.
 
 Dependencies
 ============
@@ -47,7 +47,7 @@ Native:
 
 State
 =====
-[![Build Status](https://travis-ci.org/udevbe/westmalle.svg?branch=master)](https://travis-ci.org/udevbe/westmalle)
+[![Build Status](https://travis-ci.org/udevbe/westford.svg?branch=master)](https://travis-ci.org/udevbe/westford)
 
 | Functionality                  | Implemented        |
 | :-------------------------:    | :----------------: |
@@ -83,7 +83,7 @@ Roadmap
 License
 =======
 
-Westmalle Wayland Compositor.
+Westford Wayland Compositor.
 Copyright (C) 2016  Erik De Rijcke
 
 This program is free software: you can redistribute it and/or modify

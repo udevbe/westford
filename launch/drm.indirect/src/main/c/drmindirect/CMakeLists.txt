@@ -1,4 +1,4 @@
-project (westmalle-launch C)
+project (westford-launch C)
 
 cmake_minimum_required (VERSION 2.8)
 set(CMAKE_BUILD_TYPE Release)
@@ -15,5 +15,5 @@ find_package(PAM REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 include_directories(${PAM_INCLUDE_DIR})
-add_executable(westmalle-launch src/westmalle-launch.c src/westmalle-launch.h)
-target_link_libraries(westmalle-launch ${JAVA_JVM_LIBRARY} ${PAM_LIBRARIES})
+add_executable(westford-launch src/westford-launch.c src/westford-launch.h)
+target_link_libraries(westford-launch ${JAVA_JVM_LIBRARY} ${PAM_LIBRARIES})

@@ -56,7 +56,7 @@
 #include <systemd/sd-login.h>
 #endif
 
-#include "westmalle-launch.h"
+#include "westford-launch.h"
 
 #define DRM_MAJOR 226
 
@@ -90,7 +90,7 @@ drmSetMaster(int drm_fd)
 
 #endif
 
-struct westmalle_launch {
+struct westford_launch {
 	struct pam_conv pc;
 	pam_handle_t *ph;
 	int tty;
@@ -136,7 +136,7 @@ read_groups(void)
 }
 
 static bool
-westmalle_launch_allowed(struct westmalle_launch *wl)
+westford_launch_allowed(struct westford_launch *wl)
 {
 	struct group *gr;
 	gid_t *groups;
@@ -149,7 +149,7 @@ westmalle_launch_allowed(struct westmalle_launch *wl)
 	if (getuid() == 0)
 		return true;
 
-	gr = getgrnam("westmalle-launch");
+	gr = getgrnam("westford-launch");
 	if (gr) {
 		groups = read_groups();
 		if (groups) {
@@ -189,7 +189,7 @@ pam_conversation_fn(int msg_count,
 }
 
 static int
-setup_pam(struct westmalle_launch *wl)
+setup_pam(struct westford_launch *wl)
 {
 	int err;
 
@@ -221,7 +221,7 @@ setup_pam(struct westmalle_launch *wl)
 }
 
 static int
-setup_launcher_socket(struct westmalle_launch *wl)
+setup_launcher_socket(struct westford_launch *wl)
 {
 	if (socketpair(AF_LOCAL, SOCK_SEQPACKET, 0, wl->sock) < 0)
 		error(1, errno, "socketpair failed");
@@ -233,7 +233,7 @@ setup_launcher_socket(struct westmalle_launch *wl)
 }
 
 static int
-setup_signals(struct westmalle_launch *wl)
+setup_signals(struct westford_launch *wl)
 {
 	int ret;
 	sigset_t mask;
@@ -276,7 +276,7 @@ setenv_fd(const char *env, int fd)
 }
 
 static int
-send_reply(struct westmalle_launch *wl, int reply)
+send_reply(struct westford_launch *wl, int reply)
 {
 	int len;
 
@@ -288,7 +288,7 @@ send_reply(struct westmalle_launch *wl, int reply)
 }
 
 static int
-handle_open(struct westmalle_launch *wl, struct msghdr *msg, ssize_t len)
+handle_open(struct westford_launch *wl, struct msghdr *msg, ssize_t len)
 {
 	int fd = -1, ret = -1;
 	char control[CMSG_SPACE(sizeof(fd))];
@@ -296,7 +296,7 @@ handle_open(struct westmalle_launch *wl, struct msghdr *msg, ssize_t len)
 	struct stat s;
 	struct msghdr nmsg;
 	struct iovec iov;
-	struct westmalle_launcher_open *message;
+	struct westford_launcher_open *message;
 	union cmsg_data *data;
 
 	message = msg->msg_iov->iov_base;
@@ -349,7 +349,7 @@ err0:
 	iov.iov_len = sizeof ret;
 
 	if (wl->verbose)
-		fprintf(stderr, "westmalle-launch: opened %s: ret: %d, fd: %d\n",
+		fprintf(stderr, "westford-launch: opened %s: ret: %d, fd: %d\n",
 			message->path, ret, fd);
 	do {
 		len = sendmsg(wl->sock[0], &nmsg, 0);
@@ -368,7 +368,7 @@ err0:
 }
 
 static int
-handle_socket_msg(struct westmalle_launch *wl)
+handle_socket_msg(struct westford_launch *wl)
 {
 	char control[CMSG_SPACE(sizeof(int))];
 	char buf[BUFSIZ];
@@ -376,7 +376,7 @@ handle_socket_msg(struct westmalle_launch *wl)
 	struct iovec iov;
 	int ret = -1;
 	ssize_t len;
-	struct westmalle_launcher_message *message;
+	struct westford_launcher_message *message;
 
 	memset(&msg, 0, sizeof(msg));
 	iov.iov_base = buf;
@@ -404,7 +404,7 @@ handle_socket_msg(struct westmalle_launch *wl)
 }
 
 static void
-quit(struct westmalle_launch *wl, int status)
+quit(struct westford_launch *wl, int status)
 {
 	struct vt_mode mode = { 0 };
 	int err;
@@ -440,7 +440,7 @@ quit(struct westmalle_launch *wl, int status)
 }
 
 static void
-close_input_fds(struct westmalle_launch *wl)
+close_input_fds(struct westford_launch *wl)
 {
 	struct stat s;
 	int fd;
@@ -456,7 +456,7 @@ close_input_fds(struct westmalle_launch *wl)
 }
 
 static int
-handle_signal(struct westmalle_launch *wl)
+handle_signal(struct westford_launch *wl)
 {
 	struct signalfd_siginfo sig;
 	int pid, status, ret;
@@ -475,9 +475,9 @@ handle_signal(struct westmalle_launch *wl)
 				ret = WEXITSTATUS(status);
 			else if (WIFSIGNALED(status))
 				/*
-				 * If westmalle dies because of signal N, we
+				 * If westford dies because of signal N, we
 				 * return 10+N. This is distinct from
-				 * westmalle-launch dying because of a signal
+				 * westford-launch dying because of a signal
 				 * (128+N).
 				 */
 				ret = 10 + WTERMSIG(status);
@@ -510,7 +510,7 @@ handle_signal(struct westmalle_launch *wl)
 }
 
 static int
-setup_tty(struct westmalle_launch *wl, const char *tty)
+setup_tty(struct westford_launch *wl, const char *tty)
 {
 	struct stat buf;
 	struct vt_mode mode = { 0 };
@@ -544,7 +544,7 @@ setup_tty(struct westmalle_launch *wl, const char *tty)
 
 	if (fstat(wl->tty, &buf) == -1 ||
 	    major(buf.st_rdev) != TTY_MAJOR || minor(buf.st_rdev) == 0)
-		error(1, 0, "westmalle-launch must be run from a virtual terminal");
+		error(1, 0, "westford-launch must be run from a virtual terminal");
 
 	if (tty) {
 		if (fstat(wl->tty, &buf) < 0)
@@ -576,7 +576,7 @@ setup_tty(struct westmalle_launch *wl, const char *tty)
 }
 
 static void
-drop_privileges(struct westmalle_launch *wl)
+drop_privileges(struct westford_launch *wl)
 {
 	if (setgid(wl->pw->pw_gid) < 0 ||
 #ifdef HAVE_INITGROUPS
@@ -620,7 +620,7 @@ static void
 invoke_class(JNIEnv* env) {
 	jclass bootClass;
 	jmethodID mainMethod;
-	const char* cls = "org/westmalle/wayland/bootstrap/drm/direct/Boot";
+	const char* cls = "org/westford/wayland/bootstrap/drm/direct/Boot";
 	const char* entry = "main_from_native";
 
 	bootClass = (*env)->FindClass(env, cls);
@@ -640,12 +640,12 @@ invoke_class(JNIEnv* env) {
 }
 
 static void
-launch_compositor(struct westmalle_launch *wl, int argc, char *argv[])
+launch_compositor(struct westford_launch *wl, int argc, char *argv[])
 {
 	sigset_t mask;
 
 	if (wl->verbose)
-		printf("westmalle-launch: spawned westmalle with pid: %d\n", getpid());
+		printf("westford-launch: spawned westford with pid: %d\n", getpid());
 
 
 	if (geteuid() == 0)
@@ -672,7 +672,7 @@ launch_compositor(struct westmalle_launch *wl, int argc, char *argv[])
 static void
 help(const char *name)
 {
-	fprintf(stderr, "Usage: %s [args...] [-- [westmalle args..]]\n", name);
+	fprintf(stderr, "Usage: %s [args...] [-- [westford args..]]\n", name);
 	fprintf(stderr, "  -t, --tty       Start session on alternative tty\n");
 	fprintf(stderr, "  -v, --verbose   Be verbose\n");
 	fprintf(stderr, "  -h, --help      Display this help message\n");
@@ -681,7 +681,7 @@ help(const char *name)
 int
 main(int argc, char *argv[])
 {
-	struct westmalle_launch wl;
+	struct westford_launch wl;
 	int i, c;
 	char *tty = NULL;
 	struct option opts[] = {
@@ -702,7 +702,7 @@ main(int argc, char *argv[])
 			wl.verbose = 1;
 			break;
 		case 'h':
-			help("westmalle-launch");
+			help("westford-launch");
 			exit(EXIT_FAILURE);
 		default:
 			exit(EXIT_FAILURE);
@@ -710,7 +710,7 @@ main(int argc, char *argv[])
 	}
 
 	if ((argc - optind) > (MAX_ARGV_SIZE - 5))
-		error(1, E2BIG, "Too many arguments to pass to westmalle");
+		error(1, E2BIG, "Too many arguments to pass to westford");
 
 	if (wl.new_user)
 		wl.pw = getpwnam(wl.new_user);
@@ -719,14 +719,14 @@ main(int argc, char *argv[])
 	if (wl.pw == NULL)
 		error(1, errno, "failed to get username");
 
-	if (!westmalle_launch_allowed(&wl))
+	if (!westford_launch_allowed(&wl))
 		error(1, 0, "Permission denied. You should either:\n"
 #ifdef HAVE_SYSTEMD_LOGIN
 		      " - run from an active and local (systemd) session.\n"
 #else
-		      " - enable systemd session support for westmalle-launch.\n"
+		      " - enable systemd session support for westford-launch.\n"
 #endif
-		      " - or add yourself to the 'westmalle-launch' group.");
+		      " - or add yourself to the 'westford-launch' group.");
 
 	if (setup_tty(&wl, tty) < 0)
 		exit(EXIT_FAILURE);
