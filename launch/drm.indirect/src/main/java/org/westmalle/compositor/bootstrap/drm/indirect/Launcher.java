@@ -121,7 +121,6 @@ public class Launcher {
     private void addTtyKeyBindings(final IndirectDrmEglCompositor drmEglCompositor,
                                    final KeyboardDevice keyboardDevice,
                                    final Tty tty) {
-        //TODO we don't want to switch the tty ourselves directly but instead signal our parent launch to do the switch.
 
         final KeyBindingFactory keyBindingFactory = drmEglCompositor.keyBindingFactory();
 

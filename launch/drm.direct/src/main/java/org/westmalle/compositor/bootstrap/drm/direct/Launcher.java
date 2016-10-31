@@ -54,7 +54,7 @@ public class Launcher {
     public static void main_from_native() {
         try {
             //this main is not launched directly, but instead from native code that invokes the jvm after
-            //it has properly configured OS signals, used for tty switching.
+            //it has properly configured OS signal masks, used for tty switching.
 
             configureLogger();
             LOGGER.info("Starting Westmalle");
@@ -81,7 +81,7 @@ public class Launcher {
         });
     }
 
-    public void launch(final DirectDrmEglCompositor drmEglCompositor) {
+    private void launch(final DirectDrmEglCompositor drmEglCompositor) {
 
         final LifeCycle lifeCycle = drmEglCompositor.lifeCycle();
 
@@ -132,7 +132,6 @@ public class Launcher {
         final Tty  tty  = drmEglCompositor.tty();
         final Libc libc = drmEglCompositor.libc();
 
-        //listen for tty switching signals
        /*
         * SIGRTMIN is used as global VT-acquire+release signal. Note that
         * SIGRT* must be tested on runtime, as their exact values are not
@@ -180,8 +179,6 @@ public class Launcher {
     private void addTtyKeyBindings(final DirectDrmEglCompositor drmEglCompositor,
                                    final KeyboardDevice keyboardDevice,
                                    final Tty tty) {
-        //TODO we don't want to switch the tty ourselves directly but instead signal our parent launch to do the switch.
-
         final KeyBindingFactory keyBindingFactory = drmEglCompositor.keyBindingFactory();
 
         keyBindingFactory.create(keyboardDevice,
