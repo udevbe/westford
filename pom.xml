@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.westmalle</groupId>
-    <artifactId>shell</artifactId>
+    <artifactId>westmalle</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -62,8 +62,8 @@
     </properties>
 
     <modules>
-        <module>wayland</module>
-        <module>bootstrap</module>
+        <module>compositor</module>
+        <module>launch</module>
     </modules>
 
     <dependencies>
