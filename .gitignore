@@ -248,3 +248,4 @@ nb-configuration.xml
 
 bootstrap/dependency-reduced-pom.xml
 /westford.log*
+/launch/drm.direct/dependency-reduced-pom.xml
