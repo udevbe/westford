@@ -1,4 +1,4 @@
-project (drmdirect C)
+project (westford-drmdirect C)
 
 cmake_minimum_required (VERSION 2.8)
 set(CMAKE_BUILD_TYPE Release)
@@ -20,11 +20,18 @@ configure_file (
 # add the binary tree to the search path for include files
 # so that we will find Config.h
 include_directories("${PROJECT_BINARY_DIR}")
-find_package (Threads)
+find_package(Threads REQUIRED)
 find_package(JNI REQUIRED)
 
-# generate drmdirect
+# generate westford-drmdirect
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
-add_executable(drmdirect src/drmdirect.c)
-target_link_libraries(drmdirect ${JAVA_JVM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+add_executable(westford-drmdirect src/westford-drmdirect.c)
+target_link_libraries(westford-drmdirect ${JNI_LIBRARIES})
+
+if(THREADS_HAVE_PTHREAD_ARG)
+  target_compile_options(PUBLIC westford-drmdirect "-pthread")
+endif()
+if(CMAKE_THREAD_LIBS_INIT)
+  target_link_libraries(westford-drmdirect "${CMAKE_THREAD_LIBS_INIT}")
+endif()
