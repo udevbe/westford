@@ -62,7 +62,7 @@ invoke_class(JNIEnv* env)
 {
 	jclass bootClass;
 	jmethodID mainMethod;
-	const char* cls = "org/westford/wayland/bootstrap/drm/direct/Boot";
+	const char* cls = "org/westford/compositor/launch/drm/direct/Launcher";
 	const char* entry = "main_from_native";
 
 	bootClass = (*env)->FindClass(env, cls);
