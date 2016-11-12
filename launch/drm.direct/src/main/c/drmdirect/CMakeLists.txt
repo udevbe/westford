@@ -27,7 +27,7 @@ find_package(JNI REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 add_executable(westford-drmdirect src/westford-drmdirect.c)
-target_link_libraries(westford-drmdirect ${JNI_LIBRARIES})
+target_link_libraries(westford-drmdirect ${JAVA_JVM_LIBRARY})
 
 if(THREADS_HAVE_PTHREAD_ARG)
   target_compile_options(PUBLIC westford-drmdirect "-pthread")
