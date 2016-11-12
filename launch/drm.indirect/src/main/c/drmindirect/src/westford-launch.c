@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <string.h>
 #include <assert.h>
 #include <poll.h>
@@ -48,7 +49,6 @@
 
 #include <pwd.h>
 #include <grp.h>
-#include <security/pam_appl.h>
 
 #include <jni.h>
 
@@ -57,6 +57,7 @@
 #endif
 
 #include "westford-launch.h"
+#include "Config.h"
 
 #define DRM_MAJOR 226
 
@@ -91,8 +92,6 @@ drmSetMaster(int drm_fd)
 #endif
 
 struct westford_launch {
-	struct pam_conv pc;
-	pam_handle_t *ph;
 	int tty;
 	int ttynr;
 	int sock[2];
@@ -105,7 +104,6 @@ struct westford_launch {
 
 	pid_t child;
 	int verbose;
-	char *new_user;
 };
 
 union cmsg_data { unsigned char b[4]; int fd; };
@@ -177,47 +175,6 @@ westford_launch_allowed(struct westford_launch *wl)
 #endif
 
 	return false;
-}
-
-static int
-pam_conversation_fn(int msg_count,
-		    const struct pam_message **messages,
-		    struct pam_response **responses,
-		    void *user_data)
-{
-	return PAM_SUCCESS;
-}
-
-static int
-setup_pam(struct westford_launch *wl)
-{
-	int err;
-
-	wl->pc.conv = pam_conversation_fn;
-	wl->pc.appdata_ptr = wl;
-
-	err = pam_start("login", wl->pw->pw_name, &wl->pc, &wl->ph);
-	if (err != PAM_SUCCESS) {
-		fprintf(stderr, "failed to start pam transaction: %d: %s\n",
-			err, pam_strerror(wl->ph, err));
-		return -1;
-	}
-
-	err = pam_set_item(wl->ph, PAM_TTY, ttyname(wl->tty));
-	if (err != PAM_SUCCESS) {
-		fprintf(stderr, "failed to set PAM_TTY item: %d: %s\n",
-			err, pam_strerror(wl->ph, err));
-		return -1;
-	}
-
-	err = pam_open_session(wl->ph, 0);
-	if (err != PAM_SUCCESS) {
-		fprintf(stderr, "failed to open pam session: %d: %s\n",
-			err, pam_strerror(wl->ph, err));
-		return -1;
-	}
-
-	return 0;
 }
 
 static int
@@ -412,14 +369,6 @@ quit(struct westford_launch *wl, int status)
 	close(wl->signalfd);
 	close(wl->sock[0]);
 
-	if (wl->new_user) {
-		err = pam_close_session(wl->ph, 0);
-		if (err)
-			fprintf(stderr, "pam_close_session failed: %d: %s\n",
-				err, pam_strerror(wl->ph, err));
-		pam_end(wl->ph, err);
-	}
-
 	if (ioctl(wl->tty, KDSKBMUTE, 0) &&
 	    ioctl(wl->tty, KDSKBMODE, wl->kb_mode))
 		fprintf(stderr, "failed to restore keyboard mode: %m\n");
@@ -516,28 +465,28 @@ setup_tty(struct westford_launch *wl, const char *tty)
 	struct vt_mode mode = { 0 };
 	char *t;
 
-	if (!wl->new_user) {
+//	if (!wl->new_user) {
 		wl->tty = STDIN_FILENO;
-	} else if (tty) {
-		t = ttyname(STDIN_FILENO);
-		if (t && strcmp(t, tty) == 0)
-			wl->tty = STDIN_FILENO;
-		else
-			wl->tty = open(tty, O_RDWR | O_NOCTTY);
-	} else {
-		int tty0 = open("/dev/tty0", O_WRONLY | O_CLOEXEC);
-		char filename[16];
-
-		if (tty0 < 0)
-			error(1, errno, "could not open tty0");
-
-		if (ioctl(tty0, VT_OPENQRY, &wl->ttynr) < 0 || wl->ttynr == -1)
-			error(1, errno, "failed to find non-opened console");
-
-		snprintf(filename, sizeof filename, "/dev/tty%d", wl->ttynr);
-		wl->tty = open(filename, O_RDWR | O_NOCTTY);
-		close(tty0);
-	}
+//	} else if (tty) {
+//		t = ttyname(STDIN_FILENO);
+//		if (t && strcmp(t, tty) == 0)
+//			wl->tty = STDIN_FILENO;
+//		else
+//			wl->tty = open(tty, O_RDWR | O_NOCTTY);
+//	} else {
+//		int tty0 = open("/dev/tty0", O_WRONLY | O_CLOEXEC);
+//		char filename[16];
+//
+//		if (tty0 < 0)
+//			error(1, errno, "could not open tty0");
+//
+//		if (ioctl(tty0, VT_OPENQRY, &wl->ttynr) < 0 || wl->ttynr == -1)
+//			error(1, errno, "failed to find non-opened console");
+//
+//		snprintf(filename, sizeof filename, "/dev/tty%d", wl->ttynr);
+//		wl->tty = open(filename, O_RDWR | O_NOCTTY);
+//		close(tty0);
+//	}
 
 	if (wl->tty < 0)
 		error(1, errno, "failed to open tty");
@@ -587,7 +536,8 @@ drop_privileges(struct westford_launch *wl)
 }
 
 static JNIEnv*
-create_vm(int argc, char **argv) {
+create_vm(int argc, char **argv)
+{
 	JavaVM* jvm;
 	JNIEnv* env;
 	JavaVMInitArgs args;
@@ -597,7 +547,8 @@ create_vm(int argc, char **argv) {
 	args.version = JNI_VERSION_1_6;
 	args.nOptions = argc;
 
-	options[0].optionString = "-Djava.class.path=drm.direct.jar";
+    //TODO use config file to reference installed jar file directly
+	options[0].optionString = "-Djava.class.path=drm.indirect-"VERSION_MAJOR"."VERSION_MINOR"."VERSION_PATCH"-"VERSION_EXT".jar";
     fprintf(stdout, "INFO: Adding JVM option %s.\n", options[0].optionString);
 
     for(i = 1; i < argc; i++) {
@@ -661,7 +612,7 @@ launch_compositor(struct westford_launch *wl, int argc, char *argv[])
 	sigaddset(&mask, SIGTERM);
 	sigaddset(&mask, SIGCHLD);
 	sigaddset(&mask, SIGINT);
-	sigprocmask(SIG_UNBLOCK, &mask, NULL);
+	pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
     JNIEnv* env = create_vm(argc, argv);
     invoke_class(env);
@@ -712,10 +663,8 @@ main(int argc, char *argv[])
 	if ((argc - optind) > (MAX_ARGV_SIZE - 5))
 		error(1, E2BIG, "Too many arguments to pass to westford");
 
-	if (wl.new_user)
-		wl.pw = getpwnam(wl.new_user);
-	else
-		wl.pw = getpwuid(getuid());
+
+	wl.pw = getpwuid(getuid());
 	if (wl.pw == NULL)
 		error(1, errno, "failed to get username");
 
@@ -729,9 +678,6 @@ main(int argc, char *argv[])
 		      " - or add yourself to the 'westford-launch' group.");
 
 	if (setup_tty(&wl, tty) < 0)
-		exit(EXIT_FAILURE);
-
-	if (wl.new_user && setup_pam(&wl) < 0)
 		exit(EXIT_FAILURE);
 
 	if (setup_launcher_socket(&wl) < 0)

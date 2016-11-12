@@ -12,8 +12,110 @@
     <artifactId>drm.indirect</artifactId>
     <name>Westford Drm Indirect Launcher</name>
 
+    <profiles>
+        <profile>
+            <id>linux-aarch64</id>
+            <properties>
+                <westford.arch>linux-aarch64</westford.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-armv7hf</id>
+            <properties>
+                <westford.arch>linux-armv7hf</westford.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-armv7sf</id>
+            <properties>
+                <westford.arch>linux-armv7sf</westford.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-armv6hf</id>
+            <properties>
+                <westford.arch>linux-armv6hf</westford.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-x86_64</id>
+            <properties>
+                <westford.arch>linux-x86_64</westford.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-i686</id>
+            <properties>
+                <westford.arch>linux-i686</westford.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>all</id>
+            <properties>
+                <westford.arch>all</westford.arch>
+            </properties>
+        </profile>
+    </profiles>
+
+    <properties>
+        <!-- native compilation -->
+        <westford.arch/>
+
+        <!-- plugins -->
+        <exec-maven-plugin.version>1.5.0</exec-maven-plugin.version>
+    </properties>
+
     <build>
         <plugins>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <!-- generate runtime native lib -->
+                    <execution>
+                        <id>westford-native</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${basedir}</workingDirectory>
+                            <executable>${basedir}/build.sh</executable>
+                            <arguments>
+                                <argument>${westford.arch}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <!-- runtime native lib -->
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/main/c/drmindirect/build/</directory>
+                                    <includes>
+                                        <include>**/westford-drmindirect</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
