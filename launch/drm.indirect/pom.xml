@@ -107,7 +107,7 @@
                                 <resource>
                                     <directory>${basedir}/src/main/c/drmindirect/build/</directory>
                                     <includes>
-                                        <include>**/westford-drmindirect</include>
+                                        <include>**/westford-launch</include>
                                     </includes>
                                 </resource>
                             </resources>
