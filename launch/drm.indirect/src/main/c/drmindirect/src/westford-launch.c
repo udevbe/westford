@@ -549,7 +549,7 @@ create_vm(int argc, char **argv)
 
     //TODO use config file to reference installed jar file directly
 	options[0].optionString = "-Djava.class.path=drm.indirect-"VERSION_MAJOR"."VERSION_MINOR"."VERSION_PATCH"-"VERSION_EXT".jar";
-    fprintf(stdout, "INFO: Adding JVM option %s.\n", options[0].optionString);
+    fprintf(stdout, "INFO: Adding JVM option %s\n", options[0].optionString);
 
     for(i = 1; i < argc; i++) {
         options[i].optionString = argv[i];
@@ -571,7 +571,7 @@ static void
 invoke_class(JNIEnv* env) {
 	jclass bootClass;
 	jmethodID mainMethod;
-	const char* cls = "org/westford/wayland/bootstrap/drm/direct/Boot";
+	const char* cls = "org/westford/compositor/launch/drm/indirect/Launcher";
 	const char* entry = "main_from_native";
 
 	bootClass = (*env)->FindClass(env, cls);
