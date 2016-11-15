@@ -35,7 +35,7 @@ create_vm(int argc, char **argv)
 	int i;
 
 	args.version = JNI_VERSION_1_6;
-	args.nOptions = argc;
+	args.nOptions = argc+1;
 
     //TODO use config file to reference installed jar file directly
 	options[0].optionString = "-Djava.class.path=drm.direct-"VERSION_MAJOR"."VERSION_MINOR"."VERSION_PATCH"-"VERSION_EXT".jar";

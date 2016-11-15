@@ -364,7 +364,7 @@ static void
 quit(struct westford_launch *wl, int status)
 {
 	struct vt_mode mode = { 0 };
-	int err;
+//	int err;
 
 	close(wl->signalfd);
 	close(wl->sock[0]);
@@ -463,7 +463,7 @@ setup_tty(struct westford_launch *wl, const char *tty)
 {
 	struct stat buf;
 	struct vt_mode mode = { 0 };
-	char *t;
+//	char *t;
 
 //	if (!wl->new_user) {
 		wl->tty = STDIN_FILENO;
@@ -545,7 +545,7 @@ create_vm(int argc, char **argv)
 	int i;
 
 	args.version = JNI_VERSION_1_6;
-	args.nOptions = argc;
+	args.nOptions = argc+1;
 
     //TODO use config file to reference installed jar file directly
 	options[0].optionString = "-Djava.class.path=drm.indirect-"VERSION_MAJOR"."VERSION_MINOR"."VERSION_PATCH"-"VERSION_EXT".jar";
@@ -567,7 +567,7 @@ create_vm(int argc, char **argv)
 	return env;
 }
 
-static void
+static int
 invoke_class(JNIEnv* env) {
 	jclass bootClass;
 	jmethodID mainMethod;
@@ -579,15 +579,17 @@ invoke_class(JNIEnv* env) {
 		mainMethod = (*env)->GetStaticMethodID(env, bootClass, entry, "()V");
 	} else {
 	    fprintf(stderr, "ERROR: %s not found on classpath.\n", cls);
-        exit(1);
+        return 1;
 	}
 
     if(mainMethod){
         (*env)->CallStaticVoidMethod(env, bootClass, mainMethod);
     } else {
     	fprintf(stderr, "ERROR: Method %s not found on class %s.\n", entry, cls);
-    	exit(1);
+    	return 1;
     }
+
+    return 0;
 }
 
 static void
@@ -615,9 +617,9 @@ launch_compositor(struct westford_launch *wl, int argc, char *argv[])
 	pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 
     JNIEnv* env = create_vm(argc, argv);
-    invoke_class(env);
-
-	error(1, errno, "exec failed");
+    if(invoke_class(env)){
+        error(1, errno, "exec failed");
+    }
 }
 
 static void
