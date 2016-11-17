@@ -14,7 +14,7 @@ public class IndirectPrivilegesFactory {
     }
 
     public IndirectPrivileges create() {
-        final int socketFd1 = Integer.parseInt(System.getenv(NativeConstants.ENV_WESTMALLE_LAUNCHER_SOCK));
+        final int socketFd1 = Integer.parseInt(System.getenv(NativeConstants.ENV_WESTFORD_LAUNCHER_SOCK));
         return this.privatePrivilegesProxyFactory.create(socketFd1);
     }
 }

@@ -10,7 +10,7 @@ public class NativeConstants {
     public static final int EVENT_WESTMALLE_LAUNCHER_ACTIVATE   = 1;
     public static final int EVENT_WESTMALLE_LAUNCHER_DEACTIVATE = 2;
 
-    public static final String ENV_WESTMALLE_TTY_FD        = "WESTMALLE_TTY_FD";
-    public static final String ENV_WESTMALLE_LAUNCHER_SOCK = "WESTMALLE_LAUNCHER_SOCK";
+    public static final String ENV_WESTFORD_TTY_FD        = "WESTFORD_TTY_FD";
+    public static final String ENV_WESTFORD_LAUNCHER_SOCK = "WESTFORD_LAUNCHER_SOCK";
 
 }

@@ -223,13 +223,18 @@ setup_signals(struct westford_launch *wl)
 	return 0;
 }
 
-static void
+static int
 setenv_fd(const char *env, int fd)
 {
 	char buf[32];
 
 	snprintf(buf, sizeof buf, "%d", fd);
-	setenv(env, buf, 1);
+	if(setenv(env, buf, 1)){
+	    fprintf(stderr, "failed to set environment variable %s: %m\n", env);
+	    return 1;
+	}
+
+	return 0;
 }
 
 static int
@@ -583,6 +588,7 @@ static void
 launch_compositor(struct westford_launch *wl, int argc, char *argv[])
 {
 	sigset_t mask;
+	int err;
 
 	if (wl->verbose)
 		printf("westford-launch: spawned westford with pid: %d\n", getpid());
@@ -591,8 +597,11 @@ launch_compositor(struct westford_launch *wl, int argc, char *argv[])
 	if (geteuid() == 0)
 		drop_privileges(wl);
 
-	setenv_fd("WESTMALLE_TTY_FD", wl->tty);
-	setenv_fd("WESTMALLE_LAUNCHER_SOCK", wl->sock[1]);
+	err = setenv_fd("WESTFORD_TTY_FD", wl->tty);
+	err |= setenv_fd("WESTFORD_LAUNCHER_SOCK", wl->sock[1]);
+	if(err) {
+	    error(1, errno, "exec failed");
+	}
 
 	unsetenv("DISPLAY");
 
