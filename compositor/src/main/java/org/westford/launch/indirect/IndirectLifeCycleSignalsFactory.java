@@ -23,7 +23,7 @@ public class IndirectLifeCycleSignalsFactory {
     }
 
     public IndirectLifeCycleSignals create() {
-        final int socketFd1 = Integer.parseInt(System.getenv(NativeConstants.ENV_WESTMALLE_LAUNCHER_SOCK));
+        final int socketFd1 = Integer.parseInt(System.getenv(NativeConstants.ENV_WESTFORD_LAUNCHER_SOCK));
 
         final IndirectLifeCycleSignals indirectLifeCycleSignals = this.privateIndirectLifeCycleSignalsFactory.create(socketFd1);
         this.display.getEventLoop()
