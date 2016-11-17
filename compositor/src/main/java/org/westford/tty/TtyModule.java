@@ -33,7 +33,7 @@ public class TtyModule {
             return ttyFactory.create();
         }
         else {
-            final int ttyFd = Integer.parseInt(System.getenv(westfordTtyFd));
+            final int ttyFd = Integer.parseInt(westfordTtyFd);
             return ttyFactory.create(ttyFd);
         }
     }
