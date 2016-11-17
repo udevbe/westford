@@ -463,37 +463,24 @@ setup_tty(struct westford_launch *wl, const char *tty)
 {
 	struct stat buf;
 	struct vt_mode mode = { 0 };
-//	char *t;
+	char *t;
 
-//	if (!wl->new_user) {
+	if (tty) {
+        t = ttyname(STDIN_FILENO);
+        if (t && strcmp(t, tty) == 0)
+            wl->tty = STDIN_FILENO;
+        else
+            wl->tty = open(tty, O_RDWR | O_NOCTTY);
+	} else {
 		wl->tty = STDIN_FILENO;
-//	} else if (tty) {
-//		t = ttyname(STDIN_FILENO);
-//		if (t && strcmp(t, tty) == 0)
-//			wl->tty = STDIN_FILENO;
-//		else
-//			wl->tty = open(tty, O_RDWR | O_NOCTTY);
-//	} else {
-//		int tty0 = open("/dev/tty0", O_WRONLY | O_CLOEXEC);
-//		char filename[16];
-//
-//		if (tty0 < 0)
-//			error(1, errno, "could not open tty0");
-//
-//		if (ioctl(tty0, VT_OPENQRY, &wl->ttynr) < 0 || wl->ttynr == -1)
-//			error(1, errno, "failed to find non-opened console");
-//
-//		snprintf(filename, sizeof filename, "/dev/tty%d", wl->ttynr);
-//		wl->tty = open(filename, O_RDWR | O_NOCTTY);
-//		close(tty0);
-//	}
+	}
 
 	if (wl->tty < 0)
 		error(1, errno, "failed to open tty");
 
 	if (fstat(wl->tty, &buf) == -1 ||
 	    major(buf.st_rdev) != TTY_MAJOR || minor(buf.st_rdev) == 0)
-		error(1, 0, "westford-launch must be run from a virtual terminal");
+		error(1, 0, "westford-launch must be run from a virtual terminal or provide one to westford-launch with --tty");
 
 	if (tty) {
 		if (fstat(wl->tty, &buf) < 0)
@@ -551,8 +538,8 @@ create_vm(int argc, char **argv)
 	options[0].optionString = "-Djava.class.path=drm.indirect-"VERSION_MAJOR"."VERSION_MINOR"."VERSION_PATCH"-"VERSION_EXT".jar";
     fprintf(stdout, "INFO: Adding JVM option %s\n", options[0].optionString);
 
-    for(i = 1; i < argc; i++) {
-        options[i].optionString = argv[i];
+    for(i = 0; i < argc; i++) {
+        options[i+1].optionString = argv[i];
         fprintf(stdout, "INFO: Adding JVM option %s.\n", argv[i]);
     }
 
