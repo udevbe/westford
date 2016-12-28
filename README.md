@@ -11,38 +11,78 @@ Not available yet.
 
 Building
 ========
-Run `maven install` in the root of the project.
+Prerequisites: 
+- maven
+- cmake 
+- docker (optional, needed for build-in cross compilation) 
+
+Run `mvn package` in the root of the project. Westford is still under heavy 
+development, so occasionally tests might fail. If this is the case you can run the build
+with `mvn package -DskipTests`.
+
+To cross compile for a specific architecture, set the corresponding profile in the maven build command.
+Available profiles are:
+
+| Architecture | Profile     |
+|:------------:|:-----------:|
+| aarch64      |linux-aarch64|
+| armv7hf      |linux-armv7hf| 
+| armv7sf      |linux-armv7sf|
+| armv6hf      |linux-armv6hf|
+| x86_64       |linux-x86_64 |
+| i686         |linux-i686   |
+| all of above |all          |
+
+So if we were to build for `armv7hf`, our build command would becomes `mvn package -DskipTests -Plinux-armv7hf`.
+This will trigger a cross compilation inside an cleanly isolated docker container.
+
+If no profile is selected, the maven build will default to the `native` profile, which corresponds to
+the architecture that you're currently building on, without the use of docker.
 
 Running
 =======
-Go in the `bootstrap/target` folder. Type `java -jar bootstrap-1.0.0-SNAPSHOT.jar`.
+Westford can be launched using different back-ends and configuration. These live as separate projects
+under `launch`
+
+Currently the following back-ends exist:
+- `launch/x11`A back-end that outputs to a regular X11 window, one window per (virtual) screen. Ideal for quick testing.
+- `launch/x11.html5` Wraps the X11 back-end, and enables input and output using a browser and an html5 canvas (experimental). 
+- `launch/drm.direct` Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. Root user only. 
+- `launch/drm.indirect`Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. All users.
+- `launch/dispmanx` Raspberry Pi 1/2/3 (experimental)
+
+
+Running under X11
+=================
+Go into the `launch/x11/target` folder. Type `java -jar x11-1.0.0-SNAPSHOT.jar`.
 Next fire up some test clients from the Weston compositor (eg `weston-terminal`). 
 Make sure you use Weston 1.4 as more recent versions depend on xdg-shell which is not 
 yet implemented by Westford.
 
+To configure the X11 back-end, open up `org.westford.compositor.launch.x11.X11PlatformConfigSimple` 
+found in `X11PlatformConfigSimple.java` and adjust as required.
+
+Running with drm/kms
+====================
+//TODO
+
 Dependencies
 ============
-Java:
-
- - JDK8.
- - Google Auto-Factory. Available on maven central.
- - Google Auto-Value. Available on maven central.
- - Google Dagger 2. Available on maven central.
- - jsr305. Available on maven central.
- - SLF4J. Available on maven central.
- - Wayland-Java-Bindings. Available on maven central.
- 
-Native:
-
+The following native libraries are expected:
  - libc
  - pixman-1
  - EGL
  - GLESv2
- - X11
- - xcb
- - X11-xcb
+ - libdrm (drm/kms back-end)
+ - libpng (x11-html5 back-end)
+ - libudev (drm/kms + rpi back-end)
+ - libinput (rpi & drm/kms back-end)
+ - X11 (x11 back-end)
+ - xcb (x11 back-end)
+ - X11-xcb (x11 back-end)
  - xkbcommon
- - xkbcommon-x11
+ - xkbcommon-x11 (x11 back-end)
+ - bcm_host (rpi back-end)
  - linux
 
 State
