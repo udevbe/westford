@@ -409,10 +409,12 @@ public class Gles2Renderer implements GlRenderer {
 
     @Override
     public void visit(@Nonnull final EglOutput eglOutput) {
-        render(eglOutput);
+        render(eglOutput,
+               this.scene.getSurfacesStack());
     }
 
-    private void render(@Nonnull final EglOutput eglOutput) {
+    public void render(@Nonnull final EglOutput eglOutput,
+                       final Iterable<WlSurfaceResource> surfacesStack) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglSurface(),
@@ -435,8 +437,7 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
 
         //naive single pass, bottom to top overdraw rendering.
-        this.scene.getSurfacesStack()
-                  .forEach(this::draw);
+        surfacesStack.forEach(this::draw);
         flushRenderState(eglOutput);
     }
 

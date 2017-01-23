@@ -24,6 +24,7 @@ import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlShellSurfaceRequests;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.freedesktop.wayland.shared.WlShellSurfaceFullscreenMethod;
 import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.westford.compositor.wlshell.ShellSurface;
 
