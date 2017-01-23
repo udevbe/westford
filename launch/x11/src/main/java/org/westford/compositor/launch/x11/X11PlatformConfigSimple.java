@@ -23,6 +23,7 @@ import org.westford.compositor.x11.config.X11PlatformConfig;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class X11PlatformConfigSimple implements X11PlatformConfig {
 
@@ -35,40 +36,23 @@ public class X11PlatformConfigSimple implements X11PlatformConfig {
     @Nonnull
     @Override
     public Iterable<X11OutputConfig> getX11RenderOutputConfigs() {
-        return Arrays.asList(new X11OutputConfig() {
-                                 @Nonnull
-                                 @Override
-                                 public String getName() {
-                                     return "window0";
-                                 }
+        return Collections.singletonList(new X11OutputConfig() {
+                                             @Nonnull
+                                             @Override
+                                             public String getName() {
+                                                 return "window0";
+                                             }
 
-                                 @Override
-                                 public int getWidth() {
-                                     return 1024;
-                                 }
+                                             @Override
+                                             public int getWidth() {
+                                                 return 1024;
+                                             }
 
-                                 @Override
-                                 public int getHeight() {
-                                     return 768;
-                                 }
-                             },
-                             new X11OutputConfig() {
-                                 @Nonnull
-                                 @Override
-                                 public String getName() {
-                                     return "window1";
-                                 }
-
-                                 @Override
-                                 public int getWidth() {
-                                     return 1024;
-                                 }
-
-                                 @Override
-                                 public int getHeight() {
-                                     return 768;
-                                 }
-                             }
-                            );
+                                             @Override
+                                             public int getHeight() {
+                                                 return 768;
+                                             }
+                                         }
+                                        );
     }
 }

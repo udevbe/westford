@@ -1,6 +1,6 @@
 /*
  * Westford Wayland Compositor.
- * Copyright (C) 2016  Erik De Rijcke
+ * Copyright (C) 2017  Erik De Rijcke
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,28 +17,18 @@
  */
 package org.westford.compositor.core;
 
-import org.freedesktop.wayland.server.WlBufferResource;
-import org.freedesktop.wayland.server.WlSurfaceResource;
 
-import javax.annotation.Nonnull;
+import org.westford.compositor.drm.egl.DrmEglOutput;
+import org.westford.compositor.x11.egl.X11EglOutput;
 
-public interface Renderer {
-    void visit(@Nonnull RenderOutput renderOutput);
+public interface FullscreenRenderer extends Renderer {
+    void visit(DrmEglOutput drmEglOutput);
 
-    void visit(@Nonnull EglOutput eglConnector);
+    void visit(X11EglOutput x11EglOutput);
 
     //TODO pixman sw rendering platform
-    //void visit(PixmanOutput pixmanOutput);
+    //void visit(DrmPixmanOutput drmPixmanOutput);
 
-    /**
-     * @param wlSurfaceResource
-     *
-     * @deprecated method will be removed
-     */
-    //FIXME remove this method and instead register a destroy listener in the renderer implementation
-    @Deprecated
-    void onDestroy(@Nonnull WlSurfaceResource wlSurfaceResource);
-
-    @Nonnull
-    Buffer queryBuffer(@Nonnull WlBufferResource wlBufferResource);
+    //TODO pixman sw rendering platform
+    //void visit(X11PixmanOutput x11PixmanOutput);
 }
