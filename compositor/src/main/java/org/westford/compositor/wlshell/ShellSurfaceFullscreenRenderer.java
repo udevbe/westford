@@ -6,8 +6,8 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.compositor.core.Buffer;
 import org.westford.compositor.core.EglOutput;
-import org.westford.compositor.core.FullscreenRenderer;
 import org.westford.compositor.core.RenderOutput;
+import org.westford.compositor.core.Renderer;
 import org.westford.compositor.drm.egl.DrmEglOutput;
 import org.westford.compositor.gles2.Gles2Renderer;
 import org.westford.compositor.x11.egl.X11EglOutput;
@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 
 @AutoFactory(allowSubclasses = true,
              className = "ShellSurfaceFullscreenRendererFactory")
-public class ShellSurfaceFullscreenRenderer implements FullscreenRenderer {
+public class ShellSurfaceFullscreenRenderer implements Renderer {
 
 
     //fallback renderer
@@ -27,13 +27,13 @@ public class ShellSurfaceFullscreenRenderer implements FullscreenRenderer {
     }
 
     @Override
-    public void visit(final DrmEglOutput drmEglOutput) {
-        //TODO can do direct scanout, use 'real' fullscreen
+    public void visit(@Nonnull final DrmEglOutput drmEglOutput) {
+        //TODO can potentially do direct scanout and use 'real' fullscreen
 
     }
 
     @Override
-    public void visit(final X11EglOutput x11EglOutput) {
+    public void visit(@Nonnull final X11EglOutput x11EglOutput) {
         //can't do direct scanout, use 'fake' fullscreen
         //TODO pass our wlsurface?
 //        gles2Renderer.render(x11EglOutput,
@@ -63,6 +63,6 @@ public class ShellSurfaceFullscreenRenderer implements FullscreenRenderer {
     @Nonnull
     @Override
     public Buffer queryBuffer(@Nonnull final WlBufferResource wlBufferResource) {
-        return null;
+        return gles2Renderer.queryBuffer(wlBufferResource);
     }
 }
