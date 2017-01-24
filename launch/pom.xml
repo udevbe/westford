@@ -25,7 +25,5 @@
         <module>x11</module>
         <module>drm.direct</module>
         <module>drm.indirect</module>
-        <module>dispmanx</module>
-        <module>x11.html5</module>
     </modules>
 </project>
