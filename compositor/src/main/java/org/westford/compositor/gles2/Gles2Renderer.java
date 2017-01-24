@@ -42,7 +42,9 @@ import org.westford.compositor.core.SurfaceRenderState;
 import org.westford.compositor.core.SurfaceRenderStateVisitor;
 import org.westford.compositor.core.UnsupportedBuffer;
 import org.westford.compositor.core.calc.Mat4;
+import org.westford.compositor.drm.egl.DrmEglOutput;
 import org.westford.compositor.protocol.WlSurface;
+import org.westford.compositor.x11.egl.X11EglOutput;
 import org.westford.nativ.libEGL.EglBindWaylandDisplayWL;
 import org.westford.nativ.libEGL.EglCreateImageKHR;
 import org.westford.nativ.libEGL.EglDestroyImageKHR;
@@ -411,6 +413,16 @@ public class Gles2Renderer implements GlRenderer {
     public void visit(@Nonnull final EglOutput eglOutput) {
         render(eglOutput,
                this.scene.getSurfacesStack());
+    }
+
+    @Override
+    public void visit(@Nonnull DrmEglOutput drmEglOutput) {
+        visit((EglOutput)drmEglOutput);
+    }
+
+    @Override
+    public void visit(@Nonnull X11EglOutput x11EglOutput) {
+        visit((EglOutput)x11EglOutput);
     }
 
     public void render(@Nonnull final EglOutput eglOutput,
