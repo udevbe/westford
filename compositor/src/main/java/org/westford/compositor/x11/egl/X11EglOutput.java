@@ -29,6 +29,7 @@ import org.westford.compositor.protocol.WlOutput;
 import org.westford.compositor.x11.X11Output;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedList;
 import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
@@ -36,7 +37,9 @@ import java.util.Optional;
 public class X11EglOutput implements EglOutput {
 
     @Nonnull
-    private final Renderer  renderer;
+    private final Renderer renderer;
+    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
+
     @Nonnull
     private final X11Output x11Output;
     @Nonnull
@@ -117,8 +120,24 @@ public class X11EglOutput implements EglOutput {
     }
 
     private void doRender() {
-        this.renderer.visit(this);
+        Renderer activeRender = this.customRenderers.getFirst();
+        if (activeRender == null) {
+            activeRender = this.renderer;
+        }
+        activeRender.visit(this);
+
         this.display.flushClients();
         this.renderScheduled = false;
+    }
+
+
+    @Override
+    public void push(@Nonnull final Renderer renderer) {
+        this.customRenderers.push(renderer);
+    }
+
+    @Override
+    public Optional<Renderer> popRenderer() {
+        return Optional.ofNullable(this.customRenderers.pollFirst());
     }
 }

@@ -38,6 +38,7 @@ import org.westford.nativ.libgbm.Libgbm;
 import org.westford.nativ.libgbm.Pointerdestroy_user_data;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedList;
 import java.util.Optional;
 
 import static org.westford.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
@@ -58,6 +59,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
 
     @Nonnull
     private final Renderer renderer;
+    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
 
     private final int       drmFd;
     private final long      gbmSurface;
@@ -210,8 +212,13 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     }
 
     private void doRender() {
+        Renderer activeRender = this.customRenderers.getFirst();
+        if (activeRender == null) {
+            activeRender = this.renderer;
+        }
+
         this.onIdleEventSource = Optional.empty();
-        this.renderer.visit(this);
+        activeRender.visit(this);
         this.display.flushClients();
         this.renderPending = false;
     }
@@ -273,5 +280,15 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
             throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
                                                      this.libc.getErrno()));
         }
+    }
+
+    @Override
+    public void push(@Nonnull final Renderer renderer) {
+        this.customRenderers.push(renderer);
+    }
+
+    @Override
+    public Optional<Renderer> popRenderer() {
+        return Optional.ofNullable(this.customRenderers.pollFirst());
     }
 }
