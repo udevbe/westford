@@ -26,6 +26,8 @@ import org.westford.compositor.core.Renderer;
 import org.westford.compositor.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedList;
+import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
              className = "X11OutputFactory")
@@ -33,6 +35,8 @@ public class X11Output implements RenderOutput {
 
     @Nonnull
     private final Renderer renderer;
+    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
+
     private final int      xWindow;
     @Nonnull
     private final WlOutput wlOutput;
@@ -67,7 +71,21 @@ public class X11Output implements RenderOutput {
     }
 
     @Override
+    public void push(@Nonnull final Renderer renderer) {
+        this.customRenderers.push(renderer);
+    }
+
+    @Override
+    public Optional<Renderer> popRenderer() {
+        return Optional.ofNullable(this.customRenderers.pollFirst());
+    }
+
+    @Override
     public void render() {
-        this.renderer.visit(this);
+        Renderer activeRender = this.customRenderers.getFirst();
+        if (activeRender == null) {
+            activeRender = this.renderer;
+        }
+        activeRender.visit(this);
     }
 }

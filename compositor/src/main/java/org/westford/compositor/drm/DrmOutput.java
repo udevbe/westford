@@ -29,14 +29,19 @@ import org.westford.nativ.libdrm.DrmModeRes;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.LinkedList;
+import java.util.Optional;
 
 //TODO drm connector, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "DrmOutputFactory")
 public class DrmOutput implements RenderOutput {
 
+
     @Nonnull
-    private final Renderer         renderer;
+    private final Renderer renderer;
+    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
+
     @Nonnull
     private final WlOutput         wlOutput;
     @Nonnull
@@ -87,7 +92,21 @@ public class DrmOutput implements RenderOutput {
     }
 
     @Override
+    public void push(@Nonnull final Renderer renderer) {
+        this.customRenderers.push(renderer);
+    }
+
+    @Override
+    public Optional<Renderer> popRenderer() {
+        return Optional.ofNullable(this.customRenderers.pollFirst());
+    }
+
+    @Override
     public void render() {
-        this.renderer.visit(this);
+        Renderer activeRender = this.customRenderers.getFirst();
+        if (activeRender == null) {
+            activeRender = this.renderer;
+        }
+        activeRender.visit(this);
     }
 }

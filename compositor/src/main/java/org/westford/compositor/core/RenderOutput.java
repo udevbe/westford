@@ -20,11 +20,29 @@ package org.westford.compositor.core;
 import org.westford.compositor.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * A {@link RenderPlatform} specific drawing output for a {@link Renderer}.
  */
 public interface RenderOutput {
+
+    /**
+     * Push a custom renderer to this output. This effectively overrides the current active renderer for this output.
+     * This enables a specialised temporarily renderer to take over the screen output eg. a renderer that displays a
+     * single fullscreen client.
+     *
+     * @param renderer A renderer that will take over the screen output.
+     */
+    void push(@Nonnull Renderer renderer);
+
+    /**
+     * Pop the latest pushed renderer. The default renderer can never be popped. If
+     * no renderers are on the stack, an empty optional will be returned.
+     *
+     * @return A pushed renderer, or empty of no pushed renderer.
+     */
+    Optional<Renderer> popRenderer();
 
     /**
      * Request a render for this {@code RenderOutput}.
