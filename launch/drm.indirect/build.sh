@@ -6,12 +6,20 @@ DOCKER_IMAGE="zubnix/jni-cross-compilers";
 #ARCHS match docker tags of "zubnix/jni-cross-compilers" images
 ARCHS=("linux-aarch64" "linux-armv7hf" "linux-armv7sf" "linux-armv6hf" "linux-x86_64" "linux-i686");
 
+# check if stdout is a terminal...
+if test -t 1; then
 
-NORMAL=$(tput sgr0);
-RED=$(tput setaf 1);
-GREEN=$(tput setaf 2);
-MAGENTA=$(tput setaf 5);
-BOLD=$(tput bold);
+    # see if it supports colors...
+    ncolors=$(tput colors)
+
+    if test -n "$ncolors" && test $ncolors -ge 8; then
+        NORMAL=$(tput sgr0);
+        RED=$(tput setaf 1);
+        GREEN=$(tput setaf 2);
+        MAGENTA=$(tput setaf 5);
+        BOLD=$(tput bold);
+    fi
+fi
 
 prep_build_for_arch() {
     ARCH=$1;
