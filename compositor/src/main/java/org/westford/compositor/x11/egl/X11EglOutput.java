@@ -50,8 +50,6 @@ public class X11EglOutput implements EglOutput {
 
     private boolean renderScheduled = false;
 
-    private final EventLoop.IdleHandler doRender = this::doRender;
-
     private Optional<EglOutputState> state = Optional.empty();
 
     X11EglOutput(@Nonnull @Provided final Display display,
@@ -95,36 +93,28 @@ public class X11EglOutput implements EglOutput {
     }
 
     @Nonnull
-    @Override
-    public WlOutput getWlOutput() {
-        return this.x11Output.getWlOutput();
-    }
-
-    @Nonnull
     public X11Output getX11Output() {
         return this.x11Output;
     }
 
     @Override
-    public void render() {
+    public void render(@Nonnull final WlOutput wlOutput) {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled
-        whenIdleDoRender();
+        whenIdleDoRender(wlOutput);
     }
 
-    private void whenIdleDoRender() {
+    private void whenIdleDoRender(@Nonnull final WlOutput wlOutput) {
         if (!this.renderScheduled) {
             this.renderScheduled = true;
             this.display.getEventLoop()
-                        .addIdle(this.doRender);
+                        .addIdle(() -> doRender(wlOutput));
         }
     }
 
-    private void doRender() {
-        Renderer activeRender = this.customRenderers.getFirst();
-        if (activeRender == null) {
-            activeRender = this.renderer;
-        }
-        activeRender.visit(this);
+    private void doRender(@Nonnull final WlOutput wlOutput) {
+        Renderer activeRender = this.customRenderers.isEmpty() ? this.renderer : this.customRenderers.getFirst();
+        activeRender.visit(this,
+                           wlOutput);
 
         this.display.flushClients();
         this.renderScheduled = false;

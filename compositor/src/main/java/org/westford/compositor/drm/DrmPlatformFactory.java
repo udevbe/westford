@@ -20,10 +20,6 @@ package org.westford.compositor.drm;
 
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore;
-import org.westford.compositor.core.OutputFactory;
-import org.westford.compositor.core.OutputGeometry;
-import org.westford.compositor.core.OutputMode;
-import org.westford.compositor.protocol.WlOutputFactory;
 import org.westford.launch.Privileges;
 import org.westford.nativ.glibc.Libc;
 import org.westford.nativ.libdrm.DrmModeConnector;
@@ -51,8 +47,6 @@ public class DrmPlatformFactory {
     @Nonnull
     private final Libudev                   libudev;
     @Nonnull
-    private final Libc                      libc;
-    @Nonnull
     private final Libdrm                    libdrm;
     @Nonnull
     private final Display                   display;
@@ -62,10 +56,6 @@ public class DrmPlatformFactory {
     private final DrmEventBusFactory        drmEventBusFactory;
     @Nonnull
     private final PrivateDrmPlatformFactory privateDrmPlatformFactory;
-    @Nonnull
-    private final WlOutputFactory           wlOutputFactory;
-    @Nonnull
-    private final OutputFactory             outputFactory;
     @Nonnull
     private final Privileges                privileges;
 
@@ -77,18 +67,13 @@ public class DrmPlatformFactory {
                        @Nonnull final DrmOutputFactory drmOutputFactory,
                        @Nonnull final DrmEventBusFactory drmEventBusFactory,
                        @Nonnull final PrivateDrmPlatformFactory privateDrmPlatformFactory,
-                       @Nonnull final WlOutputFactory wlOutputFactory,
-                       @Nonnull final OutputFactory outputFactory,
                        @Nonnull final Privileges privileges) {
         this.libudev = libudev;
-        this.libc = libc;
         this.libdrm = libdrm;
         this.display = display;
         this.drmOutputFactory = drmOutputFactory;
         this.drmEventBusFactory = drmEventBusFactory;
         this.privateDrmPlatformFactory = privateDrmPlatformFactory;
-        this.wlOutputFactory = wlOutputFactory;
-        this.outputFactory = outputFactory;
         this.privileges = privileges;
     }
 
@@ -313,43 +298,8 @@ public class DrmPlatformFactory {
             throw new RuntimeException("Could not find a valid mode.");
         }
 
-        final int fallBackDpi = 96;
-
-        int         mmWidth  = drmModeConnector.mmWidth();
-        final short hdisplay = mode.hdisplay();
-        if (mmWidth == 0) {
-            mmWidth = (int) ((hdisplay * 25.4) / fallBackDpi);
-        }
-
-        int         mmHeight = drmModeConnector.mmHeight();
-        final short vdisplay = mode.vdisplay();
-        if (mmHeight == 0) {
-            mmHeight = (int) ((vdisplay * 25.4) / fallBackDpi);
-        }
-
-        //TODO gather more geo & mode info
-        final OutputGeometry outputGeometry = OutputGeometry.builder()
-                                                            .physicalWidth(mmWidth)
-                                                            .physicalHeight(mmHeight)
-                                                            .make("unknown")
-                                                            .model("unknown")
-                                                            .x(0)
-                                                            .y(0)
-                                                            .subpixel(drmModeConnector.drmModeSubPixel())
-                                                            .transform(0)
-                                                            .build();
-        final OutputMode outputMode = OutputMode.builder()
-                                                .width(hdisplay)
-                                                .height(vdisplay)
-                                                .refresh(mode.vrefresh())
-                                                .flags(mode.flags())
-                                                .build();
-
         //FIXME deduce an output name from the drm connector
-        return this.drmOutputFactory.create(this.wlOutputFactory.create(this.outputFactory.create("dummy",
-                                                                                                  outputGeometry,
-                                                                                                  outputMode)),
-                                            drmModeRes,
+        return this.drmOutputFactory.create(drmModeRes,
                                             drmModeConnector,
                                             crtcId,
                                             mode);

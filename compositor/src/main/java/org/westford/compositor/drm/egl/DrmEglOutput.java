@@ -70,12 +70,10 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private final long      eglDisplay;
     private       long      gbmBo;
     private       long      nextGbmBo;
-    private       boolean               renderPending       = false;
-    private       boolean               pageFlipPending     = false;
-    private       Optional<Runnable>    afterPageFlipRender = Optional.empty();
-    private       Optional<EventSource> onIdleEventSource   = Optional.empty();
-    private final EventLoop.IdleHandler doRender            = this::doRender;
-    private final Optional<Runnable>    whenIdleDoRender    = Optional.of(this::whenIdleDoRender);
+    private boolean               renderPending       = false;
+    private boolean               pageFlipPending     = false;
+    private Optional<Runnable>    afterPageFlipRender = Optional.empty();
+    private Optional<EventSource> onIdleEventSource   = Optional.empty();
     private boolean enabled;
     private Optional<EglOutputState> state = Optional.empty();
 
@@ -201,24 +199,19 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     }
 
     @Nonnull
-    @Override
-    public WlOutput getWlOutput() {
-        return this.drmOutput.getWlOutput();
-    }
-
-    @Nonnull
     public DrmOutput getDrmOutput() {
         return this.drmOutput;
     }
 
-    private void doRender() {
+    private void doRender(@Nonnull final WlOutput wlOutput) {
         Renderer activeRender = this.customRenderers.getFirst();
         if (activeRender == null) {
             activeRender = this.renderer;
         }
 
         this.onIdleEventSource = Optional.empty();
-        activeRender.visit(this);
+        activeRender.visit(this,
+                           wlOutput);
         this.display.flushClients();
         this.renderPending = false;
     }
@@ -231,37 +224,37 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     }
 
     @Override
-    public void enable() {
+    public void enable(@Nonnull final WlOutput wlOutput) {
         this.enabled = true;
-        render();
+        render(wlOutput);
     }
 
     @Override
-    public void render() {
+    public void render(@Nonnull final WlOutput wlOutput) {
         if (this.enabled) {
-            scheduleRender();
+            scheduleRender(wlOutput);
         }
     }
 
-    private void scheduleRender() {
+    private void scheduleRender(final WlOutput wlOutput) {
         //TODO unit test 3 cases here: schedule idle, no-op when already scheduled, delayed render when pageflip pending
 
         //schedule a new render as soon as the pageflip ends, but only if we haven't scheduled one already
         if (this.pageFlipPending) {
             if (!this.afterPageFlipRender.isPresent()) {
-                this.afterPageFlipRender = this.whenIdleDoRender;
+                this.afterPageFlipRender = Optional.of(() -> whenIdleDoRender(wlOutput));
             }
         }
         //schedule a new render but only if we haven't scheduled one already.
         else if (!this.renderPending) {
-            whenIdleDoRender();
+            whenIdleDoRender(wlOutput);
         }
     }
 
-    private void whenIdleDoRender() {
+    private void whenIdleDoRender(final WlOutput wlOutput) {
         this.renderPending = true;
         this.onIdleEventSource = Optional.of(this.display.getEventLoop()
-                                                         .addIdle(this.doRender));
+                                                         .addIdle(() -> doRender(wlOutput)));
     }
 
     public void setDefaultMode() {

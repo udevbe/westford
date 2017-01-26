@@ -14,10 +14,12 @@ public class OutputFactory {
         this.privateOutputFactory = privateOutputFactory;
     }
 
-    public Output create(@Nonnull final String name,
+    public Output create(@Nonnull final RenderOutput renderOutput,
+                         @Nonnull final String name,
                          @Nonnull final OutputGeometry outputGeometry,
                          @Nonnull final OutputMode outputMode) {
-        final Output output = this.privateOutputFactory.create(name);
+        final Output output = this.privateOutputFactory.create(renderOutput,
+                                                               name);
         output.update(Collections.emptySet(),
                       outputGeometry);
         output.update(Collections.emptySet(),

@@ -33,16 +33,14 @@ public class WlPointerFactory {
         this.renderPlatform.getRenderOutputNewSignal()
                            .connect(event ->
                                             pointerDevice.getClampRegion()
-                                                         .add(event.getRenderOutput()
-                                                                   .getWlOutput()
+                                                         .add(event.getWlOutput()
                                                                    .getOutput()
                                                                    .getRegion()));
         //TODO unit test
         this.renderPlatform.getRenderOutputDestroyedSignal()
                            .connect(event -> {
                                pointerDevice.getClampRegion()
-                                            .remove(event.getRenderOutput()
-                                                         .getWlOutput()
+                                            .remove(event.getWlOutput()
                                                          .getOutput()
                                                          .getRegion());
                                pointerDevice.clamp(wlPointer.getResources(),

@@ -26,11 +26,10 @@ public class PointerDeviceFactory {
         final FiniteRegion  outputsRegion = this.finiteRegionFactory.create();
         final PointerDevice pointerDevice = this.privatePointerDeviceFactory.create(outputsRegion);
 
-        this.renderPlatform.getRenderOutputs()
-                           .forEach(renderOutput ->
-                                            outputsRegion.add(renderOutput.getWlOutput()
-                                                                          .getOutput()
-                                                                          .getRegion()));
+        this.renderPlatform.getWlOutputs()
+                           .forEach(wlOutput ->
+                                            outputsRegion.add(wlOutput.getOutput()
+                                                                      .getRegion()));
         return pointerDevice;
     }
 }

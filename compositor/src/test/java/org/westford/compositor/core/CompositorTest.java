@@ -45,7 +45,7 @@ public class CompositorTest {
         final RenderOutput renderOutput1 = mock(RenderOutput.class);
         final List<? extends RenderOutput> renderOutputs = Arrays.asList(renderOutput0,
                                                                          renderOutput1);
-        when(this.renderPlatform.getRenderOutputs()).thenReturn((List) renderOutputs);
+        when(this.renderPlatform.getWlOutputs()).thenReturn((List) renderOutputs);
 
         //when
         this.compositor.requestRender();

@@ -45,17 +45,11 @@ public interface RenderOutput {
     Optional<Renderer> popRenderer();
 
     /**
-     * Request a render for this {@code RenderOutput}.
-     */
-    void render();
-
-    /**
-     * The wayland output protocol object associated with this connector.
+     * Request a render for this {@code RenderOutput} on the given wl output.
      *
-     * @return the wayland output
+     * @param wlOutput a wayland output used as the rendering context.
      */
-    @Nonnull
-    WlOutput getWlOutput();
+    void render(WlOutput wlOutput);
 
     /**
      * Called by the @{@link Renderer} of this {@code RenderOutput} when it starts to draw to it's back buffer.
@@ -88,8 +82,10 @@ public interface RenderOutput {
 
     /**
      * Enables rendering and triggers a redraw for this {@code RenderOutput}.
+     *
+     * @param wlOutput a wayland output used as the rendering context.
      */
-    default void enable() {}
+    default void enable(@Nonnull final WlOutput wlOutput) {}
 
 
 }

@@ -39,6 +39,8 @@ public class Output {
     private final Signal<OutputMode, Slot<OutputMode>>           outputModeSignal = new Signal<>();
 
     @Nonnull
+    private final RenderOutput renderOutput;
+    @Nonnull
     private final String       name;
     @Nonnull
     private final FiniteRegion region;
@@ -68,8 +70,10 @@ public class Output {
                                                         .build();
 
     Output(@Provided @Nonnull final FiniteRegion finiteRegion,
+           @Nonnull final RenderOutput renderOutput,
            @Nonnull final String name) {
         this.region = finiteRegion;
+        this.renderOutput = renderOutput;
         this.name = name;
     }
 
@@ -244,5 +248,10 @@ public class Output {
     @Nonnull
     public FiniteRegion getRegion() {
         return this.region;
+    }
+
+    @Nonnull
+    public RenderOutput getRenderOutput() {
+        return renderOutput;
     }
 }

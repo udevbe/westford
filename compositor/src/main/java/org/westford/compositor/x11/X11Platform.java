@@ -30,12 +30,10 @@ import java.util.Map;
 
 @AutoFactory(className = "PrivateX11PlatformFactory",
              allowSubclasses = true)
-public class X11Platform implements RenderPlatform {
+public class X11Platform {
 
     @Nonnull
     private final List<X11Output> x11Outputs;
-    private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
-    private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
     @Nonnull
     private final X11EventBus          x11EventBus;
@@ -75,18 +73,7 @@ public class X11Platform implements RenderPlatform {
     }
 
     @Nonnull
-    @Override
     public List<X11Output> getRenderOutputs() {
         return this.x11Outputs;
-    }
-
-    @Override
-    public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
-        return this.renderOutputNewSignal;
-    }
-
-    @Override
-    public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
-        return this.renderOutputDestroyedSignal;
     }
 }

@@ -20,14 +20,21 @@ package org.westford.compositor.drm.egl;
 
 import org.freedesktop.jaccall.Pointer;
 import org.westford.compositor.core.GlRenderer;
+import org.westford.compositor.core.OutputFactory;
+import org.westford.compositor.core.OutputGeometry;
+import org.westford.compositor.core.OutputMode;
 import org.westford.compositor.drm.DrmOutput;
 import org.westford.compositor.drm.DrmPlatform;
+import org.westford.compositor.protocol.WlOutput;
+import org.westford.compositor.protocol.WlOutputFactory;
 import org.westford.launch.LifeCycleSignals;
 import org.westford.launch.Privileges;
 import org.westford.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westford.nativ.libEGL.EglGetPlatformDisplayEXT;
 import org.westford.nativ.libEGL.LibEGL;
 import org.westford.nativ.libGLESv2.LibGLESv2;
+import org.westford.nativ.libdrm.DrmModeConnector;
+import org.westford.nativ.libdrm.DrmModeModeInfo;
 import org.westford.nativ.libgbm.Libgbm;
 
 import javax.annotation.Nonnull;
@@ -54,6 +61,10 @@ public class DrmEglPlatformFactory {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     @Nonnull
+    private final WlOutputFactory              wlOutputFactory;
+    @Nonnull
+    private final OutputFactory                outputFactory;
+    @Nonnull
     private final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory;
     @Nonnull
     private final Libgbm                       libgbm;
@@ -73,7 +84,9 @@ public class DrmEglPlatformFactory {
     private final Privileges                   privileges;
 
     @Inject
-    DrmEglPlatformFactory(@Nonnull final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory,
+    DrmEglPlatformFactory(@Nonnull final WlOutputFactory wlOutputFactory,
+                          @Nonnull final OutputFactory outputFactory,
+                          @Nonnull final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory,
                           @Nonnull final Libgbm libgbm,
                           @Nonnull final LibEGL libEGL,
                           @Nonnull final LibGLESv2 libGLESv2,
@@ -82,6 +95,8 @@ public class DrmEglPlatformFactory {
                           @Nonnull final GlRenderer glRenderer,
                           @Nonnull final LifeCycleSignals lifeCycleSignals,
                           @Nonnull final Privileges privileges) {
+        this.wlOutputFactory = wlOutputFactory;
+        this.outputFactory = outputFactory;
         this.privateDrmEglPlatformFactory = privateDrmEglPlatformFactory;
         this.libgbm = libgbm;
         this.libEGL = libEGL;
@@ -131,6 +146,7 @@ public class DrmEglPlatformFactory {
 
         final List<DrmOutput>    drmOutputs          = this.drmPlatform.getRenderOutputs();
         final List<DrmEglOutput> drmEglRenderOutputs = new ArrayList<>(drmOutputs.size());
+        final List<WlOutput>     wlOutputs           = new ArrayList<>(drmEglRenderOutputs.size());
 
         drmOutputs.forEach(drmOutput ->
                                    drmEglRenderOutputs.add(createDrmEglRenderOutput(drmOutput,
@@ -138,12 +154,17 @@ public class DrmEglPlatformFactory {
                                                                                     eglDisplay,
                                                                                     eglContext,
                                                                                     eglConfig)));
+        drmEglRenderOutputs.forEach(drmEglOutput ->
+                                            wlOutputs.add(createWlOutput(drmEglOutput)));
+
         this.lifeCycleSignals.getActivateSignal()
                              .connect(event -> {
                                  this.privileges.setDrmMaster(this.drmPlatform.getDrmFd());
-                                 drmEglRenderOutputs.forEach(drmEglRenderOutput -> {
-                                     drmEglRenderOutput.setDefaultMode();
-                                     drmEglRenderOutput.enable();
+                                 wlOutputs.forEach(wlOutput -> {
+                                     DrmEglOutput drmEglOutput = (DrmEglOutput) wlOutput.getOutput()
+                                                                                        .getRenderOutput();
+                                     drmEglOutput.setDefaultMode();
+                                     drmEglOutput.enable(wlOutput);
                                  });
                              });
         this.lifeCycleSignals.getDeactivateSignal()
@@ -152,11 +173,61 @@ public class DrmEglPlatformFactory {
                                  this.privileges.dropDrmMaster(this.drmPlatform.getDrmFd());
                              });
 
+
         return this.privateDrmEglPlatformFactory.create(gbmDevice,
                                                         eglDisplay,
                                                         eglContext,
                                                         eglExtensions,
-                                                        drmEglRenderOutputs);
+                                                        wlOutputs);
+    }
+
+    private WlOutput createWlOutput(DrmEglOutput drmEglOutput) {
+
+        final DrmOutput drmOutput = drmEglOutput.getDrmOutput();
+
+        final DrmModeConnector drmModeConnector = drmOutput.getDrmModeConnector();
+        final DrmModeModeInfo  drmModeModeInfo  = drmOutput.getMode();
+
+        final int fallBackDpi = 96;
+
+        int mmWidth = drmModeConnector.mmWidth();
+        final short hdisplay = drmOutput.getMode()
+                                        .hdisplay();
+        if (mmWidth == 0) {
+            mmWidth = (int) ((hdisplay * 25.4) / fallBackDpi);
+        }
+
+        int mmHeight = drmModeConnector.mmHeight();
+        final short vdisplay = drmOutput.getMode()
+                                        .vdisplay();
+        if (mmHeight == 0) {
+            mmHeight = (int) ((vdisplay * 25.4) / fallBackDpi);
+        }
+
+        //TODO gather more geo & drmModeModeInfo info
+        final OutputGeometry outputGeometry = OutputGeometry.builder()
+                                                            .physicalWidth(mmWidth)
+                                                            .physicalHeight(mmHeight)
+                                                            .make("unknown")
+                                                            .model("unknown")
+                                                            .x(0)
+                                                            .y(0)
+                                                            .subpixel(drmModeConnector.drmModeSubPixel())
+                                                            .transform(0)
+                                                            .build();
+        final OutputMode outputMode = OutputMode.builder()
+                                                .width(hdisplay)
+                                                .height(vdisplay)
+                                                .refresh(drmOutput.getMode()
+                                                                  .vrefresh())
+                                                .flags(drmModeModeInfo.flags())
+                                                .build();
+
+        //FIXME deduce an output name from the drm connector
+        return this.wlOutputFactory.create(this.outputFactory.create(drmEglOutput,
+                                                                     "fixme",
+                                                                     outputGeometry,
+                                                                     outputMode));
     }
 
     private long createEglDisplay(final long gbmDevice) {
@@ -216,11 +287,13 @@ public class DrmEglPlatformFactory {
                                                   final long eglContext,
                                                   final long eglConfig) {
 
+        final DrmModeModeInfo drmModeModeInfo = drmOutput.getMode();
+
         final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
-                                                               drmOutput.getMode()
-                                                                        .hdisplay(),
-                                                               drmOutput.getMode()
-                                                                        .vdisplay(),
+                                                               drmModeModeInfo
+                                                                       .hdisplay(),
+                                                               drmModeModeInfo
+                                                                       .vdisplay(),
                                                                Libgbm.GBM_FORMAT_XRGB8888,
                                                                Libgbm.GBM_BO_USE_SCANOUT | Libgbm.GBM_BO_USE_RENDERING);
 

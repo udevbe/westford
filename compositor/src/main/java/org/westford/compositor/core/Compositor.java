@@ -37,8 +37,10 @@ public class Compositor {
 
     public void requestRender() {
         //TODO optimize by only requesting a render for specific damaged render outputs
-        this.renderPlatform.getRenderOutputs()
-                           .forEach(RenderOutput::render);
+        this.renderPlatform.getWlOutputs()
+                           .forEach((wlOutput) -> wlOutput.getOutput()
+                                                          .getRenderOutput()
+                                                          .render(wlOutput));
     }
 
     @Nonnegative

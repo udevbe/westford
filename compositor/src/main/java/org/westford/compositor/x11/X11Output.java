@@ -18,74 +18,67 @@
 package org.westford.compositor.x11;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
-import org.westford.compositor.core.OutputGeometry;
-import org.westford.compositor.core.Point;
-import org.westford.compositor.core.RenderOutput;
-import org.westford.compositor.core.Renderer;
-import org.westford.compositor.protocol.WlOutput;
+import org.westford.Signal;
+import org.westford.Slot;
+import org.westford.compositor.core.events.RenderOutputDestroyed;
+import org.westford.nativ.libxcb.xcb_screen_t;
 
 import javax.annotation.Nonnull;
-import java.util.LinkedList;
-import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
              className = "X11OutputFactory")
-public class X11Output implements RenderOutput {
+public class X11Output {
 
-    @Nonnull
-    private final Renderer renderer;
-    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
+    private final int xWindow;
 
-    private final int      xWindow;
-    @Nonnull
-    private final WlOutput wlOutput;
+    private final int          x;
+    private final int          y;
+    private final int          width;
+    private final int          height;
+    private final String       name;
+    private final xcb_screen_t screen;
 
-    X11Output(@Nonnull @Provided final Renderer renderer,
-              final int xWindow,
-              @Nonnull final WlOutput wlOutput) {
-        this.renderer = renderer;
+    X11Output(final int xWindow,
+              final int x,
+              final int y,
+              final int width,
+              final int height,
+              final String name,
+              final xcb_screen_t screen) {
         this.xWindow = xWindow;
-        this.wlOutput = wlOutput;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.name = name;
+        this.screen = screen;
     }
 
     public int getXWindow() {
         return this.xWindow;
     }
 
-    public Point toGlobal(final int x11WindowX,
-                          final int x11WindowY) {
-        final OutputGeometry geometry = getWlOutput().getOutput()
-                                                     .getGeometry();
-        final int globalX = geometry.getX() + x11WindowX;
-        final int globalY = geometry.getY() + x11WindowY;
-
-        return Point.create(globalX,
-                            globalY);
+    public int getX() {
+        return x;
     }
 
-    @Nonnull
-    @Override
-    public WlOutput getWlOutput() {
-        return this.wlOutput;
+    public int getY() {
+        return y;
     }
 
-    @Override
-    public void push(@Nonnull final Renderer renderer) {
-        this.customRenderers.push(renderer);
+    public int getWidth() {
+        return width;
     }
 
-    @Override
-    public Optional<Renderer> popRenderer() {
-        return Optional.ofNullable(this.customRenderers.pollFirst());
+    public int getHeight() {
+        return height;
     }
 
-    @Override
-    public void render() {
-        Renderer activeRender = this.customRenderers.getFirst();
-        if (activeRender == null) {
-            activeRender = this.renderer;
-        }
-        activeRender.visit(this);
+    public String getName() {
+        return name;
+    }
+
+    public xcb_screen_t getScreen() {
+        return screen;
     }
 }
