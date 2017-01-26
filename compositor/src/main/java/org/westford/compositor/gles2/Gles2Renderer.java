@@ -43,6 +43,7 @@ import org.westford.compositor.core.SurfaceRenderStateVisitor;
 import org.westford.compositor.core.UnsupportedBuffer;
 import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.drm.egl.DrmEglOutput;
+import org.westford.compositor.protocol.WlOutput;
 import org.westford.compositor.protocol.WlSurface;
 import org.westford.compositor.x11.egl.X11EglOutput;
 import org.westford.nativ.libEGL.EglBindWaylandDisplayWL;
@@ -404,28 +405,36 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     @Override
-    public void visit(@Nonnull final RenderOutput renderOutput) {
+    public void visit(@Nonnull final RenderOutput renderOutput,
+                      @Nonnull WlOutput wlOutput) {
         throw new UnsupportedOperationException(String.format("Need an egl capable renderOutput. Got %s",
                                                               renderOutput));
     }
 
     @Override
-    public void visit(@Nonnull final EglOutput eglOutput) {
+    public void visit(@Nonnull final EglOutput eglOutput,
+                      @Nonnull WlOutput wlOutput) {
         render(eglOutput,
+               wlOutput,
                this.scene.getSurfacesStack());
     }
 
     @Override
-    public void visit(@Nonnull DrmEglOutput drmEglOutput) {
-        visit((EglOutput)drmEglOutput);
+    public void visit(@Nonnull DrmEglOutput drmEglOutput,
+                      @Nonnull WlOutput wlOutput) {
+        visit((EglOutput) drmEglOutput,
+              wlOutput);
     }
 
     @Override
-    public void visit(@Nonnull X11EglOutput x11EglOutput) {
-        visit((EglOutput)x11EglOutput);
+    public void visit(@Nonnull X11EglOutput x11EglOutput,
+                      @Nonnull WlOutput wlOutput) {
+        visit((EglOutput) x11EglOutput,
+              wlOutput);
     }
 
     public void render(@Nonnull final EglOutput eglOutput,
+                       final WlOutput wlOutput,
                        final Iterable<WlSurfaceResource> surfacesStack) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglOutput.getEglSurface(),
@@ -439,7 +448,8 @@ public class Gles2Renderer implements GlRenderer {
             initRenderer();
         }
 
-        setupEglOutputState(eglOutput);
+        setupEglOutputState(eglOutput,
+                            wlOutput);
 
         //TODO comment out these 2 calls when we have a shell that provides a solid background.
         this.libGLESv2.glClearColor(1.0f,
@@ -500,10 +510,12 @@ public class Gles2Renderer implements GlRenderer {
         this.init = true;
     }
 
-    private void setupEglOutputState(@Nonnull final EglOutput eglOutput) {
+    private void setupEglOutputState(@Nonnull final EglOutput eglOutput,
+                                     @Nonnull final WlOutput wlOutput) {
         //to be used state
         this.eglOutputState = eglOutput.getState()
-                                       .orElseGet(() -> initOutputRenderState(eglOutput));
+                                       .orElseGet(() -> initOutputRenderState(eglOutput,
+                                                                              wlOutput));
         //updates to state are registered with the builder
         this.newEglOutputState = this.eglOutputState.toBuilder();
     }
@@ -578,11 +590,11 @@ public class Gles2Renderer implements GlRenderer {
         return shaderProgram;
     }
 
-    private EglOutputState initOutputRenderState(final EglOutput eglOutput) {
+    private EglOutputState initOutputRenderState(final EglOutput eglOutput,
+                                                 final WlOutput wlOutput) {
 
         final EglOutputState.Builder builder = EglOutputState.builder();
-        final Output output = eglOutput.getWlOutput()
-                                       .getOutput();
+        final Output                 output  = wlOutput.getOutput();
         updateTransform(builder,
                         output);
 
@@ -592,10 +604,10 @@ public class Gles2Renderer implements GlRenderer {
         //listen for external updates
         output.getTransformSignal()
               .connect(event -> handleOutputUpdate(eglOutput,
-                                                   output));
+                                                   wlOutput));
         output.getModeSignal()
               .connect(event -> handleOutputUpdate(eglOutput,
-                                                   output));
+                                                   wlOutput));
 
         return eglOutputState;
     }
@@ -636,15 +648,15 @@ public class Gles2Renderer implements GlRenderer {
     }
 
     private void handleOutputUpdate(final EglOutput eglOutput,
-                                    final Output output) {
+                                    final WlOutput wlOutput) {
         eglOutput.getState()
                  .ifPresent(eglOutputState -> {
                      final EglOutputState.Builder stateBuilder = eglOutputState.toBuilder();
                      updateTransform(stateBuilder,
-                                     output);
+                                     wlOutput.getOutput());
                      eglOutput.updateState(stateBuilder.build());
                      //schedule new render
-                     eglOutput.render();
+                     eglOutput.render(wlOutput);
                  });
     }
 

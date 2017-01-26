@@ -20,18 +20,23 @@ package org.westford.compositor.core;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.compositor.drm.egl.DrmEglOutput;
+import org.westford.compositor.protocol.WlOutput;
 import org.westford.compositor.x11.egl.X11EglOutput;
 
 import javax.annotation.Nonnull;
 
 public interface Renderer {
-    void visit(@Nonnull RenderOutput renderOutput);
+    void visit(@Nonnull RenderOutput renderOutput,
+               @Nonnull WlOutput wlOutput);
 
-    void visit(@Nonnull EglOutput eglConnector);
+    void visit(@Nonnull EglOutput eglConnector,
+               @Nonnull WlOutput wlOutput);
 
-    void visit(@Nonnull DrmEglOutput drmEglOutput);
+    void visit(@Nonnull DrmEglOutput drmEglOutput,
+               @Nonnull WlOutput wlOutput);
 
-    void visit(@Nonnull X11EglOutput x11EglOutput);
+    void visit(@Nonnull X11EglOutput x11EglOutput,
+               @Nonnull WlOutput wlOutput);
 
     //TODO pixman sw rendering platform
     //void visit(PixmanOutput pixmanOutput);

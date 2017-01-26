@@ -21,6 +21,7 @@ import org.westford.Signal;
 import org.westford.Slot;
 import org.westford.compositor.core.events.RenderOutputDestroyed;
 import org.westford.compositor.core.events.RenderOutputNew;
+import org.westford.compositor.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.List;
 public interface RenderPlatform {
 
     @Nonnull
-    List<? extends RenderOutput> getRenderOutputs();
+    List<WlOutput> getWlOutputs();
 
     Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal();
 

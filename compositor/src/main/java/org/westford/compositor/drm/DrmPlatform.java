@@ -30,7 +30,7 @@ import java.util.List;
 //TODO drm platform, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "PrivateDrmPlatformFactory")
-public class DrmPlatform implements RenderPlatform {
+public class DrmPlatform {
 
     private final long            drmDevice;
     private final int             drmFd;
@@ -56,12 +56,10 @@ public class DrmPlatform implements RenderPlatform {
         return this.drmOutputs;
     }
 
-    @Override
     public Signal<RenderOutputNew, Slot<RenderOutputNew>> getRenderOutputNewSignal() {
         return this.renderOutputNewSignal;
     }
 
-    @Override
     public Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> getRenderOutputDestroyedSignal() {
         return this.renderOutputDestroyedSignal;
     }

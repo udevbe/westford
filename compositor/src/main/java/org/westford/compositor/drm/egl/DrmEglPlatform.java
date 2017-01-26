@@ -23,6 +23,7 @@ import org.westford.Slot;
 import org.westford.compositor.core.EglPlatform;
 import org.westford.compositor.core.events.RenderOutputDestroyed;
 import org.westford.compositor.core.events.RenderOutputNew;
+import org.westford.compositor.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -35,12 +36,12 @@ public class DrmEglPlatform implements EglPlatform {
 
     private final long gbmDevice;
 
-    private final long   eglDisplay;
-    private final long   eglContext;
-    private final String eglExtensions;
-
+    private final long           eglDisplay;
+    private final long           eglContext;
+    private final String         eglExtensions;
     @Nonnull
-    private final List<DrmEglOutput> drmEglRenderOutputs;
+    private final List<WlOutput> wlOutputs;
+
     private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
     private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
@@ -48,12 +49,12 @@ public class DrmEglPlatform implements EglPlatform {
                    final long eglDisplay,
                    final long eglContext,
                    final String eglExtensions,
-                   @Nonnull final List<DrmEglOutput> drmEglRenderOutputs) {
+                   @Nonnull final List<WlOutput> wlOutputs) {
         this.gbmDevice = gbmDevice;
         this.eglDisplay = eglDisplay;
         this.eglContext = eglContext;
         this.eglExtensions = eglExtensions;
-        this.drmEglRenderOutputs = drmEglRenderOutputs;
+        this.wlOutputs = wlOutputs;
     }
 
     @Override
@@ -68,8 +69,8 @@ public class DrmEglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public List<DrmEglOutput> getRenderOutputs() {
-        return this.drmEglRenderOutputs;
+    public List<WlOutput> getWlOutputs() {
+        return this.wlOutputs;
     }
 
     @Override

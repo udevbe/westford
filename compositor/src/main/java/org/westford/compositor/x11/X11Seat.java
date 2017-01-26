@@ -22,6 +22,7 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
+import org.westford.compositor.core.OutputGeometry;
 import org.westford.compositor.core.Point;
 import org.westford.compositor.core.PointerDevice;
 import org.westford.compositor.protocol.WlKeyboard;
@@ -207,13 +208,13 @@ public class X11Seat {
                               final int time,
                               final int x,
                               final int y) {
-
         this.x11Platform.getRenderOutputs()
                         .forEach(x11RenderOutput -> {
                             if (x11RenderOutput.getXWindow() == windowId) {
 
-                                final Point point = x11RenderOutput.toGlobal(x,
-                                                                             y);
+                                final Point point = toGlobal(x11RenderOutput,
+                                                             x,
+                                                             y);
 
                                 final WlPointer     wlPointer     = this.wlSeat.getWlPointer();
                                 final PointerDevice pointerDevice = wlPointer.getPointerDevice();
@@ -225,6 +226,16 @@ public class X11Seat {
                                 pointerDevice.frame(wlPointer.getResources());
                             }
                         });
+    }
+
+    private Point toGlobal(final X11Output x11RenderOutput,
+                           final int x11WindowX,
+                           final int x11WindowY) {
+        final int globalX = x11RenderOutput.getX() + x11WindowX;
+        final int globalY = x11RenderOutput.getY() + x11WindowY;
+
+        return Point.create(globalX,
+                            globalY);
     }
 
     @Nonnull

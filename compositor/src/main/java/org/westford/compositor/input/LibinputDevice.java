@@ -164,11 +164,10 @@ public class LibinputDevice {
 
         final long outputNamePointer = this.libinput.libinput_device_get_output_name(this.device);
         if (outputNamePointer == 0L) {
-            final Iterator<? extends RenderOutput> iterator = this.renderPlatform.getRenderOutputs()
-                                                                                 .iterator();
+            final Iterator<WlOutput> iterator = this.renderPlatform.getWlOutputs()
+                                                                   .iterator();
             if (iterator.hasNext()) {
-                return Optional.of(iterator.next()
-                                           .getWlOutput());
+                return Optional.of(iterator.next());
             }
             else {
                 return Optional.empty();
@@ -182,9 +181,8 @@ public class LibinputDevice {
         //FIXME give outputs a name, iterate them and match
 //            if (deviceOutputName.equals(renderPlatform.getOutput()
 //                                                .getName())) {
-        return Optional.of(this.renderPlatform.getRenderOutputs()
-                                              .get(0)
-                                              .getWlOutput());
+        return Optional.of(this.renderPlatform.getWlOutputs()
+                                              .get(0));
 //            }
         //     }
 

@@ -23,6 +23,7 @@ import org.westford.Slot;
 import org.westford.compositor.core.EglPlatform;
 import org.westford.compositor.core.events.RenderOutputDestroyed;
 import org.westford.compositor.core.events.RenderOutputNew;
+import org.westford.compositor.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.List;
 public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
-    private final List<X11EglOutput> x11EglRenderOutputs;
+    private final List<WlOutput> wlOutputs;
     private final Signal<RenderOutputNew, Slot<RenderOutputNew>>             renderOutputNewSignal       = new Signal<>();
     private final Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> renderOutputDestroyedSignal = new Signal<>();
 
@@ -42,11 +43,11 @@ public class X11EglPlatform implements EglPlatform {
     @Nonnull
     private final String eglExtensions;
 
-    X11EglPlatform(@Nonnull final List<X11EglOutput> x11EglRenderOutputs,
+    X11EglPlatform(@Nonnull final List<WlOutput> wlOutputs,
                    final long eglDisplay,
                    final long eglContext,
                    @Nonnull final String eglExtensions) {
-        this.x11EglRenderOutputs = x11EglRenderOutputs;
+        this.wlOutputs = wlOutputs;
         this.eglDisplay = eglDisplay;
         this.eglContext = eglContext;
         this.eglExtensions = eglExtensions;
@@ -64,8 +65,8 @@ public class X11EglPlatform implements EglPlatform {
 
     @Nonnull
     @Override
-    public List<X11EglOutput> getRenderOutputs() {
-        return this.x11EglRenderOutputs;
+    public List<WlOutput> getWlOutputs() {
+        return this.wlOutputs;
     }
 
     @Override

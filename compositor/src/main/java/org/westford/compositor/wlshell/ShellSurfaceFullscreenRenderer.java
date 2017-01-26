@@ -10,6 +10,7 @@ import org.westford.compositor.core.RenderOutput;
 import org.westford.compositor.core.Renderer;
 import org.westford.compositor.drm.egl.DrmEglOutput;
 import org.westford.compositor.gles2.Gles2Renderer;
+import org.westford.compositor.protocol.WlOutput;
 import org.westford.compositor.x11.egl.X11EglOutput;
 
 import javax.annotation.Nonnull;
@@ -27,13 +28,15 @@ public class ShellSurfaceFullscreenRenderer implements Renderer {
     }
 
     @Override
-    public void visit(@Nonnull final DrmEglOutput drmEglOutput) {
+    public void visit(@Nonnull final DrmEglOutput drmEglOutput,
+                      @Nonnull WlOutput wlOutput) {
         //TODO can potentially do direct scanout and use 'real' fullscreen
 
     }
 
     @Override
-    public void visit(@Nonnull final X11EglOutput x11EglOutput) {
+    public void visit(@Nonnull final X11EglOutput x11EglOutput,
+                      @Nonnull WlOutput wlOutput) {
         //can't do direct scanout, use 'fake' fullscreen
         //TODO pass our wlsurface?
 //        gles2Renderer.render(x11EglOutput,
@@ -41,14 +44,16 @@ public class ShellSurfaceFullscreenRenderer implements Renderer {
     }
 
     @Override
-    public void visit(@Nonnull final RenderOutput renderOutput) {
+    public void visit(@Nonnull final RenderOutput renderOutput,
+                      @Nonnull WlOutput wlOutput) {
         //can't render anything. not enough information.
         throw new UnsupportedOperationException(String.format("Need an egl capable renderOutput. Got %s",
                                                               renderOutput));
     }
 
     @Override
-    public void visit(@Nonnull final EglOutput eglConnector) {
+    public void visit(@Nonnull final EglOutput eglConnector,
+                      @Nonnull WlOutput wlOutput) {
         //TODO can't do direct scanout, use 'fake' fullscreen
         //TODO pass our wlsurface?
 //        gles2Renderer.render(x11EglOutput,

@@ -32,18 +32,10 @@ import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Optional;
 
-//TODO drm connector, remove all gbm dependencies
 @AutoFactory(allowSubclasses = true,
              className = "DrmOutputFactory")
-public class DrmOutput implements RenderOutput {
+public class DrmOutput {
 
-
-    @Nonnull
-    private final Renderer renderer;
-    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
-
-    @Nonnull
-    private final WlOutput         wlOutput;
     @Nonnull
     private final DrmModeRes       drmModeRes;
     @Nonnull
@@ -52,24 +44,14 @@ public class DrmOutput implements RenderOutput {
     @Nonnull
     private final DrmModeModeInfo  mode;
 
-    DrmOutput(@Nonnull @Provided final Renderer renderer,
-              @Nonnull final WlOutput wlOutput,
-              @Nonnull final DrmModeRes drmModeRes,
+    DrmOutput(@Nonnull final DrmModeRes drmModeRes,
               @Nonnull final DrmModeConnector drmModeConnector,
               @Nonnegative final int crtcId,
               @Nonnull final DrmModeModeInfo mode) {
-        this.renderer = renderer;
-        this.wlOutput = wlOutput;
         this.drmModeRes = drmModeRes;
         this.drmModeConnector = drmModeConnector;
         this.crtcId = crtcId;
         this.mode = mode;
-    }
-
-    @Nonnull
-    @Override
-    public WlOutput getWlOutput() {
-        return this.wlOutput;
     }
 
     @Nonnull
@@ -89,24 +71,5 @@ public class DrmOutput implements RenderOutput {
     @Nonnull
     public DrmModeModeInfo getMode() {
         return this.mode;
-    }
-
-    @Override
-    public void push(@Nonnull final Renderer renderer) {
-        this.customRenderers.push(renderer);
-    }
-
-    @Override
-    public Optional<Renderer> popRenderer() {
-        return Optional.ofNullable(this.customRenderers.pollFirst());
-    }
-
-    @Override
-    public void render() {
-        Renderer activeRender = this.customRenderers.getFirst();
-        if (activeRender == null) {
-            activeRender = this.renderer;
-        }
-        activeRender.visit(this);
     }
 }
