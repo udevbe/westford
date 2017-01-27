@@ -141,9 +141,9 @@ public class X11SeatTest {
         //given
         final X11Output x11Output = mock(X11Output.class);
         when(x11Output.getXWindow()).thenReturn(12345);
-        when(x11Output.toGlobal(80,
-                                -120)).thenReturn(Point.create(10,
-                                                               20));
+        when(x11Output.getX()).thenReturn(-70);
+        when(x11Output.getY()).thenReturn(140);
+
         when(this.x11Platform.getRenderOutputs()).thenReturn(Collections.singletonList(x11Output));
 
         final WlPointer wlPointer = mock(WlPointer.class);
@@ -156,6 +156,7 @@ public class X11SeatTest {
         final int time = 2134;
         final int x    = 80;
         final int y    = -120;
+
         //when
         this.x11Seat.deliverMotion(12345,
                                    time,

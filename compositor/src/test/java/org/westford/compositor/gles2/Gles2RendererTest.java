@@ -14,6 +14,7 @@
 package org.westford.compositor.gles2;
 
 import org.freedesktop.jaccall.Pointer;
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.ShmBuffer;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,6 +26,7 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.westford.compositor.core.Scene;
+import org.westford.nativ.libEGL.LibEGL;
 import org.westford.nativ.libGLESv2.LibGLESv2;
 
 import static org.mockito.Matchers.anyInt;
@@ -44,9 +46,14 @@ public class Gles2RendererTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private LibGLESv2     libGLESv2;
+    private LibEGL    libEGL;
     @Mock
-    private Scene         scene;
+    private LibGLESv2 libGLESv2;
+    @Mock
+    private Display   display;
+    @Mock
+    private Scene     scene;
+
     @InjectMocks
     private Gles2Renderer eglGles2RenderEngine;
 

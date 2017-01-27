@@ -18,6 +18,8 @@
 package org.westford.compositor.core;
 
 
+import org.westford.compositor.protocol.WlOutput;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -38,9 +40,13 @@ public class Compositor {
     public void requestRender() {
         //TODO optimize by only requesting a render for specific damaged render outputs
         this.renderPlatform.getWlOutputs()
-                           .forEach((wlOutput) -> wlOutput.getOutput()
-                                                          .getRenderOutput()
-                                                          .render(wlOutput));
+                           .forEach(this::render);
+    }
+
+    private void render(final WlOutput wlOutput) {
+        wlOutput.getOutput()
+                .getRenderOutput()
+                .render(wlOutput);
     }
 
     @Nonnegative

@@ -14,9 +14,9 @@
 package org.westford.compositor.core;
 
 import org.freedesktop.wayland.server.WlOutputResource;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -31,15 +31,19 @@ import static org.mockito.Mockito.when;
 public class OutputTest {
 
     @Mock
-    private FiniteRegion   finiteRegion;
+    private FiniteRegion finiteRegion;
     @Mock
-    private OutputGeometry outputGeometry;
-    @Mock
-    private OutputMode     outputMode;
-    @Mock
-    private Object         platformImplementation;
-    @InjectMocks
-    private Output         output;
+    private RenderOutput renderOutput;
+    private final String name = "dummy";
+
+    private Output output;
+
+    @Before
+    public void setUp() {
+        this.output = new Output(this.finiteRegion,
+                                 renderOutput,
+                                 name);
+    }
 
     @Test
     public void testUpdateMode() throws Exception {

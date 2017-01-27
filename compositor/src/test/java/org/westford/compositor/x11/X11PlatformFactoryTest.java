@@ -186,6 +186,7 @@ public class X11PlatformFactoryTest {
         final Output output = mock(Output.class);
         when(this.outputFactory.create(any(),
                                        any(),
+                                       any(),
                                        any())).thenReturn(output);
         final WlOutput wlOutput = mock(WlOutput.class);
         when(this.wlOutputFactory.create(output)).thenReturn(wlOutput);
@@ -232,7 +233,12 @@ public class X11PlatformFactoryTest {
                                                0L)).thenAnswer(invocation -> malloc(xcb_intern_atom_reply_t.SIZE,
                                                                                     xcb_intern_atom_reply_t.class).address);
         when(this.x11OutputFactory.create(window,
-                                          wlOutput)).thenReturn(x11Output);
+                                          0,
+                                          0,
+                                          100,
+                                          200,
+                                          "test",
+                                          screen)).thenReturn(x11Output);
         //when
         this.x11PlatformFactory.create();
         //then
