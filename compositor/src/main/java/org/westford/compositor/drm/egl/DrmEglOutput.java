@@ -24,7 +24,6 @@ import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.EventSource;
 import org.westford.compositor.core.EglOutput;
 import org.westford.compositor.core.EglOutputState;
@@ -58,7 +57,9 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private final Display display;
 
     @Nonnull
-    private final Renderer renderer;
+    private final Renderer defaultRenderer;
+    @Nonnull
+    private       Renderer activeRenderer;
     private final LinkedList<Renderer> customRenderers = new LinkedList<>();
 
     private final int       drmFd;
@@ -82,7 +83,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
                  @Nonnull @Provided final Libgbm libgbm,
                  @Nonnull @Provided final Libdrm libdrm,
                  @Nonnull @Provided final Display display,
-                 @Nonnull @Provided final Renderer renderer,
+                 @Nonnull @Provided final Renderer defaultRenderer,
                  final int drmFd,
                  final long gbmBo,
                  final long gbmSurface,
@@ -94,7 +95,8 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.display = display;
-        this.renderer = renderer;
+        this.defaultRenderer = defaultRenderer;
+        this.activeRenderer = defaultRenderer;
         this.drmFd = drmFd;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
@@ -204,14 +206,9 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     }
 
     private void doRender(@Nonnull final WlOutput wlOutput) {
-        Renderer activeRender = this.customRenderers.getFirst();
-        if (activeRender == null) {
-            activeRender = this.renderer;
-        }
-
         this.onIdleEventSource = Optional.empty();
-        activeRender.visit(this,
-                           wlOutput);
+        this.activeRenderer.visit(this,
+                                  wlOutput);
         this.display.flushClients();
         this.renderPending = false;
     }
@@ -278,10 +275,20 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     @Override
     public void push(@Nonnull final Renderer renderer) {
         this.customRenderers.push(renderer);
+        this.activeRenderer = renderer;
     }
 
     @Override
     public Optional<Renderer> popRenderer() {
-        return Optional.ofNullable(this.customRenderers.pollFirst());
+        final Optional<Renderer> customRenderer = Optional.ofNullable(this.customRenderers.pollFirst());
+
+        if (this.customRenderers.isEmpty()) {
+            this.activeRenderer = this.defaultRenderer;
+        }
+        else {
+            this.activeRenderer = this.customRenderers.peekFirst();
+        }
+
+        return customRenderer;
     }
 }
