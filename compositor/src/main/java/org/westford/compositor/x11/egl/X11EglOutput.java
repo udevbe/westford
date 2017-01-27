@@ -21,7 +21,6 @@ package org.westford.compositor.x11.egl;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.EventLoop;
 import org.westford.compositor.core.EglOutput;
 import org.westford.compositor.core.EglOutputState;
 import org.westford.compositor.core.Renderer;
@@ -37,7 +36,9 @@ import java.util.Optional;
 public class X11EglOutput implements EglOutput {
 
     @Nonnull
-    private final Renderer renderer;
+    private final Renderer defaultRenderer;
+    @Nonnull
+    private       Renderer activeRenderer;
     private final LinkedList<Renderer> customRenderers = new LinkedList<>();
 
     @Nonnull
@@ -53,13 +54,14 @@ public class X11EglOutput implements EglOutput {
     private Optional<EglOutputState> state = Optional.empty();
 
     X11EglOutput(@Nonnull @Provided final Display display,
-                 @Nonnull @Provided final Renderer renderer,
+                 @Nonnull @Provided final Renderer defaultRenderer,
                  @Nonnull final X11Output x11Output,
                  final long eglSurface,
                  final long eglContext,
                  final long eglDisplay) {
         this.display = display;
-        this.renderer = renderer;
+        this.defaultRenderer = defaultRenderer;
+        this.activeRenderer = defaultRenderer;
         this.x11Output = x11Output;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
@@ -112,9 +114,8 @@ public class X11EglOutput implements EglOutput {
     }
 
     private void doRender(@Nonnull final WlOutput wlOutput) {
-        Renderer activeRender = this.customRenderers.isEmpty() ? this.renderer : this.customRenderers.getFirst();
-        activeRender.visit(this,
-                           wlOutput);
+        this.activeRenderer.visit(this,
+                                  wlOutput);
 
         this.display.flushClients();
         this.renderScheduled = false;
@@ -124,10 +125,20 @@ public class X11EglOutput implements EglOutput {
     @Override
     public void push(@Nonnull final Renderer renderer) {
         this.customRenderers.push(renderer);
+        this.activeRenderer = renderer;
     }
 
     @Override
     public Optional<Renderer> popRenderer() {
-        return Optional.ofNullable(this.customRenderers.pollFirst());
+        final Optional<Renderer> customRenderer = Optional.ofNullable(this.customRenderers.pollFirst());
+
+        if (this.customRenderers.isEmpty()) {
+            this.activeRenderer = this.defaultRenderer;
+        }
+        else {
+            this.activeRenderer = this.customRenderers.peekFirst();
+        }
+
+        return customRenderer;
     }
 }
