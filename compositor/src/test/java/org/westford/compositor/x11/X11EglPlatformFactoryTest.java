@@ -22,18 +22,29 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.westford.Signal;
+import org.westford.Slot;
 import org.westford.compositor.core.GlRenderer;
+import org.westford.compositor.core.OutputFactory;
+import org.westford.compositor.protocol.WlOutputFactory;
 import org.westford.compositor.x11.egl.PrivateX11EglPlatformFactory;
+import org.westford.compositor.x11.egl.X11EglOutput;
 import org.westford.compositor.x11.egl.X11EglOutputFactory;
+import org.westford.compositor.x11.egl.X11EglPlatform;
 import org.westford.compositor.x11.egl.X11EglPlatformFactory;
 import org.westford.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT;
 import org.westford.nativ.libEGL.LibEGL;
 import org.westford.nativ.libEGL.PointerEglCreatePlatformWindowSurfaceEXT;
 import org.westford.nativ.libEGL.PointerEglGetPlatformDisplayEXT;
+import org.westford.nativ.libxcb.Libxcb;
+import org.westford.nativ.libxcb.xcb_generic_event_t;
+import org.westford.nativ.libxcb.xcb_screen_t;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -54,6 +65,9 @@ public class X11EglPlatformFactoryTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
+
+    @Mock
+    private Libxcb                       libxcb;
     @Mock
     private LibEGL                       libEGL;
     @Mock
@@ -61,11 +75,16 @@ public class X11EglPlatformFactoryTest {
     @Mock
     private X11Platform                  x11Platform;
     @Mock
+    private WlOutputFactory              wlOutputFactory;
+    @Mock
+    private OutputFactory                outputFactory;
+    @Mock
     private GlRenderer                   glRenderer;
     @Mock
     private X11EglOutputFactory          x11EglOutputFactory;
+
     @InjectMocks
-    private X11EglPlatformFactory        x11EglPlatformFactory;
+    private X11EglPlatformFactory x11EglPlatformFactory;
 
     @Before
     public void setUp() {
@@ -330,7 +349,8 @@ public class X11EglPlatformFactoryTest {
         final Pointer<String> eglQueryString = Pointer.nref("EGL_EXT_platform_x11");
         when(this.libEGL.eglQueryString(EGL_NO_DISPLAY,
                                         EGL_EXTENSIONS)).thenReturn(eglQueryString.address);
-        final Pointer<String> eglDisplayExtensions = Pointer.nref("mock_extension");
+        final String          mockExtension        = "mock_extension";
+        final Pointer<String> eglDisplayExtensions = Pointer.nref(mockExtension);
         when(this.libEGL.eglQueryString(eglDisplay,
                                         EGL_EXTENSIONS)).thenReturn(eglDisplayExtensions.address);
 
@@ -365,7 +385,7 @@ public class X11EglPlatformFactoryTest {
                                         EGL_VERSION)).thenReturn(eglVersion);
 
         when(this.glRenderer.eglConfig(eq(eglDisplay),
-                                       eq("mock_extension"))).thenReturn(config);
+                                       eq(mockExtension))).thenReturn(config);
 
         when(this.libEGL.eglChooseConfig(eq(eglDisplay),
                                          anyLong(),
@@ -388,8 +408,35 @@ public class X11EglPlatformFactoryTest {
                                           eq(EGL_NO_CONTEXT),
                                           anyLong())).thenReturn(context);
 
+        final X11EglOutput x11EglOutput = mock(X11EglOutput.class);
+        when(this.x11EglOutputFactory.create(any(),
+                                             eq(eglSurface),
+                                             anyLong(),
+                                             eq(eglDisplay))).thenReturn(x11EglOutput);
+
+        final X11Output x11Output = mock(X11Output.class);
+        when(x11EglOutput.getX11Output()).thenReturn(x11Output);
+        final xcb_screen_t xcb_screen_t = new xcb_screen_t();
+        xcb_screen_t.width_in_millimeters((short) 12345);
+        xcb_screen_t.width_in_pixels((short) 123);
+        xcb_screen_t.height_in_millimeters((short) 2345);
+        xcb_screen_t.height_in_pixels((short) 234);
+        when(x11Output.getScreen()).thenReturn(xcb_screen_t);
+
+        final X11EventBus x11EventBus = mock(X11EventBus.class);
+        when(this.x11Platform.getX11EventBus()).thenReturn(x11EventBus);
+        final Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>> xEventSignal = new Signal<>();
+        when(x11EventBus.getXEventSignal()).thenReturn(xEventSignal);
+
+        final X11EglPlatform x11EglPlatform = mock(X11EglPlatform.class);
+        when(this.privateX11EglPlatformFactory.create(any(),
+                                                      eq(eglDisplay),
+                                                      anyLong(),
+                                                      eq(mockExtension))).thenReturn(x11EglPlatform);
+
         //when
         this.x11EglPlatformFactory.create();
+
         //then
         verify(this.libEGL).eglQueryString(EGL_NO_DISPLAY,
                                            EGL_EXTENSIONS);

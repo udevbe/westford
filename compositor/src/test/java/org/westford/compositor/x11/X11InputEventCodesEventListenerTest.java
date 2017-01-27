@@ -14,6 +14,8 @@ import org.westford.nativ.libxcb.xcb_generic_event_t;
 import org.westford.nativ.libxcb.xcb_key_press_event_t;
 import org.westford.nativ.libxcb.xcb_motion_notify_event_t;
 
+import javax.annotation.Nonnull;
+
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyShort;
 import static org.mockito.Matchers.eq;
@@ -25,9 +27,12 @@ import static org.mockito.Mockito.when;
 public class X11InputEventCodesEventListenerTest {
 
     @Mock
-    private X11XkbFactory         x11XkbFactory;
+    private X11XkbFactory x11XkbFactory;
     @Mock
-    private X11Seat               x11Seat;
+    private X11Platform   x11Platform;
+    @Mock
+    private X11Seat       x11Seat;
+
     @InjectMocks
     private X11InputEventListener x11InputEventListener;
 

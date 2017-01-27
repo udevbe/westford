@@ -228,11 +228,11 @@ public class X11Seat {
                         });
     }
 
-    private Point toGlobal(final X11Output x11RenderOutput,
+    private Point toGlobal(final X11Output x11Output,
                            final int x11WindowX,
                            final int x11WindowY) {
-        final int globalX = x11RenderOutput.getX() + x11WindowX;
-        final int globalY = x11RenderOutput.getY() + x11WindowY;
+        final int globalX = x11Output.getX() + x11WindowX;
+        final int globalY = x11Output.getY() + x11WindowY;
 
         return Point.create(globalX,
                             globalY);
