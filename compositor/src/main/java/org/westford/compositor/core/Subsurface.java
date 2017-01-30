@@ -25,11 +25,20 @@ import org.westford.Slot;
 import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateSubsurfaceFactory")
 public class Subsurface implements Role {
+
+    @Nonnull
+    private final Set<SurfaceView>                       surfaceViews             = new HashSet<>();
+    @Nonnull
+    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewAddedSignal   = new Signal<>();
+    @Nonnull
+    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewRemovedSignal = new Signal<>();
 
     @Nonnull
     private final Scene             scene;
@@ -74,6 +83,43 @@ public class Subsurface implements Role {
             //set back cached state so surface can do eg. buffer release
             surface.setState(getCachedSurfaceState());
         }
+    }
+
+    @Nonnull
+    @Override
+    public Iterable<SurfaceView> getSurfaceViews() {
+        return this.surfaceViews;
+    }
+
+    @Override
+    public void addSurfaceView(@Nonnull final SurfaceView surfaceView) {
+        if (this.surfaceViews.add(surfaceView)) {
+            this.surfaceViewAddedSignal.emit(surfaceView);
+        }
+    }
+
+    @Override
+    public void removeSurfaceView(@Nonnull final SurfaceView surfaceView) {
+        if (this.surfaceViews.remove(surfaceView)) {
+            this.surfaceViewRemovedSignal.emit(surfaceView);
+        }
+    }
+
+    @Nonnull
+    @Override
+    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewAddedSignal() {
+        return this.surfaceViewAddedSignal;
+    }
+
+    @Nonnull
+    @Override
+    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewRemovedSignal() {
+        return this.surfaceViewRemovedSignal;
+    }
+
+    @Override
+    public void accept(@Nonnull final RoleVisitor roleVisitor) {
+        roleVisitor.visit(this);
     }
 
     public boolean isInert() {
@@ -148,6 +194,7 @@ public class Subsurface implements Role {
         final Surface parentSurface = parentWlSurface.getSurface();
         final Point   global        = parentSurface.global(getPosition());
 
+        //FIXME apply position on all views, based on parent view
         wlSurface.getSurface()
                  .setPosition(global);
     }

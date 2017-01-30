@@ -53,10 +53,11 @@ public class Surface {
     @Nonnull
     private final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = new Signal<>();
     @Nonnull
-    private final Signal<Point, Slot<Point>>                             positionSignal            = new Signal<>();
-    @Nonnull
     private final Signal<SurfaceState, Slot<SurfaceState>>               applySurfaceStateSignal   = new Signal<>();
 
+    /*
+     * Business dependencies
+     */
     @Nonnull
     private final FiniteRegionFactory finiteRegionFactory;
     @Nonnull
@@ -64,9 +65,10 @@ public class Surface {
     @Nonnull
     private final Renderer            renderer;
     @Nonnull
-    private final List<WlCallbackResource>  callbacks                    = new LinkedList<>();
+    private final List<WlCallbackResource> callbacks       = new LinkedList<>();
     @Nonnull
-    private final Set<WlKeyboardResource>   keyboardFocuses              = new HashSet<>();
+    private final Set<WlKeyboardResource>  keyboardFocuses = new HashSet<>();
+
     /*
      * pending state
      */
@@ -76,12 +78,14 @@ public class Surface {
     private       Optional<Role>            surfaceRole                  = Optional.empty();
     @Nonnull
     private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
+
     /*
      * committed state
      */
     @Nonnull
-    private       SurfaceState              state                        = SurfaceState.builder()
-                                                                                       .build();
+    private SurfaceState state = SurfaceState.builder()
+                                             .build();
+
     /*
      * committed derived states
      */
@@ -147,9 +151,8 @@ public class Surface {
         this.pendingBufferDestroyListener = Optional.of(this::detachBuffer);
         wlBufferResource.register(this.pendingBufferDestroyListener.get());
         getPendingState().buffer(Optional.of(wlBufferResource))
-                         .positionTransform(Transforms.TRANSLATE(dx,
-                                                                 dy)
-                                                      .multiply(getState().getPositionTransform()));
+                         .deltaPosition(Point.create(dx,
+                                                     dx));
         return this;
     }
 
@@ -218,11 +221,8 @@ public class Surface {
     public Surface updateTransform() {
         final SurfaceState state = getState();
 
-        //apply positioning
-        Mat4 result = state.getPositionTransform();
         //client buffer transform;
-        result = state.getBufferTransform()
-                      .multiply(result);
+        Mat4 result = state.getBufferTransform();
         //homogenized
         result = Transforms.SCALE(1f / result.getM33())
                            .multiply(result);
@@ -293,25 +293,6 @@ public class Surface {
         final Region   region   = wlRegion.getRegion();
         getPendingState().inputRegion(Optional.of(region));
         return this;
-    }
-
-    @Nonnull
-    public Surface setPosition(@Nonnull final Point global) {
-        //TODO unit test positioning
-        apply(getState().toBuilder()
-                        .positionTransform(Transforms.TRANSLATE(global.getX(),
-                                                                global.getY()))
-                        .build());
-        getPendingState().positionTransform(getState().getPositionTransform());
-
-        getPositionSignal().emit(global);
-
-        return this;
-    }
-
-    @Nonnull
-    public Signal<Point, Slot<Point>> getPositionSignal() {
-        return this.positionSignal;
     }
 
     @Nonnull

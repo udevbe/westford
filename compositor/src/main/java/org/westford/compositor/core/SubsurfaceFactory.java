@@ -53,18 +53,19 @@ public class SubsurfaceFactory {
         final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
+        //FIXME find all parent views, and for each parent view create a child view
         parentSurface.getApplySurfaceStateSignal()
                      .connect((surfaceState) -> subsurface.onParentApply());
         parentSurface.getPositionSignal()
                      .connect(event -> subsurface.applyPosition());
         parentSurface.getRole()
-                     .ifPresent(role -> {
-                         if (role instanceof Subsurface) {
-                             final Subsurface parentSubsurface = (Subsurface) role;
+                     .ifPresent(role -> role.accept(new RoleVisitor() {
+                         @Override
+                         public void visit(final Subsurface parentSubsurface) {
                              parentSubsurface.getEffectiveSyncSignal()
-                                             .connect(subsurface::updateEffectiveSync);
+                                             .connect(parentSubsurface::updateEffectiveSync);
                          }
-                     });
+                     }));
 
         this.scene.getSurfacesStack()
                   .remove(wlSurfaceResource);
