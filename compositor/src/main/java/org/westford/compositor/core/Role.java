@@ -18,6 +18,8 @@
 package org.westford.compositor.core;
 
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westford.Signal;
+import org.westford.Slot;
 
 import javax.annotation.Nonnull;
 
@@ -25,6 +27,26 @@ public interface Role {
     default void beforeCommit(@Nonnull final WlSurfaceResource wlSurfaceResource) {}
 
     default void afterDestroy(@Nonnull final WlSurfaceResource wlSurfaceResource) {}
+
+    /**
+     * Read only iterable.
+     *
+     * @return iterable of available views for this role.
+     */
+    @Nonnull
+    Iterable<SurfaceView> getSurfaceViews();
+
+    void addSurfaceView(@Nonnull SurfaceView surfaceView);
+
+    void removeSurfaceView(@Nonnull SurfaceView surfaceView);
+
+    @Nonnull
+    Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewAddedSignal();
+
+    @Nonnull
+    Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewRemovedSignal();
+
+    void accept(@Nonnull RoleVisitor roleVisitor);
 
     //TODO let role decide what should happen after a commit(?)
 }

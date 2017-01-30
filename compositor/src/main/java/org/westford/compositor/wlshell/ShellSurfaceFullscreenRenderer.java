@@ -52,7 +52,7 @@ public class ShellSurfaceFullscreenRenderer implements Renderer {
     }
 
     @Override
-    public void visit(@Nonnull final EglOutput eglConnector,
+    public void visit(@Nonnull final EglOutput eglOutput,
                       @Nonnull WlOutput wlOutput) {
         //TODO can't do direct scanout, use 'fake' fullscreen
         //TODO pass our wlsurface?

@@ -52,6 +52,13 @@ import java.util.stream.Collectors;
 public class PointerDevice implements Role {
 
     @Nonnull
+    private final Set<SurfaceView>                       surfaceViews             = new HashSet<>();
+    @Nonnull
+    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewAddedSignal   = new Signal<>();
+    @Nonnull
+    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewRemovedSignal = new Signal<>();
+
+    @Nonnull
     private final Signal<PointerMotion, Slot<PointerMotion>> motionSignal       = new Signal<>();
     @Nonnull
     private final Signal<Button, Slot<Button>>               buttonSignal       = new Signal<>();
@@ -683,5 +690,42 @@ public class PointerDevice implements Role {
     @Nonnull
     public FiniteRegion getClampRegion() {
         return this.clampRegion;
+    }
+
+    @Nonnull
+    @Override
+    public Iterable<SurfaceView> getSurfaceViews() {
+        return this.surfaceViews;
+    }
+
+    @Override
+    public void addSurfaceView(@Nonnull final SurfaceView surfaceView) {
+        if (this.surfaceViews.add(surfaceView)) {
+            this.surfaceViewAddedSignal.emit(surfaceView);
+        }
+    }
+
+    @Override
+    public void removeSurfaceView(@Nonnull final SurfaceView surfaceView) {
+        if (this.surfaceViews.remove(surfaceView)) {
+            this.surfaceViewRemovedSignal.emit(surfaceView);
+        }
+    }
+
+    @Nonnull
+    @Override
+    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewAddedSignal() {
+        return this.surfaceViewAddedSignal;
+    }
+
+    @Nonnull
+    @Override
+    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewRemovedSignal() {
+        return this.surfaceViewRemovedSignal;
+    }
+
+    @Override
+    public void accept(@Nonnull final RoleVisitor roleVisitor) {
+        roleVisitor.visit(this);
     }
 }

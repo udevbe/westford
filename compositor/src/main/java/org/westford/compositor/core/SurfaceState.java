@@ -34,7 +34,6 @@ public abstract class SurfaceState {
                                                    .damage(Optional.<Region>empty())
                                                    .buffer(Optional.<WlBufferResource>empty())
                                                    .bufferTransform(Mat4.IDENTITY)
-                                                   .positionTransform(Mat4.IDENTITY)
                                                    .scale(1);
     }
 
@@ -54,7 +53,7 @@ public abstract class SurfaceState {
     public abstract Mat4 getBufferTransform();
 
     @Nonnull
-    public abstract Mat4 getPositionTransform();
+    public abstract Point getDeltaPosition();
 
     @Nonnegative
     public abstract int getScale();
@@ -73,9 +72,9 @@ public abstract class SurfaceState {
 
         Builder bufferTransform(Mat4 bufferTransform);
 
-        Builder positionTransform(Mat4 positionTransform);
-
         Builder scale(int scale);
+
+        Builder deltaPosition(Point point);
 
         SurfaceState build();
     }
