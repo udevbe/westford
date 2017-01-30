@@ -26,17 +26,29 @@ import org.westford.compositor.x11.egl.X11EglOutput;
 import javax.annotation.Nonnull;
 
 public interface Renderer {
-    void visit(@Nonnull RenderOutput renderOutput,
-               @Nonnull WlOutput wlOutput);
+    default void visit(@Nonnull RenderOutput renderOutput,
+                       @Nonnull WlOutput wlOutput) {
+        throw new UnsupportedOperationException(String.format("RenderOutput %s not supported.",
+                                                              renderOutput));
+    }
 
-    void visit(@Nonnull EglOutput eglConnector,
-               @Nonnull WlOutput wlOutput);
+    default void visit(@Nonnull EglOutput eglOutput,
+                       @Nonnull WlOutput wlOutput) {
+        throw new UnsupportedOperationException(String.format("EglOutput %s not supported.",
+                                                              eglOutput));
+    }
 
-    void visit(@Nonnull DrmEglOutput drmEglOutput,
-               @Nonnull WlOutput wlOutput);
+    default void visit(@Nonnull DrmEglOutput drmEglOutput,
+                       @Nonnull WlOutput wlOutput) {
+        throw new UnsupportedOperationException(String.format("DrmEglOutput %s not supported.",
+                                                              drmEglOutput));
+    }
 
-    void visit(@Nonnull X11EglOutput x11EglOutput,
-               @Nonnull WlOutput wlOutput);
+    default void visit(@Nonnull X11EglOutput x11EglOutput,
+                       @Nonnull WlOutput wlOutput) {
+        throw new UnsupportedOperationException(String.format("X11EglOutput %s not supported.",
+                                                              x11EglOutput));
+    }
 
     //TODO pixman sw rendering platform
     //void visit(PixmanOutput pixmanOutput);
