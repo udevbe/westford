@@ -33,11 +33,11 @@ import java.util.Optional;
 @Singleton
 public class Scene {
     @Nonnull
-    private final LinkedList<SurfaceView>                   surfacesStack          = new LinkedList<>();
+    private final LinkedList<WlSurfaceResource>                         surfacesStack          = new LinkedList<>();
     @Nonnull
-    private final Map<SurfaceView, LinkedList<SurfaceView>> subsurfaceStack        = new HashMap<>();
+    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> subsurfaceStack        = new HashMap<>();
     @Nonnull
-    private final Map<SurfaceView, LinkedList<SurfaceView>> pendingSubsurfaceStack = new HashMap<>();
+    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> pendingSubsurfaceStack = new HashMap<>();
     @Nonnull
     private final InfiniteRegion infiniteRegion;
 
@@ -46,54 +46,58 @@ public class Scene {
         this.infiniteRegion = infiniteRegion;
     }
 
-    public void removeSubsurfaceViewStack(@Nonnull final SurfaceView parentSurfaceView) {
-        this.subsurfaceStack.remove(parentSurfaceView);
-        this.pendingSubsurfaceStack.remove(parentSurfaceView);
+    public void removeSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        this.subsurfaceStack.remove(parentSurface);
+        this.pendingSubsurfaceStack.remove(parentSurface);
     }
 
-    public void commitSubsurfaceViewStack(@Nonnull final SurfaceView parentSurfaceView) {
-        this.subsurfaceStack.put(parentSurfaceView,
-                                 getPendingSubsurfaceViewStack(parentSurfaceView));
-        this.pendingSubsurfaceStack.remove(parentSurfaceView);
+    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        this.subsurfaceStack.put(parentSurface,
+                                 getPendingSubsurfaceStack(parentSurface));
+        this.pendingSubsurfaceStack.remove(parentSurface);
     }
 
     /**
      * Get a pending z-ordered stack of subsurfaces grouped by their parent.
-     * The returned subsurface stack is only valid until {@link #commitSubsurfaceViewStack(SurfaceView)} is called.
+     * The returned subsurface stack is only valid until {@link #commitSubsurfaceStack(WlSurfaceResource)} is called.
      *
-     * @param parentSurfaceView the parent of the subsurfaces.
+     * @param parentSurface the parent of the subsurfaces.
      *
      * @return A list of subsurfaces, including the parent, in z-order.
      */
     @Nonnull
-    public LinkedList<SurfaceView> getPendingSubsurfaceViewStack(@Nonnull final SurfaceView parentSurfaceView) {
-        //TODO unit test pending subsurface stack initialization
-        return this.pendingSubsurfaceStack.computeIfAbsent(parentSurfaceView,
-                                                           key -> new LinkedList<>(getSubsurfaceViewStack(parentSurfaceView)));
+    public LinkedList<WlSurfaceResource> getPendingSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        LinkedList<WlSurfaceResource> subsurfaces = this.pendingSubsurfaceStack.get(parentSurface);
+        if (subsurfaces == null) {
+            //TODO unit test pending subsurface stack initialization
+            subsurfaces = new LinkedList<>(getSubsurfaceStack(parentSurface));
+            this.pendingSubsurfaceStack.put(parentSurface,
+                                            subsurfaces);
+        }
+        return subsurfaces;
     }
 
     @Nonnull
-    public LinkedList<SurfaceView> getSubsurfaceViewStack(@Nonnull final SurfaceView parentSurfaceView) {
-        LinkedList<SurfaceView> subsurfaces = this.subsurfaceStack.get(parentSurfaceView);
+    public LinkedList<WlSurfaceResource> getSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
+        LinkedList<WlSurfaceResource> subsurfaces = this.subsurfaceStack.get(parentSurface);
         if (subsurfaces == null) {
             //TODO unit test subsurface stack initialization
             subsurfaces = new LinkedList<>();
-            subsurfaces.add(parentSurfaceView);
-            this.subsurfaceStack.put(parentSurfaceView,
+            subsurfaces.add(parentSurface);
+            this.subsurfaceStack.put(parentSurface,
                                      subsurfaces);
         }
         return subsurfaces;
     }
 
     @Nonnull
-    public Optional<SurfaceView> pickSurfaceView(final Point global) {
-        final Iterator<SurfaceView> surfaceIterator = getSurfacesStack().descendingIterator();
-        Optional<SurfaceView>       pointerOver     = Optional.empty();
+    public Optional<WlSurfaceResource> pickSurface(final Point global) {
+        final Iterator<WlSurfaceResource> surfaceIterator = getSurfacesStack().descendingIterator();
+        Optional<WlSurfaceResource>       pointerOver     = Optional.empty();
         while (surfaceIterator.hasNext()) {
-            final SurfaceView       surfaceView       = surfaceIterator.next();
-            final WlSurfaceResource wlSurfaceResource = surfaceView.getWlSurfaceResource();
-            final WlSurfaceRequests implementation    = wlSurfaceResource.getImplementation();
-            final Surface           surface           = ((WlSurface) implementation).getSurface();
+            final WlSurfaceResource surfaceResource = surfaceIterator.next();
+            final WlSurfaceRequests implementation  = surfaceResource.getImplementation();
+            final Surface           surface         = ((WlSurface) implementation).getSurface();
 
             //surface can be invisible (null buffer), in which case we should ignore it.
             if (!surface.getState()
@@ -110,7 +114,7 @@ public class Scene {
             final Point     local = surface.local(global);
             if (region.contains(size,
                                 local)) {
-                pointerOver = Optional.of(surfaceView);
+                pointerOver = Optional.of(surfaceResource);
                 break;
             }
         }
@@ -119,7 +123,7 @@ public class Scene {
     }
 
     @Nonnull
-    public LinkedList<SurfaceView> getSurfacesStack() {
+    public LinkedList<WlSurfaceResource> getSurfacesStack() {
         return this.surfacesStack;
     }
 }
