@@ -55,25 +55,26 @@ public class SubsurfaceFactory {
 
         parentSurface.getApplySurfaceStateSignal()
                      .connect((surfaceState) -> subsurface.onParentApply());
-
+        parentSurface.getPositionSignal()
+                     .connect(event -> subsurface.applyPosition());
         parentSurface.getRole()
-                     .ifPresent(role -> role.accept(new RoleVisitor() {
-                         @Override
-                         public void visit(final Subsurface parentSubsurface) {
+                     .ifPresent(role -> {
+                         if (role instanceof Subsurface) {
+                             final Subsurface parentSubsurface = (Subsurface) role;
                              parentSubsurface.getEffectiveSyncSignal()
-                                             .connect(parentSubsurface::updateEffectiveSync);
+                                             .connect(subsurface::updateEffectiveSync);
                          }
-                     }));
+                     });
 
         this.scene.getSurfacesStack()
                   .remove(wlSurfaceResource);
-        this.scene.getSubsurfaceViewStack(parentWlSurfaceResource)
+        this.scene.getSubsurfaceStack(parentWlSurfaceResource)
                   .addLast(wlSurfaceResource);
 
         final DestroyListener destroyListener = () -> {
-            this.scene.getSubsurfaceViewStack(parentWlSurfaceResource)
+            this.scene.getSubsurfaceStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
-            this.scene.getPendingSubsurfaceViewStack(parentWlSurfaceResource)
+            this.scene.getPendingSubsurfaceStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
         };
         wlSurfaceResource.register(destroyListener);
@@ -89,14 +90,6 @@ public class SubsurfaceFactory {
              */
             subsurface.setInert(true);
         });
-
-        parentSurface.getViews()
-                     .forEach(parentSurfaceView -> {
-                         final SurfaceView view = surface.createView(wlSurfaceResource,
-                                                                     Point.ZERO);
-                         parentSurfaceView.getPositionSignal()
-                                          .connect(event -> subsurface.applyPosition(view));
-                     });
 
         return subsurface;
     }
