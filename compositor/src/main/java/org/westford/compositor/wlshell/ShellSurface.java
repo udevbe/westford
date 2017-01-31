@@ -28,7 +28,6 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceResize;
 import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.freedesktop.wayland.util.Fixed;
-import org.westford.Signal;
 import org.westford.Slot;
 import org.westford.compositor.core.Compositor;
 import org.westford.compositor.core.KeyboardDevice;
@@ -39,7 +38,6 @@ import org.westford.compositor.core.Role;
 import org.westford.compositor.core.RoleVisitor;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Surface;
-import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.Transforms;
 import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.core.calc.Vec4;
@@ -51,7 +49,6 @@ import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
@@ -59,13 +56,6 @@ import java.util.Set;
 @AutoFactory(className = "ShellSurfaceFactory",
              allowSubclasses = true)
 public class ShellSurface implements Role {
-
-    @Nonnull
-    private final Set<SurfaceView>                       surfaceViews             = new HashSet<>();
-    @Nonnull
-    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewAddedSignal   = new Signal<>();
-    @Nonnull
-    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewRemovedSignal = new Signal<>();
 
     @Nonnull
     private final Compositor  compositor;
@@ -377,38 +367,6 @@ public class ShellSurface implements Role {
                                                      .global(Point.create(x,
                                                                           y));
         surface.setPosition(surfacePosition);
-    }
-
-    @Nonnull
-    @Override
-    public Iterable<SurfaceView> getSurfaceViews() {
-        return this.surfaceViews;
-    }
-
-    @Override
-    public void addSurfaceView(@Nonnull final SurfaceView surfaceView) {
-        if (this.surfaceViews.add(surfaceView)) {
-            this.surfaceViewAddedSignal.emit(surfaceView);
-        }
-    }
-
-    @Override
-    public void removeSurfaceView(@Nonnull final SurfaceView surfaceView) {
-        if (this.surfaceViews.remove(surfaceView)) {
-            this.surfaceViewRemovedSignal.emit(surfaceView);
-        }
-    }
-
-    @Nonnull
-    @Override
-    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewAddedSignal() {
-        return this.surfaceViewAddedSignal;
-    }
-
-    @Nonnull
-    @Override
-    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewRemovedSignal() {
-        return this.surfaceViewRemovedSignal;
     }
 
     @Override

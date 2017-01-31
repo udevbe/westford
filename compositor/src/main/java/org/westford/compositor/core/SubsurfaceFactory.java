@@ -53,11 +53,9 @@ public class SubsurfaceFactory {
         final WlSurface parentWlSurface = (WlSurface) parentWlSurfaceResource.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
-        //FIXME find all parent views, and for each parent view create a child view
         parentSurface.getApplySurfaceStateSignal()
                      .connect((surfaceState) -> subsurface.onParentApply());
-        parentSurface.getPositionSignal()
-                     .connect(event -> subsurface.applyPosition());
+
         parentSurface.getRole()
                      .ifPresent(role -> role.accept(new RoleVisitor() {
                          @Override
@@ -69,13 +67,13 @@ public class SubsurfaceFactory {
 
         this.scene.getSurfacesStack()
                   .remove(wlSurfaceResource);
-        this.scene.getSubsurfaceStack(parentWlSurfaceResource)
+        this.scene.getSubsurfaceViewStack(parentWlSurfaceResource)
                   .addLast(wlSurfaceResource);
 
         final DestroyListener destroyListener = () -> {
-            this.scene.getSubsurfaceStack(parentWlSurfaceResource)
+            this.scene.getSubsurfaceViewStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
-            this.scene.getPendingSubsurfaceStack(parentWlSurfaceResource)
+            this.scene.getPendingSubsurfaceViewStack(parentWlSurfaceResource)
                       .remove(wlSurfaceResource);
         };
         wlSurfaceResource.register(destroyListener);
@@ -91,6 +89,14 @@ public class SubsurfaceFactory {
              */
             subsurface.setInert(true);
         });
+
+        parentSurface.getViews()
+                     .forEach(parentSurfaceView -> {
+                         final SurfaceView view = surface.createView(wlSurfaceResource,
+                                                                     Point.ZERO);
+                         parentSurfaceView.getPositionSignal()
+                                          .connect(event -> subsurface.applyPosition(view));
+                     });
 
         return subsurface;
     }

@@ -710,7 +710,7 @@ public class Gles2Renderer implements GlRenderer {
                  .getState()
                  .getBuffer()
                  .ifPresent(wlBufferResource -> {
-                     final LinkedList<WlSurfaceResource> subsurfaces = this.scene.getSubsurfaceStack(wlSurfaceResource);
+                     final LinkedList<WlSurfaceResource> subsurfaces = this.scene.getSubsurfaceViewStack(wlSurfaceResource);
                      draw(wlSurfaceResource,
                           wlBufferResource);
                      subsurfaces.forEach((subsurface) -> {

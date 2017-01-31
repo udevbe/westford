@@ -24,6 +24,7 @@ import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
 import org.freedesktop.wayland.server.WlKeyboardResource;
 import org.freedesktop.wayland.server.WlRegionResource;
+import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.Signal;
 import org.westford.Slot;
 import org.westford.compositor.core.calc.Mat4;
@@ -46,6 +47,12 @@ import java.util.Set;
 public class Surface {
 
     /*
+     * Views
+     */
+    @Nonnull
+    private final Set<SurfaceView> surfaceViews = new HashSet<>();
+
+    /*
      * Signals
      */
     @Nonnull
@@ -54,6 +61,8 @@ public class Surface {
     private final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = new Signal<>();
     @Nonnull
     private final Signal<SurfaceState, Slot<SurfaceState>>               applySurfaceStateSignal   = new Signal<>();
+    @Nonnull
+    private final Signal<SurfaceView, Slot<SurfaceView>>                 viewCreatedSignal         = new Signal<>();
 
     /*
      * Business dependencies
@@ -64,6 +73,8 @@ public class Surface {
     private final Compositor          compositor;
     @Nonnull
     private final Renderer            renderer;
+    @Nonnull
+    private final SurfaceViewFactory  surfaceViewFactory;
     @Nonnull
     private final List<WlCallbackResource> callbacks       = new LinkedList<>();
     @Nonnull
@@ -104,10 +115,12 @@ public class Surface {
 
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
             @Nonnull @Provided final Compositor compositor,
-            @Nonnull @Provided final Renderer renderer) {
+            @Nonnull @Provided final Renderer renderer,
+            @Nonnull @Provided final SurfaceViewFactory surfaceViewFactory) {
         this.finiteRegionFactory = finiteRegionFactory;
         this.compositor = compositor;
         this.renderer = renderer;
+        this.surfaceViewFactory = surfaceViewFactory;
     }
 
     @Nonnull
@@ -369,5 +382,28 @@ public class Surface {
 
     public void setRenderState(@Nonnull final SurfaceRenderState renderState) {
         this.renderState = Optional.of(renderState);
+    }
+
+    @Nonnull
+    public Iterable<SurfaceView> getViews() {
+        return this.surfaceViews;
+    }
+
+    public SurfaceView createView(WlSurfaceResource wlSurfaceResource,
+                                  Point position) {
+        final SurfaceView surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
+                                                                       position);
+        surfaceView.getDestroyedSignal()
+                   .connect(event -> this.surfaceViews.remove(surfaceView));
+
+        if (this.surfaceViews.add(surfaceView)) {
+            this.viewCreatedSignal.emit(surfaceView);
+        }
+        return surfaceView;
+    }
+
+    @Nonnull
+    public Signal<SurfaceView, Slot<SurfaceView>> getViewCreatedSignal() {
+        return this.viewCreatedSignal;
     }
 }

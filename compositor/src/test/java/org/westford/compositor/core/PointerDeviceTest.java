@@ -200,10 +200,10 @@ public class PointerDeviceTest {
         when(this.display.nextSerial()).thenReturn(serial);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.of(wlSurfaceResource0));
-        when(this.scene.pickSurface(eq(Point.create(x1,
-                                                    y1)))).thenReturn(Optional.of(wlSurfaceResource1));
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x1,
+                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource1));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -362,10 +362,10 @@ public class PointerDeviceTest {
                                                    serial3);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.of(wlSurfaceResource0));
-        when(this.scene.pickSurface(eq(Point.create(x1,
-                                                    y1)))).thenReturn(Optional.of(wlSurfaceResource1));
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x1,
+                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource1));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -464,10 +464,10 @@ public class PointerDeviceTest {
                                                    serial2);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.of(wlSurfaceResource0));
-        when(this.scene.pickSurface(eq(Point.create(x1,
-                                                    y1)))).thenReturn(Optional.empty());
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x1,
+                                                        y1)))).thenReturn(Optional.empty());
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -557,10 +557,10 @@ public class PointerDeviceTest {
                                                    serial2);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.empty());
-        when(this.scene.pickSurface(eq(Point.create(x1,
-                                                    y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.empty());
+        when(this.scene.pickSurfaceView(eq(Point.create(x1,
+                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -652,10 +652,10 @@ public class PointerDeviceTest {
         final int button0 = 1;
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.empty());
-        when(this.scene.pickSurface(eq(Point.create(x1,
-                                                    y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.empty());
+        when(this.scene.pickSurfaceView(eq(Point.create(x1,
+                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -761,10 +761,10 @@ public class PointerDeviceTest {
         final int button0 = 1;
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.of(wlSurfaceResource0));
-        when(this.scene.pickSurface(eq(Point.create(x1,
-                                                    y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x1,
+                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -864,8 +864,8 @@ public class PointerDeviceTest {
         final int button0 = 1;
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -947,8 +947,8 @@ public class PointerDeviceTest {
                                      0);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x,
-                                                    y)))).thenReturn(Optional.of(wlSurfaceResource1));
+        when(this.scene.pickSurfaceView(eq(Point.create(x,
+                                                        y)))).thenReturn(Optional.of(wlSurfaceResource1));
 
         // when: cursor moves outside of old surface to new surface
         this.pointerDevice.motion(wlPointerResources,
@@ -1028,10 +1028,10 @@ public class PointerDeviceTest {
         when(cursor0.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor0);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(0,
-                                                    0)))).thenReturn(Optional.empty());
-        when(this.scene.pickSurface(eq(Point.create(x,
-                                                    y)))).thenReturn(Optional.of(wlSurfaceResource));
+        when(this.scene.pickSurfaceView(eq(Point.create(0,
+                                                        0)))).thenReturn(Optional.empty());
+        when(this.scene.pickSurfaceView(eq(Point.create(x,
+                                                        y)))).thenReturn(Optional.of(wlSurfaceResource));
 
         this.pointerDevice.motion(wlPointerResources,
                                   1234,
@@ -1131,10 +1131,10 @@ public class PointerDeviceTest {
         final PointerGrabMotion pointerGrabMotion = mock(PointerGrabMotion.class);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x0,
-                                                    y0)))).thenReturn(Optional.of(wlSurfaceResource0));
-        when(this.scene.pickSurface(eq(Point.create(x1,
-                                                    y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x0,
+                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x1,
+                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -1395,8 +1395,8 @@ public class PointerDeviceTest {
         when(cursor.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(0,
-                                                    0)))).thenReturn(Optional.of(wlSurfaceResource));
+        when(this.scene.pickSurfaceView(eq(Point.create(0,
+                                                        0)))).thenReturn(Optional.of(wlSurfaceResource));
 
         this.pointerDevice.motion(wlPointerResources,
                                   1234,
@@ -1506,10 +1506,10 @@ public class PointerDeviceTest {
         when(cursor1.getWlSurfaceResource()).thenReturn(wlSurfaceResourceCursor1);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(x,
-                                                    y)))).thenReturn(Optional.of(wlSurfaceResource1));
-        when(this.scene.pickSurface(eq(Point.create(0,
-                                                    0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(x,
+                                                        y)))).thenReturn(Optional.of(wlSurfaceResource1));
+        when(this.scene.pickSurfaceView(eq(Point.create(0,
+                                                        0)))).thenReturn(Optional.of(wlSurfaceResource0));
 
         //move cursor from one client's surface to another
         //so 2 different cursor 'images' were set for 2 different clients
@@ -1594,8 +1594,8 @@ public class PointerDeviceTest {
         when(cursor.isHidden()).thenReturn(true);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(0,
-                                                    0)))).thenReturn(Optional.of(wlSurfaceResource));
+        when(this.scene.pickSurfaceView(eq(Point.create(0,
+                                                        0)))).thenReturn(Optional.of(wlSurfaceResource));
 
         this.pointerDevice.motion(wlPointerResources,
                                   1,
@@ -1682,8 +1682,8 @@ public class PointerDeviceTest {
         pointerResources.add(wlPointerResource0);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(0,
-                                                    0)))).thenReturn(Optional.of(wlSurfaceResource0));
+        when(this.scene.pickSurfaceView(eq(Point.create(0,
+                                                        0)))).thenReturn(Optional.of(wlSurfaceResource0));
 
         this.pointerDevice.motion(pointerResources,
                                   1,
@@ -1763,8 +1763,8 @@ public class PointerDeviceTest {
         pointerResources.add(wlPointerResource1);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(0,
-                                                    0)))).thenReturn(Optional.of(wlSurfaceResource1),
+        when(this.scene.pickSurfaceView(eq(Point.create(0,
+                                                        0)))).thenReturn(Optional.of(wlSurfaceResource1),
                                                                      Optional.of(wlSurfaceResource0));
 
         this.pointerDevice.motion(pointerResources,
@@ -1822,8 +1822,8 @@ public class PointerDeviceTest {
         pointerResources.add(wlPointerResource0);
 
         //mock scene
-        when(this.scene.pickSurface(eq(Point.create(0,
-                                                    0)))).thenReturn(Optional.of(wlSurfaceResource0),
+        when(this.scene.pickSurfaceView(eq(Point.create(0,
+                                                        0)))).thenReturn(Optional.of(wlSurfaceResource0),
                                                                      Optional.empty());
 
         this.pointerDevice.motion(pointerResources,

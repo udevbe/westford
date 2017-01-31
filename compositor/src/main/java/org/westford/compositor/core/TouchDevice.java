@@ -115,8 +115,8 @@ public class TouchDevice {
 
         //get a grabbed surface or try to establish new grab
         if (!getGrab().isPresent()) {
-            this.grab = this.scene.pickSurface(Point.create(x,
-                                                            y));
+            this.grab = this.scene.pickSurfaceView(Point.create(x,
+                                                                y));
             this.touchGrabSignal.emit(TouchGrab.create());
         }
 
