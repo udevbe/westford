@@ -141,7 +141,7 @@ public class WlSubsurfaceTest {
 
         final LinkedList<WlSurfaceResource> subsurfaceStack = mock(LinkedList.class);
 
-        when(this.scene.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfaceStack);
+        when(this.scene.getSubsurfaceViewStack(parentWlSurfaceResource)).thenReturn(subsurfaceStack);
         when(subsurfaceStack.contains(siblingWlSurfaceResource)).thenReturn(siblingValid);
     }
 

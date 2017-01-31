@@ -82,8 +82,8 @@ public class SubsurfaceFactoryTest {
         when(surface.getApplySurfaceStateSignal()).thenReturn(applySurfaceStateSignal);
         when(wlCompositorResource.getImplementation()).thenReturn(wlCompositor);
         when(this.scene.getSurfacesStack()).thenReturn(surfacesStack);
-        when(this.scene.getSubsurfaceStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
-        when(this.scene.getPendingSubsurfaceStack(parentWlSurfaceResource)).thenReturn(pendingSubsurfacesStack);
+        when(this.scene.getSubsurfaceViewStack(parentWlSurfaceResource)).thenReturn(subsurfacesStack);
+        when(this.scene.getPendingSubsurfaceViewStack(parentWlSurfaceResource)).thenReturn(pendingSubsurfacesStack);
 
         final Subsurface subsurface = mock(Subsurface.class);
 

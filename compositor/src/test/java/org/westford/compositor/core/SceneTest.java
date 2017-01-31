@@ -80,7 +80,7 @@ public class SceneTest {
                   .add(wlSurfaceResource1);
 
         //when
-        final Optional<WlSurfaceResource> pickSurface = this.scene.pickSurface(global);
+        final Optional<WlSurfaceResource> pickSurface = this.scene.pickSurfaceView(global);
 
         //then
         assertThat(pickSurface.get()).isEqualTo(wlSurfaceResource0);

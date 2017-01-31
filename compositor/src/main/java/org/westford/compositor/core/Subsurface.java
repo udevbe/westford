@@ -25,20 +25,11 @@ import org.westford.Slot;
 import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateSubsurfaceFactory")
 public class Subsurface implements Role {
-
-    @Nonnull
-    private final Set<SurfaceView>                       surfaceViews             = new HashSet<>();
-    @Nonnull
-    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewAddedSignal   = new Signal<>();
-    @Nonnull
-    private final Signal<SurfaceView, Slot<SurfaceView>> surfaceViewRemovedSignal = new Signal<>();
 
     @Nonnull
     private final Scene             scene;
@@ -85,38 +76,6 @@ public class Subsurface implements Role {
         }
     }
 
-    @Nonnull
-    @Override
-    public Iterable<SurfaceView> getSurfaceViews() {
-        return this.surfaceViews;
-    }
-
-    @Override
-    public void addSurfaceView(@Nonnull final SurfaceView surfaceView) {
-        if (this.surfaceViews.add(surfaceView)) {
-            this.surfaceViewAddedSignal.emit(surfaceView);
-        }
-    }
-
-    @Override
-    public void removeSurfaceView(@Nonnull final SurfaceView surfaceView) {
-        if (this.surfaceViews.remove(surfaceView)) {
-            this.surfaceViewRemovedSignal.emit(surfaceView);
-        }
-    }
-
-    @Nonnull
-    @Override
-    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewAddedSignal() {
-        return this.surfaceViewAddedSignal;
-    }
-
-    @Nonnull
-    @Override
-    public Signal<SurfaceView, Slot<SurfaceView>> getSurfaceViewRemovedSignal() {
-        return this.surfaceViewRemovedSignal;
-    }
-
     @Override
     public void accept(@Nonnull final RoleVisitor roleVisitor) {
         roleVisitor.visit(this);
@@ -152,7 +111,10 @@ public class Subsurface implements Role {
             apply(cachedSurfaceState);
         }
 
-        applyPosition();
+        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+        surface.getViews()
+               .forEach(this::applyPosition);
     }
 
     @Nonnull
@@ -183,20 +145,17 @@ public class Subsurface implements Role {
         }
     }
 
-    public void applyPosition() {
+    public void applyPosition(SurfaceView surfaceView) {
         if (isInert()) {
             return;
         }
 
         final WlSurface parentWlSurface = (WlSurface) getParentWlSurfaceResource().getImplementation();
-        final WlSurface wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
-
-        final Surface parentSurface = parentWlSurface.getSurface();
-        final Point   global        = parentSurface.global(getPosition());
+        final Surface   parentSurface   = parentWlSurface.getSurface();
+        final Point     global          = parentSurface.global(getPosition());
 
         //FIXME apply position on all views, based on parent view
-        wlSurface.getSurface()
-                 .setPosition(global);
+        surfaceView.setPosition(global);
     }
 
     @Nonnull
@@ -279,12 +238,29 @@ public class Subsurface implements Role {
 
     private void placement(final boolean below,
                            final WlSurfaceResource sibling) {
-        final LinkedList<WlSurfaceResource> pendingSubsurfaceStack = this.scene.getPendingSubsurfaceStack(getParentWlSurfaceResource());
-        final int                           siblingPosition        = pendingSubsurfaceStack.indexOf(sibling);
 
-        pendingSubsurfaceStack.remove(getWlSurfaceResource());
-        pendingSubsurfaceStack.add(below ? siblingPosition : siblingPosition + 1,
-                                   getWlSurfaceResource());
+        final WlSurfaceResource parentWlSurfaceResource = getParentWlSurfaceResource();
+        WlSurface               parentWlSurface         = (WlSurface) parentWlSurfaceResource.getImplementation();
+
+        parentWlSurface.getSurface()
+                       .getViews()
+                       .forEach(parentSurfaceView -> {
+                           final LinkedList<SurfaceView> pendingSubsurfaceStack = this.scene.getPendingSubsurfaceViewStack(parentSurfaceView);
+
+                           final int siblingPosition = pendingSubsurfaceStack.indexOf(parentSurfaceView);
+
+                           final WlSurfaceResource wlSurfaceResource = getWlSurfaceResource();
+                           WlSurface               wlSurface         = (WlSurface) wlSurfaceResource.getImplementation();
+
+                           wlSurface.getSurface()
+                                    .getViews()
+                                    .forEach(surfaceView -> {
+                                        pendingSubsurfaceStack.remove(surfaceView);
+                                        pendingSubsurfaceStack.add(below ? siblingPosition : siblingPosition + 1,
+                                                                   surfaceView);
+                                    });
+                       });
+
 
         //Note: committing the subsurface stack happens in WlCompositor.
     }
