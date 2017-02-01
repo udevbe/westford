@@ -95,7 +95,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         final WlSurfaceResource wlSurfaceResource = wlSurface.add(compositorResource.getClient(),
                                                                   compositorResource.getVersion(),
                                                                   id);
-        surface.getSubsurfaceSiblings()
+        surface.getSiblings()
                .add(wlSurfaceResource);
 
         //TODO unit test destroy handler

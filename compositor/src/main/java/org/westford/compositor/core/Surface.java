@@ -47,10 +47,12 @@ import java.util.Set;
 public class Surface {
 
     /*
-     * Views
+     * Overall state
      */
     @Nonnull
     private final Set<SurfaceView> surfaceViews = new HashSet<>();
+    @Nonnull
+    private       Optional<Role>   surfaceRole  = Optional.empty();
 
     /*
      * Signals
@@ -84,20 +86,21 @@ public class Surface {
      * pending state
      */
     @Nonnull
-    private final SurfaceState.Builder      pendingState                 = SurfaceState.builder();
+    private final SurfaceState.Builder          pendingState                 = SurfaceState.builder();
     @Nonnull
-    private       Optional<Role>            surfaceRole                  = Optional.empty();
+    private       Optional<DestroyListener>     pendingBufferDestroyListener = Optional.empty();
     @Nonnull
-    private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
+    private final LinkedList<WlSurfaceResource> pendingSiblings              = new LinkedList<>();
 
     /*
      * committed state
      */
     @Nonnull
-    private       SurfaceState                  state              = SurfaceState.builder()
-                                                                                 .build();
+    private       SurfaceState                  state    = SurfaceState.builder()
+                                                                       .build();
     @Nonnull
-    private final LinkedList<WlSurfaceResource> subsurfaceSiblings = new LinkedList<>();
+    private final LinkedList<WlSurfaceResource> siblings = new LinkedList<>();
+
 
     /*
      * committed derived states
@@ -213,7 +216,9 @@ public class Surface {
     }
 
     public void apply(final SurfaceState surfaceState) {
-        getViews().forEach(SurfaceView::commitKids);
+        this.siblings.clear();
+        this.siblings.addAll(this.pendingSiblings);
+
         this.pendingState.build();
         setState(surfaceState);
         updateTransform();
@@ -374,12 +379,6 @@ public class Surface {
                                   Point position) {
         final SurfaceView surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
                                                                        position);
-        surfaceView.getDestroyedSignal()
-                   .connect(event -> {
-                       this.surfaceViews.remove(surfaceView);
-                       surfaceView.removeParent();
-                   });
-
         if (this.surfaceViews.add(surfaceView)) {
             this.viewCreatedSignal.emit(surfaceView);
         }
@@ -392,7 +391,12 @@ public class Surface {
     }
 
     @Nonnull
-    public LinkedList<WlSurfaceResource> getSubsurfaceSiblings() {
-        return subsurfaceSiblings;
+    public LinkedList<WlSurfaceResource> getSiblings() {
+        return this.siblings;
+    }
+
+    @Nonnull
+    public LinkedList<WlSurfaceResource> getPendingSiblings() {
+        return this.pendingSiblings;
     }
 }
