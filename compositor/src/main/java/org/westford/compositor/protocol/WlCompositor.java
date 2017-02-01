@@ -95,22 +95,17 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         final WlSurfaceResource wlSurfaceResource = wlSurface.add(compositorResource.getClient(),
                                                                   compositorResource.getVersion(),
                                                                   id);
+        surface.getSubsurfaceSiblings()
+               .add(wlSurfaceResource);
+
         //TODO unit test destroy handler
         wlSurfaceResource.register(() -> {
             this.scene.getSurfacesStack()
-                      .remove(wlSurfaceResource);
-            this.scene.removeSubsurfaceViewStack(wlSurfaceResource);
+                      .removeAll(surface.getViews());
             surface.markDestroyed();
             this.renderer.onDestroy(wlSurfaceResource);
             this.compositor.requestRender();
         });
-
-        this.scene.getSurfacesStack()
-                  .addLast(wlSurfaceResource);
-
-        //TODO unit test commit handler
-        surface.getApplySurfaceStateSignal()
-               .connect(event -> this.scene.commitSubsurfaceViewStack(wlSurfaceResource));
     }
 
     @Override

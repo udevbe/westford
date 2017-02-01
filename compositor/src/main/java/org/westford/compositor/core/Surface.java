@@ -28,7 +28,6 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.Signal;
 import org.westford.Slot;
 import org.westford.compositor.core.calc.Mat4;
-import org.westford.compositor.core.calc.Vec4;
 import org.westford.compositor.core.events.KeyboardFocusGained;
 import org.westford.compositor.core.events.KeyboardFocusLost;
 import org.westford.compositor.protocol.WlRegion;
@@ -36,6 +35,7 @@ import org.westford.compositor.protocol.WlRegion;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,8 +94,10 @@ public class Surface {
      * committed state
      */
     @Nonnull
-    private SurfaceState state = SurfaceState.builder()
-                                             .build();
+    private       SurfaceState                  state              = SurfaceState.builder()
+                                                                                 .build();
+    @Nonnull
+    private final LinkedList<WlSurfaceResource> subsurfaceSiblings = new LinkedList<>();
 
     /*
      * committed derived states
@@ -165,7 +167,7 @@ public class Surface {
         wlBufferResource.register(this.pendingBufferDestroyListener.get());
         getPendingState().buffer(Optional.of(wlBufferResource))
                          .deltaPosition(Point.create(dx,
-                                                     dx));
+                                                     dy));
         return this;
     }
 
@@ -203,7 +205,7 @@ public class Surface {
         }
 
         //flush states
-        apply(this.pendingState.build());
+        apply(this.state);
 
         //reset pending buffer state
         detachBuffer();
@@ -211,6 +213,8 @@ public class Surface {
     }
 
     public void apply(final SurfaceState surfaceState) {
+        getViews().forEach(SurfaceView::commitKids);
+        this.pendingState.build();
         setState(surfaceState);
         updateTransform();
         updateSize();
@@ -233,14 +237,8 @@ public class Surface {
     @Nonnull
     public Surface updateTransform() {
         final SurfaceState state = getState();
-
-        //client buffer transform;
-        Mat4 result = state.getBufferTransform();
-        //homogenized
-        result = Transforms.SCALE(1f / result.getM33())
-                           .multiply(result);
-
-        this.transform = result;
+        this.transform = Transforms.SCALE(state.getScale())
+                                   .multiply(state.getBufferTransform());
         this.inverseTransform = getTransform().invert();
         return this;
     }
@@ -325,25 +323,8 @@ public class Surface {
     }
 
     @Nonnull
-    public Point local(@Nonnull final Point global) {
-        final Vec4 localPoint = this.inverseTransform.multiply(Transforms.SCALE(getState().getScale())
-                                                                         .invert())
-                                                     .multiply(global.toVec4());
-        return Point.create((int) localPoint.getX(),
-                            (int) localPoint.getY());
-    }
-
-    @Nonnull
     public Mat4 getInverseTransform() {
         return this.inverseTransform;
-    }
-
-    @Nonnull
-    public Point global(@Nonnull final Point surfaceLocal) {
-        final Vec4 globalPoint = this.transform.multiply(Transforms.SCALE(getState().getScale()))
-                                               .multiply(surfaceLocal.toVec4());
-        return Point.create((int) globalPoint.getX(),
-                            (int) globalPoint.getY());
     }
 
     @Nonnull
@@ -385,7 +366,7 @@ public class Surface {
     }
 
     @Nonnull
-    public Iterable<SurfaceView> getViews() {
+    public Collection<SurfaceView> getViews() {
         return this.surfaceViews;
     }
 
@@ -394,7 +375,10 @@ public class Surface {
         final SurfaceView surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
                                                                        position);
         surfaceView.getDestroyedSignal()
-                   .connect(event -> this.surfaceViews.remove(surfaceView));
+                   .connect(event -> {
+                       this.surfaceViews.remove(surfaceView);
+                       surfaceView.removeParent();
+                   });
 
         if (this.surfaceViews.add(surfaceView)) {
             this.viewCreatedSignal.emit(surfaceView);
@@ -405,5 +389,10 @@ public class Surface {
     @Nonnull
     public Signal<SurfaceView, Slot<SurfaceView>> getViewCreatedSignal() {
         return this.viewCreatedSignal;
+    }
+
+    @Nonnull
+    public LinkedList<WlSurfaceResource> getSubsurfaceSiblings() {
+        return subsurfaceSiblings;
     }
 }

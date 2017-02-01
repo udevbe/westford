@@ -155,6 +155,6 @@ public class SubsurfaceFactoryTest {
         parentDestroyListener.handle();
 
         //then: the subsurface must become inert
-        verify(subsurface).setInert(true);
+        verify(subsurface).setInert();
     }
 }

@@ -55,8 +55,15 @@ public class SubsurfaceFactory {
 
         parentSurface.getApplySurfaceStateSignal()
                      .connect((surfaceState) -> subsurface.onParentApply());
-        parentSurface.getPositionSignal()
-                     .connect(event -> subsurface.applyPosition());
+
+        parentSurface.getViews()
+                     .forEach(parentSurfaceView -> {
+                         final SurfaceView surfaceView = surface.createView(wlSurfaceResource,
+                                                                            Point.ZERO);
+                         parentSurfaceView.getPositionSignal()
+                                          .connect(event -> subsurface.applyPosition(surfaceView));
+                     });
+
         parentSurface.getRole()
                      .ifPresent(role -> {
                          if (role instanceof Subsurface) {
@@ -88,7 +95,7 @@ public class SubsurfaceFactory {
             /*
              * Docs says a subsurface with a destroyed parent must become inert.
              */
-            subsurface.setInert(true);
+            subsurface.setInert();
         });
 
         return subsurface;

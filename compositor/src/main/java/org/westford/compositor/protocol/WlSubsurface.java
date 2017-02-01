@@ -109,7 +109,7 @@ public class WlSubsurface implements WlSubsurfaceRequests,
             return true;
         }
 
-        return this.scene.getSubsurfaceViewStack(subsurface.getParentWlSurfaceResource())
+        return this.scene.getSubsurfaceStack(subsurface.getParentWlSurfaceResource())
                          .contains(sibling);
     }
 

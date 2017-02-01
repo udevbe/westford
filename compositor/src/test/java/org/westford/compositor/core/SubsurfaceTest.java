@@ -87,7 +87,7 @@ public class SubsurfaceTest {
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
 
-        this.subsurface.setInert(true);
+        this.subsurface.setInert();
         final Point position = Point.create(123,
                                             456);
 
@@ -132,7 +132,7 @@ public class SubsurfaceTest {
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
 
-        this.subsurface.setInert(true);
+        this.subsurface.setInert();
 
         //when: the subsurface position is applied
         this.subsurface.applyPosition();
@@ -205,7 +205,7 @@ public class SubsurfaceTest {
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
 
-        this.subsurface.setInert(true);
+        this.subsurface.setInert();
 
         //when: the before commit hook is called
         this.subsurface.beforeCommit(this.wlSurfaceResource);
@@ -271,7 +271,7 @@ public class SubsurfaceTest {
         when(this.wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
 
-        this.subsurface.setInert(true);
+        this.subsurface.setInert();
 
         //when: the commit hook is called
         final SurfaceState newSurfaceState = mock(SurfaceState.class);
