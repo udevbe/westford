@@ -1,6 +1,7 @@
 package org.westford.compositor.core;
 
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
@@ -18,11 +19,21 @@ public class SurfaceViewFactory {
 
     SurfaceView create(@Nonnull WlSurfaceResource wlSurfaceResource,
                        @Nonnull Point globalPosition) {
+
+        final WlSurface wlSurface        = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface          = wlSurface.getSurface();
+        final Mat4      surfaceTransform = surface.getTransform();
+
+        final Mat4 positionTransform = Transforms.TRANSLATE(globalPosition.getX(),
+                                                            globalPosition.getY());
+
+        Mat4 transform        = positionTransform.multiply(surfaceTransform);
+        Mat4 inverseTransform = transform.invert();
+
         final SurfaceView surfaceView = this.privateSurfaceViewFactory.create(wlSurfaceResource,
-                                                                              Transforms.TRANSLATE(globalPosition.getX(),
-                                                                                                   globalPosition.getY()));
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
+                                                                              positionTransform,
+                                                                              transform,
+                                                                              inverseTransform);
 
         surface.getApplySurfaceStateSignal()
                .connect(surfaceView::onApply);
