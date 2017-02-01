@@ -23,11 +23,7 @@ public class SurfaceView {
     private final Signal<Point, Slot<Point>>             positionSignal  = new Signal<>();
 
     @Nonnull
-    private       Optional<SurfaceView>   parent      = Optional.empty();
-    @Nonnull
-    private final LinkedList<SurfaceView> pendingKids = new LinkedList<>();
-    @Nonnull
-    private       LinkedList<SurfaceView> kids        = new LinkedList<>();
+    private Optional<SurfaceView> parent = Optional.empty();
 
     @Nonnull
     private final Scene             scene;
@@ -101,26 +97,13 @@ public class SurfaceView {
     }
 
     public void destroy() {
+        final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+        surface.getViews()
+               .remove(this);
+
         this.destroyedSignal.emit(this);
-    }
-
-    /**
-     * The children of this surface view. To update this list, use {@link #setParent(SurfaceView)} and {@link #removeParent()} on the child.
-     *
-     * @return
-     */
-    @Nonnull
-    public LinkedList<SurfaceView> getKids() {
-        return this.kids;
-    }
-
-    @Nonnull
-    public LinkedList<SurfaceView> getPendingKids() {
-        return this.pendingKids;
-    }
-
-    public void commitKids() {
-        this.kids = new LinkedList<>(this.pendingKids);
+        removeParent();
     }
 
     @Nonnull
@@ -137,13 +120,7 @@ public class SurfaceView {
     }
 
     public void removeParent() {
-        this.parent.ifPresent(parentSurfaceView -> {
-            parentSurfaceView.getKids()
-                             .remove(this);
-            parentSurfaceView.getPendingKids()
-                             .remove(this);
-            this.parent = Optional.empty();
-        });
+        this.parent.ifPresent(parentSurfaceView -> this.parent = Optional.empty());
     }
 
     @Nonnull

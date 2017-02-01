@@ -30,10 +30,8 @@ import java.util.Optional;
 
 @Singleton
 public class Scene {
-
     @Nonnull
-    private LinkedList<SurfaceView> surfacesStack = new LinkedList<>();
-
+    private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
     @Nonnull
     private final InfiniteRegion infiniteRegion;
 
@@ -43,17 +41,16 @@ public class Scene {
     }
 
     @Nonnull
-    public Optional<SurfaceView> pickSurface(final Point global) {
-        final Iterator<SurfaceView> surfaceIterator = getSurfacesStack().descendingIterator();
-        Optional<SurfaceView>       pointerOver     = Optional.empty();
-        while (surfaceIterator.hasNext()) {
-            final SurfaceView surfaceView = surfaceIterator.next();
+    public Optional<WlSurfaceResource> pickSurface(final Point global) {
 
-            final WlSurfaceResource surfaceResource = surfaceView.getWlSurfaceResource();
+        final Iterator<WlSurfaceResource> surfaceIterator = getSurfacesStack().descendingIterator();
+        Optional<WlSurfaceResource>       pointerOver     = Optional.empty();
+        while (surfaceIterator.hasNext()) {
+
+            final WlSurfaceResource surfaceResource = surfaceIterator.next();
             final WlSurfaceRequests implementation  = surfaceResource.getImplementation();
             final Surface           surface         = ((WlSurface) implementation).getSurface();
 
-            //TODO add visibility toggle for surface views for eg, minimizing
             //surface can be invisible (null buffer), in which case we should ignore it.
             if (!surface.getState()
                         .getBuffer()
@@ -65,12 +62,15 @@ public class Scene {
                                                         .getInputRegion();
             final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
 
-            final Rectangle size  = surface.getSize();
-            final Point     local = surfaceView.local(global);
-            if (region.contains(size,
-                                local)) {
-                pointerOver = Optional.of(surfaceView);
-                break;
+            final Rectangle size = surface.getSize();
+
+            for (SurfaceView surfaceView : surface.getViews()) {
+                final Point local = surfaceView.local(global);
+                if (region.contains(size,
+                                    local)) {
+                    pointerOver = Optional.of(surfaceResource);
+                    break;
+                }
             }
         }
 
@@ -78,7 +78,50 @@ public class Scene {
     }
 
     @Nonnull
-    public LinkedList<SurfaceView> getSurfacesStack() {
+    public LinkedList<WlSurfaceResource> getSurfacesStack() {
         return this.surfacesStack;
+    }
+
+
+    private LinkedList<SurfaceView> createSurfaceViewStack() {
+        final LinkedList<SurfaceView> surfaceViews = new LinkedList<>();
+
+        this.surfacesStack.forEach(wlSurfaceResource -> {
+            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final Surface   surface   = wlSurface.getSurface();
+
+            //siblings includes parent
+
+            for (WlSurfaceResource siblingWlSurfaceResource : surface.getSiblings()) {
+
+                final WlSurface siblingWlSurface = (WlSurface) siblingWlSurfaceResource.getImplementation();
+                final Surface   siblingSurface   = siblingWlSurface.getSurface();
+
+                for (SurfaceView siblingSurfaceView : siblingSurface.getViews()) {
+
+                    //filter views based on this common parent
+                    SurfaceView parentSurfaceView;
+                    if (siblingSurface.equals(surface)) {
+                        parentSurfaceView = siblingSurfaceView;
+                    }
+                    else if (siblingSurfaceView.getParent()
+                                               .isPresent()) {
+                        parentSurfaceView = siblingSurfaceView.getParent()
+                                                              .get();
+                    }
+                    else {
+                        //TODO what do we do here?
+                        return;
+                    }
+
+                    surfaceViews.add(siblingSurfaceView);
+
+                    //TODO iterate remaining
+                    parentSurfaceView.getWlSurfaceResource();
+                }
+            }
+        });
+
+        return surfaceViews;
     }
 }
