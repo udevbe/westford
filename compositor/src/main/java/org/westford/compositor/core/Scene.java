@@ -24,20 +24,16 @@ import org.westford.compositor.protocol.WlSurface;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Optional;
 
 @Singleton
 public class Scene {
+
     @Nonnull
-    private final LinkedList<WlSurfaceResource>                         surfacesStack          = new LinkedList<>();
-    @Nonnull
-    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> subsurfaceStack        = new HashMap<>();
-    @Nonnull
-    private final Map<WlSurfaceResource, LinkedList<WlSurfaceResource>> pendingSubsurfaceStack = new HashMap<>();
+    private LinkedList<SurfaceView> surfacesStack = new LinkedList<>();
+
     @Nonnull
     private final InfiniteRegion infiniteRegion;
 
@@ -46,59 +42,18 @@ public class Scene {
         this.infiniteRegion = infiniteRegion;
     }
 
-    public void removeSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        this.subsurfaceStack.remove(parentSurface);
-        this.pendingSubsurfaceStack.remove(parentSurface);
-    }
-
-    public void commitSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        this.subsurfaceStack.put(parentSurface,
-                                 getPendingSubsurfaceStack(parentSurface));
-        this.pendingSubsurfaceStack.remove(parentSurface);
-    }
-
-    /**
-     * Get a pending z-ordered stack of subsurfaces grouped by their parent.
-     * The returned subsurface stack is only valid until {@link #commitSubsurfaceStack(WlSurfaceResource)} is called.
-     *
-     * @param parentSurface the parent of the subsurfaces.
-     *
-     * @return A list of subsurfaces, including the parent, in z-order.
-     */
     @Nonnull
-    public LinkedList<WlSurfaceResource> getPendingSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        LinkedList<WlSurfaceResource> subsurfaces = this.pendingSubsurfaceStack.get(parentSurface);
-        if (subsurfaces == null) {
-            //TODO unit test pending subsurface stack initialization
-            subsurfaces = new LinkedList<>(getSubsurfaceStack(parentSurface));
-            this.pendingSubsurfaceStack.put(parentSurface,
-                                            subsurfaces);
-        }
-        return subsurfaces;
-    }
-
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getSubsurfaceStack(@Nonnull final WlSurfaceResource parentSurface) {
-        LinkedList<WlSurfaceResource> subsurfaces = this.subsurfaceStack.get(parentSurface);
-        if (subsurfaces == null) {
-            //TODO unit test subsurface stack initialization
-            subsurfaces = new LinkedList<>();
-            subsurfaces.add(parentSurface);
-            this.subsurfaceStack.put(parentSurface,
-                                     subsurfaces);
-        }
-        return subsurfaces;
-    }
-
-    @Nonnull
-    public Optional<WlSurfaceResource> pickSurface(final Point global) {
-        final Iterator<WlSurfaceResource> surfaceIterator = getSurfacesStack().descendingIterator();
-        Optional<WlSurfaceResource>       pointerOver     = Optional.empty();
+    public Optional<SurfaceView> pickSurface(final Point global) {
+        final Iterator<SurfaceView> surfaceIterator = getSurfacesStack().descendingIterator();
+        Optional<SurfaceView>       pointerOver     = Optional.empty();
         while (surfaceIterator.hasNext()) {
-            final WlSurfaceResource surfaceResource = surfaceIterator.next();
+            final SurfaceView surfaceView = surfaceIterator.next();
+
+            final WlSurfaceResource surfaceResource = surfaceView.getWlSurfaceResource();
             final WlSurfaceRequests implementation  = surfaceResource.getImplementation();
             final Surface           surface         = ((WlSurface) implementation).getSurface();
 
+            //TODO add visibility toggle for surface views for eg, minimizing
             //surface can be invisible (null buffer), in which case we should ignore it.
             if (!surface.getState()
                         .getBuffer()
@@ -111,10 +66,10 @@ public class Scene {
             final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
 
             final Rectangle size  = surface.getSize();
-            final Point     local = surface.local(global);
+            final Point     local = surfaceView.local(global);
             if (region.contains(size,
                                 local)) {
-                pointerOver = Optional.of(surfaceResource);
+                pointerOver = Optional.of(surfaceView);
                 break;
             }
         }
@@ -123,7 +78,7 @@ public class Scene {
     }
 
     @Nonnull
-    public LinkedList<WlSurfaceResource> getSurfacesStack() {
+    public LinkedList<SurfaceView> getSurfacesStack() {
         return this.surfacesStack;
     }
 }

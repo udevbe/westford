@@ -1,6 +1,7 @@
 package org.westford.compositor.core;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.Signal;
 import org.westford.Slot;
@@ -22,10 +23,14 @@ public class SurfaceView {
     private final Signal<Point, Slot<Point>>             positionSignal  = new Signal<>();
 
     @Nonnull
-    private       Optional<SurfaceView>   parent = Optional.empty();
+    private       Optional<SurfaceView>   parent      = Optional.empty();
     @Nonnull
-    private final LinkedList<SurfaceView> kids   = new LinkedList<>();
+    private final LinkedList<SurfaceView> pendingKids = new LinkedList<>();
+    @Nonnull
+    private       LinkedList<SurfaceView> kids        = new LinkedList<>();
 
+    @Nonnull
+    private final Scene             scene;
     @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
 
@@ -37,10 +42,12 @@ public class SurfaceView {
     @Nonnull
     private Mat4 inverseTransform;
 
-    SurfaceView(@Nonnull WlSurfaceResource wlSurfaceResource,
+    SurfaceView(@Provided @Nonnull Scene scene,
+                @Nonnull WlSurfaceResource wlSurfaceResource,
                 @Nonnull Mat4 positionTransform,
                 @Nonnull Mat4 transform,
                 @Nonnull Mat4 inverseTransform) {
+        this.scene = scene;
         this.wlSurfaceResource = wlSurfaceResource;
         this.positionTransform = positionTransform;
         this.transform = transform;
@@ -108,18 +115,32 @@ public class SurfaceView {
     }
 
     @Nonnull
+    public LinkedList<SurfaceView> getPendingKids() {
+        return this.pendingKids;
+    }
+
+    public void commitKids() {
+        this.kids = new LinkedList<>(this.pendingKids);
+    }
+
+    @Nonnull
     public Optional<SurfaceView> getParent() {
         return this.parent;
     }
 
     public void setParent(@Nonnull final SurfaceView parent) {
         removeParent();
+
+        this.scene.getSurfacesStack()
+                  .remove(this);
         this.parent = Optional.of(parent);
     }
 
     public void removeParent() {
         this.parent.ifPresent(parentSurfaceView -> {
             parentSurfaceView.getKids()
+                             .remove(this);
+            parentSurfaceView.getPendingKids()
                              .remove(this);
             this.parent = Optional.empty();
         });
