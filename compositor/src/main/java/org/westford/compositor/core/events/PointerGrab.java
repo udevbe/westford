@@ -18,15 +18,15 @@
 package org.westford.compositor.core.events;
 
 import com.google.auto.value.AutoValue;
-import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westford.compositor.core.SurfaceView;
 
 import java.util.Optional;
 
 @AutoValue
 public abstract class PointerGrab {
-    public static PointerGrab create(final Optional<WlSurfaceResource> wlSurfaceResource) {
-        return new AutoValue_PointerGrab(wlSurfaceResource);
+    public static PointerGrab create(final Optional<SurfaceView> surfaceView) {
+        return new AutoValue_PointerGrab(surfaceView);
     }
 
-    public abstract Optional<WlSurfaceResource> getWlSurfaceResource();
+    public abstract Optional<SurfaceView> getWlSurfaceResource();
 }

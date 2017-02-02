@@ -40,6 +40,7 @@ import org.westford.compositor.protocol.WlSurface;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -79,17 +80,17 @@ public class PointerDevice implements Role {
     @Nonnull
     private final FiniteRegion  clampRegion;
     @Nonnull
-    private Point                       position             = Point.ZERO;
+    private Point                     position             = Point.ZERO;
     @Nonnull
-    private Optional<Cursor>            activeCursor         = Optional.empty();
+    private Optional<Cursor>          activeCursor         = Optional.empty();
     @Nonnull
-    private Optional<DestroyListener>   grabDestroyListener  = Optional.empty();
+    private Optional<DestroyListener> grabDestroyListener  = Optional.empty();
     @Nonnull
-    private Optional<WlSurfaceResource> grab                 = Optional.empty();
+    private Optional<SurfaceView>     grab                 = Optional.empty();
     @Nonnull
-    private Optional<WlSurfaceResource> focus                = Optional.empty();
+    private Optional<SurfaceView>     focus                = Optional.empty();
     @Nonnull
-    private Optional<DestroyListener>   focusDestroyListener = Optional.empty();
+    private Optional<DestroyListener> focusDestroyListener = Optional.empty();
     private int buttonPressSerial;
     private int buttonReleaseSerial;
     private int enterSerial;
@@ -118,8 +119,9 @@ public class PointerDevice implements Role {
     //TODO unit test
     public void axisSource(@Nonnull final Set<WlPointerResource> wlPointerResources,
                            final WlPointerAxisSource wlPointerAxisSource) {
-        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
-                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
+        getFocus().ifPresent(surfaceView -> filter(wlPointerResources,
+                                                   surfaceView.getWlSurfaceResource()
+                                                              .getClient()).forEach(wlPointerResource -> {
             if (wlPointerResource.getVersion() > 4) {
                 wlPointerResource.axisSource(wlPointerAxisSource.value);
             }
@@ -128,7 +130,7 @@ public class PointerDevice implements Role {
     }
 
     @Nonnull
-    public Optional<WlSurfaceResource> getFocus() {
+    public Optional<SurfaceView> getFocus() {
         return this.focus;
     }
 
@@ -143,8 +145,9 @@ public class PointerDevice implements Role {
 
     //TODO unit test
     public void frame(@Nonnull final Set<WlPointerResource> wlPointerResources) {
-        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
-                                                         wlSurfaceResource.getClient()).forEach((wlPointerResource) -> {
+        getFocus().ifPresent(surfaceView -> filter(wlPointerResources,
+                                                   surfaceView.getWlSurfaceResource()
+                                                              .getClient()).forEach((wlPointerResource) -> {
             if (wlPointerResource.getVersion() > 4) {
                 wlPointerResource.frame();
             }
@@ -156,19 +159,20 @@ public class PointerDevice implements Role {
     public void axisStop(@Nonnull final Set<WlPointerResource> wlPointerResources,
                          final WlPointerAxis wlPointerAxis,
                          final int time) {
-        getFocus().ifPresent(wlSurfaceResource -> reportAxisStop(wlPointerResources,
-                                                                 wlSurfaceResource,
-                                                                 wlPointerAxis,
-                                                                 time));
+        getFocus().ifPresent(surfaceView -> reportAxisStop(wlPointerResources,
+                                                           surfaceView,
+                                                           wlPointerAxis,
+                                                           time));
         //TODO emit event?
     }
 
     private void reportAxisStop(final Set<WlPointerResource> surfaceResource,
-                                final WlSurfaceResource wlSurfaceResource,
+                                final SurfaceView surfaceView,
                                 final WlPointerAxis wlPointerAxis,
                                 final int time) {
         filter(surfaceResource,
-               wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
+               surfaceView.getWlSurfaceResource()
+                          .getClient()).forEach(wlPointerResource -> {
             if (wlPointerResource.getVersion() > 4) {
                 wlPointerResource.axisStop(time,
                                            wlPointerAxis.value);
@@ -182,8 +186,9 @@ public class PointerDevice implements Role {
                              final int time,
                              final int discrete,
                              final float value) {
-        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
-                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
+        getFocus().ifPresent(surfaceView -> filter(wlPointerResources,
+                                                   surfaceView.getWlSurfaceResource()
+                                                              .getClient()).forEach(wlPointerResource -> {
 
             if (wlPointerResource.getVersion() > 4) {
                 wlPointerResource.axisDiscrete(wlPointerAxis.value,
@@ -218,11 +223,12 @@ public class PointerDevice implements Role {
                                final int time,
                                final WlPointerAxis wlPointerAxis,
                                final float value) {
-        getFocus().ifPresent(wlSurfaceResource -> filter(wlPointerResources,
-                                                         wlSurfaceResource.getClient()).forEach(wlPointerResource -> axisOrStop(wlPointerResource,
-                                                                                                                                time,
-                                                                                                                                wlPointerAxis,
-                                                                                                                                value)));
+        getFocus().ifPresent(surfaceView -> filter(wlPointerResources,
+                                                   surfaceView.getWlSurfaceResource()
+                                                              .getClient()).forEach(wlPointerResource -> axisOrStop(wlPointerResource,
+                                                                                                                    time,
+                                                                                                                    wlPointerAxis,
+                                                                                                                    value)));
         //TODO emit event?
     }
 
@@ -242,18 +248,18 @@ public class PointerDevice implements Role {
               Point.create(x,
                            y));
 
-        getFocus().ifPresent(wlSurfaceResource ->
+        getFocus().ifPresent(surfaceView ->
                                      reportMotion(wlPointerResources,
                                                   time,
-                                                  wlSurfaceResource));
+                                                  surfaceView));
 
         this.motionSignal.emit(PointerMotion.create(time,
                                                     getPosition()));
     }
 
     public void calculateFocus(@Nonnull final Set<WlPointerResource> wlPointerResources) {
-        final Optional<WlSurfaceResource> oldFocus = getFocus();
-        final Optional<WlSurfaceResource> newFocus = this.scene.pickSurfaceView(getPosition());
+        final Optional<SurfaceView> oldFocus = getFocus();
+        final Optional<SurfaceView> newFocus = this.scene.pickSurfaceView(getPosition());
 
         if (!oldFocus.equals(newFocus)) {
             updateFocus(wlPointerResources,
@@ -264,15 +270,14 @@ public class PointerDevice implements Role {
 
     private void reportMotion(final Set<WlPointerResource> wlPointerResources,
                               final int time,
-                              final WlSurfaceResource wlSurfaceResource) {
+                              final SurfaceView surfaceView) {
 
         final Point pointerPosition = getPosition();
 
         filter(wlPointerResources,
-               wlSurfaceResource.getClient()).forEach(wlPointerResource -> {
-            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Point relativePoint = wlSurface.getSurface()
-                                                 .local(pointerPosition);
+               surfaceView.getWlSurfaceResource()
+                          .getClient()).forEach(wlPointerResource -> {
+            final Point relativePoint = surfaceView.local(pointerPosition);
             wlPointerResource.motion(time,
                                      Fixed.create(relativePoint.getX()),
                                      Fixed.create(relativePoint.getY()));
@@ -282,19 +287,17 @@ public class PointerDevice implements Role {
     }
 
     private void reportLeave(final Set<WlPointerResource> wlPointerResources,
-                             final WlSurfaceResource wlSurfaceResource) {
+                             final SurfaceView surfaceView) {
         wlPointerResources.forEach(wlPointerResource -> wlPointerResource.leave(nextLeaveSerial(),
-                                                                                wlSurfaceResource));
+                                                                                surfaceView.getWlSurfaceResource()));
     }
 
     private void reportEnter(final Set<WlPointerResource> wlPointerResources,
-                             final WlSurfaceResource wlSurfaceResource) {
+                             final SurfaceView surfaceView) {
         wlPointerResources.forEach(wlPointerResource -> {
-            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Point relativePoint = wlSurface.getSurface()
-                                                 .local(getPosition());
+            final Point relativePoint = surfaceView.local(getPosition());
             wlPointerResource.enter(nextEnterSerial(),
-                                    wlSurfaceResource,
+                                    surfaceView.getWlSurfaceResource(),
                                     Fixed.create(relativePoint.getX()),
                                     Fixed.create(relativePoint.getY()));
         });
@@ -358,9 +361,9 @@ public class PointerDevice implements Role {
             grab();
         }
 
-        getGrab().ifPresent(wlSurfaceResource -> {
+        getGrab().ifPresent(surfaceView -> {
             reportButton(wlPointerResources,
-                         wlSurfaceResource,
+                         surfaceView,
                          time,
                          button,
                          wlPointerButtonState);
@@ -372,7 +375,7 @@ public class PointerDevice implements Role {
     }
 
     @Nonnull
-    public Optional<WlSurfaceResource> getGrab() {
+    public Optional<SurfaceView> getGrab() {
         return this.grab;
     }
 
@@ -380,30 +383,33 @@ public class PointerDevice implements Role {
         this.grab = getFocus();
         this.grabDestroyListener = Optional.of(this::ungrab);
 
-        final WlSurfaceResource wlSurfaceResource = getGrab().get();
+        final SurfaceView surfaceView = getGrab().get();
         //if the surface having the grab is destroyed, we clear the grab
-        wlSurfaceResource.register(this.grabDestroyListener.get());
+        surfaceView.getWlSurfaceResource()
+                   .register(this.grabDestroyListener.get());
 
         this.pointerGrabSignal.emit(PointerGrab.create(getGrab()));
     }
 
     private void reportButton(final Set<WlPointerResource> wlPointerResources,
-                              final WlSurfaceResource wlSurfaceResource,
+                              final SurfaceView surfaceView,
                               final int time,
                               final int button,
                               final WlPointerButtonState wlPointerButtonState) {
         filter(wlPointerResources,
-               wlSurfaceResource.getClient()).forEach(wlPointerResource ->
-                                                              wlPointerResource.button(wlPointerButtonState == WlPointerButtonState.PRESSED ?
-                                                                                       nextButtonPressSerial() : nextButtonReleaseSerial(),
-                                                                                       time,
-                                                                                       button,
-                                                                                       wlPointerButtonState.value));
+               surfaceView.getWlSurfaceResource()
+                          .getClient()).forEach(wlPointerResource ->
+                                                        wlPointerResource.button(wlPointerButtonState == WlPointerButtonState.PRESSED ?
+                                                                                 nextButtonPressSerial() : nextButtonReleaseSerial(),
+                                                                                 time,
+                                                                                 button,
+                                                                                 wlPointerButtonState.value));
     }
 
     private void ungrab() {
         //grab will be updated, don't listen for previous grab surface destruction.
-        getGrab().ifPresent(wlSurfaceResource -> wlSurfaceResource.unregister(this.grabDestroyListener.get()));
+        getGrab().ifPresent(surfaceView -> surfaceView.getWlSurfaceResource()
+                                                      .unregister(this.grabDestroyListener.get()));
         this.grabDestroyListener = Optional.empty();
         this.grab = Optional.empty();
         this.pointerGrabSignal.emit(PointerGrab.create(getGrab()));
@@ -428,31 +434,35 @@ public class PointerDevice implements Role {
     }
 
     private void updateFocus(final Set<WlPointerResource> wlPointerResources,
-                             final Optional<WlSurfaceResource> oldFocus,
-                             final Optional<WlSurfaceResource> newFocus) {
+                             final Optional<SurfaceView> oldFocus,
+                             final Optional<SurfaceView> newFocus) {
 
-        oldFocus.ifPresent(oldFocusResource -> {
+        oldFocus.ifPresent(oldFocusView -> {
             //remove old focus destroy listener
-            oldFocusResource.unregister(this.focusDestroyListener.get());
+            oldFocusView.getWlSurfaceResource()
+                        .unregister(this.focusDestroyListener.get());
             //notify client of focus lost
             reportLeave(filter(wlPointerResources,
-                               oldFocusResource.getClient()),
-                        oldFocusResource);
+                               oldFocusView.getWlSurfaceResource()
+                                           .getClient()),
+                        oldFocusView);
         });
         //clear ref to old destroy listener
         this.focusDestroyListener = Optional.empty();
 
-        newFocus.ifPresent(newFocusResource -> {
+        newFocus.ifPresent(newFocusView -> {
             //if focus resource is destroyed, trigger schedule focus update. This guarantees that
             //the compositor removes and updates the list of active surfaces first.
             final DestroyListener destroyListener = () -> this.jobExecutor.submit(() -> calculateFocus(wlPointerResources));
             this.focusDestroyListener = Optional.of(destroyListener);
             //add destroy listener
-            newFocusResource.register(destroyListener);
+            newFocusView.getWlSurfaceResource()
+                        .register(destroyListener);
             //notify client of new focus
             reportEnter(filter(wlPointerResources,
-                               newFocusResource.getClient()),
-                        newFocusResource);
+                               newFocusView.getWlSurfaceResource()
+                                           .getClient()),
+                        newFocusView);
         });
 
         //update focus to new focus
@@ -480,21 +490,22 @@ public class PointerDevice implements Role {
     public boolean grabMotion(@Nonnull final WlSurfaceResource wlSurfaceResource,
                               final int buttonPressSerial,
                               @Nonnull final PointerGrabMotion pointerGrabMotion) {
+        final WlSurface               wlSurface    = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface                 surface      = wlSurface.getSurface();
+        final Collection<SurfaceView> surfaceViews = surface.getViews();
+
         if (!getGrab().isPresent() ||
-            !getGrab().get()
-                      .equals(wlSurfaceResource) ||
+            !surfaceViews.contains(getGrab().get()) ||
             getButtonPressSerial() != buttonPressSerial) {
             //preconditions not met
             return false;
         }
 
-
         final Slot<PointerMotion> motionSlot = new Slot<PointerMotion>() {
 
             public void handle(@Nonnull final PointerMotion motion) {
                 if (getGrab().isPresent() &&
-                    getGrab().get()
-                             .equals(wlSurfaceResource)) {
+                    surfaceViews.contains(getGrab().get())) {
                     //there is pointer motion
                     pointerGrabMotion.motion(motion);
                 }

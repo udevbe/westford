@@ -38,6 +38,7 @@ import org.westford.compositor.core.Role;
 import org.westford.compositor.core.RoleVisitor;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Surface;
+import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.Transforms;
 import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.core.calc.Vec4;
@@ -123,6 +124,7 @@ public class ShellSurface implements Role {
     public void move(@Nonnull final WlSurfaceResource wlSurfaceResource,
                      @Nonnull final WlPointerResource wlPointerResource,
                      final int grabSerial) {
+
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
@@ -130,15 +132,21 @@ public class ShellSurface implements Role {
         final PointerDevice pointerDevice = wlPointer.getPointerDevice();
 
         final Point pointerPosition = pointerDevice.getPosition();
-        final Point surfacePosition = surface.global(Point.create(0,
-                                                                  0));
-        final Point pointerOffset = pointerPosition.subtract(surfacePosition);
 
-        //FIXME pick a surface view based on the pointer position
-        pointerDevice.grabMotion(wlSurfaceResource,
-                                 grabSerial,
-                                 (motion) -> surface.setPosition(motion.getPoint()
-                                                                       .subtract(pointerOffset)));
+        pointerDevice.getGrab()
+                     .filter(grabSurfaceView -> surface.getViews()
+                                                       .contains(grabSurfaceView))
+                     .ifPresent(grabSurfaceView -> {
+                         final Point surfacePosition = grabSurfaceView.global(Point.create(0,
+                                                                                           0));
+                         final Point pointerOffset = pointerPosition.subtract(surfacePosition);
+
+                         //FIXME pick a surface view based on the pointer position
+                         pointerDevice.grabMotion(wlSurfaceResource,
+                                                  grabSerial,
+                                                  (motion) -> grabSurfaceView.setPosition(motion.getPoint()
+                                                                                                .subtract(pointerOffset)));
+                     });
     }
 
     public void resize(@Nonnull final WlShellSurfaceResource wlShellSurfaceResource,
@@ -146,53 +154,61 @@ public class ShellSurface implements Role {
                        @Nonnull final WlPointerResource wlPointerResource,
                        final int buttonPressSerial,
                        final int edges) {
-        final WlSurface     wlSurface       = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface       surface         = wlSurface.getSurface();
+
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+
         final WlPointer     wlPointer       = (WlPointer) wlPointerResource.getImplementation();
         final PointerDevice pointerDevice   = wlPointer.getPointerDevice();
         final Point         pointerStartPos = pointerDevice.getPosition();
 
-        final Point     local = surface.local(pointerStartPos);
-        final Rectangle size  = surface.getSize();
+        pointerDevice.getGrab()
+                     .filter(grabSurfaceView -> surface.getViews()
+                                                       .contains(grabSurfaceView))
+                     .ifPresent(grabSurfaceView -> {
+                         final Point     local = grabSurfaceView.local(pointerStartPos);
+                         final Rectangle size  = surface.getSize();
 
-        final WlShellSurfaceResize quadrant = quadrant(edges);
-        final Mat4 transform = transform(quadrant,
-                                         size,
-                                         local);
+                         final WlShellSurfaceResize quadrant = quadrant(edges);
+                         final Mat4 transform = transform(quadrant,
+                                                          size,
+                                                          local);
 
-        final Mat4 inverseTransform = surface.getInverseTransform();
+                         final Mat4 inverseTransform = surface.getInverseTransform();
 
-        final boolean grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
-                                                                   buttonPressSerial,
-                                                                   motion -> {
-                                                                       final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
-                                                                                                                                .toVec4());
-                                                                       final Vec4 resize = transform.multiply(motionLocal);
-                                                                       final int  width  = (int) resize.getX();
-                                                                       final int  height = (int) resize.getY();
-                                                                       wlShellSurfaceResource.configure(quadrant.value,
-                                                                                                        width < 1 ? 1 : width,
-                                                                                                        height < 1 ? 1 : height);
-                                                                   });
-        if (grabMotionSuccess) {
-            wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
-                                    wlSurfaceResource);
-            pointerDevice.getPointerGrabSignal()
-                         .connect(new Slot<PointerGrab>() {
-                             @Override
-                             public void handle(@Nonnull final PointerGrab event) {
-                                 if (!pointerDevice.getGrab()
-                                                   .isPresent()) {
-                                     pointerDevice.getPointerGrabSignal()
-                                                  .disconnect(this);
-                                     wlPointerResource.enter(pointerDevice.nextEnterSerial(),
-                                                             wlSurfaceResource,
-                                                             Fixed.create(local.getX()),
-                                                             Fixed.create(local.getY()));
-                                 }
-                             }
-                         });
-        }
+                         final boolean grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
+                                                                                    buttonPressSerial,
+                                                                                    motion -> {
+                                                                                        final Vec4 motionLocal = inverseTransform.multiply(motion.getPoint()
+                                                                                                                                                 .toVec4());
+                                                                                        final Vec4 resize = transform.multiply(motionLocal);
+                                                                                        final int  width  = (int) resize.getX();
+                                                                                        final int  height = (int) resize.getY();
+                                                                                        wlShellSurfaceResource.configure(quadrant.value,
+                                                                                                                         width < 1 ? 1 : width,
+                                                                                                                         height < 1 ? 1 : height);
+                                                                                    });
+
+                         if (grabMotionSuccess) {
+                             wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
+                                                     wlSurfaceResource);
+                             pointerDevice.getPointerGrabSignal()
+                                          .connect(new Slot<PointerGrab>() {
+                                              @Override
+                                              public void handle(@Nonnull final PointerGrab event) {
+                                                  if (!pointerDevice.getGrab()
+                                                                    .isPresent()) {
+                                                      pointerDevice.getPointerGrabSignal()
+                                                                   .disconnect(this);
+                                                      wlPointerResource.enter(pointerDevice.nextEnterSerial(),
+                                                                              wlSurfaceResource,
+                                                                              Fixed.create(local.getX()),
+                                                                              Fixed.create(local.getY()));
+                                                  }
+                                              }
+                                          });
+                         }
+                     });
     }
 
     private WlShellSurfaceResize quadrant(final int edges) {
@@ -361,12 +377,39 @@ public class ShellSurface implements Role {
             this.keyboardFocusListener = Optional.of(slot);
         }
 
-        //FIXME find all parent views, and for each parent view, create/set the child view
+        //clear existing views, if any.
+        surface.getViews()
+               .clear();
+
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
-        final Point surfacePosition = parentWlSurface.getSurface()
-                                                     .global(Point.create(x,
-                                                                          y));
-        surface.setPosition(surfacePosition);
+        final Surface   parentSurface   = parentWlSurface.getSurface();
+
+        //add surface as child of parent, as both pending and immediate state.
+        parentSurface.getPendingSiblings()
+                     .add(wlSurfaceResource);
+        parentSurface.getSiblings()
+                     .add(wlSurfaceResource);
+
+        //remove surface as child of parent if surface is destroyed.
+        wlSurfaceResource.register(() -> {
+            parentSurface.getPendingSiblings()
+                         .remove(wlSurfaceResource);
+            parentSurface.getSiblings()
+                         .remove(wlSurfaceResource);
+        });
+
+        //create a new surface view for each parent view that moves relative to the parent view.
+        parentSurface.getViews()
+                     .forEach(parentSurfaceView -> {
+                         final Point relativePosition = Point.create(x,
+                                                                     y);
+                         final Point position = parentSurfaceView.global(relativePosition);
+                         final SurfaceView surfaceView = surface.createView(wlSurfaceResource,
+                                                                            position);
+                         surfaceView.setParent(parentSurfaceView);
+                         parentSurfaceView.getPositionSignal()
+                                          .connect(event -> surfaceView.setPosition(parentSurfaceView.global(relativePosition)));
+                     });
     }
 
     @Override

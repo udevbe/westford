@@ -90,7 +90,8 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     public void placeAbove(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
         //TODO unit test
-        if (isValid(sibling)) {
+        if (isValid(requester,
+                    sibling)) {
             getSubsurface().above(sibling);
         }
         else {
@@ -99,7 +100,8 @@ public class WlSubsurface implements WlSubsurfaceRequests,
         }
     }
 
-    private boolean isValid(final WlSurfaceResource sibling) {
+    private boolean isValid(final WlSubsurfaceResource requester,
+                            final WlSurfaceResource sibling) {
         final Subsurface subsurface = getSubsurface();
         if (subsurface.isInert()) {
             /*
@@ -109,15 +111,19 @@ public class WlSubsurface implements WlSubsurfaceRequests,
             return true;
         }
 
-        return this.scene.getSubsurfaceStack(subsurface.getParentWlSurfaceResource())
-                         .contains(sibling);
+        final WlSurface wlSurface = (WlSurface) requester.getImplementation();
+
+        return wlSurface.getSurface()
+                        .getSiblings()
+                        .contains(sibling);
     }
 
     @Override
     public void placeBelow(final WlSubsurfaceResource requester,
                            @Nonnull final WlSurfaceResource sibling) {
         //TODO unit test
-        if (isValid(sibling)) {
+        if (isValid(requester,
+                    sibling)) {
             getSubsurface().below(sibling);
         }
         else {
