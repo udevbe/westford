@@ -1,7 +1,6 @@
 package org.westford.compositor.core;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.Signal;
 import org.westford.Slot;
@@ -10,7 +9,6 @@ import org.westford.compositor.core.calc.Vec4;
 import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
-import java.util.LinkedList;
 import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
@@ -26,24 +24,22 @@ public class SurfaceView {
     private Optional<SurfaceView> parent = Optional.empty();
 
     @Nonnull
-    private final Scene             scene;
-    @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
 
     @Nonnull
     private Mat4 positionTransform;
-
     @Nonnull
     private Mat4 transform;
     @Nonnull
     private Mat4 inverseTransform;
 
-    SurfaceView(@Provided @Nonnull Scene scene,
-                @Nonnull WlSurfaceResource wlSurfaceResource,
+    private boolean enabled;
+    private boolean drawable;
+
+    SurfaceView(@Nonnull WlSurfaceResource wlSurfaceResource,
                 @Nonnull Mat4 positionTransform,
                 @Nonnull Mat4 transform,
                 @Nonnull Mat4 inverseTransform) {
-        this.scene = scene;
         this.wlSurfaceResource = wlSurfaceResource;
         this.positionTransform = positionTransform;
         this.transform = transform;
@@ -83,6 +79,10 @@ public class SurfaceView {
     }
 
     public void onApply(@Nonnull final SurfaceState surfaceState) {
+
+        this.drawable = surfaceState.getBuffer()
+                                    .isPresent();
+
         final Point deltaPosition = surfaceState.getDeltaPosition();
         final int   dx            = deltaPosition.getX();
         final int   dy            = deltaPosition.getY();
@@ -113,9 +113,8 @@ public class SurfaceView {
 
     public void setParent(@Nonnull final SurfaceView parent) {
         removeParent();
-
-        this.scene.getSurfacesStack()
-                  .remove(this);
+        parent.getDestroyedSignal()
+              .connect(event -> destroy());
         this.parent = Optional.of(parent);
     }
 
@@ -135,5 +134,17 @@ public class SurfaceView {
         final Vec4 globalPoint = this.transform.multiply(surfaceLocal.toVec4());
         return Point.create((int) globalPoint.getX(),
                             (int) globalPoint.getY());
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isDrawable() {
+        return this.drawable;
     }
 }

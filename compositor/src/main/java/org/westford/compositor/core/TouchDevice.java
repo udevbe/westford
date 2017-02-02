@@ -19,7 +19,6 @@ package org.westford.compositor.core;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Display;
-import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.server.WlTouchResource;
 import org.freedesktop.wayland.util.Fixed;
 import org.westford.Signal;
@@ -28,7 +27,6 @@ import org.westford.compositor.core.events.TouchDown;
 import org.westford.compositor.core.events.TouchGrab;
 import org.westford.compositor.core.events.TouchMotion;
 import org.westford.compositor.core.events.TouchUp;
-import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -54,7 +52,7 @@ public class TouchDevice {
     private final Scene   scene;
 
     @Nonnull
-    private Optional<WlSurfaceResource> grab = Optional.empty();
+    private Optional<SurfaceView> grab = Optional.empty();
     @Nonnegative
     private int touchCount;
 
@@ -70,8 +68,9 @@ public class TouchDevice {
 
     //TODO unit test
     public void cancel(final Set<WlTouchResource> wlTouchResources) {
-        getGrab().ifPresent(wlSurfaceResource -> filter(wlTouchResources,
-                                                        wlSurfaceResource.getClient()).forEach(WlTouchResource::cancel));
+        getGrab().ifPresent(surfaceView -> filter(wlTouchResources,
+                                                  surfaceView.getWlSurfaceResource()
+                                                             .getClient()).forEach(WlTouchResource::cancel));
         this.grab = Optional.empty();
         this.touchCount = 0;
 
@@ -79,7 +78,7 @@ public class TouchDevice {
     }
 
     @Nonnull
-    public Optional<WlSurfaceResource> getGrab() {
+    public Optional<SurfaceView> getGrab() {
         return this.grab;
     }
 
@@ -94,8 +93,9 @@ public class TouchDevice {
 
     //TODO unit test
     public void frame(final Set<WlTouchResource> wlTouchResources) {
-        getGrab().ifPresent(wlSurfaceResource -> filter(wlTouchResources,
-                                                        wlSurfaceResource.getClient()).forEach(wlTouchResource -> {
+        getGrab().ifPresent(surfaceView -> filter(wlTouchResources,
+                                                  surfaceView.getWlSurfaceResource()
+                                                             .getClient()).forEach(wlTouchResource -> {
             if (this.touchCount == 0) {
                 this.grab = Optional.empty();
                 this.touchGrabSignal.emit(TouchGrab.create());
@@ -121,20 +121,19 @@ public class TouchDevice {
         }
 
         //report 'down' to grab (if any)
-        getGrab().ifPresent(wlSurfaceResource -> {
+        getGrab().ifPresent(surfaceView -> {
             this.touchCount++;
 
-            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Point local = wlSurface.getSurface()
-                                         .local(Point.create(x,
-                                                             y));
+            final Point local = surfaceView.local(Point.create(x,
+                                                               y));
             filter(wlTouchResources,
-                   wlSurfaceResource.getClient()).forEach(wlTouchResource -> wlTouchResource.down(nextDownSerial(),
-                                                                                                  time,
-                                                                                                  wlSurfaceResource,
-                                                                                                  id,
-                                                                                                  Fixed.create(local.getX()),
-                                                                                                  Fixed.create(local.getY())));
+                   surfaceView.getWlSurfaceResource()
+                              .getClient()).forEach(wlTouchResource -> wlTouchResource.down(nextDownSerial(),
+                                                                                            time,
+                                                                                            surfaceView.getWlSurfaceResource(),
+                                                                                            id,
+                                                                                            Fixed.create(local.getX()),
+                                                                                            Fixed.create(local.getY())));
         });
 
         this.touchDownSignal.emit(TouchDown.create());
@@ -153,11 +152,12 @@ public class TouchDevice {
     public void up(final Set<WlTouchResource> wlTouchResources,
                    final int id,
                    final int time) {
-        getGrab().ifPresent(wlSurfaceResource -> {
+        getGrab().ifPresent(surfaceView -> {
             filter(wlTouchResources,
-                   wlSurfaceResource.getClient()).forEach(wlTouchResource -> wlTouchResource.up(nextUpSerial(),
-                                                                                                time,
-                                                                                                id));
+                   surfaceView.getWlSurfaceResource()
+                              .getClient()).forEach(wlTouchResource -> wlTouchResource.up(nextUpSerial(),
+                                                                                          time,
+                                                                                          id));
             if (--this.touchCount < 0) {
                 //safeguard against strange negative touch count (shouldn't happen normally)
                 this.touchCount = 0;
@@ -178,16 +178,15 @@ public class TouchDevice {
                        final int time,
                        final int x,
                        final int y) {
-        getGrab().ifPresent(wlSurfaceResource -> {
-            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Point local = wlSurface.getSurface()
-                                         .local(Point.create(x,
-                                                             y));
+        getGrab().ifPresent(surfaceView -> {
+            final Point local = surfaceView.local(Point.create(x,
+                                                               y));
             filter(wlTouchResources,
-                   wlSurfaceResource.getClient()).forEach(wlTouchResource -> wlTouchResource.motion(time,
-                                                                                                    id,
-                                                                                                    Fixed.create(local.getX()),
-                                                                                                    Fixed.create(local.getY())));
+                   surfaceView.getWlSurfaceResource()
+                              .getClient()).forEach(wlTouchResource -> wlTouchResource.motion(time,
+                                                                                              id,
+                                                                                              Fixed.create(local.getX()),
+                                                                                              Fixed.create(local.getY())));
         });
 
         this.touchMotionSignal.emit(TouchMotion.create());

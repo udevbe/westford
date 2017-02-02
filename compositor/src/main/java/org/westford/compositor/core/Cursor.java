@@ -43,7 +43,8 @@ public class Cursor {
     public void updatePosition(final Point pointerPosition) {
         final WlSurface wlSurface = (WlSurface) this.wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
-        surface.setPosition(pointerPosition.subtract(getHotspot()));
+        surface.getViews()
+               .forEach(surfaceView -> surfaceView.setPosition(pointerPosition.subtract(getHotspot())));
     }
 
     @Nonnull

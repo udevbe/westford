@@ -240,45 +240,18 @@ public class Subsurface implements Role {
     private void placement(final boolean below,
                            final WlSurfaceResource sibling) {
 
-        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
+        final WlSurfaceResource             parentWlSurfaceResource = getParentWlSurfaceResource();
+        final WlSurface                     parentWlSurface         = (WlSurface) parentWlSurfaceResource.getImplementation();
+        final Surface                       parentSurface           = parentWlSurface.getSurface();
+        final LinkedList<WlSurfaceResource> siblings                = parentSurface.getSiblings();
 
-        final WlSurface siblingWlSurface = (WlSurface) sibling.getImplementation();
-        final Surface   siblingSurface   = siblingWlSurface.getSurface();
+        final int siblingIndex = siblings.indexOf(sibling);
+        if (-1 != siblingIndex) {
+            siblings.add(below ? siblingIndex : siblingIndex + 1,
+                         getWlSurfaceResource());
+        }
 
-        final WlSurfaceResource parentWlSurfaceResource = getParentWlSurfaceResource();
-        final WlSurface         parentWlSurface         = (WlSurface) parentWlSurfaceResource.getImplementation();
-        final Surface           parentSurface           = parentWlSurface.getSurface();
-
-        parentSurface.getViews()
-                     .forEach(parentSurfaceView -> placement(surface,
-                                                             below,
-                                                             parentSurfaceView,
-                                                             siblingSurface));
-
-        //Note: committing the subsurface stack happens in Surface.
-    }
-
-    private void placement(final Surface surface,
-                           final boolean below,
-                           final SurfaceView parentSurfaceView,
-                           final Surface siblingSurface) {
-
-        final LinkedList<SurfaceView> pendingKids = parentSurfaceView.getPendingKids();
-
-        siblingSurface.getViews()
-                      .forEach(siblingSurfaceView -> {
-                          final int siblingPosition = pendingKids.indexOf(siblingSurfaceView);
-                          if (-1 != siblingPosition) {
-                              surface.getViews()
-                                     .forEach(surfaceView -> {
-                                         if (pendingKids.remove(surfaceView)) {
-                                             pendingKids.add(below ? siblingPosition : siblingPosition + 1,
-                                                             surfaceView);
-                                         }
-                                     });
-                          }
-                      });
+        //Note: committing the subsurface stack happens in the parent surface.
     }
 
     public void below(@Nonnull final WlSurfaceResource sibling) {
