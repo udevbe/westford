@@ -32,26 +32,25 @@ public class Subsurface implements Role {
 
     @Nonnull
     private final WlSurfaceResource parentWlSurfaceResource;
-    @Nonnull
-    private final WlSurfaceResource wlSurfaceResource;
 
     private final Signal<Boolean, Slot<Boolean>> effectiveSyncSignal = new Signal<>();
     private       boolean                        effectiveSync       = true;
 
-    private boolean inert    = false;
-    private boolean sync     = true;
+    private boolean inert = false;
+    private boolean sync  = true;
+
     @Nonnull
-    private Point   position = Point.ZERO;
+    private Sibling      sibling;
     @Nonnull
     private SurfaceState surfaceState;
     @Nonnull
     private SurfaceState cachedSurfaceState;
 
     Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
-               @Nonnull final WlSurfaceResource wlSurfaceResource,
+               @Nonnull final Sibling sibling,
                @Nonnull final SurfaceState surfaceState) {
         this.parentWlSurfaceResource = parentWlSurfaceResource;
-        this.wlSurfaceResource = wlSurfaceResource;
+        this.sibling = sibling;
         this.surfaceState = surfaceState;
         this.cachedSurfaceState = surfaceState;
     }
@@ -120,7 +119,8 @@ public class Subsurface implements Role {
         }
 
         if (isEffectiveSync()) {
-            final WlSurface    wlSurface       = (WlSurface) getWlSurfaceResource().getImplementation();
+            final WlSurface    wlSurface       = (WlSurface) getSibling().getWlSurfaceResource()
+                                                                         .getImplementation();
             final Surface      surface         = wlSurface.getSurface();
             final SurfaceState oldSurfaceState = getSurfaceState();
             if (!surface.getState()
@@ -142,8 +142,9 @@ public class Subsurface implements Role {
             return;
         }
 
-        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
+        final WlSurface wlSurface = (WlSurface) getSibling().getWlSurfaceResource()
+                                                            .getImplementation();
+        final Surface surface = wlSurface.getSurface();
 
         surface.getViews()
                .forEach(this::applyPosition);
@@ -152,32 +153,19 @@ public class Subsurface implements Role {
     public void applyPosition(SurfaceView surfaceView) {
         surfaceView.getParent()
                    .ifPresent(parentSurfaceView -> {
-                       final Point global = parentSurfaceView.global(getPosition());
+                       final Point global = parentSurfaceView.global(getSibling().getPosition());
                        surfaceView.setPosition(global);
                    });
     }
 
     @Nonnull
-    public WlSurfaceResource getWlSurfaceResource() {
-        return this.wlSurfaceResource;
+    public Sibling getSibling() {
+        return this.sibling;
     }
 
     @Nonnull
     public WlSurfaceResource getParentWlSurfaceResource() {
         return this.parentWlSurfaceResource;
-    }
-
-    @Nonnull
-    public Point getPosition() {
-        return this.position;
-    }
-
-    public void setPosition(@Nonnull final Point position) {
-        if (isInert()) {
-            return;
-        }
-
-        this.position = position;
     }
 
     public void setSync(final boolean sync) {
@@ -215,7 +203,8 @@ public class Subsurface implements Role {
              */
             //TODO unit test this
             if (!isEffectiveSync()) {
-                final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+                final WlSurface wlSurface = (WlSurface) getSibling().getWlSurfaceResource()
+                                                                    .getImplementation();
                 wlSurface.getSurface()
                          .apply(getCachedSurfaceState());
             }
@@ -238,18 +227,35 @@ public class Subsurface implements Role {
     }
 
     private void placement(final boolean below,
-                           final WlSurfaceResource sibling) {
+                           final WlSurfaceResource siblingWlSurfaceResource) {
 
-        final WlSurfaceResource             parentWlSurfaceResource = getParentWlSurfaceResource();
-        final WlSurface                     parentWlSurface         = (WlSurface) parentWlSurfaceResource.getImplementation();
-        final Surface                       parentSurface           = parentWlSurface.getSurface();
-        final LinkedList<WlSurfaceResource> siblings                = parentSurface.getSiblings();
+        final WlSurfaceResource   parentWlSurfaceResource = getParentWlSurfaceResource();
+        final WlSurface           parentWlSurface         = (WlSurface) parentWlSurfaceResource.getImplementation();
+        final Surface             parentSurface           = parentWlSurface.getSurface();
+        final LinkedList<Sibling> siblings                = parentSurface.getSiblings();
 
-        final int siblingIndex = siblings.indexOf(sibling);
-        if (-1 != siblingIndex) {
-            siblings.add(below ? siblingIndex : siblingIndex + 1,
-                         getWlSurfaceResource());
+        int siblingIndex = -1;
+        int thisIndex    = -1;
+
+        for (int i = 0; i < siblings.size(); i++) {
+            final Sibling sibling = siblings.get(i);
+
+            if (sibling.equals(Sibling.create(siblingWlSurfaceResource))) {
+                siblingIndex = i;
+            }
+            else if (sibling.equals(getSibling())) {
+                thisIndex = i;
+            }
+
+            if (siblingIndex != -1 && thisIndex != -1) {
+                break;
+            }
         }
+
+        //FIXME if siblingIndex == -1 then we have a (client) protocol error, else we have a bug.
+
+        siblings.add(below ? siblingIndex : siblingIndex + 1,
+                     siblings.remove(thisIndex));
 
         //Note: committing the subsurface stack happens in the parent surface.
     }
