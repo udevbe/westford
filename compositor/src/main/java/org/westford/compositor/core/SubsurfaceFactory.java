@@ -17,7 +17,6 @@
  */
 package org.westford.compositor.core;
 
-import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.compositor.protocol.WlSurface;
 
@@ -75,28 +74,11 @@ public class SubsurfaceFactory {
 
         this.scene.getSurfacesStack()
                   .remove(wlSurfaceResource);
-        this.scene.getSubsurfaceStack(parentWlSurfaceResource)
-                  .addLast(wlSurfaceResource);
 
-        final DestroyListener destroyListener = () -> {
-            this.scene.getSubsurfaceStack(parentWlSurfaceResource)
-                      .remove(wlSurfaceResource);
-            this.scene.getPendingSubsurfaceStack(parentWlSurfaceResource)
-                      .remove(wlSurfaceResource);
-        };
-        wlSurfaceResource.register(destroyListener);
-
-        parentWlSurfaceResource.register(() -> {
-            /*
-             * A destroyed parent will have it's stack of subsurfaces removed, so no need to remove the subsurface
-             * from that stack (which is done in the subsurface destroy listener).
-             */
-            wlSurfaceResource.unregister(destroyListener);
-            /*
-             * Docs says a subsurface with a destroyed parent must become inert.
-             */
-            subsurface.setInert();
-        });
+        /*
+         * Docs says a subsurface with a destroyed parent must become inert.
+         */
+        parentWlSurfaceResource.register(subsurface::setInert);
 
         return subsurface;
     }

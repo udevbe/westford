@@ -31,6 +31,7 @@ import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.core.events.KeyboardFocusGained;
 import org.westford.compositor.core.events.KeyboardFocusLost;
 import org.westford.compositor.protocol.WlRegion;
+import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -70,13 +71,15 @@ public class Surface {
      * Business dependencies
      */
     @Nonnull
-    private final FiniteRegionFactory finiteRegionFactory;
+    private final FiniteRegionFactory   finiteRegionFactory;
     @Nonnull
-    private final Compositor          compositor;
+    private final Compositor            compositor;
     @Nonnull
-    private final Renderer            renderer;
+    private final Renderer              renderer;
     @Nonnull
-    private final SurfaceViewFactory  surfaceViewFactory;
+    private final SurfaceViewFactory    surfaceViewFactory;
+    @Nonnull
+    private final SiblingSurfaceFactory siblingSurfaceFactory;
     @Nonnull
     private final List<WlCallbackResource> callbacks       = new LinkedList<>();
     @Nonnull
@@ -86,20 +89,20 @@ public class Surface {
      * pending state
      */
     @Nonnull
-    private final SurfaceState.Builder          pendingState                 = SurfaceState.builder();
+    private final SurfaceState.Builder       pendingState                 = SurfaceState.builder();
     @Nonnull
-    private       Optional<DestroyListener>     pendingBufferDestroyListener = Optional.empty();
+    private       Optional<DestroyListener>  pendingBufferDestroyListener = Optional.empty();
     @Nonnull
-    private final LinkedList<WlSurfaceResource> pendingSiblings              = new LinkedList<>();
+    private final LinkedList<SiblingSurface> pendingSiblings              = new LinkedList<>();
 
     /*
      * committed state
      */
     @Nonnull
-    private       SurfaceState                  state    = SurfaceState.builder()
-                                                                       .build();
+    private       SurfaceState               state    = SurfaceState.builder()
+                                                                    .build();
     @Nonnull
-    private final LinkedList<WlSurfaceResource> siblings = new LinkedList<>();
+    private final LinkedList<SiblingSurface> siblings = new LinkedList<>();
 
 
     /*
@@ -121,11 +124,13 @@ public class Surface {
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
             @Nonnull @Provided final Compositor compositor,
             @Nonnull @Provided final Renderer renderer,
-            @Nonnull @Provided final SurfaceViewFactory surfaceViewFactory) {
+            @Nonnull @Provided final SurfaceViewFactory surfaceViewFactory,
+            @Nonnull @Provided final SiblingSurfaceFactory siblingSurfaceFactory) {
         this.finiteRegionFactory = finiteRegionFactory;
         this.compositor = compositor;
         this.renderer = renderer;
         this.surfaceViewFactory = surfaceViewFactory;
+        this.siblingSurfaceFactory = siblingSurfaceFactory;
     }
 
     @Nonnull
@@ -379,6 +384,19 @@ public class Surface {
                                   Point position) {
         final SurfaceView surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
                                                                        position);
+
+        //iterate siblings, and create new sibling view with the newly create parent view as parent.
+        getSiblings().forEach(siblingSurface -> {
+
+            final WlSurfaceResource siblingWlSurfaceResource = siblingSurface.getWlSurfaceResource();
+            final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
+
+            siblingWlSurface.getSurface()
+                            .createView(siblingWlSurfaceResource,
+                                        surfaceView.global(siblingSurface.getPosition()))
+                            .setParent(surfaceView);
+        });
+
         if (this.surfaceViews.add(surfaceView)) {
             this.viewCreatedSignal.emit(surfaceView);
         }
@@ -391,12 +409,44 @@ public class Surface {
     }
 
     @Nonnull
-    public LinkedList<WlSurfaceResource> getSiblings() {
+    public SiblingSurface addSibling(@Nonnull final WlSurfaceResource siblingWlSurfaceResource,
+                                     @Nonnull final Point position) {
+
+        final WlSurface siblingWlSurface = (WlSurface) siblingWlSurfaceResource.getImplementation();
+        final Surface   siblingSurface   = siblingWlSurface.getSurface();
+
+        getViews().forEach(surfaceView -> {
+            final SurfaceView siblingSurfaceView = siblingSurface.createView(siblingWlSurfaceResource,
+                                                                             surfaceView.global(position));
+            siblingSurfaceView.setParent(surfaceView);
+        });
+
+        final SiblingSurface relativeSiblingSurface = this.siblingSurfaceFactory.create(siblingWlSurfaceResource,
+                                                                                        position);
+        this.siblings.add(relativeSiblingSurface);
+
+        return relativeSiblingSurface;
+    }
+
+    public void removeSibling(@Nonnull final SiblingSurface siblingSurface) {
+        this.siblings.remove(siblingSurface);
+        this.pendingSiblings.remove(siblingSurface);
+
+        final WlSurfaceResource siblingWlSurfaceResource = siblingSurface.getWlSurfaceResource();
+        final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
+
+        siblingWlSurface.getSurface()
+                        .getViews()
+                        .forEach(SurfaceView::removeParent);
+    }
+
+    @Nonnull
+    public LinkedList<SiblingSurface> getSiblings() {
         return this.siblings;
     }
 
     @Nonnull
-    public LinkedList<WlSurfaceResource> getPendingSiblings() {
+    public LinkedList<SiblingSurface> getPendingSiblings() {
         return this.pendingSiblings;
     }
 }
