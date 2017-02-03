@@ -385,14 +385,14 @@ public class ShellSurface implements Role {
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
         //add surface as child of parent, as both pending and immediate state.
-        parentSurface.getPendingSiblings()
+        parentSurface.getPendingSubsurfaces()
                      .add(wlSurfaceResource);
         parentSurface.getSiblings()
                      .add(wlSurfaceResource);
 
         //remove surface as child of parent if surface is destroyed.
         wlSurfaceResource.register(() -> {
-            parentSurface.getPendingSiblings()
+            parentSurface.getPendingSubsurfaces()
                          .remove(wlSurfaceResource);
             parentSurface.getSiblings()
                          .remove(wlSurfaceResource);

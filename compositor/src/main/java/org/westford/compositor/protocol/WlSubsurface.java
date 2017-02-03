@@ -77,7 +77,8 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     public void setPosition(final WlSubsurfaceResource wlSubsurfaceResource,
                             final int x,
                             final int y) {
-        getSubsurface().setPosition(Point.create(x,
+        getSubsurface().getSibling()
+                       .setPosition(Point.create(x,
                                                  y));
     }
 

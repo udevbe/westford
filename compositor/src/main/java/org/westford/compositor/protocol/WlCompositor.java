@@ -26,6 +26,7 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.compositor.core.Compositor;
 import org.westford.compositor.core.Renderer;
 import org.westford.compositor.core.Scene;
+import org.westford.compositor.core.Sibling;
 import org.westford.compositor.core.Surface;
 
 import javax.annotation.Nonnegative;
@@ -96,10 +97,11 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
                                                                   compositorResource.getVersion(),
                                                                   id);
         surface.getSiblings()
-               .add(wlSurfaceResource);
+               .add(Sibling.create(wlSurfaceResource));
 
         //TODO unit test destroy handler
         wlSurfaceResource.register(() -> {
+            //FIXME
             this.scene.getSurfacesStack()
                       .removeAll(surface.getViews());
             surface.markDestroyed();

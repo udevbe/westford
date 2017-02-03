@@ -44,7 +44,7 @@ public class SubsurfaceFactory {
         final Surface   surface   = wlSurface.getSurface();
 
         final Subsurface subsurface = this.privateSubsurfaceFactory.create(parentWlSurfaceResource,
-                                                                           wlSurfaceResource,
+                                                                           Sibling.create(wlSurfaceResource),
                                                                            surface.getState());
         surface.getApplySurfaceStateSignal()
                .connect(subsurface::apply);

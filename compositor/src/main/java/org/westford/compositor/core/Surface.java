@@ -71,15 +71,13 @@ public class Surface {
      * Business dependencies
      */
     @Nonnull
-    private final FiniteRegionFactory   finiteRegionFactory;
+    private final FiniteRegionFactory finiteRegionFactory;
     @Nonnull
-    private final Compositor            compositor;
+    private final Compositor          compositor;
     @Nonnull
-    private final Renderer              renderer;
+    private final Renderer            renderer;
     @Nonnull
-    private final SurfaceViewFactory    surfaceViewFactory;
-    @Nonnull
-    private final SiblingSurfaceFactory siblingSurfaceFactory;
+    private final SurfaceViewFactory  surfaceViewFactory;
     @Nonnull
     private final List<WlCallbackResource> callbacks       = new LinkedList<>();
     @Nonnull
@@ -89,20 +87,20 @@ public class Surface {
      * pending state
      */
     @Nonnull
-    private final SurfaceState.Builder       pendingState                 = SurfaceState.builder();
+    private final SurfaceState.Builder      pendingState                 = SurfaceState.builder();
     @Nonnull
-    private       Optional<DestroyListener>  pendingBufferDestroyListener = Optional.empty();
+    private       Optional<DestroyListener> pendingBufferDestroyListener = Optional.empty();
     @Nonnull
-    private final LinkedList<SiblingSurface> pendingSiblings              = new LinkedList<>();
+    private final LinkedList<Subsurface>    pendingSubsurfaces           = new LinkedList<>();
 
     /*
      * committed state
      */
     @Nonnull
-    private       SurfaceState               state    = SurfaceState.builder()
-                                                                    .build();
+    private       SurfaceState        state    = SurfaceState.builder()
+                                                             .build();
     @Nonnull
-    private final LinkedList<SiblingSurface> siblings = new LinkedList<>();
+    private final LinkedList<Sibling> siblings = new LinkedList<>();
 
 
     /*
@@ -124,13 +122,11 @@ public class Surface {
     Surface(@Nonnull @Provided final FiniteRegionFactory finiteRegionFactory,
             @Nonnull @Provided final Compositor compositor,
             @Nonnull @Provided final Renderer renderer,
-            @Nonnull @Provided final SurfaceViewFactory surfaceViewFactory,
-            @Nonnull @Provided final SiblingSurfaceFactory siblingSurfaceFactory) {
+            @Nonnull @Provided final SurfaceViewFactory surfaceViewFactory) {
         this.finiteRegionFactory = finiteRegionFactory;
         this.compositor = compositor;
         this.renderer = renderer;
         this.surfaceViewFactory = surfaceViewFactory;
-        this.siblingSurfaceFactory = siblingSurfaceFactory;
     }
 
     @Nonnull
@@ -205,12 +201,9 @@ public class Surface {
     @Nonnull
     public Surface commit() {
         final Optional<WlBufferResource> buffer = getState().getBuffer();
-        if (buffer.isPresent()) {
-            //signal client that the previous buffer can be reused as we will now use the
-            //newly attached buffer.
-            buffer.get()
-                  .release();
-        }
+        //signal client that the previous buffer can be reused as we will now use the
+        //newly attached buffer.
+        buffer.ifPresent(WlBufferResource::release);
 
         //flush states
         apply(this.state);
@@ -221,8 +214,10 @@ public class Surface {
     }
 
     public void apply(final SurfaceState surfaceState) {
-        this.siblings.clear();
-        this.siblings.addAll(this.pendingSiblings);
+        //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
+        this.pendingSubsurfaces.forEach(subsurface -> this.siblings.remove(subsurface.getSibling()));
+        this.pendingSubsurfaces.descendingIterator()
+                               .forEachRemaining(subsurface -> this.siblings.addFirst(subsurface.getSibling()));
 
         this.pendingState.build();
         setState(surfaceState);
@@ -382,20 +377,13 @@ public class Surface {
 
     public SurfaceView createView(WlSurfaceResource wlSurfaceResource,
                                   Point position) {
+
         final SurfaceView surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
                                                                        position);
-
-        //iterate siblings, and create new sibling view with the newly create parent view as parent.
-        getSiblings().forEach(siblingSurface -> {
-
-            final WlSurfaceResource siblingWlSurfaceResource = siblingSurface.getWlSurfaceResource();
-            final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
-
-            siblingWlSurface.getSurface()
-                            .createView(siblingWlSurfaceResource,
-                                        surfaceView.global(siblingSurface.getPosition()))
-                            .setParent(surfaceView);
-        });
+        getSiblings().forEach(sibling -> ensureSiblingView(sibling,
+                                                           surfaceView));
+        getPendingSubsurfaces().forEach(subsurface -> ensureSiblingView(subsurface.getSibling(),
+                                                                        surfaceView));
 
         if (this.surfaceViews.add(surfaceView)) {
             this.viewCreatedSignal.emit(surfaceView);
@@ -408,31 +396,40 @@ public class Surface {
         return this.viewCreatedSignal;
     }
 
-    @Nonnull
-    public SiblingSurface addSibling(@Nonnull final WlSurfaceResource siblingWlSurfaceResource,
-                                     @Nonnull final Point position) {
+    private void ensureSiblingView(@Nonnull Sibling sibling,
+                                   @Nonnull final SurfaceView surfaceView) {
 
-        final WlSurface siblingWlSurface = (WlSurface) siblingWlSurfaceResource.getImplementation();
-        final Surface   siblingSurface   = siblingWlSurface.getSurface();
+        final Point             siblingPosition          = sibling.getPosition();
+        final WlSurfaceResource siblingWlSurfaceResource = sibling.getWlSurfaceResource();
+        final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
+        final Surface           siblingSurface           = siblingWlSurface.getSurface();
 
-        getViews().forEach(surfaceView -> {
-            final SurfaceView siblingSurfaceView = siblingSurface.createView(siblingWlSurfaceResource,
-                                                                             surfaceView.global(position));
-            siblingSurfaceView.setParent(surfaceView);
-        });
 
-        final SiblingSurface relativeSiblingSurface = this.siblingSurfaceFactory.create(siblingWlSurfaceResource,
-                                                                                        position);
-        this.siblings.add(relativeSiblingSurface);
+        for (SurfaceView siblingSurfaceView : siblingSurface.getViews()) {
+            final Optional<SurfaceView> siblingSurfaceViewParent = siblingSurfaceView.getParent();
+            if (siblingSurfaceViewParent.isPresent() && siblingSurfaceViewParent.get()
+                                                                                .equals(surfaceView)) {
+                //sibling already has a view with this surface as it's parent view. Do nothing.
+                return;
+            }
+        }
 
-        return relativeSiblingSurface;
+        siblingSurface.createView(siblingWlSurfaceResource,
+                                  surfaceView.global(siblingPosition))
+                      .setParent(surfaceView);
     }
 
-    public void removeSibling(@Nonnull final SiblingSurface siblingSurface) {
-        this.siblings.remove(siblingSurface);
-        this.pendingSiblings.remove(siblingSurface);
+    public void addSibling(@Nonnull Sibling sibling) {
+        //TODO destroy listener -> remove from list
+        getViews().forEach(surfaceView -> ensureSiblingView(sibling,
+                                                            surfaceView));
+        this.siblings.add(sibling);
+    }
 
-        final WlSurfaceResource siblingWlSurfaceResource = siblingSurface.getWlSurfaceResource();
+    public void removeSibling(@Nonnull final Sibling sibling) {
+        this.siblings.remove(sibling);
+
+        final WlSurfaceResource siblingWlSurfaceResource = sibling.getWlSurfaceResource();
         final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
 
         siblingWlSurface.getSurface()
@@ -441,12 +438,19 @@ public class Surface {
     }
 
     @Nonnull
-    public LinkedList<SiblingSurface> getSiblings() {
+    public LinkedList<Sibling> getSiblings() {
         return this.siblings;
     }
 
+    public void addSubsurface(@Nonnull final Subsurface subsurface) {
+        //TODO destroy listener -> remove from list
+        getViews().forEach(surfaceView -> ensureSiblingView(subsurface.getSibling(),
+                                                            surfaceView));
+        this.pendingSubsurfaces.add(subsurface);
+    }
+
     @Nonnull
-    public LinkedList<SiblingSurface> getPendingSiblings() {
-        return this.pendingSiblings;
+    public LinkedList<Subsurface> getPendingSubsurfaces() {
+        return this.pendingSubsurfaces;
     }
 }
