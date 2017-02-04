@@ -2,6 +2,7 @@ package org.westford.compositor.core;
 
 import com.google.auto.value.AutoValue;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
 
@@ -32,6 +33,18 @@ public abstract class Sibling {
 
     public void setPosition(@Nonnull final Point position) {
         this.position = position;
+        updateSurfaceViewsPosition();
+    }
+
+    public void updateSurfaceViewsPosition() {
+        final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+
+        surface.getViews()
+               .forEach(surfaceView ->
+                                surfaceView.getParent()
+                                           .ifPresent(parentSurfaceView ->
+                                                              surfaceView.setPosition(parentSurfaceView.global(this.position))));
     }
 
     @Override
