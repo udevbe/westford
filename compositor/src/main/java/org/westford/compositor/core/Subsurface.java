@@ -40,11 +40,15 @@ public class Subsurface implements Role {
     private boolean sync  = true;
 
     @Nonnull
-    private Sibling      sibling;
+    private Sibling sibling;
+
     @Nonnull
     private SurfaceState surfaceState;
     @Nonnull
     private SurfaceState cachedSurfaceState;
+
+    @Nonnull
+    private Point position = Point.ZERO;
 
     Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                @Nonnull final Sibling sibling,
@@ -104,8 +108,6 @@ public class Subsurface implements Role {
             this.surfaceState = cachedSurfaceState;
             apply(cachedSurfaceState);
         }
-
-        applyPosition();
     }
 
     @Nonnull
@@ -119,13 +121,14 @@ public class Subsurface implements Role {
         }
 
         if (isEffectiveSync()) {
-            final WlSurface    wlSurface       = (WlSurface) getSibling().getWlSurfaceResource()
-                                                                         .getImplementation();
+            final WlSurface wlSurface = (WlSurface) getSibling().getWlSurfaceResource()
+                                                                .getImplementation();
             final Surface      surface         = wlSurface.getSurface();
             final SurfaceState oldSurfaceState = getSurfaceState();
             if (!surface.getState()
                         .equals(oldSurfaceState)) {
                 //replace new state with old state
+                getSibling().setPosition(this.position);
                 surface.apply(oldSurfaceState);
                 this.cachedSurfaceState = surfaceState;
             }
@@ -134,28 +137,8 @@ public class Subsurface implements Role {
             //desync mode, our 'old' state is always the newest state.
             this.cachedSurfaceState = surfaceState;
             this.surfaceState = surfaceState;
+            getSibling().setPosition(this.position);
         }
-    }
-
-    public void applyPosition() {
-        if (isInert()) {
-            return;
-        }
-
-        final WlSurface wlSurface = (WlSurface) getSibling().getWlSurfaceResource()
-                                                            .getImplementation();
-        final Surface surface = wlSurface.getSurface();
-
-        surface.getViews()
-               .forEach(this::applyPosition);
-    }
-
-    public void applyPosition(SurfaceView surfaceView) {
-        surfaceView.getParent()
-                   .ifPresent(parentSurfaceView -> {
-                       final Point global = parentSurfaceView.global(getSibling().getPosition());
-                       surfaceView.setPosition(global);
-                   });
     }
 
     @Nonnull
@@ -267,5 +250,13 @@ public class Subsurface implements Role {
 
         placement(true,
                   sibling);
+    }
+
+    public void setPosition(@Nonnull final Point position) {
+        if (isInert()) {
+            return;
+        }
+
+        this.position = position;
     }
 }
