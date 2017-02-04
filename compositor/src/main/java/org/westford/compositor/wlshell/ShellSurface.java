@@ -37,6 +37,7 @@ import org.westford.compositor.core.Rectangle;
 import org.westford.compositor.core.Role;
 import org.westford.compositor.core.RoleVisitor;
 import org.westford.compositor.core.Scene;
+import org.westford.compositor.core.Sibling;
 import org.westford.compositor.core.Surface;
 import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.Transforms;
@@ -384,25 +385,15 @@ public class ShellSurface implements Role {
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
-        //add surface as child of parent, as both pending and immediate state.
-        parentSurface.getPendingSubsurfaces()
-                     .add(wlSurfaceResource);
-        parentSurface.getSiblings()
-                     .add(wlSurfaceResource);
-
-        //remove surface as child of parent if surface is destroyed.
-        wlSurfaceResource.register(() -> {
-            parentSurface.getPendingSubsurfaces()
-                         .remove(wlSurfaceResource);
-            parentSurface.getSiblings()
-                         .remove(wlSurfaceResource);
-        });
+        final Point relativePosition = Point.create(x,
+                                                    y);
+        parentSurface.addSibling(Sibling.create(wlSurfaceResource,
+                                                relativePosition);
 
         //create a new surface view for each parent view that moves relative to the parent view.
         parentSurface.getViews()
                      .forEach(parentSurfaceView -> {
-                         final Point relativePosition = Point.create(x,
-                                                                     y);
+
                          final Point position = parentSurfaceView.global(relativePosition);
                          final SurfaceView surfaceView = surface.createView(wlSurfaceResource,
                                                                             position);

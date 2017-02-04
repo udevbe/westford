@@ -97,10 +97,11 @@ public class Scene {
         final Surface           parentSurface           = parentWlSurface.getSurface();
 
         parentSurface.getSiblings()
-                     .forEach(siblingWlSurfaceResource -> {
+                     .forEach(sibling -> {
 
-                         final WlSurface siblingWlSurface = (WlSurface) siblingWlSurfaceResource.getImplementation();
-                         final Surface   siblingSurface   = siblingWlSurface.getSurface();
+                         final WlSurface siblingWlSurface = (WlSurface) sibling.getWlSurfaceResource()
+                                                                               .getImplementation();
+                         final Surface siblingSurface = siblingWlSurface.getSurface();
 
                          siblingSurface.getViews()
                                        .forEach(siblingSurfaceView -> {
@@ -131,9 +132,9 @@ public class Scene {
 
                    addSiblingViews(parentSurfaceView,
                                    surfaceViews);
-
                    surface.getSiblings()
-                          .forEach(siblingWlSurfaceResource -> {
+                          .forEach(sibling -> {
+                              final WlSurfaceResource siblingWlSurfaceResource = sibling.getWlSurfaceResource();
                               if (!siblingWlSurfaceResource.equals(wlSurfaceResource)) {
                                   loopSiblings(siblingWlSurfaceResource,
                                                surfaceViews);
