@@ -19,6 +19,7 @@ package org.westford.compositor.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import com.google.common.base.Supplier;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
@@ -167,8 +168,9 @@ public class Surface {
         getPendingState().build()
                          .getBuffer()
                          .ifPresent(previousWlBufferResource -> previousWlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
-        this.pendingBufferDestroyListener = Optional.of(this::detachBuffer);
-        wlBufferResource.register(this.pendingBufferDestroyListener.get());
+        final DestroyListener detachBuffer = this::detachBuffer;
+        wlBufferResource.register(detachBuffer);
+        this.pendingBufferDestroyListener = Optional.of(detachBuffer);
         getPendingState().buffer(Optional.of(wlBufferResource))
                          .deltaPosition(Point.create(dx,
                                                      dy));
@@ -414,27 +416,31 @@ public class Surface {
             }
         }
 
-        siblingSurface.createView(siblingWlSurfaceResource,
-                                  surfaceView.global(siblingPosition))
-                      .setParent(surfaceView);
+        final SurfaceView siblingSurfaceView = siblingSurface.createView(siblingWlSurfaceResource,
+                                                                         surfaceView.global(siblingPosition));
+        siblingSurfaceView.setParent(surfaceView);
+        surfaceView.getPositionSignal()
+                   .connect(event -> siblingSurfaceView.setPosition(surfaceView.global(sibling.getPosition())));
     }
 
     public void addSibling(@Nonnull Sibling sibling) {
-        //TODO destroy listener -> remove from list
         getViews().forEach(surfaceView -> ensureSiblingView(sibling,
                                                             surfaceView));
         this.siblings.add(sibling);
+        sibling.getWlSurfaceResource()
+               .register(() -> removeSibling(sibling));
     }
 
     public void removeSibling(@Nonnull final Sibling sibling) {
-        this.siblings.remove(sibling);
+        if (this.siblings.remove(sibling)) {
 
-        final WlSurfaceResource siblingWlSurfaceResource = sibling.getWlSurfaceResource();
-        final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
+            final WlSurfaceResource siblingWlSurfaceResource = sibling.getWlSurfaceResource();
+            final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
 
-        siblingWlSurface.getSurface()
-                        .getViews()
-                        .forEach(SurfaceView::removeParent);
+            siblingWlSurface.getSurface()
+                            .getViews()
+                            .forEach(SurfaceView::removeParent);
+        }
     }
 
     @Nonnull
@@ -443,10 +449,19 @@ public class Surface {
     }
 
     public void addSubsurface(@Nonnull final Subsurface subsurface) {
-        //TODO destroy listener -> remove from list
-        getViews().forEach(surfaceView -> ensureSiblingView(subsurface.getSibling(),
+        final Sibling subsurfaceSibling = subsurface.getSibling();
+        getViews().forEach(surfaceView -> ensureSiblingView(subsurfaceSibling,
                                                             surfaceView));
+        subsurfaceSibling.getWlSurfaceResource()
+                         .register(() -> removeSubsurface(subsurface));
+
         this.pendingSubsurfaces.add(subsurface);
+    }
+
+    public void removeSubsurface(@Nonnull final Subsurface subsurface) {
+        if (this.pendingSubsurfaces.remove(subsurface)) {
+            removeSibling(subsurface.getSibling());
+        }
     }
 
     @Nonnull
