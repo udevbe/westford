@@ -208,7 +208,7 @@ public class Surface {
         buffer.ifPresent(WlBufferResource::release);
 
         //flush states
-        apply(this.state);
+        apply(this.pendingState.build());
 
         //reset pending buffer state
         detachBuffer();
@@ -216,12 +216,6 @@ public class Surface {
     }
 
     public void apply(final SurfaceState surfaceState) {
-        //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
-        this.pendingSubsurfaces.forEach(subsurface -> this.siblings.remove(subsurface.getSibling()));
-        this.pendingSubsurfaces.descendingIterator()
-                               .forEachRemaining(subsurface -> this.siblings.addFirst(subsurface.getSibling()));
-
-        this.pendingState.build();
         setState(surfaceState);
         updateTransform();
         updateSize();
@@ -412,6 +406,7 @@ public class Surface {
             if (siblingSurfaceViewParent.isPresent() && siblingSurfaceViewParent.get()
                                                                                 .equals(surfaceView)) {
                 //sibling already has a view with this surface as it's parent view. Do nothing.
+                //TODO Perhaps we should we allow this?
                 return;
             }
         }

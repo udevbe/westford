@@ -43,7 +43,8 @@ public class Subsurface implements Role {
     private Sibling sibling;
 
     @Nonnull
-    private SurfaceState surfaceState;
+    private SurfaceState currentSurfaceState;
+
     @Nonnull
     private SurfaceState cachedSurfaceState;
 
@@ -52,11 +53,11 @@ public class Subsurface implements Role {
 
     Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                @Nonnull final Sibling sibling,
-               @Nonnull final SurfaceState surfaceState) {
+               @Nonnull final SurfaceState currentSurfaceState) {
         this.parentWlSurfaceResource = parentWlSurfaceResource;
         this.sibling = sibling;
-        this.surfaceState = surfaceState;
-        this.cachedSurfaceState = surfaceState;
+        this.currentSurfaceState = currentSurfaceState;
+        this.cachedSurfaceState = currentSurfaceState;
     }
 
     @Override
@@ -103,16 +104,16 @@ public class Subsurface implements Role {
 
         final SurfaceState cachedSurfaceState = getCachedSurfaceState();
         if (isEffectiveSync() &&
-            !getSurfaceState().equals(cachedSurfaceState)) {
-            //sync mode. update old state with cached state
-            this.surfaceState = cachedSurfaceState;
+            !getCurrentSurfaceState().equals(cachedSurfaceState)) {
+            //sync mode. update current state with cached state
+            this.currentSurfaceState = cachedSurfaceState;
             apply(cachedSurfaceState);
         }
     }
 
     @Nonnull
-    public SurfaceState getSurfaceState() {
-        return this.surfaceState;
+    public SurfaceState getCurrentSurfaceState() {
+        return this.currentSurfaceState;
     }
 
     public void apply(final SurfaceState surfaceState) {
@@ -120,25 +121,45 @@ public class Subsurface implements Role {
             return;
         }
 
+        final WlSurface wlSurface = (WlSurface) getSibling().getWlSurfaceResource()
+                                                            .getImplementation();
+        final Surface surface = wlSurface.getSurface();
+
         if (isEffectiveSync()) {
-            final WlSurface wlSurface = (WlSurface) getSibling().getWlSurfaceResource()
-                                                                .getImplementation();
-            final Surface      surface         = wlSurface.getSurface();
-            final SurfaceState oldSurfaceState = getSurfaceState();
+            final SurfaceState currentSurfaceState = getCurrentSurfaceState();
+
             if (!surface.getState()
-                        .equals(oldSurfaceState)) {
-                //replace new state with old state
-                getSibling().setPosition(this.position);
-                surface.apply(oldSurfaceState);
+                        .equals(currentSurfaceState)) {
+
+                if (currentSurfaceState.equals(this.cachedSurfaceState)) {
+                    //apply comes from parent parent apply
+                    applyPositionAndStacking(surface);
+                }
+
+                //replace to-be state, with current active state.
+                surface.apply(currentSurfaceState);
+                //cache to-be state.
                 this.cachedSurfaceState = surfaceState;
             }
         }
         else {
-            //desync mode, our 'old' state is always the newest state.
+            //desync mode, our to-be state is always the current state.
             this.cachedSurfaceState = surfaceState;
-            this.surfaceState = surfaceState;
-            getSibling().setPosition(this.position);
+            this.currentSurfaceState = surfaceState;
+            applyPositionAndStacking(surface);
         }
+    }
+
+    private void applyPositionAndStacking(final Surface surface) {
+        getSibling().setPosition(this.position);
+
+        //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
+        final LinkedList<Subsurface> pendingSubsurfaces = surface.getPendingSubsurfaces();
+        final LinkedList<Sibling>    siblings           = surface.getSiblings();
+
+        pendingSubsurfaces.forEach(subsurface -> siblings.remove(subsurface.getSibling()));
+        pendingSubsurfaces.descendingIterator()
+                          .forEachRemaining(subsurface -> siblings.addFirst(subsurface.getSibling()));
     }
 
     @Nonnull

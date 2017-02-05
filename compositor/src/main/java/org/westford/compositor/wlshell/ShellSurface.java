@@ -388,7 +388,7 @@ public class ShellSurface implements Role {
         final Point relativePosition = Point.create(x,
                                                     y);
         parentSurface.addSibling(Sibling.create(wlSurfaceResource,
-                                                relativePosition);
+                                                relativePosition));
 
         //create a new surface view for each parent view that moves relative to the parent view.
         parentSurface.getViews()

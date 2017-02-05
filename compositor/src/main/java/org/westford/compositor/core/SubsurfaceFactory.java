@@ -56,14 +56,15 @@ public class SubsurfaceFactory {
                      .connect((surfaceState) -> subsurface.onParentApply());
 
         parentSurface.getRole()
-                     .ifPresent(role -> {
-                         if (role instanceof Subsurface) {
-                             final Subsurface parentSubsurface = (Subsurface) role;
+                     .ifPresent(role -> role.accept(new RoleVisitor() {
+                         @Override
+                         public void visit(final Subsurface parentSubsurface) {
                              parentSubsurface.getEffectiveSyncSignal()
                                              .connect(subsurface::updateEffectiveSync);
                          }
-                     });
+                     }));
 
+        parentSurface.addSubsurface(subsurface);
         this.scene.getSurfacesStack()
                   .remove(wlSurfaceResource);
 
