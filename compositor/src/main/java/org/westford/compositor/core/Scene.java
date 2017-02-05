@@ -80,7 +80,7 @@ public class Scene {
     }
 
 
-    private LinkedList<SurfaceView> createSurfaceViewStack() {
+    public LinkedList<SurfaceView> createSurfaceViewStack() {
 
         final LinkedList<SurfaceView> surfaceViews = new LinkedList<>();
         this.surfacesStack.forEach(wlSurfaceResource -> loopSiblings(wlSurfaceResource,
