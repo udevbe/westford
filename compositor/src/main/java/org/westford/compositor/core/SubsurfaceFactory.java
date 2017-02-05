@@ -43,9 +43,11 @@ public class SubsurfaceFactory {
         final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface   = wlSurface.getSurface();
 
+        final SurfaceState surfaceState = surface.getState();
         final Subsurface subsurface = this.privateSubsurfaceFactory.create(parentWlSurfaceResource,
                                                                            Sibling.create(wlSurfaceResource),
-                                                                           surface.getState());
+                                                                           surfaceState,
+                                                                           surfaceState);
         surface.getApplySurfaceStateSignal()
                .connect(subsurface::apply);
 
@@ -53,7 +55,7 @@ public class SubsurfaceFactory {
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
         parentSurface.getApplySurfaceStateSignal()
-                     .connect((surfaceState) -> subsurface.onParentApply());
+                     .connect(parentSurfaceState -> subsurface.onParentApply());
 
         parentSurface.getRole()
                      .ifPresent(role -> role.accept(new RoleVisitor() {

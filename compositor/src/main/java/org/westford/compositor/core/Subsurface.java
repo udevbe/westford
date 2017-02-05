@@ -44,7 +44,6 @@ public class Subsurface implements Role {
 
     @Nonnull
     private SurfaceState currentSurfaceState;
-
     @Nonnull
     private SurfaceState cachedSurfaceState;
 
@@ -53,11 +52,12 @@ public class Subsurface implements Role {
 
     Subsurface(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
                @Nonnull final Sibling sibling,
-               @Nonnull final SurfaceState currentSurfaceState) {
+               @Nonnull final SurfaceState currentSurfaceState,
+               @Nonnull final SurfaceState cachedSurfaceState) {
         this.parentWlSurfaceResource = parentWlSurfaceResource;
         this.sibling = sibling;
         this.currentSurfaceState = currentSurfaceState;
-        this.cachedSurfaceState = currentSurfaceState;
+        this.cachedSurfaceState = cachedSurfaceState;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class Subsurface implements Role {
             final Surface   surface   = wlSurface.getSurface();
 
             //set back cached state so surface can do eg. buffer release
-            surface.setState(getCachedSurfaceState());
+            surface.setState(this.cachedSurfaceState);
         }
     }
 
@@ -88,11 +88,6 @@ public class Subsurface implements Role {
         return this.effectiveSync;
     }
 
-    @Nonnull
-    public SurfaceState getCachedSurfaceState() {
-        return this.cachedSurfaceState;
-    }
-
     public void setInert() {
         this.inert = true;
     }
@@ -102,18 +97,12 @@ public class Subsurface implements Role {
             return;
         }
 
-        final SurfaceState cachedSurfaceState = getCachedSurfaceState();
         if (isEffectiveSync() &&
-            !getCurrentSurfaceState().equals(cachedSurfaceState)) {
+            !this.currentSurfaceState.equals(this.cachedSurfaceState)) {
             //sync mode. update current state with cached state
-            this.currentSurfaceState = cachedSurfaceState;
-            apply(cachedSurfaceState);
+            this.currentSurfaceState = this.cachedSurfaceState;
+            apply(this.cachedSurfaceState);
         }
-    }
-
-    @Nonnull
-    public SurfaceState getCurrentSurfaceState() {
-        return this.currentSurfaceState;
     }
 
     public void apply(final SurfaceState surfaceState) {
@@ -126,18 +115,18 @@ public class Subsurface implements Role {
         final Surface surface = wlSurface.getSurface();
 
         if (isEffectiveSync()) {
-            final SurfaceState currentSurfaceState = getCurrentSurfaceState();
 
             if (!surface.getState()
-                        .equals(currentSurfaceState)) {
+                        .equals(this.currentSurfaceState)) {
 
-                if (currentSurfaceState.equals(this.cachedSurfaceState)) {
-                    //apply comes from parent parent apply
+                if (this.currentSurfaceState.equals(this.cachedSurfaceState)) {
+                    //apply is triggered by a parent apply
                     applyPositionAndStacking(surface);
                 }
 
-                //replace to-be state, with current active state.
-                surface.apply(currentSurfaceState);
+                //roll back 'to-be' state to current active state in case of non-parent commit.
+                //In case of parent commit, currentSurfaceState will be set to the accumulated cachedSurfaceState.
+                surface.apply(this.currentSurfaceState);
                 //cache to-be state.
                 this.cachedSurfaceState = surfaceState;
             }
@@ -210,7 +199,7 @@ public class Subsurface implements Role {
                 final WlSurface wlSurface = (WlSurface) getSibling().getWlSurfaceResource()
                                                                     .getImplementation();
                 wlSurface.getSurface()
-                         .apply(getCachedSurfaceState());
+                         .apply(this.cachedSurfaceState);
             }
 
             getEffectiveSyncSignal().emit(isEffectiveSync());
