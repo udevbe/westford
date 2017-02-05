@@ -40,6 +40,7 @@ import org.westford.compositor.core.SmBuffer;
 import org.westford.compositor.core.Surface;
 import org.westford.compositor.core.SurfaceRenderState;
 import org.westford.compositor.core.SurfaceRenderStateVisitor;
+import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.UnsupportedBuffer;
 import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.drm.egl.DrmEglOutput;
@@ -416,7 +417,7 @@ public class Gles2Renderer implements GlRenderer {
                       @Nonnull WlOutput wlOutput) {
         render(eglOutput,
                wlOutput,
-               this.scene.getSurfacesStack());
+               this.scene.createSurfaceViewStack());
     }
 
     @Override
@@ -435,7 +436,7 @@ public class Gles2Renderer implements GlRenderer {
 
     public void render(@Nonnull final EglOutput eglOutput,
                        final WlOutput wlOutput,
-                       final Iterable<WlSurfaceResource> surfacesStack) {
+                       final Iterable<SurfaceView> surfaceViews) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglSurface(),
@@ -459,7 +460,7 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
 
         //naive single pass, bottom to top overdraw rendering.
-        surfacesStack.forEach(this::draw);
+        surfaceViews.forEach(this::draw);
         flushRenderState(eglOutput);
     }
 
@@ -703,22 +704,19 @@ public class Gles2Renderer implements GlRenderer {
         //@formatter:on
     }
 
-    private void draw(final WlSurfaceResource wlSurfaceResource) {
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+    private void draw(final SurfaceView surfaceView) {
+
+
+        final WlSurfaceResource wlSurfaceResource = surfaceView.getWlSurfaceResource();
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
+
         //don't bother rendering subsurfaces if the parent doesn't have a buffer.
         wlSurface.getSurface()
                  .getState()
                  .getBuffer()
-                 .ifPresent(wlBufferResource -> {
-                     final LinkedList<WlSurfaceResource> subsurfaces = this.scene.getSubsurfaceViewStack(wlSurfaceResource);
-                     draw(wlSurfaceResource,
-                          wlBufferResource);
-                     subsurfaces.forEach((subsurface) -> {
-                         if (subsurface != wlSurfaceResource) {
-                             draw(subsurface);
-                         }
-                     });
-                 });
+                 .ifPresent(wlBufferResource -> draw(wlSurfaceResource,
+                                                     wlBufferResource));
     }
 
     private void draw(final WlSurfaceResource wlSurfaceResource,
