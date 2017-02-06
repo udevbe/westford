@@ -39,6 +39,7 @@ import org.westford.compositor.core.PointerGrabMotion;
 import org.westford.compositor.core.Rectangle;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Surface;
+import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.core.calc.Vec4;
 import org.westford.compositor.core.events.KeyboardFocusGained;
@@ -100,12 +101,15 @@ public class ShellSurfaceTest {
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
         final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
+
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
         final Point surfacePosition = Point.create(75,
                                                    75);
-        when(surface.global(eq(Point.create(0,
-                                            0)))).thenReturn(surfacePosition);
+        when(surfaceView.global(eq(Point.create(0,
+                                                0)))).thenReturn(surfacePosition);
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -126,8 +130,8 @@ public class ShellSurfaceTest {
                                                       Point.create(110,
                                                                    110)));
         //then
-        verify(surface).setPosition(Point.create(85,
-                                                 85));
+        verify(surfaceView).setPosition(Point.create(85,
+                                                     85));
     }
 
     @Test
@@ -149,12 +153,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                          80));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
+                                                                              80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
@@ -212,12 +219,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                          80));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
+                                                                              80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
@@ -274,12 +284,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                          20));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
+                                                                              20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
@@ -337,12 +350,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                          20));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
+                                                                              20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
@@ -400,12 +416,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                          20));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
+                                                                              20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
@@ -464,12 +483,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                          20));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
+                                                                              20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
@@ -526,12 +548,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                          80));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
+                                                                              80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
@@ -589,12 +614,15 @@ public class ShellSurfaceTest {
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface         = mock(WlSurface.class);
-        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
-        final Surface surface = mock(Surface.class);
-        when(wlSurface.getSurface()).thenReturn(surface);
+        final Surface           surface           = mock(Surface.class);
+        final SurfaceView       surfaceView       = mock(SurfaceView.class);
 
-        when(surface.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                          80));
+        when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
+        when(wlSurface.getSurface()).thenReturn(surface);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
+
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
+                                                                              80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surface.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
@@ -710,12 +738,16 @@ public class ShellSurfaceTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
+        final SurfaceView surfaceView = mock(SurfaceView.class);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
         final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
         final WlSurface         parentWlSurface         = mock(WlSurface.class);
         when(parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
         final Surface parentSurface = mock(Surface.class);
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+        final SurfaceView parentSurfaceView = mock(SurfaceView.class);
+        when(parentSurface.getViews()).thenReturn(Collections.singleton(parentSurfaceView));
 
         final int localX = 75;
         final int localY = 120;
@@ -723,9 +755,9 @@ public class ShellSurfaceTest {
         final int globalX = 100;
         final int globalY = 150;
 
-        when(parentSurface.global(Point.create(localX,
-                                               localY))).thenReturn(Point.create(globalX,
-                                                                                 globalY));
+        when(parentSurfaceView.global(Point.create(localX,
+                                                   localY))).thenReturn(Point.create(globalX,
+                                                                                     globalY));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -740,8 +772,8 @@ public class ShellSurfaceTest {
                                   EnumSet.noneOf(WlShellSurfaceTransient.class));
 
         //then
-        verify(surface).setPosition(Point.create(globalX,
-                                                 globalY));
+        verify(surfaceView).setPosition(Point.create(globalX,
+                                                     globalY));
     }
 
     @Test
@@ -752,6 +784,8 @@ public class ShellSurfaceTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
+        final SurfaceView surfaceView = mock(SurfaceView.class);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
         final Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>> keyboardFocusGainedSignal = new Signal<>();
         when(surface.getKeyboardFocusGainedSignal()).thenReturn(keyboardFocusGainedSignal);
 
@@ -774,6 +808,8 @@ public class ShellSurfaceTest {
         when(parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
         final Surface parentSurface = mock(Surface.class);
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+        final SurfaceView parentSurfaceView = mock(SurfaceView.class);
+        when(parentSurface.getViews()).thenReturn(Collections.singleton(parentSurfaceView));
 
         final int localX = 75;
         final int localY = 120;
@@ -781,9 +817,9 @@ public class ShellSurfaceTest {
         final int globalX = 100;
         final int globalY = 150;
 
-        when(parentSurface.global(Point.create(localX,
-                                               localY))).thenReturn(Point.create(globalX,
-                                                                                 globalY));
+        when(parentSurfaceView.global(Point.create(localX,
+                                                   localY))).thenReturn(Point.create(globalX,
+                                                                                     globalY));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -798,8 +834,8 @@ public class ShellSurfaceTest {
                                   EnumSet.of(WlShellSurfaceTransient.INACTIVE));
 
         //then
-        verify(surface).setPosition(Point.create(globalX,
-                                                 globalY));
+        verify(surfaceView).setPosition(Point.create(globalX,
+                                                     globalY));
         verify(wlKeyboardResource0).leave(anyInt(),
                                           eq(wlSurfaceResource));
         verify(wlKeyboardResource1).leave(anyInt(),

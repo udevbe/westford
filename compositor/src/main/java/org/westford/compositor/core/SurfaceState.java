@@ -34,6 +34,7 @@ public abstract class SurfaceState {
                                                    .damage(Optional.<Region>empty())
                                                    .buffer(Optional.<WlBufferResource>empty())
                                                    .bufferTransform(Mat4.IDENTITY)
+                                                   .deltaPosition(Point.ZERO)
                                                    .scale(1);
     }
 

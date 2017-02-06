@@ -32,8 +32,6 @@ import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Subsurface;
 import org.westford.compositor.core.Surface;
 
-import java.util.LinkedList;
-
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
@@ -138,11 +136,6 @@ public class WlSubsurfaceTest {
 
         when(siblingWlSurfaceResource.getImplementation()).thenReturn(siblingWlSurface);
         when(siblingWlSurface.getSurface()).thenReturn(siblingSurface);
-
-        final LinkedList<WlSurfaceResource> subsurfaceStack = mock(LinkedList.class);
-
-        when(this.scene.getSubsurfaceViewStack(parentWlSurfaceResource)).thenReturn(subsurfaceStack);
-        when(subsurfaceStack.contains(siblingWlSurfaceResource)).thenReturn(siblingValid);
     }
 
     @Test

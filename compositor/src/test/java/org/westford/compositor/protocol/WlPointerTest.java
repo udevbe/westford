@@ -31,8 +31,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.westford.compositor.core.PointerDevice;
 import org.westford.compositor.core.Role;
+import org.westford.compositor.core.RoleVisitor;
 import org.westford.compositor.core.Surface;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -188,7 +190,12 @@ public class WlPointerTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
-        when(surface.getRole()).thenReturn(Optional.of(new Role() {}));
+        when(surface.getRole()).thenReturn(Optional.of(new Role() {
+            @Override
+            public void accept(@Nonnull final RoleVisitor roleVisitor) {
+                roleVisitor.visit(this);
+            }
+        }));
 
         final int hotspotX = 10;
         final int hotspotY = 15;
