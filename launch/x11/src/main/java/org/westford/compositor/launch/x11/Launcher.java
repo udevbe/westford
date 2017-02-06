@@ -19,6 +19,7 @@ package org.westford.compositor.launch.x11;
 
 import org.westford.compositor.core.LifeCycle;
 import org.westford.compositor.core.PointerDevice;
+import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.protocol.WlKeyboard;
 import org.westford.compositor.protocol.WlSeat;
 import org.westford.compositor.x11.X11PlatformModule;
@@ -78,7 +79,8 @@ public class Launcher {
         pointerDevice.getPointerFocusSignal()
                      .connect(event -> wlKeyboard.getKeyboardDevice()
                                                  .setFocus(wlKeyboard.getResources(),
-                                                           pointerDevice.getFocus()));
+                                                           pointerDevice.getFocus()
+                                                                        .map(SurfaceView::getWlSurfaceResource)));
         /*
          * Start the compositor.
          */

@@ -22,6 +22,7 @@ import org.westford.compositor.core.KeyBindingFactory;
 import org.westford.compositor.core.KeyboardDevice;
 import org.westford.compositor.core.LifeCycle;
 import org.westford.compositor.core.PointerDevice;
+import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.TouchDevice;
 import org.westford.compositor.protocol.WlKeyboard;
 import org.westford.compositor.protocol.WlSeat;
@@ -99,10 +100,12 @@ public class Launcher {
 
         pointerDevice.getPointerFocusSignal()
                      .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
-                                                               pointerDevice.getFocus()));
+                                                               pointerDevice.getFocus()
+                                                                            .map(SurfaceView::getWlSurfaceResource)));
         touchDevice.getTouchDownSignal()
                    .connect(event -> keyboardDevice.setFocus(wlKeyboardResources,
-                                                             touchDevice.getGrab()));
+                                                             touchDevice.getGrab()
+                                                                        .map(SurfaceView::getWlSurfaceResource)));
 
         /*
          * setup tty switching key bindings
