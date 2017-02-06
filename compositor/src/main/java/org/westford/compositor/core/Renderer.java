@@ -56,12 +56,8 @@ public interface Renderer {
     //void visit(X11PixmanOutput x11PixmanOutput);
 
     /**
-     * @param wlSurfaceResource
-     *
-     * @deprecated method will be removed
+     * @param wlSurfaceResource the destroyed surface resource.
      */
-    //FIXME remove this method and instead register a destroy listener in the renderer implementation
-    @Deprecated
     void onDestroy(@Nonnull WlSurfaceResource wlSurfaceResource);
 
     @Nonnull

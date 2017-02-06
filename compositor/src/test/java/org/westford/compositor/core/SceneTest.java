@@ -11,6 +11,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.westford.compositor.protocol.WlRegion;
 import org.westford.compositor.protocol.WlSurface;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -35,6 +36,8 @@ public class SceneTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView surfaceView0 = mock(SurfaceView.class);
+        when(surface0.getViews()).thenReturn(Collections.singleton(surfaceView0));
         final Rectangle size0 = mock(Rectangle.class);
         when(surface0.getSize()).thenReturn(size0);
         final SurfaceState surfaceState0 = mock(SurfaceState.class);
@@ -48,7 +51,7 @@ public class SceneTest {
         when(wlRegion0.getRegion()).thenReturn(region0);
         when(surfaceState0.getInputRegion()).thenReturn(Optional.of(region0));
         final Point position0 = mock(Point.class);
-        when(surface0.local(global)).thenReturn(position0);
+        when(surfaceView0.local(global)).thenReturn(position0);
         when(region0.contains(size0,
                               position0)).thenReturn(true);
 
@@ -57,6 +60,8 @@ public class SceneTest {
         when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
         final Surface surface1 = mock(Surface.class);
         when(wlSurface1.getSurface()).thenReturn(surface1);
+        final SurfaceView surfaceView1 = mock(SurfaceView.class);
+        when(surface1.getViews()).thenReturn(Collections.singleton(surfaceView1));
         final Rectangle size1 = mock(Rectangle.class);
         when(surface1.getSize()).thenReturn(size1);
         final SurfaceState surfaceState1 = mock(SurfaceState.class);
@@ -70,7 +75,7 @@ public class SceneTest {
         when(surfaceState1.getInputRegion()).thenReturn(Optional.of(region1));
         when(wlRegion1.getRegion()).thenReturn(region1);
         final Point position1 = mock(Point.class);
-        when(surface1.local(global)).thenReturn(position1);
+        when(surfaceView1.local(global)).thenReturn(position1);
         when(region1.contains(size1,
                               position1)).thenReturn(false);
 
@@ -80,41 +85,11 @@ public class SceneTest {
                   .add(wlSurfaceResource1);
 
         //when
-        final Optional<WlSurfaceResource> pickSurface = this.scene.pickSurfaceView(global);
+        final Optional<SurfaceView> pickSurface = this.scene.pickSurfaceView(global);
 
         //then
         assertThat(pickSurface.get()).isEqualTo(wlSurfaceResource0);
     }
 
-    @Test
-    public void testGetSubsurfaceStack() throws Exception {
-        //TODO
-        //given: a compositor, a surface
-        //when: the subsurface stack is queried
-        //then: the surface's surface stack is returned consistently, including the surface itself.
-    }
-
-    @Test
-    public void testRemoveSubsurfaceStack() throws Exception {
-        //TODO
-        //given: a compositor, a surface, a surfacestack
-        //when: the surfacestack is deleted
-        //then: the surfacestack and pending surfacestack only includes the (parent) surface.
-    }
-
-    @Test
-    public void testGetPendingSubsurfaceStack() throws Exception {
-        //TODO
-        //given: a compositor, a surface
-        //when: the pending subsurface stack is queried
-        //then: the pending surface's surface stack is returned consistently, including the surface itself.
-    }
-
-    @Test
-    public void testCommitSubsurfaceStack() throws Exception {
-        //TODO
-        //given: a compositor, a surface, a pending surfacestack
-        //when: the pending surfacestack is commited
-        //then: the surface stack now reflects the (previously) pending surfacestack.
-    }
+    //TODO test create surface view stack
 }

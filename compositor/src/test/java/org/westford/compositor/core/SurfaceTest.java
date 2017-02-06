@@ -280,20 +280,21 @@ public class SurfaceTest {
         assertThat(this.surface.getFrameCallbacks()).isEmpty();
     }
 
-    @Test
-    public void testLocal() throws Exception {
-        //given
-        final Point absoluteCoordinate = Point.create(150,
-                                                      150);
-        final Point surfaceCoordinate = Point.create(100,
-                                                     100);
-        this.surface.setPosition(surfaceCoordinate);
-        //when
-        final Point relativeCoordinate = this.surface.local(absoluteCoordinate);
-        //then
-        assertThat(relativeCoordinate).isEqualTo(Point.create(50,
-                                                              50));
-    }
+    //TODO move to surfaceview test
+//    @Test
+//    public void testLocal() throws Exception {
+//        //given
+//        final Point absoluteCoordinate = Point.create(150,
+//                                                      150);
+//        final Point surfaceCoordinate = Point.create(100,
+//                                                     100);
+//        this.surface.setPosition(surfaceCoordinate);
+//        //when
+//        final Point relativeCoordinate = this.surface.local(absoluteCoordinate);
+//        //then
+//        assertThat(relativeCoordinate).isEqualTo(Point.create(50,
+//                                                              50));
+//    }
 
     @Test
     public void testUpdateSizeNoScaling() throws Exception {

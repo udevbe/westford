@@ -103,7 +103,7 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         wlSurfaceResource.register(() -> {
             //FIXME
             this.scene.getSurfacesStack()
-                      .removeAll(surface.getViews());
+                      .remove(wlSurfaceResource);
             surface.markDestroyed();
             this.renderer.onDestroy(wlSurfaceResource);
             this.compositor.requestRender();

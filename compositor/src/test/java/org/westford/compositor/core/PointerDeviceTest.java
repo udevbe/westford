@@ -38,6 +38,7 @@ import org.westford.compositor.core.events.PointerMotion;
 import org.westford.compositor.protocol.WlRegion;
 import org.westford.compositor.protocol.WlSurface;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -129,17 +130,21 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         //mock surface 1
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
@@ -162,21 +167,25 @@ public class PointerDeviceTest {
         final Region region1 = mock(Region.class);
         when(wlRegion1.getRegion()).thenReturn(region1);
         when(surfaceState1.getInputRegion()).thenReturn(Optional.of(region1));
+        final SurfaceView       surfaceView1  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews1 = new LinkedList<>();
+        surfaceViews1.add(surfaceView1);
+        when(surface1.getViews()).thenReturn(surfaceViews1);
 
         //mock surface 1 local coordinates
         final Point localPointerPosition1Start = Point.create(13,
                                                               21);
-        when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
+        when(surfaceView1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
         when(region1.contains(size1,
                               localPointerPosition1Start)).thenReturn(false);
         final Point localPointerPosition10 = Point.create(34,
                                                           55);
-        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
+        when(surfaceView1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition10))).thenReturn(false);
         final Point localPointerPosition11 = Point.create(89,
                                                           144);
-        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
+        when(surfaceView1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition11))).thenReturn(true);
 
@@ -201,9 +210,9 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
-                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y0)))).thenReturn(Optional.of(surfaceView0));
         when(this.scene.pickSurfaceView(eq(Point.create(x1,
-                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource1));
+                                                        y1)))).thenReturn(Optional.of(surfaceView1));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -288,17 +297,21 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         //mock surface 1
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
@@ -321,21 +334,25 @@ public class PointerDeviceTest {
         final Region region1 = mock(Region.class);
         when(wlRegion1.getRegion()).thenReturn(region1);
         when(surfaceState1.getInputRegion()).thenReturn(Optional.of(region1));
+        final SurfaceView       surfaceView1  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews1 = new LinkedList<>();
+        surfaceViews1.add(surfaceView1);
+        when(surface1.getViews()).thenReturn(surfaceViews1);
 
         //mock surface 1 local coordinates
         final Point localPointerPosition1Start = Point.create(13,
                                                               21);
-        when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
+        when(surfaceView1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
         when(region1.contains(size1,
                               localPointerPosition1Start)).thenReturn(false);
         final Point localPointerPosition10 = Point.create(34,
                                                           55);
-        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
+        when(surfaceView1.local(eq(pointerPos1))).thenReturn(localPointerPosition10);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition10))).thenReturn(false);
         final Point localPointerPosition11 = Point.create(89,
                                                           144);
-        when(surface1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
+        when(surfaceView1.local(eq(pointerPos1))).thenReturn(localPointerPosition11);
         when(region1.contains(eq(size1),
                               eq(localPointerPosition11))).thenReturn(true);
 
@@ -363,9 +380,9 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
-                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y0)))).thenReturn(Optional.of(surfaceView0));
         when(this.scene.pickSurfaceView(eq(Point.create(x1,
-                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource1));
+                                                        y1)))).thenReturn(Optional.of(surfaceView1));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -435,18 +452,22 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         final Set<WlPointerResource> pointerResources = new HashSet<>();
 
@@ -465,7 +486,7 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
-                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y0)))).thenReturn(Optional.of(surfaceView0));
         when(this.scene.pickSurfaceView(eq(Point.create(x1,
                                                         y1)))).thenReturn(Optional.empty());
 
@@ -528,18 +549,22 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         final Set<WlPointerResource> pointerResources = new HashSet<>();
 
@@ -560,7 +585,7 @@ public class PointerDeviceTest {
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
                                                         y0)))).thenReturn(Optional.empty());
         when(this.scene.pickSurfaceView(eq(Point.create(x1,
-                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y1)))).thenReturn(Optional.of(surfaceView0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -620,18 +645,22 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         final Set<WlPointerResource> pointerResources = new HashSet<>();
 
@@ -655,7 +684,7 @@ public class PointerDeviceTest {
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
                                                         y0)))).thenReturn(Optional.empty());
         when(this.scene.pickSurfaceView(eq(Point.create(x1,
-                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y1)))).thenReturn(Optional.of(surfaceView0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -730,17 +759,21 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         final Set<WlPointerResource> pointerResources = new HashSet<>();
 
@@ -762,9 +795,9 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
-                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y0)))).thenReturn(Optional.of(surfaceView0));
         when(this.scene.pickSurfaceView(eq(Point.create(x1,
-                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y1)))).thenReturn(Optional.of(surfaceView0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -833,17 +866,21 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         final Set<WlPointerResource> pointerResources = new HashSet<>();
 
@@ -865,7 +902,7 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
-                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y0)))).thenReturn(Optional.of(surfaceView0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -909,9 +946,13 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         final Point localPointerPosition0 = mock(Point.class);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
 
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         wlSurfaceResources.add(wlSurfaceResource1);
@@ -920,10 +961,14 @@ public class PointerDeviceTest {
         when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
         final Surface surface1 = mock(Surface.class);
         when(wlSurface1.getSurface()).thenReturn(surface1);
+        final SurfaceView       surfaceView1  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews1 = new LinkedList<>();
+        surfaceViews1.add(surfaceView1);
+        when(surface1.getViews()).thenReturn(surfaceViews1);
 
         final Point localPointerPosition1 = mock(Point.class);
-        when(surface1.local(Point.create(x,
-                                         y))).thenReturn(localPointerPosition1);
+        when(surfaceView1.local(Point.create(x,
+                                             y))).thenReturn(localPointerPosition1);
 
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
@@ -948,7 +993,7 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x,
-                                                        y)))).thenReturn(Optional.of(wlSurfaceResource1));
+                                                        y)))).thenReturn(Optional.of(surfaceView1));
 
         // when: cursor moves outside of old surface to new surface
         this.pointerDevice.motion(wlPointerResources,
@@ -1003,13 +1048,17 @@ public class PointerDeviceTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface.getViews()).thenReturn(surfaceViews0);
 
         final Point localPointerPosition0 = mock(Point.class);
-        when(surface.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
 
         final Point localPointerPosition1 = mock(Point.class);
-        when(surface.local(Point.create(x,
-                                        y))).thenReturn(localPointerPosition1);
+        when(surfaceView0.local(Point.create(x,
+                                             y))).thenReturn(localPointerPosition1);
 
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
@@ -1031,7 +1080,7 @@ public class PointerDeviceTest {
         when(this.scene.pickSurfaceView(eq(Point.create(0,
                                                         0)))).thenReturn(Optional.empty());
         when(this.scene.pickSurfaceView(eq(Point.create(x,
-                                                        y)))).thenReturn(Optional.of(wlSurfaceResource));
+                                                        y)))).thenReturn(Optional.of(surfaceView0));
 
         this.pointerDevice.motion(wlPointerResources,
                                   1234,
@@ -1094,17 +1143,21 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = Point.create(1,
                                                               1);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
         final Point localPointerPosition00 = Point.create(2,
                                                           3);
-        when(surface0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
+        when(surfaceView0.local(eq(pointerPos0))).thenReturn(localPointerPosition00);
         final Point localPointerPosition01 = Point.create(5,
                                                           8);
-        when(surface0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
+        when(surfaceView0.local(eq(pointerPos1))).thenReturn(localPointerPosition01);
 
         //mock display
         final int serial0 = 90879;
@@ -1132,9 +1185,9 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x0,
-                                                        y0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y0)))).thenReturn(Optional.of(surfaceView0));
         when(this.scene.pickSurfaceView(eq(Point.create(x1,
-                                                        y1)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        y1)))).thenReturn(Optional.of(surfaceView0));
 
         //when
         this.pointerDevice.motion(pointerResources,
@@ -1365,9 +1418,13 @@ public class PointerDeviceTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface.getViews()).thenReturn(surfaceViews0);
 
         final Point localPointerPosition0 = mock(Point.class);
-        when(surface.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
 
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
@@ -1396,7 +1453,7 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(0,
-                                                        0)))).thenReturn(Optional.of(wlSurfaceResource));
+                                                        0)))).thenReturn(Optional.of(surfaceView0));
 
         this.pointerDevice.motion(wlPointerResources,
                                   1234,
@@ -1443,9 +1500,13 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         final Point localPointerPosition0 = mock(Point.class);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
 
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
         wlSurfaceResources.add(wlSurfaceResource1);
@@ -1454,10 +1515,14 @@ public class PointerDeviceTest {
         when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
         final Surface surface1 = mock(Surface.class);
         when(wlSurface1.getSurface()).thenReturn(surface1);
+        final SurfaceView       surfaceView1  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews1 = new LinkedList<>();
+        surfaceViews1.add(surfaceView1);
+        when(surface1.getViews()).thenReturn(surfaceViews1);
 
         final Point localPointerPosition1 = mock(Point.class);
-        when(surface1.local(Point.create(x,
-                                         y))).thenReturn(localPointerPosition1);
+        when(surfaceView1.local(Point.create(x,
+                                             y))).thenReturn(localPointerPosition1);
 
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
@@ -1507,9 +1572,9 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(x,
-                                                        y)))).thenReturn(Optional.of(wlSurfaceResource1));
+                                                        y)))).thenReturn(Optional.of(surfaceView1));
         when(this.scene.pickSurfaceView(eq(Point.create(0,
-                                                        0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        0)))).thenReturn(Optional.of(surfaceView0));
 
         //move cursor from one client's surface to another
         //so 2 different cursor 'images' were set for 2 different clients
@@ -1564,9 +1629,13 @@ public class PointerDeviceTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         final Surface surface = mock(Surface.class);
         when(wlSurface.getSurface()).thenReturn(surface);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface.getViews()).thenReturn(surfaceViews0);
 
         final Point localPointerPosition0 = mock(Point.class);
-        when(surface.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
 
         when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
@@ -1595,7 +1664,7 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(0,
-                                                        0)))).thenReturn(Optional.of(wlSurfaceResource));
+                                                        0)))).thenReturn(Optional.of(surfaceView0));
 
         this.pointerDevice.motion(wlPointerResources,
                                   1,
@@ -1670,10 +1739,14 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = mock(Point.class);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
 
         //mock pointer 0 resource
         final Set<WlPointerResource> pointerResources   = new HashSet<>();
@@ -1683,7 +1756,7 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(0,
-                                                        0)))).thenReturn(Optional.of(wlSurfaceResource0));
+                                                        0)))).thenReturn(Optional.of(surfaceView0));
 
         this.pointerDevice.motion(pointerResources,
                                   1,
@@ -1733,10 +1806,14 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = mock(Point.class);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
 
         //mock pointer 0 resource
         final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
@@ -1752,10 +1829,14 @@ public class PointerDeviceTest {
         when(wlSurfaceResource1.getImplementation()).thenReturn(wlSurface1);
         final Surface surface1 = mock(Surface.class);
         when(wlSurface1.getSurface()).thenReturn(surface1);
+        final SurfaceView       surfaceView1  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews1 = new LinkedList<>();
+        surfaceViews1.add(surfaceView1);
+        when(surface1.getViews()).thenReturn(surfaceViews1);
 
         //mock surface 1 local coordinates
         final Point localPointerPosition1Start = mock(Point.class);
-        when(surface1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
+        when(surfaceView1.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition1Start);
 
         //mock pointer 1 resource
         final WlPointerResource wlPointerResource1 = mock(WlPointerResource.class);
@@ -1764,8 +1845,8 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(0,
-                                                        0)))).thenReturn(Optional.of(wlSurfaceResource1),
-                                                                     Optional.of(wlSurfaceResource0));
+                                                        0)))).thenReturn(Optional.of(surfaceView1),
+                                                                         Optional.of(surfaceView0));
 
         this.pointerDevice.motion(pointerResources,
                                   1,
@@ -1810,10 +1891,14 @@ public class PointerDeviceTest {
         when(wlSurfaceResource0.getImplementation()).thenReturn(wlSurface0);
         final Surface surface0 = mock(Surface.class);
         when(wlSurface0.getSurface()).thenReturn(surface0);
+        final SurfaceView       surfaceView0  = mock(SurfaceView.class);
+        Collection<SurfaceView> surfaceViews0 = new LinkedList<>();
+        surfaceViews0.add(surfaceView0);
+        when(surface0.getViews()).thenReturn(surfaceViews0);
 
         //mock surface 0 local coordinates
         final Point localPointerPosition0Start = mock(Point.class);
-        when(surface0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
+        when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0Start);
 
         //mock pointer 0 resource
         final Set<WlPointerResource> pointerResources   = new HashSet<>();
@@ -1823,8 +1908,8 @@ public class PointerDeviceTest {
 
         //mock scene
         when(this.scene.pickSurfaceView(eq(Point.create(0,
-                                                        0)))).thenReturn(Optional.of(wlSurfaceResource0),
-                                                                     Optional.empty());
+                                                        0)))).thenReturn(Optional.of(surfaceView0),
+                                                                         Optional.empty());
 
         this.pointerDevice.motion(pointerResources,
                                   1,

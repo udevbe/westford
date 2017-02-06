@@ -22,10 +22,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westford.compositor.protocol.WlSurface;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -70,10 +72,12 @@ public class CursorTest {
         //given
         final Point point = Point.create(123,
                                          456);
+        final SurfaceView surfaceView = mock(SurfaceView.class);
+        when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
         //when
         this.cursor.updatePosition(point);
         //then
-        verify(this.surface).setPosition(eq(Point.create(123,
-                                                         456)));
+        verify(surfaceView).setPosition(eq(Point.create(123,
+                                                        456)));
     }
 }
