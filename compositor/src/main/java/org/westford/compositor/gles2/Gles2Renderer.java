@@ -58,7 +58,6 @@ import org.westford.nativ.libGLESv2.LibGLESv2;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -706,8 +705,6 @@ public class Gles2Renderer implements GlRenderer {
 
     private void draw(final SurfaceView surfaceView) {
 
-
-        final WlSurfaceResource wlSurfaceResource = surfaceView.getWlSurfaceResource();
         final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
                                                            .getImplementation();
 
@@ -715,11 +712,11 @@ public class Gles2Renderer implements GlRenderer {
         wlSurface.getSurface()
                  .getState()
                  .getBuffer()
-                 .ifPresent(wlBufferResource -> draw(wlSurfaceResource,
+                 .ifPresent(wlBufferResource -> draw(surfaceView,
                                                      wlBufferResource));
     }
 
-    private void draw(final WlSurfaceResource wlSurfaceResource,
+    private void draw(final SurfaceView surfaceView,
                       final WlBufferResource wlBufferResource) {
         queryBuffer(wlBufferResource).accept(new BufferVisitor() {
             @Override
@@ -729,81 +726,77 @@ public class Gles2Renderer implements GlRenderer {
 
             @Override
             public void visit(@Nonnull final EglBuffer eglBuffer) {
-                drawEgl(wlSurfaceResource,
+                drawEgl(surfaceView,
                         eglBuffer);
             }
 
             @Override
             public void visit(@Nonnull final SmBuffer smBuffer) {
-                drawShm(wlSurfaceResource,
+                drawShm(surfaceView,
                         smBuffer);
             }
         });
     }
 
-    private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,
+    private void drawShm(final @Nonnull SurfaceView surfaceView,
                          final SmBuffer smBuffer) {
 
-        queryShmSurfaceRenderState(wlSurfaceResource,
+        queryShmSurfaceRenderState(surfaceView,
                                    smBuffer.getShmBuffer()).ifPresent(surfaceRenderState -> surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
             @Override
             public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
-                drawShm(wlSurfaceResource,
+                drawShm(surfaceView,
                         shmSurfaceState);
                 return null;
             }
         }));
     }
 
-    private Optional<SurfaceRenderState> queryShmSurfaceRenderState(final WlSurfaceResource wlSurfaceResource,
+    private Optional<SurfaceRenderState> queryShmSurfaceRenderState(final SurfaceView surfaceView,
                                                                     final ShmBuffer shmBuffer) {
 
-        final WlSurface              wlSurface          = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface                surface            = wlSurface.getSurface();
-        Optional<SurfaceRenderState> surfaceRenderState = surface.getRenderState();
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
+        final Surface surface = wlSurface.getSurface();
+        final Optional<SurfaceRenderState> renderStateOptional = surface.getRenderState()
+                                                                        .map(surfaceRenderState -> surfaceRenderState
+                                                                                .accept(new SurfaceRenderStateVisitor() {
+                                                                                    @Override
+                                                                                    public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
+                                                                                        //the surface already has an shm render state associated. update it.
+                                                                                        return createShmSurfaceRenderState(surfaceView,
+                                                                                                                           shmBuffer,
+                                                                                                                           Optional.of(shmSurfaceState));
+                                                                                    }
 
-        if (surfaceRenderState.isPresent()) {
-            surfaceRenderState = surfaceRenderState.get()
-                                                   .accept(new SurfaceRenderStateVisitor() {
-                                                       @Override
-                                                       public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
-                                                           //the surface already has an shm render state associated. update it.
-                                                           return createShmSurfaceRenderState(wlSurfaceResource,
-                                                                                              shmBuffer,
-                                                                                              Optional.of(shmSurfaceState));
-                                                       }
+                                                                                    @Override
+                                                                                    public Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) {
+                                                                                        //the surface was previously associated with an egl render state but is now using an shm render state. create it.
+                                                                                        destroy(eglSurfaceState);
+                                                                                        //TODO we could reuse the texture id from the egl surface render state
+                                                                                        return createShmSurfaceRenderState(surfaceView,
+                                                                                                                           shmBuffer,
+                                                                                                                           Optional.empty());
+                                                                                    }
+                                                                                }))
+                                                                        //the surface was not previously associated with any render state. create an shm render state.
+                                                                        .orElseGet(() -> createShmSurfaceRenderState(surfaceView,
+                                                                                                                     shmBuffer,
+                                                                                                                     Optional.empty()));
 
-                                                       @Override
-                                                       public Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) {
-                                                           //the surface was previously associated with an egl render state but is now using an shm render state. create it.
-                                                           destroy(eglSurfaceState);
-                                                           //TODO we could reuse the texture id from the egl surface render state
-                                                           return createShmSurfaceRenderState(wlSurfaceResource,
-                                                                                              shmBuffer,
-                                                                                              Optional.empty());
-                                                       }
-                                                   });
-        }
-        else {
-            //the surface was not previously associated with any render state. create an shm render state.
-            surfaceRenderState = createShmSurfaceRenderState(wlSurfaceResource,
-                                                             shmBuffer,
-                                                             Optional.empty());
-        }
-
-        if (surfaceRenderState.isPresent()) {
+        if (renderStateOptional.isPresent()) {
             surface
-                    .setRenderState(surfaceRenderState.get());
+                    .setRenderState(renderStateOptional.get());
         }
         else {
-            onDestroy(wlSurfaceResource);
+            onDestroy(surfaceView.getWlSurfaceResource());
         }
 
-        return surfaceRenderState;
+        return renderStateOptional;
     }
 
 
-    private Optional<SurfaceRenderState> createShmSurfaceRenderState(final WlSurfaceResource wlSurfaceResource,
+    private Optional<SurfaceRenderState> createShmSurfaceRenderState(final SurfaceView surfaceView,
                                                                      final ShmBuffer shmBuffer,
                                                                      final Optional<ShmSurfaceState> oldRenderState) {
         //new values
@@ -857,13 +850,13 @@ public class Gles2Renderer implements GlRenderer {
                 glFormat != oldShmSurfaceState.getGlFormat() ||
                 glPixelType != oldShmSurfaceState.getGlPixelType()) {
                 //state needs full texture updating
-                shmUpdateAll(wlSurfaceResource,
+                shmUpdateAll(surfaceView,
                              shmBuffer,
                              newShmSurfaceState);
             }
             else {
                 //partial texture update
-                shmUpdateDamaged(wlSurfaceResource,
+                shmUpdateDamaged(surfaceView,
                                  shmBuffer,
                                  newShmSurfaceState);
             }
@@ -878,7 +871,7 @@ public class Gles2Renderer implements GlRenderer {
                                                         glFormat,
                                                         glPixelType,
                                                         texture);
-            shmUpdateAll(wlSurfaceResource,
+            shmUpdateAll(surfaceView,
                          shmBuffer,
                          newShmSurfaceState);
         }
@@ -886,7 +879,7 @@ public class Gles2Renderer implements GlRenderer {
         return Optional.of(newShmSurfaceState);
     }
 
-    private void shmUpdateDamaged(final WlSurfaceResource wlSurfaceResource,
+    private void shmUpdateDamaged(final SurfaceView wlSurfaceResource,
                                   final ShmBuffer shmBuffer,
                                   final ShmSurfaceState newShmSurfaceState) {
         //TODO implement damage
@@ -895,7 +888,7 @@ public class Gles2Renderer implements GlRenderer {
                      newShmSurfaceState);
     }
 
-    private void shmUpdateAll(final WlSurfaceResource wlSurfaceResource,
+    private void shmUpdateAll(final SurfaceView surfaceView,
                               final ShmBuffer shmBuffer,
                               final ShmSurfaceState newShmSurfaceState) {
         this.libGLESv2.glBindTexture(newShmSurfaceState.getTarget(),
@@ -916,18 +909,20 @@ public class Gles2Renderer implements GlRenderer {
 
         //FIXME firing the paint callback here is actually wrong since we might still need to draw on a different output. Only when all views of a surface are processed, we can call the fire paint callback.
         //TODO Introduce the concept of views => output <-- view (=many2many) --> surface
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        //FIXME we should only fire the callback once all views are rendered
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
         wlSurface.getSurface()
                  .firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
     }
 
-    private void drawShm(final @Nonnull WlSurfaceResource wlSurfaceResource,
+    private void drawShm(final @Nonnull SurfaceView surfaceView,
                          final ShmSurfaceState shmSurfaceState) {
         final int shaderProgram = shmSurfaceState.getShaderProgram();
 
         //activate & setup shader
         this.libGLESv2.glUseProgram(shaderProgram);
-        setupVertexParams(wlSurfaceResource,
+        setupVertexParams(surfaceView,
                           shmSurfaceState.getPitch(),
                           shmSurfaceState.getHeight());
 
@@ -952,47 +947,43 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glUseProgram(0);
     }
 
-    private Optional<SurfaceRenderState> queryEglSurfaceRenderState(final WlSurfaceResource wlSurfaceResource,
+    private Optional<SurfaceRenderState> queryEglSurfaceRenderState(final SurfaceView surfaceView,
                                                                     final EglBuffer eglBuffer) {
 
-        final WlSurface              wlSurface          = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface                surface            = wlSurface.getSurface();
-        Optional<SurfaceRenderState> surfaceRenderState = surface.getRenderState();
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
+        final Surface surface = wlSurface.getSurface();
+        final Optional<SurfaceRenderState> renderStateOptional = surface.getRenderState()
+                                                                        .map(surfaceRenderState ->
+                                                                                     surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+                                                                                         @Override
+                                                                                         public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
+                                                                                             //the surface was previously associated with an shm render state but is now using an egl render state. create it.
+                                                                                             destroy(shmSurfaceState);
+                                                                                             return createEglSurfaceRenderState(eglBuffer,
+                                                                                                                                Optional.empty());
+                                                                                         }
 
-        if (surfaceRenderState.isPresent()) {
-            surfaceRenderState = surfaceRenderState.get()
-                                                   .accept(new SurfaceRenderStateVisitor() {
-                                                       @Override
-                                                       public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
-                                                           //the surface was previously associated with an shm render state but is now using an egl render state. create it.
-                                                           //TODO we could reuse the texture id
-                                                           destroy(shmSurfaceState);
-                                                           return createEglSurfaceRenderState(eglBuffer,
-                                                                                              Optional.empty());
-                                                       }
+                                                                                         @Override
+                                                                                         public Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) {
+                                                                                             //TODO we could reuse the texture id
+                                                                                             //the surface already has an egl render state associated. update it.
+                                                                                             return createEglSurfaceRenderState(eglBuffer,
+                                                                                                                                Optional.of(eglSurfaceState));
+                                                                                         }
+                                                                                     }))
+                                                                        //the surface was not previously associated with any render state. create an egl render state.
+                                                                        .orElseGet(() -> createEglSurfaceRenderState(eglBuffer,
+                                                                                                                     Optional.empty()));
 
-                                                       @Override
-                                                       public Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) {
-                                                           //the surface already has an egl render state associated. update it.
-                                                           return createEglSurfaceRenderState(eglBuffer,
-                                                                                              Optional.of(eglSurfaceState));
-                                                       }
-                                                   });
+        if (renderStateOptional.isPresent()) {
+            surface.setRenderState(renderStateOptional.get());
         }
         else {
-            //the surface was not previously associated with any render state. create an egl render state.
-            surfaceRenderState = createEglSurfaceRenderState(eglBuffer,
-                                                             Optional.empty());
+            onDestroy(surfaceView.getWlSurfaceResource());
         }
 
-        if (surfaceRenderState.isPresent()) {
-            surface.setRenderState(surfaceRenderState.get());
-        }
-        else {
-            onDestroy(wlSurfaceResource);
-        }
-
-        return surfaceRenderState;
+        return renderStateOptional;
     }
 
     private Optional<SurfaceRenderState> createEglSurfaceRenderState(final EglBuffer eglBuffer,
@@ -1130,20 +1121,20 @@ public class Gles2Renderer implements GlRenderer {
     }
 
 
-    private void drawEgl(final WlSurfaceResource wlSurfaceResource,
+    private void drawEgl(final SurfaceView surfaceView,
                          final EglBuffer eglBuffer) {
-        queryEglSurfaceRenderState(wlSurfaceResource,
+        queryEglSurfaceRenderState(surfaceView,
                                    eglBuffer).ifPresent(surfaceRenderState -> surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
             @Override
             public Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) {
-                drawEgl(wlSurfaceResource,
+                drawEgl(surfaceView,
                         eglSurfaceState);
                 return null;
             }
         }));
     }
 
-    private void drawEgl(final WlSurfaceResource wlSurfaceResource,
+    private void drawEgl(final SurfaceView surfaceView,
                          final EglSurfaceState eglSurfaceState) {
         //TODO unify with drawShm
 
@@ -1151,7 +1142,7 @@ public class Gles2Renderer implements GlRenderer {
 
         //activate & setup shader
         this.libGLESv2.glUseProgram(shaderProgram);
-        setupVertexParams(wlSurfaceResource,
+        setupVertexParams(surfaceView,
                           eglSurfaceState.getPitch(),
                           eglSurfaceState.getHeight());
 
@@ -1189,7 +1180,11 @@ public class Gles2Renderer implements GlRenderer {
         }
         this.libGLESv2.glUseProgram(0);
 
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        //FIXME firing the paint callback here is actually wrong since we might still need to draw on a different output. Only when all views of a surface are processed, we can call the fire paint callback.
+        //TODO Introduce the concept of views => output <-- view (=many2many) --> surface
+        //FIXME we should only fire the callback once all views are rendered
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
         wlSurface.getSurface()
                  .firePaintCallbacks((int) NANOSECONDS.toMillis(System.nanoTime()));
     }
@@ -1218,13 +1213,15 @@ public class Gles2Renderer implements GlRenderer {
         return textureId;
     }
 
-    private void setupVertexParams(final @Nonnull WlSurfaceResource wlSurfaceResource,
+    private void setupVertexParams(final @Nonnull SurfaceView surfaceView,
                                    final float bufferWidth,
                                    final float bufferHeight) {
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
-        final float[] transform = surface.getTransform()
-                                         .toArray();
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
+        final Surface surface = wlSurface.getSurface();
+        final float[] transform = surfaceView.getPositionTransform()
+                                             .multiply(surface.getTransform())
+                                             .toArray();
 
         //define vertex data
         final Pointer<Float> vertexData = vertexData(bufferWidth,
