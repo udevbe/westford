@@ -107,24 +107,23 @@ public class Scene {
                          //TODO we could move the views to the generic role itf.
                          if (siblingSurface.getRole()
                                            .isPresent()) {
+
                              siblingSurface.getViews()
                                            .forEach(siblingSurfaceView -> {
 
                                                if (siblingSurfaceView.getParent()
-                                                                     .orElse(siblingSurfaceView)
-                                                                     .equals(parentSurfaceView)) {
-
+                                                                     .filter(siblingParentSurfaceView ->
+                                                                                     siblingParentSurfaceView.equals(parentSurfaceView))
+                                                                     .isPresent()) {
+                                                   addSiblingViews(siblingSurfaceView,
+                                                                   surfaceViews);
+                                               }
+                                               else if (siblingSurfaceView.equals(parentSurfaceView)) {
                                                    surfaceViews.add(siblingSurfaceView);
-
-                                                   if (!siblingSurfaceView.equals(parentSurfaceView)) {
-                                                       addSiblingViews(siblingSurfaceView,
-                                                                       surfaceViews);
-                                                   }
                                                }
                                            });
                          }
                      });
-
     }
 
     private void loopSiblings(WlSurfaceResource wlSurfaceResource,
@@ -134,18 +133,7 @@ public class Scene {
         final Surface   surface   = wlSurface.getSurface();
 
         surface.getViews()
-               .forEach(parentSurfaceView -> {
-
-                   addSiblingViews(parentSurfaceView,
-                                   surfaceViews);
-                   surface.getSiblings()
-                          .forEach(sibling -> {
-                              final WlSurfaceResource siblingWlSurfaceResource = sibling.getWlSurfaceResource();
-                              if (!siblingWlSurfaceResource.equals(wlSurfaceResource)) {
-                                  loopSiblings(siblingWlSurfaceResource,
-                                               surfaceViews);
-                              }
-                          });
-               });
+               .forEach(parentSurfaceView -> addSiblingViews(parentSurfaceView,
+                                                             surfaceViews));
     }
 }
