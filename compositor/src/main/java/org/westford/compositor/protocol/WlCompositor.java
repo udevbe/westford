@@ -24,6 +24,7 @@ import org.freedesktop.wayland.server.WlCompositorRequestsV4;
 import org.freedesktop.wayland.server.WlCompositorResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.compositor.core.Compositor;
+import org.westford.compositor.core.Point;
 import org.westford.compositor.core.Renderer;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Sibling;
@@ -96,8 +97,15 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         final WlSurfaceResource wlSurfaceResource = wlSurface.add(compositorResource.getClient(),
                                                                   compositorResource.getVersion(),
                                                                   id);
+        //TODO we might want to move view creation to role object
+        surface.createView(wlSurfaceResource,
+                           Point.ZERO);
         surface.getSiblings()
                .add(Sibling.create(wlSurfaceResource));
+
+        //adding a surface to the scene should be done when we add/create a new role
+        this.scene.getSurfacesStack()
+                  .add(wlSurfaceResource);
 
         //TODO unit test destroy handler
         wlSurfaceResource.register(() -> {
