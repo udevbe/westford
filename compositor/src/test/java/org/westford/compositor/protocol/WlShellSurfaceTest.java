@@ -193,7 +193,7 @@ public class WlShellSurfaceTest {
         this.wlShellSurface.setToplevel(wlShellSurfaceResource);
 
         //then
-        verify(this.shellSurface).toFront(this.wlSurfaceResource);
+        verify(this.shellSurface).setTopLevel(this.wlSurfaceResource);
     }
 
     @Test

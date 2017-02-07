@@ -24,7 +24,6 @@ import org.freedesktop.wayland.server.WlSeatResource;
 import org.freedesktop.wayland.server.WlShellSurfaceRequests;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
-import org.freedesktop.wayland.shared.WlShellSurfaceFullscreenMethod;
 import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
 import org.westford.compositor.wlshell.ShellSurface;
 
@@ -94,7 +93,7 @@ public class WlShellSurface implements WlShellSurfaceRequests, ProtocolObject<Wl
 
     @Override
     public void setToplevel(final WlShellSurfaceResource requester) {
-        getShellSurface().toFront(getWlSurfaceResource());
+        getShellSurface().setTopLevel(getWlSurfaceResource());
     }
 
     @Override
