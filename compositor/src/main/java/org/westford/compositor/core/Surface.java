@@ -19,7 +19,6 @@ package org.westford.compositor.core;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
-import com.google.common.base.Supplier;
 import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlCallbackResource;
@@ -38,6 +37,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -219,6 +219,12 @@ public class Surface {
         setState(surfaceState);
         updateTransform();
         updateSize();
+
+        //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
+        this.pendingSubsurfaces.forEach(subsurface -> this.siblings.remove(subsurface.getSibling()));
+        this.pendingSubsurfaces.descendingIterator()
+                               .forEachRemaining(subsurface -> this.siblings.addFirst(subsurface.getSibling()));
+
         this.compositor.requestRender();
 
         getApplySurfaceStateSignal().emit(getState());
@@ -368,7 +374,7 @@ public class Surface {
 
     @Nonnull
     public Collection<SurfaceView> getViews() {
-        return this.surfaceViews;
+        return Collections.unmodifiableCollection(this.surfaceViews);
     }
 
     public SurfaceView createView(WlSurfaceResource wlSurfaceResource,
@@ -376,12 +382,11 @@ public class Surface {
 
         final SurfaceView surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
                                                                        position);
-        getSiblings().forEach(sibling -> ensureSiblingView(sibling,
-                                                           surfaceView));
-        getPendingSubsurfaces().forEach(subsurface -> ensureSiblingView(subsurface.getSibling(),
-                                                                        surfaceView));
-
         if (this.surfaceViews.add(surfaceView)) {
+            getSiblings().forEach(sibling -> ensureSiblingView(sibling,
+                                                               surfaceView));
+            getPendingSubsurfaces().forEach(subsurface -> ensureSiblingView(subsurface.getSibling(),
+                                                                            surfaceView));
             this.viewCreatedSignal.emit(surfaceView);
         }
         return surfaceView;
@@ -400,6 +405,9 @@ public class Surface {
         final WlSurface         siblingWlSurface         = (WlSurface) siblingWlSurfaceResource.getImplementation();
         final Surface           siblingSurface           = siblingWlSurface.getSurface();
 
+        if (siblingSurface.equals(this)) {
+            return;
+        }
 
         for (SurfaceView siblingSurfaceView : siblingSurface.getViews()) {
             final Optional<SurfaceView> siblingSurfaceViewParent = siblingSurfaceView.getParent();
