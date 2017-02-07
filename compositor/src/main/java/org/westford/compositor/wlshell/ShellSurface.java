@@ -39,7 +39,6 @@ import org.westford.compositor.core.RoleVisitor;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Sibling;
 import org.westford.compositor.core.Surface;
-import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.Transforms;
 import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.core.calc.Vec4;
@@ -378,7 +377,7 @@ public class ShellSurface implements Role {
             this.keyboardFocusListener = Optional.of(slot);
         }
 
-        //clear existing views, if any.
+        //clear existing views, if any. The call to addSibling will ensure it has a new view.
         surface.getViews()
                .clear();
 
@@ -389,18 +388,6 @@ public class ShellSurface implements Role {
                                                     y);
         parentSurface.addSibling(Sibling.create(wlSurfaceResource,
                                                 relativePosition));
-
-        //create a new surface view for each parent view that moves relative to the parent view.
-        parentSurface.getViews()
-                     .forEach(parentSurfaceView -> {
-
-                         final Point position = parentSurfaceView.global(relativePosition);
-                         final SurfaceView surfaceView = surface.createView(wlSurfaceResource,
-                                                                            position);
-                         surfaceView.setParent(parentSurfaceView);
-                         parentSurfaceView.getPositionSignal()
-                                          .connect(event -> surfaceView.setPosition(parentSurfaceView.global(relativePosition)));
-                     });
     }
 
     @Override
