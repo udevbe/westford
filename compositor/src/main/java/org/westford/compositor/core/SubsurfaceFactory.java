@@ -75,6 +75,9 @@ public class SubsurfaceFactory {
          */
         parentWlSurfaceResource.register(subsurface::setInert);
 
+        parentSurface.getPendingSubsurfaces()
+                     .add(subsurface);
+
         return subsurface;
     }
 }
