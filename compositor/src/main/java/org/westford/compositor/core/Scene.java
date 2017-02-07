@@ -103,22 +103,28 @@ public class Scene {
                                                                                .getImplementation();
                          final Surface siblingSurface = siblingWlSurface.getSurface();
 
-                         siblingSurface.getViews()
-                                       .forEach(siblingSurfaceView -> {
+                         //only consider surface if it has a role.
+                         //TODO we could move the views to the generic role itf.
+                         if (siblingSurface.getRole()
+                                           .isPresent()) {
+                             siblingSurface.getViews()
+                                           .forEach(siblingSurfaceView -> {
 
-                                           if (siblingSurfaceView.getParent()
-                                                                 .orElse(siblingSurfaceView)
-                                                                 .equals(parentSurfaceView)) {
+                                               if (siblingSurfaceView.getParent()
+                                                                     .orElse(siblingSurfaceView)
+                                                                     .equals(parentSurfaceView)) {
 
-                                               surfaceViews.add(siblingSurfaceView);
+                                                   surfaceViews.add(siblingSurfaceView);
 
-                                               if (!siblingSurfaceView.equals(parentSurfaceView)) {
-                                                   addSiblingViews(siblingSurfaceView,
-                                                                   surfaceViews);
+                                                   if (!siblingSurfaceView.equals(parentSurfaceView)) {
+                                                       addSiblingViews(siblingSurfaceView,
+                                                                       surfaceViews);
+                                                   }
                                                }
-                                           }
-                                       });
+                                           });
+                         }
                      });
+
     }
 
     private void loopSiblings(WlSurfaceResource wlSurfaceResource,
