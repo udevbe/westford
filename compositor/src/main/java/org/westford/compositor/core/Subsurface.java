@@ -103,6 +103,9 @@ public class Subsurface implements Role {
             this.currentSurfaceState = this.cachedSurfaceState;
             apply(this.cachedSurfaceState);
         }
+
+        //only triggered on parent commit, regardless of mode.
+        getSibling().setPosition(this.position);
     }
 
     public void apply(final SurfaceState surfaceState) {
@@ -118,12 +121,6 @@ public class Subsurface implements Role {
 
             if (!surface.getState()
                         .equals(this.currentSurfaceState)) {
-
-                if (this.currentSurfaceState.equals(this.cachedSurfaceState)) {
-                    //apply is triggered by a parent apply
-                    applyPositionAndStacking(surface);
-                }
-
                 //roll back 'to-be' state to current active state in case of non-parent commit.
                 //In case of parent commit, currentSurfaceState will be set to the accumulated cachedSurfaceState.
                 surface.apply(this.currentSurfaceState);
@@ -135,20 +132,7 @@ public class Subsurface implements Role {
             //desync mode, our to-be state is always the current state.
             this.cachedSurfaceState = surfaceState;
             this.currentSurfaceState = surfaceState;
-            applyPositionAndStacking(surface);
         }
-    }
-
-    private void applyPositionAndStacking(final Surface surface) {
-        getSibling().setPosition(this.position);
-
-        //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
-        final LinkedList<Subsurface> pendingSubsurfaces = surface.getPendingSubsurfaces();
-        final LinkedList<Sibling>    siblings           = surface.getSiblings();
-
-        pendingSubsurfaces.forEach(subsurface -> siblings.remove(subsurface.getSibling()));
-        pendingSubsurfaces.descendingIterator()
-                          .forEachRemaining(subsurface -> siblings.addFirst(subsurface.getSibling()));
     }
 
     @Nonnull
