@@ -39,6 +39,7 @@ import org.westford.compositor.core.RoleVisitor;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Sibling;
 import org.westford.compositor.core.Surface;
+import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.Transforms;
 import org.westford.compositor.core.calc.Mat4;
 import org.westford.compositor.core.calc.Vec4;
@@ -50,7 +51,6 @@ import org.westford.compositor.protocol.WlSurface;
 
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
 
@@ -336,14 +336,6 @@ public class ShellSurface implements Role {
                                     .build();
     }
 
-    public void toFront(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        final LinkedList<WlSurfaceResource> surfacesStack = this.scene.getSurfacesStack();
-        if (surfacesStack.remove(wlSurfaceResource)) {
-            surfacesStack.addLast(wlSurfaceResource);
-            this.compositor.requestRender();
-        }
-    }
-
     public void setTransient(@Nonnull final WlSurfaceResource wlSurfaceResource,
                              @Nonnull final WlSurfaceResource parent,
                              final int x,
@@ -379,7 +371,7 @@ public class ShellSurface implements Role {
 
         //clear existing views, if any. The call to addSibling will ensure it has a new view.
         surface.getViews()
-               .clear();
+               .forEach(SurfaceView::destroy);
 
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
@@ -393,5 +385,20 @@ public class ShellSurface implements Role {
     @Override
     public void accept(@Nonnull final RoleVisitor roleVisitor) {
         roleVisitor.visit(this);
+    }
+
+    public void setTopLevel(final WlSurfaceResource wlSurfaceResource) {
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+
+        surface.getViews()
+               .forEach(surfaceView ->
+                                surfaceView.getParent()
+                                           .ifPresent(parentSurfaceView -> {
+                                               final WlSurfaceResource parentWlSurfaceResource = parentSurfaceView.getWlSurfaceResource();
+                                               final WlSurface         parentWlSurface         = (WlSurface) parentWlSurfaceResource.getImplementation();
+                                               final Surface           parentSurface           = parentWlSurface.getSurface();
+                                               parentSurface.removeSibling(Sibling.create(wlSurfaceResource));
+                                           }));
     }
 }

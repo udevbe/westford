@@ -724,7 +724,7 @@ public class ShellSurfaceTest {
         surfacesStack.add(wlSurfaceResource2);
 
         //when
-        shellSurface.toFront(wlSurfaceResource0);
+        shellSurface.setTopLevel(wlSurfaceResource0);
 
         //then
         assertThat(surfacesStack.getLast()).isSameAs(wlSurfaceResource0);
