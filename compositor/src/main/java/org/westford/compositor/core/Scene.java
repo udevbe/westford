@@ -119,7 +119,7 @@ public class Scene {
                                                                    surfaceViews);
                                                }
                                                else if (siblingSurfaceView.equals(parentSurfaceView)) {
-                                                   surfaceViews.add(siblingSurfaceView);
+                                                   surfaceViews.addFirst(siblingSurfaceView);
                                                }
                                            });
                          }
