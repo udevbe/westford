@@ -705,15 +705,18 @@ public class Gles2Renderer implements GlRenderer {
 
     private void draw(final SurfaceView surfaceView) {
 
-        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
-                                                           .getImplementation();
+        if (surfaceView.isEnabled() && surfaceView.isDrawable()) {
 
-        //don't bother rendering subsurfaces if the parent doesn't have a buffer.
-        wlSurface.getSurface()
-                 .getState()
-                 .getBuffer()
-                 .ifPresent(wlBufferResource -> draw(surfaceView,
-                                                     wlBufferResource));
+            final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                               .getImplementation();
+
+            //don't bother rendering subsurfaces if the parent doesn't have a buffer.
+            wlSurface.getSurface()
+                     .getState()
+                     .getBuffer()
+                     .ifPresent(wlBufferResource -> draw(surfaceView,
+                                                         wlBufferResource));
+        }
     }
 
     private void draw(final SurfaceView surfaceView,
