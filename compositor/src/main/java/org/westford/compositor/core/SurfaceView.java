@@ -33,8 +33,8 @@ public class SurfaceView {
     @Nonnull
     private Mat4 inverseTransform;
 
-    private boolean enabled;
-    private boolean drawable;
+    private boolean enabled  = true;
+    private boolean drawable = false;
 
     SurfaceView(@Nonnull WlSurfaceResource wlSurfaceResource,
                 @Nonnull Mat4 positionTransform,
