@@ -29,8 +29,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.westford.compositor.core.Point;
 import org.westford.compositor.core.Scene;
+import org.westford.compositor.core.Sibling;
 import org.westford.compositor.core.Subsurface;
 import org.westford.compositor.core.Surface;
+
+import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
@@ -126,10 +129,20 @@ public class WlSubsurfaceTest {
                               final boolean siblingValid) {
         final WlSubsurface      wlSubsurface            = mock(WlSubsurface.class);
         final WlSurfaceResource parentWlSurfaceResource = mock(WlSurfaceResource.class);
+        final WlSurface         parentWlSurface         = mock(WlSurface.class);
+        final Surface           parentSurface           = mock(Surface.class);
+
+        final LinkedList<Sibling> siblings = new LinkedList<>();
 
         when(wlSubsurfaceResource.getImplementation()).thenReturn(wlSubsurface);
         when(wlSubsurface.getSubsurface()).thenReturn(this.subsurface);
         when(this.subsurface.getParentWlSurfaceResource()).thenReturn(parentWlSurfaceResource);
+        when(parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
+        when(parentWlSurface.getSurface()).thenReturn(parentSurface);
+        when(parentSurface.getSiblings()).thenReturn(siblings);
+        if (siblingValid) {
+            siblings.add(Sibling.create(siblingWlSurfaceResource));
+        }
 
         final WlSurface siblingWlSurface = mock(WlSurface.class);
         final Surface   siblingSurface   = mock(Surface.class);

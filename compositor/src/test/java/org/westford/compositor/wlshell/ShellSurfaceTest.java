@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -110,6 +111,7 @@ public class ShellSurfaceTest {
                                                    75);
         when(surfaceView.global(eq(Point.create(0,
                                                 0)))).thenReturn(surfacePosition);
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -173,6 +175,7 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -239,6 +242,8 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
+
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
                                                            this.scene,
@@ -304,6 +309,7 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -370,6 +376,7 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -436,6 +443,7 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -502,6 +510,7 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -568,6 +577,7 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -634,6 +644,7 @@ public class ShellSurfaceTest {
                                                             0,
                                                             100,
                                                             100));
+        when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -705,7 +716,7 @@ public class ShellSurfaceTest {
     }
 
     @Test
-    public void testToFront() throws Exception {
+    public void testSetTopLevel() throws Exception {
         //given
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,

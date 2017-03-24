@@ -36,6 +36,10 @@ public abstract class Sibling {
         updateSurfaceViewsPosition();
     }
 
+    /**
+     * Update all views' position of this sibling surface, with respect to their parent view. This method should be
+     * called if the parent view moved to ensure child views move with it.
+     */
     public void updateSurfaceViewsPosition() {
         final WlSurface wlSurface = (WlSurface) getWlSurfaceResource().getImplementation();
         final Surface   surface   = wlSurface.getSurface();
