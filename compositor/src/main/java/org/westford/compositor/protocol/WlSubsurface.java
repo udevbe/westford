@@ -26,6 +26,7 @@ import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlSubsurfaceError;
 import org.westford.compositor.core.Point;
 import org.westford.compositor.core.Scene;
+import org.westford.compositor.core.Sibling;
 import org.westford.compositor.core.Subsurface;
 
 import javax.annotation.Nonnegative;
@@ -101,7 +102,7 @@ public class WlSubsurface implements WlSubsurfaceRequests,
     }
 
     private boolean isValid(final WlSubsurfaceResource requester,
-                            final WlSurfaceResource sibling) {
+                            final WlSurfaceResource siblingWlSurfaceResource) {
         final Subsurface subsurface = getSubsurface();
         if (subsurface.isInert()) {
             /*
@@ -111,11 +112,13 @@ public class WlSubsurface implements WlSubsurfaceRequests,
             return true;
         }
 
-        final WlSurface wlSurface = (WlSurface) requester.getImplementation();
-
-        return wlSurface.getSurface()
-                        .getSiblings()
-                        .contains(sibling);
+        final WlSubsurface wlSubsurface = (WlSubsurface) requester.getImplementation();
+        final WlSurface parentWlSurface = (WlSurface) wlSubsurface.getSubsurface()
+                                                                  .getParentWlSurfaceResource()
+                                                                  .getImplementation();
+        return parentWlSurface.getSurface()
+                              .getSiblings()
+                              .contains(Sibling.create(siblingWlSurfaceResource));
     }
 
     @Override

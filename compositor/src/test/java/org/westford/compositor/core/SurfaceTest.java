@@ -42,6 +42,8 @@ public class SurfaceTest {
     private Compositor          compositor;
     @Mock
     private Renderer            renderer;
+    @Mock
+    private SurfaceViewFactory  surfaceViewFactory;
 
     @InjectMocks
     private Surface surface;
