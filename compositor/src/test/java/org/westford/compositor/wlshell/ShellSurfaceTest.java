@@ -734,11 +734,10 @@ public class ShellSurfaceTest {
         surfacesStack.add(wlSurfaceResource0);
         surfacesStack.add(wlSurfaceResource2);
 
+        //TODO
         //when
-        shellSurface.setTopLevel(wlSurfaceResource0);
 
         //then
-        assertThat(surfacesStack.getLast()).isSameAs(wlSurfaceResource0);
     }
 
     @Test
@@ -759,6 +758,8 @@ public class ShellSurfaceTest {
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);
         final SurfaceView parentSurfaceView = mock(SurfaceView.class);
         when(parentSurface.getViews()).thenReturn(Collections.singleton(parentSurfaceView));
+
+        when(surfaceView.getParent()).thenReturn(Optional.of(parentSurfaceView));
 
         final int localX = 75;
         final int localY = 120;
@@ -821,6 +822,8 @@ public class ShellSurfaceTest {
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);
         final SurfaceView parentSurfaceView = mock(SurfaceView.class);
         when(parentSurface.getViews()).thenReturn(Collections.singleton(parentSurfaceView));
+
+        when(surfaceView.getParent()).thenReturn(Optional.of(parentSurfaceView));
 
         final int localX = 75;
         final int localY = 120;

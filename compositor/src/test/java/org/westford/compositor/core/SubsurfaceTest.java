@@ -24,6 +24,8 @@ import org.westford.compositor.protocol.WlSurface;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -162,6 +164,13 @@ public class SubsurfaceTest {
         when(this.parentWlSurfaceResource.getImplementation()).thenReturn(parentWlSurface);
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);
         when(parentSurface.getRole()).thenReturn(Optional.of(parentSubsurface));
+        doAnswer(invocation -> {
+            invocation.getArgumentAt(0,
+                                     RoleVisitor.class)
+                      .visit(parentSubsurface);
+            return null;
+        }).when(parentSubsurface)
+          .accept(any());
         when(parentSubsurface.isEffectiveSync()).thenReturn(false);
 
         final SurfaceState newSurfaceState = mock(SurfaceState.class);

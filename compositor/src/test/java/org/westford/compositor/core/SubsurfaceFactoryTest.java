@@ -27,9 +27,10 @@ import org.westford.Slot;
 import org.westford.compositor.protocol.WlCompositor;
 import org.westford.compositor.protocol.WlSurface;
 
-import java.util.LinkedList;
 import java.util.Optional;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,7 +52,6 @@ public class SubsurfaceFactoryTest {
         final WlSurface                                parentWlSurface               = mock(WlSurface.class);
         final Surface                                  parentSurface                 = mock(Surface.class);
         final Signal<SurfaceState, Slot<SurfaceState>> parentApplySurfaceStateSignal = mock(Signal.class);
-        final Signal<Point, Slot<Point>>               parentPositionSignal          = mock(Signal.class);
         final Subsurface                               parentRole                    = mock(Subsurface.class);
         final Signal<Boolean, Slot<Boolean>>           parentEffectiveSyncSignal     = mock(Signal.class);
 
@@ -59,6 +59,13 @@ public class SubsurfaceFactoryTest {
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);
         when(parentSurface.getApplySurfaceStateSignal()).thenReturn(parentApplySurfaceStateSignal);
         when(parentSurface.getRole()).thenReturn(Optional.of(parentRole));
+        doAnswer(invocation -> {
+            invocation.getArgumentAt(0,
+                                     RoleVisitor.class)
+                      .visit(parentRole);
+            return null;
+        }).when(parentRole)
+          .accept(any());
         when(parentRole.getEffectiveSyncSignal()).thenReturn(parentEffectiveSyncSignal);
         when(parentRole.isEffectiveSync()).thenReturn(true);
 
@@ -70,10 +77,6 @@ public class SubsurfaceFactoryTest {
         final Signal<SurfaceState, Slot<SurfaceState>> applySurfaceStateSignal = mock(Signal.class);
         final WlCompositorResource                     wlCompositorResource    = mock(WlCompositorResource.class);
         final WlCompositor                             wlCompositor            = mock(WlCompositor.class);
-
-        final LinkedList<WlSurfaceResource> surfacesStack           = mock(LinkedList.class);
-        final LinkedList<WlSurfaceResource> subsurfacesStack        = mock(LinkedList.class);
-        final LinkedList<WlSurfaceResource> pendingSubsurfacesStack = mock(LinkedList.class);
 
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
@@ -91,11 +94,6 @@ public class SubsurfaceFactoryTest {
         //when: create is called
         this.subsurfaceFactory.create(parentWlSurfaceResource,
                                       wlSurfaceResource);
-
-        //the subsurface is placed at the top of the subsurface stack
-        verify(subsurfacesStack).addLast(wlSurfaceResource);
-        // and the subsurface is no longer part of the main surface stack
-        verify(surfacesStack).remove(wlSurfaceResource);
 
         //and when: the surface commit is called
         final ArgumentCaptor<Slot> applySurfaceStateSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
@@ -115,16 +113,6 @@ public class SubsurfaceFactoryTest {
         //then: the subsurface is notified of this sync mode change
         verify(subsurface).updateEffectiveSync(false);
 
-        //and when: the parent position is changed
-        final ArgumentCaptor<Slot> positionSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
-        verify(parentPositionSignal).connect(positionSlotArgumentCaptor.capture());
-        final Slot<Point> positionSlot = positionSlotArgumentCaptor.getValue();
-        positionSlot.handle(mock(Point.class));
-
-        //then: the subsurface position is (re)applied
-        //TODO fix & test sibling positioning
-        //verify(subsurface).applyPosition();
-
         //and when: the parent commit is called
         final ArgumentCaptor<Slot> parentApplySurfaceStateSlotArgumentCaptor = ArgumentCaptor.forClass(Slot.class);
         verify(parentApplySurfaceStateSignal).connect(parentApplySurfaceStateSlotArgumentCaptor.capture());
@@ -133,18 +121,6 @@ public class SubsurfaceFactoryTest {
 
         //then: the subsurface is notified
         verify(subsurface).onParentApply();
-
-        //and when: the surface is destroyed
-        final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
-        verify(wlSurfaceResource).register(destroyListenerArgumentCaptor.capture());
-        final DestroyListener destroyListener = destroyListenerArgumentCaptor.getValue();
-        destroyListener.handle();
-
-        //then: the surface is removed from the subsurface stack
-        verify(subsurfacesStack).remove(wlSurfaceResource);
-
-        // and the surface is removed from the pending subsurface stack
-        verify(pendingSubsurfacesStack).remove(wlSurfaceResource);
 
         //and when: the parent is destroyed
         final ArgumentCaptor<DestroyListener> parentDestroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);

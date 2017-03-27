@@ -359,4 +359,6 @@ public class SurfaceTest {
                                                                       20,
                                                                       20));
     }
+
+    //TODO sibling tests (move, add, remove, pending subsurface, ...)
 }

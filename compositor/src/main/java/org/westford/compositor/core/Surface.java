@@ -446,6 +446,11 @@ public class Surface {
         }
     }
 
+    /**
+     * Return all sibling surfaces, including this surface.
+     *
+     * @return
+     */
     @Nonnull
     public LinkedList<Sibling> getSiblings() {
         return this.siblings;

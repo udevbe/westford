@@ -1895,7 +1895,7 @@ public class PointerDeviceTest {
 
         // then: the underlying surface gets the focus
         assertThat(this.pointerDevice.getFocus()
-                                     .get()).isEqualTo(wlSurfaceResource0);
+                                     .get()).isEqualTo(surfaceView0);
     }
 
     @Test
