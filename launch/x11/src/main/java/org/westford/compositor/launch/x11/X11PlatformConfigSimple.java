@@ -22,7 +22,6 @@ import org.westford.compositor.x11.config.X11OutputConfig;
 import org.westford.compositor.x11.config.X11PlatformConfig;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class X11PlatformConfigSimple implements X11PlatformConfig {
@@ -30,7 +29,7 @@ public class X11PlatformConfigSimple implements X11PlatformConfig {
     @Nonnull
     @Override
     public String getDisplay() {
-        return ":0";
+        return System.getenv("DISPLAY");
     }
 
     @Nonnull
