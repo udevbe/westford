@@ -1,6 +1,7 @@
 package org.westford.compositor.core;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.Signal;
 import org.westford.Slot;
@@ -24,6 +25,8 @@ public class SurfaceView {
     private Optional<SurfaceView> parent = Optional.empty();
 
     @Nonnull
+    private final Compositor        compositor;
+    @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
 
     @Nonnull
@@ -36,10 +39,12 @@ public class SurfaceView {
     private boolean enabled  = true;
     private boolean drawable = false;
 
-    SurfaceView(@Nonnull WlSurfaceResource wlSurfaceResource,
+    SurfaceView(@Provided @Nonnull final Compositor compositor,
+                @Nonnull WlSurfaceResource wlSurfaceResource,
                 @Nonnull Mat4 positionTransform,
                 @Nonnull Mat4 transform,
                 @Nonnull Mat4 inverseTransform) {
+        this.compositor = compositor;
         this.wlSurfaceResource = wlSurfaceResource;
         this.positionTransform = positionTransform;
         this.transform = transform;
@@ -71,6 +76,8 @@ public class SurfaceView {
         setPosition(Transforms.TRANSLATE(global.getX(),
                                          global.getY()));
         getPositionSignal().emit(global);
+
+        this.compositor.requestRender();
     }
 
     @Nonnull
