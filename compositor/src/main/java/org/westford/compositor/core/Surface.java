@@ -144,27 +144,22 @@ public class Surface {
         return this.destroyed;
     }
 
-    @Nonnull
-    public Surface markDestroyed() {
+    public void markDestroyed() {
         this.destroyed = true;
-        return this;
     }
 
-    @Nonnull
-    public Surface markDamaged(@Nonnull final Rectangle damage) {
+    public void markDamaged(@Nonnull final Rectangle damage) {
 
         final Region damageRegion = this.pendingState.build()
                                                      .getDamage()
                                                      .orElseGet(this.finiteRegionFactory::create);
         damageRegion.add(damage);
         this.pendingState.damage(Optional.of(damageRegion));
-        return this;
     }
 
-    @Nonnull
-    public Surface attachBuffer(@Nonnull final WlBufferResource wlBufferResource,
-                                final int dx,
-                                final int dy) {
+    public void attachBuffer(@Nonnull final WlBufferResource wlBufferResource,
+                             final int dx,
+                             final int dy) {
         getPendingState().build()
                          .getBuffer()
                          .ifPresent(previousWlBufferResource -> previousWlBufferResource.unregister(this.pendingBufferDestroyListener.get()));
@@ -174,7 +169,6 @@ public class Surface {
         getPendingState().buffer(Optional.of(wlBufferResource))
                          .deltaPosition(Point.create(dx,
                                                      dy));
-        return this;
     }
 
     @Nonnull
@@ -200,8 +194,7 @@ public class Surface {
         this.surfaceRole = Optional.of(role);
     }
 
-    @Nonnull
-    public Surface commit() {
+    public void commit() {
         final Optional<WlBufferResource> buffer = getState().getBuffer();
         //signal client that the previous buffer can be reused as we will now use the
         //newly attached buffer.
@@ -212,7 +205,6 @@ public class Surface {
 
         //reset pending buffer state
         detachBuffer();
-        return this;
     }
 
     public void apply(final SurfaceState surfaceState) {
@@ -241,13 +233,11 @@ public class Surface {
         return this;
     }
 
-    @Nonnull
-    public Surface updateTransform() {
+    public void updateTransform() {
         final SurfaceState state = getState();
         this.transform = Transforms.SCALE(state.getScale())
                                    .multiply(state.getBufferTransform());
         this.inverseTransform = getTransform().invert();
-        return this;
     }
 
     public void updateSize() {
@@ -274,54 +264,48 @@ public class Surface {
         return this.applySurfaceStateSignal;
     }
 
+    /**
+     * Surface level transformation. Contains transformations that should be applied on all views of this surface.
+     * These are almost always scaling transformations. Positioning and rotation is done in {@link SurfaceView}.
+     *
+     * @return
+     */
     @Nonnull
     public Mat4 getTransform() {
         return this.transform;
     }
 
-    @Nonnull
-    public Surface addCallback(@Nonnull final WlCallbackResource callback) {
+    public void addCallback(@Nonnull final WlCallbackResource callback) {
         this.callbacks.add(callback);
-        return this;
     }
 
-    @Nonnull
-    public Surface removeOpaqueRegion() {
+    public void removeOpaqueRegion() {
         this.pendingState.opaqueRegion(Optional.empty());
-        return this;
     }
 
-    @Nonnull
-    public Surface setOpaqueRegion(@Nonnull final WlRegionResource wlRegionResource) {
+    public void setOpaqueRegion(@Nonnull final WlRegionResource wlRegionResource) {
         final WlRegion wlRegion = (WlRegion) wlRegionResource.getImplementation();
         final Region   region   = wlRegion.getRegion();
         this.pendingState.opaqueRegion(Optional.of(region));
-        return this;
     }
 
-    @Nonnull
-    public Surface removeInputRegion() {
+    public void removeInputRegion() {
         this.pendingState.inputRegion(Optional.empty());
-        return this;
     }
 
-    @Nonnull
-    public Surface setInputRegion(@Nonnull final WlRegionResource wlRegionResource) {
+    public void setInputRegion(@Nonnull final WlRegionResource wlRegionResource) {
         final WlRegion wlRegion = (WlRegion) wlRegionResource.getImplementation();
         final Region   region   = wlRegion.getRegion();
         getPendingState().inputRegion(Optional.of(region));
-        return this;
     }
 
-    @Nonnull
-    public Surface firePaintCallbacks(final int serial) {
+    public void firePaintCallbacks(final int serial) {
         final List<WlCallbackResource> callbacks = new ArrayList<>(getFrameCallbacks());
         getFrameCallbacks().clear();
         callbacks.forEach(frameCallback -> {
             frameCallback.done(serial);
             frameCallback.destroy();
         });
-        return this;
     }
 
     @Nonnull
@@ -339,15 +323,12 @@ public class Surface {
         return this.size;
     }
 
-    public Surface setScale(@Nonnegative final int scale) {
+    public void setScale(@Nonnegative final int scale) {
         getPendingState().scale(scale);
-        return this;
     }
 
-    @Nonnull
-    public Surface setBufferTransform(@Nonnull final Mat4 bufferTransform) {
+    public void setBufferTransform(@Nonnull final Mat4 bufferTransform) {
         getPendingState().bufferTransform(bufferTransform);
-        return this;
     }
 
     /**
