@@ -178,7 +178,7 @@ public class ShellSurface implements Role {
                                                           size,
                                                           local);
 
-                         final Mat4 inverseTransform = surface.getInverseTransform();
+                         final Mat4 inverseTransform = grabSurfaceView.getInverseTransform();
 
                          final boolean grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
                                                                                     buttonPressSerial,

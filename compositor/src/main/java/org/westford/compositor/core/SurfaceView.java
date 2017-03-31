@@ -1,6 +1,7 @@
 package org.westford.compositor.core;
 
 import com.google.auto.factory.AutoFactory;
+import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.westford.Signal;
 import org.westford.Slot;
@@ -24,6 +25,8 @@ public class SurfaceView {
     private Optional<SurfaceView> parent = Optional.empty();
 
     @Nonnull
+    private final Compositor        compositor;
+    @Nonnull
     private final WlSurfaceResource wlSurfaceResource;
 
     @Nonnull
@@ -36,10 +39,12 @@ public class SurfaceView {
     private boolean enabled  = true;
     private boolean drawable = false;
 
-    SurfaceView(@Nonnull WlSurfaceResource wlSurfaceResource,
+    SurfaceView(@Provided @Nonnull final Compositor compositor,
+                @Nonnull WlSurfaceResource wlSurfaceResource,
                 @Nonnull Mat4 positionTransform,
                 @Nonnull Mat4 transform,
                 @Nonnull Mat4 inverseTransform) {
+        this.compositor = compositor;
         this.wlSurfaceResource = wlSurfaceResource;
         this.positionTransform = positionTransform;
         this.transform = transform;
@@ -71,6 +76,8 @@ public class SurfaceView {
         setPosition(Transforms.TRANSLATE(global.getX(),
                                          global.getY()));
         getPositionSignal().emit(global);
+
+        this.compositor.requestRender();
     }
 
     @Nonnull
@@ -122,6 +129,13 @@ public class SurfaceView {
         this.parent.ifPresent(parentSurfaceView -> this.parent = Optional.empty());
     }
 
+    /**
+     * Conveniently translate from a compositor global coordinate to a view local coordinate.
+     *
+     * @param global A point from the compositor global plane.
+     *
+     * @return A point in view local plane.
+     */
     @Nonnull
     public Point local(@Nonnull final Point global) {
         final Vec4 localPoint = this.inverseTransform.multiply(global.toVec4());
@@ -129,6 +143,13 @@ public class SurfaceView {
                             (int) localPoint.getY());
     }
 
+    /**
+     * Conveniently translate from a view local coordinate to a compositor global coordinate.
+     *
+     * @param surfaceLocal A point from the view local plane.
+     *
+     * @return A point in the compositor global plane.
+     */
     @Nonnull
     public Point global(@Nonnull final Point surfaceLocal) {
         final Vec4 globalPoint = this.transform.multiply(surfaceLocal.toVec4());
@@ -136,6 +157,11 @@ public class SurfaceView {
                             (int) globalPoint.getY());
     }
 
+    /**
+     * Indicates if this view should be rendered.
+     *
+     * @return
+     */
     public boolean isEnabled() {
         return this.enabled;
     }
@@ -144,7 +170,34 @@ public class SurfaceView {
         this.enabled = enabled;
     }
 
+    /**
+     * Indicates if this view is drawable ie. does it have a buffer that can be rendered.
+     *
+     * @return
+     */
     public boolean isDrawable() {
         return this.drawable;
+    }
+
+    /**
+     * Inverse of {{@link #getTransform()}}. Translates from compositor global coordinates to view local coordinates.
+     *
+     * @return
+     */
+    @Nonnull
+    public Mat4 getInverseTransform() {
+        return inverseTransform;
+    }
+
+    /**
+     * Contains all view specific transformations, this includes positioning, rotation etc. of the view.
+     * <p>
+     * Translates from view local coordinates to compositor global coordinates.
+     *
+     * @return
+     */
+    @Nonnull
+    public Mat4 getTransform() {
+        return transform;
     }
 }

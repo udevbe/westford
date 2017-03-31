@@ -264,6 +264,12 @@ public class Surface {
         return this.applySurfaceStateSignal;
     }
 
+    /**
+     * Surface level transformation. Contains transformations that should be applied on all views of this surface.
+     * These are almost always scaling transformations. Positioning and rotation is done in {@link SurfaceView}.
+     *
+     * @return
+     */
     @Nonnull
     public Mat4 getTransform() {
         return this.transform;
