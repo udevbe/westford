@@ -54,7 +54,7 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-@AutoFactory(className = "ShellSurfaceFactory",
+@AutoFactory(className = "PrivateShellSurfaceFactory",
              allowSubclasses = true)
 public class ShellSurface implements Role {
 
@@ -62,6 +62,8 @@ public class ShellSurface implements Role {
     private final Compositor  compositor;
     @Nonnull
     private final Scene       scene;
+    @Nonnull
+    private final SurfaceView surfaceView;
     private final int         pingSerial;
     @Nonnull
     private final EventSource timerEventSource;
@@ -77,9 +79,11 @@ public class ShellSurface implements Role {
     ShellSurface(@Provided @Nonnull final Display display,
                  @Provided @Nonnull final Compositor compositor,
                  @Provided @Nonnull final Scene scene,
+                 final @Nonnull SurfaceView surfaceView,
                  final int pingSerial) {
         this.compositor = compositor;
         this.scene = scene;
+        this.surfaceView = surfaceView;
         this.pingSerial = pingSerial;
         this.timerEventSource = display.getEventLoop()
                                        .addTimer(() -> {
@@ -369,17 +373,16 @@ public class ShellSurface implements Role {
             this.keyboardFocusListener = Optional.of(slot);
         }
 
-        //clear existing views, if any. The call to addSibling will ensure it has a new view.
-        surface.getViews()
-               .forEach(SurfaceView::destroy);
-
         final WlSurface parentWlSurface = (WlSurface) parent.getImplementation();
         final Surface   parentSurface   = parentWlSurface.getSurface();
 
-        final Point relativePosition = Point.create(x,
-                                                    y);
+        this.scene.removeView(this.surfaceView);
+        parentSurface.getViews()
+                     .forEach(this.surfaceView::setParent);
+
         parentSurface.addSibling(Sibling.create(wlSurfaceResource,
-                                                relativePosition));
+                                                Point.create(x,
+                                                             y)));
     }
 
     @Override
@@ -400,5 +403,10 @@ public class ShellSurface implements Role {
                                                final Surface           parentSurface           = parentWlSurface.getSurface();
                                                parentSurface.removeSibling(Sibling.create(wlSurfaceResource));
                                            }));
+
+        this.scene.removeView(this.surfaceView);
+        this.scene.getApplicationLayer()
+                  .getSurfaceViews()
+                  .add(this.surfaceView);
     }
 }

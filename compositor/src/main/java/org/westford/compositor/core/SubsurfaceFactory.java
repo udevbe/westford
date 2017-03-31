@@ -27,14 +27,10 @@ public class SubsurfaceFactory {
 
     @Nonnull
     private final PrivateSubsurfaceFactory privateSubsurfaceFactory;
-    @Nonnull
-    private final Scene                    scene;
 
     @Inject
-    SubsurfaceFactory(@Nonnull final PrivateSubsurfaceFactory privateSubsurfaceFactory,
-                      @Nonnull final Scene scene) {
+    SubsurfaceFactory(@Nonnull final PrivateSubsurfaceFactory privateSubsurfaceFactory) {
         this.privateSubsurfaceFactory = privateSubsurfaceFactory;
-        this.scene = scene;
     }
 
     public Subsurface create(@Nonnull final WlSurfaceResource parentWlSurfaceResource,
@@ -67,8 +63,6 @@ public class SubsurfaceFactory {
                      }));
 
         parentSurface.addSubsurface(subsurface);
-        this.scene.getSurfacesStack()
-                  .remove(wlSurfaceResource);
 
         /*
          * Docs says a subsurface with a destroyed parent must become inert.

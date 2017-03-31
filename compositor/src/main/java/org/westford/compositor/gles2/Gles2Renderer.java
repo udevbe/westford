@@ -416,7 +416,7 @@ public class Gles2Renderer implements GlRenderer {
                       @Nonnull WlOutput wlOutput) {
         render(eglOutput,
                wlOutput,
-               this.scene.createSurfaceViewStack());
+               this.scene.drawableSurfaces());
     }
 
     @Override

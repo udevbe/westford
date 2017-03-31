@@ -141,9 +141,6 @@ public class WlCompositorTest {
     @Test
     public void testCreateSurface() throws Exception {
         //given
-        final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(surfacesStack);
-
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
         final WlSurface         wlSurface0         = mock(WlSurface.class);
         when(wlSurface0.add(any(),
@@ -192,9 +189,6 @@ public class WlCompositorTest {
         verify(wlSurface1).add(client,
                                version,
                                id1);
-        assertThat(surfacesStack).containsExactly(wlSurfaceResource0,
-                                                  wlSurfaceResource1)
-                                 .inOrder();
 
         final ArgumentCaptor<DestroyListener> destroyListenerCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource1).register(destroyListenerCaptor.capture());
@@ -205,7 +199,6 @@ public class WlCompositorTest {
 
         //then
         //TODO check subsurface stacks
-        assertThat(surfacesStack).doesNotContain(wlSurfaceResource1);
         verify(this.compositor).requestRender();
     }
 

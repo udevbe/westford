@@ -99,10 +99,10 @@ public class SceneTest {
         when(surface1.getRole()).thenReturn(Optional.of(role1));
 
 
-        this.scene.getSurfacesStack()
-                  .add(wlSurfaceResource0);
-        this.scene.getSurfacesStack()
-                  .add(wlSurfaceResource1);
+//        this.scene.getSurfacesStack()
+//                  .add(wlSurfaceResource0);
+//        this.scene.getSurfacesStack()
+//                  .add(wlSurfaceResource1);
 
         //when
         final Optional<SurfaceView> pickSurface = this.scene.pickSurfaceView(global);

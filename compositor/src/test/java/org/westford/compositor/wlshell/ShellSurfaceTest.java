@@ -51,7 +51,6 @@ import org.westford.compositor.protocol.WlSurface;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
 
@@ -113,10 +112,11 @@ public class ShellSurfaceTest {
                                                 0)))).thenReturn(surfacePosition);
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
         //when
         shellSurface.move(wlSurfaceResource,
                           wlPointerResource,
@@ -177,10 +177,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -244,10 +245,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -311,10 +313,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -378,10 +381,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -445,10 +449,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -512,10 +517,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -579,10 +585,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -646,10 +653,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           0);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -678,10 +686,11 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final int                    pingSerial             = 12345;
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           12345);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                          12345);
 
         //when
         shellSurface.pong(wlShellSurfaceResource,
@@ -695,10 +704,11 @@ public class ShellSurfaceTest {
     @Test
     public void testPongTimeout() {
         //given
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           12345);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                          12345);
         final ArgumentCaptor<EventLoop.TimerEventHandler> timerEventHandlerArgumentCaptor = ArgumentCaptor.forClass(EventLoop.TimerEventHandler.class);
         verify(this.eventLoop).addTimer(timerEventHandlerArgumentCaptor.capture());
         final EventLoop.TimerEventHandler timerEventHandler = timerEventHandlerArgumentCaptor.getValue();
@@ -718,21 +728,12 @@ public class ShellSurfaceTest {
     @Test
     public void testSetTopLevel() throws Exception {
         //given
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           12345);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                          12345);
 
-        final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(surfacesStack);
-
-        final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-        final WlSurfaceResource wlSurfaceResource2 = mock(WlSurfaceResource.class);
-
-        surfacesStack.add(wlSurfaceResource1);
-        surfacesStack.add(wlSurfaceResource0);
-        surfacesStack.add(wlSurfaceResource2);
 
         //TODO
         //when
@@ -771,10 +772,11 @@ public class ShellSurfaceTest {
                                                    localY))).thenReturn(Point.create(globalX,
                                                                                      globalY));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           12345);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                          12345);
 
         //when
         shellSurface.setTransient(wlSurfaceResource,
@@ -835,10 +837,11 @@ public class ShellSurfaceTest {
                                                    localY))).thenReturn(Point.create(globalX,
                                                                                      globalY));
 
-        final ShellSurface shellSurface = new ShellSurface(this.display,
-                                                           this.compositor,
-                                                           this.scene,
-                                                           12345);
+        final ShellSurface shellSurface = null;
+//                new ShellSurface(this.display,
+//                                                           this.compositor,
+//                                                           this.scene,
+//                                                          12345);
 
         //when
         shellSurface.setTransient(wlSurfaceResource,

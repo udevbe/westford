@@ -32,6 +32,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -53,35 +54,35 @@ public class WlPointer implements WlPointerRequestsV5, ProtocolObject<WlPointerR
                           @Nullable final WlSurfaceResource wlSurfaceResource,
                           final int hotspotX,
                           final int hotspotY) {
+
         if (wlSurfaceResource == null) {
             getPointerDevice().removeCursor(wlPointerResource,
                                             serial);
+            return;
         }
-        else {
-            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Surface   surface   = wlSurface.getSurface();
 
-            final Role role = surface.getRole()
-                                     .orElseGet(this::getPointerDevice);
 
-            if (role.equals(getPointerDevice())) {
-                final PointerDevice pointerDevice = (PointerDevice) role;
-                surface.setRole(pointerDevice);
-                pointerDevice.setCursor(wlPointerResource,
-                                        serial,
-                                        wlSurfaceResource,
-                                        hotspotX,
-                                        hotspotY);
-            }
-            else {
-                wlPointerResource.getClient()
-                                 .getObject(Display.OBJECT_ID)
-                                 .postError(WlPointerError.ROLE.value,
-                                            String.format("Desired cursor surface already has another role (%s)",
-                                                          role.getClass()
-                                                              .getSimpleName()));
-            }
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
+
+        final Optional<Role> role = surface.getRole();
+        if (role.isPresent() && !role.get()
+                                     .equals(this.pointerDevice)) {
+            wlPointerResource.getClient()
+                             .getObject(Display.OBJECT_ID)
+                             .postError(WlPointerError.ROLE.value,
+                                        String.format("Desired cursor surface already has another role (%s)",
+                                                      role.getClass()
+                                                          .getSimpleName()));
+            return;
         }
+
+        surface.setRole(this.pointerDevice);
+        pointerDevice.setCursor(wlPointerResource,
+                                serial,
+                                wlSurfaceResource,
+                                hotspotX,
+                                hotspotY);
     }
 
     public PointerDevice getPointerDevice() {

@@ -577,6 +577,15 @@ public class PointerDevice implements Role {
         if (cursor == null) {
             cursor = this.cursorFactory.create(wlSurfaceResource,
                                                hotspot);
+
+            WlSurface     wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final Surface surface   = wlSurface.getSurface();
+            final SurfaceView view = surface.createView(wlSurfaceResource,
+                                                        this.position);
+            this.scene.getCursorLayer()
+                      .getSurfaceViews()
+                      .add(view);
+
             this.cursors.put(wlPointerResource,
                              cursor);
             wlPointerResource.register(() -> Optional.ofNullable(this.cursors.remove(wlPointerResource))
@@ -623,13 +632,6 @@ public class PointerDevice implements Role {
                              .equals(wlSurfaceResource) &&
             !this.activeCursor.get()
                               .isHidden()) {
-
-            //TODO put cursor surfaces in a separate list in the scene.
-            //move visible cursor to top of surface stack
-            this.scene.getSurfacesStack()
-                      .remove(wlSurfaceResource);
-            this.scene.getSurfacesStack()
-                      .addLast(wlSurfaceResource);
         }
         else {
             surfaceStateBuilder.buffer(Optional.empty());

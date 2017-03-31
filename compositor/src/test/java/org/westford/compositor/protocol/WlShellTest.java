@@ -171,7 +171,7 @@ public class WlShellTest {
         when(wlShellSurface.add(any(),
                                 anyInt(),
                                 anyInt())).thenReturn(wlShellSurfaceResource);
-        when(this.shellSurfaceFactory.create(anyInt())).thenReturn(shellSurface);
+//        when(this.shellSurfaceFactory.create(anyInt())).thenReturn(shellSurface);
         //when
         this.wlShell.getShellSurface(wlShellResource,
                                      id,

@@ -79,13 +79,17 @@ public class WlSubcompositor extends Global<WlSubcompositorResource> implements 
          * Check if the surface does not have a role or has an inactive subsurface role, both are ok. Otherwise we raise
          * a protocol error.
          */
-        if (!hasRole ||
-            role.get() instanceof Subsurface &&
-            ((Subsurface) role.get()).isInert()) {
+        if (!hasRole || (
+                role.get() instanceof Subsurface &&
+                ((Subsurface) role.get()).isInert())) {
 
             final Subsurface subsurface = this.subsurfaceFactory.create(parentWlSurfaceResource,
                                                                         wlSurfaceResource);
             surface.setRole(subsurface);
+
+            if (!hasRole) {
+
+            }
 
             final WlSubsurface wlSubsurface = this.wlSubSurfaceFactory.create(subsurface);
             final WlSubsurfaceResource wlSubsurfaceResource = wlSubsurface.add(requester.getClient(),

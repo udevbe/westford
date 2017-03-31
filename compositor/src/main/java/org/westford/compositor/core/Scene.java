@@ -24,26 +24,58 @@ import org.westford.compositor.protocol.WlSurface;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Optional;
 
 @Singleton
 public class Scene {
+
     @Nonnull
     private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
+
+    @Nonnull
+    private final SingleViewLayer backgroundLayer;
+    @Nonnull
+    private final MultiViewLayer  underLayer;
+    @Nonnull
+    private final MultiViewLayer  applicationLayer;
+    @Nonnull
+    private final MultiViewLayer  overLayer;
+    @Nonnull
+    private final SingleViewLayer fullscreenLayer;
+    @Nonnull
+    private final SingleViewLayer lockLayer;
+    @Nonnull
+    private final MultiViewLayer  cursorLayer;
+
     @Nonnull
     private final InfiniteRegion infiniteRegion;
 
     @Inject
-    Scene(@Nonnull final InfiniteRegion infiniteRegion) {
+    Scene(@Nonnull final SingleViewLayer backgroundLayer,
+          @Nonnull final MultiViewLayer underLayer,
+          @Nonnull final MultiViewLayer applicationLayer,
+          @Nonnull final MultiViewLayer overLayer,
+          @Nonnull final SingleViewLayer fullscreenLayer,
+          @Nonnull final SingleViewLayer lockLayer,
+          @Nonnull final MultiViewLayer cursor,
+          @Nonnull final InfiniteRegion infiniteRegion) {
+        this.backgroundLayer = backgroundLayer;
+        this.underLayer = underLayer;
+        this.applicationLayer = applicationLayer;
+        this.overLayer = overLayer;
+        this.fullscreenLayer = fullscreenLayer;
+        this.lockLayer = lockLayer;
+        this.cursorLayer = cursor;
         this.infiniteRegion = infiniteRegion;
     }
 
     @Nonnull
     public Optional<SurfaceView> pickSurfaceView(final Point global) {
 
-        final Iterator<SurfaceView> surfaceViewIterator = createSurfaceViewStack().descendingIterator();
+        final Iterator<SurfaceView> surfaceViewIterator = pickableSurfaces().descendingIterator();
         Optional<SurfaceView>       pointerOver         = Optional.empty();
 
         while (surfaceViewIterator.hasNext()) {
@@ -59,7 +91,7 @@ public class Scene {
 
             final Optional<Region> inputRegion = surface.getState()
                                                         .getInputRegion();
-            final Region region = inputRegion.orElseGet(() -> this.infiniteRegion);
+            final Region region = inputRegion.orElse(this.infiniteRegion);
 
             final Rectangle size = surface.getSize();
 
@@ -74,21 +106,61 @@ public class Scene {
         return pointerOver;
     }
 
-    @Nonnull
-    public LinkedList<WlSurfaceResource> getSurfacesStack() {
-        return this.surfacesStack;
+    private LinkedList<SurfaceView> pickableSurfaces() {
+
+        final LinkedList<SurfaceView> views = new LinkedList<>();
+
+        if (this.lockLayer.getSurfaceView()
+                          .isPresent()) {
+            //lockLayer screen
+            views.add(this.lockLayer.getSurfaceView()
+                                    .get());
+        }
+        else if (this.fullscreenLayer.getSurfaceView()
+                                     .isPresent()) {
+            //fullscreenLayer
+            views.add(this.fullscreenLayer.getSurfaceView()
+                                          .get());
+        }
+        else {
+            //other
+            this.backgroundLayer.getSurfaceView()
+                                .ifPresent(views::add);
+            views.addAll(this.underLayer.getSurfaceViews());
+            views.addAll(this.applicationLayer.getSurfaceViews());
+            views.addAll(this.overLayer.getSurfaceViews());
+        }
+
+        //make sure we include any sub-views
+        LinkedList<SurfaceView> pickableViews = new LinkedList<>();
+        views.forEach(surfaceView -> pickableViews.addAll(withSiblingViews(surfaceView)));
+
+        return pickableViews;
     }
 
+    public LinkedList<SurfaceView> drawableSurfaces() {
 
-    public LinkedList<SurfaceView> createSurfaceViewStack() {
+        final LinkedList<SurfaceView> drawableSurfaceViewStack = pickableSurfaces();
+        //add cursor surfaces
+        this.cursorLayer.getSurfaceViews()
+                        .forEach(cursorSurfaceView -> drawableSurfaceViewStack.addAll(withSiblingViews(cursorSurfaceView)));
 
+        return drawableSurfaceViewStack;
+    }
+
+    public LinkedList<SurfaceView> withSiblingViews(final SurfaceView surfaceView) {
         final LinkedList<SurfaceView> surfaceViews = new LinkedList<>();
-        this.surfacesStack.forEach(wlSurfaceResource -> loopSiblings(wlSurfaceResource,
-                                                                     surfaceViews));
-
+        addSiblingViews(surfaceView,
+                        surfaceViews);
         return surfaceViews;
     }
 
+    /**
+     * Gather all parent surface views, including the parent surface view and insert it with a correct order into the provided list.
+     *
+     * @param parentSurfaceView
+     * @param surfaceViews
+     */
     private void addSiblingViews(final SurfaceView parentSurfaceView,
                                  final LinkedList<SurfaceView> surfaceViews) {
 
@@ -126,14 +198,58 @@ public class Scene {
                      });
     }
 
-    private void loopSiblings(WlSurfaceResource wlSurfaceResource,
-                              LinkedList<SurfaceView> surfaceViews) {
+    @Nonnull
+    public SingleViewLayer getBackgroundLayer() {
+        return this.backgroundLayer;
+    }
 
-        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface   surface   = wlSurface.getSurface();
+    @Nonnull
+    public MultiViewLayer getUnderLayer() {
+        return this.underLayer;
+    }
 
-        surface.getViews()
-               .forEach(parentSurfaceView -> addSiblingViews(parentSurfaceView,
-                                                             surfaceViews));
+    @Nonnull
+    public MultiViewLayer getApplicationLayer() {
+        return this.applicationLayer;
+    }
+
+    @Nonnull
+    public MultiViewLayer getOverLayer() {
+        return this.overLayer;
+    }
+
+    @Nonnull
+    public SingleViewLayer getFullscreenLayer() {
+        return this.fullscreenLayer;
+    }
+
+    @Nonnull
+    public SingleViewLayer getLockLayer() {
+        return this.lockLayer;
+    }
+
+    @Nonnull
+    public MultiViewLayer getCursorLayer() {
+        return this.cursorLayer;
+    }
+
+    public void removeView(@Nonnull final SurfaceView surfaceView) {
+        backgroundLayer.removeIfEqualTo(surfaceView);
+        this.underLayer.getSurfaceViews()
+                       .remove(surfaceView);
+        this.applicationLayer.getSurfaceViews()
+                             .remove(surfaceView);
+        this.overLayer.getSurfaceViews()
+                      .remove(surfaceView);
+        this.fullscreenLayer.removeIfEqualTo(surfaceView);
+        this.lockLayer.removeIfEqualTo(surfaceView);
+    }
+
+    public void removeAllViews(@Nonnull final WlSurfaceResource wlSurfaceResource) {
+        WlSurface     wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface surface   = wlSurface.getSurface();
+
+        final Collection<SurfaceView> views = surface.getViews();
+        views.forEach(this::removeView);
     }
 }

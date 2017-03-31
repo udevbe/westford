@@ -119,12 +119,9 @@ public class PointerDeviceTest {
                                                y1);
 
         //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -151,7 +148,6 @@ public class PointerDeviceTest {
 
         //mock surface 1
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource1);
         final Client client1 = mock(Client.class);
         when(wlSurfaceResource1.getClient()).thenReturn(client1);
         final WlSurface wlSurface1 = mock(WlSurface.class);
@@ -290,12 +286,9 @@ public class PointerDeviceTest {
                                                y1);
 
         //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -322,7 +315,6 @@ public class PointerDeviceTest {
 
         //mock surface 1
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource1);
         final Client client1 = mock(Client.class);
         when(wlSurfaceResource1.getClient()).thenReturn(client1);
         final WlSurface wlSurface1 = mock(WlSurface.class);
@@ -448,13 +440,8 @@ public class PointerDeviceTest {
         final Point pointerPos1 = Point.create(x1,
                                                y1);
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -547,13 +534,8 @@ public class PointerDeviceTest {
         final Point pointerPos1 = Point.create(x1,
                                                y1);
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -645,13 +627,8 @@ public class PointerDeviceTest {
         final Point pointerPos1 = Point.create(x1,
                                                y1);
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -761,13 +738,8 @@ public class PointerDeviceTest {
         final Point pointerPos1 = Point.create(x1,
                                                y1);
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -870,13 +842,8 @@ public class PointerDeviceTest {
         final Point pointerPos1 = Point.create(x1,
                                                y1);
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -992,8 +959,6 @@ public class PointerDeviceTest {
         when(surfaceView1.local(Point.create(x,
                                              y))).thenReturn(localPointerPosition1);
 
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         final WlSurfaceResource wlSurfaceResourceCursor0 = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor0.getClient()).thenReturn(client0);
         final WlSurface wlSurfaceCursor0 = mock(WlSurface.class);
@@ -1083,8 +1048,6 @@ public class PointerDeviceTest {
         when(surfaceView0.local(Point.create(x,
                                              y))).thenReturn(localPointerPosition1);
 
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         final WlSurfaceResource wlSurfaceResourceCursor0 = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor0.getClient()).thenReturn(client0);
         final WlSurface wlSurfaceCursor0 = mock(WlSurface.class);
@@ -1153,13 +1116,8 @@ public class PointerDeviceTest {
         final Point pointerPos1 = Point.create(x1,
                                                y1);
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -1451,8 +1409,6 @@ public class PointerDeviceTest {
         final Point localPointerPosition0 = mock(Point.class);
         when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
 
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
         final WlSurface wlSurfaceCursor = mock(WlSurface.class);
@@ -1550,8 +1506,6 @@ public class PointerDeviceTest {
         final Point localPointerPosition1 = mock(Point.class);
         when(surfaceView1.local(Point.create(x,
                                              y))).thenReturn(localPointerPosition1);
-
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
 
         final WlSurfaceResource wlSurfaceResourceCursor0 = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor0.getClient()).thenReturn(client0);
@@ -1665,8 +1619,6 @@ public class PointerDeviceTest {
         final Point localPointerPosition0 = mock(Point.class);
         when(surfaceView0.local(this.pointerDevice.getPosition())).thenReturn(localPointerPosition0);
 
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         final WlSurfaceResource wlSurfaceResourceCursor = mock(WlSurfaceResource.class);
         when(wlSurfaceResourceCursor.getClient()).thenReturn(client);
         final WlSurface wlSurfaceCursor = mock(WlSurface.class);
@@ -1754,13 +1706,8 @@ public class PointerDeviceTest {
     public void testGrabSurfaceDestroyed() throws Exception {
         // given: a surface that has the grab
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -1820,15 +1767,10 @@ public class PointerDeviceTest {
         }).when(this.jobExecutor)
           .submit(any());
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         final Set<WlPointerResource> pointerResources = new HashSet<>();
 
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -1852,7 +1794,6 @@ public class PointerDeviceTest {
 
         //mock surface 1
         final WlSurfaceResource wlSurfaceResource1 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource1);
         final Client client1 = mock(Client.class);
         when(wlSurfaceResource1.getClient()).thenReturn(client1);
         final WlSurface wlSurface1 = mock(WlSurface.class);
@@ -1888,8 +1829,6 @@ public class PointerDeviceTest {
         final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource1,
                atLeastOnce()).register(destroyListenerArgumentCaptor.capture());
-        this.scene.getSurfacesStack()
-                  .remove(wlSurfaceResource1);
         destroyListenerArgumentCaptor.getAllValues()
                                      .forEach(DestroyListener::handle);
 
@@ -1909,13 +1848,8 @@ public class PointerDeviceTest {
         }).when(this.jobExecutor)
           .submit(any());
 
-        //mock compositor
-        final LinkedList<WlSurfaceResource> wlSurfaceResources = new LinkedList<>();
-        when(this.scene.getSurfacesStack()).thenReturn(wlSurfaceResources);
-
         //mock surface 0
         final WlSurfaceResource wlSurfaceResource0 = mock(WlSurfaceResource.class);
-        wlSurfaceResources.add(wlSurfaceResource0);
         final Client client0 = mock(Client.class);
         when(wlSurfaceResource0.getClient()).thenReturn(client0);
         final WlSurface wlSurface0 = mock(WlSurface.class);
@@ -1952,8 +1886,6 @@ public class PointerDeviceTest {
         final ArgumentCaptor<DestroyListener> destroyListenerArgumentCaptor = ArgumentCaptor.forClass(DestroyListener.class);
         verify(wlSurfaceResource0,
                atLeastOnce()).register(destroyListenerArgumentCaptor.capture());
-        this.scene.getSurfacesStack()
-                  .remove(wlSurfaceResource0);
         destroyListenerArgumentCaptor.getAllValues()
                                      .forEach(DestroyListener::handle);
         // then: no surface has the focus

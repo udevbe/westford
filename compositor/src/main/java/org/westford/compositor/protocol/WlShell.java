@@ -34,7 +34,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -47,8 +47,6 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
     private final Display                                             display;
     private final WlShellSurfaceFactory                               wlShellSurfaceFactory;
     private final org.westford.compositor.wlshell.ShellSurfaceFactory shellSurfaceFactory;
-
-    private final Set<ShellSurface> activeShellSurfaceRoles = new HashSet<>();
 
     @Inject
     WlShell(@Nonnull final Display display,
@@ -71,36 +69,32 @@ public class WlShell extends Global<WlShellResource> implements WlShellRequests,
         final Surface   surface   = wlSurface.getSurface();
 
         final int pingSerial = this.display.nextSerial();
-        final Role role = surface.getRole()
-                                 .orElseGet(() -> this.shellSurfaceFactory.create(pingSerial));
 
-        if (role instanceof ShellSurface &&
-            !this.activeShellSurfaceRoles.contains(role)) {
-
-            surface.setRole(role);
-
-            final ShellSurface shellSurface = (ShellSurface) role;
-            final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(shellSurface,
-                                                                                    wlSurfaceResource);
-            final WlShellSurfaceResource wlShellSurfaceResource = wlShellSurface.add(requester.getClient(),
-                                                                                     requester.getVersion(),
-                                                                                     id);
-            this.activeShellSurfaceRoles.add(shellSurface);
-
-            wlShellSurfaceResource.register(() -> this.activeShellSurfaceRoles.remove(shellSurface));
-            wlSurfaceResource.register(wlShellSurfaceResource::destroy);
-
-            shellSurface.pong(wlShellSurfaceResource,
-                              pingSerial);
-        }
-        else {
+        final Optional<Role> role = surface.getRole();
+        if (role.isPresent()) {
             requester.getClient()
                      .getObject(Display.OBJECT_ID)
                      .postError(WlShellError.ROLE.value,
                                 String.format("Desired shell surface already has another role (%s)",
-                                              role.getClass()
-                                                  .getSimpleName()));
+                                              surface.getRole()
+                                                     .getClass()
+                                                     .getSimpleName()));
+            return;
         }
+
+        final ShellSurface shellSurface = this.shellSurfaceFactory.create(wlSurfaceResource,
+                                                                          surface,
+                                                                          pingSerial);
+        surface.setRole(shellSurface);
+        final WlShellSurface wlShellSurface = this.wlShellSurfaceFactory.create(shellSurface,
+                                                                                wlSurfaceResource);
+        final WlShellSurfaceResource wlShellSurfaceResource = wlShellSurface.add(requester.getClient(),
+                                                                                 requester.getVersion(),
+                                                                                 id);
+        wlSurfaceResource.register(wlShellSurfaceResource::destroy);
+
+        shellSurface.pong(wlShellSurfaceResource,
+                          pingSerial);
     }
 
     @Override

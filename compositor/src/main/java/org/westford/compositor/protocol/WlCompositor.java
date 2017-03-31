@@ -103,15 +103,9 @@ public class WlCompositor extends Global<WlCompositorResource> implements WlComp
         surface.getSiblings()
                .add(Sibling.create(wlSurfaceResource));
 
-        //adding a surface to the scene should be done when we add/create a new role
-        this.scene.getSurfacesStack()
-                  .add(wlSurfaceResource);
-
         //TODO unit test destroy handler
         wlSurfaceResource.register(() -> {
-            //FIXME
-            this.scene.getSurfacesStack()
-                      .remove(wlSurfaceResource);
+            this.scene.removeAllViews(wlSurfaceResource);
             surface.markDestroyed();
             this.renderer.onDestroy(wlSurfaceResource);
             this.compositor.requestRender();
