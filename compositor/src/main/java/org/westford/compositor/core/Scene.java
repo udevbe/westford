@@ -36,31 +36,31 @@ public class Scene {
     private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
 
     @Nonnull
-    private final SingleViewLayer backgroundLayer;
+    private final SceneLayer backgroundLayer;
     @Nonnull
-    private final MultiViewLayer  underLayer;
+    private final SceneLayer underLayer;
     @Nonnull
-    private final MultiViewLayer  applicationLayer;
+    private final SceneLayer applicationLayer;
     @Nonnull
-    private final MultiViewLayer  overLayer;
+    private final SceneLayer overLayer;
     @Nonnull
-    private final SingleViewLayer fullscreenLayer;
+    private final SceneLayer fullscreenLayer;
     @Nonnull
-    private final SingleViewLayer lockLayer;
+    private final SceneLayer lockLayer;
     @Nonnull
-    private final MultiViewLayer  cursorLayer;
+    private final SceneLayer cursorLayer;
 
     @Nonnull
     private final InfiniteRegion infiniteRegion;
 
     @Inject
-    Scene(@Nonnull final SingleViewLayer backgroundLayer,
-          @Nonnull final MultiViewLayer underLayer,
-          @Nonnull final MultiViewLayer applicationLayer,
-          @Nonnull final MultiViewLayer overLayer,
-          @Nonnull final SingleViewLayer fullscreenLayer,
-          @Nonnull final SingleViewLayer lockLayer,
-          @Nonnull final MultiViewLayer cursor,
+    Scene(@Nonnull final SceneLayer backgroundLayer,
+          @Nonnull final SceneLayer underLayer,
+          @Nonnull final SceneLayer applicationLayer,
+          @Nonnull final SceneLayer overLayer,
+          @Nonnull final SceneLayer fullscreenLayer,
+          @Nonnull final SceneLayer lockLayer,
+          @Nonnull final SceneLayer cursor,
           @Nonnull final InfiniteRegion infiniteRegion) {
         this.backgroundLayer = backgroundLayer;
         this.underLayer = underLayer;
@@ -110,29 +110,26 @@ public class Scene {
 
         final LinkedList<SurfaceView> views = new LinkedList<>();
 
-        if (this.lockLayer.getSurfaceView()
-                          .isPresent()) {
+        if (!this.lockLayer.getSurfaceViews()
+                           .isEmpty()) {
             //lockLayer screen
-            views.add(this.lockLayer.getSurfaceView()
-                                    .get());
+            views.addAll(this.lockLayer.getSurfaceViews());
         }
-        else if (this.fullscreenLayer.getSurfaceView()
-                                     .isPresent()) {
+        else if (!this.fullscreenLayer.getSurfaceViews()
+                                      .isEmpty()) {
             //fullscreenLayer
-            views.add(this.fullscreenLayer.getSurfaceView()
-                                          .get());
+            views.addAll(this.fullscreenLayer.getSurfaceViews());
         }
         else {
             //other
-            this.backgroundLayer.getSurfaceView()
-                                .ifPresent(views::add);
+            views.addAll(this.backgroundLayer.getSurfaceViews());
             views.addAll(this.underLayer.getSurfaceViews());
             views.addAll(this.applicationLayer.getSurfaceViews());
             views.addAll(this.overLayer.getSurfaceViews());
         }
 
         //make sure we include any sub-views
-        LinkedList<SurfaceView> pickableViews = new LinkedList<>();
+        final LinkedList<SurfaceView> pickableViews = new LinkedList<>();
         views.forEach(surfaceView -> pickableViews.addAll(withSiblingViews(surfaceView)));
 
         return pickableViews;
@@ -199,55 +196,58 @@ public class Scene {
     }
 
     @Nonnull
-    public SingleViewLayer getBackgroundLayer() {
+    public SceneLayer getBackgroundLayer() {
         return this.backgroundLayer;
     }
 
     @Nonnull
-    public MultiViewLayer getUnderLayer() {
+    public SceneLayer getUnderLayer() {
         return this.underLayer;
     }
 
     @Nonnull
-    public MultiViewLayer getApplicationLayer() {
+    public SceneLayer getApplicationLayer() {
         return this.applicationLayer;
     }
 
     @Nonnull
-    public MultiViewLayer getOverLayer() {
+    public SceneLayer getOverLayer() {
         return this.overLayer;
     }
 
     @Nonnull
-    public SingleViewLayer getFullscreenLayer() {
+    public SceneLayer getFullscreenLayer() {
         return this.fullscreenLayer;
     }
 
     @Nonnull
-    public SingleViewLayer getLockLayer() {
+    public SceneLayer getLockLayer() {
         return this.lockLayer;
     }
 
     @Nonnull
-    public MultiViewLayer getCursorLayer() {
+    public SceneLayer getCursorLayer() {
         return this.cursorLayer;
     }
 
     public void removeView(@Nonnull final SurfaceView surfaceView) {
-        backgroundLayer.removeIfEqualTo(surfaceView);
+        this.backgroundLayer.getSurfaceViews()
+                            .remove(surfaceView);
         this.underLayer.getSurfaceViews()
                        .remove(surfaceView);
         this.applicationLayer.getSurfaceViews()
                              .remove(surfaceView);
         this.overLayer.getSurfaceViews()
                       .remove(surfaceView);
-        this.fullscreenLayer.removeIfEqualTo(surfaceView);
-        this.lockLayer.removeIfEqualTo(surfaceView);
+        this.fullscreenLayer.getSurfaceViews()
+                            .remove(surfaceView);
+        this.lockLayer.getSurfaceViews()
+                      .remove(surfaceView);
     }
 
     public void removeAllViews(@Nonnull final WlSurfaceResource wlSurfaceResource) {
-        WlSurface     wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-        final Surface surface   = wlSurface.getSurface();
+        final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+        final Surface   surface   = wlSurface.getSurface();
 
         final Collection<SurfaceView> views = surface.getViews();
         views.forEach(this::removeView);
