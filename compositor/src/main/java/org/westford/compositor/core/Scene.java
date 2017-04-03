@@ -115,13 +115,8 @@ public class Scene {
             //lockLayer screen
             views.addAll(this.lockLayer.getSurfaceViews());
         }
-        else if (!this.fullscreenLayer.getSurfaceViews()
-                                      .isEmpty()) {
-            //fullscreenLayer
-            views.addAll(this.fullscreenLayer.getSurfaceViews());
-        }
         else {
-            //other
+            views.addAll(this.fullscreenLayer.getSurfaceViews());
             views.addAll(this.backgroundLayer.getSurfaceViews());
             views.addAll(this.underLayer.getSurfaceViews());
             views.addAll(this.applicationLayer.getSurfaceViews());
