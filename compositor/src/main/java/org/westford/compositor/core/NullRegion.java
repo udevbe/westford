@@ -50,6 +50,11 @@ public class NullRegion implements Region {
     }
 
     @Override
+    public boolean contains(@Nonnull final Rectangle rectangle) {
+        return false;
+    }
+
+    @Override
     public Region intersect(@Nonnull final Rectangle rectangle) {
         return this;
     }

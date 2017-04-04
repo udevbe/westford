@@ -25,8 +25,10 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 @Singleton
@@ -106,7 +108,7 @@ public class Scene {
         return pointerOver;
     }
 
-    private LinkedList<SurfaceView> pickableSurfaces() {
+    public LinkedList<SurfaceView> pickableSurfaces() {
 
         final LinkedList<SurfaceView> views = new LinkedList<>();
 
@@ -130,7 +132,138 @@ public class Scene {
         return pickableViews;
     }
 
-    public LinkedList<SurfaceView> drawableSurfaces() {
+    /**
+     * Return all views who at least have a partial intersection with the given region.
+     * <p>
+     * Sibling views are not iterated explicitly.
+     *
+     * @param views
+     * @param region
+     *
+     * @return
+     */
+    public LinkedList<SurfaceView> intersect(@Nonnull final LinkedList<SurfaceView> views,
+                                             @Nonnull final Region region) {
+
+        final LinkedList<SurfaceView> intersectingViews = new LinkedList<>();
+
+        views.forEach(surfaceView -> {
+            final WlSurfaceResource wlSurfaceResource = surfaceView.getWlSurfaceResource();
+            final WlSurface         wlSurface         = (WlSurface) wlSurfaceResource.getImplementation();
+            final Surface           surface           = wlSurface.getSurface();
+            final Rectangle         size              = surface.getSize();
+
+            final Rectangle viewBox = Rectangle.create(surfaceView.global(Point.ZERO),
+                                                       size.getWidth(),
+                                                       size.getHeight());
+
+            if (region.contains(viewBox)) {
+                intersectingViews.add(surfaceView);
+            }
+        });
+
+        return intersectingViews;
+    }
+
+    /**
+     * Return all views from the layer who at least have a partial intersection with the given region.
+     * <p>
+     * Sibling views are iterated explicitly.
+     *
+     * @param sceneLayer
+     * @param region
+     *
+     * @return
+     */
+    public LinkedList<SurfaceView> intersectLayer(@Nonnull final SceneLayer sceneLayer,
+                                                  @Nonnull final Region region) {
+        final LinkedList<SurfaceView> views = new LinkedList<>();
+        sceneLayer.getSurfaceViews()
+                  .forEach(surfaceView -> views.addAll(withSiblingViews(surfaceView)));
+        return intersect(views,
+                         region);
+    }
+
+    /**
+     * Create an output scene where all returned views are at least partially visible on the given output.
+     *
+     * @param output
+     *
+     * @return
+     */
+    public OutputScene create(@Nonnull final Output output) {
+
+        final OutputScene outputScene;
+
+        if (!this.lockLayer.getSurfaceViews()
+                           .isEmpty()) {
+            final LinkedList<SurfaceView> outputLockViews = intersectLayer(this.lockLayer,
+                                                                           output.getRegion());
+            final LinkedList<SurfaceView> cursorViews = intersectLayer(this.cursorLayer,
+                                                                       output.getRegion());
+            outputScene = OutputScene.create(Optional.empty(),
+                                             Collections.emptyList(),
+                                             Collections.emptyList(),
+                                             Collections.emptyList(),
+                                             Optional.empty(),
+                                             outputLockViews,
+                                             cursorViews);
+        }
+        else {
+
+            final Optional<SurfaceView> backgroundView;
+            final List<SurfaceView>     underViews;
+            final List<SurfaceView>     applicationViews;
+            final List<SurfaceView>     overViews;
+            final Optional<SurfaceView> fullscreenView;
+
+            final LinkedList<SurfaceView> outputFullscreenViews = intersectLayer(this.fullscreenLayer,
+                                                                                 output.getRegion());
+            final LinkedList<SurfaceView> cursorViews = intersectLayer(this.cursorLayer,
+                                                                       output.getRegion());
+            if (outputFullscreenViews.isEmpty()) {
+                final LinkedList<SurfaceView> outputBackgroundViews = intersectLayer(this.backgroundLayer,
+                                                                                     output.getRegion());
+                final LinkedList<SurfaceView> outputUnderViews = intersectLayer(this.underLayer,
+                                                                                output.getRegion());
+                final LinkedList<SurfaceView> outputApplicationViews = intersectLayer(this.applicationLayer,
+                                                                                      output.getRegion());
+                final LinkedList<SurfaceView> outputOverViews = intersectLayer(this.overLayer,
+                                                                               output.getRegion());
+
+                backgroundView = Optional.ofNullable(outputBackgroundViews.peekFirst());
+                underViews = outputUnderViews;
+                applicationViews = outputApplicationViews;
+                overViews = outputOverViews;
+                fullscreenView = Optional.empty();
+            }
+            else {
+                //there is a fullscreen view, don't bother return the underlying views
+                backgroundView = Optional.empty();
+                underViews = Collections.emptyList();
+                applicationViews = Collections.emptyList();
+                overViews = Collections.emptyList();
+                fullscreenView = Optional.ofNullable(outputFullscreenViews.getFirst());
+            }
+
+            outputScene = OutputScene.create(backgroundView,
+                                             underViews,
+                                             applicationViews,
+                                             overViews,
+                                             fullscreenView,
+                                             Collections.emptyList(),
+                                             cursorViews);
+        }
+
+        return outputScene;
+    }
+
+    /**
+     * All surfaces, including siblings.
+     *
+     * @return
+     */
+    public LinkedList<SurfaceView> allSurfaces() {
 
         final LinkedList<SurfaceView> drawableSurfaceViewStack = pickableSurfaces();
         //add cursor surfaces
@@ -140,6 +273,13 @@ public class Scene {
         return drawableSurfaceViewStack;
     }
 
+    /**
+     * Expand a view so the returned list also includes its siblings.
+     *
+     * @param surfaceView
+     *
+     * @return
+     */
     public LinkedList<SurfaceView> withSiblingViews(final SurfaceView surfaceView) {
         final LinkedList<SurfaceView> surfaceViews = new LinkedList<>();
         addSiblingViews(surfaceView,

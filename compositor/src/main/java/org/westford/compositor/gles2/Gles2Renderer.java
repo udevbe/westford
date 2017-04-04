@@ -33,6 +33,7 @@ import org.westford.compositor.core.EglSurfaceState;
 import org.westford.compositor.core.GlRenderer;
 import org.westford.compositor.core.Output;
 import org.westford.compositor.core.OutputMode;
+import org.westford.compositor.core.OutputScene;
 import org.westford.compositor.core.RenderOutput;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.ShmSurfaceState;
@@ -416,7 +417,7 @@ public class Gles2Renderer implements GlRenderer {
                       @Nonnull WlOutput wlOutput) {
         render(eglOutput,
                wlOutput,
-               this.scene.drawableSurfaces());
+               this.scene.create(wlOutput.getOutput()));
     }
 
     @Override
@@ -435,7 +436,7 @@ public class Gles2Renderer implements GlRenderer {
 
     public void render(@Nonnull final EglOutput eglOutput,
                        final WlOutput wlOutput,
-                       final Iterable<SurfaceView> surfaceViews) {
+                       final OutputScene outputScene) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglSurface(),
@@ -459,7 +460,21 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
 
         //naive single pass, bottom to top overdraw rendering.
-        surfaceViews.forEach(this::draw);
+        outputScene.getBackgroundView()
+                   .ifPresent(this::draw);
+        outputScene.getUnderViews()
+                   .forEach(this::draw);
+        outputScene.getApplicationViews()
+                   .forEach(this::draw);
+        outputScene.getOverViews()
+                   .forEach(this::draw);
+        outputScene.getFullscreenView()
+                   .ifPresent(this::draw);
+        outputScene.getLockViews()
+                   .forEach(this::draw);
+        outputScene.geCursorViews()
+                   .forEach(this::draw);
+
         flushRenderState(eglOutput);
     }
 

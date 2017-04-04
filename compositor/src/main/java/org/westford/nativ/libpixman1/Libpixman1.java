@@ -27,6 +27,10 @@ import javax.inject.Singleton;
      version = 0)
 public class Libpixman1 {
 
+    public static final int PIXMAN_REGION_OUT  = 0;
+    public static final int PIXMAN_REGION_IN   = 1;
+    public static final int PIXMAN_REGION_PART = 2;
+
     @Ptr
     public native long pixman_region32_rectangles(@Ptr long region,
                                                   @Ptr long n_rects);
@@ -64,6 +68,9 @@ public class Libpixman1 {
                                                      int y,
                                                      int width,
                                                      int height);
+
+    public native int pixman_region32_contains_rectangle(@Ptr long region,
+                                                         @Ptr long prect);
 
     public native void pixman_region32_init(@Ptr long region);
 

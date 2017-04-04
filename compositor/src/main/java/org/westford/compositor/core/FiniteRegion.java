@@ -157,6 +157,17 @@ public class FiniteRegion implements Region {
     }
 
     @Override
+    public boolean contains(@Nonnull final Rectangle rectangle) {
+        final pixman_box32 pixman_box32 = new pixman_box32();
+        pixman_box32.x1(rectangle.getX());
+        pixman_box32.y1(rectangle.getY());
+        pixman_box32.x2(rectangle.getX() + rectangle.getWidth());
+        pixman_box32.y2(rectangle.getY() + rectangle.getHeight());
+        return Libpixman1.PIXMAN_REGION_OUT != this.libpixman1.pixman_region32_contains_rectangle(this.pixman_region32Pointer.address,
+                                                                                                  Pointer.ref(pixman_box32).address);
+    }
+
+    @Override
     public Region intersect(@Nonnull final Rectangle rectangle) {
         final FiniteRegion region = this.finiteRegionFactory.create();
 

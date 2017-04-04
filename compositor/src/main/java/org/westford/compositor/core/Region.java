@@ -35,6 +35,8 @@ public interface Region {
     boolean contains(@Nonnull Rectangle clipping,
                      @Nonnull Point point);
 
+    boolean contains(@Nonnull Rectangle rectangle);
+
     Region intersect(@Nonnull Rectangle rectangle);
 }
 
