@@ -115,11 +115,11 @@ public class Scene {
             views.addAll(this.lockLayer.getSurfaceViews());
         }
         else {
-            views.addAll(this.fullscreenLayer.getSurfaceViews());
             views.addAll(this.backgroundLayer.getSurfaceViews());
             views.addAll(this.underLayer.getSurfaceViews());
             views.addAll(this.applicationLayer.getSurfaceViews());
             views.addAll(this.overLayer.getSurfaceViews());
+            views.addAll(this.fullscreenLayer.getSurfaceViews());
         }
 
         //make sure we include any sub-views

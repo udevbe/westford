@@ -3,9 +3,9 @@ package org.westford.compositor.core;
 import org.freedesktop.wayland.server.WlBufferResource;
 import org.freedesktop.wayland.server.WlRegionResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.westford.compositor.protocol.WlRegion;
@@ -39,8 +39,19 @@ public class SceneTest {
     @Mock
     private InfiniteRegion infiniteRegion;
 
-    @InjectMocks
     private Scene scene;
+
+    @Before
+    public void setUp() {
+        this.scene = new Scene(this.backgroundLayer,
+                               this.underLayer,
+                               this.applicationLayer,
+                               this.overLayer,
+                               this.fullscreenLayer,
+                               this.lockLayer,
+                               this.cursorLayer,
+                               this.infiniteRegion);
+    }
 
     @Test
     public void pickSurface() throws Exception {
