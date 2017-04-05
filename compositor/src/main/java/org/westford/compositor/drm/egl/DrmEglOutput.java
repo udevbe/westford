@@ -37,7 +37,6 @@ import org.westford.nativ.libgbm.Libgbm;
 import org.westford.nativ.libgbm.Pointerdestroy_user_data;
 
 import javax.annotation.Nonnull;
-import java.util.LinkedList;
 import java.util.Optional;
 
 import static org.westford.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
@@ -57,10 +56,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private final Display display;
 
     @Nonnull
-    private final Renderer defaultRenderer;
-    @Nonnull
-    private       Renderer activeRenderer;
-    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
+    private final Renderer renderer;
 
     private final int       drmFd;
     private final long      gbmSurface;
@@ -83,7 +79,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
                  @Nonnull @Provided final Libgbm libgbm,
                  @Nonnull @Provided final Libdrm libdrm,
                  @Nonnull @Provided final Display display,
-                 @Nonnull @Provided final Renderer defaultRenderer,
+                 @Nonnull @Provided final Renderer renderer,
                  final int drmFd,
                  final long gbmBo,
                  final long gbmSurface,
@@ -95,8 +91,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.display = display;
-        this.defaultRenderer = defaultRenderer;
-        this.activeRenderer = defaultRenderer;
+        this.renderer = renderer;
         this.drmFd = drmFd;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
@@ -207,8 +202,8 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
 
     private void doRender(@Nonnull final WlOutput wlOutput) {
         this.onIdleEventSource = Optional.empty();
-        this.activeRenderer.visit(this,
-                                  wlOutput);
+        this.renderer.visit(this,
+                            wlOutput);
         this.display.flushClients();
         this.renderPending = false;
     }
@@ -270,25 +265,5 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
             throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
                                                      this.libc.getErrno()));
         }
-    }
-
-    @Override
-    public void push(@Nonnull final Renderer renderer) {
-        this.customRenderers.push(renderer);
-        this.activeRenderer = renderer;
-    }
-
-    @Override
-    public Optional<Renderer> popRenderer() {
-        final Optional<Renderer> customRenderer = Optional.ofNullable(this.customRenderers.pollFirst());
-
-        if (this.customRenderers.isEmpty()) {
-            this.activeRenderer = this.defaultRenderer;
-        }
-        else {
-            this.activeRenderer = this.customRenderers.peekFirst();
-        }
-
-        return customRenderer;
     }
 }

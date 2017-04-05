@@ -28,7 +28,6 @@ import org.westford.compositor.protocol.WlOutput;
 import org.westford.compositor.x11.X11Output;
 
 import javax.annotation.Nonnull;
-import java.util.LinkedList;
 import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
@@ -37,9 +36,6 @@ public class X11EglOutput implements EglOutput {
 
     @Nonnull
     private final Renderer defaultRenderer;
-    @Nonnull
-    private       Renderer activeRenderer;
-    private final LinkedList<Renderer> customRenderers = new LinkedList<>();
 
     @Nonnull
     private final X11Output x11Output;
@@ -61,7 +57,6 @@ public class X11EglOutput implements EglOutput {
                  final long eglDisplay) {
         this.display = display;
         this.defaultRenderer = defaultRenderer;
-        this.activeRenderer = defaultRenderer;
         this.x11Output = x11Output;
         this.eglSurface = eglSurface;
         this.eglContext = eglContext;
@@ -114,31 +109,10 @@ public class X11EglOutput implements EglOutput {
     }
 
     private void doRender(@Nonnull final WlOutput wlOutput) {
-        this.activeRenderer.visit(this,
-                                  wlOutput);
+        this.defaultRenderer.visit(this,
+                                   wlOutput);
 
         this.display.flushClients();
         this.renderScheduled = false;
-    }
-
-
-    @Override
-    public void push(@Nonnull final Renderer renderer) {
-        this.customRenderers.push(renderer);
-        this.activeRenderer = renderer;
-    }
-
-    @Override
-    public Optional<Renderer> popRenderer() {
-        final Optional<Renderer> customRenderer = Optional.ofNullable(this.customRenderers.pollFirst());
-
-        if (this.customRenderers.isEmpty()) {
-            this.activeRenderer = this.defaultRenderer;
-        }
-        else {
-            this.activeRenderer = this.customRenderers.peekFirst();
-        }
-
-        return customRenderer;
     }
 }
