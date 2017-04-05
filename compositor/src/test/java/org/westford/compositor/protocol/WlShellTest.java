@@ -171,7 +171,10 @@ public class WlShellTest {
         when(wlShellSurface.add(any(),
                                 anyInt(),
                                 anyInt())).thenReturn(wlShellSurfaceResource);
-//        when(this.shellSurfaceFactory.create(anyInt())).thenReturn(shellSurface);
+
+        when(this.shellSurfaceFactory.create(eq(wlSurfaceResource),
+                                             eq(surface),
+                                             anyInt())).thenReturn(shellSurface);
         //when
         this.wlShell.getShellSurface(wlShellResource,
                                      id,
@@ -183,16 +186,12 @@ public class WlShellTest {
         verify(surface).setRole(shellSurface);
 
         final ArgumentCaptor<DestroyListener> surfaceResourceDestroyListenerCaptor      = ArgumentCaptor.forClass(DestroyListener.class);
-        final ArgumentCaptor<DestroyListener> shellSurfaceResourceDestroyListenerCaptor = ArgumentCaptor.forClass(DestroyListener.class);
 
         verify(wlSurfaceResource).register(surfaceResourceDestroyListenerCaptor.capture());
-        verify(wlShellSurfaceResource).register(shellSurfaceResourceDestroyListenerCaptor.capture());
 
         //and when
         final DestroyListener surfaceDestroyListener = surfaceResourceDestroyListenerCaptor.getValue();
         surfaceDestroyListener.handle();
-        final DestroyListener shellSurfaceDestroyListener = shellSurfaceResourceDestroyListenerCaptor.getValue();
-        shellSurfaceDestroyListener.handle();
 
         //then
         verify(wlShellSurfaceResource).destroy();

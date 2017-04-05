@@ -35,9 +35,6 @@ import java.util.Optional;
 public class Scene {
 
     @Nonnull
-    private final LinkedList<WlSurfaceResource> surfacesStack = new LinkedList<>();
-
-    @Nonnull
     private final SceneLayer backgroundLayer;
     @Nonnull
     private final SceneLayer underLayer;

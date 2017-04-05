@@ -907,6 +907,8 @@ public class PointerDeviceTest {
     @Test
     public void testCursorMoveOtherClientMotion() {
         // given: an active cursor for a surface, a second surface
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
 
         final Client client0 = mock(Client.class);
         final Client client1 = mock(Client.class);
@@ -1016,6 +1018,9 @@ public class PointerDeviceTest {
     @Test
     public void testCursorMoveSameClientMotion() {
         //given: an active cursor
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
+
         final Client client0 = mock(Client.class);
 
         final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
@@ -1213,6 +1218,9 @@ public class PointerDeviceTest {
     @Test
     public void testRemoveCursor() throws Exception {
         // given: pointer with no surface
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
+
         final Client            client            = mock(Client.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getClient()).thenReturn(client);
@@ -1247,6 +1255,9 @@ public class PointerDeviceTest {
     @Test
     public void testSetCursorUpdateHotspot() throws Exception {
         // given: pointer with surface
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
+
         final Client            client            = mock(Client.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getClient()).thenReturn(client);
@@ -1299,6 +1310,9 @@ public class PointerDeviceTest {
     @Test
     public void testPreviousCursorNullSetCursor() throws Exception {
         // given: pointer with no surface
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
+
         final Client            client            = mock(Client.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getClient()).thenReturn(client);
@@ -1383,6 +1397,8 @@ public class PointerDeviceTest {
     @Test
     public void testBeforeCommit() throws Exception {
         // given: a surface that is the current cursor that is visible
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
 
         final Client client = mock(Client.class);
 
@@ -1457,6 +1473,9 @@ public class PointerDeviceTest {
     @Test
     public void testNotCurrentCursorBeforeCommit() throws Exception {
         // given: a surface that is not the current cursor
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
+
         final Client client0 = mock(Client.class);
         final Client client1 = mock(Client.class);
 
@@ -1594,6 +1613,9 @@ public class PointerDeviceTest {
     @Test
     public void testCurrentCursorNotVisibleBeforeCommit() throws Exception {
         // given: a surface that is the current cursor that is not visible
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
+
         final Client client = mock(Client.class);
 
         final WlPointerResource wlPointerResource0 = mock(WlPointerResource.class);
@@ -1668,6 +1690,9 @@ public class PointerDeviceTest {
     @Test
     public void testAfterDestroy() throws Exception {
         // given: a cursor surface
+        final SceneLayer sceneLayer = mock(SceneLayer.class);
+        when(this.scene.getCursorLayer()).thenReturn(sceneLayer);
+
         final Client            client            = mock(Client.class);
         final WlPointerResource wlPointerResource = mock(WlPointerResource.class);
         when(wlPointerResource.getClient()).thenReturn(client);

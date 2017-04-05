@@ -112,11 +112,11 @@ public class ShellSurfaceTest {
                                                 0)))).thenReturn(surfacePosition);
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
         //when
         shellSurface.move(wlSurfaceResource,
                           wlPointerResource,
@@ -165,7 +165,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                               80));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
                                                                                                180,
                                                                                                0,
@@ -177,11 +177,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -233,7 +233,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                               80));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
                                                                                                180,
                                                                                                0,
@@ -245,11 +245,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -301,7 +301,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                               20));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
                                                                                                -80,
                                                                                                0,
@@ -313,11 +313,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -369,7 +369,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
                                                                               20));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
                                                                                                -80,
                                                                                                0,
@@ -381,11 +381,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -437,7 +437,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                               20));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
                                                                                                -80,
                                                                                                0,
@@ -449,11 +449,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -506,7 +506,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                               20));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
                                                                                                -80,
                                                                                                0,
@@ -517,11 +517,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -573,7 +573,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                               80));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
                                                                                                180,
                                                                                                0,
@@ -585,11 +585,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -641,7 +641,7 @@ public class ShellSurfaceTest {
         when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
                                                                               80));
         final Mat4 inverseTransform = mock(Mat4.class);
-        when(surface.getInverseTransform()).thenReturn(inverseTransform);
+        when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
         when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
                                                                                                180,
                                                                                                0,
@@ -653,11 +653,11 @@ public class ShellSurfaceTest {
                                                             100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                           0);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           0);
 
         //when
         shellSurface.resize(wlShellSurfaceResource,
@@ -686,11 +686,13 @@ public class ShellSurfaceTest {
         final WlShellSurfaceResource wlShellSurfaceResource = mock(WlShellSurfaceResource.class);
         final int                    pingSerial             = 12345;
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                          12345);
+        final SurfaceView surfaceView = mock(SurfaceView.class);
+
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           pingSerial);
 
         //when
         shellSurface.pong(wlShellSurfaceResource,
@@ -704,11 +706,12 @@ public class ShellSurfaceTest {
     @Test
     public void testPongTimeout() {
         //given
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                          12345);
+        final SurfaceView surfaceView = mock(SurfaceView.class);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           12345);
         final ArgumentCaptor<EventLoop.TimerEventHandler> timerEventHandlerArgumentCaptor = ArgumentCaptor.forClass(EventLoop.TimerEventHandler.class);
         verify(this.eventLoop).addTimer(timerEventHandlerArgumentCaptor.capture());
         final EventLoop.TimerEventHandler timerEventHandler = timerEventHandlerArgumentCaptor.getValue();
@@ -728,11 +731,12 @@ public class ShellSurfaceTest {
     @Test
     public void testSetTopLevel() throws Exception {
         //given
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                          12345);
+        final SurfaceView surfaceView = mock(SurfaceView.class);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           12345);
 
 
         //TODO
@@ -772,11 +776,11 @@ public class ShellSurfaceTest {
                                                    localY))).thenReturn(Point.create(globalX,
                                                                                      globalY));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                          12345);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           12345);
 
         //when
         shellSurface.setTransient(wlSurfaceResource,
@@ -837,11 +841,11 @@ public class ShellSurfaceTest {
                                                    localY))).thenReturn(Point.create(globalX,
                                                                                      globalY));
 
-        final ShellSurface shellSurface = null;
-//                new ShellSurface(this.display,
-//                                                           this.compositor,
-//                                                           this.scene,
-//                                                          12345);
+        final ShellSurface shellSurface = new ShellSurface(this.display,
+                                                           this.compositor,
+                                                           this.scene,
+                                                           surfaceView,
+                                                           12345);
 
         //when
         shellSurface.setTransient(wlSurfaceResource,

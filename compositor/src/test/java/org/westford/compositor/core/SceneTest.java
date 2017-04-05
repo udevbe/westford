@@ -23,9 +23,24 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class SceneTest {
 
     @Mock
+    private SceneLayer     backgroundLayer;
+    @Mock
+    private SceneLayer     underLayer;
+    @Mock
+    private SceneLayer     applicationLayer;
+    @Mock
+    private SceneLayer     overLayer;
+    @Mock
+    private SceneLayer     fullscreenLayer;
+    @Mock
+    private SceneLayer     lockLayer;
+    @Mock
+    private SceneLayer     cursorLayer;
+    @Mock
     private InfiniteRegion infiniteRegion;
+
     @InjectMocks
-    private Scene          scene;
+    private Scene scene;
 
     @Test
     public void pickSurface() throws Exception {
@@ -98,11 +113,10 @@ public class SceneTest {
         final Role role1 = mock(Role.class);
         when(surface1.getRole()).thenReturn(Optional.of(role1));
 
-
-//        this.scene.getSurfacesStack()
-//                  .add(wlSurfaceResource0);
-//        this.scene.getSurfacesStack()
-//                  .add(wlSurfaceResource1);
+        final LinkedList<SurfaceView> views = new LinkedList<>();
+        views.add(surfaceView0);
+        views.add(surfaceView1);
+        when(applicationLayer.getSurfaceViews()).thenReturn(views);
 
         //when
         final Optional<SurfaceView> pickSurface = this.scene.pickSurfaceView(global);
@@ -111,5 +125,8 @@ public class SceneTest {
         assertThat(pickSurface.get()).isEqualTo(surfaceView0);
     }
 
-    //TODO test create surface view stack
+    //TODO test if cursor views are selectable
+    //TODO test if layers are properly respected
+    //TODO test if outputscene is properly constructed
+    //TODO test if sibling views are properly included
 }
