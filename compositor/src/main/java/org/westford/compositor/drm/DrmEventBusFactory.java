@@ -45,7 +45,7 @@ public class DrmEventBusFactory {
                                                                               drmEventContextP.address);
 
         final DrmEventContext drmEventContext = drmEventContextP.dref();
-        drmEventContext.version(2);
+        drmEventContext.version(Libdrm.DRM_EVENT_CONTEXT_VERSION);
         drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref(drmEventBus::pageFlipHandler));
         drmEventContext.vblank_handler(Pointervblank_handler.nref(drmEventBus::vblankHandler));
 
