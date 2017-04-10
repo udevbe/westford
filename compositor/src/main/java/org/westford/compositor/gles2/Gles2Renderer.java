@@ -33,11 +33,11 @@ import org.westford.compositor.core.EglSurfaceState;
 import org.westford.compositor.core.GlRenderer;
 import org.westford.compositor.core.Output;
 import org.westford.compositor.core.OutputMode;
-import org.westford.compositor.core.OutputScene;
 import org.westford.compositor.core.RenderOutput;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.ShmSurfaceState;
 import org.westford.compositor.core.SmBuffer;
+import org.westford.compositor.core.Subscene;
 import org.westford.compositor.core.Surface;
 import org.westford.compositor.core.SurfaceRenderState;
 import org.westford.compositor.core.SurfaceRenderStateVisitor;
@@ -417,7 +417,8 @@ public class Gles2Renderer implements GlRenderer {
                       @Nonnull WlOutput wlOutput) {
         render(eglOutput,
                wlOutput,
-               this.scene.create(wlOutput.getOutput()));
+               this.scene.subsection(wlOutput.getOutput()
+                                             .getRegion()));
     }
 
     @Override
@@ -436,7 +437,7 @@ public class Gles2Renderer implements GlRenderer {
 
     public void render(@Nonnull final EglOutput eglOutput,
                        final WlOutput wlOutput,
-                       final OutputScene outputScene) {
+                       final Subscene outputScene) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglSurface(),
