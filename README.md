@@ -34,22 +34,20 @@ Available profiles are:
 | all of above |all          |
 
 So if we were to build for `armv7hf`, our build command would becomes `mvn package -DskipTests -Plinux-armv7hf`.
-This will trigger a cross compilation inside an cleanly isolated docker container.
+This will trigger a cross compilation inside a cleanly isolated docker container.
 
 If no profile is selected, the maven build will default to the `native` profile, which corresponds to
-the architecture that you're currently building on, without the use of docker.
+the architecture that you're currently building on without the use of docker.
 
 Running
 =======
-Westford can be launched using different back-ends and configuration. These live as separate projects
+Westford can be launched using different back-ends and configurations. These live as separate projects
 under `launch`
 
 Currently the following back-ends exist:
 - `launch/x11`A back-end that outputs to a regular X11 window, one window per (virtual) screen. Ideal for quick testing.
-- `launch/x11.html5` Wraps the X11 back-end, and enables input and output using a browser and an html5 canvas (experimental). 
 - `launch/drm.direct` Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. Root user only. 
-- `launch/drm.indirect`Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. All users.
-- `launch/dispmanx` Raspberry Pi 1/2/3 (experimental)
+- `launch/drm.indirect`Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. All users. Uses setuid.
 
 
 Running under X11
@@ -68,22 +66,20 @@ Running with drm/kms
 
 Dependencies
 ============
-The following native libraries are expected:
- - libc
- - pixman-1
- - EGL
- - GLESv2
- - libdrm (drm/kms back-end)
- - libpng (x11-html5 back-end)
- - libudev (drm/kms + rpi back-end)
- - libinput (rpi & drm/kms back-end)
- - X11 (x11 back-end)
- - xcb (x11 back-end)
- - X11-xcb (x11 back-end)
- - xkbcommon
- - xkbcommon-x11 (x11 back-end)
- - bcm_host (rpi back-end)
- - linux
+The following native libraries are expected, depending on the features used:
+ - libc (core)
+ - pixman-1 (core)
+ - EGL (core)
+ - GLESv2 (core)
+ - libdrm (drm)
+ - libudev (drm)
+ - libinput (drm)
+ - X11 (x11)
+ - xcb (x11)
+ - X11-xcb (x11)
+ - xkbcommon (core)
+ - xkbcommon-x11 (x11)
+ - linux (core)
 
 State
 =====

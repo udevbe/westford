@@ -139,8 +139,8 @@ public class Scene {
      *
      * @return
      */
-    public LinkedList<SurfaceView> intersect(@Nonnull final LinkedList<SurfaceView> views,
-                                             @Nonnull final Region region) {
+    public LinkedList<SurfaceView> subsection(@Nonnull final LinkedList<SurfaceView> views,
+                                              @Nonnull final Region region) {
 
         final LinkedList<SurfaceView> intersectingViews = new LinkedList<>();
 
@@ -172,39 +172,39 @@ public class Scene {
      *
      * @return
      */
-    public LinkedList<SurfaceView> intersectLayer(@Nonnull final SceneLayer sceneLayer,
-                                                  @Nonnull final Region region) {
+    public LinkedList<SurfaceView> subsection(@Nonnull final SceneLayer sceneLayer,
+                                              @Nonnull final Region region) {
         final LinkedList<SurfaceView> views = new LinkedList<>();
         sceneLayer.getSurfaceViews()
                   .forEach(surfaceView -> views.addAll(withSiblingViews(surfaceView)));
-        return intersect(views,
-                         region);
+        return subsection(views,
+                          region);
     }
 
     /**
-     * Create an output scene where all returned views are at least partially visible on the given output.
+     * Create a subscene where all returned views are at least partially visible on the given output.
      *
-     * @param output
+     * @param region
      *
      * @return
      */
-    public OutputScene create(@Nonnull final Output output) {
+    public Subscene subsection(@Nonnull final Region region) {
 
-        final OutputScene outputScene;
+        final Subscene outputScene;
 
         if (!this.lockLayer.getSurfaceViews()
                            .isEmpty()) {
-            final LinkedList<SurfaceView> outputLockViews = intersectLayer(this.lockLayer,
-                                                                           output.getRegion());
-            final LinkedList<SurfaceView> cursorViews = intersectLayer(this.cursorLayer,
-                                                                       output.getRegion());
-            outputScene = OutputScene.create(Optional.empty(),
-                                             Collections.emptyList(),
-                                             Collections.emptyList(),
-                                             Collections.emptyList(),
-                                             Optional.empty(),
-                                             outputLockViews,
-                                             cursorViews);
+            final LinkedList<SurfaceView> outputLockViews = subsection(this.lockLayer,
+                                                                       region);
+            final LinkedList<SurfaceView> cursorViews = subsection(this.cursorLayer,
+                                                                   region);
+            outputScene = Subscene.create(Optional.empty(),
+                                          Collections.emptyList(),
+                                          Collections.emptyList(),
+                                          Collections.emptyList(),
+                                          Optional.empty(),
+                                          outputLockViews,
+                                          cursorViews);
         }
         else {
 
@@ -214,19 +214,19 @@ public class Scene {
             final List<SurfaceView>     overViews;
             final Optional<SurfaceView> fullscreenView;
 
-            final LinkedList<SurfaceView> outputFullscreenViews = intersectLayer(this.fullscreenLayer,
-                                                                                 output.getRegion());
-            final LinkedList<SurfaceView> cursorViews = intersectLayer(this.cursorLayer,
-                                                                       output.getRegion());
+            final LinkedList<SurfaceView> outputFullscreenViews = subsection(this.fullscreenLayer,
+                                                                             region);
+            final LinkedList<SurfaceView> cursorViews = subsection(this.cursorLayer,
+                                                                   region);
             if (outputFullscreenViews.isEmpty()) {
-                final LinkedList<SurfaceView> outputBackgroundViews = intersectLayer(this.backgroundLayer,
-                                                                                     output.getRegion());
-                final LinkedList<SurfaceView> outputUnderViews = intersectLayer(this.underLayer,
-                                                                                output.getRegion());
-                final LinkedList<SurfaceView> outputApplicationViews = intersectLayer(this.applicationLayer,
-                                                                                      output.getRegion());
-                final LinkedList<SurfaceView> outputOverViews = intersectLayer(this.overLayer,
-                                                                               output.getRegion());
+                final LinkedList<SurfaceView> outputBackgroundViews = subsection(this.backgroundLayer,
+                                                                                 region);
+                final LinkedList<SurfaceView> outputUnderViews = subsection(this.underLayer,
+                                                                            region);
+                final LinkedList<SurfaceView> outputApplicationViews = subsection(this.applicationLayer,
+                                                                                  region);
+                final LinkedList<SurfaceView> outputOverViews = subsection(this.overLayer,
+                                                                           region);
 
                 backgroundView = Optional.ofNullable(outputBackgroundViews.peekFirst());
                 underViews = outputUnderViews;
@@ -243,13 +243,13 @@ public class Scene {
                 fullscreenView = Optional.ofNullable(outputFullscreenViews.getFirst());
             }
 
-            outputScene = OutputScene.create(backgroundView,
-                                             underViews,
-                                             applicationViews,
-                                             overViews,
-                                             fullscreenView,
-                                             Collections.emptyList(),
-                                             cursorViews);
+            outputScene = Subscene.create(backgroundView,
+                                          underViews,
+                                          applicationViews,
+                                          overViews,
+                                          fullscreenView,
+                                          Collections.emptyList(),
+                                          cursorViews);
         }
 
         return outputScene;
