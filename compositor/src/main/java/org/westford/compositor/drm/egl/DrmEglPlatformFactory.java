@@ -319,6 +319,7 @@ public class DrmEglPlatformFactory {
         final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
 
         final DrmEglOutput drmEglRenderOutput = this.drmEglOutputFactory.create(this.drmPlatform.getDrmFd(),
+                                                                                gbmDevice,
                                                                                 gbmBo,
                                                                                 gbmSurface,
                                                                                 drmOutput,

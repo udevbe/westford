@@ -65,6 +65,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private final long      eglSurface;
     private final long      eglContext;
     private final long      eglDisplay;
+    private final long      gbmDevice;
     private       long      gbmBo;
     private       long      nextGbmBo;
     private boolean               renderPending       = false;
@@ -81,6 +82,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
                  @Nonnull @Provided final Display display,
                  @Nonnull @Provided final Renderer renderer,
                  final int drmFd,
+                 final long gbmDevice,
                  final long gbmBo,
                  final long gbmSurface,
                  @Nonnull final DrmOutput drmOutput,
@@ -93,6 +95,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.display = display;
         this.renderer = renderer;
         this.drmFd = drmFd;
+        this.gbmDevice = gbmDevice;
         this.gbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
         this.drmOutput = drmOutput;
@@ -265,5 +268,13 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
             throw new RuntimeException(String.format("failed to drmModeSetCrtc. [%d]",
                                                      this.libc.getErrno()));
         }
+    }
+
+    public long getGbmBo() {
+        return this.gbmBo;
+    }
+
+    public long getGbmDevice() {
+        return this.gbmDevice;
     }
 }

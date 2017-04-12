@@ -33,6 +33,7 @@ import org.westford.compositor.core.EglSurfaceState;
 import org.westford.compositor.core.GlRenderer;
 import org.westford.compositor.core.Output;
 import org.westford.compositor.core.OutputMode;
+import org.westford.compositor.core.Point;
 import org.westford.compositor.core.RenderOutput;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.ShmSurfaceState;
@@ -55,10 +56,12 @@ import org.westford.nativ.libEGL.EglQueryWaylandBufferWL;
 import org.westford.nativ.libEGL.LibEGL;
 import org.westford.nativ.libGLESv2.GlEGLImageTargetTexture2DOES;
 import org.westford.nativ.libGLESv2.LibGLESv2;
+import org.westford.nativ.libgbm.Libgbm;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -91,93 +94,19 @@ import static org.westford.nativ.libEGL.LibEGL.EGL_WAYLAND_PLANE_WL;
 import static org.westford.nativ.libEGL.LibEGL.EGL_WAYLAND_Y_INVERTED_WL;
 import static org.westford.nativ.libEGL.LibEGL.EGL_WIDTH;
 import static org.westford.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
+import static org.westford.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 
 @Singleton
 public class Gles2Renderer implements GlRenderer {
 
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static final String VERTEX_SHADER =
-            "uniform mat4 u_projection;\n" +
-            "uniform mat4 u_transform;\n" +
-            "attribute vec2 a_position;\n" +
-            "attribute vec2 a_texCoord;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "void main(){\n" +
-            "    v_texCoord = a_texCoord;\n" +
-            "    gl_Position = u_projection * u_transform * vec4(a_position, 0.0, 1.0) ;\n" +
-            "}";
-
-    private static final String FRAGMENT_SHADER_ARGB8888 =
-            "precision mediump float;\n" +
-            "uniform sampler2D u_texture0;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "void main(){\n" +
-            "    gl_FragColor = texture2D(u_texture0, v_texCoord);\n" +
-            "}";
-
-    private static final String FRAGMENT_SHADER_XRGB8888 =
-            "precision mediump float;\n" +
-            "uniform sampler2D u_texture0;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "void main(){\n" +
-            "    gl_FragColor = vec4(texture2D(u_texture0, v_texCoord).bgr, 1.0);\n" +
-            "}";
-
-    private static final String FRAGMENT_SHADER_EGL_EXTERNAL =
-            "#extension GL_OES_EGL_image_external : require\n" +
-            "precision mediump float;\n" +
-            "uniform samplerExternalOES u_texture0;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "void main(){\n" +
-            "   gl_FragColor = texture2D(u_texture0, v_texCoord)\n;" +
-            "}";
-
-    private static final String FRAGMENT_CONVERT_YUV =
-            "  gl_FragColor.r = y + 1.59602678 * v;\n" +
-            "  gl_FragColor.g = y - 0.39176229 * u - 0.81296764 * v;\n" +
-            "  gl_FragColor.b = y + 2.01723214 * u;\n" +
-            "  gl_FragColor.a = 1.0;\n" +
-            "}";
-
-    private static final String FRAGMENT_SHADER_EGL_Y_UV =
-            "precision mediump float;\n" +
-            "uniform sampler2D u_texture0;\n" +
-            "uniform sampler2D u_texture1;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(u_texture0, v_texCoord).x - 0.0625);\n" +
-            "  float u = texture2D(u_texture1, v_texCoord).r - 0.5;\n" +
-            "  float v = texture2D(u_texture1, v_texCoord).g - 0.5;\n" +
-            FRAGMENT_CONVERT_YUV;
-
-    private static final String FRAGMENT_SHADER_EGL_Y_U_V =
-            "precision mediump float;\n" +
-            "uniform sampler2D u_texture0;\n" +
-            "uniform sampler2D u_texture1;\n" +
-            "uniform sampler2D u_texture2;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(u_texture0, v_texCoord).x - 0.0625);\n" +
-            "  float u = texture2D(u_texture1, v_texCoord).x - 0.5;\n" +
-            "  float v = texture2D(u_texture2, v_texCoord).x - 0.5;\n" +
-            FRAGMENT_CONVERT_YUV;
-
-    private static final String FRAGMENT_SHADER_EGL_Y_XUXV =
-            "precision mediump float;\n" +
-            "uniform sampler2D u_texture0;\n" +
-            "uniform sampler2D u_texture1;\n" +
-            "varying vec2 v_texCoord;\n" +
-            "void main() {\n" +
-            "  float y = 1.16438356 * (texture2D(u_texture0, v_texCoord).x - 0.0625);\n" +
-            "  float u = texture2D(u_texture1, v_texCoord).g - 0.5;\n" +
-            "  float v = texture2D(u_texture1, v_texCoord).a - 0.5;\n" +
-            FRAGMENT_CONVERT_YUV;
-
     @Nonnull
     private final LibEGL    libEGL;
     @Nonnull
     private final LibGLESv2 libGLESv2;
+    @Nonnull
+    private final Libgbm    libgbm;
     @Nonnull
     private final Display   display;
     @Nonnull
@@ -219,10 +148,12 @@ public class Gles2Renderer implements GlRenderer {
     @Inject
     Gles2Renderer(@Nonnull final LibEGL libEGL,
                   @Nonnull final LibGLESv2 libGLESv2,
+                  @Nonnull final Libgbm libgbm,
                   @Nonnull final Display display,
                   @Nonnull final Scene scene) {
         this.libEGL = libEGL;
         this.libGLESv2 = libGLESv2;
+        this.libgbm = libgbm;
         this.display = display;
         this.scene = scene;
     }
@@ -415,29 +346,57 @@ public class Gles2Renderer implements GlRenderer {
     @Override
     public void visit(@Nonnull final EglOutput eglOutput,
                       @Nonnull WlOutput wlOutput) {
-        render(eglOutput,
-               wlOutput,
-               this.scene.subsection(wlOutput.getOutput()
-                                             .getRegion()));
+
+        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
+                                                                .getRegion());
+        preDraw(eglOutput,
+                wlOutput,
+                subscene);
+        draw(eglOutput,
+             wlOutput,
+             subscene);
+        postDraw(eglOutput,
+                 wlOutput,
+                 subscene);
     }
 
     @Override
     public void visit(@Nonnull DrmEglOutput drmEglOutput,
                       @Nonnull WlOutput wlOutput) {
-        visit((EglOutput) drmEglOutput,
-              wlOutput);
+
+        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
+                                                                .getRegion());
+        preDraw(drmEglOutput,
+                wlOutput,
+                subscene);
+        draw(drmEglOutput,
+             wlOutput,
+             subscene);
+        postDraw(drmEglOutput,
+                 wlOutput,
+                 subscene);
     }
 
     @Override
     public void visit(@Nonnull X11EglOutput x11EglOutput,
                       @Nonnull WlOutput wlOutput) {
-        visit((EglOutput) x11EglOutput,
-              wlOutput);
+
+        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
+                                                                .getRegion());
+        preDraw(x11EglOutput,
+                wlOutput,
+                subscene);
+        draw(x11EglOutput,
+             wlOutput,
+             subscene);
+        postDraw(x11EglOutput,
+                 wlOutput,
+                 subscene);
     }
 
-    public void render(@Nonnull final EglOutput eglOutput,
-                       final WlOutput wlOutput,
-                       final Subscene outputScene) {
+    private void preDraw(final EglOutput eglOutput,
+                         final WlOutput wlOutput,
+                         final Subscene outputScene) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglSurface(),
@@ -459,23 +418,72 @@ public class Gles2Renderer implements GlRenderer {
                                     1.0f,
                                     1.0f);
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
+    }
 
-        //naive single pass, bottom to top overdraw rendering.
-        outputScene.getBackgroundView()
-                   .ifPresent(this::draw);
-        outputScene.getUnderViews()
-                   .forEach(this::draw);
-        outputScene.getApplicationViews()
-                   .forEach(this::draw);
-        outputScene.getOverViews()
-                   .forEach(this::draw);
-        outputScene.getFullscreenView()
-                   .ifPresent(this::draw);
-        outputScene.getLockViews()
-                   .forEach(this::draw);
+    private void draw(final DrmEglOutput drmEglOutput,
+                      final WlOutput wlOutput,
+                      final Subscene outputScene) {
+        //naive generic single pass, bottom to top overdraw rendering.
+        final List<SurfaceView>     lockViews      = outputScene.getLockViews();
+        final Optional<SurfaceView> fullscreenView = outputScene.getFullscreenView();
+
+        if (!lockViews.isEmpty()) {
+            lockViews.forEach(this::drawView);
+        }
+        else if (fullscreenView.isPresent()) {
+            final SurfaceView surfaceView = fullscreenView.get();
+            drawViewTryScanout(drmEglOutput,
+                               wlOutput,
+                               surfaceView);
+        }
+        else {
+            outputScene.getBackgroundView()
+                       .ifPresent(this::drawView);
+            outputScene.getUnderViews()
+                       .forEach(this::drawView);
+            outputScene.getApplicationViews()
+                       .forEach(this::drawView);
+            outputScene.getOverViews()
+                       .forEach(this::drawView);
+        }
+
+        //TODO try utilizing hw cursor plane
         outputScene.geCursorViews()
-                   .forEach(this::draw);
+                   .forEach(this::drawView);
+    }
 
+    private void draw(final EglOutput eglOutput,
+                      final WlOutput wlOutput,
+                      final Subscene outputScene) {
+        //naive generic single pass, bottom to top overdraw rendering.
+        final List<SurfaceView>     lockViews      = outputScene.getLockViews();
+        final Optional<SurfaceView> fullscreenView = outputScene.getFullscreenView();
+
+        if (!lockViews.isEmpty()) {
+            lockViews.forEach(this::drawView);
+        }
+        else if (fullscreenView.isPresent()) {
+            final SurfaceView surfaceView = fullscreenView.get();
+            drawView(surfaceView);
+        }
+        else {
+            outputScene.getBackgroundView()
+                       .ifPresent(this::drawView);
+            outputScene.getUnderViews()
+                       .forEach(this::drawView);
+            outputScene.getApplicationViews()
+                       .forEach(this::drawView);
+            outputScene.getOverViews()
+                       .forEach(this::drawView);
+        }
+
+        outputScene.geCursorViews()
+                   .forEach(this::drawView);
+    }
+
+    private void postDraw(@Nonnull final EglOutput eglOutput,
+                          final WlOutput wlOutput,
+                          final Subscene outputScene) {
         flushRenderState(eglOutput);
     }
 
@@ -491,28 +499,28 @@ public class Gles2Renderer implements GlRenderer {
             System.exit(1);
         }
         //this shader is reused in wl egl
-        this.argb8888ShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                         FRAGMENT_SHADER_ARGB8888,
+        this.argb8888ShaderProgram = createShaderProgram(Gles2Shaders.VERTEX_SHADER,
+                                                         Gles2Shaders.FRAGMENT_SHADER_ARGB8888,
                                                          1);
-        this.xrgb8888ShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                         FRAGMENT_SHADER_XRGB8888,
+        this.xrgb8888ShaderProgram = createShaderProgram(Gles2Shaders.VERTEX_SHADER,
+                                                         Gles2Shaders.FRAGMENT_SHADER_XRGB8888,
                                                          1);
 
         //compile wl egl shaders
         if (this.hasWlEglDisplay) {
-            this.y_u_vShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                          FRAGMENT_SHADER_EGL_Y_U_V,
+            this.y_u_vShaderProgram = createShaderProgram(Gles2Shaders.VERTEX_SHADER,
+                                                          Gles2Shaders.FRAGMENT_SHADER_EGL_Y_U_V,
                                                           3);
-            this.y_uvShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                         FRAGMENT_SHADER_EGL_Y_UV,
+            this.y_uvShaderProgram = createShaderProgram(Gles2Shaders.VERTEX_SHADER,
+                                                         Gles2Shaders.FRAGMENT_SHADER_EGL_Y_UV,
                                                          2);
-            this.y_xuxvShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                           FRAGMENT_SHADER_EGL_Y_XUXV,
+            this.y_xuxvShaderProgram = createShaderProgram(Gles2Shaders.VERTEX_SHADER,
+                                                           Gles2Shaders.FRAGMENT_SHADER_EGL_Y_XUXV,
                                                            2);
 
             if (glExtensions.contains("GL_OES_EGL_image_external")) {
-                this.externalImageShaderProgram = createShaderProgram(VERTEX_SHADER,
-                                                                      FRAGMENT_SHADER_EGL_EXTERNAL,
+                this.externalImageShaderProgram = createShaderProgram(Gles2Shaders.VERTEX_SHADER,
+                                                                      Gles2Shaders.FRAGMENT_SHADER_EGL_EXTERNAL,
                                                                       1);
             }
             else {
@@ -719,24 +727,75 @@ public class Gles2Renderer implements GlRenderer {
         //@formatter:on
     }
 
-    private void draw(final SurfaceView surfaceView) {
+    private boolean tryScanout(final DrmEglOutput drmEglOutput,
+                               final WlOutput wlOutput,
+                               final SurfaceView surfaceView) {
+        final Point  surfaceViewPosition = surfaceView.global(Point.ZERO);
+        final Output output              = wlOutput.getOutput();
+        final Point  outputPosition      = output.global(Point.ZERO);
 
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
+        final WlBufferResource wlBufferResource = wlSurface.getSurface()
+                                                           .getState()
+                                                           .getBuffer()
+                                                           .get();
+        final Buffer     buffer = queryBuffer(wlBufferResource);
+        final OutputMode mode   = output.getMode();
+
+        if (buffer.getWidth() == mode.getWidth() &&
+            buffer.getHeight() == mode.getHeight() &&
+            surfaceViewPosition.equals(outputPosition)) {
+            //try scanout
+            final long bo = this.libgbm.gbm_bo_import(drmEglOutput.getGbmDevice(),
+                                                      GBM_BO_IMPORT_WL_BUFFER,
+                                                      wlBufferResource.pointer,
+                                                      GBM_BO_USE_SCANOUT);
+            if (bo == 0L) {
+                //Unable to use the buffer for scanout
+                return false;
+            }
+
+
+
+            return true;
+
+        }
+
+        return false;
+    }
+
+    private void drawViewTryScanout(final DrmEglOutput drmEglOutput,
+                                    final WlOutput wlOutput,
+                                    final SurfaceView surfaceView) {
+
+        if (surfaceView.isDrawable() &&
+            surfaceView.isEnabled()) {
+
+            if (!tryScanout(drmEglOutput,
+                            wlOutput,
+                            surfaceView)) {
+                //no scanout possible
+                drawView(surfaceView);
+            }
+        }
+        //no draw possible
+    }
+
+    private void drawView(final SurfaceView surfaceView) {
         if (surfaceView.isEnabled() && surfaceView.isDrawable()) {
-
             final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
                                                                .getImplementation();
-
-            //don't bother rendering subsurfaces if the parent doesn't have a buffer.
-            wlSurface.getSurface()
-                     .getState()
-                     .getBuffer()
-                     .ifPresent(wlBufferResource -> draw(surfaceView,
-                                                         wlBufferResource));
+            drawView(surfaceView,
+                     wlSurface.getSurface()
+                              .getState()
+                              .getBuffer()
+                              .get());
         }
     }
 
-    private void draw(final SurfaceView surfaceView,
-                      final WlBufferResource wlBufferResource) {
+    private void drawView(final SurfaceView surfaceView,
+                          final WlBufferResource wlBufferResource) {
         queryBuffer(wlBufferResource).accept(new BufferVisitor() {
             @Override
             public void visit(@Nonnull final Buffer buffer) {
@@ -759,16 +818,16 @@ public class Gles2Renderer implements GlRenderer {
 
     private void drawShm(final @Nonnull SurfaceView surfaceView,
                          final SmBuffer smBuffer) {
-
         queryShmSurfaceRenderState(surfaceView,
-                                   smBuffer.getShmBuffer()).ifPresent(surfaceRenderState -> surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
-            @Override
-            public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
-                drawShm(surfaceView,
-                        shmSurfaceState);
-                return null;
-            }
-        }));
+                                   smBuffer.getShmBuffer()).ifPresent(surfaceRenderState ->
+                                                                              surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+                                                                                  @Override
+                                                                                  public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
+                                                                                      drawShm(surfaceView,
+                                                                                              shmSurfaceState);
+                                                                                      return null;
+                                                                                  }
+                                                                              }));
     }
 
     private Optional<SurfaceRenderState> queryShmSurfaceRenderState(final SurfaceView surfaceView,
@@ -778,26 +837,26 @@ public class Gles2Renderer implements GlRenderer {
                                                            .getImplementation();
         final Surface surface = wlSurface.getSurface();
         final Optional<SurfaceRenderState> renderStateOptional = surface.getRenderState()
-                                                                        .map(surfaceRenderState -> surfaceRenderState
-                                                                                .accept(new SurfaceRenderStateVisitor() {
-                                                                                    @Override
-                                                                                    public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
-                                                                                        //the surface already has an shm render state associated. update it.
-                                                                                        return createShmSurfaceRenderState(surfaceView,
-                                                                                                                           shmBuffer,
-                                                                                                                           Optional.of(shmSurfaceState));
-                                                                                    }
+                                                                        .map(surfaceRenderState ->
+                                                                                     surfaceRenderState.accept(new SurfaceRenderStateVisitor() {
+                                                                                         @Override
+                                                                                         public Optional<SurfaceRenderState> visit(final ShmSurfaceState shmSurfaceState) {
+                                                                                             //the surface already has an shm render state associated. update it.
+                                                                                             return createShmSurfaceRenderState(surfaceView,
+                                                                                                                                shmBuffer,
+                                                                                                                                Optional.of(shmSurfaceState));
+                                                                                         }
 
-                                                                                    @Override
-                                                                                    public Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) {
-                                                                                        //the surface was previously associated with an egl render state but is now using an shm render state. create it.
-                                                                                        destroy(eglSurfaceState);
-                                                                                        //TODO we could reuse the texture id from the egl surface render state
-                                                                                        return createShmSurfaceRenderState(surfaceView,
-                                                                                                                           shmBuffer,
-                                                                                                                           Optional.empty());
-                                                                                    }
-                                                                                }))
+                                                                                         @Override
+                                                                                         public Optional<SurfaceRenderState> visit(final EglSurfaceState eglSurfaceState) {
+                                                                                             //the surface was previously associated with an egl render state but is now using an shm render state. create it.
+                                                                                             destroy(eglSurfaceState);
+                                                                                             //TODO we could reuse the texture id from the egl surface render state
+                                                                                             return createShmSurfaceRenderState(surfaceView,
+                                                                                                                                shmBuffer,
+                                                                                                                                Optional.empty());
+                                                                                         }
+                                                                                     }))
                                                                         //the surface was not previously associated with any render state. create an shm render state.
                                                                         .orElseGet(() -> createShmSurfaceRenderState(surfaceView,
                                                                                                                      shmBuffer,
