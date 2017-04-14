@@ -45,12 +45,29 @@ public class Libdrm {
     public static final int DRM_MODE_SUBPIXEL_VERTICAL_BGR   = 5;
     public static final int DRM_MODE_SUBPIXEL_NONE           = 6;
 
+    /**
+     * Open the DRM device.
+     * <p>
+     * Looks up the specified name and bus ID, and opens the device found.  The
+     * entry in /dev/dri is created if necessary and if called by root.
+     *
+     * @param name  driver name. Not referenced if bus ID is supplied.
+     * @param busid bus ID. Zero if not known.
+     *
+     * @return a file descriptor on success, or a negative value on error.
+     */
     public native int drmOpen(@Ptr(String.class) long name,
                               @Ptr(String.class) long busid);
 
+    /**
+     * Retrieves all of the resources associated with a card.
+     */
     @Ptr(DrmModeRes.class)
     public native long drmModeGetResources(int fd);
 
+    /**
+     * Retrieve information about the connector connectorId.
+     */
     @Ptr(DrmModeConnector.class)
     public native long drmModeGetConnector(int fd,
                                            @Unsigned int connectorId);
@@ -63,9 +80,15 @@ public class Libdrm {
 
     public native void drmModeFreeEncoder(@Ptr(DrmModeEncoder.class) long ptr);
 
+    /**
+     * Destroys the given framebuffer.
+     */
     public native int drmModeRmFB(int fd,
                                   @Unsigned int bufferId);
 
+    /**
+     * Creates a new framebuffer with an buffer object as its scanout buffer.
+     */
     public native int drmModeAddFB(int fd,
                                    @Unsigned int width,
                                    @Unsigned int height,
@@ -75,6 +98,9 @@ public class Libdrm {
                                    @Unsigned int bo_handle,
                                    @Ptr(int.class) long buf_id);
 
+    /**
+     * Set the mode on a crtc crtcId with the given mode modeId.
+     */
     public native int drmModeSetCrtc(int fd,
                                      @Unsigned int crtcId,
                                      @Unsigned int bufferId,
