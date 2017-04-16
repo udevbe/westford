@@ -25,6 +25,9 @@ import org.freedesktop.jaccall.Unsigned;
      version = 1)
 public class Libgbm {
 
+    public static final int GBM_BO_IMPORT_WL_BUFFER = 0x5501;
+    public static final int GBM_BO_IMPORT_EGL_IMAGE = 0x5502;
+
     /**
      * RGB with 8 bits per channel in a 32 bit value
      */
@@ -227,4 +230,43 @@ public class Libgbm {
 
     public native void gbm_surface_release_buffer(@Ptr long surface,
                                                   @Ptr long bo);
+
+    /**
+     * Create a gbm buffer object from an foreign object
+     * <p>
+     * This function imports a foreign object and creates a new gbm bo for it.
+     * This enabled using the foreign object with a display API such as KMS.
+     * Currently two types of foreign objects are supported, indicated by the type
+     * argument:
+     * <p>
+     * GBM_BO_IMPORT_WL_BUFFER
+     * GBM_BO_IMPORT_EGL_IMAGE
+     * <p>
+     * The the gbm bo shares the underlying pixels but its life-time is
+     * independent of the foreign object.
+     *
+     * @param gbm    The gbm device returned from gbm_create_device()
+     * @param type   The type of object we're importing
+     * @param buffer Pointer to the external object
+     * @param usage  The union of the usage flags for this buffer
+     *
+     * @return A newly allocated buffer object that should be freed with
+     * {@link #gbm_bo_destroy(long)} when no longer needed.
+     * <p>
+     *
+     * @see enum gbm_bo_flags for the list of usage flags
+     */
+    @Ptr
+    public native long gbm_bo_import(@Ptr long gbm,
+                                     @Unsigned int type,
+                                     @Ptr long buffer,
+                                     @Unsigned int usage);
+
+    /**
+     * Destroys the given buffer object and frees all resources associated with
+     * it.
+     *
+     * @param bo The buffer object
+     */
+    public native void gbm_bo_destroy(@Ptr long gbm);
 }

@@ -33,22 +33,16 @@ import org.westford.compositor.core.EglSurfaceState;
 import org.westford.compositor.core.GlRenderer;
 import org.westford.compositor.core.Output;
 import org.westford.compositor.core.OutputMode;
-import org.westford.compositor.core.Point;
-import org.westford.compositor.core.RenderOutput;
-import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.ShmSurfaceState;
 import org.westford.compositor.core.SmBuffer;
-import org.westford.compositor.core.Subscene;
 import org.westford.compositor.core.Surface;
 import org.westford.compositor.core.SurfaceRenderState;
 import org.westford.compositor.core.SurfaceRenderStateVisitor;
 import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.core.UnsupportedBuffer;
 import org.westford.compositor.core.calc.Mat4;
-import org.westford.compositor.drm.egl.DrmEglOutput;
 import org.westford.compositor.protocol.WlOutput;
 import org.westford.compositor.protocol.WlSurface;
-import org.westford.compositor.x11.egl.X11EglOutput;
 import org.westford.nativ.libEGL.EglBindWaylandDisplayWL;
 import org.westford.nativ.libEGL.EglCreateImageKHR;
 import org.westford.nativ.libEGL.EglDestroyImageKHR;
@@ -56,12 +50,10 @@ import org.westford.nativ.libEGL.EglQueryWaylandBufferWL;
 import org.westford.nativ.libEGL.LibEGL;
 import org.westford.nativ.libGLESv2.GlEGLImageTargetTexture2DOES;
 import org.westford.nativ.libGLESv2.LibGLESv2;
-import org.westford.nativ.libgbm.Libgbm;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -94,7 +86,6 @@ import static org.westford.nativ.libEGL.LibEGL.EGL_WAYLAND_PLANE_WL;
 import static org.westford.nativ.libEGL.LibEGL.EGL_WAYLAND_Y_INVERTED_WL;
 import static org.westford.nativ.libEGL.LibEGL.EGL_WIDTH;
 import static org.westford.nativ.libEGL.LibEGL.EGL_WINDOW_BIT;
-import static org.westford.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 
 @Singleton
 public class Gles2Renderer implements GlRenderer {
@@ -106,11 +97,7 @@ public class Gles2Renderer implements GlRenderer {
     @Nonnull
     private final LibGLESv2 libGLESv2;
     @Nonnull
-    private final Libgbm    libgbm;
-    @Nonnull
     private final Display   display;
-    @Nonnull
-    private final Scene     scene;
     private final int[]                                  textureArgs                  = new int[3];
     @Nonnull
     private       Optional<EglQueryWaylandBufferWL>      eglQueryWaylandBufferWL      = Optional.empty();
@@ -148,14 +135,10 @@ public class Gles2Renderer implements GlRenderer {
     @Inject
     Gles2Renderer(@Nonnull final LibEGL libEGL,
                   @Nonnull final LibGLESv2 libGLESv2,
-                  @Nonnull final Libgbm libgbm,
-                  @Nonnull final Display display,
-                  @Nonnull final Scene scene) {
+                  @Nonnull final Display display) {
         this.libEGL = libEGL;
         this.libGLESv2 = libGLESv2;
-        this.libgbm = libgbm;
         this.display = display;
-        this.scene = scene;
     }
 
     @Override
@@ -336,67 +319,16 @@ public class Gles2Renderer implements GlRenderer {
         }
     }
 
-    @Override
-    public void visit(@Nonnull final RenderOutput renderOutput,
-                      @Nonnull WlOutput wlOutput) {
-        throw new UnsupportedOperationException(String.format("Need an egl capable renderOutput. Got %s",
-                                                              renderOutput));
-    }
-
-    @Override
-    public void visit(@Nonnull final EglOutput eglOutput,
-                      @Nonnull WlOutput wlOutput) {
-
-        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
-                                                                .getRegion());
-        preDraw(eglOutput,
-                wlOutput,
-                subscene);
-        draw(eglOutput,
-             wlOutput,
-             subscene);
-        postDraw(eglOutput,
-                 wlOutput,
-                 subscene);
-    }
-
-    @Override
-    public void visit(@Nonnull DrmEglOutput drmEglOutput,
-                      @Nonnull WlOutput wlOutput) {
-
-        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
-                                                                .getRegion());
-        preDraw(drmEglOutput,
-                wlOutput,
-                subscene);
-        draw(drmEglOutput,
-             wlOutput,
-             subscene);
-        postDraw(drmEglOutput,
-                 wlOutput,
-                 subscene);
-    }
-
-    @Override
-    public void visit(@Nonnull X11EglOutput x11EglOutput,
-                      @Nonnull WlOutput wlOutput) {
-
-        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
-                                                                .getRegion());
-        preDraw(x11EglOutput,
-                wlOutput,
-                subscene);
-        draw(x11EglOutput,
-             wlOutput,
-             subscene);
-        postDraw(x11EglOutput,
-                 wlOutput,
-                 subscene);
-    }
-
-    private void preDraw(final EglOutput eglOutput,
-                         final WlOutput wlOutput,
-                         final Subscene outputScene) {
+    /**
+     * Prepare the renderer for drawing.
+     * <p>
+     * This makes sure all subsequent calls to {@link #drawView(SurfaceView)} have the correct transformations set up for the given output.
+     *
+     * @param eglOutput
+     * @param wlOutput
+     */
+    public void prepareDraw(@Nonnull final EglOutput eglOutput,
+                            @Nonnull final WlOutput wlOutput) {
         this.libEGL.eglMakeCurrent(this.eglDisplay,
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglSurface(),
@@ -420,70 +352,12 @@ public class Gles2Renderer implements GlRenderer {
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
     }
 
-    private void draw(final DrmEglOutput drmEglOutput,
-                      final WlOutput wlOutput,
-                      final Subscene outputScene) {
-        //naive generic single pass, bottom to top overdraw rendering.
-        final List<SurfaceView>     lockViews      = outputScene.getLockViews();
-        final Optional<SurfaceView> fullscreenView = outputScene.getFullscreenView();
-
-        if (!lockViews.isEmpty()) {
-            lockViews.forEach(this::drawView);
-        }
-        else if (fullscreenView.isPresent()) {
-            final SurfaceView surfaceView = fullscreenView.get();
-            drawViewTryScanout(drmEglOutput,
-                               wlOutput,
-                               surfaceView);
-        }
-        else {
-            outputScene.getBackgroundView()
-                       .ifPresent(this::drawView);
-            outputScene.getUnderViews()
-                       .forEach(this::drawView);
-            outputScene.getApplicationViews()
-                       .forEach(this::drawView);
-            outputScene.getOverViews()
-                       .forEach(this::drawView);
-        }
-
-        //TODO try utilizing hw cursor plane
-        outputScene.geCursorViews()
-                   .forEach(this::drawView);
-    }
-
-    private void draw(final EglOutput eglOutput,
-                      final WlOutput wlOutput,
-                      final Subscene outputScene) {
-        //naive generic single pass, bottom to top overdraw rendering.
-        final List<SurfaceView>     lockViews      = outputScene.getLockViews();
-        final Optional<SurfaceView> fullscreenView = outputScene.getFullscreenView();
-
-        if (!lockViews.isEmpty()) {
-            lockViews.forEach(this::drawView);
-        }
-        else if (fullscreenView.isPresent()) {
-            final SurfaceView surfaceView = fullscreenView.get();
-            drawView(surfaceView);
-        }
-        else {
-            outputScene.getBackgroundView()
-                       .ifPresent(this::drawView);
-            outputScene.getUnderViews()
-                       .forEach(this::drawView);
-            outputScene.getApplicationViews()
-                       .forEach(this::drawView);
-            outputScene.getOverViews()
-                       .forEach(this::drawView);
-        }
-
-        outputScene.geCursorViews()
-                   .forEach(this::drawView);
-    }
-
-    private void postDraw(@Nonnull final EglOutput eglOutput,
-                          final WlOutput wlOutput,
-                          final Subscene outputScene) {
+    /**
+     * Flush all pending drawing commands and signal any listeners that drawing has finish for the given output.
+     *
+     * @param eglOutput
+     */
+    public void finishDraw(@Nonnull final EglOutput eglOutput) {
         flushRenderState(eglOutput);
     }
 
@@ -727,71 +601,15 @@ public class Gles2Renderer implements GlRenderer {
         //@formatter:on
     }
 
-    private boolean tryScanout(final DrmEglOutput drmEglOutput,
-                               final WlOutput wlOutput,
-                               final SurfaceView surfaceView) {
-        final Point  surfaceViewPosition = surfaceView.global(Point.ZERO);
-        final Output output              = wlOutput.getOutput();
-        final Point  outputPosition      = output.global(Point.ZERO);
 
+    public void drawView(@Nonnull final SurfaceView surfaceView) {
         final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
                                                            .getImplementation();
-        final WlBufferResource wlBufferResource = wlSurface.getSurface()
-                                                           .getState()
-                                                           .getBuffer()
-                                                           .get();
-        final Buffer     buffer = queryBuffer(wlBufferResource);
-        final OutputMode mode   = output.getMode();
-
-        if (buffer.getWidth() == mode.getWidth() &&
-            buffer.getHeight() == mode.getHeight() &&
-            surfaceViewPosition.equals(outputPosition)) {
-            //try scanout
-            final long bo = this.libgbm.gbm_bo_import(drmEglOutput.getGbmDevice(),
-                                                      GBM_BO_IMPORT_WL_BUFFER,
-                                                      wlBufferResource.pointer,
-                                                      GBM_BO_USE_SCANOUT);
-            if (bo == 0L) {
-                //Unable to use the buffer for scanout
-                return false;
-            }
-
-
-
-            return true;
-
-        }
-
-        return false;
-    }
-
-    private void drawViewTryScanout(final DrmEglOutput drmEglOutput,
-                                    final WlOutput wlOutput,
-                                    final SurfaceView surfaceView) {
-
-        if (surfaceView.isDrawable() &&
-            surfaceView.isEnabled()) {
-
-            if (!tryScanout(drmEglOutput,
-                            wlOutput,
-                            surfaceView)) {
-                //no scanout possible
-                drawView(surfaceView);
-            }
-        }
-        //no draw possible
-    }
-
-    private void drawView(final SurfaceView surfaceView) {
-        if (surfaceView.isEnabled() && surfaceView.isDrawable()) {
-            final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
-                                                               .getImplementation();
-            drawView(surfaceView,
-                     wlSurface.getSurface()
-                              .getState()
-                              .getBuffer()
-                              .get());
-        }
+        wlSurface.getSurface()
+                 .getState()
+                 .getBuffer()
+                 .ifPresent(wlBufferResource -> drawView(surfaceView,
+                                                         wlBufferResource));
     }
 
     private void drawView(final SurfaceView surfaceView,

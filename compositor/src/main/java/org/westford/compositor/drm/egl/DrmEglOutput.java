@@ -25,21 +25,35 @@ import org.freedesktop.jaccall.Size;
 import org.freedesktop.jaccall.Unsigned;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.EventSource;
+import org.freedesktop.wayland.server.WlBufferResource;
+import org.westford.compositor.core.Buffer;
 import org.westford.compositor.core.EglOutput;
 import org.westford.compositor.core.EglOutputState;
-import org.westford.compositor.core.Renderer;
+import org.westford.compositor.core.Output;
+import org.westford.compositor.core.OutputMode;
+import org.westford.compositor.core.Point;
+import org.westford.compositor.core.Scene;
+import org.westford.compositor.core.Subscene;
+import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.drm.DrmOutput;
 import org.westford.compositor.drm.DrmPageFlipCallback;
+import org.westford.compositor.gles2.Gles2Painter;
+import org.westford.compositor.gles2.Gles2PainterFactory;
+import org.westford.compositor.gles2.Gles2Renderer;
 import org.westford.compositor.protocol.WlOutput;
+import org.westford.compositor.protocol.WlSurface;
 import org.westford.nativ.glibc.Libc;
 import org.westford.nativ.libdrm.Libdrm;
 import org.westford.nativ.libgbm.Libgbm;
 import org.westford.nativ.libgbm.Pointerdestroy_user_data;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Optional;
 
 import static org.westford.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
+import static org.westford.nativ.libgbm.Libgbm.GBM_BO_IMPORT_WL_BUFFER;
+import static org.westford.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
 
 //TODO put all gbm/egl specifics here
 @AutoFactory(allowSubclasses = true,
@@ -56,8 +70,12 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private final Display display;
 
     @Nonnull
-    private final Renderer renderer;
+    private final Gles2PainterFactory gles2PainterFactory;
+    @Nonnull
+    private final Gles2Renderer       gles2Renderer;
 
+    @Nonnull
+    private final Scene     scene;
     private final int       drmFd;
     private final long      gbmSurface;
     @Nonnull
@@ -80,7 +98,9 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
                  @Nonnull @Provided final Libgbm libgbm,
                  @Nonnull @Provided final Libdrm libdrm,
                  @Nonnull @Provided final Display display,
-                 @Nonnull @Provided final Renderer renderer,
+                 @Nonnull @Provided final org.westford.compositor.gles2.Gles2PainterFactory gles2PainterFactory,
+                 @Nonnull @Provided final Gles2Renderer gles2Renderer,
+                 @Nonnull @Provided final Scene scene,
                  final int drmFd,
                  final long gbmDevice,
                  final long gbmBo,
@@ -93,7 +113,9 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.libgbm = libgbm;
         this.libdrm = libdrm;
         this.display = display;
-        this.renderer = renderer;
+        this.gles2PainterFactory = gles2PainterFactory;
+        this.gles2Renderer = gles2Renderer;
+        this.scene = scene;
         this.drmFd = drmFd;
         this.gbmDevice = gbmDevice;
         this.gbmBo = gbmBo;
@@ -205,10 +227,51 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
 
     private void doRender(@Nonnull final WlOutput wlOutput) {
         this.onIdleEventSource = Optional.empty();
-        this.renderer.visit(this,
-                            wlOutput);
+        paint(wlOutput);
         this.display.flushClients();
         this.renderPending = false;
+    }
+
+    private void paint(@Nonnull final WlOutput wlOutput) {
+
+        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
+                                                                .getRegion());
+
+        try (final Gles2Painter gles2Painter = this.gles2PainterFactory.create(this,
+                                                                               wlOutput)) {
+
+            //naive generic single pass, bottom to top overdraw rendering.
+            final List<SurfaceView>     lockViews      = subscene.getLockViews();
+            final Optional<SurfaceView> fullscreenView = subscene.getFullscreenView();
+
+            //lockscreen(s) hide all other screens.
+            if (!lockViews.isEmpty()) {
+                lockViews.forEach(gles2Painter::paint);
+            }
+            else {
+                fullscreenView.ifPresent(fullscreenSurfaceView -> {
+                    //try painting fullscreen view
+                    if (!paintFullscreen(gles2Painter,
+                                         wlOutput,
+                                         fullscreenSurfaceView)) {
+                        //fullscreen view not visible, paint the rest of the subscene.
+                        subscene.getBackgroundView()
+                                .ifPresent(gles2Painter::paint);
+                        subscene.getUnderViews()
+                                .forEach(gles2Painter::paint);
+                        subscene.getApplicationViews()
+                                .forEach(gles2Painter::paint);
+                        subscene.getOverViews()
+                                .forEach(gles2Painter::paint);
+                    }
+
+
+                    //TODO try utilizing hw cursor plane
+                    subscene.geCursorViews()
+                            .forEach(gles2Painter::paint);
+                });
+            }
+        }
     }
 
     @Override
@@ -219,13 +282,15 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     }
 
     @Override
-    public void enable(@Nonnull final WlOutput wlOutput) {
+    public void enable(
+            @Nonnull final WlOutput wlOutput) {
         this.enabled = true;
         render(wlOutput);
     }
 
     @Override
-    public void render(@Nonnull final WlOutput wlOutput) {
+    public void render(
+            @Nonnull final WlOutput wlOutput) {
         if (this.enabled) {
             scheduleRender(wlOutput);
         }
@@ -270,11 +335,47 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         }
     }
 
-    public long getGbmBo() {
-        return this.gbmBo;
-    }
 
-    public long getGbmDevice() {
-        return this.gbmDevice;
+    private boolean paintFullscreen(final Gles2Painter gles2Painter,
+                                    final WlOutput wlOutput,
+                                    final SurfaceView surfaceView) {
+
+        if (!surfaceView.isEnabled() || !surfaceView.isDrawable()) { return false; }
+
+
+        final Point  surfaceViewPosition = surfaceView.global(Point.ZERO);
+        final Output output              = wlOutput.getOutput();
+        final Point  outputPosition      = output.global(Point.ZERO);
+
+        final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
+                                                           .getImplementation();
+        final WlBufferResource wlBufferResource = wlSurface.getSurface()
+                                                           .getState()
+                                                           .getBuffer()
+                                                           .get();
+        final Buffer     buffer = this.gles2Renderer.queryBuffer(wlBufferResource);
+        final OutputMode mode   = output.getMode();
+
+        if (buffer.getWidth() == mode.getWidth() &&
+            buffer.getHeight() == mode.getHeight() &&
+            surfaceViewPosition.equals(outputPosition)) {
+            //try scanout
+            final long bo = this.libgbm.gbm_bo_import(this.gbmDevice,
+                                                      GBM_BO_IMPORT_WL_BUFFER,
+                                                      wlBufferResource.pointer,
+                                                      GBM_BO_USE_SCANOUT);
+            if (bo == 0L) {
+                //fallback to gles2
+                return gles2Painter.paint(surfaceView);
+            }
+
+            //TODO to direct scanout
+
+            return true;
+        }
+        else {
+            //fallback to gles2
+            return gles2Painter.paint(surfaceView);
+        }
     }
 }

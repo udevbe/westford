@@ -26,34 +26,6 @@ import org.westford.compositor.x11.egl.X11EglOutput;
 import javax.annotation.Nonnull;
 
 public interface Renderer {
-    default void visit(@Nonnull RenderOutput renderOutput,
-                       @Nonnull WlOutput wlOutput) {
-        throw new UnsupportedOperationException(String.format("RenderOutput %s not supported.",
-                                                              renderOutput));
-    }
-
-    default void visit(@Nonnull EglOutput eglOutput,
-                       @Nonnull WlOutput wlOutput) {
-        throw new UnsupportedOperationException(String.format("EglOutput %s not supported.",
-                                                              eglOutput));
-    }
-
-    default void visit(@Nonnull DrmEglOutput drmEglOutput,
-                       @Nonnull WlOutput wlOutput) {
-        throw new UnsupportedOperationException(String.format("DrmEglOutput %s not supported.",
-                                                              drmEglOutput));
-    }
-
-    default void visit(@Nonnull X11EglOutput x11EglOutput,
-                       @Nonnull WlOutput wlOutput) {
-        throw new UnsupportedOperationException(String.format("X11EglOutput %s not supported.",
-                                                              x11EglOutput));
-    }
-
-    //TODO pixman sw rendering platform
-    //void visit(PixmanOutput pixmanOutput);
-    //void visit(DrmPixmanOutput drmPixmanOutput);
-    //void visit(X11PixmanOutput x11PixmanOutput);
 
     /**
      * @param wlSurfaceResource the destroyed surface resource.
