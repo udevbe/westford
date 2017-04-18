@@ -58,4 +58,16 @@ public class NullRegion implements Region {
     public Region intersect(@Nonnull final Rectangle rectangle) {
         return this;
     }
+
+    @Override
+    public Region copy() {
+        return this;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    //TODO hash & equals?
 }

@@ -31,15 +31,20 @@ public class Libgbm {
     /**
      * RGB with 8 bits per channel in a 32 bit value
      */
-    public static final int GBM_BO_FORMAT_XRGB8888  = 0;
+    public static final int GBM_BO_FORMAT_XRGB8888 = 0;
     /**
      * ARGB with 8 bits per channel in a 32 bit value
      */
-    public static final int GBM_BO_FORMAT_ARGB8888  = 1;
+    public static final int GBM_BO_FORMAT_ARGB8888 = 1;
+
+    public static final int GBM_FORMAT_ARGB8888     = __gbm_fourcc_code((byte) 'A',
+                                                                        (byte) 'R',
+                                                                        (byte) '2',
+                                                                        (byte) '4'); /* [31:0] A:R:G:B 8:8:8:8 little endian */
     public static final int GBM_FORMAT_XRGB8888     = __gbm_fourcc_code((byte) 'X',
                                                                         (byte) 'R',
                                                                         (byte) '2',
-                                                                        (byte) '4');
+                                                                        (byte) '4'); /* [31:0] x:R:G:B 8:8:8:8 little endian */
     /**
      * Buffer is going to be presented to the screen using an API such as KMS
      */

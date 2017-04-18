@@ -38,5 +38,9 @@ public interface Region {
     boolean contains(@Nonnull Rectangle rectangle);
 
     Region intersect(@Nonnull Rectangle rectangle);
+
+    Region copy();
+
+    boolean isEmpty();
 }
 

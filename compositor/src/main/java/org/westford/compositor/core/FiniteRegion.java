@@ -29,9 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.freedesktop.jaccall.Pointer.malloc;
-
-@AutoFactory(className = "FiniteRegionFactory",
+@AutoFactory(className = "PrivateFiniteRegionFactory",
              allowSubclasses = true)
 public class FiniteRegion implements Region {
 
@@ -40,12 +38,11 @@ public class FiniteRegion implements Region {
     private final Pointer<pixman_region32> pixman_region32Pointer;
 
     public FiniteRegion(@Provided final Libpixman1 libpixman1,
-                        @Provided final FiniteRegionFactory finiteRegionFactory) {
+                        @Provided final FiniteRegionFactory finiteRegionFactory,
+                        final Pointer<pixman_region32> pixman_region32Pointer) {
         this.libpixman1 = libpixman1;
         this.finiteRegionFactory = finiteRegionFactory;
-        this.pixman_region32Pointer = malloc(pixman_region32.SIZE,
-                                             pixman_region32.class);
-        this.libpixman1.pixman_region32_init(this.pixman_region32Pointer.address);
+        this.pixman_region32Pointer = pixman_region32Pointer;
     }
 
     @Override
@@ -127,6 +124,7 @@ public class FiniteRegion implements Region {
         this.libpixman1.pixman_region32_subtract(this.pixman_region32Pointer.address,
                                                  this.pixman_region32Pointer.address,
                                                  delta_pixman_region32.address);
+        this.libpixman1.pixman_region32_fini(delta_pixman_region32.address);
     }
 
     @Override
@@ -182,9 +180,24 @@ public class FiniteRegion implements Region {
     }
 
     @Override
+    public Region copy() {
+        final Pointer<pixman_region32> copyRegion = Pointer.ref(new pixman_region32());
+
+        final FiniteRegion copy = this.finiteRegionFactory.create();
+
+
+        return copy;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.libpixman1.pixman_region32_not_empty(this.pixman_region32Pointer.address) == 0;
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        this.pixman_region32Pointer.close();
+        this.libpixman1.pixman_region32_fini(this.pixman_region32Pointer.address);
     }
 
     public void remove(final FiniteRegion region) {

@@ -72,7 +72,15 @@ public class Libpixman1 {
     public native int pixman_region32_contains_rectangle(@Ptr long region,
                                                          @Ptr long prect);
 
+    public native int pixman_region32_not_empty(@Ptr long region);
+
+
     public native void pixman_region32_init(@Ptr long region);
 
     public native void pixman_region32_clear(@Ptr long region);
+
+    public native void pixman_region32_fini(@Ptr long region);
+
+    public native int pixman_region32_copy(@Ptr long dest,
+                                           @Ptr long source);
 }

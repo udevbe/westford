@@ -333,7 +333,6 @@ public class Gles2Renderer implements GlRenderer {
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglSurface(),
                                    eglOutput.getEglContext());
-        eglOutput.renderBegin();
 
         if (!this.init) {
             //one time init because we need a current context
@@ -420,10 +419,8 @@ public class Gles2Renderer implements GlRenderer {
 
     private void flushRenderState(final EglOutput eglOutput) {
         eglOutput.updateState(this.newEglOutputState.build());
-        eglOutput.renderEndBeforeSwap();
         this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    eglOutput.getEglSurface());
-        eglOutput.renderEndAfterSwap();
     }
 
     private int createShaderProgram(final String vertexShaderSource,

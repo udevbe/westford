@@ -69,6 +69,8 @@ public class DrmEglPlatformFactory {
     @Nonnull
     private final Libgbm                       libgbm;
     @Nonnull
+    private final GbmBoFactory                 gbmBoFactory;
+    @Nonnull
     private final LibEGL                       libEGL;
     @Nonnull
     private final LibGLESv2                    libGLESv2;
@@ -88,6 +90,7 @@ public class DrmEglPlatformFactory {
                           @Nonnull final OutputFactory outputFactory,
                           @Nonnull final PrivateDrmEglPlatformFactory privateDrmEglPlatformFactory,
                           @Nonnull final Libgbm libgbm,
+                          @Nonnull final GbmBoFactory gbmBoFactory,
                           @Nonnull final LibEGL libEGL,
                           @Nonnull final LibGLESv2 libGLESv2,
                           @Nonnull final DrmPlatform drmPlatform,
@@ -99,6 +102,7 @@ public class DrmEglPlatformFactory {
         this.outputFactory = outputFactory;
         this.privateDrmEglPlatformFactory = privateDrmEglPlatformFactory;
         this.libgbm = libgbm;
+        this.gbmBoFactory = gbmBoFactory;
         this.libEGL = libEGL;
         this.libGLESv2 = libGLESv2;
         this.drmPlatform = drmPlatform;
@@ -289,6 +293,7 @@ public class DrmEglPlatformFactory {
 
         final DrmModeModeInfo drmModeModeInfo = drmOutput.getMode();
 
+        //TODO test if format is supported (gbm_device_is_format_supported)?
         final long gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
                                                                drmModeModeInfo
                                                                        .hdisplay(),
@@ -316,8 +321,8 @@ public class DrmEglPlatformFactory {
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT);
         this.libEGL.eglSwapBuffers(eglDisplay,
                                    eglSurface);
-        final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
 
+        final GbmBo gbmBo = this.gbmBoFactory.create(gbmSurface);
         final DrmEglOutput drmEglRenderOutput = this.drmEglOutputFactory.create(this.drmPlatform.getDrmFd(),
                                                                                 gbmDevice,
                                                                                 gbmBo,

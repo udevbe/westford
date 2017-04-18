@@ -31,9 +31,11 @@ import org.westford.compositor.core.EglOutput;
 import org.westford.compositor.core.EglOutputState;
 import org.westford.compositor.core.Output;
 import org.westford.compositor.core.OutputMode;
-import org.westford.compositor.core.Point;
+import org.westford.compositor.core.Rectangle;
+import org.westford.compositor.core.Region;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Subscene;
+import org.westford.compositor.core.Surface;
 import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.drm.DrmOutput;
 import org.westford.compositor.drm.DrmPageFlipCallback;
@@ -52,10 +54,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.westford.nativ.libdrm.Libdrm.DRM_MODE_PAGE_FLIP_EVENT;
-import static org.westford.nativ.libgbm.Libgbm.GBM_BO_IMPORT_WL_BUFFER;
-import static org.westford.nativ.libgbm.Libgbm.GBM_BO_USE_SCANOUT;
+import static org.westford.nativ.libgbm.Libgbm.GBM_FORMAT_ARGB8888;
+import static org.westford.nativ.libgbm.Libgbm.GBM_FORMAT_XRGB8888;
 
-//TODO put all gbm/egl specifics here
 @AutoFactory(allowSubclasses = true,
              className = "DrmEglOutputFactory")
 public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
@@ -75,24 +76,27 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private final Gles2Renderer       gles2Renderer;
 
     @Nonnull
-    private final Scene     scene;
-    private final int       drmFd;
-    private final long      gbmSurface;
+    private final Scene        scene;
     @Nonnull
-    private final DrmOutput drmOutput;
-    private final long      eglSurface;
-    private final long      eglContext;
-    private final long      eglDisplay;
-    private final long      gbmDevice;
-    private       long      gbmBo;
-    private       long      nextGbmBo;
+    private final GbmBoFactory gbmBoFactory;
+    private final int          drmFd;
+    private final long         gbmSurface;
+    @Nonnull
+    private final DrmOutput    drmOutput;
+    private final long         eglSurface;
+    private final long         eglContext;
+    private final long         eglDisplay;
+    private final long         gbmDevice;
+    @Nonnull
+    private       GbmBo        gbmBo;
+    @Nonnull
+    private       GbmBo        nextGbmBo;
     private boolean               renderPending       = false;
     private boolean               pageFlipPending     = false;
     private Optional<Runnable>    afterPageFlipRender = Optional.empty();
     private Optional<EventSource> onIdleEventSource   = Optional.empty();
     private boolean enabled;
     private Optional<EglOutputState> state = Optional.empty();
-
 
     DrmEglOutput(@Nonnull @Provided final Libc libc,
                  @Nonnull @Provided final Libgbm libgbm,
@@ -101,9 +105,10 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
                  @Nonnull @Provided final org.westford.compositor.gles2.Gles2PainterFactory gles2PainterFactory,
                  @Nonnull @Provided final Gles2Renderer gles2Renderer,
                  @Nonnull @Provided final Scene scene,
+                 @Nonnull @Provided final GbmBoFactory gbmBoFactory,
                  final int drmFd,
                  final long gbmDevice,
-                 final long gbmBo,
+                 @Nonnull final GbmBo gbmBo,
                  final long gbmSurface,
                  @Nonnull final DrmOutput drmOutput,
                  final long eglSurface,
@@ -116,9 +121,11 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.gles2PainterFactory = gles2PainterFactory;
         this.gles2Renderer = gles2Renderer;
         this.scene = scene;
+        this.gbmBoFactory = gbmBoFactory;
         this.drmFd = drmFd;
         this.gbmDevice = gbmDevice;
         this.gbmBo = gbmBo;
+        this.nextGbmBo = gbmBo;
         this.gbmSurface = gbmSurface;
         this.drmOutput = drmOutput;
         this.eglSurface = eglSurface;
@@ -126,9 +133,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.eglDisplay = eglDisplay;
     }
 
-    @Override
-    public void renderEndAfterSwap() {
-        this.nextGbmBo = this.libgbm.gbm_surface_lock_front_buffer(this.gbmSurface);
+    private void schedulePageFlip() {
         this.libdrm.drmModePageFlip(this.drmFd,
                                     this.drmOutput.getCrtcId(),
                                     getFbId(this.nextGbmBo),
@@ -137,8 +142,8 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.pageFlipPending = true;
     }
 
-    public int getFbId(final long gbmBo) {
-        final long fbIdP = this.libgbm.gbm_bo_get_user_data(gbmBo);
+    private int getFbId(final GbmBo gbmBo) {
+        final long fbIdP = this.libgbm.gbm_bo_get_user_data(gbmBo.getGbmBo());
         if (fbIdP != 0L) {
             return Pointer.wrap(Integer.class,
                                 fbIdP)
@@ -148,23 +153,37 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         final Pointer<Integer> fb = Pointer.calloc(1,
                                                    Size.sizeof((Integer) null),
                                                    Integer.class);
-        final int width  = this.libgbm.gbm_bo_get_width(gbmBo);
-        final int height = this.libgbm.gbm_bo_get_height(gbmBo);
-        final int stride = this.libgbm.gbm_bo_get_stride(gbmBo);
-        final int handle = (int) this.libgbm.gbm_bo_get_handle(gbmBo);
-        final int ret = this.libdrm.drmModeAddFB(this.drmFd,
-                                                 width,
-                                                 height,
-                                                 (byte) 24,
-                                                 (byte) 32,
-                                                 stride,
-                                                 handle,
-                                                 fb.address);
+        final long gbmBoPtr = this.gbmBo.getGbmBo();
+        final int  format   = this.libgbm.gbm_bo_get_format(gbmBoPtr);
+        final int  width    = this.libgbm.gbm_bo_get_width(gbmBoPtr);
+        final int  height   = this.libgbm.gbm_bo_get_height(gbmBoPtr);
+        final int  stride   = this.libgbm.gbm_bo_get_stride(gbmBoPtr);
+        final int  handle   = (int) this.libgbm.gbm_bo_get_handle(gbmBoPtr);
+
+        final Pointer<Integer> handles = Pointer.nref(handle,
+                                                      0,
+                                                      0,
+                                                      0);
+        final Pointer<Integer> pitches = Pointer.nref(stride,
+                                                      0,
+                                                      0,
+                                                      0);
+        final Pointer<Integer> offsets = Pointer.nref(new int[4]);
+
+        final int ret = this.libdrm.drmModeAddFB2(this.drmFd,
+                                                  width,
+                                                  height,
+                                                  format,
+                                                  handles.address,
+                                                  pitches.address,
+                                                  offsets.address,
+                                                  fb.address,
+                                                  0);
         if (ret != 0) {
             throw new RuntimeException("failed to create fb");
         }
 
-        this.libgbm.gbm_bo_set_user_data(gbmBo,
+        this.libgbm.gbm_bo_set_user_data(gbmBoPtr,
                                          fb.address,
                                          Pointerdestroy_user_data.nref(this::destroyUserData).address);
 
@@ -175,8 +194,8 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     public void onPageFlip(@Unsigned final int sequence,
                            @Unsigned final int tv_sec,
                            @Unsigned final int tv_usec) {
-        this.libgbm.gbm_surface_release_buffer(this.gbmSurface,
-                                               this.gbmBo);
+        this.gbmBo.close();
+
         this.gbmBo = this.nextGbmBo;
         this.pageFlipPending = false;
 
@@ -194,84 +213,61 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         fbIdP.close();
     }
 
-    @Override
-    public long getEglSurface() {
-        return this.eglSurface;
-    }
-
-    @Override
-    public long getEglContext() {
-        return this.eglContext;
-    }
-
-    @Override
-    public long getEglDisplay() {
-        return this.eglDisplay;
-    }
-
-    @Nonnull
-    @Override
-    public Optional<EglOutputState> getState() {
-        return this.state;
-    }
-
-    @Override
-    public void updateState(@Nonnull final EglOutputState eglOutputState) {
-        this.state = Optional.of(eglOutputState);
-    }
-
-    @Nonnull
-    public DrmOutput getDrmOutput() {
-        return this.drmOutput;
-    }
-
     private void doRender(@Nonnull final WlOutput wlOutput) {
         this.onIdleEventSource = Optional.empty();
-        paint(wlOutput);
+
+        final Gles2Painter gles2Painter = this.gles2PainterFactory.create(this,
+                                                                          wlOutput);
+        try (final Gles2Painter painter = gles2Painter) {
+            final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
+                                                                    .getRegion());
+            paint(wlOutput,
+                  painter,
+                  subscene);
+
+            //TODO paint cursors on separate overlay
+            subscene.geCursorViews()
+                    .forEach(painter::paint);
+        }
+        //FIXME how to compose different gbm_bos?
+        if (gles2Painter.hasPainted()) {
+            this.nextGbmBo = this.gbmBoFactory.create(gbmSurface);
+        }
+        schedulePageFlip();
+
         this.display.flushClients();
         this.renderPending = false;
     }
 
-    private void paint(@Nonnull final WlOutput wlOutput) {
+    private void paint(@Nonnull final WlOutput wlOutput,
+                       final Gles2Painter gles2Painter,
+                       final Subscene subscene) {
 
-        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
-                                                                .getRegion());
+        //naive generic single pass, bottom to top overdraw rendering.
+        final List<SurfaceView>     lockViews      = subscene.getLockViews();
+        final Optional<SurfaceView> fullscreenView = subscene.getFullscreenView();
 
-        try (final Gles2Painter gles2Painter = this.gles2PainterFactory.create(this,
-                                                                               wlOutput)) {
-
-            //naive generic single pass, bottom to top overdraw rendering.
-            final List<SurfaceView>     lockViews      = subscene.getLockViews();
-            final Optional<SurfaceView> fullscreenView = subscene.getFullscreenView();
-
-            //lockscreen(s) hide all other screens.
-            if (!lockViews.isEmpty()) {
-                lockViews.forEach(gles2Painter::paint);
-            }
-            else {
-                fullscreenView.ifPresent(fullscreenSurfaceView -> {
-                    //try painting fullscreen view
-                    if (!paintFullscreen(gles2Painter,
-                                         wlOutput,
-                                         fullscreenSurfaceView)) {
-                        //fullscreen view not visible, paint the rest of the subscene.
-                        subscene.getBackgroundView()
-                                .ifPresent(gles2Painter::paint);
-                        subscene.getUnderViews()
-                                .forEach(gles2Painter::paint);
-                        subscene.getApplicationViews()
-                                .forEach(gles2Painter::paint);
-                        subscene.getOverViews()
-                                .forEach(gles2Painter::paint);
-                    }
-
-
-                    //TODO try utilizing hw cursor plane
-                    subscene.geCursorViews()
-                            .forEach(gles2Painter::paint);
-                });
-            }
+        if (!lockViews.isEmpty()) {
+            lockViews.forEach(gles2Painter::paint);
+            //lockscreen(s) hide(s) all other screens.
+            return;
         }
+
+        if (fullscreenView.isPresent() && paintFullscreen(gles2Painter,
+                                                          wlOutput,
+                                                          fullscreenView.get())) {
+            //fullscreen view painted, don't bother painting underlying views
+            return;
+        }
+
+        subscene.getBackgroundView()
+                .ifPresent(gles2Painter::paint);
+        subscene.getUnderViews()
+                .forEach(gles2Painter::paint);
+        subscene.getApplicationViews()
+                .forEach(gles2Painter::paint);
+        subscene.getOverViews()
+                .forEach(gles2Painter::paint);
     }
 
     @Override
@@ -342,40 +338,103 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
 
         if (!surfaceView.isEnabled() || !surfaceView.isDrawable()) { return false; }
 
-
-        final Point  surfaceViewPosition = surfaceView.global(Point.ZERO);
-        final Output output              = wlOutput.getOutput();
-        final Point  outputPosition      = output.global(Point.ZERO);
+        final Output output = wlOutput.getOutput();
 
         final WlSurface wlSurface = (WlSurface) surfaceView.getWlSurfaceResource()
                                                            .getImplementation();
-        final WlBufferResource wlBufferResource = wlSurface.getSurface()
-                                                           .getState()
-                                                           .getBuffer()
-                                                           .get();
+        final Surface surface = wlSurface.getSurface();
+        final WlBufferResource wlBufferResource = surface.getState()
+                                                         .getBuffer()
+                                                         .get();
         final Buffer     buffer = this.gles2Renderer.queryBuffer(wlBufferResource);
         final OutputMode mode   = output.getMode();
 
+
         if (buffer.getWidth() == mode.getWidth() &&
-            buffer.getHeight() == mode.getHeight() &&
-            surfaceViewPosition.equals(outputPosition)) {
-            //try scanout
-            final long bo = this.libgbm.gbm_bo_import(this.gbmDevice,
-                                                      GBM_BO_IMPORT_WL_BUFFER,
-                                                      wlBufferResource.pointer,
-                                                      GBM_BO_USE_SCANOUT);
-            if (bo == 0L) {
-                //fallback to gles2
+            buffer.getHeight() == mode.getHeight()) {
+
+            final GbmBo gbmBo = this.gbmBoFactory.create(this.gbmDevice,
+                                                         wlBufferResource);
+            final int format = getScanoutFormat(gbmBo,
+                                                mode,
+                                                surface);
+            if (format == 0) {
+                //no suitable scanout pixel format, fallback to gles2
+                gbmBo.close();
                 return gles2Painter.paint(surfaceView);
             }
 
-            //TODO to direct scanout
-
+            this.nextGbmBo = gbmBo;
             return true;
         }
         else {
-            //fallback to gles2
+            //no direct scanout possible, fallback to gles2
             return gles2Painter.paint(surfaceView);
         }
+    }
+
+    private int getScanoutFormat(final GbmBo clientGbmBo,
+                                 final OutputMode mode,
+                                 final Surface surface) {
+        if (clientGbmBo.getGbmBo() == 0L) {
+            return 0;
+        }
+
+        int clientFormat = this.libgbm.gbm_bo_get_format(clientGbmBo.getGbmBo());
+
+        if (clientFormat == GBM_FORMAT_ARGB8888 && surface.getState()
+                                                          .getOpaqueRegion()
+                                                          .isPresent()) {
+            final Region opaqueCopy = surface.getState()
+                                             .getOpaqueRegion()
+                                             .get()
+                                             .copy();
+            opaqueCopy.subtract(Rectangle.create(0,
+                                                 0,
+                                                 mode.getWidth(),
+                                                 mode.getHeight()));
+            if (opaqueCopy.isEmpty()) {
+                clientFormat = GBM_FORMAT_XRGB8888;
+            }
+        }
+
+        final int format = this.libgbm.gbm_bo_get_format(this.gbmBo.getGbmBo());
+        if (format == clientFormat) {
+            return clientFormat;
+        }
+
+        return 0;
+    }
+
+
+    @Override
+    public long getEglSurface() {
+        return this.eglSurface;
+    }
+
+    @Override
+    public long getEglContext() {
+        return this.eglContext;
+    }
+
+    @Override
+    public long getEglDisplay() {
+        return this.eglDisplay;
+    }
+
+    @Nonnull
+    @Override
+    public Optional<EglOutputState> getState() {
+        return this.state;
+    }
+
+    @Override
+    public void updateState(@Nonnull final EglOutputState eglOutputState) {
+        this.state = Optional.of(eglOutputState);
+    }
+
+    @Nonnull
+    public DrmOutput getDrmOutput() {
+        return this.drmOutput;
     }
 }

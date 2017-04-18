@@ -32,5 +32,7 @@ public interface EglOutput extends RenderOutput {
     @Nonnull
     Optional<EglOutputState> getState();
 
+    //TODO refactor & remove this method
+    @Deprecated
     void updateState(@Nonnull EglOutputState eglOutputState);
 }

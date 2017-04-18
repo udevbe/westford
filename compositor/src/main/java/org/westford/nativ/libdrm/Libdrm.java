@@ -98,6 +98,16 @@ public class Libdrm {
                                    @Unsigned int bo_handle,
                                    @Ptr(int.class) long buf_id);
 
+    public native int drmModeAddFB2(int fd,
+                                    @Unsigned int width,
+                                    @Unsigned int height,
+                                    @Unsigned int pixel_format,
+                                    @Ptr(int.class) long bo_handles,
+                                    @Ptr(int.class) long pitches,
+                                    @Ptr(int.class) long offsets,
+                                    @Ptr(int.class) long buf_id,
+                                    @Unsigned int flags);
+
     /**
      * Set the mode on a crtc crtcId with the given mode modeId.
      */

@@ -23,7 +23,7 @@ public class Gles2Painter implements AutoCloseable {
     @Nonnull
     private final WlOutput      wlOutput;
 
-    private boolean needsClose;
+    private boolean painted = false;
 
     Gles2Painter(@Provided @Nonnull final Gles2Renderer gles2Renderer,
                  @Nonnull final EglOutput eglOutput,
@@ -45,10 +45,10 @@ public class Gles2Painter implements AutoCloseable {
         //if surface not visible, don't even bother.
         if (!surfaceView.isEnabled() || !surfaceView.isDrawable()) { return false; }
 
-        if (!this.needsClose) {
+        if (!this.painted) {
             this.gles2Renderer.prepareDraw(this.eglOutput,
                                            this.wlOutput);
-            this.needsClose = true;
+            this.painted = true;
         }
 
         this.gles2Renderer.drawView(surfaceView);
@@ -58,8 +58,12 @@ public class Gles2Painter implements AutoCloseable {
 
     @Override
     public void close() {
-        if (this.needsClose) {
+        if (this.painted) {
             this.gles2Renderer.finishDraw(this.eglOutput);
         }
+    }
+
+    public boolean hasPainted() {
+        return this.painted;
     }
 }
