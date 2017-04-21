@@ -132,4 +132,29 @@ public class Libdrm {
     public native int drmSetMaster(int fd);
 
     public native int drmDropMaster(int fd);
+
+    public native int drmModeSetPlane(int fd,
+                                      @Unsigned int plane_id,
+                                      @Unsigned int crtc_id,
+                                      @Unsigned int fb_id,
+                                      @Unsigned int flags,
+                                      @Unsigned int crtc_x,
+                                      @Unsigned int crtc_y,
+                                      @Unsigned int crtc_w,
+                                      @Unsigned int crtc_h,
+                                      @Unsigned int src_x,
+                                      @Unsigned int src_y,
+                                      @Unsigned int src_w,
+                                      @Unsigned int src_h);
+
+    @Ptr(drmModePlaneRes.class)
+    public native long drmModeGetPlaneResources(int fd);
+
+    public native void drmModeFreePlaneResources(@Ptr(drmModePlaneRes.class) long ptr);
+
+    @Ptr(drmModePlane.class)
+    public native long drmModeGetPlane(int fd,
+                                       @Unsigned int plane_id);
+
+    public native void drmModeFreePlane(@Ptr(drmModePlane.class) long ptr);
 }
