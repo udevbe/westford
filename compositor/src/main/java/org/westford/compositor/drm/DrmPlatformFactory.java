@@ -60,8 +60,7 @@ public class DrmPlatformFactory {
     private final Privileges                privileges;
 
     @Inject
-    DrmPlatformFactory(@Nonnull final Libc libc,
-                       @Nonnull final Libudev libudev,
+    DrmPlatformFactory(@Nonnull final Libudev libudev,
                        @Nonnull final Libdrm libdrm,
                        @Nonnull final Display display,
                        @Nonnull final DrmOutputFactory drmOutputFactory,

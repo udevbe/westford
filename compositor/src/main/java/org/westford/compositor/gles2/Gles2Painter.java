@@ -9,12 +9,11 @@ import org.westford.compositor.protocol.WlOutput;
 import javax.annotation.Nonnull;
 
 /**
- * Convenience class to lazily setup, draw and flush using a {@link Gles2Renderer}. A Painter instance can only be used once after it has been closed.
+ * Convenience class to lazily setup, draw and flush using a {@link Gles2Renderer}.
  */
 @AutoFactory(allowSubclasses = true,
              className = "Gles2PainterFactory")
-public class Gles2Painter implements AutoCloseable {
-
+public class Gles2Painter {
 
     @Nonnull
     private final Gles2Renderer gles2Renderer;
@@ -34,7 +33,7 @@ public class Gles2Painter implements AutoCloseable {
     }
 
     /**
-     * Paint a surface using a {@link Gles2Renderer}, preparing the one time draw setup if needed.
+     * Paint a surface using a {@link Gles2Renderer}, doing a one time draw setup if needed.
      *
      * @param surfaceView the view to paint.
      *
@@ -56,14 +55,11 @@ public class Gles2Painter implements AutoCloseable {
         return true;
     }
 
-    @Override
-    public void close() {
+    public boolean commit() {
         if (this.painted) {
             this.gles2Renderer.finishDraw(this.eglOutput);
         }
-    }
 
-    public boolean hasPainted() {
         return this.painted;
     }
 }

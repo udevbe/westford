@@ -28,7 +28,6 @@ import org.westford.compositor.core.Subscene;
 import org.westford.compositor.core.SurfaceView;
 import org.westford.compositor.gles2.Gles2Painter;
 import org.westford.compositor.gles2.Gles2PainterFactory;
-import org.westford.compositor.gles2.Gles2Renderer;
 import org.westford.compositor.protocol.WlOutput;
 import org.westford.compositor.x11.X11Output;
 
@@ -128,37 +127,36 @@ public class X11EglOutput implements EglOutput {
         final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
                                                                 .getRegion());
 
-        try (final Gles2Painter gles2Painter = this.gles2PainterFactory.create(this,
-                                                                               wlOutput)) {
+        final Gles2Painter gles2Painter = this.gles2PainterFactory.create(this,
+                                                                          wlOutput);
 
-            //naive generic single pass, bottom to top overdraw rendering.
-            final List<SurfaceView>     lockViews      = subscene.getLockViews();
-            final Optional<SurfaceView> fullscreenView = subscene.getFullscreenView();
+        //naive generic single pass, bottom to top overdraw rendering.
+        final List<SurfaceView>     lockViews      = subscene.getLockViews();
+        final Optional<SurfaceView> fullscreenView = subscene.getFullscreenView();
 
-            //lockscreen(s) hide all other screens.
-            if (!lockViews.isEmpty()) {
-                lockViews.forEach(gles2Painter::paint);
-            }
-            else {
-                fullscreenView.ifPresent(fullscreenSurfaceView -> {
-                    //try painting fullscreen view
-                    if (!gles2Painter.paint(fullscreenSurfaceView)) {
-                        //fullscreen view not visible, paint the rest of the subscene.
-                        subscene.getBackgroundView()
-                                .ifPresent(gles2Painter::paint);
-                        subscene.getUnderViews()
-                                .forEach(gles2Painter::paint);
-                        subscene.getApplicationViews()
-                                .forEach(gles2Painter::paint);
-                        subscene.getOverViews()
-                                .forEach(gles2Painter::paint);
-                    }
-                });
-            }
-
-            //TODO try utilizing hw cursor plane
-            subscene.geCursorViews()
-                    .forEach(gles2Painter::paint);
+        //lockscreen(s) hide all other screens.
+        if (!lockViews.isEmpty()) {
+            lockViews.forEach(gles2Painter::paint);
         }
+        else {
+            fullscreenView.ifPresent(fullscreenSurfaceView -> {
+                //try painting fullscreen view
+                if (!gles2Painter.paint(fullscreenSurfaceView)) {
+                    //fullscreen view not visible, paint the rest of the subscene.
+                    subscene.getBackgroundView()
+                            .ifPresent(gles2Painter::paint);
+                    subscene.getUnderViews()
+                            .forEach(gles2Painter::paint);
+                    subscene.getApplicationViews()
+                            .forEach(gles2Painter::paint);
+                    subscene.getOverViews()
+                            .forEach(gles2Painter::paint);
+                }
+            });
+        }
+
+        subscene.geCursorViews()
+                .forEach(gles2Painter::paint);
+        gles2Painter.commit();
     }
 }

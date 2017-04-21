@@ -216,21 +216,20 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private void doRender(@Nonnull final WlOutput wlOutput) {
         this.onIdleEventSource = Optional.empty();
 
-        final Gles2Painter gles2Painter = this.gles2PainterFactory.create(this,
-                                                                          wlOutput);
-        try (final Gles2Painter painter = gles2Painter) {
-            final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
-                                                                    .getRegion());
-            paint(wlOutput,
-                  painter,
-                  subscene);
+        final Gles2Painter painter = this.gles2PainterFactory.create(this,
+                                                                     wlOutput);
+        final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
+                                                                .getRegion());
+        paint(wlOutput,
+              painter,
+              subscene);
 
-            //TODO paint cursors on separate overlay
-            subscene.geCursorViews()
-                    .forEach(painter::paint);
-        }
+        //TODO paint cursors on separate overlay
+        subscene.geCursorViews()
+                .forEach(painter::paint);
+
         //FIXME how to compose different gbm_bos?
-        if (gles2Painter.hasPainted()) {
+        if (painter.commit()) {
             this.nextGbmBo = this.gbmBoFactory.create(gbmSurface);
         }
         schedulePageFlip();
@@ -278,15 +277,13 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     }
 
     @Override
-    public void enable(
-            @Nonnull final WlOutput wlOutput) {
+    public void enable(@Nonnull final WlOutput wlOutput) {
         this.enabled = true;
         render(wlOutput);
     }
 
     @Override
-    public void render(
-            @Nonnull final WlOutput wlOutput) {
+    public void render(@Nonnull final WlOutput wlOutput) {
         if (this.enabled) {
             scheduleRender(wlOutput);
         }
