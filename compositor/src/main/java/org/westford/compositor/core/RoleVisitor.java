@@ -5,13 +5,13 @@ import org.westford.compositor.wlshell.ShellSurface;
 
 public interface RoleVisitor {
 
-    default void visit(Role role) {defaultAction(role);}
+    default void visit(final Role role) {defaultAction(role);}
 
-    default void visit(PointerDevice pointerDevice) {defaultAction(pointerDevice);}
+    default void visit(final PointerDevice pointerDevice) {defaultAction(pointerDevice);}
 
-    default void visit(ShellSurface shellSurface) {defaultAction(shellSurface);}
+    default void visit(final ShellSurface shellSurface) {defaultAction(shellSurface);}
 
-    default void visit(Subsurface subsurface) {defaultAction(subsurface);}
+    default void visit(final Subsurface subsurface) {defaultAction(subsurface);}
 
-    default void defaultAction(Role role) {}
+    default void defaultAction(final Role role) {}
 }

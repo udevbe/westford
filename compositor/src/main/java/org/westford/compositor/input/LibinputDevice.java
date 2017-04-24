@@ -28,7 +28,6 @@ import org.freedesktop.wayland.shared.WlSeatCapability;
 import org.westford.compositor.core.OutputGeometry;
 import org.westford.compositor.core.Point;
 import org.westford.compositor.core.PointerDevice;
-import org.westford.compositor.core.RenderOutput;
 import org.westford.compositor.core.RenderPlatform;
 import org.westford.compositor.protocol.WlKeyboard;
 import org.westford.compositor.protocol.WlOutput;

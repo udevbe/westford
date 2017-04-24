@@ -40,7 +40,7 @@ public class Subsurface implements Role {
     private boolean sync  = true;
 
     @Nonnull
-    private Sibling sibling;
+    private final Sibling sibling;
 
     @Nonnull
     private SurfaceState currentSurfaceState;

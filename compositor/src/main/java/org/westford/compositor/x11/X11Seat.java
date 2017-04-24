@@ -22,7 +22,6 @@ import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.shared.WlKeyboardKeyState;
 import org.freedesktop.wayland.shared.WlPointerAxis;
 import org.freedesktop.wayland.shared.WlPointerButtonState;
-import org.westford.compositor.core.OutputGeometry;
 import org.westford.compositor.core.Point;
 import org.westford.compositor.core.PointerDevice;
 import org.westford.compositor.protocol.WlKeyboard;

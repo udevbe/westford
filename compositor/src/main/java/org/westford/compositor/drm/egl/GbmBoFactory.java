@@ -35,7 +35,7 @@ public class GbmBoFactory {
      *
      * @return
      */
-    public GbmBo create(long gbmSurface) {
+    public GbmBo create(final long gbmSurface) {
         final long gbmBo = this.libgbm.gbm_surface_lock_front_buffer(gbmSurface);
         return this.privateGbmBoServerFactory.create(gbmSurface,
                                                      gbmBo);

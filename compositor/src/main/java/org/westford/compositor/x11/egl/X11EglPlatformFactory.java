@@ -288,8 +288,8 @@ public class X11EglPlatformFactory {
                                                                       .iterator();
             while (wlOutputIterator.hasNext()) {
                 final WlOutput wlOutput = wlOutputIterator.next();
-                X11EglOutput x11EglOutput = (X11EglOutput) wlOutput.getOutput()
-                                                                   .getRenderOutput();
+                final X11EglOutput x11EglOutput = (X11EglOutput) wlOutput.getOutput()
+                                                                         .getRenderOutput();
                 final X11Output x11Output = x11EglOutput.getX11Output();
 
                 if (x11Output.getXWindow() == sourceWindow) {

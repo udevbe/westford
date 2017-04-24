@@ -18,12 +18,7 @@
 package org.westford.compositor.x11;
 
 import com.google.auto.factory.AutoFactory;
-import org.westford.Signal;
-import org.westford.Slot;
-import org.westford.compositor.core.events.RenderOutputDestroyed;
 import org.westford.nativ.libxcb.xcb_screen_t;
-
-import javax.annotation.Nonnull;
 
 @AutoFactory(allowSubclasses = true,
              className = "X11OutputFactory")
@@ -59,26 +54,26 @@ public class X11Output {
     }
 
     public int getX() {
-        return x;
+        return this.x;
     }
 
     public int getY() {
-        return y;
+        return this.y;
     }
 
     public int getWidth() {
-        return width;
+        return this.width;
     }
 
     public int getHeight() {
-        return height;
+        return this.height;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public xcb_screen_t getScreen() {
-        return screen;
+        return this.screen;
     }
 }

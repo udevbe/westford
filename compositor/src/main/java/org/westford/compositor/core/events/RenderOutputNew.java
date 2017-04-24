@@ -1,7 +1,6 @@
 package org.westford.compositor.core.events;
 
 import com.google.auto.value.AutoValue;
-import org.westford.compositor.core.RenderOutput;
 import org.westford.compositor.protocol.WlOutput;
 
 import javax.annotation.Nonnull;

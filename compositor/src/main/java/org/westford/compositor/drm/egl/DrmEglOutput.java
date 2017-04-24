@@ -230,7 +230,7 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
 
         //FIXME how to compose different gbm_bos?
         if (painter.commit()) {
-            this.nextGbmBo = this.gbmBoFactory.create(gbmSurface);
+            this.nextGbmBo = this.gbmBoFactory.create(this.gbmSurface);
         }
         schedulePageFlip();
 

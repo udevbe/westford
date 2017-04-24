@@ -15,8 +15,8 @@ public class GbmBoServer implements GbmBo {
     private final long   gbmBo;
 
     GbmBoServer(@Provided @Nonnull final Libgbm libgbm,
-                long gbmSurface,
-                long gbmBo) {
+                final long gbmSurface,
+                final long gbmBo) {
         this.libgbm = libgbm;
         this.gbmSurface = gbmSurface;
         this.gbmBo = gbmBo;

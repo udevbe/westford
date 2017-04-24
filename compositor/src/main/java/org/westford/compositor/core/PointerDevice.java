@@ -578,8 +578,8 @@ public class PointerDevice implements Role {
             cursor = this.cursorFactory.create(wlSurfaceResource,
                                                hotspot);
 
-            WlSurface     wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
-            final Surface surface   = wlSurface.getSurface();
+            final WlSurface wlSurface = (WlSurface) wlSurfaceResource.getImplementation();
+            final Surface   surface   = wlSurface.getSurface();
             final SurfaceView view = surface.createView(wlSurfaceResource,
                                                         this.position);
             this.scene.getCursorLayer()

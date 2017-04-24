@@ -78,11 +78,11 @@ public class WlPointer implements WlPointerRequestsV5, ProtocolObject<WlPointerR
         }
 
         surface.setRole(this.pointerDevice);
-        pointerDevice.setCursor(wlPointerResource,
-                                serial,
-                                wlSurfaceResource,
-                                hotspotX,
-                                hotspotY);
+        this.pointerDevice.setCursor(wlPointerResource,
+                                     serial,
+                                     wlSurfaceResource,
+                                     hotspotX,
+                                     hotspotY);
     }
 
     public PointerDevice getPointerDevice() {

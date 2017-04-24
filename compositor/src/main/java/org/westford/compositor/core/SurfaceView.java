@@ -40,10 +40,10 @@ public class SurfaceView {
     private boolean drawable = false;
 
     SurfaceView(@Provided @Nonnull final Compositor compositor,
-                @Nonnull WlSurfaceResource wlSurfaceResource,
-                @Nonnull Mat4 positionTransform,
-                @Nonnull Mat4 transform,
-                @Nonnull Mat4 inverseTransform) {
+                @Nonnull final WlSurfaceResource wlSurfaceResource,
+                @Nonnull final Mat4 positionTransform,
+                @Nonnull final Mat4 transform,
+                @Nonnull final Mat4 inverseTransform) {
         this.compositor = compositor;
         this.wlSurfaceResource = wlSurfaceResource;
         this.positionTransform = positionTransform;
@@ -186,7 +186,7 @@ public class SurfaceView {
      */
     @Nonnull
     public Mat4 getInverseTransform() {
-        return inverseTransform;
+        return this.inverseTransform;
     }
 
     /**
@@ -198,6 +198,6 @@ public class SurfaceView {
      */
     @Nonnull
     public Mat4 getTransform() {
-        return transform;
+        return this.transform;
     }
 }

@@ -18,11 +18,6 @@
 package org.westford.compositor.x11;
 
 import com.google.auto.factory.AutoFactory;
-import org.westford.Signal;
-import org.westford.Slot;
-import org.westford.compositor.core.RenderPlatform;
-import org.westford.compositor.core.events.RenderOutputDestroyed;
-import org.westford.compositor.core.events.RenderOutputNew;
 
 import javax.annotation.Nonnull;
 import java.util.List;

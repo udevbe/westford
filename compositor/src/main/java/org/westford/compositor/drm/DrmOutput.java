@@ -19,18 +19,12 @@ package org.westford.compositor.drm;
 
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
-import org.westford.compositor.core.RenderOutput;
-import org.westford.compositor.core.Renderer;
-import org.westford.compositor.protocol.WlOutput;
 import org.westford.nativ.libdrm.DrmModeConnector;
 import org.westford.nativ.libdrm.DrmModeModeInfo;
 import org.westford.nativ.libdrm.DrmModeRes;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.LinkedList;
-import java.util.Optional;
 
 @AutoFactory(allowSubclasses = true,
              className = "DrmOutputFactory")

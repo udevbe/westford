@@ -26,7 +26,7 @@ import javax.annotation.Nonnull;
 @AutoValue
 public abstract class UnsupportedBuffer implements Buffer {
 
-    public static UnsupportedBuffer create(@Nonnull WlBufferResource wlBufferResource) {
+    public static UnsupportedBuffer create(@Nonnull final WlBufferResource wlBufferResource) {
         return new AutoValue_UnsupportedBuffer(wlBufferResource);
     }
 

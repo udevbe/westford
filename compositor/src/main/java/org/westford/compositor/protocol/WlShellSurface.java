@@ -18,7 +18,6 @@
 package org.westford.compositor.protocol;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.WlOutputResource;
 import org.freedesktop.wayland.server.WlSeatResource;
@@ -26,7 +25,6 @@ import org.freedesktop.wayland.server.WlShellSurfaceRequests;
 import org.freedesktop.wayland.server.WlShellSurfaceResource;
 import org.freedesktop.wayland.server.WlSurfaceResource;
 import org.freedesktop.wayland.shared.WlShellSurfaceTransient;
-import org.westford.compositor.core.Scene;
 import org.westford.compositor.wlshell.ShellSurface;
 
 import javax.annotation.Nonnegative;

@@ -358,8 +358,8 @@ public class Surface {
         return Collections.unmodifiableCollection(this.surfaceViews);
     }
 
-    public SurfaceView createView(WlSurfaceResource wlSurfaceResource,
-                                  Point position) {
+    public SurfaceView createView(final WlSurfaceResource wlSurfaceResource,
+                                  final Point position) {
 
         final SurfaceView surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
                                                                        position);
@@ -378,7 +378,7 @@ public class Surface {
         return this.viewCreatedSignal;
     }
 
-    private void ensureSiblingView(@Nonnull Sibling sibling,
+    private void ensureSiblingView(@Nonnull final Sibling sibling,
                                    @Nonnull final SurfaceView surfaceView) {
 
         final Point             siblingPosition          = sibling.getPosition();
@@ -390,7 +390,7 @@ public class Surface {
             return;
         }
 
-        for (SurfaceView siblingSurfaceView : siblingSurface.getViews()) {
+        for (final SurfaceView siblingSurfaceView : siblingSurface.getViews()) {
             final Optional<SurfaceView> siblingSurfaceViewParent = siblingSurfaceView.getParent();
             if (siblingSurfaceViewParent.isPresent() && siblingSurfaceViewParent.get()
                                                                                 .equals(surfaceView)) {
@@ -407,7 +407,7 @@ public class Surface {
                    .connect(event -> siblingSurfaceView.setPosition(surfaceView.global(sibling.getPosition())));
     }
 
-    public void addSibling(@Nonnull Sibling sibling) {
+    public void addSibling(@Nonnull final Sibling sibling) {
         getViews().forEach(surfaceView -> ensureSiblingView(sibling,
                                                             surfaceView));
         this.siblings.add(sibling);

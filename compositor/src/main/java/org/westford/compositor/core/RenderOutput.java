@@ -20,7 +20,6 @@ package org.westford.compositor.core;
 import org.westford.compositor.protocol.WlOutput;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 /**
  * A {@link RenderPlatform} specific drawing output for a {@link Renderer}.

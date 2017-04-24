@@ -17,10 +17,7 @@
  */
 package org.westford.compositor.core;
 
-import org.westford.compositor.protocol.WlOutput;
-
 import javax.annotation.Nonnull;
-import java.util.List;
 
 public interface EglPlatform extends RenderPlatform {
 

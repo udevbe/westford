@@ -46,8 +46,6 @@ gen/
 
 # Gradle files
 .gradle/
-build/
-
 # Local configuration file (sdk path, etc)
 local.properties
 
@@ -60,15 +58,11 @@ proguard/
 
 ### Gradle template
 .gradle
-build/
-
 # Ignore Gradle GUI config
 gradle-app.setting
 
 
 ### Java template
-*.class
-
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
@@ -84,14 +78,11 @@ hs_err_pid*
 ### Eclipse template
 *.pydevproject
 .metadata
-.gradle
-bin/
 tmp/
 *.tmp
 *.bak
 *.swp
 *~.nib
-local.properties
 .settings/
 .loadpath
 
@@ -207,37 +198,16 @@ crashlytics-build.properties
 ### C++ template
 # Compiled Object files
 *.slo
-*.lo
-*.o
-*.obj
-
 # Precompiled Headers
-*.gch
-*.pch
-
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
 # Fortran module files
 *.mod
 
 # Compiled Static libraries
 *.lai
-*.la
-*.a
-*.lib
-
 # Executables
-*.exe
-*.out
-*.app
-
-
 ### NetBeans template
 nbproject/private/
-build/
 nbbuild/
 dist/
 nbdist/

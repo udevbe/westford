@@ -16,7 +16,7 @@ public class GbmBoClient implements GbmBo {
     private final long   gbmBo;
 
     GbmBoClient(@Provided @Nonnull final Libgbm libgbm,
-                long gbmBo) {
+                final long gbmBo) {
         this.libgbm = libgbm;
         this.gbmBo = gbmBo;
     }

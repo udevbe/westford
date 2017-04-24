@@ -17,8 +17,8 @@ public class SurfaceViewFactory {
         this.privateSurfaceViewFactory = privateSurfaceViewFactory;
     }
 
-    SurfaceView create(@Nonnull WlSurfaceResource wlSurfaceResource,
-                       @Nonnull Point globalPosition) {
+    SurfaceView create(@Nonnull final WlSurfaceResource wlSurfaceResource,
+                       @Nonnull final Point globalPosition) {
 
         final WlSurface wlSurface        = (WlSurface) wlSurfaceResource.getImplementation();
         final Surface   surface          = wlSurface.getSurface();
@@ -27,8 +27,8 @@ public class SurfaceViewFactory {
         final Mat4 positionTransform = Transforms.TRANSLATE(globalPosition.getX(),
                                                             globalPosition.getY());
 
-        Mat4 transform        = positionTransform.multiply(surfaceTransform);
-        Mat4 inverseTransform = transform.invert();
+        final Mat4 transform        = positionTransform.multiply(surfaceTransform);
+        final Mat4 inverseTransform = transform.invert();
 
         final SurfaceView surfaceView = this.privateSurfaceViewFactory.create(wlSurfaceResource,
                                                                               positionTransform,

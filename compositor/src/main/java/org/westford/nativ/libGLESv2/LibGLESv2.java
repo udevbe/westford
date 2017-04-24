@@ -479,7 +479,7 @@ public class LibGLESv2 {
     public native void glBlendFunc(int sfactor,
                                    int dfactor);
 
-    public void check(String function) {
+    public void check(final String function) {
         final int error = glGetError();
         if (error != 0) {
             throw new RuntimeException(function + " - Got gl error " + error);

@@ -252,6 +252,6 @@ public class Output {
 
     @Nonnull
     public RenderOutput getRenderOutput() {
-        return renderOutput;
+        return this.renderOutput;
     }
 }

@@ -165,8 +165,8 @@ public class DrmEglPlatformFactory {
                              .connect(event -> {
                                  this.privileges.setDrmMaster(this.drmPlatform.getDrmFd());
                                  wlOutputs.forEach(wlOutput -> {
-                                     DrmEglOutput drmEglOutput = (DrmEglOutput) wlOutput.getOutput()
-                                                                                        .getRenderOutput();
+                                     final DrmEglOutput drmEglOutput = (DrmEglOutput) wlOutput.getOutput()
+                                                                                              .getRenderOutput();
                                      drmEglOutput.setDefaultMode();
                                      drmEglOutput.enable(wlOutput);
                                  });
@@ -185,7 +185,7 @@ public class DrmEglPlatformFactory {
                                                         wlOutputs);
     }
 
-    private WlOutput createWlOutput(DrmEglOutput drmEglOutput) {
+    private WlOutput createWlOutput(final DrmEglOutput drmEglOutput) {
 
         final DrmOutput drmOutput = drmEglOutput.getDrmOutput();
 

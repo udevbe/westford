@@ -182,11 +182,9 @@ public class FiniteRegion implements Region {
     @Override
     public Region copy() {
         final Pointer<pixman_region32> copyRegion = Pointer.ref(new pixman_region32());
-
-        final FiniteRegion copy = this.finiteRegionFactory.create();
-
-
-        return copy;
+        this.libpixman1.pixman_region32_copy(copyRegion.address,
+                                             this.pixman_region32Pointer.address);
+        return this.finiteRegionFactory.create(copyRegion);
     }
 
     @Override

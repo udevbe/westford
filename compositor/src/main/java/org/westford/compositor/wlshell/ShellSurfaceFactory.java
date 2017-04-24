@@ -22,7 +22,7 @@ public class ShellSurfaceFactory {
 
     public ShellSurface create(@Nonnull final WlSurfaceResource wlSurfaceResource,
                                @Nonnull final Surface surface,
-                               int pingSerial) {
+                               final int pingSerial) {
         final SurfaceView view = surface.createView(wlSurfaceResource,
                                                     Point.ZERO);
         return this.privateShellSurfaceFactory.create(view,
