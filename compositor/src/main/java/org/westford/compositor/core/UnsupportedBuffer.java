@@ -47,7 +47,7 @@ public abstract class UnsupportedBuffer implements Buffer {
     public abstract WlBufferResource getWlBufferResource();
 
     @Override
-    public void accept(@Nonnegative final BufferVisitor bufferVisitor) {
+    public void accept(@Nonnull final BufferVisitor bufferVisitor) {
         bufferVisitor.visit(this);
     }
 }
