@@ -19,6 +19,7 @@ package org.westford.compositor.drm.egl;
 
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
+import com.sun.javafx.scene.SceneUtils;
 import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.jaccall.Ptr;
 import org.freedesktop.jaccall.Size;
@@ -89,8 +90,10 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
     private final long         gbmDevice;
     @Nonnull
     private       GbmBo        gbmBo;
+
     @Nonnull
-    private       GbmBo        nextGbmBo;
+    private GbmBo nextGbmBo;
+
     private boolean               renderPending       = false;
     private boolean               pageFlipPending     = false;
     private Optional<Runnable>    afterPageFlipRender = Optional.empty();
@@ -220,6 +223,65 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
                                                                      wlOutput);
         final Subscene subscene = this.scene.subsection(wlOutput.getOutput()
                                                                 .getRegion());
+
+
+        Optional<DrmPlane> cursorPlane = toCursorPlane(wlOutput,
+                                                       subscene.geCursorViews());
+        //If we can't offload to some kind of cursor plane then we are forced to put it on the primary plane.
+        //This means we can't really offload anything to other planes as hey would be shown on top of the cursor
+        //primary plane
+        if (cursorPlane.isPresent()) {
+            //continue offloading to overlay planes
+            Optional<DrmPlane> lockViewsPlane = toOverlayPlane(wlOutput,
+                                                               subscene.getLockViews());
+            if (lockViewsPlane.isPresent()) {
+                return;
+            }
+
+
+            Optional<DrmPlane> fullscreenPlane = toPrimaryPlane(wlOutput,
+                                                                subscene.getFullscreenView());
+            if (fullscreenPlane.isPresent()) {
+                return;
+            }
+
+            Optional<DrmPlane> overPlane = toOverlayPlane(wlOutput,
+                                                          subscene.getOverViews());
+            if (!overPlane.isPresent()) {
+                toPrimaryPlane(wlOutput,
+                               subscene.getBackgroundView(),
+                               subscene.getUnderViews(),
+                               subscene.getApplicationViews(),
+                               subscene.getOverViews());
+            }
+
+            Optional<DrmPlane> applicationsPlane = toOverlayPlane(wlOutput,
+                                                                  subscene.getApplicationViews());
+            if (!applicationsPlane.isPresent()) {
+                toPrimaryPlane(wlOutput,
+                               subscene.getBackgroundView(),
+                               subscene.getUnderViews(),
+                               subscene.getApplicationViews());
+            }
+
+            Optional<DrmPlane> underPlane = toOverlayPlane(wlOutput,
+                                                           subscene.getUnderViews());
+            if (!underPlane.isPresent()) {
+                toPrimaryPlane(wlOutput,
+                               subscene.getBackgroundView(),
+                               subscene.getUnderViews());
+            }
+
+            toPrimaryPlane(wlOutput,
+                           subscene.getBackgroundView());
+        }
+        else {
+            //put everything on the primary plane
+            toPrimaryPlane(wlOutput,
+                           subscene);
+        }
+
+
         paint(wlOutput,
               painter,
               subscene);
@@ -237,6 +299,28 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
         this.display.flushClients();
         this.renderPending = false;
     }
+
+    private Optional<DrmPlane> toPrimaryPlane(final WlOutput wlOutput,
+                                              final Subscene subscene) {
+        return null;
+    }
+
+    private Optional<DrmPlane> toPrimaryPlane(final WlOutput wlOutput,
+                                              final Optional<SurfaceView> view,
+                                              final List<SurfaceView>... views) {
+        return null;
+    }
+
+    private Optional<DrmPlane> toOverlayPlane(final WlOutput wlOutput,
+                                              final List<SurfaceView> views) {
+        return null;
+    }
+
+    private Optional<DrmPlane> toCursorPlane(final WlOutput wlOutput,
+                                             final List<SurfaceView> surfaceViews) {
+        return null;
+    }
+
 
     private void paint(@Nonnull final WlOutput wlOutput,
                        final Gles2Painter gles2Painter,
@@ -352,6 +436,11 @@ public class DrmEglOutput implements EglOutput, DrmPageFlipCallback {
 
             final GbmBo gbmBo = this.gbmBoFactory.create(this.gbmDevice,
                                                          wlBufferResource);
+            if (gbmBo.getGbmBo() == 0L) {
+                //buffer import failed, fallback to painter
+                return gles2Painter.paint(surfaceView);
+            }
+
             final int format = getScanoutFormat(gbmBo,
                                                 mode,
                                                 surface);
