@@ -48,24 +48,24 @@ public class InfiniteRegionTest {
     @Test
     public void testSubtract() throws Exception {
         //given
-        final Rectangle rectangle = Rectangle.create(123,
-                                                     456,
-                                                     789,
-                                                     12);
+        final Rectangle rectangle = Rectangle.Companion.create(123,
+                                                               456,
+                                                               789,
+                                                               12);
         //when
         this.region.subtract(rectangle);
 
         //then
-        assertThat(this.region.contains(Point.create(150,
-                                                     460))).isTrue();
+        assertThat(this.region.contains(Point.Companion.create(150,
+                                                               460))).isTrue();
     }
 
     @Test
     public void testContains() throws Exception {
         //given
         //when
-        final boolean contains = this.region.contains(Point.create(Short.MAX_VALUE,
-                                                                   Short.MAX_VALUE));
+        final boolean contains = this.region.contains(Point.Companion.create(Short.MAX_VALUE,
+                                                                             Short.MAX_VALUE));
         //then
         assertThat(contains).isTrue();
     }
@@ -73,12 +73,12 @@ public class InfiniteRegionTest {
     @Test
     public void testContainsClipping() throws Exception {
         //given
-        final Point point = Point.create(123,
-                                         456);
-        final Rectangle rectangle = Rectangle.create(123,
-                                                     456,
-                                                     789,
-                                                     12);
+        final Point point = Point.Companion.create(123,
+                                                   456);
+        final Rectangle rectangle = Rectangle.Companion.create(123,
+                                                               456,
+                                                               789,
+                                                               12);
         final FiniteRegion finiteRegion = mock(FiniteRegion.class);
         when(this.finiteRegionFactory.create()).thenReturn(finiteRegion);
         //when

@@ -24,13 +24,13 @@ public class Mat4Test {
     public void testAdd() throws Exception {
         //given
         //@formatter:off
-        final Mat4 left = Mat4.create(  11f, 22f,   33f, 44f,
+        final Mat4 left = Mat4.Companion.create(  11f, 22f,   33f, 44f,
                                         55f, 66f,   77f, 88f,
                                        -.5f, -1f, -1.5f, -2f,
                                       -2.5f, -3f, -3.5f, -4f);
         //@formatter:on
         //@formatter:off
-        final Mat4 right = Mat4.create(  9f, 8f,   7f, 6f,
+        final Mat4 right = Mat4.Companion.create(  9f, 8f,   7f, 6f,
                                          5f, 4f,   3f, 2f,
                                         .5f, 1f, 1.5f, 2f,
                                        2.5f, 3f, 3.5f, 4f);
@@ -64,13 +64,13 @@ public class Mat4Test {
     public void testMultiplyMat() throws Exception {
         //given
         //@formatter:off
-        final Mat4 left = Mat4.create(  11f, 22f,   33f, 44f,
+        final Mat4 left = Mat4.Companion.create(  11f, 22f,   33f, 44f,
                                         55f, 66f,   77f, 88f,
                                        -.5f, -1f, -1.5f, -2f,
                                       -2.5f, -3f, -3.5f, -4f);
         //@formatter:on
         //@formatter:off
-        final Mat4 right = Mat4.create(  9f, 8f,   7f, 6f,
+        final Mat4 right = Mat4.Companion.create(  9f, 8f,   7f, 6f,
                                          5f, 4f,   3f, 2f,
                                         .5f, 1f, 1.5f, 2f,
                                        2.5f, 3f, 3.5f, 4f);
@@ -104,13 +104,13 @@ public class Mat4Test {
     public void testMultiplyVec() throws Exception {
         //given
         //@formatter:off
-        final Mat4 left = Mat4.create(  11f, 22f,   33f, 44f,
+        final Mat4 left = Mat4.Companion.create(  11f, 22f,   33f, 44f,
                                         55f, 66f,   77f, 88f,
                                        -.5f, -1f, -1.5f, -2f,
                                       -2.5f, -3f, -3.5f, -4f);
         //@formatter:on
         //@formatter:off
-        final Vec4 right = Vec4.create(  11f,
+        final Vec4 right = Vec4.Companion.create(  11f,
                                          66f,
                                        -1.5f,
                                          -4f);
@@ -130,7 +130,7 @@ public class Mat4Test {
     public void testInvert() throws Exception {
         //given
         //@formatter:off
-        final Mat4 left = Mat4.create(1f, 0f, 5f, 0f,
+        final Mat4 left = Mat4.Companion.create(1f, 0f, 5f, 0f,
                                       2f, 1f, 6f, 0f,
                                       3f, 4f, 0f, 0f,
                                       0f, 0f, 0f, 1f);

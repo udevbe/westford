@@ -90,7 +90,7 @@ public class WlSurfaceTest {
         this.wlSurface.setBufferTransform(wlSurfaceResource,
                                           transform);
         //then
-        verify(this.surface).setBufferTransform(Mat4.IDENTITY);
+        verify(this.surface).setBufferTransform(Mat4.Companion.getIDENTITY());
 
     }
 
@@ -228,10 +228,10 @@ public class WlSurfaceTest {
                               height);
         //then
         verify(this.surface,
-               times(1)).markDamaged(eq(Rectangle.create(x,
-                                                         y,
-                                                         width,
-                                                         height)));
+               times(1)).markDamaged(eq(Rectangle.Companion.create(x,
+                                                                   y,
+                                                                   width,
+                                                                   height)));
     }
 
     @Test(expected = IllegalArgumentException.class)

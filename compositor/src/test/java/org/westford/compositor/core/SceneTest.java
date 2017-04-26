@@ -86,7 +86,7 @@ public class SceneTest {
         when(region0.contains(size0,
                               position0)).thenReturn(true);
         final LinkedList<Sibling> siblings0 = new LinkedList<>();
-        siblings0.add(Sibling.create(wlSurfaceResource0));
+        siblings0.add(Sibling.Companion.create(wlSurfaceResource0));
         when(surface0.getSiblings()).thenReturn(siblings0);
         final Role role0 = mock(Role.class);
         when(surface0.getRole()).thenReturn(Optional.of(role0));
@@ -119,7 +119,7 @@ public class SceneTest {
         when(region1.contains(size1,
                               position1)).thenReturn(false);
         final LinkedList<Sibling> siblings1 = new LinkedList<>();
-        siblings1.add(Sibling.create(wlSurfaceResource1));
+        siblings1.add(Sibling.Companion.create(wlSurfaceResource1));
         when(surface1.getSiblings()).thenReturn(siblings1);
         final Role role1 = mock(Role.class);
         when(surface1.getRole()).thenReturn(Optional.of(role1));

@@ -54,49 +54,49 @@ public class GeoTest {
                                                            factoryProvider);
         final Region clampRegion = new FiniteRegion(libpixman1,
                                                     this.finiteRegionFactory);
-        clampRegion.add(Rectangle.create(0,
-                                         0,
-                                         100,
-                                         100));
+        clampRegion.add(Rectangle.Companion.create(0,
+                                                   0,
+                                                   100,
+                                                   100));
 
-        final Point iNorth = Point.create(50,
-                                          0);
-        final Point oNorth = Point.create(55,
-                                          -10);
+        final Point iNorth = Point.Companion.create(50,
+                                                    0);
+        final Point oNorth = Point.Companion.create(55,
+                                                    -10);
 
-        final Point iNorthEast = Point.create(99,
-                                              0);
-        final Point oNorthEast = Point.create(105,
-                                              -5);
+        final Point iNorthEast = Point.Companion.create(99,
+                                                        0);
+        final Point oNorthEast = Point.Companion.create(105,
+                                                        -5);
 
-        final Point iEast = Point.create(99,
-                                         50);
-        final Point oEast = Point.create(105,
-                                         60);
+        final Point iEast = Point.Companion.create(99,
+                                                   50);
+        final Point oEast = Point.Companion.create(105,
+                                                   60);
 
-        final Point iSouthEast = Point.create(99,
-                                              99);
-        final Point oSouthEast = Point.create(105,
-                                              105);
+        final Point iSouthEast = Point.Companion.create(99,
+                                                        99);
+        final Point oSouthEast = Point.Companion.create(105,
+                                                        105);
 
-        final Point iSouth = Point.create(50,
-                                          99);
-        final Point oSouth = Point.create(45,
-                                          105);
+        final Point iSouth = Point.Companion.create(50,
+                                                    99);
+        final Point oSouth = Point.Companion.create(45,
+                                                    105);
 
-        final Point iSouthWest = Point.create(0,
-                                              99);
-        final Point oSouthWest = Point.create(-10,
-                                              105);
+        final Point iSouthWest = Point.Companion.create(0,
+                                                        99);
+        final Point oSouthWest = Point.Companion.create(-10,
+                                                        105);
 
-        final Point iWest = Point.create(0,
-                                         50);
-        final Point oWest = Point.create(-5,
-                                         40);
-        final Point iNorthWest = Point.create(0,
-                                              0);
-        final Point oNorthWest = Point.create(-5,
-                                              -10);
+        final Point iWest = Point.Companion.create(0,
+                                                   50);
+        final Point oWest = Point.Companion.create(-5,
+                                                   40);
+        final Point iNorthWest = Point.Companion.create(0,
+                                                        0);
+        final Point oNorthWest = Point.Companion.create(-5,
+                                                        -10);
 
         //when
         final Point clampNorth = this.geo.clamp(iNorth,
@@ -125,22 +125,22 @@ public class GeoTest {
                                                     clampRegion);
 
         //then
-        assertThat(clampNorth).isEqualTo(Point.create(55,
-                                                      0));
-        assertThat(clampNorthEast).isEqualTo(Point.create(99,
-                                                          0));
-        assertThat(clampEast).isEqualTo(Point.create(99,
-                                                     60));
-        assertThat(clampSoutEast).isEqualTo(Point.create(99,
-                                                         99));
-        assertThat(clampSouth).isEqualTo(Point.create(45,
-                                                      99));
-        assertThat(clampSouthWest).isEqualTo(Point.create(0,
-                                                          99));
-        assertThat(clampWest).isEqualTo(Point.create(0,
-                                                     40));
-        assertThat(clampNorthWest).isEqualTo(Point.create(0,
-                                                          0));
+        assertThat(clampNorth).isEqualTo(Point.Companion.create(55,
+                                                                0));
+        assertThat(clampNorthEast).isEqualTo(Point.Companion.create(99,
+                                                                    0));
+        assertThat(clampEast).isEqualTo(Point.Companion.create(99,
+                                                               60));
+        assertThat(clampSoutEast).isEqualTo(Point.Companion.create(99,
+                                                                   99));
+        assertThat(clampSouth).isEqualTo(Point.Companion.create(45,
+                                                                99));
+        assertThat(clampSouthWest).isEqualTo(Point.Companion.create(0,
+                                                                    99));
+        assertThat(clampWest).isEqualTo(Point.Companion.create(0,
+                                                               40));
+        assertThat(clampNorthWest).isEqualTo(Point.Companion.create(0,
+                                                                    0));
     }
 
     @Test

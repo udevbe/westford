@@ -36,10 +36,10 @@ public class FiniteRegionTest {
     @Test
     public void testAdd() throws Exception {
         //given
-        final Rectangle rectangle = Rectangle.builder()
-                                             .width(100)
-                                             .height(100)
-                                             .build();
+        final Rectangle rectangle = Rectangle.Companion.builder()
+                                                       .width(100)
+                                                       .height(100)
+                                                       .build();
         //when
         this.finiteRegion.add(rectangle);
         //then
@@ -54,10 +54,10 @@ public class FiniteRegionTest {
     @Test
     public void testSubtract() throws Exception {
         //given
-        final Rectangle rectangle = Rectangle.builder()
-                                             .width(100)
-                                             .height(100)
-                                             .build();
+        final Rectangle rectangle = Rectangle.Companion.builder()
+                                                       .width(100)
+                                                       .height(100)
+                                                       .build();
         //when
         this.finiteRegion.subtract(rectangle);
         //then
@@ -75,8 +75,8 @@ public class FiniteRegionTest {
     @Test
     public void testContains() throws Exception {
         //given
-        final Point point = Point.create(50,
-                                         50);
+        final Point point = Point.Companion.create(50,
+                                                   50);
         //when
         this.finiteRegion.contains(point);
         //then
@@ -89,12 +89,12 @@ public class FiniteRegionTest {
     @Test
     public void testContainsWithClipping() throws Exception {
         //given
-        final Rectangle clipping = Rectangle.create(60,
-                                                    60,
-                                                    10,
-                                                    10);
-        final Point point = Point.create(60,
-                                         60);
+        final Rectangle clipping = Rectangle.Companion.create(60,
+                                                              60,
+                                                              10,
+                                                              10);
+        final Point point = Point.Companion.create(60,
+                                                   60);
         //when
         this.finiteRegion.contains(clipping,
                                    point);

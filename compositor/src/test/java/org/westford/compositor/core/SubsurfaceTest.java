@@ -50,7 +50,7 @@ public class SubsurfaceTest {
     public void setUp() {
         //mockito doesn't properly inject the member so we have to create our subsurface manually.
         this.subsurface = new Subsurface(this.parentWlSurfaceResource,
-                                         Sibling.create(this.wlSurfaceResource),
+                                         Sibling.Companion.create(this.wlSurfaceResource),
                                          this.surfaceState,
                                          this.surfaceState);
     }
@@ -65,8 +65,8 @@ public class SubsurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
 
         this.subsurface.setInert();
-        final Point position = Point.create(123,
-                                            456);
+        final Point position = Point.Companion.create(123,
+                                                      456);
 
         //when: a new position is set
         this.subsurface.setPosition(position);

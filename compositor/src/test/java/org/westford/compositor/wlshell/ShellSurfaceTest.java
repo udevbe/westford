@@ -92,8 +92,8 @@ public class ShellSurfaceTest {
 
         final PointerDevice pointerDevice = mock(PointerDevice.class);
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
-        final Point pointerPosition = Point.create(100,
-                                                   100);
+        final Point pointerPosition = Point.Companion.create(100,
+                                                             100);
         when(pointerDevice.getPosition()).thenReturn(pointerPosition);
 
         final int serial = 12345;
@@ -106,10 +106,10 @@ public class ShellSurfaceTest {
         when(wlSurfaceResource.getImplementation()).thenReturn(wlSurface);
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
-        final Point surfacePosition = Point.create(75,
-                                                   75);
-        when(surfaceView.global(eq(Point.create(0,
-                                                0)))).thenReturn(surfacePosition);
+        final Point surfacePosition = Point.Companion.create(75,
+                                                             75);
+        when(surfaceView.global(eq(Point.Companion.create(0,
+                                                          0)))).thenReturn(surfacePosition);
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -128,12 +128,12 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(98765,
-                                                      Point.create(110,
-                                                                   110)));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(98765,
+                                                                Point.Companion.create(110,
+                                                                                       110)));
         //then
-        verify(surfaceView).setPosition(Point.create(85,
-                                                     85));
+        verify(surfaceView).setPosition(Point.Companion.create(85,
+                                                               85));
     }
 
     @Test
@@ -149,8 +149,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -162,19 +162,19 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                              80));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(80,
+                                                                                        80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
-                                                                                               180,
-                                                                                               0,
-                                                                                               1));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(180,
+                                                                                                         180,
+                                                                                                         0,
+                                                                                                         1));
 
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -196,8 +196,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.RIGHT.value,
                                                  200,
@@ -217,8 +217,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -230,19 +230,19 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                              80));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(80,
+                                                                                        80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
-                                                                                               180,
-                                                                                               0,
-                                                                                               1));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(180,
+                                                                                                         180,
+                                                                                                         0,
+                                                                                                         1));
 
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -264,8 +264,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_RIGHT.value,
                                                  200,
@@ -285,8 +285,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -298,19 +298,19 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                              20));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(80,
+                                                                                        20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
-                                                                                               -80,
-                                                                                               0,
-                                                                                               1));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(180,
+                                                                                                         -80,
+                                                                                                         0,
+                                                                                                         1));
 
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -332,8 +332,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP.value,
                                                  100,
@@ -353,8 +353,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -366,19 +366,19 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(80,
-                                                                              20));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(80,
+                                                                                        20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(180,
-                                                                                               -80,
-                                                                                               0,
-                                                                                               1));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(180,
+                                                                                                         -80,
+                                                                                                         0,
+                                                                                                         1));
 
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -400,8 +400,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP_RIGHT.value,
                                                  200,
@@ -421,8 +421,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -434,19 +434,19 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                              20));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(20,
+                                                                                        20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
-                                                                                               -80,
-                                                                                               0,
-                                                                                               1));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(-80,
+                                                                                                         -80,
+                                                                                                         0,
+                                                                                                         1));
 
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -468,8 +468,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.LEFT.value,
                                                  200,
@@ -489,8 +489,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
 
         final int serial = 12345;
 
@@ -503,18 +503,18 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                              20));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(20,
+                                                                                        20));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
-                                                                                               -80,
-                                                                                               0,
-                                                                                               1));
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(-80,
+                                                                                                         -80,
+                                                                                                         0,
+                                                                                                         1));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -536,8 +536,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.TOP_LEFT.value,
                                                  200,
@@ -557,8 +557,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -570,19 +570,19 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                              80));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(20,
+                                                                                        80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
-                                                                                               180,
-                                                                                               0,
-                                                                                               1));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(-80,
+                                                                                                         180,
+                                                                                                         0,
+                                                                                                         1));
 
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -604,8 +604,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM.value,
                                                  100,
@@ -625,8 +625,8 @@ public class ShellSurfaceTest {
         when(wlPointer.getPointerDevice()).thenReturn(pointerDevice);
         final Point pointerPositionStart = mock(Point.class);
         when(pointerDevice.getPosition()).thenReturn(pointerPositionStart);
-        final Point pointerPositionMotion = Point.create(1200,
-                                                         900);
+        final Point pointerPositionMotion = Point.Companion.create(1200,
+                                                                   900);
         final int serial = 12345;
 
         final WlSurfaceResource wlSurfaceResource = mock(WlSurfaceResource.class);
@@ -638,19 +638,19 @@ public class ShellSurfaceTest {
         when(wlSurface.getSurface()).thenReturn(surface);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
 
-        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.create(20,
-                                                                              80));
+        when(surfaceView.local(pointerPositionStart)).thenReturn(Point.Companion.create(20,
+                                                                                        80));
         final Mat4 inverseTransform = mock(Mat4.class);
         when(surfaceView.getInverseTransform()).thenReturn(inverseTransform);
-        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.create(-80,
-                                                                                               180,
-                                                                                               0,
-                                                                                               1));
+        when(inverseTransform.multiply(pointerPositionMotion.toVec4())).thenReturn(Vec4.Companion.create(-80,
+                                                                                                         180,
+                                                                                                         0,
+                                                                                                         1));
 
-        when(surface.getSize()).thenReturn(Rectangle.create(0,
-                                                            0,
-                                                            100,
-                                                            100));
+        when(surface.getSize()).thenReturn(Rectangle.Companion.create(0,
+                                                                      0,
+                                                                      100,
+                                                                      100));
         when(pointerDevice.getGrab()).thenReturn(Optional.of(surfaceView));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
@@ -672,8 +672,8 @@ public class ShellSurfaceTest {
                                          pointerGrabMotionArgumentCaptor.capture());
         //and when
         final PointerGrabMotion pointerGrabMotion = pointerGrabMotionArgumentCaptor.getValue();
-        pointerGrabMotion.motion(PointerMotion.create(456767,
-                                                      pointerPositionMotion));
+        pointerGrabMotion.motion(PointerMotion.Companion.create(456767,
+                                                                pointerPositionMotion));
         //then
         verify(wlShellSurfaceResource).configure(WlShellSurfaceResize.BOTTOM_LEFT.value,
                                                  200,
@@ -772,9 +772,9 @@ public class ShellSurfaceTest {
         final int globalX = 100;
         final int globalY = 150;
 
-        when(parentSurfaceView.global(Point.create(localX,
-                                                   localY))).thenReturn(Point.create(globalX,
-                                                                                     globalY));
+        when(parentSurfaceView.global(Point.Companion.create(localX,
+                                                             localY))).thenReturn(Point.Companion.create(globalX,
+                                                                                                         globalY));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -790,8 +790,8 @@ public class ShellSurfaceTest {
                                   EnumSet.noneOf(WlShellSurfaceTransient.class));
 
         //then
-        verify(surfaceView).setPosition(Point.create(globalX,
-                                                     globalY));
+        verify(surfaceView).setPosition(Point.Companion.create(globalX,
+                                                               globalY));
     }
 
     @Test
@@ -837,9 +837,9 @@ public class ShellSurfaceTest {
         final int globalX = 100;
         final int globalY = 150;
 
-        when(parentSurfaceView.global(Point.create(localX,
-                                                   localY))).thenReturn(Point.create(globalX,
-                                                                                     globalY));
+        when(parentSurfaceView.global(Point.Companion.create(localX,
+                                                             localY))).thenReturn(Point.Companion.create(globalX,
+                                                                                                         globalY));
 
         final ShellSurface shellSurface = new ShellSurface(this.display,
                                                            this.compositor,
@@ -855,8 +855,8 @@ public class ShellSurfaceTest {
                                   EnumSet.of(WlShellSurfaceTransient.INACTIVE));
 
         //then
-        verify(surfaceView).setPosition(Point.create(globalX,
-                                                     globalY));
+        verify(surfaceView).setPosition(Point.Companion.create(globalX,
+                                                               globalY));
         verify(wlKeyboardResource0).leave(anyInt(),
                                           eq(wlSurfaceResource));
         verify(wlKeyboardResource1).leave(anyInt(),
@@ -870,7 +870,7 @@ public class ShellSurfaceTest {
         keyboardFocuses.add(wlKeyboardResource2);
 
         surface.getKeyboardFocusGainedSignal()
-               .emit(KeyboardFocusGained.create(Collections.singleton(wlKeyboardResource2)));
+               .emit(KeyboardFocusGained.Companion.create(Collections.singleton(wlKeyboardResource2)));
 
         //then
         assertThat(keyboardFocuses).isEmpty();

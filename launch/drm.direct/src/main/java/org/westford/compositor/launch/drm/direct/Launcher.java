@@ -163,10 +163,10 @@ public class Launcher {
         final LifeCycleSignals lifeCycleSignals = drmEglCompositor.lifeCycleSignals();
         tty.getVtEnterSignal()
            .connect(event -> lifeCycleSignals.getActivateSignal()
-                                             .emit(Activate.create()));
+                                             .emit(Activate.INSTANCE.create()));
         tty.getVtLeaveSignal()
            .connect(event -> lifeCycleSignals.getDeactivateSignal()
-                                             .emit(Deactivate.create()));
+                                             .emit(Deactivate.INSTANCE.create()));
 
         final EventSource vtSource = display.getEventLoop()
                                             .addSignal(libc.SIGRTMIN(),

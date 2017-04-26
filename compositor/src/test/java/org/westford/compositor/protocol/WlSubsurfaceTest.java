@@ -102,8 +102,8 @@ public class WlSubsurfaceTest {
                                       y);
 
         //then: subsurface set position is called with x and y coordinates
-        verify(this.subsurface).setPosition(eq(Point.create(x,
-                                                            y)));
+        verify(this.subsurface).setPosition(eq(Point.Companion.create(x,
+                                                                      y)));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class WlSubsurfaceTest {
         when(parentWlSurface.getSurface()).thenReturn(parentSurface);
         when(parentSurface.getSiblings()).thenReturn(siblings);
         if (siblingValid) {
-            siblings.add(Sibling.create(siblingWlSurfaceResource));
+            siblings.add(Sibling.Companion.create(siblingWlSurfaceResource));
         }
 
         final WlSurface siblingWlSurface = mock(WlSurface.class);

@@ -55,29 +55,29 @@ public class CursorTest {
     @Test
     public void testHide() throws Exception {
         //given
-        final SurfaceState surfaceState = SurfaceState.builder()
-                                                      .build();
+        final SurfaceState surfaceState = SurfaceState.Companion.builder()
+                                                                .build();
         when(this.surface.getState()).thenReturn(surfaceState);
         //when
         this.cursor.hide();
         //then
-        verify(this.surface).setState(eq(SurfaceState.builder()
-                                                     .buffer(Optional.empty())
-                                                     .build()));
+        verify(this.surface).setState(eq(SurfaceState.Companion.builder()
+                                                               .buffer(Optional.empty())
+                                                               .build()));
         assertThat(this.cursor.isHidden()).isTrue();
     }
 
     @Test
     public void testUpdatePosition() throws Exception {
         //given
-        final Point point = Point.create(123,
-                                         456);
+        final Point point = Point.Companion.create(123,
+                                                   456);
         final SurfaceView surfaceView = mock(SurfaceView.class);
         when(surface.getViews()).thenReturn(Collections.singleton(surfaceView));
         //when
         this.cursor.updatePosition(point);
         //then
-        verify(surfaceView).setPosition(eq(Point.create(123,
-                                                        456)));
+        verify(surfaceView).setPosition(eq(Point.Companion.create(123,
+                                                                  456)));
     }
 }

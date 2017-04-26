@@ -62,10 +62,10 @@ public class SurfaceTest {
         //given
         final FiniteRegion region = mock(FiniteRegion.class);
         when(this.finiteRegionFactory.create()).thenReturn(region);
-        final Rectangle damage = Rectangle.create(100,
-                                                  100,
-                                                  20,
-                                                  50);
+        final Rectangle damage = Rectangle.Companion.create(100,
+                                                            100,
+                                                            20,
+                                                            50);
         //when
         this.surface.markDamaged(damage);
         //then
@@ -95,10 +95,10 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .isPresent()).isTrue();
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder()
-                                                              .width(200)
-                                                              .height(300)
-                                                              .build());
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.Companion.builder()
+                                                                        .width(200)
+                                                                        .height(300)
+                                                                        .build());
         verify(this.compositor).requestRender();
     }
 
@@ -126,10 +126,10 @@ public class SurfaceTest {
                                   relY);
         this.surface.commit();
         //then
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder()
-                                                              .width(200)
-                                                              .height(300)
-                                                              .build());
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.Companion.builder()
+                                                                        .width(200)
+                                                                        .height(300)
+                                                                        .build());
         verify(wlBufferResource).release();
     }
 
@@ -170,10 +170,10 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .get()).isSameAs(wlBufferResource1);
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.builder()
-                                                              .width(123)
-                                                              .height(456)
-                                                              .build());
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.Companion.builder()
+                                                                        .width(123)
+                                                                        .height(456)
+                                                                        .build());
     }
 
     @Test
@@ -222,7 +222,7 @@ public class SurfaceTest {
         assertThat(this.surface.getState()
                                .getBuffer()
                                .isPresent()).isFalse();
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.ZERO);
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.Companion.getZERO());
         verify(this.compositor).requestRender();
     }
 
@@ -317,10 +317,10 @@ public class SurfaceTest {
         this.surface.commit();
 
         //then
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.create(0,
-                                                                      0,
-                                                                      100,
-                                                                      100));
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.Companion.create(0,
+                                                                                0,
+                                                                                100,
+                                                                                100));
     }
 
     @Test
@@ -330,7 +330,7 @@ public class SurfaceTest {
         this.surface.commit();
 
         //then
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.ZERO);
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.Companion.getZERO());
     }
 
     @Test
@@ -354,10 +354,10 @@ public class SurfaceTest {
         this.surface.commit();
 
         //then
-        assertThat(this.surface.getSize()).isEqualTo(Rectangle.create(0,
-                                                                      0,
-                                                                      20,
-                                                                      20));
+        assertThat(this.surface.getSize()).isEqualTo(Rectangle.Companion.create(0,
+                                                                                0,
+                                                                                20,
+                                                                                20));
     }
 
     //TODO sibling tests (move, add, remove, pending subsurface, ...)

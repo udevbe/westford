@@ -87,7 +87,7 @@ public class SubsurfaceFactoryTest {
         final Subsurface subsurface = mock(Subsurface.class);
 
         when(this.privateSubsurfaceFactory.create(parentWlSurfaceResource,
-                                                  Sibling.create(wlSurfaceResource),
+                                                  Sibling.Companion.create(wlSurfaceResource),
                                                   oldSurfaceState,
                                                   oldSurfaceState)).thenReturn(subsurface);
 
