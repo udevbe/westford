@@ -18,31 +18,29 @@
 package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
+import org.freedesktop.wayland.server.WlBufferResource
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.compositor.protocol.WlSurface
-import java.util.Optional
+import java.util.*
 
 @AutoFactory(className = "CursorFactory", allowSubclasses = true)
-class Cursor internal constructor(var wlSurfaceResource: WlSurfaceResource,
-                                  var hotspot: Point) {
+class Cursor(var wlSurfaceResource: WlSurfaceResource,
+             var hotspot: Point) {
+
     var isHidden: Boolean = false
         private set
 
     fun updatePosition(pointerPosition: Point) {
         val wlSurface = this.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
-        surface.views
-                .forEach { surfaceView -> surfaceView.setPosition(pointerPosition.subtract(hotspot)) }
+        surface.views.forEach { it.setPosition(pointerPosition.subtract(hotspot)) }
     }
 
     fun hide() {
         val wlSurface = this.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        surface.state = surface.state
-                .toBuilder()
-                .buffer(Optional.empty<WlBufferResource>())
-                .build()
+        surface.state = surface.state.toBuilder().buffer(Optional.empty<WlBufferResource>()).build()
 
         this.isHidden = true
     }

@@ -21,14 +21,12 @@ import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.jaccall.Pointer
 import org.freedesktop.wayland.server.Client
-import org.freedesktop.wayland.server.DestroyListener
 import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.WlKeyboardResource
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.freedesktop.wayland.shared.WlKeyboardKeyState
 import org.freedesktop.wayland.shared.WlKeyboardKeymapFormat
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.events.Key
 import org.westford.compositor.core.events.KeyboardFocus
 import org.westford.compositor.core.events.KeyboardFocusGained
@@ -37,32 +35,29 @@ import org.westford.compositor.protocol.WlSurface
 import org.westford.nativ.NativeFileFactory
 import org.westford.nativ.glibc.Libc
 import org.westford.nativ.libxkbcommon.Libxkbcommon
-
-import javax.annotation.Nonnegative
-import java.nio.ByteBuffer
-import java.util.HashSet
-import java.util.Optional
-import java.util.stream.Collectors
-
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_KEY_DOWN
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_KEY_UP
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_STATE_LAYOUT_EFFECTIVE
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_STATE_MODS_DEPRESSED
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_STATE_MODS_LATCHED
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_STATE_MODS_LOCKED
+import java.nio.ByteBuffer
+import java.util.*
+import java.util.stream.Collectors
+import javax.annotation.Nonnegative
 
 @AutoFactory(className = "KeyboardDeviceFactory", allowSubclasses = true)
-class KeyboardDevice internal constructor(@param:Provided private val display: Display,
-                                          @param:Provided private val nativeFileFactory: NativeFileFactory,
-                                          @param:Provided private val libc: Libc,
-                                          @param:Provided private val libxkbcommon: Libxkbcommon,
+class KeyboardDevice(@param:Provided private val display: Display,
+                     @param:Provided private val nativeFileFactory: NativeFileFactory,
+                     @param:Provided private val libc: Libc,
+                     @param:Provided private val libxkbcommon: Libxkbcommon,
         //we're not updating the state when updating xkb as that would potentially introduce to much bugs
-                                          var xkb: Xkb) {
+                     var xkb: Xkb) {
 
-    val keySignal = Signal<Key, Slot<Key>>()
-    val keyboardFocusSignal = Signal<KeyboardFocus, Slot<KeyboardFocus>>()
-    private val pressedKeys = HashSet<Int>()
-    private var focusDestroyListener = Optional.empty<DestroyListener>()
+    val keySignal = Signal<Key>()
+    val keyboardFocusSignal = Signal<KeyboardFocus>()
+    val pressedKeys = HashSet<Int>()
+    private var focusDestroyListener = Optional.empty<() -> Unit>()
     var focus = Optional.empty<WlSurfaceResource>()
         private set
 
@@ -213,17 +208,14 @@ class KeyboardDevice internal constructor(@param:Provided private val display: D
 
         oldFocus.ifPresent { oldFocusResource ->
             oldFocusResource.unregister(this.focusDestroyListener.get())
-            this.focusDestroyListener = Optional.empty<DestroyListener>()
+            this.focusDestroyListener = Optional.empty()
 
             val wlSurface = oldFocusResource.implementation as WlSurface
             val surface = wlSurface.surface
 
-            val clientKeyboardResources = filter(wlKeyboardResources,
-                    oldFocusResource.client)
-            surface.keyboardFocuses
-                    .removeAll(clientKeyboardResources)
-            surface.keyboardFocusLostSignal
-                    .emit(KeyboardFocusLost.create(clientKeyboardResources))
+            val clientKeyboardResources = filter(wlKeyboardResources, oldFocusResource.client)
+            surface.keyboardFocuses.minus(clientKeyboardResources)
+            surface.keyboardFocusLostSignal.emit(KeyboardFocusLost.create(clientKeyboardResources))
 
             clientKeyboardResources.forEach { oldFocusKeyboardResource ->
                 oldFocusKeyboardResource.leave(nextKeyboardSerial(),
@@ -232,22 +224,15 @@ class KeyboardDevice internal constructor(@param:Provided private val display: D
         }
 
         newFocus.ifPresent { newFocusResource ->
-            this.focusDestroyListener = Optional.of<DestroyListener>({
-                updateFocus(wlKeyboardResources,
-                        newFocus,
-                        Optional.empty<WlSurfaceResource>())
-            })
+            this.focusDestroyListener = Optional.of { updateFocus(wlKeyboardResources, newFocus, Optional.empty<WlSurfaceResource>()) }
             newFocusResource.register(this.focusDestroyListener.get())
 
             val wlSurface = newFocusResource.implementation as WlSurface
             val surface = wlSurface.surface
 
-            val clientKeyboardResources = filter(wlKeyboardResources,
-                    newFocusResource.client)
-            surface.keyboardFocuses
-                    .addAll(clientKeyboardResources)
-            surface.keyboardFocusGainedSignal
-                    .emit(KeyboardFocusGained.create(clientKeyboardResources))
+            val clientKeyboardResources = filter(wlKeyboardResources, newFocusResource.client)
+            surface.keyboardFocuses.plus(clientKeyboardResources)
+            surface.keyboardFocusGainedSignal.emit(KeyboardFocusGained.create(clientKeyboardResources))
 
             match(wlKeyboardResources,
                     newFocusResource).forEach { newFocusKeyboardResource ->
@@ -261,13 +246,12 @@ class KeyboardDevice internal constructor(@param:Provided private val display: D
         }
     }
 
-
+    /**
+     * filter out keyboard resources that do not belong to the given client.
+     */
     private fun filter(wlKeyboardResources: Set<WlKeyboardResource>,
                        client: Client): Set<WlKeyboardResource> {
-        //filter out keyboard resources that do not belong to the given client.
-        return wlKeyboardResources.stream()
-                .filter { wlKeyboardResource -> wlKeyboardResource.client == client }
-                .collect<Set<WlKeyboardResource>, Any>(Collectors.toSet<WlKeyboardResource>())
+        return wlKeyboardResources.stream().filter { wlKeyboardResource -> wlKeyboardResource.client == client }.collect(Collectors.toSet<WlKeyboardResource>())
     }
 
     fun emitKeymap(wlKeyboardResources: Set<WlKeyboardResource>) {

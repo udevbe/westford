@@ -21,12 +21,7 @@ import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.jaccall.Pointer
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.nativ.glibc.Libc
-import org.westford.nativ.linux.vt_mode
-
-import java.util.logging.Logger
-
 import org.westford.nativ.linux.Kd.KDSETMODE
 import org.westford.nativ.linux.Kd.KDSKBMODE
 import org.westford.nativ.linux.Kd.KD_TEXT
@@ -36,14 +31,16 @@ import org.westford.nativ.linux.Vt.VT_ACTIVATE
 import org.westford.nativ.linux.Vt.VT_AUTO
 import org.westford.nativ.linux.Vt.VT_RELDISP
 import org.westford.nativ.linux.Vt.VT_SETMODE
+import org.westford.nativ.linux.vt_mode
+import java.util.logging.Logger
 
 @AutoFactory(className = "PrivateTtyFactory", allowSubclasses = true)
 class Tty internal constructor(@param:Provided private val libc: Libc,
                                val ttyFd: Int,
                                private val oldKbMode: Int) : AutoCloseable {
 
-    val vtEnterSignal = Signal<VtEnter, Slot<VtEnter>>()
-    val vtLeaveSignal = Signal<VtLeave, Slot<VtLeave>>()
+    val vtEnterSignal = Signal<VtEnter>()
+    val vtLeaveSignal = Signal<VtLeave>()
 
     private var vtActive = true
 

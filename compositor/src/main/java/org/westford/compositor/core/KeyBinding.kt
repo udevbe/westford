@@ -19,44 +19,34 @@ package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
 import org.freedesktop.wayland.shared.WlKeyboardKeyState
-import org.westford.Slot
 import org.westford.compositor.core.events.Key
-import java.util.Optional
+import java.util.*
 
 @AutoFactory(allowSubclasses = true, className = "KeyBindingFactory")
 class KeyBinding internal constructor(private val keyboardDevice: KeyboardDevice,
                                       private val keys: Set<Int>,
                                       private val binding: Runnable) {
     private var triggerKey = Optional.empty<Int>()
-    private val handleKey = Slot<Key> { this.handleKey(it) }
 
     //TODO unit test enable/disable & consummation of key events
 
-    fun enable() {
-        this.keyboardDevice.keySignal
-                .connect(this.handleKey)
-    }
-
-    fun disable() {
-        this.keyboardDevice.keySignal
-                .disconnect(this.handleKey)
-    }
+    fun enable() = this.keyboardDevice.keySignal.connect(this::handleKey)
+    fun disable() = this.keyboardDevice.keySignal.disconnect(this::handleKey)
 
     private fun handleKey(event: Key) {
         val keyState = event.keyState
         if (keyState == WlKeyboardKeyState.RELEASED) {
             //the trigger key is released, the hide it from the client.
-            this.triggerKey.ifPresent { key ->
-                if (key === event.key) {
+            this.triggerKey.ifPresent {
+                if (it == event.key) {
                     this.keyboardDevice.consumeNextKeyEvent()
                     this.triggerKey = Optional.empty<Int>()
                 }
             }
         } else {
             //make sure pressed keys match without any additional keys being pressed.
-            if (this.keyboardDevice.pressedKeys
-                    .size == this.keys.size && this.keyboardDevice.pressedKeys
-                    .containsAll(this.keys)) {
+            if (this.keyboardDevice.pressedKeys.size == this.keys.size &&
+                    this.keyboardDevice.pressedKeys.containsAll(this.keys)) {
                 //Store the latest key that triggered the binding. This is needed because we must suppress the release of this key as well
                 this.triggerKey = Optional.of(event.key)
                 //this will consume the press of the latest key that fulfills the required keys needed for the binding.

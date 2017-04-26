@@ -23,8 +23,7 @@ import org.freedesktop.jaccall.Pointer
 import org.westford.nativ.libpixman1.Libpixman1
 import org.westford.nativ.libpixman1.pixman_box32
 import org.westford.nativ.libpixman1.pixman_region32
-import java.util.ArrayList
-import java.util.Objects
+import java.util.*
 
 @AutoFactory(className = "PrivateFiniteRegionFactory", allowSubclasses = true)
 class FiniteRegion(@param:Provided private val libpixman1: Libpixman1,
@@ -38,7 +37,7 @@ class FiniteRegion(@param:Provided private val libpixman1: Libpixman1,
     override fun asList(): List<Rectangle> {
         //int pointer
         val n_rects = Pointer.nref(0)
-        val pixman_box32_array = Pointer.wrap<pixman_box32>(pixman_box32::class.java!!,
+        val pixman_box32_array = Pointer.wrap<pixman_box32>(pixman_box32::class.java,
                 this.libpixman1.pixman_region32_rectangles(this.pixmanRegion32.address,
                         n_rects.address))
         val size = n_rects.dref()
@@ -160,9 +159,7 @@ class FiniteRegion(@param:Provided private val libpixman1: Libpixman1,
         return this.libpixman1.pixman_region32_not_empty(this.pixmanRegion32.address) == 0
     }
 
-    @Throws(Throwable::class)
-    protected override fun finalize() {
-        super.finalize()
+    fun finalize() {
         this.libpixman1.pixman_region32_fini(this.pixmanRegion32.address)
     }
 

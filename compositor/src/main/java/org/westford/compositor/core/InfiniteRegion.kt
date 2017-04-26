@@ -19,7 +19,6 @@ package org.westford.compositor.core
 
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.util.Collections
 
 /**
  * x: -32768
@@ -39,9 +38,7 @@ internal constructor(private val finiteRegionFactory: FiniteRegionFactory) : Reg
 
     override fun subtract(rectangle: Rectangle) {}
 
-    override fun contains(point: Point): Boolean {
-        return true
-    }
+    override fun contains(point: Point) = true
 
     override fun contains(clipping: Rectangle,
                           point: Point): Boolean {
@@ -50,21 +47,13 @@ internal constructor(private val finiteRegionFactory: FiniteRegionFactory) : Reg
         return finiteRegion.contains(point)
     }
 
-    override fun contains(rectangle: Rectangle): Boolean {
-        return true
-    }
+    override fun contains(rectangle: Rectangle) = true
 
-    override fun intersect(rectangle: Rectangle): Region {
-        return this
-    }
+    override fun intersect(rectangle: Rectangle) = this
 
-    override fun copy(): Region {
-        return this
-    }
+    override fun copy() = this
 
-    override fun isEmpty(): Boolean {
-        return false
-    }
+    override fun isEmpty() = false
 
     companion object {
         private val INFINITE_RECT = listOf<Rectangle>(Rectangle.create(java.lang.Short.MIN_VALUE.toInt(),

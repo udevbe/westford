@@ -36,6 +36,6 @@ interface Region {
 
     fun copy(): Region
 
-    val isEmpty: Boolean
+    fun isEmpty(): Boolean
 }
 

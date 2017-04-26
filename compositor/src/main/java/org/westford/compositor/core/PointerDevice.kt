@@ -19,30 +19,22 @@ package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import org.freedesktop.wayland.server.Client
-import org.freedesktop.wayland.server.DestroyListener
-import org.freedesktop.wayland.server.Display
-import org.freedesktop.wayland.server.WlPointerResource
-import org.freedesktop.wayland.server.WlSurfaceResource
+import org.freedesktop.wayland.server.*
 import org.freedesktop.wayland.shared.WlPointerAxis
 import org.freedesktop.wayland.shared.WlPointerAxisSource
 import org.freedesktop.wayland.shared.WlPointerButtonState
 import org.freedesktop.wayland.util.Fixed
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.calc.Geo
 import org.westford.compositor.core.events.Button
 import org.westford.compositor.core.events.PointerFocus
 import org.westford.compositor.core.events.PointerGrab
 import org.westford.compositor.core.events.PointerMotion
 import org.westford.compositor.protocol.WlSurface
-
+import java.util.*
+import java.util.stream.Collectors
 import javax.annotation.Nonnegative
 import javax.inject.Inject
-import java.util.HashMap
-import java.util.HashSet
-import java.util.Optional
-import java.util.stream.Collectors
 
 @AutoFactory(allowSubclasses = true, className = "PrivatePointerDeviceFactory")
 class PointerDevice @Inject
@@ -496,8 +488,7 @@ internal constructor(@param:Provided private val geo: Geo,
         if (serial != enterSerial) {
             return
         }
-        Optional.ofNullable(this.cursors.remove(wlPointerResource))
-                .ifPresent(Consumer<Cursor> { it.hide() })
+        Optional.ofNullable(this.cursors.remove(wlPointerResource)).ifPresent { it.hide() }
     }
 
     fun setCursor(wlPointerResource: WlPointerResource,
@@ -559,21 +550,19 @@ internal constructor(@param:Provided private val geo: Geo,
         this.activeCursor.ifPresent { clientCursor -> clientCursor.updatePosition(position) }
 
         if (oldCursor != this.activeCursor) {
-            oldCursor.ifPresent(Consumer<Cursor> { it.hide() })
+            oldCursor.ifPresent { it.hide() }
         }
     }
 
     private fun updateCursorSurfaceState(wlSurfaceResource: WlSurfaceResource,
                                          surfaceStateBuilder: SurfaceState.Builder) {
 
-        surfaceStateBuilder.inputRegion(Optional.of<Region>(this.nullRegion))
+        surfaceStateBuilder.inputRegion(Optional.of(this.nullRegion))
         if (this.activeCursor.isPresent &&
-                this.activeCursor.get()
-                        .wlSurfaceResource == wlSurfaceResource &&
-                !this.activeCursor.get()
-                        .isHidden) {
+                this.activeCursor.get().wlSurfaceResource == wlSurfaceResource &&
+                !this.activeCursor.get().isHidden) {
         } else {
-            surfaceStateBuilder.buffer(Optional.empty<WlBufferResource>())
+            surfaceStateBuilder.buffer(Optional.empty())
         }
     }
 
@@ -586,17 +575,14 @@ internal constructor(@param:Provided private val geo: Geo,
     }
 
     override fun afterDestroy(wlSurfaceResource: WlSurfaceResource) {
-        this.cursors.values
-                .removeIf { cursor ->
-                    if (cursor.wlSurfaceResource == wlSurfaceResource) {
-                        cursor.hide()
-                        return @this.cursors.values()
-                                .removeIf true
-                    } else {
-                        return @this.cursors.values()
-                                .removeIf false
-                    }
-                }
+        this.cursors.values.removeIf {
+            if (it.wlSurfaceResource == wlSurfaceResource) {
+                it.hide()
+                return @this.cursors.values.removeIf true
+            } else {
+                return @this.cursors.values.removeIf false
+            }
+        }
     }
 
     //TODO unit test

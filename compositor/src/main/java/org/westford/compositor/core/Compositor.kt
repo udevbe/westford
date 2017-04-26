@@ -19,29 +19,18 @@ package org.westford.compositor.core
 
 
 import org.westford.compositor.protocol.WlOutput
-
+import java.util.concurrent.TimeUnit
 import javax.annotation.Nonnegative
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.util.concurrent.TimeUnit
 
 @Singleton
 class Compositor @Inject
 internal constructor(private val renderPlatform: RenderPlatform) {
 
-    fun requestRender() {
-        //TODO optimize by only requesting a render for specific damaged render outputs
-        this.renderPlatform.wlOutputs
-                .forEach(Consumer<WlOutput> { this.render(it) })
-    }
+    fun requestRender() = this.renderPlatform.wlOutputs.forEach { this.render(it) }
 
-    private fun render(wlOutput: WlOutput) {
-        wlOutput.output
-                .renderOutput
-                .render(wlOutput)
-    }
+    private fun render(wlOutput: WlOutput) = wlOutput.output.renderOutput.render(wlOutput)
 
-    val time: Int
-        @Nonnegative
-        get() = TimeUnit.NANOSECONDS.toMillis(System.nanoTime()).toInt()
+    val time: Int @Nonnegative get() = TimeUnit.NANOSECONDS.toMillis(System.nanoTime()).toInt()
 }

@@ -22,9 +22,7 @@ import com.google.auto.factory.Provided
 import org.freedesktop.wayland.server.WlOutputResource
 import org.freedesktop.wayland.shared.WlOutputTransform
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.calc.Mat4
-import org.westford.compositor.core.calc.Vec4
 import org.westford.compositor.core.events.OutputTransform
 
 import javax.annotation.Nonnegative
@@ -34,8 +32,8 @@ class Output internal constructor(@param:Provided val region: FiniteRegion,
                                   val renderOutput: RenderOutput,
                                   val name: String) {
 
-    val transformSignal = Signal<OutputTransform, Slot<OutputTransform>>()
-    val modeSignal = Signal<OutputMode, Slot<OutputMode>>()
+    val transformSignal = Signal<OutputTransform>()
+    val modeSignal = Signal<OutputMode>()
     @Nonnegative
     @get:Nonnegative
     var scale = 1f
@@ -83,7 +81,7 @@ class Output internal constructor(@param:Provided val region: FiniteRegion,
             updateOutputTransform()
         }
 
-        resources.forEach(Consumer<WlOutputResource> { this.notifyGeometry(it) })
+        resources.forEach { this.notifyGeometry(it) }
     }
 
     private fun updateOutputTransform() {
@@ -147,7 +145,7 @@ class Output internal constructor(@param:Provided val region: FiniteRegion,
             updateRegion()
             this.modeSignal.emit(outputMode)
         }
-        resources.forEach(Consumer<WlOutputResource> { this.notifyMode(it) })
+        resources.forEach { this.notifyMode(it) }
         return this
     }
 
