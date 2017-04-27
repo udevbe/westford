@@ -43,8 +43,7 @@ abstract class SurfaceState {
 
     abstract fun toBuilder(): Builder
 
-    @AutoValue.Builder
-    internal interface Builder {
+    @AutoValue.Builder interface Builder {
         fun opaqueRegion(wlRegionResource: Optional<Region>): Builder
 
         fun inputRegion(wlRegionResource: Region?): Builder

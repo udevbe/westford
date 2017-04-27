@@ -19,50 +19,34 @@ package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import org.freedesktop.wayland.server.DestroyListener
-import org.freedesktop.wayland.server.WlBufferResource
-import org.freedesktop.wayland.server.WlCallbackResource
-import org.freedesktop.wayland.server.WlKeyboardResource
-import org.freedesktop.wayland.server.WlRegionResource
-import org.freedesktop.wayland.server.WlSurfaceResource
+import org.freedesktop.wayland.server.*
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.calc.Mat4
 import org.westford.compositor.core.events.KeyboardFocusGained
 import org.westford.compositor.core.events.KeyboardFocusLost
 import org.westford.compositor.protocol.WlRegion
 import org.westford.compositor.protocol.WlSurface
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.ArrayList
-import java.util.Collections
-import java.util.HashSet
-import java.util.LinkedList
-import java.util.Optional
 
-@AutoFactory(className = "SurfaceFactory", allowSubclasses = true)
-class Surface internal constructor(/*
-     * Business dependencies
-     */
-        @param:Provided private val finiteRegionFactory: FiniteRegionFactory,
-        @param:Provided private val compositor: Compositor,
-        @param:Provided private val renderer: Renderer,
-        @param:Provided private val surfaceViewFactory: SurfaceViewFactory) {
-
+@AutoFactory(className = "SurfaceFactory",
+             allowSubclasses = true) class Surfaceconstructor(@param:Provided private val finiteRegionFactory: FiniteRegionFactory,
+                                                              @param:Provided private val compositor: Compositor,
+                                                              @param:Provided private val renderer: Renderer,
+                                                              @param:Provided private val surfaceViewFactory: SurfaceViewFactory) {
     /*
      * Overall state
      */
     private val surfaceViews = HashSet<SurfaceView>()
-    var role = Optional.empty<Role>()
-        private set
+    var role = Optional.empty<Role>(); private set
 
     /*
      * Signals
      */
-    val keyboardFocusLostSignal = Signal<KeyboardFocusLost, Slot<KeyboardFocusLost>>()
-    val keyboardFocusGainedSignal = Signal<KeyboardFocusGained, Slot<KeyboardFocusGained>>()
-    val applySurfaceStateSignal = Signal<SurfaceState, Slot<SurfaceState>>()
-    val viewCreatedSignal = Signal<SurfaceView, Slot<SurfaceView>>()
+    val keyboardFocusLostSignal = Signal<KeyboardFocusLost>()
+    val keyboardFocusGainedSignal = Signal<KeyboardFocusGained>()
+    val applySurfaceStateSignal = Signal<SurfaceState>()
+    val viewCreatedSignal = Signal<SurfaceView>()
     val frameCallbacks: MutableList<WlCallbackResource> = LinkedList()
     /**
      * The keyboards that will be used to notify the client of any keyboard events on this surface. This collection is
@@ -92,24 +76,19 @@ class Surface internal constructor(/*
      */
     val siblings = LinkedList<Sibling>()
 
-
     /*
      * committed derived states
      */
-    var isDestroyed: Boolean = false
-        private set
+    var isDestroyed: Boolean = false; private set
     /**
      * Surface level transformation. Contains transformations that should be applied on all views of this surface.
      * These are almost always scaling transformations. Positioning and rotation is done in [SurfaceView].
 
      * @return
      */
-    var transform = Transforms.NORMAL
-        private set
-    var inverseTransform = Transforms.NORMAL
-        private set
-    var size = Rectangle.ZERO
-        private set
+    var transform = Transforms.NORMAL; private set
+    var inverseTransform = Transforms.NORMAL; private set
+    var size = Rectangle.ZERO; private set
 
     /*
      * render state
@@ -132,15 +111,12 @@ class Surface internal constructor(/*
     fun attachBuffer(wlBufferResource: WlBufferResource,
                      dx: Int,
                      dy: Int) {
-        pendingState.build()
-                .buffer
-                .ifPresent { previousWlBufferResource -> previousWlBufferResource.unregister(this.pendingBufferDestroyListener.get()) }
+        pendingState.build().buffer.ifPresent { previousWlBufferResource -> previousWlBufferResource.unregister(this.pendingBufferDestroyListener.get()) }
         val detachBuffer = DestroyListener { this.detachBuffer() }
         wlBufferResource.register(detachBuffer)
         this.pendingBufferDestroyListener = Optional.of(detachBuffer)
-        pendingState.buffer(Optional.of(wlBufferResource))
-                .deltaPosition(Point.create(dx,
-                        dy))
+        pendingState.buffer(Optional.of(wlBufferResource)).deltaPosition(Point.create(dx,
+                                                                                      dy))
     }
 
     fun setRole(role: Role) {
@@ -151,7 +127,7 @@ class Surface internal constructor(/*
         val buffer = state.buffer
         //signal client that the previous buffer can be reused as we will now use the
         //newly attached buffer.
-        buffer.ifPresent(Consumer<WlBufferResource> { it.release() })
+        buffer.ifPresent({ it.release() })
 
         //flush states
         apply(this.pendingState.build())
@@ -167,8 +143,7 @@ class Surface internal constructor(/*
 
         //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
         this.pendingSubsurfaces.forEach { subsurface -> this.siblings.remove(subsurface.sibling) }
-        this.pendingSubsurfaces.descendingIterator()
-                .forEachRemaining { subsurface -> this.siblings.addFirst(subsurface.sibling) }
+        this.pendingSubsurfaces.descendingIterator().forEachRemaining { subsurface -> this.siblings.addFirst(subsurface.sibling) }
 
         this.compositor.requestRender()
 
@@ -176,19 +151,15 @@ class Surface internal constructor(/*
     }
 
     fun detachBuffer(): Surface {
-        pendingState.build()
-                .buffer
-                .ifPresent { wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()) }
+        pendingState.build().buffer.ifPresent { wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()) }
         this.pendingBufferDestroyListener = Optional.empty<DestroyListener>()
-        pendingState.buffer(Optional.empty<WlBufferResource>())
-                .damage(Optional.empty<Region>())
+        pendingState.buffer(Optional.empty<WlBufferResource>()).damage(Optional.empty<Region>())
         return this
     }
 
     fun updateTransform() {
         val state = state
-        this.transform = Transforms.SCALE(state.scale.toFloat())
-                .multiply(state.bufferTransform)
+        this.transform = Transforms.SCALE(state.scale.toFloat()).multiply(state.bufferTransform)
         this.inverseTransform = transform.invert()
     }
 
@@ -204,10 +175,7 @@ class Surface internal constructor(/*
             val width = buffer.width / scale
             val height = buffer.height / scale
 
-            this.size = Rectangle.builder()
-                    .width(width)
-                    .height(height)
-                    .build()
+            this.size = Rectangle.builder().width(width).height(height).build()
         }
     }
 
@@ -226,21 +194,21 @@ class Surface internal constructor(/*
     }
 
     fun removeInputRegion() {
-        this.pendingState.inputRegion(Optional.empty<Region>())
+        this.pendingState.inputRegion(null)
     }
 
     fun setInputRegion(wlRegionResource: WlRegionResource) {
         val wlRegion = wlRegionResource.implementation as WlRegion
         val region = wlRegion.region
-        pendingState.inputRegion(Optional.of(region))
+        pendingState.inputRegion(region)
     }
 
     fun firePaintCallbacks(serial: Int) {
         val callbacks = ArrayList(frameCallbacks)
         frameCallbacks.clear()
-        callbacks.forEach { frameCallback ->
-            frameCallback.done(serial)
-            frameCallback.destroy()
+        callbacks.forEach {
+            it.done(serial)
+            it.destroy()
         }
     }
 
@@ -263,15 +231,15 @@ class Surface internal constructor(/*
                    position: Point): SurfaceView {
 
         val surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
-                position)
+                                                         position)
         if (this.surfaceViews.add(surfaceView)) {
             siblings.forEach { sibling ->
                 ensureSiblingView(sibling,
-                        surfaceView)
+                                  surfaceView)
             }
             pendingSubsurfaces.forEach { subsurface ->
                 ensureSiblingView(subsurface.sibling,
-                        surfaceView)
+                                  surfaceView)
             }
             this.viewCreatedSignal.emit(surfaceView)
         }
@@ -292,7 +260,7 @@ class Surface internal constructor(/*
 
         for (siblingSurfaceView in siblingSurface.views) {
             val siblingSurfaceViewParent = siblingSurfaceView.parent
-            if (siblingSurfaceViewParent.isPresent && siblingSurfaceViewParent.get() == surfaceView) {
+            if (siblingSurfaceViewParent != null && siblingSurfaceViewParent.get() == surfaceView) {
                 //sibling already has a view with this surface as it's parent view. Do nothing.
                 //TODO Perhaps we should we allow this?
                 return
@@ -300,20 +268,18 @@ class Surface internal constructor(/*
         }
 
         val siblingSurfaceView = siblingSurface.createView(siblingWlSurfaceResource,
-                surfaceView.global(siblingPosition))
+                                                           surfaceView.global(siblingPosition))
         siblingSurfaceView.setParent(surfaceView)
-        surfaceView.positionSignal
-                .connect({ event -> siblingSurfaceView.setPosition(surfaceView.global(sibling.position)) })
+        surfaceView.positionSignal.connect({ event -> siblingSurfaceView.setPosition(surfaceView.global(sibling.position)) })
     }
 
     fun addSibling(sibling: Sibling) {
         views.forEach { surfaceView ->
             ensureSiblingView(sibling,
-                    surfaceView)
+                              surfaceView)
         }
         this.siblings.add(sibling)
-        sibling.wlSurfaceResource
-                .register { removeSibling(sibling) }
+        sibling.wlSurfaceResource.register { removeSibling(sibling) }
     }
 
     fun removeSibling(sibling: Sibling) {
@@ -322,9 +288,7 @@ class Surface internal constructor(/*
             val siblingWlSurfaceResource = sibling.wlSurfaceResource
             val siblingWlSurface = siblingWlSurfaceResource.implementation as WlSurface
 
-            siblingWlSurface.surface
-                    .views
-                    .forEach(Consumer<SurfaceView> { it.removeParent() })
+            siblingWlSurface.surface.views.forEach { it.removeParent() }
         }
     }
 
@@ -332,10 +296,9 @@ class Surface internal constructor(/*
         val subsurfaceSibling = subsurface.sibling
         views.forEach { surfaceView ->
             ensureSiblingView(subsurfaceSibling,
-                    surfaceView)
+                              surfaceView)
         }
-        subsurfaceSibling.wlSurfaceResource
-                .register { removeSubsurface(subsurface) }
+        subsurfaceSibling.wlSurfaceResource.register { removeSubsurface(subsurface) }
 
         this.pendingSubsurfaces.add(subsurface)
     }
