@@ -19,8 +19,7 @@ package org.westford.compositor.core.events
 
 import com.google.auto.value.AutoValue
 import org.westford.compositor.core.SurfaceView
-
-import java.util.Optional
+import java.util.*
 
 @AutoValue
 abstract class PointerGrab {
@@ -28,7 +27,7 @@ abstract class PointerGrab {
     abstract val wlSurfaceResource: Optional<SurfaceView>
 
     companion object {
-        fun create(surfaceView: Optional<SurfaceView>): PointerGrab {
+        fun create(surfaceView: SurfaceView?): PointerGrab {
             return AutoValue_PointerGrab(surfaceView)
         }
     }

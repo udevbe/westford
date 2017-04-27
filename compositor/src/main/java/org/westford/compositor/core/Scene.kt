@@ -17,27 +17,19 @@
  */
 package org.westford.compositor.core
 
-import org.freedesktop.wayland.server.WlSurfaceRequests
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.compositor.protocol.WlSurface
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.util.Collections
-import java.util.LinkedList
-import java.util.Optional
 
-@Singleton
-class Scene @Inject
-internal constructor(val backgroundLayer: SceneLayer,
-                     val underLayer: SceneLayer,
-                     val applicationLayer: SceneLayer,
-                     val overLayer: SceneLayer,
-                     val fullscreenLayer: SceneLayer,
-                     val lockLayer: SceneLayer,
-                     val cursorLayer: SceneLayer,
-                     private val infiniteRegion: InfiniteRegion) {
+@Singleton class Scene @Inject internal constructor(val backgroundLayer: SceneLayer, val underLayer: SceneLayer,
+                                                    val applicationLayer: SceneLayer, val overLayer: SceneLayer,
+                                                    val fullscreenLayer: SceneLayer, val lockLayer: SceneLayer,
+                                                    val cursorLayer: SceneLayer,
+                                                    private val infiniteRegion: InfiniteRegion) {
 
-    fun pickSurfaceView(global: Point): Optional<SurfaceView> {
+    fun pickSurfaceView(global: Point): SurfaceView? {
 
         val surfaceViewIterator = pickableSurfaces().descendingIterator()
         var pointerOver = Optional.empty<SurfaceView>()
@@ -53,15 +45,13 @@ internal constructor(val backgroundLayer: SceneLayer,
             val implementation = surfaceResource.implementation
             val surface = (implementation as WlSurface).surface
 
-            val inputRegion = surface.state
-                    .inputRegion
+            val inputRegion = surface.state.inputRegion
             val region = inputRegion.orElse(this.infiniteRegion)
 
             val size = surface.size
 
             val local = surfaceView.local(global)
-            if (region.contains(size,
-                    local)) {
+            if (region.contains(size, local)) {
                 pointerOver = Optional.of(surfaceView)
                 break
             }
@@ -74,11 +64,11 @@ internal constructor(val backgroundLayer: SceneLayer,
 
         val views = LinkedList<SurfaceView>()
 
-        if (!this.lockLayer.surfaceViews
-                .isEmpty()) {
+        if (!this.lockLayer.surfaceViews.isEmpty()) {
             //lockLayer screen
             views.addAll(this.lockLayer.surfaceViews)
-        } else {
+        }
+        else {
             views.addAll(this.backgroundLayer.surfaceViews)
             views.addAll(this.underLayer.surfaceViews)
             views.addAll(this.applicationLayer.surfaceViews)
@@ -106,8 +96,7 @@ internal constructor(val backgroundLayer: SceneLayer,
      * *
      * @return
      */
-    fun subsection(views: LinkedList<SurfaceView>,
-                   region: Region): LinkedList<SurfaceView> {
+    fun subsection(views: LinkedList<SurfaceView>, region: Region): LinkedList<SurfaceView> {
 
         val intersectingViews = LinkedList<SurfaceView>()
 
@@ -117,9 +106,7 @@ internal constructor(val backgroundLayer: SceneLayer,
             val surface = wlSurface.surface
             val size = surface.size
 
-            val viewBox = Rectangle.create(surfaceView.global(Point.ZERO),
-                    size.width,
-                    size.height)
+            val viewBox = Rectangle.create(surfaceView.global(Point.ZERO), size.width, size.height)
 
             if (region.contains(viewBox)) {
                 intersectingViews.add(surfaceView)
@@ -142,13 +129,10 @@ internal constructor(val backgroundLayer: SceneLayer,
      * *
      * @return
      */
-    fun subsection(sceneLayer: SceneLayer,
-                   region: Region): LinkedList<SurfaceView> {
+    fun subsection(sceneLayer: SceneLayer, region: Region): LinkedList<SurfaceView> {
         val views = LinkedList<SurfaceView>()
-        sceneLayer.surfaceViews
-                .forEach { surfaceView -> views.addAll(withSiblingViews(surfaceView)) }
-        return subsection(views,
-                region)
+        sceneLayer.surfaceViews.forEach { surfaceView -> views.addAll(withSiblingViews(surfaceView)) }
+        return subsection(views, region)
     }
 
     /**
@@ -163,20 +147,14 @@ internal constructor(val backgroundLayer: SceneLayer,
 
         val outputScene: Subscene
 
-        if (!this.lockLayer.surfaceViews
-                .isEmpty()) {
-            val outputLockViews = subsection(this.lockLayer,
-                    region)
-            val cursorViews = subsection(this.cursorLayer,
-                    region)
-            outputScene = Subscene.create(Optional.empty<SurfaceView>(),
-                    emptyList<SurfaceView>(),
-                    emptyList<SurfaceView>(),
-                    emptyList<SurfaceView>(),
-                    Optional.empty<SurfaceView>(),
-                    outputLockViews,
-                    cursorViews)
-        } else {
+        if (!this.lockLayer.surfaceViews.isEmpty()) {
+            val outputLockViews = subsection(this.lockLayer, region)
+            val cursorViews = subsection(this.cursorLayer, region)
+            outputScene = Subscene.create(Optional.empty<SurfaceView>(), emptyList<SurfaceView>(),
+                                          emptyList<SurfaceView>(), emptyList<SurfaceView>(),
+                                          Optional.empty<SurfaceView>(), outputLockViews, cursorViews)
+        }
+        else {
 
             val backgroundView: Optional<SurfaceView>
             val underViews: List<SurfaceView>
@@ -184,26 +162,21 @@ internal constructor(val backgroundLayer: SceneLayer,
             val overViews: List<SurfaceView>
             val fullscreenView: Optional<SurfaceView>
 
-            val outputFullscreenViews = subsection(this.fullscreenLayer,
-                    region)
-            val cursorViews = subsection(this.cursorLayer,
-                    region)
+            val outputFullscreenViews = subsection(this.fullscreenLayer, region)
+            val cursorViews = subsection(this.cursorLayer, region)
             if (outputFullscreenViews.isEmpty()) {
-                val outputBackgroundViews = subsection(this.backgroundLayer,
-                        region)
-                val outputUnderViews = subsection(this.underLayer,
-                        region)
-                val outputApplicationViews = subsection(this.applicationLayer,
-                        region)
-                val outputOverViews = subsection(this.overLayer,
-                        region)
+                val outputBackgroundViews = subsection(this.backgroundLayer, region)
+                val outputUnderViews = subsection(this.underLayer, region)
+                val outputApplicationViews = subsection(this.applicationLayer, region)
+                val outputOverViews = subsection(this.overLayer, region)
 
                 backgroundView = Optional.ofNullable(outputBackgroundViews.peekFirst())
                 underViews = outputUnderViews
                 applicationViews = outputApplicationViews
                 overViews = outputOverViews
                 fullscreenView = Optional.empty<SurfaceView>()
-            } else {
+            }
+            else {
                 //there is a fullscreen view, don't bother return the underlying views
                 backgroundView = Optional.empty<SurfaceView>()
                 underViews = emptyList<SurfaceView>()
@@ -212,13 +185,8 @@ internal constructor(val backgroundLayer: SceneLayer,
                 fullscreenView = Optional.ofNullable(outputFullscreenViews.first)
             }
 
-            outputScene = Subscene.create(backgroundView,
-                    underViews,
-                    applicationViews,
-                    overViews,
-                    fullscreenView,
-                    emptyList<SurfaceView>(),
-                    cursorViews)
+            outputScene = Subscene.create(backgroundView, underViews, applicationViews, overViews, fullscreenView,
+                                          emptyList<SurfaceView>(), cursorViews)
         }
 
         return outputScene
@@ -233,8 +201,9 @@ internal constructor(val backgroundLayer: SceneLayer,
 
         val drawableSurfaceViewStack = pickableSurfaces()
         //add cursor surfaces
-        this.cursorLayer.surfaceViews
-                .forEach { cursorSurfaceView -> drawableSurfaceViewStack.addAll(withSiblingViews(cursorSurfaceView)) }
+        this.cursorLayer.surfaceViews.forEach { cursorSurfaceView ->
+            drawableSurfaceViewStack.addAll(withSiblingViews(cursorSurfaceView))
+        }
 
         return drawableSurfaceViewStack
     }
@@ -249,8 +218,7 @@ internal constructor(val backgroundLayer: SceneLayer,
      */
     fun withSiblingViews(surfaceView: SurfaceView): LinkedList<SurfaceView> {
         val surfaceViews = LinkedList<SurfaceView>()
-        addSiblingViews(surfaceView,
-                surfaceViews)
+        addSiblingViews(surfaceView, surfaceViews)
         return surfaceViews
     }
 
@@ -261,54 +229,41 @@ internal constructor(val backgroundLayer: SceneLayer,
      * *
      * @param surfaceViews
      */
-    private fun addSiblingViews(parentSurfaceView: SurfaceView,
-                                surfaceViews: LinkedList<SurfaceView>) {
+    private fun addSiblingViews(parentSurfaceView: SurfaceView, surfaceViews: LinkedList<SurfaceView>) {
 
         val parentWlSurfaceResource = parentSurfaceView.wlSurfaceResource
         val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
         val parentSurface = parentWlSurface.surface
 
-        parentSurface.siblings
-                .forEach { sibling ->
+        parentSurface.siblings.forEach { sibling ->
 
-                    val siblingWlSurface = sibling.wlSurfaceResource
-                            .implementation as WlSurface
-                    val siblingSurface = siblingWlSurface.surface
+            val siblingWlSurface = sibling.wlSurfaceResource.implementation as WlSurface
+            val siblingSurface = siblingWlSurface.surface
 
-                    //only consider surface if it has a role.
-                    //TODO we could move the views to the generic role itf.
-                    if (siblingSurface.role
-                            .isPresent) {
+            //only consider surface if it has a role.
+            //TODO we could move the views to the generic role itf.
+            if (siblingSurface.role.isPresent) {
 
-                        siblingSurface.views
-                                .forEach { siblingSurfaceView ->
+                siblingSurface.views.forEach { siblingSurfaceView ->
 
-                                    if (siblingSurfaceView.parent
-                                            .filter { siblingParentSurfaceView -> siblingParentSurfaceView == parentSurfaceView }
-                                            .isPresent) {
-                                        addSiblingViews(siblingSurfaceView,
-                                                surfaceViews)
-                                    } else if (siblingSurfaceView == parentSurfaceView) {
-                                        surfaceViews.addFirst(siblingSurfaceView)
-                                    }
-                                }
+                    if (siblingSurfaceView.parent.filter { siblingParentSurfaceView -> siblingParentSurfaceView == parentSurfaceView }.isPresent) {
+                        addSiblingViews(siblingSurfaceView, surfaceViews)
+                    }
+                    else if (siblingSurfaceView == parentSurfaceView) {
+                        surfaceViews.addFirst(siblingSurfaceView)
                     }
                 }
+            }
+        }
     }
 
     fun removeView(surfaceView: SurfaceView) {
-        this.backgroundLayer.surfaceViews
-                .remove(surfaceView)
-        this.underLayer.surfaceViews
-                .remove(surfaceView)
-        this.applicationLayer.surfaceViews
-                .remove(surfaceView)
-        this.overLayer.surfaceViews
-                .remove(surfaceView)
-        this.fullscreenLayer.surfaceViews
-                .remove(surfaceView)
-        this.lockLayer.surfaceViews
-                .remove(surfaceView)
+        this.backgroundLayer.surfaceViews.remove(surfaceView)
+        this.underLayer.surfaceViews.remove(surfaceView)
+        this.applicationLayer.surfaceViews.remove(surfaceView)
+        this.overLayer.surfaceViews.remove(surfaceView)
+        this.fullscreenLayer.surfaceViews.remove(surfaceView)
+        this.lockLayer.surfaceViews.remove(surfaceView)
     }
 
     fun removeAllViews(wlSurfaceResource: WlSurfaceResource) {

@@ -20,9 +20,8 @@ package org.westford.compositor.core
 import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.WlBufferResource
 import org.westford.compositor.core.calc.Mat4
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Optional
 
 @AutoValue
 abstract class SurfaceState {
@@ -48,7 +47,7 @@ abstract class SurfaceState {
     internal interface Builder {
         fun opaqueRegion(wlRegionResource: Optional<Region>): Builder
 
-        fun inputRegion(wlRegionResource: Optional<Region>): Builder
+        fun inputRegion(wlRegionResource: Region?): Builder
 
         fun damage(damage: Optional<Region>): Builder
 

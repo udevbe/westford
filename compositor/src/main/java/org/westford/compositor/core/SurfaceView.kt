@@ -4,21 +4,19 @@ import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.calc.Mat4
-import org.westford.compositor.core.calc.Vec4
 import org.westford.compositor.protocol.WlSurface
-import java.util.Optional
+import java.util.*
 
-@AutoFactory(allowSubclasses = true, className = "PrivateSurfaceViewFactory")
-class SurfaceView internal constructor(@param:Provided private val compositor: Compositor,
-                                       val wlSurfaceResource: WlSurfaceResource,
-                                       positionTransform: Mat4,
-                                       transform: Mat4,
-                                       inverseTransform: Mat4) {
+@AutoFactory(allowSubclasses = true,
+             className = "PrivateSurfaceViewFactory") class SurfaceView(@param:Provided private val compositor: Compositor,
+                                                                        val wlSurfaceResource: WlSurfaceResource,
+                                                                        positionTransform: Mat4,
+                                                                        transform: Mat4,
+                                                                        inverseTransform: Mat4) {
 
-    val destroyedSignal = Signal<SurfaceView, Slot<SurfaceView>>()
-    val positionSignal = Signal<Point, Slot<Point>>()
+    val destroyedSignal = Signal<SurfaceView>()
+    val positionSignal = Signal<Point>()
 
     var parent = Optional.empty<SurfaceView>()
         private set
@@ -75,8 +73,7 @@ class SurfaceView internal constructor(@param:Provided private val compositor: C
     }
 
     fun setPosition(global: Point) {
-        setPosition(Transforms.TRANSLATE(global.x,
-                global.y))
+        setPosition(Transforms.TRANSLATE(global.x, global.y))
         positionSignal.emit(global)
 
         this.compositor.requestRender()
@@ -84,22 +81,19 @@ class SurfaceView internal constructor(@param:Provided private val compositor: C
 
     fun onApply(surfaceState: SurfaceState) {
 
-        this.isDrawable = surfaceState.buffer
-                .isPresent
+        this.isDrawable = surfaceState.buffer.isPresent
 
         val deltaPosition = surfaceState.deltaPosition
         val dx = deltaPosition.x
         val dy = deltaPosition.y
 
-        setPosition(this.positionTransform.multiply(Transforms.TRANSLATE(dx,
-                dy)))
+        setPosition(this.positionTransform.multiply(Transforms.TRANSLATE(dx, dy)))
     }
 
     fun destroy() {
         val wlSurface = this.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
-        surface.views
-                .remove(this)
+        surface.views.remove(this)
 
         this.destroyedSignal.emit(this)
         removeParent()
@@ -107,8 +101,7 @@ class SurfaceView internal constructor(@param:Provided private val compositor: C
 
     fun setParent(parent: SurfaceView) {
         removeParent()
-        parent.destroyedSignal
-                .connect({ event -> destroy() })
+        parent.destroyedSignal.connect({ event -> destroy() })
         this.parent = Optional.of(parent)
     }
 
@@ -126,8 +119,7 @@ class SurfaceView internal constructor(@param:Provided private val compositor: C
      */
     fun local(global: Point): Point {
         val localPoint = this.inverseTransform.multiply(global.toVec4())
-        return Point.create(localPoint.x.toInt(),
-                localPoint.y.toInt())
+        return Point.create(localPoint.x.toInt(), localPoint.y.toInt())
     }
 
     /**
@@ -140,7 +132,6 @@ class SurfaceView internal constructor(@param:Provided private val compositor: C
      */
     fun global(surfaceLocal: Point): Point {
         val globalPoint = this.transform.multiply(surfaceLocal.toVec4())
-        return Point.create(globalPoint.x.toInt(),
-                globalPoint.y.toInt())
+        return Point.create(globalPoint.x.toInt(), globalPoint.y.toInt())
     }
 }

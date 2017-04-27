@@ -23,18 +23,14 @@ import org.freedesktop.wayland.server.EventLoop
 import org.freedesktop.wayland.server.EventSource
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore
 import org.westford.nativ.glibc.Libc
+import java.util.*
+import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.util.LinkedList
-import java.util.Optional
-import java.util.concurrent.locks.ReentrantLock
 
-@Singleton
-class JobExecutor @Inject
-internal constructor(private val display: Display,
-                     private val pipeR: Int,
-                     private val pipeWR: Int,
-                     private val libc: Libc) : EventLoop.FileDescriptorEventHandler {
+@Singleton class JobExecutor @Inject internal constructor(private val display: Display, private val pipeR: Int,
+                                                          private val pipeWR: Int,
+                                                          private val libc: Libc) : EventLoop.FileDescriptorEventHandler {
 
     private val eventNewJobBuffer = Pointer.nref(EVENT_NEW_JOB)
     private val eventFinishedBuffer = Pointer.nref(EVENT_FINISHED)
@@ -46,40 +42,35 @@ internal constructor(private val display: Display,
 
     fun start() {
         if (!this.eventSource.isPresent) {
-            this.eventSource = Optional.of(this.display.eventLoop
-                    .addFileDescriptor(this.pipeR,
-                            WaylandServerCore.WL_EVENT_READABLE,
-                            this))
-        } else {
+            this.eventSource = Optional.of(
+                    this.display.eventLoop.addFileDescriptor(this.pipeR, WaylandServerCore.WL_EVENT_READABLE, this))
+        }
+        else {
             throw IllegalStateException("Job executor already started.")
         }
     }
 
     fun fireFinishedEvent() {
-        this.libc.write(this.pipeWR,
-                this.eventFinishedBuffer.address,
-                1)
+        this.libc.write(this.pipeWR, this.eventFinishedBuffer.address, 1)
     }
 
-    fun submit(job: Runnable) {
+    fun submit(job: () -> Unit) {
         try {
             this.jobsLock.lock()
             this.pendingJobs.add(job)
             //wake up event thread
             fireNewJobEvent()
-        } finally {
+        }
+        finally {
             this.jobsLock.unlock()
         }
     }
 
     private fun fireNewJobEvent() {
-        this.libc.write(this.pipeWR,
-                this.eventNewJobBuffer.address,
-                1)
+        this.libc.write(this.pipeWR, this.eventNewJobBuffer.address, 1)
     }
 
-    override fun handle(fd: Int,
-                        mask: Int): Int {
+    override fun handle(fd: Int, mask: Int): Int {
         val jobs = commit()
         while (this.eventSource.isPresent) {
             if (!handleNextEvent(jobs)) {
@@ -98,7 +89,8 @@ internal constructor(private val display: Display,
                 jobs = LinkedList(this.pendingJobs)
                 this.pendingJobs.clear()
             }
-        } finally {
+        }
+        finally {
             this.jobsLock.unlock()
         }
         return jobs
@@ -109,27 +101,25 @@ internal constructor(private val display: Display,
         if (event == EVENT_FINISHED) {
             clean()
             return false
-        } else if (event == EVENT_NEW_JOB) {
-            jobs.pop()
-                    .run()
+        }
+        else if (event == EVENT_NEW_JOB) {
+            jobs.pop().run()
             return !jobs.isEmpty()
-        } else {
+        }
+        else {
             throw IllegalStateException("Got illegal event code " + event)
         }
     }
 
     private fun read(): Byte {
-        this.libc.read(this.pipeR,
-                this.eventReadBuffer.address,
-                1)
+        this.libc.read(this.pipeR, this.eventReadBuffer.address, 1)
         return this.eventReadBuffer.dref()
     }
 
     private fun clean() {
         this.libc.close(this.pipeR)
         this.libc.close(this.pipeWR)
-        this.eventSource.get()
-                .remove()
+        this.eventSource.get().remove()
         this.eventSource = Optional.empty<EventSource>()
     }
 

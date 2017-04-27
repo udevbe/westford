@@ -19,7 +19,10 @@ package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import org.freedesktop.wayland.server.*
+import org.freedesktop.wayland.server.Client
+import org.freedesktop.wayland.server.Display
+import org.freedesktop.wayland.server.WlPointerResource
+import org.freedesktop.wayland.server.WlSurfaceResource
 import org.freedesktop.wayland.shared.WlPointerAxis
 import org.freedesktop.wayland.shared.WlPointerAxisSource
 import org.freedesktop.wayland.shared.WlPointerButtonState
@@ -32,57 +35,46 @@ import org.westford.compositor.core.events.PointerGrab
 import org.westford.compositor.core.events.PointerMotion
 import org.westford.compositor.protocol.WlSurface
 import java.util.*
-import java.util.stream.Collectors
 import javax.annotation.Nonnegative
-import javax.inject.Inject
 
-@AutoFactory(allowSubclasses = true, className = "PrivatePointerDeviceFactory")
-class PointerDevice @Inject
-internal constructor(@param:Provided private val geo: Geo,
-                     @param:Provided private val display: Display,
-                     @param:Provided private val nullRegion: NullRegion,
-                     @param:Provided private val cursorFactory: CursorFactory,
-                     @param:Provided private val jobExecutor: JobExecutor,
-                     @param:Provided private val scene: Scene,
-                     val clampRegion: FiniteRegion) : Role {
+@AutoFactory(allowSubclasses = true,
+             className = "PrivatePointerDeviceFactory") class PointerDevice(@param:Provided private val geo: Geo,
+                                                                            @param:Provided private val display: Display,
+                                                                            @param:Provided private val nullRegion: NullRegion,
+                                                                            @param:Provided private val cursorFactory: CursorFactory,
+                                                                            @param:Provided private val jobExecutor: JobExecutor,
+                                                                            @param:Provided private val scene: Scene,
+                                                                            val clampRegion: FiniteRegion) : Role {
 
-    val motionSignal = Signal<PointerMotion, Slot<PointerMotion>>()
-    val buttonSignal = Signal<Button, Slot<Button>>()
-    val pointerGrabSignal = Signal<PointerGrab, Slot<PointerGrab>>()
-    val pointerFocusSignal = Signal<PointerFocus, Slot<PointerFocus>>()
+    val motionSignal = Signal<PointerMotion>()
+    val buttonSignal = Signal<Button>()
+    val pointerGrabSignal = Signal<PointerGrab>()
+    val pointerFocusSignal = Signal<PointerFocus>()
+
+    var position = Point.ZERO; private set
+    var buttonPressSerial: Int = 0; private set
+    var buttonReleaseSerial: Int = 0; private set
+    var enterSerial: Int = 0; private set
+    var leaveSerial: Int = 0; private set
+    var grab: SurfaceView? = null; private set
+    var focus: SurfaceView? = null; private set
 
     private val pressedButtons = HashSet<Int>()
     private val cursors = HashMap<WlPointerResource, Cursor>()
-    var position = Point.ZERO
-        private set
-    private var activeCursor = Optional.empty<Cursor>()
-    private var grabDestroyListener = Optional.empty<DestroyListener>()
-    var grab = Optional.empty<SurfaceView>()
-        private set
-    var focus = Optional.empty<SurfaceView>()
-        private set
-    private var focusDestroyListener = Optional.empty<DestroyListener>()
-    var buttonPressSerial: Int = 0
-        private set
-    var buttonReleaseSerial: Int = 0
-        private set
-    var enterSerial: Int = 0
-        private set
-    var leaveSerial: Int = 0
-        private set
+    private var activeCursor: Cursor? = null
+    private var grabDestroyListener: (() -> Unit)? = null
+    private var focusDestroyListener: (() -> Unit)? = null
 
-    @Nonnegative
-    private var buttonsPressed: Int = 0
+    @Nonnegative private var buttonsPressed: Int = 0
 
     //TODO unit test
     fun axisSource(wlPointerResources: Set<WlPointerResource>,
                    wlPointerAxisSource: WlPointerAxisSource) {
-        focus.ifPresent { surfaceView ->
+        focus?.let {
             filter(wlPointerResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlPointerResource ->
-                if (wlPointerResource.version > 4) {
-                    wlPointerResource.axisSource(wlPointerAxisSource.value)
+                   it.wlSurfaceResource.client).forEach {
+                if (it.version > 4) {
+                    it.axisSource(wlPointerAxisSource.value)
                 }
             }
         }
@@ -92,19 +84,16 @@ internal constructor(@param:Provided private val geo: Geo,
     private fun filter(wlPointerResources: Set<WlPointerResource>,
                        client: Client): Set<WlPointerResource> {
         //filter out pointer resources that do not belong to the given client.
-        return wlPointerResources.stream()
-                .filter { wlPointerResource -> wlPointerResource.client == client }
-                .collect<Set<WlPointerResource>, Any>(Collectors.toSet<WlPointerResource>())
+        return wlPointerResources.filter { it.client == client }.toSet()
     }
 
     //TODO unit test
     fun frame(wlPointerResources: Set<WlPointerResource>) {
-        focus.ifPresent { surfaceView ->
+        focus?.let {
             filter(wlPointerResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlPointerResource ->
-                if (wlPointerResource.version > 4) {
-                    wlPointerResource.frame()
+                   it.wlSurfaceResource.client).forEach {
+                if (it.version > 4) {
+                    it.frame()
                 }
             }
         }
@@ -115,11 +104,11 @@ internal constructor(@param:Provided private val geo: Geo,
     fun axisStop(wlPointerResources: Set<WlPointerResource>,
                  wlPointerAxis: WlPointerAxis,
                  time: Int) {
-        focus.ifPresent { surfaceView ->
+        focus?.let {
             reportAxisStop(wlPointerResources,
-                    surfaceView,
-                    wlPointerAxis,
-                    time)
+                           it,
+                           wlPointerAxis,
+                           time)
         }
         //TODO emit event?
     }
@@ -129,11 +118,10 @@ internal constructor(@param:Provided private val geo: Geo,
                                wlPointerAxis: WlPointerAxis,
                                time: Int) {
         filter(surfaceResource,
-                surfaceView.wlSurfaceResource
-                        .client).forEach { wlPointerResource ->
-            if (wlPointerResource.version > 4) {
-                wlPointerResource.axisStop(time,
-                        wlPointerAxis.value)
+               surfaceView.wlSurfaceResource.client).forEach {
+            if (it.version > 4) {
+                it.axisStop(time,
+                            wlPointerAxis.value)
             }
         }
     }
@@ -144,20 +132,17 @@ internal constructor(@param:Provided private val geo: Geo,
                      time: Int,
                      discrete: Int,
                      value: Float) {
-        focus.ifPresent { surfaceView ->
+        focus?.let {
             filter(wlPointerResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlPointerResource ->
-
-                if (wlPointerResource.version > 4) {
-                    wlPointerResource.axisDiscrete(wlPointerAxis.value,
-                            discrete)
+                   it.wlSurfaceResource.client).forEach {
+                if (it.version > 4) {
+                    it.axisDiscrete(wlPointerAxis.value,
+                                    discrete)
                 }
-
-                axisOrStop(wlPointerResource,
-                        time,
-                        wlPointerAxis,
-                        value)
+                axisOrStop(it,
+                           time,
+                           wlPointerAxis,
+                           value)
             }
         }
         //TODO emit event?
@@ -169,11 +154,12 @@ internal constructor(@param:Provided private val geo: Geo,
                            value: Float) {
         if (value != 0f) {
             wlPointerResource.axis(time,
-                    wlPointerAxis.value,
-                    Fixed.create(value))
-        } else if (wlPointerResource.version > 4) {
+                                   wlPointerAxis.value,
+                                   Fixed.create(value))
+        }
+        else if (wlPointerResource.version > 4) {
             wlPointerResource.axisStop(time,
-                    wlPointerAxis.value)
+                                       wlPointerAxis.value)
         }
     }
 
@@ -182,14 +168,13 @@ internal constructor(@param:Provided private val geo: Geo,
                        time: Int,
                        wlPointerAxis: WlPointerAxis,
                        value: Float) {
-        focus.ifPresent { surfaceView ->
+        focus?.let {
             filter(wlPointerResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlPointerResource ->
-                axisOrStop(wlPointerResource,
-                        time,
-                        wlPointerAxis,
-                        value)
+                   it.wlSurfaceResource.client).forEach {
+                axisOrStop(it,
+                           time,
+                           wlPointerAxis,
+                           value)
             }
         }
         //TODO emit event?
@@ -210,17 +195,17 @@ internal constructor(@param:Provided private val geo: Geo,
                y: Int) {
 
         clamp(wlPointerResources,
-                Point.create(x,
-                        y))
+              Point.create(x,
+                           y))
 
-        focus.ifPresent { surfaceView ->
+        focus?.let {
             reportMotion(wlPointerResources,
-                    time,
-                    surfaceView)
+                         time,
+                         it)
         }
 
         this.motionSignal.emit(PointerMotion.create(time,
-                position))
+                                                    position))
     }
 
     fun calculateFocus(wlPointerResources: Set<WlPointerResource>) {
@@ -229,8 +214,8 @@ internal constructor(@param:Provided private val geo: Geo,
 
         if (oldFocus != newFocus) {
             updateFocus(wlPointerResources,
-                    oldFocus,
-                    newFocus)
+                        oldFocus,
+                        newFocus)
         }
     }
 
@@ -241,22 +226,21 @@ internal constructor(@param:Provided private val geo: Geo,
         val pointerPosition = position
 
         filter(wlPointerResources,
-                surfaceView.wlSurfaceResource
-                        .client).forEach { wlPointerResource ->
+               surfaceView.wlSurfaceResource.client).forEach {
             val relativePoint = surfaceView.local(pointerPosition)
-            wlPointerResource.motion(time,
-                    Fixed.create(relativePoint.x),
-                    Fixed.create(relativePoint.y))
+            it.motion(time,
+                      Fixed.create(relativePoint.x),
+                      Fixed.create(relativePoint.y))
         }
 
-        this.activeCursor.ifPresent { cursor -> cursor.updatePosition(pointerPosition) }
+        this.activeCursor?.updatePosition(pointerPosition)
     }
 
     private fun reportLeave(wlPointerResources: Set<WlPointerResource>,
                             surfaceView: SurfaceView) {
         wlPointerResources.forEach { wlPointerResource ->
             wlPointerResource.leave(nextLeaveSerial(),
-                    surfaceView.wlSurfaceResource)
+                                    surfaceView.wlSurfaceResource)
         }
     }
 
@@ -265,9 +249,9 @@ internal constructor(@param:Provided private val geo: Geo,
         wlPointerResources.forEach { wlPointerResource ->
             val relativePoint = surfaceView.local(position)
             wlPointerResource.enter(nextEnterSerial(),
-                    surfaceView.wlSurfaceResource,
-                    Fixed.create(relativePoint.x),
-                    Fixed.create(relativePoint.y))
+                                    surfaceView.wlSurfaceResource,
+                                    Fixed.create(relativePoint.x),
+                                    Fixed.create(relativePoint.y))
         }
     }
 
@@ -287,16 +271,17 @@ internal constructor(@param:Provided private val geo: Geo,
                wlPointerButtonState: WlPointerButtonState) {
         if (wlPointerButtonState == WlPointerButtonState.PRESSED) {
             this.pressedButtons.add(button)
-        } else {
+        }
+        else {
             this.pressedButtons.remove(button)
         }
         doButton(wlPointerResources,
-                time,
-                button,
-                wlPointerButtonState)
+                 time,
+                 button,
+                 wlPointerButtonState)
         this.buttonSignal.emit(Button.create(time,
-                button,
-                wlPointerButtonState))
+                                             button,
+                                             wlPointerButtonState))
     }
 
     private fun doButton(wlPointerResources: Set<WlPointerResource>,
@@ -306,29 +291,28 @@ internal constructor(@param:Provided private val geo: Geo,
 
         if (wlPointerButtonState == WlPointerButtonState.PRESSED) {
             this.buttonsPressed++
-        } else if (this.buttonsPressed > 0) {
+        }
+        else if (this.buttonsPressed > 0) {
             //make sure we only decrement if we had a least one increment.
             //Is such a thing even possible? Yes it is. (Aliens pressing a button before starting compositor)
             this.buttonsPressed--
         }
 
         val hasPress = this.buttonsPressed != 0
-        val hasFocus = this.focus.isPresent
-        val hasGrab = grab.isPresent
+        val hasFocus = this.focus != null
+        val hasGrab = grab != null
 
-        if (hasPress &&
-                !hasGrab &&
-                hasFocus) {
+        if (hasPress && !hasGrab && hasFocus) {
             //no grab, but we do have a focus and a pressed button. Focused surface becomes grab.
             grab()
         }
 
-        grab.ifPresent { surfaceView ->
+        grab?.let {
             reportButton(wlPointerResources,
-                    surfaceView,
-                    time,
-                    button,
-                    wlPointerButtonState)
+                         it,
+                         time,
+                         button,
+                         wlPointerButtonState)
 
             if (!hasPress) {
                 ungrab()
@@ -338,12 +322,11 @@ internal constructor(@param:Provided private val geo: Geo,
 
     private fun grab() {
         this.grab = focus
-        this.grabDestroyListener = Optional.of(DestroyListener { this.ungrab() })
+        this.grabDestroyListener = { this.ungrab() }
 
-        val surfaceView = grab.get()
+        val surfaceView = grab
         //if the surface having the grab is destroyed, we clear the grab
-        surfaceView.wlSurfaceResource
-                .register(this.grabDestroyListener.get())
+        surfaceView?.wlSurfaceResource?.register(this.grabDestroyListener)
 
         this.pointerGrabSignal.emit(PointerGrab.create(grab))
     }
@@ -354,26 +337,19 @@ internal constructor(@param:Provided private val geo: Geo,
                              button: Int,
                              wlPointerButtonState: WlPointerButtonState) {
         filter(wlPointerResources,
-                surfaceView.wlSurfaceResource
-                        .client).forEach { wlPointerResource ->
-            wlPointerResource.button(if (wlPointerButtonState == WlPointerButtonState.PRESSED)
-                nextButtonPressSerial()
-            else
-                nextButtonReleaseSerial(),
-                    time,
-                    button,
-                    wlPointerButtonState.value)
+               surfaceView.wlSurfaceResource.client).forEach { wlPointerResource ->
+            wlPointerResource.button(if (wlPointerButtonState == WlPointerButtonState.PRESSED) nextButtonPressSerial() else nextButtonReleaseSerial(),
+                                     time,
+                                     button,
+                                     wlPointerButtonState.value)
         }
     }
 
     private fun ungrab() {
         //grab will be updated, don't listen for previous grab surface destruction.
-        grab.ifPresent { surfaceView ->
-            surfaceView.wlSurfaceResource
-                    .unregister(this.grabDestroyListener.get())
-        }
-        this.grabDestroyListener = Optional.empty<DestroyListener>()
-        this.grab = Optional.empty<SurfaceView>()
+        grab?.wlSurfaceResource?.unregister(this.grabDestroyListener)
+        this.grabDestroyListener = null
+        this.grab = null
         this.pointerGrabSignal.emit(PointerGrab.create(grab))
     }
 
@@ -388,35 +364,35 @@ internal constructor(@param:Provided private val geo: Geo,
     }
 
     private fun updateFocus(wlPointerResources: Set<WlPointerResource>,
-                            oldFocus: Optional<SurfaceView>,
-                            newFocus: Optional<SurfaceView>) {
+                            oldFocus: SurfaceView?,
+                            newFocus: SurfaceView?) {
 
-        oldFocus.ifPresent { oldFocusView ->
+        oldFocus?.let {
             //remove old focus destroy listener
-            oldFocusView.wlSurfaceResource
-                    .unregister(this.focusDestroyListener.get())
+            it.wlSurfaceResource.unregister(this.focusDestroyListener)
             //notify client of focus lost
             reportLeave(filter(wlPointerResources,
-                    oldFocusView.wlSurfaceResource
-                            .client),
-                    oldFocusView)
+                               it.wlSurfaceResource.client),
+                        it)
         }
         //clear ref to old destroy listener
-        this.focusDestroyListener = Optional.empty<DestroyListener>()
+        this.focusDestroyListener = null
 
-        newFocus.ifPresent { newFocusView ->
+        newFocus?.let {
             //if focus resource is destroyed, trigger schedule focus update. This guarantees that
             //the compositor removes and updates the list of active surfaces first.
-            val destroyListener = { this.jobExecutor.submit { calculateFocus(wlPointerResources) } }
-            this.focusDestroyListener = Optional.of<DestroyListener>(destroyListener)
+            val destroyListener = {
+                this.jobExecutor.submit {
+                    calculateFocus(wlPointerResources)
+                }
+            }
+            this.focusDestroyListener = destroyListener
             //add destroy listener
-            newFocusView.wlSurfaceResource
-                    .register(destroyListener)
+            it.wlSurfaceResource.register(destroyListener)
             //notify client of new focus
             reportEnter(filter(wlPointerResources,
-                    newFocusView.wlSurfaceResource
-                            .client),
-                    newFocusView)
+                               it.wlSurfaceResource.client),
+                        it)
         }
 
         //update focus to new focus
@@ -452,26 +428,23 @@ internal constructor(@param:Provided private val geo: Geo,
         val surface = wlSurface.surface
         val surfaceViews = surface.views
 
-        if (!grab.isPresent ||
-                !surfaceViews.contains(grab.get()) ||
-                buttonPressSerial != buttonPressSerial) {
+        if (grab != null || !surfaceViews.contains(grab) || buttonPressSerial != this.buttonPressSerial) {
             //preconditions not met
             return false
         }
 
-        val motionSlot = object : Slot<PointerMotion> {
-
-            override fun handle(motion: PointerMotion) {
-                if (grab.isPresent && surfaceViews.contains(grab.get())) {
+        val motionSlot = object : (PointerMotion) -> Unit {
+            override fun invoke(pointerMotion: PointerMotion) {
+                if (surfaceViews.contains(grab)) {
                     //there is pointer motion
-                    pointerGrabMotion.motion(motion)
-                } else {
+                    pointerGrabMotion.motion(pointerMotion)
+                }
+                else {
                     //another surface has the grab, stop listening for pointer motion.
                     motionSignal.disconnect(this)
                 }
             }
         }
-
         //listen for pointer motion
         motionSignal.connect(motionSlot)
         //listen for surface destruction
@@ -488,7 +461,7 @@ internal constructor(@param:Provided private val geo: Geo,
         if (serial != enterSerial) {
             return
         }
-        Optional.ofNullable(this.cursors.remove(wlPointerResource)).ifPresent { it.hide() }
+        this.cursors.remove(wlPointerResource)?.hide()
     }
 
     fun setCursor(wlPointerResource: WlPointerResource,
@@ -503,27 +476,25 @@ internal constructor(@param:Provided private val geo: Geo,
 
         var cursor: Cursor? = this.cursors[wlPointerResource]
         val hotspot = Point.create(hotspotX,
-                hotspotY)
+                                   hotspotY)
 
         if (cursor == null) {
             cursor = this.cursorFactory.create(wlSurfaceResource,
-                    hotspot)
+                                               hotspot)
 
             val wlSurface = wlSurfaceResource.implementation as WlSurface
             val surface = wlSurface.surface
             val view = surface.createView(wlSurfaceResource,
-                    this.position)
-            this.scene.cursorLayer
-                    .surfaceViews
-                    .add(view)
+                                          this.position)
+            this.scene.cursorLayer.surfaceViews.add(view)
 
             this.cursors.put(wlPointerResource,
-                    cursor)
+                             cursor)
             wlPointerResource.register {
-                Optional.ofNullable(this.cursors.remove(wlPointerResource))
-                        .ifPresent(Consumer<Cursor> { it.hide() })
+                Optional.ofNullable(this.cursors.remove(wlPointerResource)).ifPresent { it.hide() }
             }
-        } else {
+        }
+        else {
             cursor.wlSurfaceResource = wlSurfaceResource
             cursor.hotspot = hotspot
         }
@@ -534,10 +505,9 @@ internal constructor(@param:Provided private val geo: Geo,
         val wlSurface = wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        val stateBuilder = surface.state
-                .toBuilder()
+        val stateBuilder = surface.state.toBuilder()
         updateCursorSurfaceState(wlSurfaceResource,
-                stateBuilder)
+                                 stateBuilder)
         surface.state = stateBuilder.build()
     }
 
@@ -545,23 +515,21 @@ internal constructor(@param:Provided private val geo: Geo,
 
         val cursor = this.cursors[wlPointerResource]
         val oldCursor = this.activeCursor
-        this.activeCursor = Optional.ofNullable(cursor)
+        this.activeCursor = cursor
 
-        this.activeCursor.ifPresent { clientCursor -> clientCursor.updatePosition(position) }
+        this.activeCursor?.updatePosition(position)
 
         if (oldCursor != this.activeCursor) {
-            oldCursor.ifPresent { it.hide() }
+            oldCursor?.hide()
         }
     }
 
     private fun updateCursorSurfaceState(wlSurfaceResource: WlSurfaceResource,
                                          surfaceStateBuilder: SurfaceState.Builder) {
-
-        surfaceStateBuilder.inputRegion(Optional.of(this.nullRegion))
-        if (this.activeCursor.isPresent &&
-                this.activeCursor.get().wlSurfaceResource == wlSurfaceResource &&
-                !this.activeCursor.get().isHidden) {
-        } else {
+        surfaceStateBuilder.inputRegion(this.nullRegion)
+        if (this.activeCursor?.wlSurfaceResource == wlSurfaceResource && !(this.activeCursor?.isHidden ?: false)) {
+        }
+        else {
             surfaceStateBuilder.buffer(Optional.empty())
         }
     }
@@ -571,7 +539,7 @@ internal constructor(@param:Provided private val geo: Geo,
         val surface = wlSurface.surface
 
         updateCursorSurfaceState(wlSurfaceResource,
-                surface.pendingState)
+                                 surface.pendingState)
     }
 
     override fun afterDestroy(wlSurfaceResource: WlSurfaceResource) {
@@ -579,7 +547,8 @@ internal constructor(@param:Provided private val geo: Geo,
             if (it.wlSurfaceResource == wlSurfaceResource) {
                 it.hide()
                 return @this.cursors.values.removeIf true
-            } else {
+            }
+            else {
                 return @this.cursors.values.removeIf false
             }
         }
@@ -598,16 +567,16 @@ internal constructor(@param:Provided private val geo: Geo,
     fun clamp(wlPointerResources: Set<WlPointerResource>,
               newPosition: Point) {
         warp(wlPointerResources,
-                this.geo.clamp(this.position,
-                        newPosition,
-                        this.clampRegion))
+             this.geo.clamp(this.position,
+                            newPosition,
+                            this.clampRegion))
     }
 
     //TODO unit test
     fun warp(wlPointerResources: Set<WlPointerResource>,
              position: Point) {
         this.position = position
-        if (!grab.isPresent) {
+        if (grab != null) {
             calculateFocus(wlPointerResources)
         }
     }
