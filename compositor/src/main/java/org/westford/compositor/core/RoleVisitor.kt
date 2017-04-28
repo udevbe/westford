@@ -1,6 +1,5 @@
 package org.westford.compositor.core
 
-
 import org.westford.compositor.wlshell.ShellSurface
 
 interface RoleVisitor {
@@ -17,9 +16,9 @@ interface RoleVisitor {
         defaultAction(shellSurface)
     }
 
-    open fun visit(subsurface: Subsurface) {
+    fun visit(subsurface: Subsurface) {
         defaultAction(subsurface)
     }
 
-    open fun defaultAction(role: Role) {}
+    fun defaultAction(role: Role) {}
 }

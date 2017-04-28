@@ -35,7 +35,6 @@ import org.westford.compositor.core.Compositor;
 import org.westford.compositor.core.KeyboardDevice;
 import org.westford.compositor.core.Point;
 import org.westford.compositor.core.PointerDevice;
-import org.westford.compositor.core.PointerGrabMotion;
 import org.westford.compositor.core.Rectangle;
 import org.westford.compositor.core.Scene;
 import org.westford.compositor.core.Surface;

@@ -21,8 +21,7 @@ import com.google.auto.value.AutoValue
 
 import javax.annotation.Nonnegative
 
-@AutoValue
-abstract class OutputGeometry {
+@AutoValue abstract class OutputGeometry {
 
     /**
      * @return x position within the global compositor space
@@ -37,14 +36,12 @@ abstract class OutputGeometry {
     /**
      * @return width in millimeters of the output
      */
-    @get:Nonnegative
-    abstract val physicalWidth: Int
+    @get:Nonnegative abstract val physicalWidth: Int
 
     /**
      * @return height in millimeters of the output
      */
-    @get:Nonnegative
-    abstract val physicalHeight: Int
+    @get:Nonnegative abstract val physicalHeight: Int
 
     /**
      * @return subpixel orientation of the output
@@ -68,8 +65,7 @@ abstract class OutputGeometry {
 
     abstract fun toBuilder(): Builder
 
-    @AutoValue.Builder
-    interface Builder {
+    @AutoValue.Builder interface Builder {
         fun x(x: Int): Builder
 
         fun y(y: Int): Builder

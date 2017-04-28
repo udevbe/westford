@@ -43,31 +43,24 @@ import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_STATE_MODS_LAT
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_STATE_MODS_LOCKED
 import java.nio.ByteBuffer
 import java.util.*
-import java.util.stream.Collectors
 import javax.annotation.Nonnegative
 
-@AutoFactory(className = "KeyboardDeviceFactory", allowSubclasses = true)
-class KeyboardDevice(@param:Provided private val display: Display,
-                     @param:Provided private val nativeFileFactory: NativeFileFactory,
-                     @param:Provided private val libc: Libc,
-                     @param:Provided private val libxkbcommon: Libxkbcommon,
-        //we're not updating the state when updating xkb as that would potentially introduce to much bugs
-                     var xkb: Xkb) {
+@AutoFactory(className = "KeyboardDeviceFactory",
+             allowSubclasses = true) class KeyboardDevice(@param:Provided private val display: Display,
+                                                          @param:Provided private val nativeFileFactory: NativeFileFactory,
+                                                          @param:Provided private val libc: Libc,
+                                                          @param:Provided private val libxkbcommon: Libxkbcommon,
+                                                          var xkb: Xkb) {
 
     val keySignal = Signal<Key>()
     val keyboardFocusSignal = Signal<KeyboardFocus>()
-    val pressedKeys = HashSet<Int>()
-    private var focusDestroyListener = Optional.empty<() -> Unit>()
-    var focus = Optional.empty<WlSurfaceResource>()
-        private set
+    val pressedKeys = mutableSetOf<Int>()
+    var focus: WlSurfaceResource? = null; private set
+    var keyboardSerial: Int = 0; private set
 
+    private var focusDestroyListener: (() -> Unit)? = null
     private var keymapFd = -1
-    @Nonnegative
-    private var keymapSize = 0
-
-    var keyboardSerial: Int = 0
-        private set
-
+    @Nonnegative private var keymapSize = 0
     private var consumeNextKeyEvent: Boolean = false
 
     /**
@@ -87,76 +80,72 @@ class KeyboardDevice(@param:Provided private val display: Display,
         var stateComponentMask = 0
         val xkbState = xkb.state
         val evdevKey = key + 8
+
         if (wlKeyboardKeyState == WlKeyboardKeyState.PRESSED) {
-            if (getPressedKeys().add(key)) {
+            if (pressedKeys.add(key)) {
                 stateComponentMask = this.libxkbcommon.xkb_state_update_key(xkbState,
-                        evdevKey,
-                        XKB_KEY_DOWN)
+                                                                            evdevKey,
+                                                                            XKB_KEY_DOWN)
             }
-        } else {
-            if (getPressedKeys().remove(key)) {
+        }
+        else {
+            if (pressedKeys.remove(key)) {
                 stateComponentMask = this.libxkbcommon.xkb_state_update_key(xkbState,
-                        evdevKey,
-                        XKB_KEY_UP)
+                                                                            evdevKey,
+                                                                            XKB_KEY_UP)
             }
         }
 
         this.keySignal.emit(Key.create(time,
-                key,
-                wlKeyboardKeyState))
+                                       key,
+                                       wlKeyboardKeyState))
 
         if (this.consumeNextKeyEvent) {
             this.consumeNextKeyEvent = false
-        } else {
+        }
+        else {
             doKey(wlKeyboardResources,
-                    time,
-                    key,
-                    wlKeyboardKeyState)
+                  time,
+                  key,
+                  wlKeyboardKeyState)
 
             handleStateComponentMask(wlKeyboardResources,
-                    stateComponentMask)
+                                     stateComponentMask)
         }
-    }
-
-    fun getPressedKeys(): MutableSet<Int> {
-        return this.pressedKeys
     }
 
     private fun doKey(wlKeyboardResources: Set<WlKeyboardResource>,
                       time: Int,
                       key: Int,
                       wlKeyboardKeyState: WlKeyboardKeyState) {
-        focus.ifPresent { wlSurfaceResource ->
+        focus?.let {
             match(wlKeyboardResources,
-                    wlSurfaceResource).forEach { wlKeyboardResource ->
-                wlKeyboardResource.key(nextKeyboardSerial(),
-                        time,
-                        key,
-                        wlKeyboardKeyState.value)
+                  it).forEach {
+                it.key(nextKeyboardSerial(),
+                       time,
+                       key,
+                       wlKeyboardKeyState.value)
             }
         }
     }
 
     private fun handleStateComponentMask(wlKeyboardResources: Set<WlKeyboardResource>,
                                          stateComponentMask: Int) {
-        if (stateComponentMask and (XKB_STATE_MODS_DEPRESSED or
-                XKB_STATE_MODS_LATCHED or
-                XKB_STATE_MODS_LOCKED or
-                XKB_STATE_LAYOUT_EFFECTIVE) != 0) {
+        if (stateComponentMask and (XKB_STATE_MODS_DEPRESSED or XKB_STATE_MODS_LATCHED or XKB_STATE_MODS_LOCKED or XKB_STATE_LAYOUT_EFFECTIVE) != 0) {
             val modsDepressed = this.libxkbcommon.xkb_state_serialize_mods(xkb.state,
-                    XKB_STATE_MODS_DEPRESSED)
+                                                                           XKB_STATE_MODS_DEPRESSED)
             val modsLatched = this.libxkbcommon.xkb_state_serialize_mods(xkb.state,
-                    XKB_STATE_MODS_LATCHED)
+                                                                         XKB_STATE_MODS_LATCHED)
             val modsLocked = this.libxkbcommon.xkb_state_serialize_mods(xkb.state,
-                    XKB_STATE_MODS_LOCKED)
+                                                                        XKB_STATE_MODS_LOCKED)
             val group = this.libxkbcommon.xkb_state_serialize_layout(xkb.state,
-                    XKB_STATE_LAYOUT_EFFECTIVE)
+                                                                     XKB_STATE_LAYOUT_EFFECTIVE)
             wlKeyboardResources.forEach { wlKeyboardResource ->
                 wlKeyboardResource.modifiers(this.display.nextSerial(),
-                        modsDepressed,
-                        modsLatched,
-                        modsLocked,
-                        group)
+                                             modsDepressed,
+                                             modsLatched,
+                                             modsLocked,
+                                             group)
             }
         }
     }
@@ -182,12 +171,12 @@ class KeyboardDevice(@param:Provided private val display: Display,
     }
 
     fun setFocus(wlKeyboardResources: Set<WlKeyboardResource>,
-                 newFocus: Optional<WlSurfaceResource>) {
+                 newFocus: WlSurfaceResource?) {
         val oldFocus = focus
         if (oldFocus != newFocus) {
             updateFocus(wlKeyboardResources,
-                    oldFocus,
-                    newFocus)
+                        oldFocus,
+                        newFocus)
         }
     }
 
@@ -201,47 +190,52 @@ class KeyboardDevice(@param:Provided private val display: Display,
     }
 
     private fun updateFocus(wlKeyboardResources: Set<WlKeyboardResource>,
-                            oldFocus: Optional<WlSurfaceResource>,
-                            newFocus: Optional<WlSurfaceResource>) {
+                            oldFocus: WlSurfaceResource?,
+                            newFocus: WlSurfaceResource?) {
         this.focus = newFocus
         keyboardFocusSignal.emit(KeyboardFocus.create(newFocus))
 
-        oldFocus.ifPresent { oldFocusResource ->
-            oldFocusResource.unregister(this.focusDestroyListener.get())
-            this.focusDestroyListener = Optional.empty()
+        oldFocus?.let {
+            it.unregister(this.focusDestroyListener)
+            this.focusDestroyListener = null
 
-            val wlSurface = oldFocusResource.implementation as WlSurface
+            val wlSurface = it.implementation as WlSurface
             val surface = wlSurface.surface
 
-            val clientKeyboardResources = filter(wlKeyboardResources, oldFocusResource.client)
+            val clientKeyboardResources = filter(wlKeyboardResources,
+                                                 it.client)
             surface.keyboardFocuses.minus(clientKeyboardResources)
             surface.keyboardFocusLostSignal.emit(KeyboardFocusLost.create(clientKeyboardResources))
 
             clientKeyboardResources.forEach { oldFocusKeyboardResource ->
                 oldFocusKeyboardResource.leave(nextKeyboardSerial(),
-                        oldFocusResource)
+                                               it)
             }
         }
 
-        newFocus.ifPresent { newFocusResource ->
-            this.focusDestroyListener = Optional.of { updateFocus(wlKeyboardResources, newFocus, Optional.empty<WlSurfaceResource>()) }
-            newFocusResource.register(this.focusDestroyListener.get())
+        newFocus?.let {
+            this.focusDestroyListener = {
+                updateFocus(wlKeyboardResources,
+                            newFocus,
+                            null)
+            }
+            it.register(this.focusDestroyListener)
 
-            val wlSurface = newFocusResource.implementation as WlSurface
+            val wlSurface = it.implementation as WlSurface
             val surface = wlSurface.surface
 
-            val clientKeyboardResources = filter(wlKeyboardResources, newFocusResource.client)
-            surface.keyboardFocuses.plus(clientKeyboardResources)
+            val clientKeyboardResources = filter(wlKeyboardResources,
+                                                 it.client)
+            surface.keyboardFocuses += clientKeyboardResources
             surface.keyboardFocusGainedSignal.emit(KeyboardFocusGained.create(clientKeyboardResources))
 
             match(wlKeyboardResources,
-                    newFocusResource).forEach { newFocusKeyboardResource ->
+                  it).forEach { newFocusKeyboardResource ->
                 val keys = ByteBuffer.allocateDirect(Integer.BYTES * this.pressedKeys.size)
-                keys.asIntBuffer()
-                        .put(toIntArray(getPressedKeys()))
+                keys.asIntBuffer().put(toIntArray(pressedKeys))
                 newFocusKeyboardResource.enter(nextKeyboardSerial(),
-                        newFocusResource,
-                        keys)
+                                               it,
+                                               keys)
             }
         }
     }
@@ -251,15 +245,17 @@ class KeyboardDevice(@param:Provided private val display: Display,
      */
     private fun filter(wlKeyboardResources: Set<WlKeyboardResource>,
                        client: Client): Set<WlKeyboardResource> {
-        return wlKeyboardResources.stream().filter { wlKeyboardResource -> wlKeyboardResource.client == client }.collect(Collectors.toSet<WlKeyboardResource>())
+        return wlKeyboardResources.filter {
+            it.client == client
+        }.toSet()
     }
 
     fun emitKeymap(wlKeyboardResources: Set<WlKeyboardResource>) {
         if (this.keymapFd >= 0) {
-            wlKeyboardResources.forEach { wlKeyboardResource ->
-                wlKeyboardResource.keymap(WlKeyboardKeymapFormat.XKB_V1.value,
-                        this.keymapFd,
-                        this.keymapSize)
+            wlKeyboardResources.forEach {
+                it.keymap(WlKeyboardKeymapFormat.XKB_V1.value,
+                          this.keymapFd,
+                          this.keymapSize)
             }
         }
     }
@@ -270,18 +266,18 @@ class KeyboardDevice(@param:Provided private val display: Display,
         val size = nativeKeyMapping.length
         val fd = this.nativeFileFactory.createAnonymousFile(size)
         val keymapArea = this.libc.mmap(0L,
-                size,
-                Libc.PROT_READ or Libc.PROT_WRITE,
-                Libc.MAP_SHARED,
-                fd,
-                0)
+                                        size,
+                                        Libc.PROT_READ or Libc.PROT_WRITE,
+                                        Libc.MAP_SHARED,
+                                        fd,
+                                        0)
         if (keymapArea == Libc.MAP_FAILED) {
             this.libc.close(fd)
             throw Error("MAP_FAILED: " + this.libc.errno)
         }
 
         this.libc.strcpy(keymapArea,
-                Pointer.nref(nativeKeyMapping).address)
+                         Pointer.nref(nativeKeyMapping).address)
 
         if (this.keymapFd >= 0) {
             this.libc.close(this.keymapFd)

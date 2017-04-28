@@ -22,14 +22,11 @@ import com.google.auto.value.AutoValue
 import javax.annotation.Nonnegative
 import java.util.Optional
 
-@AutoValue
-abstract class EglSurfaceState : SurfaceRenderState {
+@AutoValue abstract class EglSurfaceState : SurfaceRenderState {
 
-    @get:Nonnegative
-    abstract val pitch: Int
+    @get:Nonnegative abstract val pitch: Int
 
-    @get:Nonnegative
-    abstract val height: Int
+    @get:Nonnegative abstract val height: Int
 
     abstract val target: Int
 
@@ -55,12 +52,12 @@ abstract class EglSurfaceState : SurfaceRenderState {
                    textures: IntArray,
                    eglImages: LongArray): EglSurfaceState {
             return AutoValue_EglSurfaceState(pitch,
-                    height,
-                    target,
-                    shaderProgram,
-                    yInverted,
-                    textures,
-                    eglImages)
+                                             height,
+                                             target,
+                                             shaderProgram,
+                                             yInverted,
+                                             textures,
+                                             eglImages)
         }
     }
 }

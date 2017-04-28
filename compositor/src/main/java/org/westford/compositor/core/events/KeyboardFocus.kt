@@ -21,14 +21,13 @@ import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.WlSurfaceResource
 import java.util.Optional
 
-@AutoValue
-abstract class KeyboardFocus {
+@AutoValue abstract class KeyboardFocus {
 
-    abstract val wlSurfaceResource: Optional<WlSurfaceResource>
+    abstract val wlSurfaceResource: WlSurfaceResource?
 
     companion object {
 
-        fun create(wlSurfaceResource: Optional<WlSurfaceResource>): KeyboardFocus {
+        fun create(wlSurfaceResource: WlSurfaceResource?): KeyboardFocus {
             return AutoValue_KeyboardFocus(wlSurfaceResource)
         }
     }

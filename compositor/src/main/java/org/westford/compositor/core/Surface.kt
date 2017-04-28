@@ -26,108 +26,86 @@ import org.westford.compositor.core.events.KeyboardFocusGained
 import org.westford.compositor.core.events.KeyboardFocusLost
 import org.westford.compositor.protocol.WlRegion
 import org.westford.compositor.protocol.WlSurface
-import java.util.*
 import javax.annotation.Nonnegative
 
 @AutoFactory(className = "SurfaceFactory",
-             allowSubclasses = true) class Surfaceconstructor(@param:Provided private val finiteRegionFactory: FiniteRegionFactory,
-                                                              @param:Provided private val compositor: Compositor,
-                                                              @param:Provided private val renderer: Renderer,
-                                                              @param:Provided private val surfaceViewFactory: SurfaceViewFactory) {
-    /*
-     * Overall state
-     */
-    private val surfaceViews = HashSet<SurfaceView>()
-    var role = Optional.empty<Role>(); private set
+             allowSubclasses = true) class Surface(@param:Provided private val finiteRegionFactory: FiniteRegionFactory,
+                                                   @param:Provided private val compositor: Compositor,
+                                                   @param:Provided private val renderer: Renderer,
+                                                   @param:Provided private val surfaceViewFactory: SurfaceViewFactory) {
 
-    /*
-     * Signals
-     */
     val keyboardFocusLostSignal = Signal<KeyboardFocusLost>()
     val keyboardFocusGainedSignal = Signal<KeyboardFocusGained>()
     val applySurfaceStateSignal = Signal<SurfaceState>()
     val viewCreatedSignal = Signal<SurfaceView>()
-    val frameCallbacks: MutableList<WlCallbackResource> = LinkedList()
+
+    val frameCallbacks = mutableListOf<WlCallbackResource>()
     /**
      * The keyboards that will be used to notify the client of any keyboard events on this surface. This collection is
      * updated each time the keyboard focus changes for this surface. To keep the client from receiving keyboard events,
      * clear this list each time the focus is set for this surface. To listen for focus updates, register a keyboard focus
      * listener on this surface.
-
      * @return a set of keyboard resources.
      */
-    val keyboardFocuses: Set<WlKeyboardResource> = HashSet()
-
-    /*
-     * pending state
-     */
+    val keyboardFocuses = mutableSetOf<WlKeyboardResource>();
     val pendingState: SurfaceState.Builder = SurfaceState.builder()
-    private var pendingBufferDestroyListener = Optional.empty<DestroyListener>()
-    val pendingSubsurfaces = LinkedList<Subsurface>()
-
-    /*
-     * committed state
-     */
-    var state = SurfaceState.builder().build()
+    val pendingSubsurfaces = mutableListOf<Subsurface>()
     /**
      * Return all sibling surfaces, including this surface.
-
      * @return
      */
-    val siblings = LinkedList<Sibling>()
+    val siblings = mutableListOf<Sibling>()
+    val views: MutableSet<SurfaceView>
+        get() = this.surfaceViews
 
-    /*
-     * committed derived states
-     */
-    var isDestroyed: Boolean = false; private set
+    var state = SurfaceState.builder().build()
+    var role: Role? = null
+    var renderState: SurfaceRenderState? = null
+
     /**
      * Surface level transformation. Contains transformations that should be applied on all views of this surface.
      * These are almost always scaling transformations. Positioning and rotation is done in [SurfaceView].
-
      * @return
      */
-    var transform = Transforms.NORMAL; private set
-    var inverseTransform = Transforms.NORMAL; private set
-    var size = Rectangle.ZERO; private set
-
-    /*
-     * render state
-     */
-    var renderState = Optional.empty<SurfaceRenderState>()
+    var transform = Transforms.NORMAL
         private set
+    var inverseTransform = Transforms.NORMAL
+        private set
+    var size = Rectangle.ZERO
+        private set
+    var isDestroyed: Boolean = false
+        private set
+
+    private val surfaceViews = mutableSetOf<SurfaceView>()
+
+    private var pendingBufferDestroyListener: (() -> Unit)? = null
 
     fun markDestroyed() {
         this.isDestroyed = true
     }
 
     fun markDamaged(damage: Rectangle) {
-
-        val damageRegion = this.pendingState.build().damage.orElseGet({ this.finiteRegionFactory.create() })
+        val damageRegion = this.pendingState.build().damage ?: this.finiteRegionFactory.create()
         damageRegion.add(damage)
-        this.pendingState.damage(Optional.of(damageRegion))
-
+        this.pendingState.damage(damageRegion)
     }
 
     fun attachBuffer(wlBufferResource: WlBufferResource,
                      dx: Int,
                      dy: Int) {
-        pendingState.build().buffer.ifPresent { previousWlBufferResource -> previousWlBufferResource.unregister(this.pendingBufferDestroyListener.get()) }
-        val detachBuffer = DestroyListener { this.detachBuffer() }
+        pendingState.build().buffer?.unregister(this.pendingBufferDestroyListener)
+        val detachBuffer = { this.detachBuffer() }
         wlBufferResource.register(detachBuffer)
-        this.pendingBufferDestroyListener = Optional.of(detachBuffer)
-        pendingState.buffer(Optional.of(wlBufferResource)).deltaPosition(Point.create(dx,
-                                                                                      dy))
-    }
-
-    fun setRole(role: Role) {
-        this.role = Optional.of(role)
+        this.pendingBufferDestroyListener = detachBuffer
+        pendingState.buffer(wlBufferResource).deltaPosition(Point.create(dx,
+                                                                         dy))
     }
 
     fun commit() {
         val buffer = state.buffer
         //signal client that the previous buffer can be reused as we will now use the
         //newly attached buffer.
-        buffer.ifPresent({ it.release() })
+        buffer?.release()
 
         //flush states
         apply(this.pendingState.build())
@@ -142,19 +120,22 @@ import javax.annotation.Nonnegative
         updateSize()
 
         //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
-        this.pendingSubsurfaces.forEach { subsurface -> this.siblings.remove(subsurface.sibling) }
-        this.pendingSubsurfaces.descendingIterator().forEachRemaining { subsurface -> this.siblings.addFirst(subsurface.sibling) }
+        this.pendingSubsurfaces.forEach {
+            this.siblings -= (it.sibling)
+        }
+        this.pendingSubsurfaces.asReversed().forEach {
+            this.siblings += (it.sibling)
+        }
 
         this.compositor.requestRender()
 
         applySurfaceStateSignal.emit(state)
     }
 
-    fun detachBuffer(): Surface {
-        pendingState.build().buffer.ifPresent { wlBufferResource -> wlBufferResource.unregister(this.pendingBufferDestroyListener.get()) }
-        this.pendingBufferDestroyListener = Optional.empty<DestroyListener>()
-        pendingState.buffer(Optional.empty<WlBufferResource>()).damage(Optional.empty<Region>())
-        return this
+    fun detachBuffer() {
+        pendingState.build().buffer?.unregister(this.pendingBufferDestroyListener)
+        this.pendingBufferDestroyListener = null
+        pendingState.buffer(null).damage(null)
     }
 
     fun updateTransform() {
@@ -170,8 +151,8 @@ import javax.annotation.Nonnegative
 
         this.size = Rectangle.ZERO
 
-        wlBufferResourceOptional.ifPresent { wlBufferResource ->
-            val buffer = this.renderer.queryBuffer(wlBufferResource)
+        wlBufferResourceOptional?.let {
+            val buffer = this.renderer.queryBuffer(it)
             val width = buffer.width / scale
             val height = buffer.height / scale
 
@@ -179,23 +160,17 @@ import javax.annotation.Nonnegative
         }
     }
 
-    fun addCallback(callback: WlCallbackResource) {
-        this.frameCallbacks.add(callback)
-    }
+    fun addCallback(callback: WlCallbackResource) = this.frameCallbacks.add(callback)
 
-    fun removeOpaqueRegion() {
-        this.pendingState.opaqueRegion(Optional.empty<Region>())
-    }
+    fun removeOpaqueRegion() = this.pendingState.opaqueRegion(null)
 
     fun setOpaqueRegion(wlRegionResource: WlRegionResource) {
         val wlRegion = wlRegionResource.implementation as WlRegion
         val region = wlRegion.region
-        this.pendingState.opaqueRegion(Optional.of(region))
+        this.pendingState.opaqueRegion(region)
     }
 
-    fun removeInputRegion() {
-        this.pendingState.inputRegion(null)
-    }
+    fun removeInputRegion() = this.pendingState.inputRegion(null)
 
     fun setInputRegion(wlRegionResource: WlRegionResource) {
         val wlRegion = wlRegionResource.implementation as WlRegion
@@ -212,20 +187,9 @@ import javax.annotation.Nonnegative
         }
     }
 
-    fun setScale(@Nonnegative scale: Int) {
-        pendingState.scale(scale)
-    }
+    fun setScale(@Nonnegative scale: Int) = pendingState.scale(scale)
 
-    fun setBufferTransform(bufferTransform: Mat4) {
-        pendingState.bufferTransform(bufferTransform)
-    }
-
-    fun setRenderState(renderState: SurfaceRenderState) {
-        this.renderState = Optional.of(renderState)
-    }
-
-    val views: Collection<SurfaceView>
-        get() = Collections.unmodifiableCollection(this.surfaceViews)
+    fun setBufferTransform(bufferTransform: Mat4) = pendingState.bufferTransform(bufferTransform)
 
     fun createView(wlSurfaceResource: WlSurfaceResource,
                    position: Point): SurfaceView {
@@ -233,12 +197,12 @@ import javax.annotation.Nonnegative
         val surfaceView = this.surfaceViewFactory.create(wlSurfaceResource,
                                                          position)
         if (this.surfaceViews.add(surfaceView)) {
-            siblings.forEach { sibling ->
-                ensureSiblingView(sibling,
+            siblings.forEach {
+                ensureSiblingView(it,
                                   surfaceView)
             }
-            pendingSubsurfaces.forEach { subsurface ->
-                ensureSiblingView(subsurface.sibling,
+            pendingSubsurfaces.forEach {
+                ensureSiblingView(it.sibling,
                                   surfaceView)
             }
             this.viewCreatedSignal.emit(surfaceView)
@@ -258,28 +222,29 @@ import javax.annotation.Nonnegative
             return
         }
 
-        for (siblingSurfaceView in siblingSurface.views) {
-            val siblingSurfaceViewParent = siblingSurfaceView.parent
-            if (siblingSurfaceViewParent != null && siblingSurfaceViewParent.get() == surfaceView) {
-                //sibling already has a view with this surface as it's parent view. Do nothing.
-                //TODO Perhaps we should we allow this?
-                return
-            }
+        siblingSurface.views.filter { it.parent == surfaceView }.forEach {
+            //sibling already has a view with this surface as it's parent view. Do nothing.
+            //TODO Perhaps we should we allow this?
+            return
         }
 
         val siblingSurfaceView = siblingSurface.createView(siblingWlSurfaceResource,
                                                            surfaceView.global(siblingPosition))
-        siblingSurfaceView.setParent(surfaceView)
-        surfaceView.positionSignal.connect({ event -> siblingSurfaceView.setPosition(surfaceView.global(sibling.position)) })
+        siblingSurfaceView.parent = surfaceView
+        surfaceView.positionSignal.connect {
+            siblingSurfaceView.setPosition(surfaceView.global(sibling.position))
+        }
     }
 
     fun addSibling(sibling: Sibling) {
-        views.forEach { surfaceView ->
+        views.forEach {
             ensureSiblingView(sibling,
-                              surfaceView)
+                              it)
         }
         this.siblings.add(sibling)
-        sibling.wlSurfaceResource.register { removeSibling(sibling) }
+        sibling.wlSurfaceResource.register {
+            removeSibling(sibling)
+        }
     }
 
     fun removeSibling(sibling: Sibling) {
@@ -294,11 +259,13 @@ import javax.annotation.Nonnegative
 
     fun addSubsurface(subsurface: Subsurface) {
         val subsurfaceSibling = subsurface.sibling
-        views.forEach { surfaceView ->
+        views.forEach {
             ensureSiblingView(subsurfaceSibling,
-                              surfaceView)
+                              it)
         }
-        subsurfaceSibling.wlSurfaceResource.register { removeSubsurface(subsurface) }
+        subsurfaceSibling.wlSurfaceResource.register {
+            removeSubsurface(subsurface)
+        }
 
         this.pendingSubsurfaces.add(subsurface)
     }

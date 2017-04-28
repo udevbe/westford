@@ -6,7 +6,6 @@ import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.Signal
 import org.westford.compositor.core.calc.Mat4
 import org.westford.compositor.protocol.WlSurface
-import java.util.*
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateSurfaceViewFactory") class SurfaceView(@param:Provided private val compositor: Compositor,
@@ -14,12 +13,15 @@ import java.util.*
                                                                         positionTransform: Mat4,
                                                                         transform: Mat4,
                                                                         inverseTransform: Mat4) {
-
     val destroyedSignal = Signal<SurfaceView>()
     val positionSignal = Signal<Point>()
 
-    var parent = Optional.empty<SurfaceView>()
-        private set
+    var parent: SurfaceView? = null
+        set(value) {
+            removeParent()
+            value?.destroyedSignal?.connect(this::destroyOnParent)
+            this.parent = parent
+        }
 
     var positionTransform: Mat4
         private set
@@ -73,7 +75,8 @@ import java.util.*
     }
 
     fun setPosition(global: Point) {
-        setPosition(Transforms.TRANSLATE(global.x, global.y))
+        setPosition(Transforms.TRANSLATE(global.x,
+                                         global.y))
         positionSignal.emit(global)
 
         this.compositor.requestRender()
@@ -81,32 +84,32 @@ import java.util.*
 
     fun onApply(surfaceState: SurfaceState) {
 
-        this.isDrawable = surfaceState.buffer.isPresent
+        this.isDrawable = surfaceState.buffer != null
 
         val deltaPosition = surfaceState.deltaPosition
         val dx = deltaPosition.x
         val dy = deltaPosition.y
 
-        setPosition(this.positionTransform.multiply(Transforms.TRANSLATE(dx, dy)))
+        setPosition(this.positionTransform.multiply(Transforms.TRANSLATE(dx,
+                                                                         dy)))
+    }
+
+    private fun destroyOnParent(parent: SurfaceView) {
+        destroy()
     }
 
     fun destroy() {
         val wlSurface = this.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
-        surface.views.remove(this)
+        surface.views -= this
 
         this.destroyedSignal.emit(this)
         removeParent()
     }
 
-    fun setParent(parent: SurfaceView) {
-        removeParent()
-        parent.destroyedSignal.connect({ event -> destroy() })
-        this.parent = Optional.of(parent)
-    }
-
     fun removeParent() {
-        this.parent.ifPresent { parentSurfaceView -> this.parent = Optional.empty<SurfaceView>() }
+        this.parent?.destroyedSignal?.disconnect(this::destroyOnParent)
+        this.parent = null
     }
 
     /**
@@ -119,7 +122,8 @@ import java.util.*
      */
     fun local(global: Point): Point {
         val localPoint = this.inverseTransform.multiply(global.toVec4())
-        return Point.create(localPoint.x.toInt(), localPoint.y.toInt())
+        return Point.create(localPoint.x.toInt(),
+                            localPoint.y.toInt())
     }
 
     /**
@@ -132,6 +136,7 @@ import java.util.*
      */
     fun global(surfaceLocal: Point): Point {
         val globalPoint = this.transform.multiply(surfaceLocal.toVec4())
-        return Point.create(globalPoint.x.toInt(), globalPoint.y.toInt())
+        return Point.create(globalPoint.x.toInt(),
+                            globalPoint.y.toInt())
     }
 }

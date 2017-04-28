@@ -23,46 +23,44 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class Scene @Inject internal constructor(val backgroundLayer: SceneLayer, val underLayer: SceneLayer,
-                                                    val applicationLayer: SceneLayer, val overLayer: SceneLayer,
-                                                    val fullscreenLayer: SceneLayer, val lockLayer: SceneLayer,
+@Singleton class Scene @Inject internal constructor(val backgroundLayer: SceneLayer,
+                                                    val underLayer: SceneLayer,
+                                                    val applicationLayer: SceneLayer,
+                                                    val overLayer: SceneLayer,
+                                                    val fullscreenLayer: SceneLayer,
+                                                    val lockLayer: SceneLayer,
                                                     val cursorLayer: SceneLayer,
                                                     private val infiniteRegion: InfiniteRegion) {
 
     fun pickSurfaceView(global: Point): SurfaceView? {
 
-        val surfaceViewIterator = pickableSurfaces().descendingIterator()
-        var pointerOver = Optional.empty<SurfaceView>()
+        var pointerOver: SurfaceView? = null
 
-        while (surfaceViewIterator.hasNext()) {
-            val surfaceView = surfaceViewIterator.next()
+        pickableSurfaces().asReversed().forEach lit@ {
+            if (it.isDrawable && it.isEnabled) {
+                val implementation = it.wlSurfaceResource.implementation as WlSurface
+                val surface = implementation.surface
 
-            if (!surfaceView.isDrawable || !surfaceView.isEnabled) {
-                continue
-            }
+                val inputRegion = surface.state.inputRegion
+                val region = inputRegion ?: this.infiniteRegion
 
-            val surfaceResource = surfaceView.wlSurfaceResource
-            val implementation = surfaceResource.implementation
-            val surface = (implementation as WlSurface).surface
+                val size = surface.size
 
-            val inputRegion = surface.state.inputRegion
-            val region = inputRegion.orElse(this.infiniteRegion)
-
-            val size = surface.size
-
-            val local = surfaceView.local(global)
-            if (region.contains(size, local)) {
-                pointerOver = Optional.of(surfaceView)
-                break
+                val local = it.local(global)
+                if (region.contains(size,
+                                    local)) {
+                    pointerOver = it
+                    return@lit
+                }
             }
         }
 
         return pointerOver
     }
 
-    fun pickableSurfaces(): LinkedList<SurfaceView> {
+    fun pickableSurfaces(): MutableList<SurfaceView> {
 
-        val views = LinkedList<SurfaceView>()
+        val views = mutableListOf<SurfaceView>()
 
         if (!this.lockLayer.surfaceViews.isEmpty()) {
             //lockLayer screen
@@ -77,8 +75,10 @@ import javax.inject.Singleton
         }
 
         //make sure we include any sub-views
-        val pickableViews = LinkedList<SurfaceView>()
-        views.forEach { surfaceView -> pickableViews.addAll(withSiblingViews(surfaceView)) }
+        val pickableViews = mutableListOf<SurfaceView>()
+        views.forEach {
+            pickableViews.addAll(withSiblingViews(it))
+        }
 
         return pickableViews
     }
@@ -96,20 +96,22 @@ import javax.inject.Singleton
      * *
      * @return
      */
-    fun subsection(views: LinkedList<SurfaceView>, region: Region): LinkedList<SurfaceView> {
+    fun subsection(views: List<SurfaceView>,
+                   region: Region): List<SurfaceView> {
 
-        val intersectingViews = LinkedList<SurfaceView>()
+        val intersectingViews = mutableListOf<SurfaceView>()
 
-        views.forEach { surfaceView ->
-            val wlSurfaceResource = surfaceView.wlSurfaceResource
-            val wlSurface = wlSurfaceResource.implementation as WlSurface
+        views.forEach {
+            val wlSurface = it.wlSurfaceResource.implementation as WlSurface
             val surface = wlSurface.surface
             val size = surface.size
 
-            val viewBox = Rectangle.create(surfaceView.global(Point.ZERO), size.width, size.height)
+            val viewBox = Rectangle.create(it.global(Point.ZERO),
+                                           size.width,
+                                           size.height)
 
             if (region.contains(viewBox)) {
-                intersectingViews.add(surfaceView)
+                intersectingViews.add(it)
             }
         }
 
@@ -129,10 +131,14 @@ import javax.inject.Singleton
      * *
      * @return
      */
-    fun subsection(sceneLayer: SceneLayer, region: Region): LinkedList<SurfaceView> {
-        val views = LinkedList<SurfaceView>()
-        sceneLayer.surfaceViews.forEach { surfaceView -> views.addAll(withSiblingViews(surfaceView)) }
-        return subsection(views, region)
+    fun subsection(sceneLayer: SceneLayer,
+                   region: Region): List<SurfaceView> {
+        val views = mutableListOf<SurfaceView>()
+        sceneLayer.surfaceViews.forEach {
+            views.addAll(withSiblingViews(it))
+        }
+        return subsection(views,
+                          region)
     }
 
     /**
@@ -148,45 +154,62 @@ import javax.inject.Singleton
         val outputScene: Subscene
 
         if (!this.lockLayer.surfaceViews.isEmpty()) {
-            val outputLockViews = subsection(this.lockLayer, region)
-            val cursorViews = subsection(this.cursorLayer, region)
-            outputScene = Subscene.create(Optional.empty<SurfaceView>(), emptyList<SurfaceView>(),
-                                          emptyList<SurfaceView>(), emptyList<SurfaceView>(),
-                                          Optional.empty<SurfaceView>(), outputLockViews, cursorViews)
+            val outputLockViews = subsection(this.lockLayer,
+                                             region)
+            val cursorViews = subsection(this.cursorLayer,
+                                         region)
+            outputScene = Subscene.create(null,
+                                          emptyList<SurfaceView>(),
+                                          emptyList<SurfaceView>(),
+                                          emptyList<SurfaceView>(),
+                                          null,
+                                          outputLockViews,
+                                          cursorViews)
         }
         else {
 
-            val backgroundView: Optional<SurfaceView>
+            val backgroundView: SurfaceView?
             val underViews: List<SurfaceView>
             val applicationViews: List<SurfaceView>
             val overViews: List<SurfaceView>
-            val fullscreenView: Optional<SurfaceView>
+            val fullscreenView: SurfaceView?
 
-            val outputFullscreenViews = subsection(this.fullscreenLayer, region)
-            val cursorViews = subsection(this.cursorLayer, region)
+            val outputFullscreenViews = subsection(this.fullscreenLayer,
+                                                   region)
+            val cursorViews = subsection(this.cursorLayer,
+                                         region)
             if (outputFullscreenViews.isEmpty()) {
-                val outputBackgroundViews = subsection(this.backgroundLayer, region)
-                val outputUnderViews = subsection(this.underLayer, region)
-                val outputApplicationViews = subsection(this.applicationLayer, region)
-                val outputOverViews = subsection(this.overLayer, region)
+                val outputBackgroundViews = subsection(this.backgroundLayer,
+                                                       region)
+                val outputUnderViews = subsection(this.underLayer,
+                                                  region)
+                val outputApplicationViews = subsection(this.applicationLayer,
+                                                        region)
+                val outputOverViews = subsection(this.overLayer,
+                                                 region)
 
-                backgroundView = Optional.ofNullable(outputBackgroundViews.peekFirst())
+                backgroundView = outputBackgroundViews.firstOrNull()
                 underViews = outputUnderViews
                 applicationViews = outputApplicationViews
                 overViews = outputOverViews
-                fullscreenView = Optional.empty<SurfaceView>()
+                fullscreenView = null
             }
             else {
                 //there is a fullscreen view, don't bother return the underlying views
-                backgroundView = Optional.empty<SurfaceView>()
+                backgroundView = null
                 underViews = emptyList<SurfaceView>()
                 applicationViews = emptyList<SurfaceView>()
                 overViews = emptyList<SurfaceView>()
-                fullscreenView = Optional.ofNullable(outputFullscreenViews.first)
+                fullscreenView = outputFullscreenViews.first()
             }
 
-            outputScene = Subscene.create(backgroundView, underViews, applicationViews, overViews, fullscreenView,
-                                          emptyList<SurfaceView>(), cursorViews)
+            outputScene = Subscene.create(backgroundView,
+                                          underViews,
+                                          applicationViews,
+                                          overViews,
+                                          fullscreenView,
+                                          emptyList<SurfaceView>(),
+                                          cursorViews)
         }
 
         return outputScene
@@ -197,12 +220,12 @@ import javax.inject.Singleton
 
      * @return
      */
-    fun allSurfaces(): LinkedList<SurfaceView> {
+    fun allSurfaces(): List<SurfaceView> {
 
         val drawableSurfaceViewStack = pickableSurfaces()
         //add cursor surfaces
-        this.cursorLayer.surfaceViews.forEach { cursorSurfaceView ->
-            drawableSurfaceViewStack.addAll(withSiblingViews(cursorSurfaceView))
+        this.cursorLayer.surfaceViews.forEach {
+            drawableSurfaceViewStack += withSiblingViews(it)
         }
 
         return drawableSurfaceViewStack
@@ -218,7 +241,8 @@ import javax.inject.Singleton
      */
     fun withSiblingViews(surfaceView: SurfaceView): LinkedList<SurfaceView> {
         val surfaceViews = LinkedList<SurfaceView>()
-        addSiblingViews(surfaceView, surfaceViews)
+        addSiblingViews(surfaceView,
+                        surfaceViews)
         return surfaceViews
     }
 
@@ -229,28 +253,30 @@ import javax.inject.Singleton
      * *
      * @param surfaceViews
      */
-    private fun addSiblingViews(parentSurfaceView: SurfaceView, surfaceViews: LinkedList<SurfaceView>) {
+    private fun addSiblingViews(parentSurfaceView: SurfaceView,
+                                surfaceViews: MutableList<SurfaceView>) {
 
         val parentWlSurfaceResource = parentSurfaceView.wlSurfaceResource
         val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
         val parentSurface = parentWlSurface.surface
 
-        parentSurface.siblings.forEach { sibling ->
+        parentSurface.siblings.forEach {
 
-            val siblingWlSurface = sibling.wlSurfaceResource.implementation as WlSurface
+            val siblingWlSurface = it.wlSurfaceResource.implementation as WlSurface
             val siblingSurface = siblingWlSurface.surface
 
             //only consider surface if it has a role.
             //TODO we could move the views to the generic role itf.
-            if (siblingSurface.role.isPresent) {
+            if (siblingSurface.role != null) {
 
-                siblingSurface.views.forEach { siblingSurfaceView ->
-
-                    if (siblingSurfaceView.parent.filter { siblingParentSurfaceView -> siblingParentSurfaceView == parentSurfaceView }.isPresent) {
-                        addSiblingViews(siblingSurfaceView, surfaceViews)
+                siblingSurface.views.forEach {
+                    if (it.parent.filter { it == parentSurfaceView }.isPresent) {
+                        addSiblingViews(it,
+                                        surfaceViews)
                     }
-                    else if (siblingSurfaceView == parentSurfaceView) {
-                        surfaceViews.addFirst(siblingSurfaceView)
+                    else if (it == parentSurfaceView) {
+                        surfaceViews.add(0,
+                                         it)
                     }
                 }
             }
@@ -271,6 +297,8 @@ import javax.inject.Singleton
         val surface = wlSurface.surface
 
         val views = surface.views
-        views.forEach(Consumer<SurfaceView> { this.removeView(it) })
+        views.forEach {
+            this.removeView(it)
+        }
     }
 }

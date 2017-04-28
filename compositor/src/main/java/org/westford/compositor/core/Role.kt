@@ -20,9 +20,9 @@ package org.westford.compositor.core
 import org.freedesktop.wayland.server.WlSurfaceResource
 
 interface Role {
-    open fun beforeCommit(wlSurfaceResource: WlSurfaceResource) {}
+    fun beforeCommit(wlSurfaceResource: WlSurfaceResource) {}
 
-    open fun afterDestroy(wlSurfaceResource: WlSurfaceResource) {}
+    fun afterDestroy(wlSurfaceResource: WlSurfaceResource) {}
 
     fun accept(roleVisitor: RoleVisitor)
 

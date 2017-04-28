@@ -34,14 +34,13 @@ interface RenderOutput {
     /**
      * Disables any pending and future rendering for this connector.
      */
-    open fun disable() {}
+    fun disable() {}
 
     /**
      * Enables rendering and triggers a redraw for this `RenderOutput`.
 
      * @param wlOutput a wayland output used as the rendering context.
      */
-    open fun enable(wlOutput: WlOutput) {}
-
+    fun enable(wlOutput: WlOutput) {}
 
 }

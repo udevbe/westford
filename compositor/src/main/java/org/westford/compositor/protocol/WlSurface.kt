@@ -23,33 +23,29 @@ import org.freedesktop.wayland.server.*
 import org.freedesktop.wayland.shared.WlOutputTransform
 import org.freedesktop.wayland.shared.WlSurfaceError
 import org.westford.compositor.core.Rectangle
+import org.westford.compositor.core.Surface
 import org.westford.compositor.core.Transforms
 import org.westford.compositor.core.calc.Mat4
 import java.util.*
 import javax.annotation.Nonnegative
 
-@AutoFactory(className = "WlSurfaceFactory", allowSubclasses = true)
-class WlSurface internal constructor(@param:Provided private val wlCallbackFactory: WlCallbackFactory,
-                                     val surface: Surface) : WlSurfaceRequestsV4, ProtocolObject<WlSurfaceResource> {
+@AutoFactory(className = "WlSurfaceFactory",
+             allowSubclasses = true) class WlSurface(@param:Provided private val wlCallbackFactory: WlCallbackFactory,
+                                                     val surface: Surface) : WlSurfaceRequestsV4, ProtocolObject<WlSurfaceResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlSurfaceResource, Boolean>())
+    override val resources = Collections.newSetFromMap(WeakHashMap<WlSurfaceResource, Boolean>())
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
                         id: Int): WlSurfaceResource {
         val wlSurfaceResource = WlSurfaceResource(client,
-                version,
-                id,
-                this)
+                                                  version,
+                                                  id,
+                                                  this)
         wlSurfaceResource.register {
-            surface.role
-                    .ifPresent { role -> role.afterDestroy(wlSurfaceResource) }
+            surface.role?.afterDestroy(wlSurfaceResource)
         }
         return wlSurfaceResource
-    }
-
-    override fun getResources(): MutableSet<WlSurfaceResource> {
-        return this.resources
     }
 
     override fun destroy(resource: WlSurfaceResource) {
@@ -63,10 +59,11 @@ class WlSurface internal constructor(@param:Provided private val wlCallbackFacto
                         y: Int) {
         if (buffer == null) {
             surface.detachBuffer()
-        } else {
+        }
+        else {
             surface.attachBuffer(buffer,
-                    x,
-                    y)
+                                 x,
+                                 y)
         }
     }
 
@@ -80,17 +77,16 @@ class WlSurface internal constructor(@param:Provided private val wlCallbackFacto
         }
 
         surface.markDamaged(Rectangle.create(x,
-                y,
-                width,
-                height))
+                                             y,
+                                             width,
+                                             height))
     }
 
     override fun frame(resource: WlSurfaceResource,
                        callbackId: Int) {
-        val callbackResource = this.wlCallbackFactory.create()
-                .add(resource.client,
-                        resource.version,
-                        callbackId)
+        val callbackResource = this.wlCallbackFactory.create().add(resource.client,
+                                                                   resource.version,
+                                                                   callbackId)
         surface.addCallback(callbackResource)
     }
 
@@ -98,7 +94,8 @@ class WlSurface internal constructor(@param:Provided private val wlCallbackFacto
                                  region: WlRegionResource?) {
         if (region == null) {
             surface.removeOpaqueRegion()
-        } else {
+        }
+        else {
             surface.setOpaqueRegion(region)
         }
     }
@@ -107,47 +104,55 @@ class WlSurface internal constructor(@param:Provided private val wlCallbackFacto
                                 regionResource: WlRegionResource?) {
         if (regionResource == null) {
             surface.removeInputRegion()
-        } else {
+        }
+        else {
             surface.setInputRegion(regionResource)
         }
     }
 
     override fun commit(requester: WlSurfaceResource) {
         val surface = surface
-        surface.role
-                .ifPresent { role -> role.beforeCommit(requester) }
+        surface.role?.beforeCommit(requester)
         surface.commit()
     }
 
     override fun setBufferTransform(resource: WlSurfaceResource,
                                     transform: Int) {
         this.surface.setBufferTransform(getMatrix(resource,
-                transform))
+                                                  transform))
     }
 
     private fun getMatrix(resource: WlSurfaceResource,
                           transform: Int): Mat4 {
         if (WlOutputTransform.NORMAL.value == transform) {
             return Transforms.NORMAL
-        } else if (WlOutputTransform._90.value == transform) {
+        }
+        else if (WlOutputTransform._90.value == transform) {
             return Transforms._90
-        } else if (WlOutputTransform._180.value == transform) {
+        }
+        else if (WlOutputTransform._180.value == transform) {
             return Transforms._180
-        } else if (WlOutputTransform._270.value == transform) {
+        }
+        else if (WlOutputTransform._270.value == transform) {
             return Transforms._270
-        } else if (WlOutputTransform.FLIPPED.value == transform) {
+        }
+        else if (WlOutputTransform.FLIPPED.value == transform) {
             return Transforms.FLIPPED
-        } else if (WlOutputTransform.FLIPPED_90.value == transform) {
+        }
+        else if (WlOutputTransform.FLIPPED_90.value == transform) {
             return Transforms.FLIPPED_90
-        } else if (WlOutputTransform.FLIPPED_180.value == transform) {
+        }
+        else if (WlOutputTransform.FLIPPED_180.value == transform) {
             return Transforms.FLIPPED_180
-        } else if (WlOutputTransform.FLIPPED_270.value == transform) {
+        }
+        else if (WlOutputTransform.FLIPPED_270.value == transform) {
             return Transforms.FLIPPED_270
-        } else {
+        }
+        else {
             resource.postError(WlSurfaceError.INVALID_TRANSFORM.value,
-                    String.format("Invalid transform %d. Supported values are %s.",
-                            transform,
-                            Arrays.asList(*WlOutputTransform.values())))
+                               String.format("Invalid transform %d. Supported values are %s.",
+                                             transform,
+                                             Arrays.asList(*WlOutputTransform.values())))
             return Transforms.NORMAL
         }
     }
@@ -156,10 +161,11 @@ class WlSurface internal constructor(@param:Provided private val wlCallbackFacto
                                 @Nonnegative scale: Int) {
         if (scale > 0) {
             surface.setScale(scale)
-        } else {
+        }
+        else {
             resource.postError(WlSurfaceError.INVALID_SCALE.value,
-                    String.format("Invalid scale %d. Scale must be positive integer.",
-                            scale))
+                               String.format("Invalid scale %d. Scale must be positive integer.",
+                                             scale))
         }
     }
 

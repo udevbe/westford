@@ -423,7 +423,7 @@ import javax.annotation.Nonnegative
      */
     fun grabMotion(wlSurfaceResource: WlSurfaceResource,
                    buttonPressSerial: Int,
-                   pointerGrabMotion: PointerGrabMotion): Boolean {
+                   pointerGrabMotion: (PointerMotion) -> Unit): Boolean {
         val wlSurface = wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
         val surfaceViews = surface.views
@@ -437,7 +437,7 @@ import javax.annotation.Nonnegative
             override fun invoke(pointerMotion: PointerMotion) {
                 if (surfaceViews.contains(grab)) {
                     //there is pointer motion
-                    pointerGrabMotion.motion(pointerMotion)
+                    pointerGrabMotion(pointerMotion)
                 }
                 else {
                     //another surface has the grab, stop listening for pointer motion.

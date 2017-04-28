@@ -27,16 +27,15 @@ import org.westford.compositor.core.events.OutputTransform
 
 import javax.annotation.Nonnegative
 
-@AutoFactory(className = "PrivateOutputFactory", allowSubclasses = true)
-class Output internal constructor(@param:Provided val region: FiniteRegion,
-                                  val renderOutput: RenderOutput,
-                                  val name: String) {
+@AutoFactory(className = "PrivateOutputFactory",
+             allowSubclasses = true) class Output(@param:Provided val region: FiniteRegion,
+                                                  val renderOutput: RenderOutput,
+                                                  val name: String) {
 
     val transformSignal = Signal<OutputTransform>()
     val modeSignal = Signal<OutputMode>()
-    @Nonnegative
-    @get:Nonnegative
-    var scale = 1f
+
+    @Nonnegative @get:Nonnegative var scale = 1f
         set(@Nonnegative scale) {
             field = scale
             updateOutputTransform()
@@ -55,23 +54,9 @@ class Output internal constructor(@param:Provided val region: FiniteRegion,
      */
     var inverseTransform = Mat4.IDENTITY
         private set
-    var geometry = OutputGeometry.builder()
-            .physicalWidth(0)
-            .physicalHeight(0)
-            .make("")
-            .model("")
-            .x(0)
-            .y(0)
-            .subpixel(0)
-            .transform(0)
-            .build()
+    var geometry = OutputGeometry.builder().physicalWidth(0).physicalHeight(0).make("").model("").x(0).y(0).subpixel(0).transform(0).build()
         private set
-    var mode = OutputMode.builder()
-            .width(0)
-            .height(0)
-            .refresh(0)
-            .flags(0)
-            .build()
+    var mode = OutputMode.builder().width(0).height(0).refresh(0).flags(0).build()
         private set
 
     fun update(resources: Set<WlOutputResource>,
@@ -90,31 +75,38 @@ class Output internal constructor(@param:Provided val region: FiniteRegion,
         val x = this.geometry.x
         val y = this.geometry.y
         val moveMat = Transforms.TRANSLATE(x,
-                y)
+                                           y)
         val transformMat: Mat4
         val transformNr = this.geometry.transform
         if (transformNr == WlOutputTransform.NORMAL.value) {
             transformMat = Mat4.IDENTITY
-        } else if (transformNr == WlOutputTransform._90.value) {
+        }
+        else if (transformNr == WlOutputTransform._90.value) {
             transformMat = Transforms._90
-        } else if (transformNr == WlOutputTransform._180.value) {
+        }
+        else if (transformNr == WlOutputTransform._180.value) {
             transformMat = Transforms._180
-        } else if (transformNr == WlOutputTransform._270.value) {
+        }
+        else if (transformNr == WlOutputTransform._270.value) {
             transformMat = Transforms._270
-        } else if (transformNr == WlOutputTransform.FLIPPED.value) {
+        }
+        else if (transformNr == WlOutputTransform.FLIPPED.value) {
             transformMat = Transforms.FLIPPED
-        } else if (transformNr == WlOutputTransform.FLIPPED_90.value) {
+        }
+        else if (transformNr == WlOutputTransform.FLIPPED_90.value) {
             transformMat = Transforms.FLIPPED_90
-        } else if (transformNr == WlOutputTransform.FLIPPED_180.value) {
+        }
+        else if (transformNr == WlOutputTransform.FLIPPED_180.value) {
             transformMat = Transforms.FLIPPED_180
-        } else if (transformNr == WlOutputTransform.FLIPPED_270.value) {
+        }
+        else if (transformNr == WlOutputTransform.FLIPPED_270.value) {
             transformMat = Transforms.FLIPPED_270
-        } else {
+        }
+        else {
             transformMat = Mat4.IDENTITY
         }
 
-        val newTransform = transformMat.multiply(scaleMat)
-                .multiply(moveMat)
+        val newTransform = transformMat.multiply(scaleMat).multiply(moveMat)
         if (this.transform != newTransform) {
             this.transform = newTransform
             this.inverseTransform = this.transform.invert()
@@ -124,18 +116,15 @@ class Output internal constructor(@param:Provided val region: FiniteRegion,
     }
 
     private fun updateRegion() {
-        val regionTopLeft = this.transform.multiply(Point.ZERO.toVec4())
-                .toPoint()
+        val regionTopLeft = this.transform.multiply(Point.ZERO.toVec4()).toPoint()
         val regionBottomRight = this.transform.multiply(Point.create(this.mode.width,
-                this.mode.height)
-                .toVec4())
-                .toPoint()
+                                                                     this.mode.height).toVec4()).toPoint()
         //TODO fire region event?
         this.region.clear()
         //TODO check if the region is properly updated in the unit tests
         this.region.add(Rectangle.create(regionTopLeft,
-                regionBottomRight.x - regionTopLeft.x,
-                regionBottomRight.y - regionTopLeft.y))
+                                         regionBottomRight.x - regionTopLeft.x,
+                                         regionBottomRight.y - regionTopLeft.y))
     }
 
     fun update(resources: Set<WlOutputResource>,
@@ -151,31 +140,31 @@ class Output internal constructor(@param:Provided val region: FiniteRegion,
 
     fun notifyMode(wlOutputResource: WlOutputResource) {
         wlOutputResource.mode(this.mode.flags,
-                this.mode.width,
-                this.mode.height,
-                this.mode.refresh)
+                              this.mode.width,
+                              this.mode.height,
+                              this.mode.refresh)
     }
 
     fun notifyGeometry(wlOutputResource: WlOutputResource) {
         wlOutputResource.geometry(this.geometry.x,
-                this.geometry.y,
-                this.geometry.physicalWidth,
-                this.geometry.physicalHeight,
-                this.geometry.subpixel,
-                this.geometry.make,
-                this.geometry.model,
-                this.geometry.transform)
+                                  this.geometry.y,
+                                  this.geometry.physicalWidth,
+                                  this.geometry.physicalHeight,
+                                  this.geometry.subpixel,
+                                  this.geometry.make,
+                                  this.geometry.model,
+                                  this.geometry.transform)
     }
 
     fun local(global: Point): Point {
         val localPoint = this.inverseTransform.multiply(global.toVec4())
         return Point.create(localPoint.x.toInt(),
-                localPoint.y.toInt())
+                            localPoint.y.toInt())
     }
 
     fun global(outputLocal: Point): Point {
         val globalPoint = this.transform.multiply(outputLocal.toVec4())
         return Point.create(globalPoint.x.toInt(),
-                globalPoint.y.toInt())
+                            globalPoint.y.toInt())
     }
 }

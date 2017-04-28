@@ -24,31 +24,27 @@ import org.westford.nativ.libxkbcommon.Libxkbcommon
 
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_KEYMAP_FORMAT_TEXT_V1
 
-@AutoFactory(className = "XkbFactory", allowSubclasses = true)
-class Xkb internal constructor(@param:Provided private val libxkbcommon: Libxkbcommon,
-                               val context: Long,
-                               val state: Long,
-                               val keymap: Long) {
+@AutoFactory(className = "XkbFactory",
+             allowSubclasses = true) class Xkb(@param:Provided private val libxkbcommon: Libxkbcommon,
+                                               val context: Long,
+                                               val state: Long,
+                                               val keymap: Long) {
 
     val keymapString: String
         get() {
-            Pointer.wrap<String>(String::class.java!!,
-                    this.libxkbcommon.xkb_keymap_get_as_string(this.keymap,
-                            XKB_KEYMAP_FORMAT_TEXT_V1)).use { keymapStringPointer ->
-                if (keymapStringPointer.address == 0L) {
-                    throw RuntimeException("Got an error while trying to get keymap as string. " +
-                            "Unfortunately the docs of the xkb library do not specify how we to get more information " +
-                            "about the error, so you'll have to do it with this lousy exception.")
+            Pointer.wrap<String>(String::class.java,
+                                 this.libxkbcommon.xkb_keymap_get_as_string(this.keymap,
+                                                                            XKB_KEYMAP_FORMAT_TEXT_V1)).use {
+                if (it.address == 0L) {
+                    throw RuntimeException("Got an error while trying to get keymap as string.\nUnfortunately the docs of the xkb library do not specify how we to get more information about the error, so you'll have to do it with this lousy exception.")
                 }
-                return keymapStringPointer.dref()
+                return it.dref()
             }
         }
 
-    @Throws(Throwable::class)
-    protected fun finalize() {
+    fun finalize() {
         this.libxkbcommon.xkb_context_unref(context)
         this.libxkbcommon.xkb_keymap_unref(keymap)
         this.libxkbcommon.xkb_state_unref(state)
-        super.finalize()
     }
 }

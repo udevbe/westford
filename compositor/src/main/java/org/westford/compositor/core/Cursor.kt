@@ -23,9 +23,9 @@ import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.compositor.protocol.WlSurface
 import java.util.*
 
-@AutoFactory(className = "CursorFactory", allowSubclasses = true)
-class Cursor(var wlSurfaceResource: WlSurfaceResource,
-             var hotspot: Point) {
+@AutoFactory(className = "CursorFactory",
+             allowSubclasses = true) class Cursor(var wlSurfaceResource: WlSurfaceResource,
+                                                  var hotspot: Point) {
 
     var isHidden: Boolean = false
         private set
@@ -40,7 +40,7 @@ class Cursor(var wlSurfaceResource: WlSurfaceResource,
         val wlSurface = this.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        surface.state = surface.state.toBuilder().buffer(Optional.empty<WlBufferResource>()).build()
+        surface.state = surface.state.toBuilder().buffer(null).build()
 
         this.isHidden = true
     }

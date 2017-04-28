@@ -22,10 +22,12 @@ import org.freedesktop.wayland.shared.WlKeyboardKeyState
 import org.westford.compositor.core.events.Key
 import java.util.*
 
-@AutoFactory(allowSubclasses = true, className = "KeyBindingFactory")
-class KeyBinding internal constructor(private val keyboardDevice: KeyboardDevice,
-                                      private val keys: Set<Int>,
-                                      private val binding: Runnable) {
+@AutoFactory(allowSubclasses = true,
+             className = "KeyBindingFactory") class KeyBinding
+internal constructor(private val keyboardDevice: KeyboardDevice,
+                     private val keys: Set<Int>,
+                     private val binding: Runnable) {
+
     private var triggerKey = Optional.empty<Int>()
 
     //TODO unit test enable/disable & consummation of key events
@@ -43,10 +45,10 @@ class KeyBinding internal constructor(private val keyboardDevice: KeyboardDevice
                     this.triggerKey = Optional.empty<Int>()
                 }
             }
-        } else {
+        }
+        else {
             //make sure pressed keys match without any additional keys being pressed.
-            if (this.keyboardDevice.pressedKeys.size == this.keys.size &&
-                    this.keyboardDevice.pressedKeys.containsAll(this.keys)) {
+            if (this.keyboardDevice.pressedKeys.size == this.keys.size && this.keyboardDevice.pressedKeys.containsAll(this.keys)) {
                 //Store the latest key that triggered the binding. This is needed because we must suppress the release of this key as well
                 this.triggerKey = Optional.of(event.key)
                 //this will consume the press of the latest key that fulfills the required keys needed for the binding.

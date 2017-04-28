@@ -5,8 +5,7 @@ import org.westford.compositor.core.calc.Mat4
 import org.westford.compositor.protocol.WlSurface
 import javax.inject.Inject
 
-class SurfaceViewFactory @Inject
-internal constructor(private val privateSurfaceViewFactory: PrivateSurfaceViewFactory) {
+class SurfaceViewFactory @Inject internal constructor(private val privateSurfaceViewFactory: PrivateSurfaceViewFactory) {
 
     internal fun create(wlSurfaceResource: WlSurfaceResource,
                         globalPosition: Point): SurfaceView {
@@ -16,18 +15,17 @@ internal constructor(private val privateSurfaceViewFactory: PrivateSurfaceViewFa
         val surfaceTransform = surface.transform
 
         val positionTransform = Transforms.TRANSLATE(globalPosition.x,
-                globalPosition.y)
+                                                     globalPosition.y)
 
         val transform = positionTransform.multiply(surfaceTransform)
         val inverseTransform = transform.invert()
 
         val surfaceView = this.privateSurfaceViewFactory.create(wlSurfaceResource,
-                positionTransform,
-                transform,
-                inverseTransform)
+                                                                positionTransform,
+                                                                transform,
+                                                                inverseTransform)
 
-        surface.applySurfaceStateSignal
-                .connect(Slot<SurfaceState> { surfaceView.onApply(it) })
+        surface.applySurfaceStateSignal.connect { surfaceView.onApply(it) }
 
         return surfaceView
     }

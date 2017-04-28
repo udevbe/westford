@@ -18,7 +18,6 @@
 package org.westford.compositor.core
 
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.events.RenderOutputDestroyed
 import org.westford.compositor.core.events.RenderOutputNew
 import org.westford.compositor.protocol.WlOutput
@@ -27,7 +26,7 @@ interface RenderPlatform {
 
     val wlOutputs: List<WlOutput>
 
-    val renderOutputNewSignal: Signal<RenderOutputNew, Slot<RenderOutputNew>>
+    val renderOutputNewSignal: Signal<RenderOutputNew>
 
-    val renderOutputDestroyedSignal: Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>>
+    val renderOutputDestroyedSignal: Signal<RenderOutputDestroyed>
 }

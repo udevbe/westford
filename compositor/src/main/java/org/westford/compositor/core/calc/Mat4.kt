@@ -28,9 +28,9 @@ abstract class Mat4 {
     fun add(other: Mat4): Mat4 {
         //@formatter:off
         return Mat4.create(m00 + other.m00, m10 + other.m10, m20 + other.m20, m30 + other.m30,
-m01 + other.m01, m11 + other.m11, m21 + other.m21, m31 + other.m31,
-m02 + other.m02, m12 + other.m12, m22 + other.m22, m32 + other.m32,
-m03 + other.m03, m13 + other.m13, m23 + other.m23, m33 + other.m33)
+                           m01 + other.m01, m11 + other.m11, m21 + other.m21, m31 + other.m31,
+                           m02 + other.m02, m12 + other.m12, m22 + other.m22, m32 + other.m32,
+                           m03 + other.m03, m13 + other.m13, m23 + other.m23, m33 + other.m33)
  //@formatter:on
     }
 

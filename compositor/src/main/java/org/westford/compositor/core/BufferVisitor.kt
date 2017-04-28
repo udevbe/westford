@@ -19,9 +19,9 @@ package org.westford.compositor.core
 
 interface BufferVisitor {
 
-    open fun visit(buffer: Buffer) {}
+    fun visit(buffer: Buffer) {}
 
-    open fun visit(eglBuffer: EglBuffer) {}
+    fun visit(eglBuffer: EglBuffer) {}
 
-    open fun visit(smBuffer: SmBuffer) {}
+    fun visit(smBuffer: SmBuffer) {}
 }

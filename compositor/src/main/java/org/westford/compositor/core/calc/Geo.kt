@@ -24,8 +24,7 @@ import java.util.HashSet
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class Geo @Inject
-internal constructor() {
+class Geo @Inject internal constructor() {
 
     /**
      * Given: A line between between 2 points, one inside the region, the other outside.
@@ -60,7 +59,8 @@ internal constructor() {
             //compensate for libpixman considering edge points not being inside, so we move the (potential) edge point a bit inside
             sourceX--
             rectWidth = targetX - sourceX
-        } else {
+        }
+        else {
             sourceX++
             rectWidth = sourceX - targetX
         }
@@ -71,7 +71,8 @@ internal constructor() {
             //compensate for libpixman considering edge points not being inside, so we move the (potential) edge point a bit inside
             sourceY--
             rectHeight = targetY - sourceY
-        } else {
+        }
+        else {
             sourceY++
             rectHeight = sourceY - targetY
         }
@@ -80,9 +81,9 @@ internal constructor() {
         val rectY = if (targetY > sourceY) sourceY else targetY
 
         val intersect = region.intersect(Rectangle.create(rectX,
-                rectY,
-                rectWidth,
-                rectHeight))
+                                                          rectY,
+                                                          rectWidth,
+                                                          rectHeight))
         var intersectionRects = intersect.asList()
         if (intersectionRects.isEmpty()) {
             //Both points fall completely outside the region. make the entire clamp region the intersection.
@@ -90,16 +91,16 @@ internal constructor() {
             intersectionRects = region.asList()
         }
 
-        val points = HashSet<Point>()
+        val points = mutableSetOf<Point>()
         for (intersectRect in intersectionRects) {
             points.add(Point.create(intersectRect.x,
-                    intersectRect.y))
+                                    intersectRect.y))
             points.add(Point.create(intersectRect.x + intersectRect.width,
-                    intersectRect.y))
+                                    intersectRect.y))
             points.add(Point.create(intersectRect.x + intersectRect.width,
-                    intersectRect.y + intersectRect.height))
+                                    intersectRect.y + intersectRect.height))
             points.add(Point.create(intersectRect.x,
-                    intersectRect.y + intersectRect.height))
+                                    intersectRect.y + intersectRect.height))
         }
 
         var clampPoint = source
@@ -107,7 +108,7 @@ internal constructor() {
 
         for (point in points) {
             val distance = distance(target,
-                    point)
+                                    point)
             if (distance < clampDistance) {
                 clampDistance = distance
                 clampPoint = point
@@ -116,17 +117,17 @@ internal constructor() {
 
         //compensate for libpixman return rectangles whose edge points fall outside the clamp region
         return compensateEdge(clampPoint,
-                sourceX,
-                sourceY,
-                targetX,
-                targetY)
+                              sourceX,
+                              sourceY,
+                              targetX,
+                              targetY)
     }
 
     fun distance(a: Point,
                  b: Point): Double {
         return Math.sqrt(Math.pow((a.x - b.x).toDouble(),
-                2.0) + Math.pow((a.y - b.y).toDouble(),
-                2.0))
+                                  2.0) + Math.pow((a.y - b.y).toDouble(),
+                                                  2.0))
     }
 
     private fun compensateEdge(clampPoint: Point,
@@ -147,24 +148,28 @@ internal constructor() {
                 //right edge
                 builder.x(clampPoint.x - 1)
             }
-        } else if (clampPoint.x == targetX) {
+        }
+        else if (clampPoint.x == targetX) {
             //top-bottom edge
 
             if (bottom) {
                 //bottom edge
                 builder.y(clampPoint.y - 1)
             }
-        } else if (clampPoint.x != targetX && clampPoint.y != targetY) {
+        }
+        else if (clampPoint.x != targetX && clampPoint.y != targetY) {
             //corner point
 
             if (right && bottom) {
                 //bottom-right corner
                 builder.x(clampPoint.x - 1)
                 builder.y(clampPoint.y - 1)
-            } else if (right) {
+            }
+            else if (right) {
                 //top-right corner
                 builder.x(clampPoint.x - 1)
-            } else if (bottom) {
+            }
+            else if (bottom) {
                 //bottom-left corner
                 builder.y(clampPoint.y - 1)
             }

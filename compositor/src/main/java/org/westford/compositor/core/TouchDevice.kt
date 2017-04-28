@@ -22,7 +22,6 @@ import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.WlTouchResource
 import org.freedesktop.wayland.util.Fixed
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.events.TouchDown
 import org.westford.compositor.core.events.TouchGrab
 import org.westford.compositor.core.events.TouchMotion
@@ -30,22 +29,18 @@ import org.westford.compositor.core.events.TouchUp
 
 import javax.annotation.Nonnegative
 import javax.inject.Inject
-import java.util.Optional
-import java.util.stream.Collectors
 
-class TouchDevice @Inject
-internal constructor(private val display: Display,
-                     private val scene: Scene) {
+class TouchDevice @Inject internal constructor(private val display: Display,
+                                               private val scene: Scene) {
 
-    val touchDownSignal = Signal<TouchDown, Slot<TouchDown>>()
-    val touchGrabSignal = Signal<TouchGrab, Slot<TouchGrab>>()
-    val touchMotionSignal = Signal<TouchMotion, Slot<TouchMotion>>()
-    val touchUpSignal = Signal<TouchUp, Slot<TouchUp>>()
+    val touchDownSignal = Signal<TouchDown>()
+    val touchGrabSignal = Signal<TouchGrab>()
+    val touchMotionSignal = Signal<TouchMotion>()
+    val touchUpSignal = Signal<TouchUp>()
 
-    var grab = Optional.empty<SurfaceView>()
+    var grab: SurfaceView? = null
         private set
-    @Nonnegative
-    var touchCount: Int = 0
+    @Nonnegative var touchCount: Int = 0
         private set
 
     var downSerial: Int = 0
@@ -55,12 +50,13 @@ internal constructor(private val display: Display,
 
     //TODO unit test
     fun cancel(wlTouchResources: Set<WlTouchResource>) {
-        grab.ifPresent { surfaceView ->
+        grab?.let { surfaceView ->
             filter(wlTouchResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach(Consumer<WlTouchResource> { it.cancel() })
+                   surfaceView.wlSurfaceResource.client).forEach {
+                it.cancel()
+            }
         }
-        this.grab = Optional.empty<SurfaceView>()
+        this.grab = null
         this.touchCount = 0
 
         //TODO send event(s)?
@@ -69,22 +65,21 @@ internal constructor(private val display: Display,
     private fun filter(wlTouchResources: Set<WlTouchResource>,
                        client: Client): Set<WlTouchResource> {
         //filter out touch resources that do not belong to the given client.
-        return wlTouchResources.stream()
-                .filter { wlPointerResource -> wlPointerResource.client == client }
-                .collect<Set<WlTouchResource>, Any>(Collectors.toSet<WlTouchResource>())
+        return wlTouchResources.filter {
+            it.client == client
+        }.toSet()
     }
 
     //TODO unit test
     fun frame(wlTouchResources: Set<WlTouchResource>) {
-        grab.ifPresent { surfaceView ->
+        grab?.let {
             filter(wlTouchResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlTouchResource ->
+                   it.wlSurfaceResource.client).forEach {
                 if (this.touchCount == 0) {
-                    this.grab = Optional.empty<SurfaceView>()
+                    this.grab = null
                     this.touchGrabSignal.emit(TouchGrab.create())
                 }
-                wlTouchResource.frame()
+                it.frame()
             }
         }
 
@@ -99,27 +94,26 @@ internal constructor(private val display: Display,
              y: Int) {
 
         //get a grabbed surface or try to establish new grab
-        if (!grab.isPresent) {
+        if (grab == null) {
             this.grab = this.scene.pickSurfaceView(Point.create(x,
-                    y))
+                                                                y))
             this.touchGrabSignal.emit(TouchGrab.create())
         }
 
         //report 'down' to grab (if any)
-        grab.ifPresent { surfaceView ->
+        grab?.let {
             this.touchCount++
 
-            val local = surfaceView.local(Point.create(x,
-                    y))
+            val local = it.local(Point.create(x,
+                                              y))
             filter(wlTouchResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlTouchResource ->
+                   it.wlSurfaceResource.client).forEach { wlTouchResource ->
                 wlTouchResource.down(nextDownSerial(),
-                        time,
-                        surfaceView.wlSurfaceResource,
-                        id,
-                        Fixed.create(local.x),
-                        Fixed.create(local.y))
+                                     time,
+                                     it.wlSurfaceResource,
+                                     id,
+                                     Fixed.create(local.x),
+                                     Fixed.create(local.y))
             }
         }
 
@@ -135,13 +129,12 @@ internal constructor(private val display: Display,
     fun up(wlTouchResources: Set<WlTouchResource>,
            id: Int,
            time: Int) {
-        grab.ifPresent { surfaceView ->
+        grab?.let {
             filter(wlTouchResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlTouchResource ->
-                wlTouchResource.up(nextUpSerial(),
-                        time,
-                        id)
+                   it.wlSurfaceResource.client).forEach {
+                it.up(nextUpSerial(),
+                      time,
+                      id)
             }
             if (--this.touchCount < 0) {
                 //safeguard against strange negative touch count (shouldn't happen normally)
@@ -163,16 +156,15 @@ internal constructor(private val display: Display,
                time: Int,
                x: Int,
                y: Int) {
-        grab.ifPresent { surfaceView ->
-            val local = surfaceView.local(Point.create(x,
-                    y))
+        grab?.let {
+            val local = it.local(Point.create(x,
+                                              y))
             filter(wlTouchResources,
-                    surfaceView.wlSurfaceResource
-                            .client).forEach { wlTouchResource ->
-                wlTouchResource.motion(time,
-                        id,
-                        Fixed.create(local.x),
-                        Fixed.create(local.y))
+                   it.wlSurfaceResource.client).forEach {
+                it.motion(time,
+                          id,
+                          Fixed.create(local.x),
+                          Fixed.create(local.y))
             }
         }
 

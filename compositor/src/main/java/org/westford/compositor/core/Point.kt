@@ -20,14 +20,13 @@ package org.westford.compositor.core
 import com.google.auto.value.AutoValue
 import org.westford.compositor.core.calc.Vec4
 
-@AutoValue
-abstract class Point {
+@AutoValue abstract class Point {
 
     fun toVec4(): Vec4 {
         return Vec4.create(x.toFloat(),
-                y.toFloat(),
-                0f,
-                1f)
+                           y.toFloat(),
+                           0f,
+                           1f)
     }
 
     abstract val x: Int
@@ -36,18 +35,17 @@ abstract class Point {
 
     fun add(right: Point): Point {
         return Point.create(x + right.x,
-                y + right.y)
+                            y + right.y)
     }
 
     fun subtract(right: Point): Point {
         return Point.create(x - right.x,
-                y - right.y)
+                            y - right.y)
     }
 
     abstract fun toBuilder(): Builder
 
-    @AutoValue.Builder
-    interface Builder {
+    @AutoValue.Builder interface Builder {
         fun x(x: Int): Builder
 
         fun y(y: Int): Builder
@@ -61,14 +59,11 @@ abstract class Point {
 
         fun create(x: Int,
                    y: Int): Point {
-            return builder().x(x)
-                    .y(y)
-                    .build()
+            return builder().x(x).y(y).build()
         }
 
         fun builder(): Builder {
-            return AutoValue_Point.Builder().x(0)
-                    .y(0)
+            return AutoValue_Point.Builder().x(0).y(0)
         }
     }
 }

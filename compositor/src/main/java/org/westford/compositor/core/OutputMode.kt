@@ -21,8 +21,7 @@ import com.google.auto.value.AutoValue
 
 import javax.annotation.Nonnegative
 
-@AutoValue
-abstract class OutputMode {
+@AutoValue abstract class OutputMode {
 
     /**
      * @return bitfield of mode flags
@@ -32,25 +31,21 @@ abstract class OutputMode {
     /**
      * @return width of the mode in hardware units
      */
-    @get:Nonnegative
-    abstract val width: Int
+    @get:Nonnegative abstract val width: Int
 
     /**
      * @return height of the mode in hardware units
      */
-    @get:Nonnegative
-    abstract val height: Int
+    @get:Nonnegative abstract val height: Int
 
     /**
      * @return vertical refresh rate in mHz
      */
-    @get:Nonnegative
-    abstract val refresh: Int
+    @get:Nonnegative abstract val refresh: Int
 
     abstract fun toBuilder(): Builder
 
-    @AutoValue.Builder
-    interface Builder {
+    @AutoValue.Builder interface Builder {
 
         fun flags(flags: Int): Builder
 

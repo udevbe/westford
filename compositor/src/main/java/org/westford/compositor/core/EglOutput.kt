@@ -17,7 +17,6 @@
  */
 package org.westford.compositor.core
 
-
 import java.util.Optional
 
 interface EglOutput : RenderOutput {
@@ -28,9 +27,8 @@ interface EglOutput : RenderOutput {
 
     val eglDisplay: Long
 
-    val state: Optional<EglOutputState>
+    val state: EglOutputState?
 
     //TODO refactor & remove this method
-    @Deprecated("")
-    fun updateState(eglOutputState: EglOutputState)
+    @Deprecated("") fun updateState(eglOutputState: EglOutputState)
 }

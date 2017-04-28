@@ -21,18 +21,15 @@ import com.google.auto.value.AutoValue
 
 import javax.annotation.Nonnegative
 
-@AutoValue
-abstract class Rectangle {
+@AutoValue abstract class Rectangle {
 
-    @get:Nonnegative
-    abstract val width: Int
+    @get:Nonnegative abstract val width: Int
 
-    @get:Nonnegative
-    abstract val height: Int
+    @get:Nonnegative abstract val height: Int
 
     val position: Point
         get() = Point.create(x,
-                y)
+                             y)
 
     abstract val x: Int
 
@@ -40,8 +37,7 @@ abstract class Rectangle {
 
     abstract fun toBuilder(): Builder
 
-    @AutoValue.Builder
-    interface Builder {
+    @AutoValue.Builder interface Builder {
         fun x(x: Int): Builder
 
         fun y(y: Int): Builder
@@ -61,27 +57,20 @@ abstract class Rectangle {
                    @Nonnegative width: Int,
                    @Nonnegative height: Int): Rectangle {
             return create(position.x,
-                    position.y,
-                    width,
-                    height)
+                          position.y,
+                          width,
+                          height)
         }
 
         fun create(x: Int,
                    y: Int,
                    @Nonnegative width: Int,
                    @Nonnegative height: Int): Rectangle {
-            return builder().x(x)
-                    .y(y)
-                    .width(width)
-                    .height(height)
-                    .build()
+            return builder().x(x).y(y).width(width).height(height).build()
         }
 
         fun builder(): Builder {
-            return AutoValue_Rectangle.Builder().x(0)
-                    .y(0)
-                    .width(0)
-                    .height(0)
+            return AutoValue_Rectangle.Builder().x(0).y(0).width(0).height(0)
         }
 
         fun create(a: Point,
@@ -92,7 +81,8 @@ abstract class Rectangle {
             if (a.x > b.x) {
                 width = a.x - b.x
                 x = b.x
-            } else {
+            }
+            else {
                 width = b.x - a.x
                 x = a.x
             }
@@ -102,15 +92,16 @@ abstract class Rectangle {
             if (a.x > b.y) {
                 height = a.y - b.y
                 y = b.y
-            } else {
+            }
+            else {
                 height = b.y - a.y
                 y = a.y
             }
 
             return create(x,
-                    y,
-                    width,
-                    height)
+                          y,
+                          width,
+                          height)
         }
     }
 }

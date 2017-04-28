@@ -17,42 +17,26 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import java.util.Collections
 
-@Singleton
-class NullRegion @Inject
-internal constructor() : Region {
+@Singleton class NullRegion @Inject internal constructor() : Region {
 
-    override fun asList(): List<Rectangle> {
-        return emptyList<Rectangle>()
-    }
+    override fun asList(): List<Rectangle> = emptyList()
 
     override fun add(rectangle: Rectangle) {}
 
     override fun subtract(rectangle: Rectangle) {}
 
-    override fun contains(point: Point): Boolean {
-        return false
-    }
+    override fun contains(point: Point): Boolean = false
 
     override fun contains(clipping: Rectangle,
-                          point: Point): Boolean {
-        return false
-    }
+                          point: Point): Boolean = false
 
-    override fun contains(rectangle: Rectangle): Boolean {
-        return false
-    }
+    override fun contains(rectangle: Rectangle): Boolean = false
 
-    override fun intersect(rectangle: Rectangle): Region {
-        return this
-    }
+    override fun intersect(rectangle: Rectangle): Region = this
 
-    override fun copy(): Region {
-        return this
-    }
+    override fun copy(): Region = this
 
-    override fun isEmpty(): Boolean {
-        return true
-    }
+    override fun isEmpty(): Boolean = true
 
     //TODO hash & equals?
 }

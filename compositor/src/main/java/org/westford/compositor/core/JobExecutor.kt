@@ -28,10 +28,11 @@ import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class JobExecutor @Inject internal constructor(private val display: Display,
-                                                          private val pipeR: Int,
-                                                          private val pipeWR: Int,
-                                                          private val libc: Libc) : EventLoop.FileDescriptorEventHandler {
+@Singleton class JobExecutor
+@Inject internal constructor(private val display: Display,
+                             private val pipeR: Int,
+                             private val pipeWR: Int,
+                             private val libc: Libc) : EventLoop.FileDescriptorEventHandler {
 
     private val eventNewJobBuffer = Pointer.nref(EVENT_NEW_JOB)
     private val eventFinishedBuffer = Pointer.nref(EVENT_FINISHED)

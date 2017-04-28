@@ -20,37 +20,34 @@ package org.westford.compositor.core
 import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.WlBufferResource
 import org.westford.compositor.core.calc.Mat4
-import java.util.*
 import javax.annotation.Nonnegative
 
-@AutoValue
-abstract class SurfaceState {
+@AutoValue abstract class SurfaceState {
 
-    abstract val opaqueRegion: Optional<Region>
+    abstract val opaqueRegion: Region?
 
-    abstract val inputRegion: Optional<Region>
+    abstract val inputRegion: Region?
 
-    abstract val damage: Optional<Region>
+    abstract val damage: Region?
 
-    abstract val buffer: Optional<WlBufferResource>
+    abstract val buffer: WlBufferResource?
 
     abstract val bufferTransform: Mat4
 
     abstract val deltaPosition: Point
 
-    @get:Nonnegative
-    abstract val scale: Int
+    @get:Nonnegative abstract val scale: Int
 
     abstract fun toBuilder(): Builder
 
     @AutoValue.Builder interface Builder {
-        fun opaqueRegion(wlRegionResource: Optional<Region>): Builder
+        fun opaqueRegion(wlRegionResource: Region?): Builder
 
         fun inputRegion(wlRegionResource: Region?): Builder
 
-        fun damage(damage: Optional<Region>): Builder
+        fun damage(damage: Region?): Builder
 
-        fun buffer(wlBufferResource: Optional<WlBufferResource>): Builder
+        fun buffer(wlBufferResource: WlBufferResource?): Builder
 
         fun bufferTransform(bufferTransform: Mat4): Builder
 
@@ -64,13 +61,7 @@ abstract class SurfaceState {
     companion object {
 
         internal fun builder(): Builder {
-            return AutoValue_SurfaceState.Builder().opaqueRegion(Optional.empty<Region>())
-                    .inputRegion(Optional.empty<Region>())
-                    .damage(Optional.empty<Region>())
-                    .buffer(Optional.empty<WlBufferResource>())
-                    .bufferTransform(Mat4.IDENTITY)
-                    .deltaPosition(Point.ZERO)
-                    .scale(1)
+            return AutoValue_SurfaceState.Builder().opaqueRegion(null).inputRegion(null).damage(null).buffer(null).bufferTransform(Mat4.IDENTITY).deltaPosition(Point.ZERO).scale(1)
         }
     }
 }
