@@ -18,18 +18,13 @@
 package org.westford.compositor.core
 
 import com.google.auto.value.AutoValue
-
 import javax.annotation.Nonnegative
-import java.util.Optional
 
-@AutoValue
-abstract class ShmSurfaceState : SurfaceRenderState {
+@AutoValue abstract class ShmSurfaceState : SurfaceRenderState {
 
-    @get:Nonnegative
-    abstract val pitch: Int
+    @get:Nonnegative abstract val pitch: Int
 
-    @get:Nonnegative
-    abstract val height: Int
+    @get:Nonnegative abstract val height: Int
 
     abstract val target: Int
 
@@ -41,8 +36,7 @@ abstract class ShmSurfaceState : SurfaceRenderState {
 
     abstract val texture: Int
 
-
-    override fun accept(surfaceRenderStateVisitor: SurfaceRenderStateVisitor): Optional<SurfaceRenderState> {
+    override fun accept(surfaceRenderStateVisitor: SurfaceRenderStateVisitor): SurfaceRenderState? {
         return surfaceRenderStateVisitor.visit(this)
     }
 
@@ -56,12 +50,12 @@ abstract class ShmSurfaceState : SurfaceRenderState {
                    glPixelType: Int,
                    texture: Int): ShmSurfaceState {
             return AutoValue_ShmSurfaceState(pitch,
-                    height,
-                    target,
-                    shaderProgram,
-                    glFormat,
-                    glPixelType,
-                    texture)
+                                             height,
+                                             target,
+                                             shaderProgram,
+                                             glFormat,
+                                             glPixelType,
+                                             texture)
         }
     }
 }

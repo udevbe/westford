@@ -25,19 +25,10 @@ import org.freedesktop.wayland.shared.WlPointerAxis
 import org.freedesktop.wayland.shared.WlPointerAxisSource
 import org.freedesktop.wayland.shared.WlPointerButtonState
 import org.freedesktop.wayland.shared.WlSeatCapability
-import org.westford.compositor.core.OutputGeometry
-import org.westford.compositor.core.Point
-import org.westford.compositor.core.PointerDevice
 import org.westford.compositor.core.RenderPlatform
-import org.westford.compositor.protocol.WlKeyboard
 import org.westford.compositor.protocol.WlOutput
-import org.westford.compositor.protocol.WlPointer
 import org.westford.compositor.protocol.WlSeat
-import org.westford.compositor.protocol.WlTouch
 import org.westford.nativ.libinput.Libinput
-import java.util.EnumSet
-import java.util.Optional
-
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_BUTTON_STATE_PRESSED
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_BUTTON_STATE_RELEASED
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_KEY_STATE_PRESSED
@@ -47,13 +38,14 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SCRO
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOURCE_FINGER
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOURCE_WHEEL
+import java.util.*
 
-@AutoFactory(className = "LibinputDeviceFactory", allowSubclasses = true)
-class LibinputDevice(@param:Provided private val libinput: Libinput,
-                     @param:Provided private val renderPlatform: RenderPlatform,
-                     private val wlSeat: WlSeat,
-                     private val device: Long,
-                     val deviceCapabilities: EnumSet<WlSeatCapability>) {
+@AutoFactory(className = "LibinputDeviceFactory",
+             allowSubclasses = true) class LibinputDevice(@param:Provided private val libinput: Libinput,
+                                                          @param:Provided private val renderPlatform: RenderPlatform,
+                                                          private val wlSeat: WlSeat,
+                                                          private val device: Long,
+                                                          val deviceCapabilities: EnumSet<WlSeatCapability>) {
 
     fun handleKeyboardKey(keyboardEvent: Long) {
 
@@ -68,18 +60,18 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
         }
 
         val wlKeyboard = this.wlSeat.wlKeyboard
-        wlKeyboard.keyboardDevice
-                .key(wlKeyboard.getResources(),
-                        time,
-                        key,
-                        wlKeyboardKeyState(keyState))
+        wlKeyboard.keyboardDevice.key(wlKeyboard.getResources(),
+                                      time,
+                                      key,
+                                      wlKeyboardKeyState(keyState))
     }
 
     private fun wlKeyboardKeyState(keyState: Int): WlKeyboardKeyState {
         val wlKeyboardKeyState: WlKeyboardKeyState
         if (keyState == LIBINPUT_KEY_STATE_PRESSED) {
             wlKeyboardKeyState = WlKeyboardKeyState.PRESSED
-        } else {
+        }
+        else {
             wlKeyboardKeyState = WlKeyboardKeyState.RELEASED
         }
         return wlKeyboardKeyState
@@ -96,60 +88,58 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
         val pointerDevicePosition = pointerDevice.position
 
         pointerDevice.motion(wlPointer.getResources(),
-                time,
-                pointerDevicePosition.x + dx.toInt(),
-                pointerDevicePosition.y + dy.toInt())
+                             time,
+                             pointerDevicePosition.x + dx.toInt(),
+                             pointerDevicePosition.y + dy.toInt())
         pointerDevice.frame(wlPointer.getResources())
     }
 
     fun handlePointerMotionAbsolute(pointerEvent: Long) {
-        findBoundOutput().ifPresent { wlOutput ->
+        findBoundOutput()?.let {
             //FIXME we should to take into account that boundOutput pixel size is not always the same as compositor coordinates but for now it is.
 
-            val geometry = wlOutput.output
-                    .geometry
+            val geometry = it.output.geometry
             val physicalWidth = geometry.physicalWidth
             val physicalHeight = geometry.physicalHeight
 
             val time = this.libinput.libinput_event_pointer_get_time(pointerEvent)
             val x = this.libinput.libinput_event_pointer_get_absolute_x_transformed(pointerEvent,
-                    physicalWidth)
+                                                                                    physicalWidth)
             val y = this.libinput.libinput_event_pointer_get_absolute_y_transformed(pointerEvent,
-                    physicalHeight)
+                                                                                    physicalHeight)
 
             val wlPointer = this.wlSeat.wlPointer
             val pointerDevice = wlPointer.pointerDevice
 
             pointerDevice.motion(wlPointer.getResources(),
-                    time,
-                    x.toInt(),
-                    y.toInt())
+                                 time,
+                                 x.toInt(),
+                                 y.toInt())
             pointerDevice.frame(wlPointer.getResources())
         }
     }
 
-    fun findBoundOutput(): Optional<WlOutput> {
+    fun findBoundOutput(): WlOutput? {
         //TODO we can cache the output that is mapped to this device and listen for output detsruction/addition so we save a few nanoseconds
 
         val outputNamePointer = this.libinput.libinput_device_get_output_name(this.device)
         if (outputNamePointer == 0L) {
-            val iterator = this.renderPlatform.wlOutputs
-                    .iterator()
+            val iterator = this.renderPlatform.wlOutputs.iterator()
             if (iterator.hasNext()) {
-                return Optional.of(iterator.next())
-            } else {
-                return Optional.empty<WlOutput>()
+                return iterator.next()
+            }
+            else {
+                return null
             }
         }
 
-        val deviceOutputName = Pointer.wrap<String>(String::class.java!!,
-                outputNamePointer)
-                .dref()
+        val deviceOutputName = Pointer.wrap<String>(String::class.java,
+                                                    outputNamePointer).dref()
         //        for (final WlOutput wlOutput : this.renderPlatform.getWlOutput()) {
         //FIXME give outputs a name, iterate them and match
         //            if (deviceOutputName.equals(renderPlatform.getOutput()
         //                                                .getName())) {
-        return Optional.of(this.renderPlatform.wlOutputs[0])
+        return this.renderPlatform.wlOutputs[0]
         //            }
         //     }
 
@@ -172,16 +162,17 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
         val pointerDevice = wlPointer.pointerDevice
 
         pointerDevice.button(wlPointer.getResources(),
-                time,
-                button,
-                wlPointerButtonState(buttonState))
+                             time,
+                             button,
+                             wlPointerButtonState(buttonState))
         pointerDevice.frame(wlPointer.getResources())
     }
 
     private fun wlPointerButtonState(buttonState: Int): WlPointerButtonState {
         if (buttonState == LIBINPUT_BUTTON_STATE_PRESSED) {
             return WlPointerButtonState.PRESSED
-        } else {
+        }
+        else {
             return WlPointerButtonState.RELEASED
         }
     }
@@ -189,9 +180,9 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
     fun handlePointerAxis(pointerEvent: Long) {
 
         val hasVertical = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
-                LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL)
+                                                                        LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL)
         val hasHorizontal = this.libinput.libinput_event_pointer_has_axis(pointerEvent,
-                LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL)
+                                                                          LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL)
 
         if (hasVertical == 0 && hasHorizontal == 0) {
             return
@@ -201,11 +192,10 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
         val wlPointerAxisSource: WlPointerAxisSource
 
         when (source) {
-            LIBINPUT_POINTER_AXIS_SOURCE_WHEEL -> wlPointerAxisSource = WlPointerAxisSource.WHEEL
-            LIBINPUT_POINTER_AXIS_SOURCE_FINGER -> wlPointerAxisSource = WlPointerAxisSource.FINGER
+            LIBINPUT_POINTER_AXIS_SOURCE_WHEEL      -> wlPointerAxisSource = WlPointerAxisSource.WHEEL
+            LIBINPUT_POINTER_AXIS_SOURCE_FINGER     -> wlPointerAxisSource = WlPointerAxisSource.FINGER
             LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS -> wlPointerAxisSource = WlPointerAxisSource.CONTINUOUS
-            else ->
-                //unknown scroll source
+            else                                    -> //unknown scroll source
                 return
         }
 
@@ -213,49 +203,51 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
         val pointerDevice = wlPointer.pointerDevice
 
         pointerDevice.axisSource(wlPointer.getResources(),
-                wlPointerAxisSource)
+                                 wlPointerAxisSource)
 
         if (hasVertical != 0) {
             val vertDiscrete = getAxisDiscrete(pointerEvent,
-                    LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL)
+                                               LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL)
             val vert = normalizeScroll(pointerEvent,
-                    LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL)
+                                       LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL)
 
             val time = this.libinput.libinput_event_pointer_get_time(pointerEvent)
 
             if (vertDiscrete == 0) {
                 pointerDevice.axisContinuous(wlPointer.getResources(),
-                        time,
-                        WlPointerAxis.VERTICAL_SCROLL,
-                        vert.toFloat())
-            } else {
+                                             time,
+                                             WlPointerAxis.VERTICAL_SCROLL,
+                                             vert.toFloat())
+            }
+            else {
                 pointerDevice.axisDiscrete(wlPointer.getResources(),
-                        WlPointerAxis.VERTICAL_SCROLL,
-                        time,
-                        vertDiscrete,
-                        vert.toFloat())
+                                           WlPointerAxis.VERTICAL_SCROLL,
+                                           time,
+                                           vertDiscrete,
+                                           vert.toFloat())
             }
         }
 
         if (hasHorizontal != 0) {
             val horizDiscrete = getAxisDiscrete(pointerEvent,
-                    LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL)
+                                                LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL)
             val horiz = normalizeScroll(pointerEvent,
-                    LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL)
+                                        LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL)
 
             val time = this.libinput.libinput_event_pointer_get_time(pointerEvent)
 
             if (horizDiscrete == 0) {
                 pointerDevice.axisContinuous(wlPointer.getResources(),
-                        time,
-                        WlPointerAxis.HORIZONTAL_SCROLL,
-                        horiz.toFloat())
-            } else {
+                                             time,
+                                             WlPointerAxis.HORIZONTAL_SCROLL,
+                                             horiz.toFloat())
+            }
+            else {
                 pointerDevice.axisDiscrete(wlPointer.getResources(),
-                        WlPointerAxis.HORIZONTAL_SCROLL,
-                        time,
-                        horizDiscrete,
-                        horiz.toFloat())
+                                           WlPointerAxis.HORIZONTAL_SCROLL,
+                                           time,
+                                           horizDiscrete,
+                                           horiz.toFloat())
             }
         }
 
@@ -271,7 +263,7 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
         }
 
         return this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
-                axis).toInt()
+                                                                            axis).toInt()
     }
 
     private fun normalizeScroll(pointerEvent: Long,
@@ -285,64 +277,60 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
 	   the click count.
 	 */
         when (source) {
-            LIBINPUT_POINTER_AXIS_SOURCE_WHEEL -> value = 10 * this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
-                    axis)
+            LIBINPUT_POINTER_AXIS_SOURCE_WHEEL                                           -> value = 10 * this.libinput.libinput_event_pointer_get_axis_value_discrete(pointerEvent,
+                                                                                                                                                                      axis)
             LIBINPUT_POINTER_AXIS_SOURCE_FINGER, LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS -> value = this.libinput.libinput_event_pointer_get_axis_value(pointerEvent,
-                    axis)
+                                                                                                                                                        axis)
         }
 
         return value
     }
 
     fun handleTouchDown(touchEvent: Long) {
-        findBoundOutput().ifPresent { wlOutput ->
+        findBoundOutput()?.let {
             //FIXME we should to take into account that boundOutput pixel size != compositor coordinates
 
-            val outputGeometry = wlOutput.output
-                    .geometry
+            val outputGeometry = it.output.geometry
             val physicalWidth = outputGeometry.physicalWidth
             val physicalHeight = outputGeometry.physicalHeight
 
             val time = this.libinput.libinput_event_touch_get_time(touchEvent)
             val slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent)
             val x = this.libinput.libinput_event_touch_get_x_transformed(touchEvent,
-                    physicalWidth).toInt()
+                                                                         physicalWidth).toInt()
             val y = this.libinput.libinput_event_touch_get_y_transformed(touchEvent,
-                    physicalHeight).toInt()
+                                                                         physicalHeight).toInt()
 
             val wlTouch = this.wlSeat.wlTouch
-            wlTouch.touchDevice
-                    .down(wlTouch.getResources(),
-                            slot,
-                            time,
-                            x,
-                            y)
+            wlTouch.touchDevice.down(wlTouch.getResources(),
+                                     slot,
+                                     time,
+                                     x,
+                                     y)
         }
     }
 
     fun handleTouchMotion(touchEvent: Long) {
-        findBoundOutput().ifPresent { wlOutput ->
+        findBoundOutput()?.let {
             //FIXME we should to take into account that boundOutput pixel size is not always the same as compositor coordinates but for now it is.
 
-            val outputGeometry = wlOutput.output
-                    .geometry
+            val outputGeometry = it.output.geometry
             val physicalWidth = outputGeometry.physicalWidth
             val physicalHeight = outputGeometry.physicalHeight
 
             val time = this.libinput.libinput_event_touch_get_time(touchEvent)
             val slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent)
             val x = this.libinput.libinput_event_touch_get_x_transformed(touchEvent,
-                    physicalWidth).toInt()
+                                                                         physicalWidth).toInt()
             val y = this.libinput.libinput_event_touch_get_y_transformed(touchEvent,
-                    physicalHeight).toInt()
+                                                                         physicalHeight).toInt()
 
             val wlTouch = this.wlSeat.wlTouch
-            wlTouch.touchDevice
-                    .motion(wlTouch.getResources(),
-                            slot,
-                            time,
-                            x,
-                            y)
+            wlTouch.touchDevice.motion(wlTouch.getResources(),
+                                       slot,
+                                       time,
+                                       x,
+                                       y)
         }
     }
 
@@ -351,15 +339,13 @@ class LibinputDevice(@param:Provided private val libinput: Libinput,
         val slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent)
 
         val wlTouch = this.wlSeat.wlTouch
-        wlTouch.touchDevice
-                .up(wlTouch.getResources(),
-                        slot,
-                        time)
+        wlTouch.touchDevice.up(wlTouch.getResources(),
+                               slot,
+                               time)
     }
 
     fun handleTouchFrame(touchEvent: Long) {
         val wlTouch = this.wlSeat.wlTouch
-        wlTouch.touchDevice
-                .frame(wlTouch.getResources())
+        wlTouch.touchDevice.frame(wlTouch.getResources())
     }
 }

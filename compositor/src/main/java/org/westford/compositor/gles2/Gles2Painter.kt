@@ -10,10 +10,9 @@ import org.westford.compositor.protocol.WlOutput
  * Convenience class to lazily setup, draw and flush using a [Gles2Renderer].
  */
 @AutoFactory(allowSubclasses = true,
-             className = "Gles2PainterFactory") class Gles2Painter
-internal constructor(@param:Provided private val gles2Renderer: Gles2Renderer,
-                     private val eglOutput: EglOutput,
-                     private val wlOutput: WlOutput) {
+             className = "Gles2PainterFactory") class Gles2Painter(@param:Provided private val gles2Renderer: Gles2Renderer,
+                                                                   private val eglOutput: EglOutput,
+                                                                   private val wlOutput: WlOutput) {
 
     private var painted = false
 

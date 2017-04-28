@@ -17,7 +17,6 @@
  */
 package org.westford.compositor.drm
 
-
 import com.google.auto.factory.AutoFactory
 import org.westford.nativ.libdrm.DrmModeConnector
 import org.westford.nativ.libdrm.DrmModeModeInfo
@@ -25,8 +24,8 @@ import org.westford.nativ.libdrm.DrmModeRes
 
 import javax.annotation.Nonnegative
 
-@AutoFactory(allowSubclasses = true, className = "DrmOutputFactory")
-class DrmOutput internal constructor(val drmModeRes: DrmModeRes,
-                                     val drmModeConnector: DrmModeConnector,
-                                     @param:Nonnegative val crtcId: Int,
-                                     val mode: DrmModeModeInfo)
+@AutoFactory(allowSubclasses = true,
+             className = "DrmOutputFactory") class DrmOutput(val drmModeRes: DrmModeRes,
+                                                             val drmModeConnector: DrmModeConnector,
+                                                             @param:Nonnegative val crtcId: Int,
+                                                             val mode: DrmModeModeInfo)

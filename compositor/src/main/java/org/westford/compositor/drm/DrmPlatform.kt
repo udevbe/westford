@@ -19,16 +19,15 @@ package org.westford.compositor.drm
 
 import com.google.auto.factory.AutoFactory
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.events.RenderOutputDestroyed
 import org.westford.compositor.core.events.RenderOutputNew
 
 //TODO drm platform, remove all gbm dependencies
-@AutoFactory(allowSubclasses = true, className = "PrivateDrmPlatformFactory")
-class DrmPlatform internal constructor(val drmDevice: Long,
-                                       val drmFd: Int,
-                                       val drmEventBus: DrmEventBus,
-                                       val renderOutputs: List<DrmOutput>) {
-    val renderOutputNewSignal = Signal<RenderOutputNew, Slot<RenderOutputNew>>()
-    val renderOutputDestroyedSignal = Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>>()
+@AutoFactory(allowSubclasses = true,
+             className = "PrivateDrmPlatformFactory") class DrmPlatform(val drmDevice: Long,
+                                                                        val drmFd: Int,
+                                                                        val drmEventBus: DrmEventBus,
+                                                                        val renderOutputs: List<DrmOutput>) {
+    val renderOutputNewSignal = Signal<RenderOutputNew>()
+    val renderOutputDestroyedSignal = Signal<RenderOutputDestroyed>()
 }

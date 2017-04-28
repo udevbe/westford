@@ -17,9 +17,6 @@
  */
 package org.westford.compositor.core
 
-import java.util.Optional
-
-@FunctionalInterface
-interface SurfaceRenderState {
-    fun accept(surfaceRenderStateVisitor: SurfaceRenderStateVisitor): Optional<SurfaceRenderState>
+@FunctionalInterface interface SurfaceRenderState {
+    fun accept(surfaceRenderStateVisitor: SurfaceRenderStateVisitor): SurfaceRenderState?
 }

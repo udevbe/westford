@@ -19,7 +19,11 @@ package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import org.freedesktop.wayland.server.*
+import org.freedesktop.wayland.server.WlBufferResource
+import org.freedesktop.wayland.server.WlCallbackResource
+import org.freedesktop.wayland.server.WlKeyboardResource
+import org.freedesktop.wayland.server.WlRegionResource
+import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.Signal
 import org.westford.compositor.core.calc.Mat4
 import org.westford.compositor.core.events.KeyboardFocusGained
@@ -47,7 +51,7 @@ import javax.annotation.Nonnegative
      * listener on this surface.
      * @return a set of keyboard resources.
      */
-    val keyboardFocuses = mutableSetOf<WlKeyboardResource>();
+    val keyboardFocuses = mutableSetOf<WlKeyboardResource>()
     val pendingState: SurfaceState.Builder = SurfaceState.builder()
     val pendingSubsurfaces = mutableListOf<Subsurface>()
     /**
@@ -241,7 +245,7 @@ import javax.annotation.Nonnegative
             ensureSiblingView(sibling,
                               it)
         }
-        this.siblings.add(sibling)
+        this.siblings += sibling
         sibling.wlSurfaceResource.register {
             removeSibling(sibling)
         }

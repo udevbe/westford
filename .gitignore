@@ -220,3 +220,6 @@ bootstrap/dependency-reduced-pom.xml
 /westford.log*
 /launch/drm.direct/dependency-reduced-pom.xml
 !/compositor/src/main/java/org/westford/compositor/core/OutputFactory.kt
+!/compositor/src/main/java/org/westford/compositor/core/SurfaceViewFactory.kt
+!/compositor/src/main/java/org/westford/compositor/drm/egl/GbmBoClient.kt
+!/compositor/src/main/java/org/westford/compositor/gles2/Gles2RendererModule.kt

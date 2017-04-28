@@ -17,7 +17,8 @@
  */
 package org.westford.compositor.drm
 
-
+import org.freedesktop.jaccall.Pointer.nref
+import org.freedesktop.jaccall.Pointer.wrap
 import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore
 import org.westford.launch.Privileges
@@ -27,25 +28,19 @@ import org.westford.nativ.libdrm.DrmModeEncoder
 import org.westford.nativ.libdrm.DrmModeModeInfo
 import org.westford.nativ.libdrm.DrmModeRes
 import org.westford.nativ.libdrm.Libdrm
-import org.westford.nativ.libudev.Libudev
-import javax.inject.Inject
-import java.util.ArrayList
-import java.util.HashSet
-import java.util.Optional
-
-import org.freedesktop.jaccall.Pointer.nref
-import org.freedesktop.jaccall.Pointer.wrap
 import org.westford.nativ.libdrm.Libdrm.Companion.DRM_MODE_CONNECTED
+import org.westford.nativ.libudev.Libudev
+import java.util.*
+import javax.inject.Inject
 
 //TODO tests tests tests!
-class DrmPlatformFactory @Inject
-internal constructor(private val libudev: Libudev,
-                     private val libdrm: Libdrm,
-                     private val display: Display,
-                     private val drmOutputFactory: DrmOutputFactory,
-                     private val drmEventBusFactory: DrmEventBusFactory,
-                     private val privateDrmPlatformFactory: PrivateDrmPlatformFactory,
-                     private val privileges: Privileges) {
+class DrmPlatformFactory @Inject internal constructor(private val libudev: Libudev,
+                                                      private val libdrm: Libdrm,
+                                                      private val display: Display,
+                                                      private val drmOutputFactory: DrmOutputFactory,
+                                                      private val drmEventBusFactory: DrmEventBusFactory,
+                                                      private val privateDrmPlatformFactory: PrivateDrmPlatformFactory,
+                                                      private val privileges: Privileges) {
 
     fun create(): DrmPlatform {
         val udev = this.libudev.udev_new()
@@ -54,7 +49,7 @@ internal constructor(private val libudev: Libudev,
         }
         //TODO seat from config
         val drmDevice = findPrimaryGpu(udev,
-                "seat0")
+                                       "seat0")
         if (drmDevice == 0L) {
             throw RuntimeException("No drm capable gpu device found.")
         }
@@ -64,17 +59,16 @@ internal constructor(private val libudev: Libudev,
         val drmOutputs = createDrmRenderOutputs(drmFd)
 
         val drmEventBus = this.drmEventBusFactory.create(drmFd)
-        this.display.eventLoop
-                .addFileDescriptor(drmFd,
-                        WaylandServerCore.WL_EVENT_READABLE,
-                        drmEventBus)
+        this.display.eventLoop.addFileDescriptor(drmFd,
+                                                 WaylandServerCore.WL_EVENT_READABLE,
+                                                 drmEventBus)
 
         this.privileges.setDrmMaster(drmFd)
 
         return this.privateDrmPlatformFactory.create(drmDevice,
-                drmFd,
-                drmEventBus,
-                drmOutputs)
+                                                     drmFd,
+                                                     drmEventBus,
+                                                     drmOutputs)
     }
 
     /*
@@ -89,9 +83,9 @@ internal constructor(private val libudev: Libudev,
 
         val udevEnumerate = this.libudev.udev_enumerate_new(udev)
         this.libudev.udev_enumerate_add_match_subsystem(udevEnumerate,
-                nref("drm").address)
+                                                        nref("drm").address)
         this.libudev.udev_enumerate_add_match_sysname(udevEnumerate,
-                nref("card[0-9]*").address)
+                                                      nref("card[0-9]*").address)
 
         this.libudev.udev_enumerate_scan_devices(udevEnumerate)
         var drmDevice = 0L
@@ -101,8 +95,8 @@ internal constructor(private val libudev: Libudev,
 
             val path = this.libudev.udev_list_entry_get_name(entry)
             val device = this.libudev.udev_device_new_from_syspath(udev,
-                    path)
-            if (device == 0) {
+                                                                   path)
+            if (device == 0L) {
                 //no device, process next entry
                 entry = this.libudev.udev_list_entry_get_next(entry)
                 continue
@@ -110,13 +104,14 @@ internal constructor(private val libudev: Libudev,
             }
             val deviceSeat: String
             val seatId = this.libudev.udev_device_get_property_value(device,
-                    nref("ID_SEAT").address)
-            if (seatId == 0) {
+                                                                     nref("ID_SEAT").address)
+            if (seatId == 0L) {
                 //device does not have a seat, assign it a default one.
                 deviceSeat = Libudev.DEFAULT_SEAT
-            } else {
-                deviceSeat = wrap<String>(String::class.java!!,
-                        seatId).dref()
+            }
+            else {
+                deviceSeat = wrap<String>(String::class.java,
+                                          seatId).dref()
             }
             if (deviceSeat != seat) {
                 //device has a seat, but not the one we want, process next entry
@@ -126,13 +121,13 @@ internal constructor(private val libudev: Libudev,
             }
 
             val pci = this.libudev.udev_device_get_parent_with_subsystem_devtype(device,
-                    nref("pci").address,
-                    0L)
-            if (pci != 0) {
+                                                                                 nref("pci").address,
+                                                                                 0L)
+            if (pci != 0L) {
                 val id = this.libudev.udev_device_get_sysattr_value(pci,
-                        nref("boot_vga").address)
-                if (id != 0L && wrap<String>(String::class.java!!,
-                        id).dref() == "1") {
+                                                                    nref("boot_vga").address)
+                if (id != 0L && wrap<String>(String::class.java,
+                                             id).dref() == "1") {
                     if (drmDevice != 0L) {
                         this.libudev.udev_device_unref(drmDevice)
                     }
@@ -143,7 +138,8 @@ internal constructor(private val libudev: Libudev,
 
             if (drmDevice == 0L) {
                 drmDevice = device
-            } else {
+            }
+            else {
                 this.libudev.udev_device_unref(device)
             }
             entry = this.libudev.udev_list_entry_get_next(entry)
@@ -156,20 +152,20 @@ internal constructor(private val libudev: Libudev,
     private fun initDrm(device: Long): Int {
         val sysnum = this.libudev.udev_device_get_sysnum(device)
         val drmId: Int
-        if (sysnum != 0) {
-            drmId = Integer.parseInt(wrap<String>(String::class.java!!,
-                    sysnum)
-                    .dref())
-        } else {
+        if (sysnum != 0L) {
+            drmId = Integer.parseInt(wrap<String>(String::class.java,
+                                                  sysnum).dref())
+        }
+        else {
             drmId = 0
         }
-        if (sysnum == 0 || drmId < 0) {
+        if (sysnum == 0L || drmId < 0) {
             throw RuntimeException("Failed to open drm device.")
         }
 
         val filename = this.libudev.udev_device_get_devnode(device)
         val fd = this.privileges.open(filename,
-                Libc.O_RDWR)
+                                      Libc.O_RDWR)
         if (fd < 0) {
             throw RuntimeException("Failed to open drm device.")
         }
@@ -183,8 +179,8 @@ internal constructor(private val libudev: Libudev,
             throw RuntimeException("Getting drm resources failed.")
         }
 
-        val drmModeRes = wrap<DrmModeRes>(DrmModeRes::class.java!!,
-                resources).dref()
+        val drmModeRes = wrap<DrmModeRes>(DrmModeRes::class.java,
+                                          resources).dref()
 
         val countConnectors = drmModeRes.count_connectors()
         val drmOutputs = ArrayList<DrmOutput>(countConnectors)
@@ -192,23 +188,22 @@ internal constructor(private val libudev: Libudev,
 
         for (i in 0..countConnectors - 1) {
             val connector = this.libdrm.drmModeGetConnector(drmFd,
-                    drmModeRes.connectors()
-                            .dref(i))
+                                                            drmModeRes.connectors().dref(i))
             if (connector == 0L) {
                 continue
             }
 
-            val drmModeConnector = wrap<DrmModeConnector>(DrmModeConnector::class.java!!,
-                    connector).dref()
+            val drmModeConnector = wrap<DrmModeConnector>(DrmModeConnector::class.java,
+                                                          connector).dref()
 
-            if (drmModeConnector.connection() === DRM_MODE_CONNECTED) {
+            if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
                 findCrtcIdForConnector(drmFd,
-                        drmModeRes,
-                        drmModeConnector,
-                        usedCrtcs).ifPresent { crtcId ->
+                                       drmModeRes,
+                                       drmModeConnector,
+                                       usedCrtcs).ifPresent { crtcId ->
                     drmOutputs.add(createDrmRenderOutput(drmModeRes,
-                            drmModeConnector,
-                            crtcId))
+                                                         drmModeConnector,
+                                                         crtcId))
                 }
             }
         }
@@ -223,23 +218,19 @@ internal constructor(private val libudev: Libudev,
 
         for (j in 0..drmModeConnector.count_encoders() - 1) {
             val encoder = this.libdrm.drmModeGetEncoder(drmFd,
-                    drmModeConnector.encoders()
-                            .dref(j))
+                                                        drmModeConnector.encoders().dref(j))
             if (encoder == 0L) {
                 return Optional.empty<Int>()
             }
 
             //bitwise flag of available crtcs, each bit represents the index of crtcs in drmModeRes
-            val possibleCrtcs = wrap<DrmModeEncoder>(DrmModeEncoder::class.java!!,
-                    encoder).dref()
-                    .possible_crtcs()
+            val possibleCrtcs = wrap<DrmModeEncoder>(DrmModeEncoder::class.java,
+                                                     encoder).dref().possible_crtcs()
             this.libdrm.drmModeFreeEncoder(encoder)
 
             for (i in 0..drmModeRes.count_crtcs() - 1) {
-                if (possibleCrtcs and (1 shl i) != 0 && crtcAllocations.add(drmModeRes.crtcs()
-                        .dref(i))) {
-                    return Optional.of(drmModeRes.crtcs()
-                            .dref(i))
+                if (possibleCrtcs and (1 shl i) != 0 && crtcAllocations.add(drmModeRes.crtcs().dref(i))) {
+                    return Optional.of(drmModeRes.crtcs().dref(i))
                 }
             }
         }
@@ -254,8 +245,7 @@ internal constructor(private val libudev: Libudev,
         var area = 0
         var mode: DrmModeModeInfo? = null
         for (i in 0..drmModeConnector.count_modes() - 1) {
-            val currentMode = drmModeConnector.modes()
-                    .dref(i)
+            val currentMode = drmModeConnector.modes().dref(i)
             val current_area = currentMode.hdisplay() * currentMode.vdisplay()
             if (current_area > area) {
                 mode = currentMode
@@ -269,8 +259,8 @@ internal constructor(private val libudev: Libudev,
 
         //FIXME deduce an output name from the drm connector
         return this.drmOutputFactory.create(drmModeRes,
-                drmModeConnector,
-                crtcId,
-                mode)
+                                            drmModeConnector,
+                                            crtcId,
+                                            mode)
     }
 }

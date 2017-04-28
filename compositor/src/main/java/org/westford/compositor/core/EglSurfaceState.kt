@@ -18,9 +18,7 @@
 package org.westford.compositor.core
 
 import com.google.auto.value.AutoValue
-
 import javax.annotation.Nonnegative
-import java.util.Optional
 
 @AutoValue abstract class EglSurfaceState : SurfaceRenderState {
 
@@ -38,7 +36,7 @@ import java.util.Optional
 
     abstract val eglImages: LongArray
 
-    override fun accept(surfaceRenderStateVisitor: SurfaceRenderStateVisitor): Optional<SurfaceRenderState> {
+    override fun accept(surfaceRenderStateVisitor: SurfaceRenderStateVisitor): SurfaceRenderState? {
         return surfaceRenderStateVisitor.visit(this)
     }
 

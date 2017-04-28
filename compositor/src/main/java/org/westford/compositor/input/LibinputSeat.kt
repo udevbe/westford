@@ -20,21 +20,16 @@ package org.westford.compositor.input
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.jaccall.Pointer
+import org.freedesktop.jaccall.Pointer.wrap
 import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.EventSource
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore
 import org.freedesktop.wayland.shared.WlSeatCapability
-import org.westford.compositor.core.Seat
-import org.westford.compositor.protocol.WlSeat
-import org.westford.nativ.libinput.Libinput
-import java.util.EnumSet
-import java.util.HashSet
-import java.util.Optional
-
-import org.freedesktop.jaccall.Pointer.wrap
 import org.freedesktop.wayland.shared.WlSeatCapability.KEYBOARD
 import org.freedesktop.wayland.shared.WlSeatCapability.POINTER
 import org.freedesktop.wayland.shared.WlSeatCapability.TOUCH
+import org.westford.compositor.protocol.WlSeat
+import org.westford.nativ.libinput.Libinput
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_DEVICE_CAP_KEYBOARD
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_DEVICE_CAP_POINTER
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_DEVICE_CAP_TOUCH
@@ -50,13 +45,14 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_DOWN
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_FRAME
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_MOTION
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_UP
+import java.util.*
 
-@AutoFactory(allowSubclasses = true, className = "PrivateLibinputSeatFactory")
-class LibinputSeat internal constructor(@param:Provided private val display: Display,
-                                        @param:Provided private val libinput: Libinput,
-                                        @param:Provided private val libinputDeviceFactory: LibinputDeviceFactory,
-                                        private val libinputContext: Long,
-                                        private val wlSeat: WlSeat) {
+@AutoFactory(allowSubclasses = true,
+             className = "PrivateLibinputSeatFactory") class LibinputSeat(@param:Provided private val display: Display,
+                                                                          @param:Provided private val libinput: Libinput,
+                                                                          @param:Provided private val libinputDeviceFactory: LibinputDeviceFactory,
+                                                                          private val libinputContext: Long,
+                                                                          private val wlSeat: WlSeat) {
 
     private val libinputDevices = HashSet<LibinputDevice>()
     private var inputEventSource = Optional.empty<EventSource>()
@@ -75,15 +71,13 @@ class LibinputSeat internal constructor(@param:Provided private val display: Dis
     private fun loop(libinput: Long) {
         if (!this.inputEventSource.isPresent) {
             val libinputFd = this.libinput.libinput_get_fd(libinput)
-            this.inputEventSource = Optional.of(this.display.eventLoop
-                    .addFileDescriptor(libinputFd,
-                            WaylandServerCore.WL_EVENT_READABLE
-                    ) { fd, mask ->
-                        if (fd == libinputFd) {
-                            processEvents(libinput)
-                        }
-                        0
-                    })
+            this.inputEventSource = Optional.of(this.display.eventLoop.addFileDescriptor(libinputFd,
+                                                                                         WaylandServerCore.WL_EVENT_READABLE) { fd, mask ->
+                if (fd == libinputFd) {
+                    processEvents(libinput)
+                }
+                0
+            })
         }
     }
 
@@ -104,13 +98,13 @@ class LibinputSeat internal constructor(@param:Provided private val display: Dis
         val eventType = this.libinput.libinput_event_get_type(event)
         val device = this.libinput.libinput_event_get_device(event)
         when (eventType) {
-            LIBINPUT_EVENT_NONE -> {
+            LIBINPUT_EVENT_NONE           -> {
             }
-            LIBINPUT_EVENT_DEVICE_ADDED -> handleDeviceAdded(device)
+            LIBINPUT_EVENT_DEVICE_ADDED   -> handleDeviceAdded(device)
             LIBINPUT_EVENT_DEVICE_REMOVED -> handleDeviceRemoved(device)
-            else -> processDeviceEvent(event,
-                    eventType,
-                    device)
+            else                          -> processDeviceEvent(event,
+                                                                eventType,
+                                                                device)
         }//no more events
     }
 
@@ -119,15 +113,15 @@ class LibinputSeat internal constructor(@param:Provided private val display: Dis
         val deviceCapabilities = EnumSet.noneOf<WlSeatCapability>(WlSeatCapability::class.java)
 
         if (this.libinput.libinput_device_has_capability(device,
-                LIBINPUT_DEVICE_CAP_KEYBOARD) != 0) {
+                                                         LIBINPUT_DEVICE_CAP_KEYBOARD) != 0) {
             deviceCapabilities.add(KEYBOARD)
         }
         if (this.libinput.libinput_device_has_capability(device,
-                LIBINPUT_DEVICE_CAP_POINTER) != 0) {
+                                                         LIBINPUT_DEVICE_CAP_POINTER) != 0) {
             deviceCapabilities.add(POINTER)
         }
         if (this.libinput.libinput_device_has_capability(device,
-                LIBINPUT_DEVICE_CAP_TOUCH) != 0) {
+                                                         LIBINPUT_DEVICE_CAP_TOUCH) != 0) {
             deviceCapabilities.add(TOUCH)
         }
 
@@ -138,10 +132,10 @@ class LibinputSeat internal constructor(@param:Provided private val display: Dis
         //TODO configure device
 
         val libinputDevice = this.libinputDeviceFactory.create(this.wlSeat,
-                device,
-                deviceCapabilities)
+                                                               device,
+                                                               deviceCapabilities)
         this.libinput.libinput_device_set_user_data(device,
-                Pointer.from(libinputDevice).address)
+                                                    Pointer.from(libinputDevice).address)
         this.libinput.libinput_device_ref(device)
         this.libinputDevices.add(libinputDevice)
 
@@ -155,8 +149,8 @@ class LibinputSeat internal constructor(@param:Provided private val display: Dis
             return
         }
 
-        val devicePointer = wrap<LibinputDevice>(LibinputDevice::class.java!!,
-                deviceData)
+        val devicePointer = wrap<LibinputDevice>(LibinputDevice::class.java,
+                                                 deviceData)
         val libinputDevice = devicePointer.dref()
         this.libinputDevices.remove(libinputDevice)
         devicePointer.close()
@@ -173,20 +167,20 @@ class LibinputSeat internal constructor(@param:Provided private val display: Dis
             //device was not mapped to a device we can handle
             return
         }
-        val libinputDevice = wrap<Any>(Any::class.java!!,
-                deviceData).dref() as LibinputDevice
+        val libinputDevice = wrap<Any>(Any::class.java,
+                                       deviceData).dref() as LibinputDevice
 
         when (eventType) {
-            LIBINPUT_EVENT_KEYBOARD_KEY -> libinputDevice.handleKeyboardKey(this.libinput.libinput_event_get_keyboard_event(event))
-            LIBINPUT_EVENT_POINTER_MOTION -> libinputDevice.handlePointerMotion(this.libinput.libinput_event_get_pointer_event(event))
+            LIBINPUT_EVENT_KEYBOARD_KEY            -> libinputDevice.handleKeyboardKey(this.libinput.libinput_event_get_keyboard_event(event))
+            LIBINPUT_EVENT_POINTER_MOTION          -> libinputDevice.handlePointerMotion(this.libinput.libinput_event_get_pointer_event(event))
             LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE -> libinputDevice.handlePointerMotionAbsolute(this.libinput.libinput_event_get_pointer_event(event))
-            LIBINPUT_EVENT_POINTER_BUTTON -> libinputDevice.handlePointerButton(this.libinput.libinput_event_get_pointer_event(event))
-            LIBINPUT_EVENT_POINTER_AXIS -> libinputDevice.handlePointerAxis(this.libinput.libinput_event_get_pointer_event(event))
-            LIBINPUT_EVENT_TOUCH_DOWN -> libinputDevice.handleTouchDown(this.libinput.libinput_event_get_touch_event(event))
-            LIBINPUT_EVENT_TOUCH_MOTION -> libinputDevice.handleTouchMotion(this.libinput.libinput_event_get_touch_event(event))
-            LIBINPUT_EVENT_TOUCH_UP -> libinputDevice.handleTouchUp(this.libinput.libinput_event_get_touch_event(event))
-            LIBINPUT_EVENT_TOUCH_FRAME -> libinputDevice.handleTouchFrame(this.libinput.libinput_event_get_touch_event(event))
-            else -> {
+            LIBINPUT_EVENT_POINTER_BUTTON          -> libinputDevice.handlePointerButton(this.libinput.libinput_event_get_pointer_event(event))
+            LIBINPUT_EVENT_POINTER_AXIS            -> libinputDevice.handlePointerAxis(this.libinput.libinput_event_get_pointer_event(event))
+            LIBINPUT_EVENT_TOUCH_DOWN              -> libinputDevice.handleTouchDown(this.libinput.libinput_event_get_touch_event(event))
+            LIBINPUT_EVENT_TOUCH_MOTION            -> libinputDevice.handleTouchMotion(this.libinput.libinput_event_get_touch_event(event))
+            LIBINPUT_EVENT_TOUCH_UP                -> libinputDevice.handleTouchUp(this.libinput.libinput_event_get_touch_event(event))
+            LIBINPUT_EVENT_TOUCH_FRAME             -> libinputDevice.handleTouchFrame(this.libinput.libinput_event_get_touch_event(event))
+            else                                   -> {
             }
         }//unsupported libinput event
     }

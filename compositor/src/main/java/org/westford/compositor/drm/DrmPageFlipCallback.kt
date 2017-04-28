@@ -20,9 +20,9 @@ package org.westford.compositor.drm
 import org.freedesktop.jaccall.Unsigned
 
 interface DrmPageFlipCallback {
-    open fun onPageFlip(@Unsigned sequence: Int,
-                        @Unsigned tv_sec: Int,
-                        @Unsigned tv_usec: Int) {
+    fun onPageFlip(@Unsigned sequence: Int,
+                   @Unsigned tv_sec: Int,
+                   @Unsigned tv_usec: Int) {
     }
 
     fun onVBlank(@Unsigned sequence: Int,

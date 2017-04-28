@@ -22,16 +22,13 @@ import org.freedesktop.wayland.server.WlBufferResource
 
 import javax.annotation.Nonnegative
 
-@AutoValue
-abstract class UnsupportedBuffer : Buffer {
+@AutoValue abstract class UnsupportedBuffer : Buffer {
 
     override val width: Int
-        @Nonnegative
-        get() = 0
+        @Nonnegative get() = 0
 
     override val height: Int
-        @Nonnegative
-        get() = 0
+        @Nonnegative get() = 0
 
     abstract override val wlBufferResource: WlBufferResource
 

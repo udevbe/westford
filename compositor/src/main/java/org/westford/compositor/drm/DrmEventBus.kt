@@ -25,16 +25,15 @@ import org.freedesktop.jaccall.Unsigned
 import org.freedesktop.wayland.server.EventLoop
 import org.westford.nativ.libdrm.Libdrm
 
-
-@AutoFactory(allowSubclasses = true, className = "PrivateDrmEventBusFactory")
-class DrmEventBus internal constructor(@param:Provided private val libdrm: Libdrm,
-                                       private val drmFd: Int,
-                                       private val drmEventContext: Long) : EventLoop.FileDescriptorEventHandler {
+@AutoFactory(allowSubclasses = true,
+             className = "PrivateDrmEventBusFactory") class DrmEventBus(@param:Provided private val libdrm: Libdrm,
+                                                                        private val drmFd: Int,
+                                                                        private val drmEventContext: Long) : EventLoop.FileDescriptorEventHandler {
 
     override fun handle(fd: Int,
                         mask: Int): Int {
         this.libdrm.drmHandleEvent(this.drmFd,
-                this.drmEventContext)
+                                   this.drmEventContext)
         return 0
     }
 
@@ -43,12 +42,12 @@ class DrmEventBus internal constructor(@param:Provided private val libdrm: Libdr
                         @Unsigned tv_sec: Int,
                         @Unsigned tv_usec: Int,
                         @Ptr user_data: Long) {
-        val drmPageFlipCallbackPointer = Pointer.wrap<Any>(Any::class.java!!,
-                user_data)
+        val drmPageFlipCallbackPointer = Pointer.wrap<Any>(Any::class.java,
+                                                           user_data)
         val drmPageFlipCallback = drmPageFlipCallbackPointer.dref() as DrmPageFlipCallback
         drmPageFlipCallback.onPageFlip(sequence,
-                tv_sec,
-                tv_usec)
+                                       tv_sec,
+                                       tv_usec)
         drmPageFlipCallbackPointer.close()
     }
 
@@ -57,12 +56,12 @@ class DrmEventBus internal constructor(@param:Provided private val libdrm: Libdr
                       @Unsigned tv_sec: Int,
                       @Unsigned tv_usec: Int,
                       @Ptr user_data: Long) {
-        val drmPageFlipCallbackPointer = Pointer.wrap<Any>(Any::class.java!!,
-                user_data)
+        val drmPageFlipCallbackPointer = Pointer.wrap<Any>(Any::class.java,
+                                                           user_data)
         val drmPageFlipCallback = drmPageFlipCallbackPointer.dref() as DrmPageFlipCallback
         drmPageFlipCallback.onVBlank(sequence,
-                tv_sec,
-                tv_usec)
+                                     tv_sec,
+                                     tv_usec)
         drmPageFlipCallbackPointer.close()
     }
 }

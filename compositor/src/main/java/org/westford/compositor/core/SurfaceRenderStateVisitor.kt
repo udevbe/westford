@@ -17,14 +17,12 @@
  */
 package org.westford.compositor.core
 
-import java.util.Optional
-
 interface SurfaceRenderStateVisitor {
-    fun visit(shmSurfaceState: ShmSurfaceState): Optional<SurfaceRenderState> {
-        return Optional.of<SurfaceRenderState>(shmSurfaceState)
+    fun visit(shmSurfaceState: ShmSurfaceState): SurfaceRenderState? {
+        return shmSurfaceState
     }
 
-    fun visit(eglSurfaceState: EglSurfaceState): Optional<SurfaceRenderState> {
-        return Optional.of<SurfaceRenderState>(eglSurfaceState)
+    fun visit(eglSurfaceState: EglSurfaceState): SurfaceRenderState? {
+        return eglSurfaceState
     }
 }

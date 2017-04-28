@@ -19,21 +19,15 @@ package org.westford.compositor.drm.egl
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import com.sun.javafx.scene.SceneUtils
 import org.freedesktop.jaccall.Pointer
 import org.freedesktop.jaccall.Ptr
 import org.freedesktop.jaccall.Size
 import org.freedesktop.jaccall.Unsigned
 import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.EventSource
-import org.freedesktop.wayland.server.WlBufferResource
-import org.westford.compositor.core.Buffer
 import org.westford.compositor.core.EglOutput
-import org.westford.compositor.core.EglOutputState
-import org.westford.compositor.core.Output
 import org.westford.compositor.core.OutputMode
 import org.westford.compositor.core.Rectangle
-import org.westford.compositor.core.Region
 import org.westford.compositor.core.Scene
 import org.westford.compositor.core.Subscene
 import org.westford.compositor.core.Surface
@@ -41,17 +35,13 @@ import org.westford.compositor.core.SurfaceView
 import org.westford.compositor.drm.DrmOutput
 import org.westford.compositor.drm.DrmPageFlipCallback
 import org.westford.compositor.gles2.Gles2Painter
-import org.westford.compositor.gles2.Gles2PainterFactory
 import org.westford.compositor.gles2.Gles2Renderer
 import org.westford.compositor.protocol.WlOutput
 import org.westford.compositor.protocol.WlSurface
 import org.westford.nativ.glibc.Libc
 import org.westford.nativ.libdrm.Libdrm
-import org.westford.nativ.libgbm.Libgbm
-import org.westford.nativ.libgbm.Pointerdestroy_user_data
-import java.util.Optional
-
 import org.westford.nativ.libdrm.Libdrm.Companion.DRM_MODE_PAGE_FLIP_EVENT
+import org.westford.nativ.libgbm.Libgbm
 import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_ARGB8888
 import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
 
@@ -60,7 +50,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
                                                                    @param:Provided private val libgbm: Libgbm,
                                                                    @param:Provided private val libdrm: Libdrm,
                                                                    @param:Provided private val display: Display,
-                                                                   @Provided gles2PainterFactory: org.westford.compositor.gles2.Gles2PainterFactory,
+                                                                   @param:Provided private val gles2PainterFactory: org.westford.compositor.gles2.Gles2PainterFactory,
                                                                    @param:Provided private val gles2Renderer: Gles2Renderer,
                                                                    @param:Provided private val scene: Scene,
                                                                    @param:Provided private val gbmBoFactory: GbmBoFactory,
@@ -73,10 +63,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
                                                                    override val eglContext: Long,
                                                                    override val eglDisplay: Long) : EglOutput, DrmPageFlipCallback {
 
-    private val gles2PainterFactory: Gles2PainterFactory
-
     private var nextGbmBo: GbmBo
-
     private var renderPending = false
     private var pageFlipPending = false
     private var afterPageFlipRender: (() -> Unit)? = null
@@ -84,7 +71,6 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
     private var enabled: Boolean = false
 
     init {
-        this.gles2PainterFactory = gles2PainterFactory
         this.nextGbmBo = gbmBo
     }
 
@@ -180,23 +166,23 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
         //If we can't offload to some kind of cursor plane then we are forced to put it on the primary plane.
         //This means we can't really offload anything to other planes as hey would be shown on top of the cursor
         //primary plane
-        if (cursorPlane!!.isPresent) {
+        if (cursorPlane != null) {
             //continue offloading to overlay planes
             val lockViewsPlane = toOverlayPlane(wlOutput,
                                                 subscene.lockViews)
-            if (lockViewsPlane!!.isPresent) {
+            if (lockViewsPlane != null) {
                 return
             }
 
             val fullscreenPlane = toPrimaryPlane(wlOutput,
                                                  subscene.fullscreenView)
-            if (fullscreenPlane!!.isPresent) {
+            if (fullscreenPlane != null) {
                 return
             }
 
             val overPlane = toOverlayPlane(wlOutput,
                                            subscene.overViews)
-            if (!overPlane!!.isPresent) {
+            if (overPlane == null) {
                 toPrimaryPlane(wlOutput,
                                subscene.backgroundView,
                                subscene.underViews,
@@ -206,7 +192,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
 
             val applicationsPlane = toOverlayPlane(wlOutput,
                                                    subscene.applicationViews)
-            if (!applicationsPlane!!.isPresent) {
+            if (applicationsPlane == null) {
                 toPrimaryPlane(wlOutput,
                                subscene.backgroundView,
                                subscene.underViews,
@@ -215,7 +201,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
 
             val underPlane = toOverlayPlane(wlOutput,
                                             subscene.underViews)
-            if (!underPlane!!.isPresent) {
+            if (underPlane == null) {
                 toPrimaryPlane(wlOutput,
                                subscene.backgroundView,
                                subscene.underViews)
@@ -236,7 +222,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
               subscene)
 
         //TODO paint cursors on separate overlay
-        subscene.geCursorViews().forEach(Consumer<SurfaceView> { painter.paint(it) })
+        subscene.geCursorViews().forEach { painter.paint(it) }
 
         //FIXME how to compose different gbm_bos?
         if (painter.commit()) {
@@ -405,14 +391,16 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
 
         var clientFormat = this.libgbm.gbm_bo_get_format(clientGbmBo.gbmBo)
 
-        if (clientFormat == GBM_FORMAT_ARGB8888 && surface.state.opaqueRegion != null) {
-            val opaqueCopy = surface.state.opaqueRegion?.copy()
-            opaqueCopy.subtract(Rectangle.create(0,
-                                                 0,
-                                                 mode.width,
-                                                 mode.height))
-            if (opaqueCopy.isEmpty) {
-                clientFormat = GBM_FORMAT_XRGB8888
+        if (clientFormat == GBM_FORMAT_ARGB8888) {
+            surface.state.opaqueRegion?.let {
+                val opaqueCopy = it.copy()
+                opaqueCopy.subtract(Rectangle.create(0,
+                                                     0,
+                                                     mode.width,
+                                                     mode.height))
+                if (opaqueCopy.isEmpty()) {
+                    clientFormat = GBM_FORMAT_XRGB8888
+                }
             }
         }
 

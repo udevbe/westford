@@ -27,7 +27,20 @@ import org.freedesktop.wayland.server.ShmBuffer
 import org.freedesktop.wayland.server.WlBufferResource
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.freedesktop.wayland.shared.WlShmFormat
-import org.westford.compositor.core.*
+import org.westford.compositor.core.Buffer
+import org.westford.compositor.core.BufferVisitor
+import org.westford.compositor.core.EglBuffer
+import org.westford.compositor.core.EglOutput
+import org.westford.compositor.core.EglOutputState
+import org.westford.compositor.core.EglSurfaceState
+import org.westford.compositor.core.GlRenderer
+import org.westford.compositor.core.Output
+import org.westford.compositor.core.ShmSurfaceState
+import org.westford.compositor.core.SmBuffer
+import org.westford.compositor.core.SurfaceRenderState
+import org.westford.compositor.core.SurfaceRenderStateVisitor
+import org.westford.compositor.core.SurfaceView
+import org.westford.compositor.core.UnsupportedBuffer
 import org.westford.compositor.core.calc.Mat4
 import org.westford.compositor.gles2.Gles2Shaders.FRAGMENT_SHADER_EGL_EXTERNAL
 import org.westford.compositor.gles2.Gles2Shaders.FRAGMENT_SHADER_EGL_Y_UV
@@ -36,7 +49,11 @@ import org.westford.compositor.gles2.Gles2Shaders.FRAGMENT_SHADER_EGL_Y_XUXV
 import org.westford.compositor.gles2.Gles2Shaders.VERTEX_SHADER
 import org.westford.compositor.protocol.WlOutput
 import org.westford.compositor.protocol.WlSurface
-import org.westford.nativ.libEGL.*
+import org.westford.nativ.libEGL.EglBindWaylandDisplayWL
+import org.westford.nativ.libEGL.EglCreateImageKHR
+import org.westford.nativ.libEGL.EglDestroyImageKHR
+import org.westford.nativ.libEGL.EglQueryWaylandBufferWL
+import org.westford.nativ.libEGL.LibEGL
 import org.westford.nativ.libEGL.LibEGL.Companion.EGL_ALPHA_SIZE
 import org.westford.nativ.libEGL.LibEGL.Companion.EGL_BLUE_SIZE
 import org.westford.nativ.libEGL.LibEGL.Companion.EGL_GREEN_SIZE
@@ -64,22 +81,20 @@ import org.westford.nativ.libEGL.LibEGL.Companion.EGL_WIDTH
 import org.westford.nativ.libEGL.LibEGL.Companion.EGL_WINDOW_BIT
 import org.westford.nativ.libGLESv2.GlEGLImageTargetTexture2DOES
 import org.westford.nativ.libGLESv2.LibGLESv2
-import java.util.*
 import java.util.concurrent.TimeUnit.NANOSECONDS
 import java.util.logging.Logger
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class Gles2Renderer//TODO guarantee 1 renderer instance per platform
-@Inject internal constructor(private val libEGL: LibEGL,
-                             private val libGLESv2: LibGLESv2,
-                             private val display: Display) : GlRenderer {
+@Singleton class Gles2Renderer @Inject internal constructor(private val libEGL: LibEGL,
+                                                            private val libGLESv2: LibGLESv2,
+                                                            private val display: Display) : GlRenderer {
 
     private val textureArgs = IntArray(3)
-    private var eglQueryWaylandBufferWL = Optional.empty<EglQueryWaylandBufferWL>()
-    private var eglCreateImageKHR = Optional.empty<EglCreateImageKHR>()
-    private var eglDestroyImageKHR = Optional.empty<EglDestroyImageKHR>()
-    private var glEGLImageTargetTexture2DOES = Optional.empty<GlEGLImageTargetTexture2DOES>()
+    private var eglQueryWaylandBufferWL: EglQueryWaylandBufferWL? = null
+    private var eglCreateImageKHR: EglCreateImageKHR? = null
+    private var eglDestroyImageKHR: EglDestroyImageKHR? = null
+    private var glEGLImageTargetTexture2DOES: GlEGLImageTargetTexture2DOES? = null
     //shader programs
     //used by shm & egl
     private var argb8888ShaderProgram: Int = 0
@@ -106,20 +121,17 @@ import javax.inject.Singleton
     override fun onDestroy(wlSurfaceResource: WlSurfaceResource) {
 
         val wlSurface = wlSurfaceResource.implementation as WlSurface
-        wlSurface.surface.renderState.ifPresent { surfaceRenderState ->
-            surfaceRenderState.accept(object : SurfaceRenderStateVisitor {
-                override fun visit(shmSurfaceState: ShmSurfaceState): Optional<SurfaceRenderState> {
-                    destroy(shmSurfaceState)
-                    return Optional.empty<SurfaceRenderState>()
-                }
+        wlSurface.surface.renderState?.accept(object : SurfaceRenderStateVisitor {
+            override fun visit(shmSurfaceState: ShmSurfaceState): SurfaceRenderState? {
+                destroy(shmSurfaceState)
+                return null
+            }
 
-                override fun visit(eglSurfaceState: EglSurfaceState): Optional<SurfaceRenderState> {
-                    destroy(eglSurfaceState)
-                    return Optional.empty<SurfaceRenderState>()
-                }
-            })
-        }
-
+            override fun visit(eglSurfaceState: EglSurfaceState): SurfaceRenderState? {
+                destroy(eglSurfaceState)
+                return null
+            }
+        })
     }
 
     private fun destroy(eglSurfaceState: EglSurfaceState) {
@@ -131,10 +143,8 @@ import javax.inject.Singleton
         }
 
         for (eglImage in eglSurfaceState.eglImages) {
-            this.eglDestroyImageKHR.ifPresent { eglDestroyImage ->
-                eglDestroyImage.`$`(this.eglDisplay,
-                                    eglImage)
-            }
+            this.eglDestroyImageKHR?.`$`(this.eglDisplay,
+                                         eglImage)
         }
 
     }
@@ -158,28 +168,28 @@ import javax.inject.Singleton
                                      wlBufferResource,
                                      shmBuffer)
         }
-        else if (this.eglQueryWaylandBufferWL.isPresent) {
-            val queryWlEglBuffer = this.eglQueryWaylandBufferWL.get()
+        else if (this.eglQueryWaylandBufferWL != null) {
+            val queryWlEglBuffer = this.eglQueryWaylandBufferWL
             val textureFormatP = Pointer.nref(0)
             val bufferPointer = wlBufferResource.pointer
 
-            queryWlEglBuffer.`$`(this.eglDisplay,
-                                 bufferPointer!!,
-                                 EGL_TEXTURE_FORMAT,
-                                 textureFormatP.address)
+            queryWlEglBuffer?.`$`(this.eglDisplay,
+                                  bufferPointer!!,
+                                  EGL_TEXTURE_FORMAT,
+                                  textureFormatP.address)
             val textureFormat = textureFormatP.dref()
 
             if (textureFormat != 0) {
                 val widthP = Pointer.nref(0)
                 val heightP = Pointer.nref(0)
-                queryWlEglBuffer.`$`(this.eglDisplay,
-                                     bufferPointer,
-                                     EGL_WIDTH,
-                                     widthP.address)
-                queryWlEglBuffer.`$`(this.eglDisplay,
-                                     bufferPointer,
-                                     EGL_HEIGHT,
-                                     heightP.address)
+                queryWlEglBuffer?.`$`(this.eglDisplay,
+                                      bufferPointer,
+                                      EGL_WIDTH,
+                                      widthP.address)
+                queryWlEglBuffer?.`$`(this.eglDisplay,
+                                      bufferPointer,
+                                      EGL_HEIGHT,
+                                      heightP.address)
                 val width = widthP.dref()
                 val height = heightP.dref()
 
@@ -248,18 +258,18 @@ import javax.inject.Singleton
 
         if (bindDisplay(eglDisplay,
                         eglExtensions)) {
-            this.eglQueryWaylandBufferWL = Optional.of(wrap(EglQueryWaylandBufferWL::class.java,
-                                                            this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address)).dref())
+            this.eglQueryWaylandBufferWL = wrap(EglQueryWaylandBufferWL::class.java,
+                                                this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address)).dref()
 
             //FIXME we need to check this gl extension before we can be 100% sure we support wayland egl.
-            this.glEGLImageTargetTexture2DOES = Optional.of(wrap(GlEGLImageTargetTexture2DOES::class.java,
-                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("glEGLImageTargetTexture2DOES").address)).dref())
+            this.glEGLImageTargetTexture2DOES = wrap(GlEGLImageTargetTexture2DOES::class.java,
+                                                     this.libEGL.eglGetProcAddress(Pointer.nref("glEGLImageTargetTexture2DOES").address)).dref()
 
             if (eglExtensions.contains("EGL_KHR_image_base")) {
-                this.eglCreateImageKHR = Optional.of(wrap(EglCreateImageKHR::class.java,
-                                                          this.libEGL.eglGetProcAddress(Pointer.nref("eglCreateImageKHR").address)).dref())
-                this.eglDestroyImageKHR = Optional.of(wrap(EglDestroyImageKHR::class.java,
-                                                           this.libEGL.eglGetProcAddress(Pointer.nref("eglDestroyImageKHR").address)).dref())
+                this.eglCreateImageKHR = wrap(EglCreateImageKHR::class.java,
+                                              this.libEGL.eglGetProcAddress(Pointer.nref("eglCreateImageKHR").address)).dref()
+                this.eglDestroyImageKHR = wrap(EglDestroyImageKHR::class.java,
+                                               this.libEGL.eglGetProcAddress(Pointer.nref("eglDestroyImageKHR").address)).dref()
                 this.hasWlEglDisplay = true
             }
             else {
@@ -380,12 +390,11 @@ import javax.inject.Singleton
     private fun setupEglOutputState(eglOutput: EglOutput,
                                     wlOutput: WlOutput) {
         //to be used state
-        this.eglOutputState = eglOutput.state.orElseGet {
-            initOutputRenderState(eglOutput,
-                                  wlOutput)
-        }
+        val eglOutputState = eglOutput.state ?: initOutputRenderState(eglOutput,
+                                                                      wlOutput)
         //updates to state are registered with the builder
-        this.newEglOutputState = this.eglOutputState!!.toBuilder()
+        this.newEglOutputState = eglOutputState.toBuilder()
+        this.eglOutputState = eglOutputState
     }
 
     private fun flushRenderState(eglOutput: EglOutput) {
@@ -466,14 +475,14 @@ import javax.inject.Singleton
         eglOutput.updateState(eglOutputState)
 
         //listen for external updates
-        output.transformSignal.connect({ event ->
-                                           handleOutputUpdate(eglOutput,
-                                                              wlOutput)
-                                       })
-        output.modeSignal.connect({ event ->
-                                      handleOutputUpdate(eglOutput,
-                                                         wlOutput)
-                                  })
+        output.transformSignal.connect {
+            handleOutputUpdate(eglOutput,
+                               wlOutput)
+        }
+        output.modeSignal.connect {
+            handleOutputUpdate(eglOutput,
+                               wlOutput)
+        }
 
         return eglOutputState
     }
@@ -514,8 +523,8 @@ import javax.inject.Singleton
 
     private fun handleOutputUpdate(eglOutput: EglOutput,
                                    wlOutput: WlOutput) {
-        eglOutput.state.ifPresent { eglOutputState ->
-            val stateBuilder = eglOutputState.toBuilder()
+        eglOutput.state?.let {
+            val stateBuilder = it.toBuilder()
             updateTransform(stateBuilder,
                             wlOutput.output)
             eglOutput.updateState(stateBuilder.build())
@@ -568,9 +577,9 @@ import javax.inject.Singleton
 
     fun drawView(surfaceView: SurfaceView) {
         val wlSurface = surfaceView.wlSurfaceResource.implementation as WlSurface
-        wlSurface.surface.state.buffer.ifPresent { wlBufferResource ->
+        wlSurface.surface.state.buffer?.let {
             drawView(surfaceView,
-                     wlBufferResource)
+                     it)
         }
     }
 
@@ -596,48 +605,41 @@ import javax.inject.Singleton
     private fun drawShm(surfaceView: SurfaceView,
                         smBuffer: SmBuffer) {
         queryShmSurfaceRenderState(surfaceView,
-                                   smBuffer.shmBuffer).ifPresent { surfaceRenderState ->
-            surfaceRenderState.accept(object : SurfaceRenderStateVisitor {
-                override fun visit(shmSurfaceState: ShmSurfaceState): Optional<SurfaceRenderState> {
-                    drawShm(surfaceView,
-                            shmSurfaceState)
-                    return Optional.empty()
-                }
-            })
-        }
+                                   smBuffer.shmBuffer)?.accept(object : SurfaceRenderStateVisitor {
+            override fun visit(shmSurfaceState: ShmSurfaceState): SurfaceRenderState? {
+                drawShm(surfaceView,
+                        shmSurfaceState)
+                return null
+            }
+        })
     }
 
     private fun queryShmSurfaceRenderState(surfaceView: SurfaceView,
-                                           shmBuffer: ShmBuffer): Optional<SurfaceRenderState> {
+                                           shmBuffer: ShmBuffer): SurfaceRenderState? {
         val wlSurface = surfaceView.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
-        val renderStateOptional = surface.renderState.map { surfaceRenderState ->
-            surfaceRenderState.accept(object : SurfaceRenderStateVisitor {
-                override fun visit(shmSurfaceState: ShmSurfaceState): Optional<SurfaceRenderState> {
-                    //the surface already has an shm render state associated. update it.
-                    return createShmSurfaceRenderState(surfaceView,
-                                                       shmBuffer,
-                                                       Optional.of(shmSurfaceState))
-                }
+        val renderStateOptional = surface.renderState?.accept(object : SurfaceRenderStateVisitor {
+            override fun visit(shmSurfaceState: ShmSurfaceState): SurfaceRenderState? {
+                //the surface already has an shm render state associated. update it.
+                return createShmSurfaceRenderState(surfaceView,
+                                                   shmBuffer,
+                                                   shmSurfaceState)
+            }
 
-                override fun visit(eglSurfaceState: EglSurfaceState): Optional<SurfaceRenderState> {
-                    //the surface was previously associated with an egl render state but is now using an shm render state. create it.
-                    destroy(eglSurfaceState)
-                    //TODO we could reuse the texture id from the egl surface render state
-                    return createShmSurfaceRenderState(surfaceView,
-                                                       shmBuffer,
-                                                       Optional.empty<ShmSurfaceState>())
-                }
-            })
-        }.orElseGet {
-            //the surface was not previously associated with any render state. create an shm render state.
-            createShmSurfaceRenderState(surfaceView,
-                                        shmBuffer,
-                                        Optional.empty<ShmSurfaceState>())
-        }
+            override fun visit(eglSurfaceState: EglSurfaceState): SurfaceRenderState? {
+                //the surface was previously associated with an egl render state but is now using an shm render state. create it.
+                destroy(eglSurfaceState)
+                //TODO we could reuse the texture id from the egl surface render state
+                return createShmSurfaceRenderState(surfaceView,
+                                                   shmBuffer,
+                                                   oldRenderState = null)
+            }
+        }) ?: createShmSurfaceRenderState(surfaceView,
+                                          shmBuffer,
+                                          oldRenderState = null)
 
-        if (renderStateOptional.isPresent) {
-            surface.setRenderState(renderStateOptional.get())
+        if (renderStateOptional != null) {
+            surface.renderState = renderStateOptional
         }
         else {
             onDestroy(surfaceView.wlSurfaceResource)
@@ -648,7 +650,7 @@ import javax.inject.Singleton
 
     private fun createShmSurfaceRenderState(surfaceView: SurfaceView,
                                             shmBuffer: ShmBuffer,
-                                            oldRenderState: Optional<ShmSurfaceState>): Optional<SurfaceRenderState> {
+                                            oldRenderState: ShmSurfaceState?): SurfaceRenderState? {
         //new values
         val pitch: Int
         val height = shmBuffer.height
@@ -677,14 +679,14 @@ import javax.inject.Singleton
         else {
             LOGGER.warning(String.format("Unknown shm buffer format: %d",
                                          shmBufferFormat))
-            return Optional.empty<SurfaceRenderState>()
+            return null
         }
 
         val newShmSurfaceState: ShmSurfaceState
 
 
-        if (oldRenderState.isPresent) {
-            val oldShmSurfaceState = oldRenderState.get()
+        if (oldRenderState != null) {
+            val oldShmSurfaceState = oldRenderState
             texture = oldShmSurfaceState.texture
 
             newShmSurfaceState = ShmSurfaceState.create(pitch,
@@ -723,7 +725,7 @@ import javax.inject.Singleton
                          newShmSurfaceState)
         }
 
-        return Optional.of<SurfaceRenderState>(newShmSurfaceState)
+        return newShmSurfaceState
     }
 
     private fun shmUpdateDamaged(wlSurfaceResource: SurfaceView,
@@ -795,35 +797,29 @@ import javax.inject.Singleton
     }
 
     private fun queryEglSurfaceRenderState(surfaceView: SurfaceView,
-                                           eglBuffer: EglBuffer): Optional<SurfaceRenderState> {
+                                           eglBuffer: EglBuffer): SurfaceRenderState? {
 
         val wlSurface = surfaceView.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
-        val renderStateOptional = surface.renderState.map { surfaceRenderState ->
-            surfaceRenderState.accept(object : SurfaceRenderStateVisitor {
-                override fun visit(shmSurfaceState: ShmSurfaceState): Optional<SurfaceRenderState> {
-                    //the surface was previously associated with an shm render state but is now using an egl render state. create it.
-                    destroy(shmSurfaceState)
-                    return createEglSurfaceRenderState(eglBuffer,
-                                                       Optional.empty<EglSurfaceState>())
-                }
+        val renderStateOptional = surface.renderState?.accept(object : SurfaceRenderStateVisitor {
+            override fun visit(shmSurfaceState: ShmSurfaceState): SurfaceRenderState? {
+                //the surface was previously associated with an shm render state but is now using an egl render state. create it.
+                destroy(shmSurfaceState)
+                return createEglSurfaceRenderState(eglBuffer,
+                                                   oldRenderState = null)
+            }
 
-                override fun visit(eglSurfaceState: EglSurfaceState): Optional<SurfaceRenderState> {
-                    //TODO we could reuse the texture id
-                    //the surface already has an egl render state associated. update it.
-                    return createEglSurfaceRenderState(eglBuffer,
-                                                       Optional.of(eglSurfaceState))
-                }
-            })
-        }
-                //the surface was not previously associated with any render state. create an egl render state.
-                .orElseGet {
-                    createEglSurfaceRenderState(eglBuffer,
-                                                Optional.empty<EglSurfaceState>())
-                }
+            override fun visit(eglSurfaceState: EglSurfaceState): SurfaceRenderState? {
+                //TODO we could reuse the texture id
+                //the surface already has an egl render state associated. update it.
+                return createEglSurfaceRenderState(eglBuffer,
+                                                   eglSurfaceState)
+            }
+        }) ?: createEglSurfaceRenderState(eglBuffer,
+                                          oldRenderState = null)
 
-        if (renderStateOptional.isPresent) {
-            surface.setRenderState(renderStateOptional.get())
+        if (renderStateOptional != null) {
+            surface.renderState = renderStateOptional
         }
         else {
             onDestroy(surfaceView.wlSurfaceResource)
@@ -833,7 +829,7 @@ import javax.inject.Singleton
     }
 
     private fun createEglSurfaceRenderState(eglBuffer: EglBuffer,
-                                            oldRenderState: Optional<EglSurfaceState>): Optional<SurfaceRenderState> {
+                                            oldRenderState: EglSurfaceState?): SurfaceRenderState? {
 
         //surface egl render states:
         val pitch = eglBuffer.width
@@ -847,14 +843,14 @@ import javax.inject.Singleton
         //gather render states:
         val buffer = eglBuffer.wlBufferResource.pointer
 
-        val queryWaylandBuffer = this.eglQueryWaylandBufferWL.get()
+        val queryWaylandBuffer = this.eglQueryWaylandBufferWL
 
         val yInvertedP = Pointer.nref(0)
 
-        yInverted = queryWaylandBuffer.`$`(this.eglDisplay,
-                                           buffer,
-                                           EGL_WAYLAND_Y_INVERTED_WL,
-                                           yInvertedP.address) == 0 || yInvertedP.dref() != 0
+        yInverted = queryWaylandBuffer?.`$`(this.eglDisplay,
+                                            buffer,
+                                            EGL_WAYLAND_Y_INVERTED_WL,
+                                            yInvertedP.address) == 0 || yInvertedP.dref() != 0
 
         when (eglBuffer.textureFormat) {
             EGL_TEXTURE_RGB, EGL_TEXTURE_RGBA -> {
@@ -893,10 +889,10 @@ import javax.inject.Singleton
         }
 
         //delete old egl images
-        oldRenderState.ifPresent { oldEglSurfaceState ->
-            for (oldEglImage in oldEglSurfaceState.eglImages) {
-                this.eglDestroyImageKHR.get().`$`(this.eglDisplay,
-                                                  oldEglImage)
+        oldRenderState?.let {
+            for (oldEglImage in it.eglImages) {
+                this.eglDestroyImageKHR?.`$`(this.eglDisplay,
+                                             oldEglImage)
             }
         }
 
@@ -908,22 +904,22 @@ import javax.inject.Singleton
             attribs[1] = i
             attribs[2] = EGL_NONE
 
-            val eglImage = this.eglCreateImageKHR.get().`$`(this.eglDisplay,
-                                                            EGL_NO_CONTEXT,
-                                                            EGL_WAYLAND_BUFFER_WL,
-                                                            buffer,
-                                                            Pointer.nref(*attribs).address)
+            val eglImage = this.eglCreateImageKHR?.`$`(this.eglDisplay,
+                                                       EGL_NO_CONTEXT,
+                                                       EGL_WAYLAND_BUFFER_WL,
+                                                       buffer,
+                                                       Pointer.nref(*attribs).address) ?: 0L
             if (eglImage == EGL_NO_IMAGE_KHR) {
-                return Optional.empty<SurfaceRenderState>()
+                return null
             }
             else {
                 eglImages[i] = eglImage
             }
 
             //make sure we have valid texture ids
-            oldRenderState.ifPresent { oldEglSurfaceState ->
+            oldRenderState?.let {
 
-                val oldTextures = oldEglSurfaceState.textures
+                val oldTextures = it.textures
                 val deltaNewTextures = textures.size - oldTextures.size
                 val needNewTextures = deltaNewTextures > 0
 
@@ -952,17 +948,17 @@ import javax.inject.Singleton
             this.libGLESv2.glActiveTexture(LibGLESv2.GL_TEXTURE0 + i)
             this.libGLESv2.glBindTexture(target,
                                          textures[i])
-            this.glEGLImageTargetTexture2DOES.get().`$`(target,
-                                                        eglImage)
+            this.glEGLImageTargetTexture2DOES?.`$`(target,
+                                                   eglImage)
         }
 
-        return Optional.of<SurfaceRenderState>(EglSurfaceState.create(pitch,
-                                                                      height,
-                                                                      target,
-                                                                      shaderProgram,
-                                                                      yInverted,
-                                                                      textures,
-                                                                      eglImages))
+        return EglSurfaceState.create(pitch,
+                                      height,
+                                      target,
+                                      shaderProgram,
+                                      yInverted,
+                                      textures,
+                                      eglImages)
 
     }
 
@@ -970,16 +966,13 @@ import javax.inject.Singleton
                         eglBuffer: EglBuffer) {
 
         queryEglSurfaceRenderState(surfaceView,
-                                   eglBuffer).ifPresent { surfaceRenderState ->
-            surfaceRenderState.accept(object : SurfaceRenderStateVisitor {
-                override fun visit(eglSurfaceState: EglSurfaceState): Optional<SurfaceRenderState> {
-                    drawEgl(surfaceView,
-                            eglSurfaceState)
-                    return Optional.empty()
-                }
-            })
-        }
-
+                                   eglBuffer)?.accept(object : SurfaceRenderStateVisitor {
+            override fun visit(eglSurfaceState: EglSurfaceState): SurfaceRenderState? {
+                drawEgl(surfaceView,
+                        eglSurfaceState)
+                return null
+            }
+        })
     }
 
     private fun drawEgl(surfaceView: SurfaceView,
@@ -1040,7 +1033,6 @@ import javax.inject.Singleton
         //FIXME we should only fire the callback once all views are rendered
         val wlSurface = surfaceView.wlSurfaceResource.implementation as WlSurface
         wlSurface.surface.firePaintCallbacks(NANOSECONDS.toMillis(System.nanoTime()).toInt())
-
     }
 
     private fun genTexture(target: Int): Int {
