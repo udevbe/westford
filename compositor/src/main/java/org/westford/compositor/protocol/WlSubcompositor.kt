@@ -22,32 +22,24 @@ import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.Global
 import org.freedesktop.wayland.server.WlSubcompositorRequests
 import org.freedesktop.wayland.server.WlSubcompositorResource
-import org.freedesktop.wayland.server.WlSubsurfaceResource
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.freedesktop.wayland.shared.WlSubcompositorError
-import org.westford.compositor.core.Role
 import org.westford.compositor.core.Subsurface
 import org.westford.compositor.core.SubsurfaceFactory
-import org.westford.compositor.core.Surface
-
+import java.util.*
 import javax.annotation.Nonnegative
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.util.Collections
-import java.util.Optional
-import java.util.WeakHashMap
 
-@Singleton
-class WlSubcompositor @Inject
-internal constructor(display: Display,
-                     private val wlSubSurfaceFactory: WlSubsurfaceFactory,
-                     private val subsurfaceFactory: SubsurfaceFactory) : Global<WlSubcompositorResource>(display, WlSubcompositorResource::class.java, WlSubcompositorRequests.VERSION), WlSubcompositorRequests, ProtocolObject<WlSubcompositorResource> {
+@Singleton class WlSubcompositor @Inject internal constructor(display: Display,
+                                                              private val wlSubSurfaceFactory: WlSubsurfaceFactory,
+                                                              private val subsurfaceFactory: SubsurfaceFactory) : Global<WlSubcompositorResource>(display,
+                                                                                                                                                  WlSubcompositorResource::class.java,
+                                                                                                                                                  WlSubcompositorRequests.VERSION), WlSubcompositorRequests, ProtocolObject<WlSubcompositorResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlSubcompositorResource, Boolean>())
+    override val resources: MutableSet<WlSubcompositorResource> = Collections.newSetFromMap(WeakHashMap<WlSubcompositorResource, Boolean>())
 
-    override fun destroy(resource: WlSubcompositorResource) {
-        resource.destroy()
-    }
+    override fun destroy(resource: WlSubcompositorResource) = resource.destroy()
 
     override fun getSubsurface(requester: WlSubcompositorResource,
                                id: Int,
@@ -58,17 +50,17 @@ internal constructor(display: Display,
         val surface = wlSurface.surface
 
         val role = surface.role
-        val hasRole = role.isPresent
+        val hasRole = role != null
 
         /*
          * Check if the surface does not have a role or has an inactive subsurface role, both are ok. Otherwise we raise
          * a protocol error.
          */
-        if (!hasRole || role.get() is Subsurface && (role.get() as Subsurface).isInert) {
+        if (!hasRole || role is Subsurface && role.isInert) {
 
             val subsurface = this.subsurfaceFactory.create(parentWlSurfaceResource,
-                    wlSurfaceResource)
-            surface.setRole(subsurface)
+                                                           wlSurfaceResource)
+            surface.role = subsurface
 
             if (!hasRole) {
 
@@ -76,38 +68,30 @@ internal constructor(display: Display,
 
             val wlSubsurface = this.wlSubSurfaceFactory.create(subsurface)
             val wlSubsurfaceResource = wlSubsurface.add(requester.client,
-                    requester.version,
-                    id)
-            wlSurfaceResource.register(DestroyListener { wlSubsurfaceResource.destroy() })
-        } else {
-            requester.client
-                    .getObject(Display.OBJECT_ID)
-                    .postError(WlSubcompositorError.BAD_SURFACE.value,
-                            String.format("Desired sub surface already has another role (%s)",
-                                    role.get().javaClass
-                                            .getSimpleName()))
+                                                        requester.version,
+                                                        id)
+            wlSurfaceResource.register {
+                wlSubsurfaceResource.destroy()
+            }
+        }
+        else {
+            requester.client.getObject(Display.OBJECT_ID).postError(WlSubcompositorError.BAD_SURFACE.value,
+                                                                    String.format("Desired sub surface already has another role (%s)",
+                                                                                  role?.javaClass?.simpleName))
         }
     }
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlSubcompositorResource {
-        return WlSubcompositorResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlSubcompositorResource> {
-        return this.resources
-    }
+                        id: Int): WlSubcompositorResource = WlSubcompositorResource(client,
+                                                                                    version,
+                                                                                    id,
+                                                                                    this)
 
     override fun onBindClient(client: Client,
                               version: Int,
-                              id: Int): WlSubcompositorResource {
-        return WlSubcompositorResource(client,
-                version,
-                id,
-                this)
-    }
+                              id: Int): WlSubcompositorResource = WlSubcompositorResource(client,
+                                                                                          version,
+                                                                                          id,
+                                                                                          this)
 }

@@ -21,65 +21,58 @@ import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.EventSource
-import org.freedesktop.wayland.server.WlKeyboardResource
 import org.freedesktop.wayland.server.WlPointerResource
 import org.freedesktop.wayland.server.WlShellSurfaceResource
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.freedesktop.wayland.shared.WlShellSurfaceResize
 import org.freedesktop.wayland.shared.WlShellSurfaceTransient
 import org.freedesktop.wayland.util.Fixed
-import org.westford.Slot
 import org.westford.compositor.core.Compositor
-import org.westford.compositor.core.KeyboardDevice
 import org.westford.compositor.core.Point
-import org.westford.compositor.core.PointerDevice
 import org.westford.compositor.core.Rectangle
 import org.westford.compositor.core.Role
 import org.westford.compositor.core.RoleVisitor
 import org.westford.compositor.core.Scene
 import org.westford.compositor.core.Sibling
-import org.westford.compositor.core.Surface
 import org.westford.compositor.core.SurfaceView
 import org.westford.compositor.core.Transforms
 import org.westford.compositor.core.calc.Mat4
-import org.westford.compositor.core.calc.Vec4
 import org.westford.compositor.core.events.KeyboardFocusGained
 import org.westford.compositor.core.events.PointerGrab
 import org.westford.compositor.protocol.WlKeyboard
 import org.westford.compositor.protocol.WlPointer
 import org.westford.compositor.protocol.WlSurface
-import java.util.EnumSet
-import java.util.Optional
 
-@AutoFactory(className = "PrivateShellSurfaceFactory", allowSubclasses = true)
-class ShellSurface internal constructor(@Provided display: Display,
-                                        @param:Provided private val compositor: Compositor,
-                                        @param:Provided private val scene: Scene,
-                                        private val surfaceView: SurfaceView,
-                                        private val pingSerial: Int) : Role {
+@AutoFactory(className = "PrivateShellSurfaceFactory",
+             allowSubclasses = true) class ShellSurface(@Provided display: Display,
+                                                        @param:Provided private val compositor: Compositor,
+                                                        @param:Provided private val scene: Scene,
+                                                        private val surfaceView: SurfaceView,
+                                                        private val pingSerial: Int) : Role {
     private val timerEventSource: EventSource
 
-    private var keyboardFocusListener = Optional.empty<Slot<KeyboardFocusGained>>()
+    private var keyboardFocusListener: ((KeyboardFocusGained) -> Unit)? = null
+
     var isActive = true
         private set
 
-    var clazz = Optional.empty<String>()
-        set(clazz) {
-            field = clazz
+    var clazz: String? = null
+        set(value) {
+            field = value
             this.compositor.requestRender()
         }
-    var title = Optional.empty<String>()
-        set(title) {
-            field = title
+
+    var title: String? = null
+        set(value) {
+            field = value
             this.compositor.requestRender()
         }
 
     init {
-        this.timerEventSource = display.eventLoop
-                .addTimer {
-                    this.isActive = false
-                    0
-                }
+        this.timerEventSource = display.eventLoop.addTimer {
+            this.isActive = false
+            0
+        }
     }
 
     fun pong(wlShellSurfaceResource: WlShellSurfaceResource,
@@ -103,24 +96,19 @@ class ShellSurface internal constructor(@Provided display: Display,
 
         val pointerPosition = pointerDevice.position
 
-        pointerDevice.grab
-                .filter { grabSurfaceView ->
-                    surface.views
-                            .contains(grabSurfaceView)
-                }
-                .ifPresent { grabSurfaceView ->
-                    val surfacePosition = grabSurfaceView.global(Point.create(0,
-                            0))
-                    val pointerOffset = pointerPosition.subtract(surfacePosition)
+        pointerDevice.grab?.takeIf {
+            surface.views.contains(it)
+        }?.let {
+            val surfacePosition = it.global(Point.create(0,
+                                                         0))
+            val pointerOffset = pointerPosition.subtract(surfacePosition)
 
-                    //FIXME pick a surface view based on the pointer position
-                    pointerDevice.grabMotion(wlSurfaceResource,
-                            grabSerial
-                    ) { motion ->
-                        grabSurfaceView.setPosition(motion.point
-                                .subtract(pointerOffset))
-                    }
-                }
+            //FIXME pick a surface view based on the pointer position
+            pointerDevice.grabMotion(wlSurfaceResource,
+                                     grabSerial) { motion ->
+                it.setPosition(motion.point.subtract(pointerOffset))
+            }
+        }
     }
 
     fun resize(wlShellSurfaceResource: WlShellSurfaceResource,
@@ -136,67 +124,59 @@ class ShellSurface internal constructor(@Provided display: Display,
         val pointerDevice = wlPointer.pointerDevice
         val pointerStartPos = pointerDevice.position
 
-        pointerDevice.grab
-                .filter { grabSurfaceView ->
-                    surface.views
-                            .contains(grabSurfaceView)
-                }
-                .ifPresent { grabSurfaceView ->
-                    val local = grabSurfaceView.local(pointerStartPos)
-                    val size = surface.size
+        pointerDevice.grab?.takeIf {
+            surface.views.contains(it)
+        }?.let {
+            val local = it.local(pointerStartPos)
+            val size = surface.size
 
-                    val quadrant = quadrant(edges)
-                    val transform = transform(quadrant,
-                            size,
-                            local)
+            val quadrant = quadrant(edges)
+            val transform = transform(quadrant,
+                                      size,
+                                      local)
 
-                    val inverseTransform = grabSurfaceView.inverseTransform
+            val inverseTransform = it.inverseTransform
 
-                    val grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
-                            buttonPressSerial
-                    ) { motion ->
-                        val motionLocal = inverseTransform.multiply(motion.point
-                                .toVec4())
-                        val resize = transform.multiply(motionLocal)
-                        val width = resize.x.toInt()
-                        val height = resize.y.toInt()
-                        wlShellSurfaceResource.configure(quadrant.value,
-                                if (width < 1) 1 else width,
-                                if (height < 1) 1 else height)
-                    }
+            val grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
+                                                             buttonPressSerial) {
+                val motionLocal = inverseTransform.multiply(it.point.toVec4())
+                val resize = transform.multiply(motionLocal)
+                val width = resize.x.toInt()
+                val height = resize.y.toInt()
+                wlShellSurfaceResource.configure(quadrant.value,
+                                                 if (width < 1) 1 else width,
+                                                 if (height < 1) 1 else height)
+            }
 
-                    if (grabMotionSuccess) {
-                        wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
-                                wlSurfaceResource)
-                        pointerDevice.pointerGrabSignal
-                                .connect(object : Slot<PointerGrab> {
-                                    override fun handle(event: PointerGrab) {
-                                        if (!pointerDevice.grab
-                                                .isPresent) {
-                                            pointerDevice.pointerGrabSignal
-                                                    .disconnect(this)
-                                            wlPointerResource.enter(pointerDevice.nextEnterSerial(),
+            if (grabMotionSuccess) {
+                wlPointerResource.leave(pointerDevice.nextLeaveSerial(),
+                                        wlSurfaceResource)
+                pointerDevice.pointerGrabSignal.connect(object : (PointerGrab) -> Unit {
+                    override fun invoke(event: PointerGrab) {
+                        if (pointerDevice.grab == null) {
+                            pointerDevice.pointerGrabSignal.disconnect(this)
+                            wlPointerResource.enter(pointerDevice.nextEnterSerial(),
                                                     wlSurfaceResource,
                                                     Fixed.create(local.x),
                                                     Fixed.create(local.y))
-                                        }
-                                    }
-                                })
+                        }
                     }
-                }
+                })
+            }
+        }
     }
 
     private fun quadrant(edges: Int): WlShellSurfaceResize {
         when (edges) {
-            0 -> return WlShellSurfaceResize.NONE
-            1 -> return WlShellSurfaceResize.TOP
-            2 -> return WlShellSurfaceResize.BOTTOM
-            4 -> return WlShellSurfaceResize.LEFT
-            5 -> return WlShellSurfaceResize.TOP_LEFT
-            6 -> return WlShellSurfaceResize.BOTTOM_LEFT
-            8 -> return WlShellSurfaceResize.RIGHT
-            9 -> return WlShellSurfaceResize.TOP_RIGHT
-            10 -> return WlShellSurfaceResize.BOTTOM_RIGHT
+            0    -> return WlShellSurfaceResize.NONE
+            1    -> return WlShellSurfaceResize.TOP
+            2    -> return WlShellSurfaceResize.BOTTOM
+            4    -> return WlShellSurfaceResize.LEFT
+            5    -> return WlShellSurfaceResize.TOP_LEFT
+            6    -> return WlShellSurfaceResize.BOTTOM_LEFT
+            8    -> return WlShellSurfaceResize.RIGHT
+            9    -> return WlShellSurfaceResize.TOP_RIGHT
+            10   -> return WlShellSurfaceResize.BOTTOM_RIGHT
             else -> return WlShellSurfaceResize.NONE
         }
     }
@@ -212,62 +192,50 @@ class ShellSurface internal constructor(@Provided display: Display,
         val pointerdx: Float
         val pointerdy: Float
         when (quadrant) {
-            WlShellSurfaceResize.TOP -> {
-                transformationBuilder = Transforms._180.toBuilder()
-                        .m00(0f)
-                        .m30(width.toFloat())
+            WlShellSurfaceResize.TOP          -> {
+                transformationBuilder = Transforms._180.toBuilder().m00(0f).m30(width.toFloat())
                 transformation = transformationBuilder.build()
                 val pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4())
                 pointerdx = 0f
                 pointerdy = height - pointerLocalTransformed.y
             }
-            WlShellSurfaceResize.TOP_LEFT -> {
-                transformationBuilder = Transforms._180.toBuilder()
-                        .m30(width.toFloat())
-                        .m31(height.toFloat())
+            WlShellSurfaceResize.TOP_LEFT     -> {
+                transformationBuilder = Transforms._180.toBuilder().m30(width.toFloat()).m31(height.toFloat())
                 transformation = transformationBuilder.build()
                 val localTransformed = transformation.multiply(pointerLocal.toVec4())
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
-            WlShellSurfaceResize.LEFT -> {
-                transformationBuilder = Transforms.FLIPPED.toBuilder()
-                        .m11(0f)
-                        .m31(height.toFloat())
+            WlShellSurfaceResize.LEFT         -> {
+                transformationBuilder = Transforms.FLIPPED.toBuilder().m11(0f).m31(height.toFloat())
                 transformation = transformationBuilder.build()
                 val localTransformed = transformation.multiply(pointerLocal.toVec4())
                 pointerdx = width - localTransformed.x
                 pointerdy = 0f
             }
-            WlShellSurfaceResize.BOTTOM_LEFT -> {
-                transformationBuilder = Transforms.FLIPPED.toBuilder()
-                        .m30(width.toFloat())
+            WlShellSurfaceResize.BOTTOM_LEFT  -> {
+                transformationBuilder = Transforms.FLIPPED.toBuilder().m30(width.toFloat())
                 transformation = transformationBuilder.build()
                 val localTransformed = transformation.multiply(pointerLocal.toVec4())
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
-            WlShellSurfaceResize.RIGHT -> {
-                transformationBuilder = Transforms.NORMAL.toBuilder()
-                        .m11(0f)
-                        .m31(height.toFloat())
+            WlShellSurfaceResize.RIGHT        -> {
+                transformationBuilder = Transforms.NORMAL.toBuilder().m11(0f).m31(height.toFloat())
                 transformation = transformationBuilder.build()
                 val localTransformed = transformation.multiply(pointerLocal.toVec4())
                 pointerdx = width - localTransformed.x
                 pointerdy = 0f
             }
-            WlShellSurfaceResize.TOP_RIGHT -> {
-                transformationBuilder = Transforms.FLIPPED_180.toBuilder()
-                        .m31(height.toFloat())
+            WlShellSurfaceResize.TOP_RIGHT    -> {
+                transformationBuilder = Transforms.FLIPPED_180.toBuilder().m31(height.toFloat())
                 transformation = transformationBuilder.build()
                 val localTransformed = transformation.multiply(pointerLocal.toVec4())
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
-            WlShellSurfaceResize.BOTTOM -> {
-                transformationBuilder = Transforms.NORMAL.toBuilder()
-                        .m00(0f)
-                        .m30(width.toFloat())
+            WlShellSurfaceResize.BOTTOM       -> {
+                transformationBuilder = Transforms.NORMAL.toBuilder().m00(0f).m30(width.toFloat())
                 transformation = transformationBuilder.build()
                 val pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4())
                 pointerdx = 0f
@@ -280,7 +248,7 @@ class ShellSurface internal constructor(@Provided display: Display,
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
-            else -> {
+            else                              -> {
                 transformationBuilder = Transforms.NORMAL.toBuilder()
                 transformation = transformationBuilder.build()
                 pointerdx = 0f
@@ -288,80 +256,70 @@ class ShellSurface internal constructor(@Provided display: Display,
             }
         }
 
-        return transformationBuilder.m30(transformation.m30 + pointerdx)
-                .m31(transformation.m31 + pointerdy)
-                .build()
+        return transformationBuilder.m30(transformation.m30 + pointerdx).m31(transformation.m31 + pointerdy).build()
     }
 
     fun setTransient(wlSurfaceResource: WlSurfaceResource,
                      parent: WlSurfaceResource,
                      x: Int,
                      y: Int,
-                     flags: EnumSet<WlShellSurfaceTransient>) {
+                     flags: Int) {
         val wlSurface = wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        this.keyboardFocusListener.ifPresent { slot ->
-            surface.keyboardFocusGainedSignal
-                    .disconnect(slot)
+        this.keyboardFocusListener?.let {
+            surface.keyboardFocusGainedSignal.disconnect(it)
         }
 
-        if (flags.contains(WlShellSurfaceTransient.INACTIVE)) {
-            val slot = { keyboardFocusGained ->
+        if ((flags and WlShellSurfaceTransient.INACTIVE.value) != 0) {
+            val slot: (KeyboardFocusGained) -> Unit = {
                 //clean collection of focuses, so they don't get notify of keyboard related events
-                surface.keyboardFocuses
-                        .clear()
+                surface.keyboardFocuses.clear()
             }
-            surface.keyboardFocusGainedSignal
-                    .connect(slot)
+            surface.keyboardFocusGainedSignal.connect(slot)
 
             //first time focus clearing, also send out leave events
             val keyboardFocuses = surface.keyboardFocuses
-            keyboardFocuses.forEach { wlKeyboardResource ->
-                val wlKeyboard = wlKeyboardResource.implementation as WlKeyboard
+            keyboardFocuses.forEach {
+                val wlKeyboard = it.implementation as WlKeyboard
                 val keyboardDevice = wlKeyboard.keyboardDevice
-                wlKeyboardResource.leave(keyboardDevice.nextKeyboardSerial(),
-                        wlSurfaceResource)
+                it.leave(keyboardDevice.nextKeyboardSerial(),
+                         wlSurfaceResource)
             }
             keyboardFocuses.clear()
 
-            this.keyboardFocusListener = Optional.of<Slot<KeyboardFocusGained>>(slot)
+            this.keyboardFocusListener = slot
         }
 
         val parentWlSurface = parent.implementation as WlSurface
         val parentSurface = parentWlSurface.surface
 
         this.scene.removeView(this.surfaceView)
-        parentSurface.views
-                .forEach(Consumer<SurfaceView> { this.surfaceView.setParent(it) })
+        parentSurface.views.forEach {
+            this.surfaceView.parent = it
+        }
 
         parentSurface.addSibling(Sibling.create(wlSurfaceResource,
-                Point.create(x,
-                        y)))
+                                                Point.create(x,
+                                                             y)))
     }
 
-    override fun accept(roleVisitor: RoleVisitor) {
-        roleVisitor.visit(this)
-    }
+    override fun accept(roleVisitor: RoleVisitor) = roleVisitor.visit(this)
 
     fun setTopLevel(wlSurfaceResource: WlSurfaceResource) {
         val wlSurface = wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        surface.views
-                .forEach { surfaceView ->
-                    surfaceView.parent
-                            .ifPresent { parentSurfaceView ->
-                                val parentWlSurfaceResource = parentSurfaceView.wlSurfaceResource
-                                val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
-                                val parentSurface = parentWlSurface.surface
-                                parentSurface.removeSibling(Sibling.create(wlSurfaceResource))
-                            }
-                }
+        surface.views.forEach {
+            it.parent?.let {
+                val parentWlSurfaceResource = it.wlSurfaceResource
+                val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
+                val parentSurface = parentWlSurface.surface
+                parentSurface.removeSibling(Sibling.create(wlSurfaceResource))
+            }
+        }
 
         this.scene.removeView(this.surfaceView)
-        this.scene.applicationLayer
-                .surfaceViews
-                .add(this.surfaceView)
+        this.scene.applicationLayer.surfaceViews.add(this.surfaceView)
     }
 }

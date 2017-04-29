@@ -21,31 +21,20 @@ import org.freedesktop.wayland.server.Client
 import org.freedesktop.wayland.server.WlTouchRequestsV5
 import org.freedesktop.wayland.server.WlTouchResource
 import org.westford.compositor.core.TouchDevice
-
+import java.util.*
 import javax.annotation.Nonnegative
 import javax.inject.Inject
-import java.util.Collections
-import java.util.WeakHashMap
 
-class WlTouch @Inject
-internal constructor(val touchDevice: TouchDevice) : WlTouchRequestsV5, ProtocolObject<WlTouchResource> {
+class WlTouch @Inject internal constructor(val touchDevice: TouchDevice) : WlTouchRequestsV5, ProtocolObject<WlTouchResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlTouchResource, Boolean>())
+    override val resources: MutableSet<WlTouchResource> = Collections.newSetFromMap(WeakHashMap<WlTouchResource, Boolean>())
 
-    override fun release(resource: WlTouchResource) {
-        resource.destroy()
-    }
+    override fun release(resource: WlTouchResource) = resource.destroy()
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlTouchResource {
-        return WlTouchResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlTouchResource> {
-        return this.resources
-    }
+                        id: Int): WlTouchResource = WlTouchResource(client,
+                                                                    version,
+                                                                    id,
+                                                                    this)
 }

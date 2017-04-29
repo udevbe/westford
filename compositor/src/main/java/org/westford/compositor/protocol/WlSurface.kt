@@ -19,7 +19,11 @@ package org.westford.compositor.protocol
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import org.freedesktop.wayland.server.*
+import org.freedesktop.wayland.server.Client
+import org.freedesktop.wayland.server.WlBufferResource
+import org.freedesktop.wayland.server.WlRegionResource
+import org.freedesktop.wayland.server.WlSurfaceRequestsV4
+import org.freedesktop.wayland.server.WlSurfaceResource
 import org.freedesktop.wayland.shared.WlOutputTransform
 import org.freedesktop.wayland.shared.WlSurfaceError
 import org.westford.compositor.core.Rectangle
@@ -33,7 +37,7 @@ import javax.annotation.Nonnegative
              allowSubclasses = true) class WlSurface(@param:Provided private val wlCallbackFactory: WlCallbackFactory,
                                                      val surface: Surface) : WlSurfaceRequestsV4, ProtocolObject<WlSurfaceResource> {
 
-    override val resources = Collections.newSetFromMap(WeakHashMap<WlSurfaceResource, Boolean>())
+    override val resources: MutableSet<WlSurfaceResource> = Collections.newSetFromMap(WeakHashMap<WlSurfaceResource, Boolean>())
 
     override fun create(client: Client,
                         @Nonnegative version: Int,

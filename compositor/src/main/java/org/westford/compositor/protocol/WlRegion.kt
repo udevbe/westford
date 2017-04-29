@@ -23,32 +23,22 @@ import org.freedesktop.wayland.server.WlRegionRequests
 import org.freedesktop.wayland.server.WlRegionResource
 import org.westford.compositor.core.Rectangle
 import org.westford.compositor.core.Region
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Collections
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlRegionFactory", allowSubclasses = true)
-class WlRegion internal constructor(val region: Region) : WlRegionRequests, ProtocolObject<WlRegionResource> {
+@AutoFactory(className = "WlRegionFactory",
+             allowSubclasses = true) class WlRegion(val region: Region) : WlRegionRequests, ProtocolObject<WlRegionResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlRegionResource, Boolean>())
+    override val resources: MutableSet<WlRegionResource> = Collections.newSetFromMap(WeakHashMap<WlRegionResource, Boolean>())
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlRegionResource {
-        return WlRegionResource(client,
-                version,
-                id,
-                this)
-    }
+                        id: Int): WlRegionResource = WlRegionResource(client,
+                                                                      version,
+                                                                      id,
+                                                                      this)
 
-    override fun getResources(): MutableSet<WlRegionResource> {
-        return this.resources
-    }
-
-    override fun destroy(resource: WlRegionResource) {
-        resource.destroy()
-    }
+    override fun destroy(resource: WlRegionResource) = resource.destroy()
 
     override fun add(resource: WlRegionResource,
                      x: Int,
@@ -60,9 +50,9 @@ class WlRegion internal constructor(val region: Region) : WlRegionRequests, Prot
         }
 
         this.region.add(Rectangle.create(x,
-                y,
-                width,
-                height))
+                                         y,
+                                         width,
+                                         height))
     }
 
     override fun subtract(resource: WlRegionResource,
@@ -75,8 +65,8 @@ class WlRegion internal constructor(val region: Region) : WlRegionRequests, Prot
         }
 
         this.region.subtract(Rectangle.create(x,
-                y,
-                width,
-                height))
+                                              y,
+                                              width,
+                                              height))
     }
 }

@@ -17,19 +17,15 @@
  */
 package org.westford.compositor.input
 
-
 import org.freedesktop.jaccall.Pointer
 import org.westford.compositor.core.Xkb
-import org.westford.compositor.core.XkbFactory
 import org.westford.nativ.libxkbcommon.Libxkbcommon
+import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_CONTEXT_NO_FLAGS
 import org.westford.nativ.libxkbcommon.xkb_rule_names
 import javax.inject.Inject
 
-import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_CONTEXT_NO_FLAGS
-
-class LibinputXkbFactory @Inject
-internal constructor(private val libxkbcommon: Libxkbcommon,
-                     private val xkbFactory: XkbFactory) {
+class LibinputXkbFactory @Inject internal constructor(private val libxkbcommon: Libxkbcommon,
+                                                      private val xkbFactory: XkbFactory) {
 
     fun create(rule: String,
                model: String,
@@ -39,9 +35,7 @@ internal constructor(private val libxkbcommon: Libxkbcommon,
 
         val xkbContext = this.libxkbcommon.xkb_context_new(XKB_CONTEXT_NO_FLAGS)
         if (xkbContext == 0L) {
-            throw RuntimeException("Got an error while trying to create xkb context. " +
-                    "Unfortunately the docs of the xkb library do not specify how to get more information " +
-                    "about the error, so you'll have to do it with this lousy exception.")
+            throw RuntimeException("Got an error while trying to create xkb context. " + "Unfortunately the docs of the xkb library do not specify how to get more information " + "about the error, so you'll have to do it with this lousy exception.")
         }
 
         val names = xkb_rule_names()
@@ -52,19 +46,17 @@ internal constructor(private val libxkbcommon: Libxkbcommon,
         names.options(Pointer.nref(options))
 
         val keymap = this.libxkbcommon.xkb_keymap_new_from_names(xkbContext,
-                Pointer.ref(names).address,
-                Libxkbcommon.XKB_KEYMAP_COMPILE_NO_FLAGS)
+                                                                 Pointer.ref(names).address,
+                                                                 Libxkbcommon.XKB_KEYMAP_COMPILE_NO_FLAGS)
 
         if (keymap == 0L) {
-            throw RuntimeException("Got an error while trying to get x11 keymap. " +
-                    "Unfortunately the docs of the xkb library do not specify how to get more information " +
-                    "about the error, so you'll have to do it with this lousy exception.")
+            throw RuntimeException("Got an error while trying to get x11 keymap. " + "Unfortunately the docs of the xkb library do not specify how to get more information " + "about the error, so you'll have to do it with this lousy exception.")
         }
 
         val state = this.libxkbcommon.xkb_state_new(keymap)
 
         return this.xkbFactory.create(xkbContext,
-                state,
-                keymap)
+                                      state,
+                                      keymap)
     }
 }

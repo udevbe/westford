@@ -25,18 +25,13 @@ import org.freedesktop.wayland.server.WlPointerResource
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.freedesktop.wayland.shared.WlPointerError
 import org.westford.compositor.core.PointerDevice
-import org.westford.compositor.core.Role
-import org.westford.compositor.core.Surface
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Collections
-import java.util.Optional
-import java.util.WeakHashMap
 
-@AutoFactory(allowSubclasses = true, className = "PrivateWlPointerFactory")
-class WlPointer internal constructor(val pointerDevice: PointerDevice) : WlPointerRequestsV5, ProtocolObject<WlPointerResource> {
+@AutoFactory(allowSubclasses = true,
+             className = "PrivateWlPointerFactory") class WlPointer(val pointerDevice: PointerDevice) : WlPointerRequestsV5, ProtocolObject<WlPointerResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlPointerResource, Boolean>())
+    override val resources: MutableSet<WlPointerResource> = Collections.newSetFromMap(WeakHashMap<WlPointerResource, Boolean>())
 
     override fun setCursor(wlPointerResource: WlPointerResource,
                            serial: Int,
@@ -46,47 +41,35 @@ class WlPointer internal constructor(val pointerDevice: PointerDevice) : WlPoint
 
         if (wlSurfaceResource == null) {
             pointerDevice.removeCursor(wlPointerResource,
-                    serial)
+                                       serial)
             return
         }
-
 
         val wlSurface = wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
         val role = surface.role
-        if (role.isPresent && role.get() != this.pointerDevice) {
-            wlPointerResource.client
-                    .getObject(Display.OBJECT_ID)
-                    .postError(WlPointerError.ROLE.value,
-                            String.format("Desired cursor surface already has another role (%s)",
-                                    role.javaClass
-                                            .getSimpleName()))
+        if (role != null && role != this.pointerDevice) {
+            wlPointerResource.client.getObject(Display.OBJECT_ID).postError(WlPointerError.ROLE.value,
+                                                                            String.format("Desired cursor surface already has another role (%s)",
+                                                                                          role.javaClass.simpleName))
             return
         }
 
-        surface.setRole(this.pointerDevice)
+        surface.role = this.pointerDevice
         this.pointerDevice.setCursor(wlPointerResource,
-                serial,
-                wlSurfaceResource,
-                hotspotX,
-                hotspotY)
+                                     serial,
+                                     wlSurfaceResource,
+                                     hotspotX,
+                                     hotspotY)
     }
 
-    override fun release(resource: WlPointerResource) {
-        resource.destroy()
-    }
+    override fun release(resource: WlPointerResource) = resource.destroy()
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlPointerResource {
-        return WlPointerResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlPointerResource> {
-        return this.resources
-    }
+                        id: Int): WlPointerResource = WlPointerResource(client,
+                                                                        version,
+                                                                        id,
+                                                                        this)
 }

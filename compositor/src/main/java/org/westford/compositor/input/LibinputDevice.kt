@@ -24,7 +24,6 @@ import org.freedesktop.wayland.shared.WlKeyboardKeyState
 import org.freedesktop.wayland.shared.WlPointerAxis
 import org.freedesktop.wayland.shared.WlPointerAxisSource
 import org.freedesktop.wayland.shared.WlPointerButtonState
-import org.freedesktop.wayland.shared.WlSeatCapability
 import org.westford.compositor.core.RenderPlatform
 import org.westford.compositor.protocol.WlOutput
 import org.westford.compositor.protocol.WlSeat
@@ -38,14 +37,13 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SCRO
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOURCE_FINGER
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOURCE_WHEEL
-import java.util.*
 
 @AutoFactory(className = "LibinputDeviceFactory",
              allowSubclasses = true) class LibinputDevice(@param:Provided private val libinput: Libinput,
                                                           @param:Provided private val renderPlatform: RenderPlatform,
                                                           private val wlSeat: WlSeat,
                                                           private val device: Long,
-                                                          val deviceCapabilities: EnumSet<WlSeatCapability>) {
+                                                          val deviceCapabilities: Int) {
 
     fun handleKeyboardKey(keyboardEvent: Long) {
 

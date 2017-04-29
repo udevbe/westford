@@ -22,30 +22,20 @@ import org.freedesktop.wayland.server.Client
 import org.freedesktop.wayland.server.WlKeyboardRequestsV5
 import org.freedesktop.wayland.server.WlKeyboardResource
 import org.westford.compositor.core.KeyboardDevice
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Collections
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlKeyboardFactory", allowSubclasses = true)
-class WlKeyboard internal constructor(val keyboardDevice: KeyboardDevice) : WlKeyboardRequestsV5, ProtocolObject<WlKeyboardResource> {
+@AutoFactory(className = "WlKeyboardFactory",
+             allowSubclasses = true) class WlKeyboard(val keyboardDevice: KeyboardDevice) : WlKeyboardRequestsV5, ProtocolObject<WlKeyboardResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlKeyboardResource, Boolean>())
+    override val resources: MutableSet<WlKeyboardResource> = Collections.newSetFromMap(WeakHashMap<WlKeyboardResource, Boolean>())
 
-    override fun release(resource: WlKeyboardResource) {
-        resource.destroy()
-    }
+    override fun release(resource: WlKeyboardResource) = resource.destroy()
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlKeyboardResource {
-        return WlKeyboardResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlKeyboardResource> {
-        return this.resources
-    }
+                        id: Int): WlKeyboardResource = WlKeyboardResource(client,
+                                                                          version,
+                                                                          id,
+                                                                          this)
 }

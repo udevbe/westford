@@ -21,28 +21,18 @@ import com.google.auto.factory.AutoFactory
 import org.freedesktop.wayland.server.Client
 import org.freedesktop.wayland.server.WlCallbackRequests
 import org.freedesktop.wayland.server.WlCallbackResource
-
+import java.util.*
 import javax.annotation.Nonnegative
-import javax.inject.Inject
-import java.util.Collections
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlCallbackFactory", allowSubclasses = true)
-class WlCallback @Inject
-internal constructor() : WlCallbackRequests, ProtocolObject<WlCallbackResource> {
+@AutoFactory(className = "WlCallbackFactory",
+             allowSubclasses = true) class WlCallback : WlCallbackRequests, ProtocolObject<WlCallbackResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlCallbackResource, Boolean>())
+    override val resources: MutableSet<WlCallbackResource> = Collections.newSetFromMap(WeakHashMap<WlCallbackResource, Boolean>())
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlCallbackResource {
-        return WlCallbackResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlCallbackResource> {
-        return this.resources
-    }
+                        id: Int): WlCallbackResource = WlCallbackResource(client,
+                                                                          version,
+                                                                          id,
+                                                                          this)
 }

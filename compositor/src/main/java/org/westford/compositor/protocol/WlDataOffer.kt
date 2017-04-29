@@ -21,15 +21,13 @@ import com.google.auto.factory.AutoFactory
 import org.freedesktop.wayland.server.Client
 import org.freedesktop.wayland.server.WlDataOfferRequestsV3
 import org.freedesktop.wayland.server.WlDataOfferResource
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Collections
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlDataOfferFactory", allowSubclasses = true)
-class WlDataOffer internal constructor() : WlDataOfferRequestsV3, ProtocolObject<WlDataOfferResource> {
+@AutoFactory(className = "WlDataOfferFactory",
+             allowSubclasses = true) class WlDataOffer : WlDataOfferRequestsV3, ProtocolObject<WlDataOfferResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlDataOfferResource, Boolean>())
+    override val resources: MutableSet<WlDataOfferResource> = Collections.newSetFromMap(WeakHashMap<WlDataOfferResource, Boolean>())
 
     override fun accept(resource: WlDataOfferResource,
                         serial: Int,
@@ -59,14 +57,8 @@ class WlDataOffer internal constructor() : WlDataOfferRequestsV3, ProtocolObject
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlDataOfferResource {
-        return WlDataOfferResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlDataOfferResource> {
-        return this.resources
-    }
+                        id: Int): WlDataOfferResource = WlDataOfferResource(client,
+                                                                            version,
+                                                                            id,
+                                                                            this)
 }

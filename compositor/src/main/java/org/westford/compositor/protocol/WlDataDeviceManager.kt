@@ -23,56 +23,44 @@ import org.freedesktop.wayland.server.Global
 import org.freedesktop.wayland.server.WlDataDeviceManagerRequestsV3
 import org.freedesktop.wayland.server.WlDataDeviceManagerResource
 import org.freedesktop.wayland.server.WlSeatResource
-
+import java.util.*
 import javax.annotation.Nonnegative
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.util.Collections
-import java.util.WeakHashMap
 
-@Singleton
-class WlDataDeviceManager @Inject
-internal constructor(display: Display,
-                     private val wlDataSourceFactory: WlDataSourceFactory) : Global<WlDataDeviceManagerResource>(display, WlDataDeviceManagerResource::class.java, WlDataDeviceManagerRequestsV3.VERSION), WlDataDeviceManagerRequestsV3, ProtocolObject<WlDataDeviceManagerResource> {
+@Singleton class WlDataDeviceManager @Inject internal constructor(display: Display,
+                                                                  private val wlDataSourceFactory: WlDataSourceFactory) : Global<WlDataDeviceManagerResource>(display,
+                                                                                                                                                              WlDataDeviceManagerResource::class.java,
+                                                                                                                                                              WlDataDeviceManagerRequestsV3.VERSION), WlDataDeviceManagerRequestsV3, ProtocolObject<WlDataDeviceManagerResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlDataDeviceManagerResource, Boolean>())
+    override val resources: MutableSet<WlDataDeviceManagerResource> = Collections.newSetFromMap(WeakHashMap<WlDataDeviceManagerResource, Boolean>())
 
     override fun onBindClient(client: Client,
                               version: Int,
-                              id: Int): WlDataDeviceManagerResource {
-        return add(client,
-                version,
-                id)
-    }
+                              id: Int): WlDataDeviceManagerResource = add(client,
+                                                                          version,
+                                                                          id)
 
     override fun createDataSource(resource: WlDataDeviceManagerResource,
                                   id: Int) {
-        this.wlDataSourceFactory.create()
-                .add(resource.client,
-                        resource.version,
-                        id)
+        this.wlDataSourceFactory.create().add(resource.client,
+                                              resource.version,
+                                              id)
     }
 
     override fun getDataDevice(requester: WlDataDeviceManagerResource,
                                id: Int,
                                seat: WlSeatResource) {
         val wlSeat = seat.implementation as WlSeat
-        wlSeat.wlDataDevice
-                .add(requester.client,
-                        requester.version,
-                        id)
+        wlSeat.wlDataDevice.add(requester.client,
+                                requester.version,
+                                id)
     }
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlDataDeviceManagerResource {
-        return WlDataDeviceManagerResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlDataDeviceManagerResource> {
-        return this.resources
-    }
+                        id: Int): WlDataDeviceManagerResource = WlDataDeviceManagerResource(client,
+                                                                                            version,
+                                                                                            id,
+                                                                                            this)
 }

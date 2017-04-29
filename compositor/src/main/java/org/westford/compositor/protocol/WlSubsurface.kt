@@ -28,50 +28,38 @@ import org.westford.compositor.core.Point
 import org.westford.compositor.core.Scene
 import org.westford.compositor.core.Sibling
 import org.westford.compositor.core.Subsurface
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Collections
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlSubsurfaceFactory")
-class WlSubsurface internal constructor(@param:Provided private val scene: Scene,
-                                        val subsurface: Subsurface) : WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
+@AutoFactory(className = "WlSubsurfaceFactory") class WlSubsurface(@param:Provided private val scene: Scene,
+                                                                   val subsurface: Subsurface) : WlSubsurfaceRequests, ProtocolObject<WlSubsurfaceResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlSubsurfaceResource, Boolean>())
+    override val resources: MutableSet<WlSubsurfaceResource> = Collections.newSetFromMap(WeakHashMap<WlSubsurfaceResource, Boolean>())
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlSubsurfaceResource {
-        return WlSubsurfaceResource(client,
-                version,
-                id,
-                this)
-    }
+                        id: Int): WlSubsurfaceResource = WlSubsurfaceResource(client,
+                                                                              version,
+                                                                              id,
+                                                                              this)
 
-    override fun getResources(): MutableSet<WlSubsurfaceResource> {
-        return this.resources
-    }
-
-    override fun destroy(resource: WlSubsurfaceResource) {
-        resource.destroy()
-    }
+    override fun destroy(resource: WlSubsurfaceResource) = resource.destroy()
 
     override fun setPosition(wlSubsurfaceResource: WlSubsurfaceResource,
                              x: Int,
-                             y: Int) {
-        subsurface.setPosition(Point.create(x,
-                y))
-    }
+                             y: Int) = subsurface.setPosition(Point.create(x,
+                                                                           y))
 
     override fun placeAbove(requester: WlSubsurfaceResource,
                             sibling: WlSurfaceResource) {
         //TODO unit test
         if (isValid(requester,
-                sibling)) {
+                    sibling)) {
             subsurface.above(sibling)
-        } else {
+        }
+        else {
             requester.postError(WlSubsurfaceError.BAD_SURFACE.value,
-                    "placeAbove request failed. wl_surface is not a sibling or the parent")
+                                "placeAbove request failed. wl_surface is not a sibling or the parent")
         }
     }
 
@@ -87,31 +75,24 @@ class WlSubsurface internal constructor(@param:Provided private val scene: Scene
         }
 
         val wlSubsurface = requester.implementation as WlSubsurface
-        val parentWlSurface = wlSubsurface.subsurface
-                .parentWlSurfaceResource
-                .implementation as WlSurface
-        return parentWlSurface.surface
-                .siblings
-                .contains(Sibling.create(siblingWlSurfaceResource))
+        val parentWlSurface = wlSubsurface.subsurface.parentWlSurfaceResource.implementation as WlSurface
+        return parentWlSurface.surface.siblings.contains(Sibling.create(siblingWlSurfaceResource))
     }
 
     override fun placeBelow(requester: WlSubsurfaceResource,
                             sibling: WlSurfaceResource) {
         //TODO unit test
         if (isValid(requester,
-                sibling)) {
+                    sibling)) {
             subsurface.below(sibling)
-        } else {
+        }
+        else {
             requester.postError(WlSubsurfaceError.BAD_SURFACE.value,
-                    "placeBelow request failed. wl_surface is not a sibling or the parent")
+                                "placeBelow request failed. wl_surface is not a sibling or the parent")
         }
     }
 
-    override fun setSync(requester: WlSubsurfaceResource) {
-        subsurface.setSync(true)
-    }
+    override fun setSync(requester: WlSubsurfaceResource) = subsurface.setSync(true)
 
-    override fun setDesync(requester: WlSubsurfaceResource) {
-        subsurface.setSync(false)
-    }
+    override fun setDesync(requester: WlSubsurfaceResource) = subsurface.setSync(false)
 }

@@ -25,23 +25,23 @@ import org.freedesktop.wayland.server.Global
 import org.freedesktop.wayland.server.WlOutputRequestsV2
 import org.freedesktop.wayland.server.WlOutputResource
 import org.westford.compositor.core.Output
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Collections
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlOutputFactory", allowSubclasses = true)
-class WlOutput internal constructor(@Provided display: Display,
-                                    val output: Output) : Global<WlOutputResource>(display, WlOutputResource::class.java, WlOutputRequestsV2.VERSION), WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
+@AutoFactory(className = "WlOutputFactory",
+             allowSubclasses = true) class WlOutput(@Provided display: Display,
+                                                    val output: Output) : Global<WlOutputResource>(display,
+                                                                                                   WlOutputResource::class.java,
+                                                                                                   WlOutputRequestsV2.VERSION), WlOutputRequestsV2, ProtocolObject<WlOutputResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlOutputResource, Boolean>())
+    override val resources: MutableSet<WlOutputResource> = Collections.newSetFromMap(WeakHashMap<WlOutputResource, Boolean>())
 
     override fun onBindClient(client: Client,
                               version: Int,
                               id: Int): WlOutputResource {
         val wlOutputResource = add(client,
-                version,
-                id)
+                                   version,
+                                   id)
         this.output.notifyGeometry(wlOutputResource)
         this.output.notifyMode(wlOutputResource)
         if (wlOutputResource.version >= 2) {
@@ -52,14 +52,8 @@ class WlOutput internal constructor(@Provided display: Display,
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlOutputResource {
-        return WlOutputResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlOutputResource> {
-        return this.resources
-    }
+                        id: Int): WlOutputResource = WlOutputResource(client,
+                                                                      version,
+                                                                      id,
+                                                                      this)
 }

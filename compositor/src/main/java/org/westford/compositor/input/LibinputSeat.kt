@@ -24,7 +24,6 @@ import org.freedesktop.jaccall.Pointer.wrap
 import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.EventSource
 import org.freedesktop.wayland.server.jaccall.WaylandServerCore
-import org.freedesktop.wayland.shared.WlSeatCapability
 import org.freedesktop.wayland.shared.WlSeatCapability.KEYBOARD
 import org.freedesktop.wayland.shared.WlSeatCapability.POINTER
 import org.freedesktop.wayland.shared.WlSeatCapability.TOUCH
@@ -45,7 +44,6 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_DOWN
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_FRAME
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_MOTION
 import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_UP
-import java.util.*
 
 @AutoFactory(allowSubclasses = true,
              className = "PrivateLibinputSeatFactory") class LibinputSeat(@param:Provided private val display: Display,
@@ -54,13 +52,13 @@ import java.util.*
                                                                           private val libinputContext: Long,
                                                                           private val wlSeat: WlSeat) {
 
-    private val libinputDevices = HashSet<LibinputDevice>()
-    private var inputEventSource = Optional.empty<EventSource>()
+    private val libinputDevices = mutableSetOf<LibinputDevice>()
+    private var inputEventSource: EventSource? = null
 
     fun disableInput() {
-        this.inputEventSource.ifPresent { eventSource ->
-            eventSource.remove()
-            this.inputEventSource = Optional.empty<EventSource>()
+        this.inputEventSource?.let {
+            it.remove()
+            this.inputEventSource = null
         }
     }
 
@@ -69,23 +67,24 @@ import java.util.*
     }
 
     private fun loop(libinput: Long) {
-        if (!this.inputEventSource.isPresent) {
+        if (this.inputEventSource == null) {
             val libinputFd = this.libinput.libinput_get_fd(libinput)
-            this.inputEventSource = Optional.of(this.display.eventLoop.addFileDescriptor(libinputFd,
-                                                                                         WaylandServerCore.WL_EVENT_READABLE) { fd, mask ->
-                if (fd == libinputFd) {
-                    processEvents(libinput)
-                }
-                0
-            })
+            this.inputEventSource = this.display.eventLoop.addFileDescriptor(libinputFd,
+                                                                             WaylandServerCore.WL_EVENT_READABLE,
+                                                                             { fd, mask ->
+                                                                                 if (fd == libinputFd) {
+                                                                                     processEvents(libinput)
+                                                                                 }
+                                                                                 0
+                                                                             })
         }
     }
 
     private fun processEvents(libinput: Long) {
         this.libinput.libinput_dispatch(libinput)
 
-        var event: Long
-        while ((event = this.libinput.libinput_get_event(libinput)) != 0) {
+        var event: Long = 0L
+        while ({ event = this.libinput.libinput_get_event(libinput); event }() != 0L) {
 
             processEvent(event)
 
@@ -110,22 +109,22 @@ import java.util.*
 
     private fun handleDeviceAdded(device: Long) {
         //check device capabilities, if it's not a touch, pointer or keyboard, we're not interested.
-        val deviceCapabilities = EnumSet.noneOf<WlSeatCapability>(WlSeatCapability::class.java)
+        var deviceCapabilities = 0
 
         if (this.libinput.libinput_device_has_capability(device,
                                                          LIBINPUT_DEVICE_CAP_KEYBOARD) != 0) {
-            deviceCapabilities.add(KEYBOARD)
+            deviceCapabilities = deviceCapabilities or KEYBOARD.value
         }
         if (this.libinput.libinput_device_has_capability(device,
                                                          LIBINPUT_DEVICE_CAP_POINTER) != 0) {
-            deviceCapabilities.add(POINTER)
+            deviceCapabilities = deviceCapabilities or POINTER.value
         }
         if (this.libinput.libinput_device_has_capability(device,
                                                          LIBINPUT_DEVICE_CAP_TOUCH) != 0) {
-            deviceCapabilities.add(TOUCH)
+            deviceCapabilities = deviceCapabilities or TOUCH.value
         }
 
-        if (deviceCapabilities.isEmpty()) {
+        if (deviceCapabilities == 0) {
             return
         }
 
@@ -187,14 +186,14 @@ import java.util.*
 
     private fun emitSeatCapabilities() {
 
-        val seatCapabilities = EnumSet.noneOf<WlSeatCapability>(WlSeatCapability::class.java)
+        var seatCapabilities = 0
 
         for (libinputDevice in this.libinputDevices) {
-            seatCapabilities.addAll(libinputDevice.deviceCapabilities)
+            seatCapabilities = seatCapabilities or libinputDevice.deviceCapabilities
         }
 
         val seat = this.wlSeat.seat
-        seat.setCapabilities(seatCapabilities)
+        seat.capabilities = seatCapabilities
         seat.emitCapabilities(this.wlSeat.getResources())
     }
 }

@@ -22,16 +22,13 @@ import org.freedesktop.wayland.server.WlDataDeviceRequestsV3
 import org.freedesktop.wayland.server.WlDataDeviceResource
 import org.freedesktop.wayland.server.WlDataSourceResource
 import org.freedesktop.wayland.server.WlSurfaceResource
-
+import java.util.*
 import javax.annotation.Nonnegative
 import javax.inject.Inject
-import java.util.Collections
-import java.util.WeakHashMap
 
-class WlDataDevice @Inject
-internal constructor() : WlDataDeviceRequestsV3, ProtocolObject<WlDataDeviceResource> {
+class WlDataDevice @Inject internal constructor() : WlDataDeviceRequestsV3, ProtocolObject<WlDataDeviceResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlDataDeviceResource, Boolean>())
+    override val resources: MutableSet<WlDataDeviceResource> = Collections.newSetFromMap(WeakHashMap<WlDataDeviceResource, Boolean>())
 
     override fun startDrag(requester: WlDataDeviceResource,
                            source: WlDataSourceResource?,
@@ -53,14 +50,8 @@ internal constructor() : WlDataDeviceRequestsV3, ProtocolObject<WlDataDeviceReso
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlDataDeviceResource {
-        return WlDataDeviceResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlDataDeviceResource> {
-        return this.resources
-    }
+                        id: Int): WlDataDeviceResource = WlDataDeviceResource(client,
+                                                                              version,
+                                                                              id,
+                                                                              this)
 }

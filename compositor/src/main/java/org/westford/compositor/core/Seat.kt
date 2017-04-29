@@ -18,29 +18,11 @@
 package org.westford.compositor.core
 
 import org.freedesktop.wayland.server.WlSeatResource
-import org.freedesktop.wayland.shared.WlSeatCapability
 import javax.inject.Inject
-import java.util.EnumSet
 
-class Seat @Inject
-internal constructor() {
+class Seat @Inject internal constructor() {
 
-    private var capabilities = EnumSet.noneOf<WlSeatCapability>(WlSeatCapability::class.java)
+    var capabilities: Int = 0
 
-    fun emitCapabilities(wlSeatResources: Set<WlSeatResource>) {
-        val capabilitiesFlag = capabilitiesFlag()
-        wlSeatResources.forEach { wlSeatResource -> wlSeatResource.capabilities(capabilitiesFlag) }
-    }
-
-    private fun capabilitiesFlag(): Int {
-        var flag = 0
-        for (capability in this.capabilities) {
-            flag = flag or capability.value
-        }
-        return flag
-    }
-
-    fun setCapabilities(capability: EnumSet<WlSeatCapability>) {
-        this.capabilities = capability
-    }
+    fun emitCapabilities(wlSeatResources: Set<WlSeatResource>) = wlSeatResources.forEach { it.capabilities(capabilities) }
 }

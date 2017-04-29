@@ -21,16 +21,13 @@ import com.google.auto.factory.AutoFactory
 import org.freedesktop.wayland.server.Client
 import org.freedesktop.wayland.server.WlDataSourceRequestsV3
 import org.freedesktop.wayland.server.WlDataSourceResource
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.ArrayList
-import java.util.Collections
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlDataSourceFactory", allowSubclasses = true)
-class WlDataSource internal constructor() : WlDataSourceRequestsV3, ProtocolObject<WlDataSourceResource> {
+@AutoFactory(className = "WlDataSourceFactory",
+             allowSubclasses = true) class WlDataSource : WlDataSourceRequestsV3, ProtocolObject<WlDataSourceResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlDataSourceResource, Boolean>())
+    override val resources: MutableSet<WlDataSourceResource> = Collections.newSetFromMap(WeakHashMap<WlDataSourceResource, Boolean>())
     private val mimeTypes = ArrayList<String>()
 
     override fun offer(resource: WlDataSourceResource,
@@ -38,9 +35,7 @@ class WlDataSource internal constructor() : WlDataSourceRequestsV3, ProtocolObje
         this.mimeTypes.add(mimeType)
     }
 
-    override fun destroy(resource: WlDataSourceResource) {
-        resource.destroy()
-    }
+    override fun destroy(resource: WlDataSourceResource) = resource.destroy()
 
     override fun setActions(requester: WlDataSourceResource,
                             dndActions: Int) {
@@ -49,14 +44,8 @@ class WlDataSource internal constructor() : WlDataSourceRequestsV3, ProtocolObje
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlDataSourceResource {
-        return WlDataSourceResource(client,
-                version,
-                id,
-                this)
-    }
-
-    override fun getResources(): MutableSet<WlDataSourceResource> {
-        return this.resources
-    }
+                        id: Int): WlDataSourceResource = WlDataSourceResource(client,
+                                                                              version,
+                                                                              id,
+                                                                              this)
 }

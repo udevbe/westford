@@ -17,7 +17,6 @@
  */
 package org.westford.compositor.protocol
 
-
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.wayland.server.Client
@@ -29,34 +28,32 @@ import org.freedesktop.wayland.server.WlSeatRequestsV5
 import org.freedesktop.wayland.server.WlSeatResource
 import org.freedesktop.wayland.server.WlTouchResource
 import org.westford.compositor.core.Seat
-
+import java.util.*
 import javax.annotation.Nonnegative
-import java.util.Collections
-import java.util.HashMap
-import java.util.Optional
-import java.util.WeakHashMap
 
-@AutoFactory(className = "WlSeatFactory", allowSubclasses = true)
-class WlSeat internal constructor(@Provided display: Display,
-                                  @param:Provided val wlDataDevice: WlDataDevice,
-                                  @param:Provided val seat: Seat,
-                                  val wlPointer: WlPointer,
-                                  val wlKeyboard: WlKeyboard,
-                                  @param:Provided val wlTouch: WlTouch) : Global<WlSeatResource>(display, WlSeatResource::class.java, WlSeatRequestsV5.VERSION), WlSeatRequestsV5, ProtocolObject<WlSeatResource> {
+@AutoFactory(className = "WlSeatFactory",
+             allowSubclasses = true) class WlSeat(@Provided display: Display,
+                                                  @param:Provided val wlDataDevice: WlDataDevice,
+                                                  @param:Provided val seat: Seat,
+                                                  val wlPointer: WlPointer,
+                                                  val wlKeyboard: WlKeyboard,
+                                                  @param:Provided val wlTouch: WlTouch) : Global<WlSeatResource>(display,
+                                                                                                                 WlSeatResource::class.java,
+                                                                                                                 WlSeatRequestsV5.VERSION), WlSeatRequestsV5, ProtocolObject<WlSeatResource> {
 
-    private val resources = Collections.newSetFromMap(WeakHashMap<WlSeatResource, Boolean>())
+    override val resources: MutableSet<WlSeatResource> = Collections.newSetFromMap(WeakHashMap<WlSeatResource, Boolean>())
 
-    private val wlPointerResources = HashMap<WlSeatResource, WlPointerResource>()
-    private val wlKeyboardResources = HashMap<WlSeatResource, WlKeyboardResource>()
-    private val wlTouchResources = HashMap<WlSeatResource, WlTouchResource>()
+    private val wlPointerResources = mutableMapOf<WlSeatResource, WlPointerResource>()
+    private val wlKeyboardResources = mutableMapOf<WlSeatResource, WlKeyboardResource>()
+    private val wlTouchResources = mutableMapOf<WlSeatResource, WlTouchResource>()
 
     override fun onBindClient(client: Client,
                               version: Int,
                               id: Int): WlSeatResource {
         //FIXME check if we support given version.
         val wlSeatResource = add(client,
-                version,
-                id)
+                                 version,
+                                 id)
         wlSeatResource.register {
             this@WlSeat.wlPointerResources.remove(wlSeatResource)
             this@WlSeat.wlKeyboardResources.remove(wlSeatResource)
@@ -71,63 +68,58 @@ class WlSeat internal constructor(@Provided display: Display,
     override fun getPointer(wlSeatResource: WlSeatResource,
                             id: Int) {
         val wlPointerResource = wlPointer.add(wlSeatResource.client,
-                wlSeatResource.version,
-                id)
+                                              wlSeatResource.version,
+                                              id)
         this.wlPointerResources.put(wlSeatResource,
-                wlPointerResource)
-        wlPointerResource.register { this@WlSeat.wlPointerResources.remove(wlSeatResource) }
+                                    wlPointerResource)
+        wlPointerResource.register {
+            this@WlSeat.wlPointerResources.remove(wlSeatResource)
+        }
     }
 
     override fun getKeyboard(wlSeatResource: WlSeatResource,
                              id: Int) {
         val wlKeyboard = wlKeyboard
         val wlKeyboardResource = wlKeyboard.add(wlSeatResource.client,
-                wlSeatResource.version,
-                id)
+                                                wlSeatResource.version,
+                                                id)
         this.wlKeyboardResources.put(wlSeatResource,
-                wlKeyboardResource)
-        wlKeyboardResource.register { this@WlSeat.wlKeyboardResources.remove(wlSeatResource) }
+                                     wlKeyboardResource)
+        wlKeyboardResource.register {
+            this@WlSeat.wlKeyboardResources.remove(wlSeatResource)
+        }
 
-        wlKeyboard.keyboardDevice
-                .emitKeymap(setOf<WlKeyboardResource>(wlKeyboardResource))
+        wlKeyboard.keyboardDevice.emitKeymap(setOf<WlKeyboardResource>(wlKeyboardResource))
     }
 
     override fun getTouch(wlSeatResource: WlSeatResource,
                           id: Int) {
         val wlTouchResource = wlTouch.add(wlSeatResource.client,
-                wlSeatResource.version,
-                id)
+                                          wlSeatResource.version,
+                                          id)
         this.wlTouchResources.put(wlSeatResource,
-                wlTouchResource)
-        wlTouchResource.register { this@WlSeat.wlTouchResources.remove(wlSeatResource) }
+                                  wlTouchResource)
+        wlTouchResource.register {
+            this@WlSeat.wlTouchResources.remove(wlSeatResource)
+        }
     }
 
     override fun release(requester: WlSeatResource) {
         //TODO
     }
 
-    fun getWlKeyboardResource(wlSeatResource: WlSeatResource): Optional<WlKeyboardResource> {
-        return Optional.ofNullable(this.wlKeyboardResources[wlSeatResource])
-    }
-
-    override fun getResources(): MutableSet<WlSeatResource> {
-        return this.resources
+    fun getWlKeyboardResource(wlSeatResource: WlSeatResource): WlKeyboardResource? {
+        return this.wlKeyboardResources[wlSeatResource]
     }
 
     override fun create(client: Client,
                         @Nonnegative version: Int,
-                        id: Int): WlSeatResource {
-        return WlSeatResource(client,
-                version,
-                id,
-                this)
-    }
+                        id: Int): WlSeatResource = WlSeatResource(client,
+                                                                  version,
+                                                                  id,
+                                                                  this)
 
-    fun getWlPointerResource(wlSeatResource: WlSeatResource): Optional<WlPointerResource> {
-        return Optional.ofNullable(this.wlPointerResources[wlSeatResource])
-    }
+    fun getWlPointerResource(wlSeatResource: WlSeatResource): WlPointerResource? = this.wlPointerResources[wlSeatResource]
 
-    fun getWlTouchResource(wlSeatResource: WlSeatResource): Optional<WlTouchResource> {
-        return Optional.ofNullable(this.wlTouchResources[wlSeatResource])
-    }
+    fun getWlTouchResource(wlSeatResource: WlSeatResource): WlTouchResource? = this.wlTouchResources[wlSeatResource]
 }

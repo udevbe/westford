@@ -18,35 +18,28 @@
 package org.westford.compositor.input
 
 import org.freedesktop.jaccall.Pointer
+import org.freedesktop.jaccall.Pointer.malloc
+import org.freedesktop.jaccall.Pointer.nref
 import org.freedesktop.jaccall.Ptr
-import org.westford.compositor.core.KeyboardDevice
-import org.westford.compositor.core.KeyboardDeviceFactory
-import org.westford.compositor.protocol.WlKeyboardFactory
 import org.westford.compositor.protocol.WlPointerFactory
 import org.westford.compositor.protocol.WlSeat
-import org.westford.compositor.protocol.WlSeatFactory
 import org.westford.launch.LifeCycleSignals
 import org.westford.nativ.glibc.Libc
 import org.westford.nativ.libinput.Libinput
-import org.westford.nativ.libinput.Pointerclose_restricted
 import org.westford.nativ.libinput.libinput_interface
 import org.westford.nativ.libudev.Libudev
 import javax.inject.Inject
 
-import org.freedesktop.jaccall.Pointer.malloc
-import org.westford.nativ.libinput.Pointeropen_restricted.nref
-
-class LibinputSeatFactory @Inject
-internal constructor(private val wlSeatFactory: WlSeatFactory,
-                     private val wlKeyboardFactory: WlKeyboardFactory,
-                     private val wlPointerFactory: WlPointerFactory,
-                     private val privateLibinputSeatFactory: PrivateLibinputSeatFactory,
-                     private val keyboardDeviceFactory: KeyboardDeviceFactory,
-                     private val libinputXkbFactory: LibinputXkbFactory,
-                     private val libinput: Libinput,
-                     private val libudev: Libudev,
-                     private val libc: Libc,
-                     private val lifeCycleSignals: LifeCycleSignals) {
+class LibinputSeatFactory @Inject internal constructor(private val wlSeatFactory: WlSeatFactory,
+                                                       private val wlKeyboardFactory: WlKeyboardFactory,
+                                                       private val wlPointerFactory: WlPointerFactory,
+                                                       private val privateLibinputSeatFactory: PrivateLibinputSeatFactory,
+                                                       private val keyboardDeviceFactory: KeyboardDeviceFactory,
+                                                       private val libinputXkbFactory: LibinputXkbFactory,
+                                                       private val libinput: Libinput,
+                                                       private val libudev: Libudev,
+                                                       private val libc: Libc,
+                                                       private val lifeCycleSignals: LifeCycleSignals) {
 
     fun create(seatId: String,
                keyboardRule: String,
@@ -55,23 +48,25 @@ internal constructor(private val wlSeatFactory: WlSeatFactory,
                keyboardVariant: String,
                keyboardOptions: String): WlSeat {
         val keyboardDevice = this.keyboardDeviceFactory.create(this.libinputXkbFactory.create(keyboardRule,
-                keyboardModel,
-                keyboardLayout,
-                keyboardVariant,
-                keyboardOptions))
+                                                                                              keyboardModel,
+                                                                                              keyboardLayout,
+                                                                                              keyboardVariant,
+                                                                                              keyboardOptions))
         keyboardDevice.updateKeymap()
 
         val wlSeat = this.wlSeatFactory.create(this.wlPointerFactory.create(),
-                this.wlKeyboardFactory.create(keyboardDevice))
+                                               this.wlKeyboardFactory.create(keyboardDevice))
 
         val libinputSeat = this.privateLibinputSeatFactory.create(createUdevContext(seatId),
-                wlSeat)
+                                                                  wlSeat)
         libinputSeat.enableInput()
 
-        this.lifeCycleSignals.activateSignal
-                .connect({ event -> libinputSeat.enableInput() })
-        this.lifeCycleSignals.deactivateSignal
-                .connect({ event -> libinputSeat.disableInput() })
+        this.lifeCycleSignals.activateSignal.connect {
+            libinputSeat.enableInput()
+        }
+        this.lifeCycleSignals.deactivateSignal.connect {
+            libinputSeat.disableInput()
+        }
 
         return wlSeat
     }
@@ -83,23 +78,28 @@ internal constructor(private val wlSeatFactory: WlSeatFactory,
         }
 
         val interface_ = malloc<libinput_interface>(libinput_interface.SIZE,
-                libinput_interface::class.java!!)
-        interface_.dref()
-                .open_restricted(nref(???({ path, flags, user_data -> this.openRestricted(path, flags, user_data) })))
-        interface_.dref()
-                .close_restricted(Pointerclose_restricted.nref(???({ fd, user_data -> this.closeRestricted(fd, user_data) })))
+                                                    libinput_interface::class.java)
+        interface_.dref().open_restricted(nref(???({ path, flags, user_data ->
+            this.openRestricted(path,
+                                flags,
+                                user_data)
+        })))
+        interface_.dref().close_restricted(Pointerclose_restricted.nref(???({ fd, user_data ->
+            this.closeRestricted(fd,
+                                 user_data)
+        })))
 
         val libinput = this.libinput.libinput_udev_create_context(interface_.address,
-                0,
-                udev)
+                                                                  0,
+                                                                  udev)
 
         if (this.libinput.libinput_udev_assign_seat(libinput,
-                Pointer.nref(seatId).address) != 0) {
+                                                    Pointer.nref(seatId).address) != 0) {
             this.libinput.libinput_unref(libinput)
             this.libudev.udev_unref(udev)
 
             throw RuntimeException(String.format("Failed to set seat=%s",
-                    seatId))
+                                                 seatId))
         }
 
         return libinput
@@ -109,7 +109,7 @@ internal constructor(private val wlSeatFactory: WlSeatFactory,
                                flags: Int,
                                @Ptr(Void::class) user_data: Long): Int {
         val fd = this.libc.open(path,
-                flags)
+                                flags)
 
         return if (fd < 0) -this.libc.errno else fd
     }
