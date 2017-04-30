@@ -18,7 +18,6 @@
 package org.westford.launch.direct
 
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.events.Activate
 import org.westford.compositor.core.events.Deactivate
 import org.westford.compositor.core.events.Start
@@ -27,8 +26,8 @@ import org.westford.launch.LifeCycleSignals
 
 class DirectLifeCycleSignals internal constructor() : LifeCycleSignals {
 
-    override val activateSignal = Signal<Activate, Slot<Activate>>()
-    override val deactivateSignal = Signal<Deactivate, Slot<Deactivate>>()
-    override val startSignal = Signal<Start, Slot<Start>>()
-    override val stopSignal = Signal<Stop, Slot<Stop>>()
+    override val activateSignal = Signal<Activate>()
+    override val deactivateSignal = Signal<Deactivate>()
+    override val startSignal = Signal<Start>()
+    override val stopSignal = Signal<Stop>()
 }

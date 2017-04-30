@@ -14,13 +14,9 @@ class DirectModule {
 
     @Singleton
     @Provides
-    internal fun provideLifeCycleSignals(): LifeCycleSignals {
-        return DirectLifeCycleSignals()
-    }
+    internal fun provideLifeCycleSignals(): LifeCycleSignals = DirectLifeCycleSignals()
 
     @Singleton
     @Provides
-    internal fun providePrivileges(directPrivileges: DirectPrivileges): Privileges {
-        return directPrivileges
-    }
+    internal fun providePrivileges(directPrivileges: DirectPrivileges): Privileges = directPrivileges
 }

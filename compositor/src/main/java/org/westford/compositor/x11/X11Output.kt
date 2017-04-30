@@ -20,11 +20,11 @@ package org.westford.compositor.x11
 import com.google.auto.factory.AutoFactory
 import org.westford.nativ.libxcb.xcb_screen_t
 
-@AutoFactory(allowSubclasses = true, className = "X11OutputFactory")
-class X11Output internal constructor(val xWindow: Int,
-                                     val x: Int,
-                                     val y: Int,
-                                     val width: Int,
-                                     val height: Int,
-                                     val name: String,
-                                     val screen: xcb_screen_t)
+@AutoFactory(allowSubclasses = true,
+             className = "X11OutputFactory") class X11Output(val xWindow: Int,
+                                                             val x: Int,
+                                                             val y: Int,
+                                                             val width: Int,
+                                                             val height: Int,
+                                                             val name: String,
+                                                             val screen: xcb_screen_t)

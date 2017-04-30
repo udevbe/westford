@@ -14,13 +14,9 @@ class IndirectModule {
 
     @Singleton
     @Provides
-    internal fun provideIndirectLifeCycleSignals(indirectLifeCycleSignalsFactory: IndirectLifeCycleSignalsFactory): LifeCycleSignals {
-        return indirectLifeCycleSignalsFactory.create()
-    }
+    internal fun provideIndirectLifeCycleSignals(indirectLifeCycleSignalsFactory: IndirectLifeCycleSignalsFactory): LifeCycleSignals = indirectLifeCycleSignalsFactory.create()
 
     @Singleton
     @Provides
-    internal fun provideIndirectPrivileges(indirectPrivilegesFactory: IndirectPrivilegesFactory): Privileges {
-        return indirectPrivilegesFactory.create()
-    }
+    internal fun provideIndirectPrivileges(indirectPrivilegesFactory: IndirectPrivilegesFactory): Privileges = indirectPrivilegesFactory.create()
 }

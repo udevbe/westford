@@ -22,22 +22,23 @@ import com.google.auto.factory.Provided
 import org.freedesktop.jaccall.Pointer
 import org.freedesktop.wayland.server.EventLoop
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.nativ.libxcb.Libxcb
 import org.westford.nativ.libxcb.xcb_generic_event_t
 
-@AutoFactory(className = "X11EventBusFactory", allowSubclasses = true)
-class X11EventBus internal constructor(@param:Provided private val libxcb: Libxcb,
-                                       private val xcbConnection: Long) : EventLoop.FileDescriptorEventHandler {
+@AutoFactory(className = "X11EventBusFactory",
+             allowSubclasses = true) class X11EventBus(@param:Provided private val libxcb: Libxcb,
+                                                       private val xcbConnection: Long) : EventLoop.FileDescriptorEventHandler {
 
-    val xEventSignal = Signal<Pointer<xcb_generic_event_t>, Slot<Pointer<xcb_generic_event_t>>>()
+    val xEventSignal = Signal<Pointer<xcb_generic_event_t>>()
 
     override fun handle(fd: Int,
                         mask: Int): Int {
-        var event: Long
-        while ((event = this.libxcb.xcb_poll_for_event(this.xcbConnection)) != 0L) {
-            Pointer.wrap<xcb_generic_event_t>(xcb_generic_event_t::class.java!!,
-                    event).use { generic_event -> xEventSignal.emit(generic_event) }
+        var event: Long = 0L
+        while ({ event = this.libxcb.xcb_poll_for_event(this.xcbConnection); event }() != 0L) {
+            Pointer.wrap<xcb_generic_event_t>(xcb_generic_event_t::class.java,
+                                              event).use {
+                xEventSignal.emit(it)
+            }
         }
         this.libxcb.xcb_flush(this.xcbConnection)
         return 0

@@ -18,25 +18,19 @@
 package org.westford.compositor.x11
 
 import org.freedesktop.wayland.shared.WlSeatCapability
-import org.westford.compositor.core.KeyboardDevice
-import org.westford.compositor.core.KeyboardDeviceFactory
-import org.westford.compositor.core.Xkb
-import org.westford.compositor.protocol.WlKeyboardFactory
 import org.westford.compositor.protocol.WlPointerFactory
 import org.westford.compositor.protocol.WlSeat
-import org.westford.compositor.protocol.WlSeatFactory
+import java.util.*
 import javax.inject.Inject
-import java.util.EnumSet
 
-class X11SeatFactory @Inject
-internal constructor(private val privateX11SeatFactory: PrivateX11SeatFactory,
-                     private val x11Platform: X11Platform,
-                     private val x11XkbFactory: X11XkbFactory,
-                     private val x11InputEventListenerFactory: X11InputEventListenerFactory,
-                     private val wlSeatFactory: WlSeatFactory,
-                     private val wlPointerFactory: WlPointerFactory,
-                     private val wlKeyboardFactory: WlKeyboardFactory,
-                     private val keyboardDeviceFactory: KeyboardDeviceFactory) {
+class X11SeatFactory @Inject internal constructor(private val privateX11SeatFactory: PrivateX11SeatFactory,
+                                                  private val x11Platform: X11Platform,
+                                                  private val x11XkbFactory: X11XkbFactory,
+                                                  private val x11InputEventListenerFactory: X11InputEventListenerFactory,
+                                                  private val wlSeatFactory: WlSeatFactory,
+                                                  private val wlPointerFactory: WlPointerFactory,
+                                                  private val wlKeyboardFactory: WlKeyboardFactory,
+                                                  private val keyboardDeviceFactory: KeyboardDeviceFactory) {
 
     fun create(): WlSeat {
 
@@ -46,15 +40,12 @@ internal constructor(private val privateX11SeatFactory: PrivateX11SeatFactory,
         keyboardDevice.updateKeymap()
 
         val wlSeat = this.wlSeatFactory.create(this.wlPointerFactory.create(),
-                this.wlKeyboardFactory.create(keyboardDevice))
+                                               this.wlKeyboardFactory.create(keyboardDevice))
 
-        this.x11Platform.x11EventBus
-                .xEventSignal
-                .connect(this.x11InputEventListenerFactory.create(this.privateX11SeatFactory.create(wlSeat)))
+        this.x11Platform.x11EventBus.xEventSignal.connect(this.x11InputEventListenerFactory.create(this.privateX11SeatFactory.create(wlSeat)))
         //enable pointer and keyboard for wlseat as an X11 seat always has these.
-        wlSeat.getSeat()
-                .setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
-                        WlSeatCapability.POINTER))
+        wlSeat.getSeat().setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
+                                                    WlSeatCapability.POINTER))
 
         return wlSeat
     }

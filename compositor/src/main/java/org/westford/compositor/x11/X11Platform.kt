@@ -19,14 +19,9 @@ package org.westford.compositor.x11
 
 import com.google.auto.factory.AutoFactory
 
-@AutoFactory(className = "PrivateX11PlatformFactory", allowSubclasses = true)
-class X11Platform internal constructor(val renderOutputs: List<X11Output>,
-                                       val x11EventBus: X11EventBus,
-                                       val xcbConnection: Long,
-                                       private val xDisplay: Long,
-                                       val x11Atoms: Map<String, Int>) {
-
-    fun getxDisplay(): Long {
-        return this.xDisplay
-    }
-}
+@AutoFactory(className = "PrivateX11PlatformFactory",
+             allowSubclasses = true) class X11Platform(val renderOutputs: List<X11Output>,
+                                                       val x11EventBus: X11EventBus,
+                                                       val xcbConnection: Long,
+                                                       val xDisplay: Long,
+                                                       val x11Atoms: Map<String, Int>)
