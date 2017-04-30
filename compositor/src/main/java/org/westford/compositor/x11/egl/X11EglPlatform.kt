@@ -19,41 +19,16 @@ package org.westford.compositor.x11.egl
 
 import com.google.auto.factory.AutoFactory
 import org.westford.Signal
-import org.westford.Slot
 import org.westford.compositor.core.EglPlatform
 import org.westford.compositor.core.events.RenderOutputDestroyed
 import org.westford.compositor.core.events.RenderOutputNew
 import org.westford.compositor.protocol.WlOutput
 
-@AutoFactory(className = "PrivateX11EglPlatformFactory", allowSubclasses = true)
-class X11EglPlatform internal constructor(private val wlOutputs: List<WlOutput>,
-                                          private val eglDisplay: Long,
-                                          private val eglContext: Long,
-                                          private val eglExtensions: String) : EglPlatform {
-    private val renderOutputNewSignal = Signal<RenderOutputNew, Slot<RenderOutputNew>>()
-    private val renderOutputDestroyedSignal = Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>>()
-
-    override fun getEglDisplay(): Long {
-        return this.eglDisplay
-    }
-
-    override fun getEglContext(): Long {
-        return this.eglContext
-    }
-
-    override fun getWlOutputs(): List<WlOutput> {
-        return this.wlOutputs
-    }
-
-    override fun getRenderOutputNewSignal(): Signal<RenderOutputNew, Slot<RenderOutputNew>> {
-        return this.renderOutputNewSignal
-    }
-
-    override fun getRenderOutputDestroyedSignal(): Signal<RenderOutputDestroyed, Slot<RenderOutputDestroyed>> {
-        return this.renderOutputDestroyedSignal
-    }
-
-    override fun getEglExtensions(): String {
-        return this.eglExtensions
-    }
+@AutoFactory(className = "PrivateX11EglPlatformFactory",
+             allowSubclasses = true) class X11EglPlatform(override val wlOutputs: List<WlOutput>,
+                                                          override val eglDisplay: Long,
+                                                          override val eglContext: Long,
+                                                          override val eglExtensions: String) : EglPlatform {
+    override val renderOutputNewSignal = Signal<RenderOutputNew>()
+    override val renderOutputDestroyedSignal = Signal<RenderOutputDestroyed>()
 }

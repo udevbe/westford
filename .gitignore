@@ -223,3 +223,4 @@ bootstrap/dependency-reduced-pom.xml
 !/compositor/src/main/java/org/westford/compositor/core/SurfaceViewFactory.kt
 !/compositor/src/main/java/org/westford/compositor/drm/egl/GbmBoClient.kt
 !/compositor/src/main/java/org/westford/compositor/gles2/Gles2RendererModule.kt
+!/compositor/src/main/java/org/westford/compositor/x11/egl/X11EglOutput.kt

@@ -26,6 +26,7 @@ import org.freedesktop.jaccall.Unsigned
 import org.freedesktop.wayland.server.Display
 import org.freedesktop.wayland.server.EventSource
 import org.westford.compositor.core.EglOutput
+import org.westford.compositor.core.EglOutputState
 import org.westford.compositor.core.OutputMode
 import org.westford.compositor.core.Rectangle
 import org.westford.compositor.core.Scene
@@ -62,6 +63,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
                                                                    override val eglSurface: Long,
                                                                    override val eglContext: Long,
                                                                    override val eglDisplay: Long) : EglOutput, DrmPageFlipCallback {
+    override val state: EglOutputState? = null
 
     private var nextGbmBo: GbmBo
     private var renderPending = false

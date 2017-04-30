@@ -17,58 +17,32 @@
  */
 package org.westford.compositor.x11.egl
 
-
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.wayland.server.Display
 import org.westford.compositor.core.EglOutput
 import org.westford.compositor.core.EglOutputState
 import org.westford.compositor.core.Scene
-import org.westford.compositor.core.Subscene
-import org.westford.compositor.core.SurfaceView
-import org.westford.compositor.gles2.Gles2Painter
-import org.westford.compositor.gles2.Gles2PainterFactory
 import org.westford.compositor.protocol.WlOutput
 import org.westford.compositor.x11.X11Output
-import java.util.Optional
 
-@AutoFactory(allowSubclasses = true, className = "X11EglOutputFactory")
-class X11EglOutput internal constructor(@param:Provided private val display: Display,
-                                        @Provided gles2PainterFactory: org.westford.compositor.gles2.Gles2PainterFactory,
-                                        @param:Provided private val scene: Scene,
-                                        val x11Output: X11Output,
-                                        private val eglSurface: Long,
-                                        private val eglContext: Long,
-                                        private val eglDisplay: Long) : EglOutput {
+@AutoFactory(allowSubclasses = true,
+             className = "X11EglOutputFactory") class X11EglOutput(@param:Provided private val display: Display,
+                                                                   @Provided gles2PainterFactory: org.westford.compositor.gles2.Gles2PainterFactory,
+                                                                   @param:Provided private val scene: Scene,
+                                                                   val x11Output: X11Output,
+                                                                   override val eglSurface: Long,
+                                                                   override val eglContext: Long,
+                                                                   override val eglDisplay: Long) : EglOutput {
 
     private val gles2PainterFactory: Gles2PainterFactory
 
     private var renderScheduled = false
 
-    private var state = Optional.empty<EglOutputState>()
+    override var state: EglOutputState? = null
 
     init {
         this.gles2PainterFactory = gles2PainterFactory
-    }
-
-    override fun getEglSurface(): Long {
-        return this.eglSurface
-    }
-
-    override fun getEglContext(): Long {
-        return this.eglContext
-    }
-
-    override fun getEglDisplay(): Long {
-        return this.eglDisplay
-    }
-
-    override fun getState(): Optional<EglOutputState> {
-        return this.state
-    }
-
-    override fun updateState(eglOutputState: EglOutputState) {
-        this.state = Optional.of(eglOutputState)
     }
 
     override fun render(wlOutput: WlOutput) {
@@ -79,8 +53,7 @@ class X11EglOutput internal constructor(@param:Provided private val display: Dis
     private fun whenIdleDoRender(wlOutput: WlOutput) {
         if (!this.renderScheduled) {
             this.renderScheduled = true
-            this.display.eventLoop
-                    .addIdle { doRender(wlOutput) }
+            this.display.eventLoop.addIdle { doRender(wlOutput) }
         }
     }
 
@@ -92,11 +65,10 @@ class X11EglOutput internal constructor(@param:Provided private val display: Dis
 
     private fun paint(wlOutput: WlOutput) {
 
-        val subscene = this.scene.subsection(wlOutput.output
-                .region)
+        val subscene = this.scene.subsection(wlOutput.output.region)
 
         val gles2Painter = this.gles2PainterFactory.create(this,
-                wlOutput)
+                                                           wlOutput)
 
         //naive generic single pass, bottom to top overdraw rendering.
         val lockViews = subscene.lockViews
@@ -104,26 +76,34 @@ class X11EglOutput internal constructor(@param:Provided private val display: Dis
 
         //lockscreen(s) hide all other screens.
         if (!lockViews.isEmpty()) {
-            lockViews.forEach(Consumer<SurfaceView> { gles2Painter.paint(it) })
-        } else {
-            fullscreenView.ifPresent { fullscreenSurfaceView ->
+            lockViews.forEach {
+                gles2Painter.paint(it)
+            }
+        }
+        else {
+            fullscreenView?.let { fullscreenSurfaceView ->
                 //try painting fullscreen view
                 if (!gles2Painter.paint(fullscreenSurfaceView)) {
                     //fullscreen view not visible, paint the rest of the subscene.
-                    subscene.backgroundView
-                            .ifPresent(Consumer<SurfaceView> { gles2Painter.paint(it) })
-                    subscene.underViews
-                            .forEach(Consumer<SurfaceView> { gles2Painter.paint(it) })
-                    subscene.applicationViews
-                            .forEach(Consumer<SurfaceView> { gles2Painter.paint(it) })
-                    subscene.overViews
-                            .forEach(Consumer<SurfaceView> { gles2Painter.paint(it) })
+                    subscene.backgroundView?.let {
+                        gles2Painter.paint(it)
+                    }
+                    subscene.underViews.forEach {
+                        gles2Painter.paint(it)
+                    }
+                    subscene.applicationViews.forEach {
+                        gles2Painter.paint(it)
+                    }
+                    subscene.overViews.forEach {
+                        gles2Painter.paint(it)
+                    }
                 }
             }
         }
 
-        subscene.geCursorViews()
-                .forEach(Consumer<SurfaceView> { gles2Painter.paint(it) })
+        subscene.geCursorViews().forEach {
+            gles2Painter.paint(it)
+        }
         gles2Painter.commit()
     }
 }
