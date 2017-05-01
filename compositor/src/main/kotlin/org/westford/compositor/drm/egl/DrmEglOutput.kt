@@ -82,7 +82,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
         val fbIdP = this.libgbm.gbm_bo_get_user_data(gbmBo.gbmBo)
         if (fbIdP != 0L) {
             return Pointer.wrap<Int>(Int::class.java,
-                                     fbIdP).dref()
+                                     fbIdP).get()
         }
 
         val fb = Pointer.calloc<Int>(1,
@@ -120,12 +120,9 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
 
         this.libgbm.gbm_bo_set_user_data(gbmBoPtr,
                                          fb.address,
-                                         Pointerdestroy_user_data.nref(???({ bo, data ->
-            this.destroyUserData(bo,
-                                 data)
-        })).address)
+                                         Pointerdestroy_user_data.nref(this::destroyUserData).address)
 
-        return fb.dref()
+        return fb.get()
     }
 
     override fun onPageFlip(@Unsigned sequence: Int,
@@ -144,7 +141,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
                                 @Ptr data: Long) {
         val fbIdP = Pointer.wrap<Int>(Int::class.java,
                                       data)
-        val fbId = fbIdP.dref()
+        val fbId = fbIdP.get()
         this.libdrm.drmModeRmFB(this.drmFd,
                                 fbId)
         fbIdP.close()

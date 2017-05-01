@@ -40,27 +40,27 @@ import org.westford.nativ.libxcb.Libxcb.Companion.XCB_MOTION_NOTIFY
                                                                  private val x11Seat: X11Seat) : (Pointer<xcb_generic_event_t>) -> Unit {
 
     override fun invoke(event: Pointer<xcb_generic_event_t>) {
-        val responseType = event.dref().response_type() and 0x7f
+        val responseType = event.get().response_type() and 0x7f
         when (responseType) {
             XCB_MOTION_NOTIFY  -> {
                 val motion_notify_event = event.castp<xcb_motion_notify_event_t>(xcb_motion_notify_event_t::class.java)
-                handle(motion_notify_event.dref())
+                handle(motion_notify_event.get())
             }
             XCB_BUTTON_PRESS   -> {
                 val button_press_event = event.castp<xcb_button_press_event_t>(xcb_button_press_event_t::class.java)
-                handle(button_press_event.dref())
+                handle(button_press_event.get())
             }
             XCB_BUTTON_RELEASE -> {
                 val button_release_event = event.castp<xcb_button_release_event_t>(xcb_button_release_event_t::class.java)
-                handle(button_release_event.dref())
+                handle(button_release_event.get())
             }
             XCB_KEY_PRESS      -> {
                 val key_press_event = event.castp<xcb_key_press_event_t>(xcb_key_press_event_t::class.java)
-                handle(key_press_event.dref())
+                handle(key_press_event.get())
             }
             XCB_KEY_RELEASE    -> {
                 val key_release_event = event.castp<xcb_key_release_event_t>(xcb_key_release_event_t::class.java)
-                handle(key_release_event.dref())
+                handle(key_release_event.get())
             }
             XCB_EXPOSE         -> {
             }//                final Pointer<xcb_expose_event_t> expose_event = event.castp(xcb_expose_event_t.class);
@@ -79,10 +79,10 @@ import org.westford.nativ.libxcb.Libxcb.Companion.XCB_MOTION_NOTIFY
         //handle(focus_out_event);
             XCB_KEYMAP_NOTIFY  -> {
             }//                final Pointer<xcb_keymap_notify_event_t> keymap_notify_event = event.castp(xcb_keymap_notify_event_t.class);
-        //                handle(keymap_notify_event.dref());
+        //                handle(keymap_notify_event.get());
             XCB_MAPPING_NOTIFY -> {
                 val mapping_notify_event = event.castp<xcb_mapping_notify_event_t>(xcb_mapping_notify_event_t::class.java)
-                handle(mapping_notify_event.dref())
+                handle(mapping_notify_event.get())
             }
         }
     }

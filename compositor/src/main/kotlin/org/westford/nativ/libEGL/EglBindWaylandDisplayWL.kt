@@ -20,7 +20,7 @@ package org.westford.nativ.libEGL
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@FunctionalInterface @Functor interface EglBindWaylandDisplayWL {
-    fun `$`(@Ptr dpy: Long,
-            @Ptr wlDisplay: Long): Int
+ @Functor interface EglBindWaylandDisplayWL {
+    operator fun invoke(@Ptr dpy: Long,
+                        @Ptr wlDisplay: Long): Int
 }

@@ -20,7 +20,7 @@ package org.westford.nativ.libpng
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@FunctionalInterface @Functor interface png_error_ptr {
-    fun `$`(@Ptr png_structp: Long,
+ @Functor interface png_error_ptr {
+    operator fun invoke(@Ptr png_structp: Long,
             @Ptr(Byte::class) png_const_charp: Long)
 }

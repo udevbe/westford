@@ -20,10 +20,10 @@ package org.westford.nativ.libinput
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@Functor @FunctionalInterface interface libinput_log_handler {
+@Functor  interface libinput_log_handler {
 
     //TODO at va_list (args) support to jaccall
-    fun `$`(@Ptr libinput: Long,
+    operator fun invoke(@Ptr libinput: Long,
             priority: Int,
             @Ptr(String::class) format: Long,
             @Ptr va_list_args: Long)

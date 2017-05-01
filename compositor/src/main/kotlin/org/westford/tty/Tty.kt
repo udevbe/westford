@@ -64,7 +64,7 @@ import java.util.logging.Logger
 
             if (-1 == this.libc.ioctl(this.ttyFd,
                                       VT_RELDISP.toLong(),
-                                      1)) {
+                                      1.toLong())) {
                 throw Error(String.format("ioctl[VT_RELDISP, 1] failed: %d",
                                           this.libc.errno))
             }

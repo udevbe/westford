@@ -18,9 +18,11 @@
 package org.westford.compositor.x11
 
 import org.freedesktop.wayland.shared.WlSeatCapability
+import org.westford.compositor.core.KeyboardDeviceFactory
+import org.westford.compositor.protocol.WlKeyboardFactory
 import org.westford.compositor.protocol.WlPointerFactory
 import org.westford.compositor.protocol.WlSeat
-import java.util.*
+import org.westford.compositor.protocol.WlSeatFactory
 import javax.inject.Inject
 
 class X11SeatFactory @Inject internal constructor(private val privateX11SeatFactory: PrivateX11SeatFactory,
@@ -44,8 +46,7 @@ class X11SeatFactory @Inject internal constructor(private val privateX11SeatFact
 
         this.x11Platform.x11EventBus.xEventSignal.connect(this.x11InputEventListenerFactory.create(this.privateX11SeatFactory.create(wlSeat)))
         //enable pointer and keyboard for wlseat as an X11 seat always has these.
-        wlSeat.getSeat().setCapabilities(EnumSet.of(WlSeatCapability.KEYBOARD,
-                                                    WlSeatCapability.POINTER))
+        wlSeat.seat.capabilities = WlSeatCapability.KEYBOARD.value or WlSeatCapability.POINTER.value
 
         return wlSeat
     }

@@ -18,6 +18,7 @@
 package org.westford.compositor.x11
 
 import org.westford.compositor.core.Xkb
+import org.westford.compositor.core.XkbFactory
 import org.westford.nativ.libxkbcommon.Libxkbcommon
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_CONTEXT_NO_FLAGS
 import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_KEYMAP_COMPILE_NO_FLAGS

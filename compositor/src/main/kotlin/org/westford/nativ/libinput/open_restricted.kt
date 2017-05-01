@@ -20,8 +20,8 @@ package org.westford.nativ.libinput
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@Functor @FunctionalInterface interface open_restricted {
-    fun `$`(@Ptr(String::class) path: Long,
+@Functor  interface open_restricted {
+    operator fun invoke(@Ptr(String::class) path: Long,
             flags: Int,
             @Ptr(Void::class) user_data: Long): Int
 }

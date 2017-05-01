@@ -20,8 +20,8 @@ package org.westford.nativ.libEGL
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@FunctionalInterface @Functor interface EglGetPlatformDisplayEXT {
-    @Ptr fun `$`(platform: Int,
-                 @Ptr native_display: Long,
-                 @Ptr attrib_list: Long): Long
+ @Functor interface EglGetPlatformDisplayEXT {
+    @Ptr operator fun invoke(platform: Int,
+                             @Ptr native_display: Long,
+                             @Ptr attrib_list: Long): Long
 }

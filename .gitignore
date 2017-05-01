@@ -228,3 +228,4 @@ bootstrap/dependency-reduced-pom.xml
 !/compositor/src/main/java/org/westford/nativ/libxcb/xcb_screen_t.kt
 !/compositor/src/main/java/org/westford/compositor/x11/egl/X11EglPlatformFactory.kt
 !/compositor/src/main/kotlin/org/westford/compositor/core/events/TouchUp.kt
+!/compositor/src/main/kotlin/org/westford/compositor/core/Subsurface.kt

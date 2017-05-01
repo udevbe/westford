@@ -33,7 +33,7 @@ class TtyFactory @Inject internal constructor(private val libc: Libc,
 
     fun create(ttyFd: Int): Tty {
         return this.privateTtyFactory.create(ttyFd,
-                                             Kd.K_UNICODE)
+                                             Kd.K_UNICODE.toInt())
     }
 
     fun create(): Tty {
@@ -49,10 +49,10 @@ class TtyFactory @Inject internal constructor(private val libc: Libc,
 
         if (-1 == this.libc.ioctl(tty0,
                                   VT_OPENQRY.toLong(),
-                                  ttynr.address) || -1 == ttynr.dref()) {
+                                  ttynr.address) || -1 == ttynr.get()) {
             throw RuntimeException("Failed to query for open vt: " + this.libc.strError)
         }
-        val vt = ttynr.dref()
+        val vt = ttynr.get()
         val ttyFd = this.libc.open(Pointer.nref(format("/dev/tty%d",
                                                        vt)).address,
                                    Libc.O_RDWR or Libc.O_NOCTTY)
@@ -72,7 +72,7 @@ class TtyFactory @Inject internal constructor(private val libc: Libc,
                                   kd_mode.address)) {
             throw RuntimeException("Failed to get VT mode: " + this.libc.strError)
         }
-        val oldKdMode = kd_mode.dref()
+        val oldKdMode = kd_mode.get()
 
         if (oldKdMode != Kd.KD_TEXT.toInt()) {
             throw RuntimeException("Already in graphics mode, is another display server running?")
@@ -100,13 +100,13 @@ class TtyFactory @Inject internal constructor(private val libc: Libc,
                                   kb_mode.address)) {
             throw RuntimeException("Failed to read keyboard mode: " + this.libc.strError)
         }
-        val oldKbMode = kb_mode.dref()
+        val oldKbMode = kb_mode.get()
 
         if (-1 == this.libc.ioctl(ttyFd,
                                   Stat.KDSKBMUTE.toLong(),
-                                  1) && -1 == this.libc.ioctl(ttyFd,
-                                                              Kd.KDSKBMODE.toLong(),
-                                                              Kd.K_OFF)) {
+                                  1.toLong()) && -1 == this.libc.ioctl(ttyFd,
+                                                                       Kd.KDSKBMODE.toLong(),
+                                                                       Kd.K_OFF)) {
             throw RuntimeException("Failed to set K_OFF keyboard mode: " + this.libc.strError)
         }
 

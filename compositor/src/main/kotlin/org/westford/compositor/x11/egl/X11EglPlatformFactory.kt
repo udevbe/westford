@@ -22,6 +22,7 @@ import org.freedesktop.wayland.shared.WlOutputTransform
 import org.westford.compositor.core.*
 import org.westford.compositor.core.events.RenderOutputDestroyed
 import org.westford.compositor.protocol.WlOutput
+import org.westford.compositor.protocol.WlOutputFactory
 import org.westford.compositor.x11.X11Platform
 import org.westford.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT
 import org.westford.nativ.libEGL.EglGetPlatformDisplayEXT
@@ -55,20 +56,20 @@ class X11EglPlatformFactory @Inject internal constructor(private val libxcb: Lib
 
     fun create(): X11EglPlatform {
 
-        val eglDisplay = createEglDisplay(this.x11Platform.getxDisplay())
+        val eglDisplay = createEglDisplay(this.x11Platform.xDisplay)
 
         val eglExtensions = Pointer.wrap<String>(String::class.java,
                                                  this.libEGL.eglQueryString(eglDisplay,
-                                                                            EGL_EXTENSIONS)).dref()
+                                                                            EGL_EXTENSIONS)).get()
         val eglClientApis = Pointer.wrap<String>(String::class.java,
                                                  this.libEGL.eglQueryString(eglDisplay,
-                                                                            EGL_CLIENT_APIS)).dref()
+                                                                            EGL_CLIENT_APIS)).get()
         val eglVendor = Pointer.wrap<String>(String::class.java,
                                              this.libEGL.eglQueryString(eglDisplay,
-                                                                        EGL_VENDOR)).dref()
+                                                                        EGL_VENDOR)).get()
         val eglVersion = Pointer.wrap<String>(String::class.java,
                                               this.libEGL.eglQueryString(eglDisplay,
-                                                                         EGL_VERSION)).dref()
+                                                                         EGL_VERSION)).get()
 
         LOGGER.info(format("Creating X11 EGL output:\n" + "\tEGL client apis: %s\n" + "\tEGL vendor: %s\n" + "\tEGL version: %s\n" + "\tEGL extensions: %s",
                            eglClientApis,
@@ -103,7 +104,7 @@ class X11EglPlatformFactory @Inject internal constructor(private val libxcb: Lib
                                                                       eglExtensions)
 
         this.x11Platform.x11EventBus.xEventSignal.connect {
-            val responseType = it.dref().response_type() and 0x7f
+            val responseType = it.get().response_type() and 0x7f
             when (responseType) {
                 XCB_CLIENT_MESSAGE -> {
                     handle(it.castp(xcb_client_message_event_t::class.java),
@@ -123,7 +124,7 @@ class X11EglPlatformFactory @Inject internal constructor(private val libxcb: Lib
         if (noDisplayExtensions.address == 0L) {
             throw RuntimeException("Could not query egl extensions.")
         }
-        val extensions = noDisplayExtensions.dref()
+        val extensions = noDisplayExtensions.get()
 
         if (!extensions.contains("EGL_EXT_platform_x11")) {
             throw RuntimeException("Required extension EGL_EXT_platform_x11 not available.")
@@ -132,9 +133,9 @@ class X11EglPlatformFactory @Inject internal constructor(private val libxcb: Lib
         val eglGetPlatformDisplayEXT = Pointer.wrap<EglGetPlatformDisplayEXT>(EglGetPlatformDisplayEXT::class.java,
                                                                               this.libEGL.eglGetProcAddress(Pointer.nref("eglGetPlatformDisplayEXT").address))
 
-        val eglDisplay = eglGetPlatformDisplayEXT.dref().`$`(EGL_PLATFORM_X11_KHR,
-                                                             nativeDisplay,
-                                                             0L)
+        val eglDisplay = eglGetPlatformDisplayEXT.get()(EGL_PLATFORM_X11_KHR,
+                                                        nativeDisplay,
+                                                        0L)
         if (eglDisplay == 0L) {
             throw RuntimeException("eglGetDisplay() failed")
         }
@@ -173,10 +174,10 @@ EGL_NONE
 
         val eglGetPlatformDisplayEXT = Pointer.wrap<EglCreatePlatformWindowSurfaceEXT>(EglCreatePlatformWindowSurfaceEXT::class.java,
                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("eglCreatePlatformWindowSurfaceEXT").address))
-        val eglSurface = eglGetPlatformDisplayEXT.dref().`$`(eglDisplay,
-                                                             config,
-                                                             Pointer.nref(nativeWindow).address,
-                                                             eglSurfaceAttribs.address)
+        val eglSurface = eglGetPlatformDisplayEXT.get()(eglDisplay,
+                                                        config,
+                                                        Pointer.nref(nativeWindow).address,
+                                                        eglSurfaceAttribs.address)
         if (eglSurface == 0L) {
             throw RuntimeException("eglCreateWindowSurface() failed")
         }
@@ -201,8 +202,8 @@ EGL_NONE
 
     private fun handle(event: Pointer<xcb_client_message_event_t>,
                        x11EglPlatform: X11EglPlatform) {
-        val atom = event.dref().data().data32().dref()
-        val sourceWindow = event.dref().window()
+        val atom = event.get().data().data32().get()
+        val sourceWindow = event.get().window()
 
         if (atom == this.x11Platform.x11Atoms["WM_DELETE_WINDOW"]) {
 

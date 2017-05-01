@@ -20,7 +20,9 @@ package org.westford.tty
 import com.google.auto.value.AutoValue
 
 @AutoValue open class VtEnter {
-    fun create(): VtEnter {
-        return AutoValue_VtEnter()
+    companion object {
+        fun create(): VtEnter {
+            return AutoValue_VtEnter()
+        }
     }
 }

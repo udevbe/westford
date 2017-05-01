@@ -200,7 +200,7 @@ public class X11PlatformFactoryTest {
         final long                                                                     xcbConnection = 112358;
         final long                                                                     setup         = 473289;
         final xcb_screen_t screen = malloc(xcb_screen_t.SIZE,
-                                           xcb_screen_t.class).dref();
+                                           xcb_screen_t.class).get();
         final int cookie = 95484;
         final int window = 431;
         screen.root(127);
@@ -208,7 +208,7 @@ public class X11PlatformFactoryTest {
         screen.width_in_pixels((short) 640);
         screen.height_in_pixels((short) 480);
         final xcb_screen_iterator_t screen_iter = malloc(xcb_screen_iterator_t.SIZE,
-                                                         xcb_screen_iterator_t.class).dref();
+                                                         xcb_screen_iterator_t.class).get();
         screen_iter.data(ref(screen));
 
         when(this.libX11.XOpenDisplay(anyLong())).thenReturn(xDisplay);

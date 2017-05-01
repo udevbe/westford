@@ -36,7 +36,7 @@
         <!-- higher dagger versions have deps that conflict with jaccall deps -->
         <dagger.version>2.2</dagger.version>
         <findbugs.version>3.0.1</findbugs.version>
-        <jaccall.version>1.0.5</jaccall.version>
+        <jaccall.version>2.0.0-SNAPSHOT</jaccall.version>
 
         <!-- test dep versions -->
         <junit.version>4.12</junit.version>

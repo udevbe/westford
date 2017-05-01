@@ -22,9 +22,9 @@ import org.freedesktop.jaccall.Lng
 import org.freedesktop.jaccall.Ptr
 import org.freedesktop.jaccall.Unsigned
 
-@Functor @FunctionalInterface interface png_rw_ptr {
+@Functor  interface png_rw_ptr {
 
-    fun `$`(@Ptr png_structp: Long,
+    operator fun invoke(@Ptr png_structp: Long,
             @Ptr(Byte::class) png_bytep: Long,
             @Unsigned @Lng png_size_t: Long)
 }

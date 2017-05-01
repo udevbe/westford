@@ -31,22 +31,10 @@ class DrmEventBusFactory @Inject internal constructor(private val privateDrmEven
         val drmEventBus = this.privateDrmEventBusFactory.create(drmFd,
                                                                 drmEventContextP.address)
 
-        val drmEventContext = drmEventContextP.dref()
+        val drmEventContext = drmEventContextP.get()
         drmEventContext.version(Libdrm.DRM_EVENT_CONTEXT_VERSION)
-        drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref(???({ fd, sequence, tv_sec, tv_usec, user_data ->
-            drmEventBus.pageFlipHandler(fd,
-                                        sequence,
-                                        tv_sec,
-                                        tv_usec,
-                                        user_data)
-        })))
-        drmEventContext.vblank_handler(Pointervblank_handler.nref(???({ fd, sequence, tv_sec, tv_usec, user_data ->
-            drmEventBus.vblankHandler(fd,
-                                      sequence,
-                                      tv_sec,
-                                      tv_usec,
-                                      user_data)
-        })))
+        drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref(drmEventBus::pageFlipHandler))
+        drmEventContext.vblank_handler(Pointervblank_handler.nref(drmEventBus::vblankHandler))
 
         return drmEventBus
     }

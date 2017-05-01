@@ -14,8 +14,6 @@ import org.westford.nativ.libxcb.xcb_generic_event_t;
 import org.westford.nativ.libxcb.xcb_key_press_event_t;
 import org.westford.nativ.libxcb.xcb_motion_notify_event_t;
 
-import javax.annotation.Nonnull;
-
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyShort;
 import static org.mockito.Matchers.eq;
@@ -45,7 +43,7 @@ public class X11InputEventCodesEventListenerTest {
         when(wlSeat.getSeat()).thenReturn(seat);
         final Pointer<xcb_key_press_event_t> event = Pointer.malloc(xcb_key_press_event_t.SIZE,
                                                                     xcb_key_press_event_t.class);
-        event.dref()
+        event.get()
              .response_type((byte) Libxcb.XCB_KEY_PRESS);
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
@@ -64,12 +62,12 @@ public class X11InputEventCodesEventListenerTest {
         when(wlSeat.getSeat()).thenReturn(seat);
         final Pointer<xcb_button_press_event_t> event = Pointer.malloc(xcb_button_press_event_t.SIZE,
                                                                        xcb_button_press_event_t.class);
-        event.dref()
+        event.get()
              .response_type((byte) Libxcb.XCB_BUTTON_PRESS);
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverButton(eq(event.dref()
+        verify(this.x11Seat).deliverButton(eq(event.get()
                                                    .event()),
                                            anyInt(),
                                            anyShort(),
@@ -85,7 +83,7 @@ public class X11InputEventCodesEventListenerTest {
         when(wlSeat.getSeat()).thenReturn(seat);
         final Pointer<xcb_key_press_event_t> event = Pointer.malloc(xcb_key_press_event_t.SIZE,
                                                                     xcb_key_press_event_t.class);
-        event.dref()
+        event.get()
              .response_type((byte) Libxcb.XCB_KEY_RELEASE);
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
@@ -104,12 +102,12 @@ public class X11InputEventCodesEventListenerTest {
         when(wlSeat.getSeat()).thenReturn(seat);
         final Pointer<xcb_button_press_event_t> event = Pointer.malloc(xcb_button_press_event_t.SIZE,
                                                                        xcb_button_press_event_t.class);
-        event.dref()
+        event.get()
              .response_type((byte) Libxcb.XCB_BUTTON_RELEASE);
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));
         //then
-        verify(this.x11Seat).deliverButton(eq(event.dref()
+        verify(this.x11Seat).deliverButton(eq(event.get()
                                                    .event()),
                                            anyInt(),
                                            anyShort(),
@@ -125,7 +123,7 @@ public class X11InputEventCodesEventListenerTest {
         when(wlSeat.getSeat()).thenReturn(seat);
         final Pointer<xcb_motion_notify_event_t> event = Pointer.malloc(xcb_motion_notify_event_t.SIZE,
                                                                         xcb_motion_notify_event_t.class);
-        event.dref()
+        event.get()
              .response_type((byte) Libxcb.XCB_MOTION_NOTIFY);
         //when
         this.x11InputEventListener.handle(event.castp(xcb_generic_event_t.class));

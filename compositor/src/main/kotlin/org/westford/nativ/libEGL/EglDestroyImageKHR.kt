@@ -20,7 +20,7 @@ package org.westford.nativ.libEGL
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@Functor @FunctionalInterface interface EglDestroyImageKHR {
-    fun `$`(@Ptr dpy: Long,
-            @Ptr image: Long): Int
+@Functor  interface EglDestroyImageKHR {
+    operator fun invoke(@Ptr dpy: Long,
+                        @Ptr image: Long): Int
 }

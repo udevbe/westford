@@ -109,7 +109,7 @@ public class JobExecutorTest {
                      //event finished
                      Pointer.wrap(Byte.class,
                                   buffer)
-                            .write((byte) 0);
+                            .set((byte) 0);
                      return null;
                  }
                 ).when(this.libc)
@@ -126,7 +126,7 @@ public class JobExecutorTest {
                                 eq(1));
         assertThat(Pointer.wrap(byte.class,
                                 bufferArgumentCaptor.getValue())
-                          .dref()).isEqualTo((byte) 0);
+                          .get()).isEqualTo((byte) 0);
         verify(eventSource).remove();
         verify(this.libc).close(this.pipeR);
         verify(this.libc).close(this.pipeWR);
@@ -156,7 +156,7 @@ public class JobExecutorTest {
                      //new job
                      Pointer.wrap(Byte.class,
                                   buffer)
-                            .write((byte) 1);
+                            .set((byte) 1);
                      return null;
                  }
                 ).when(this.libc)
@@ -185,7 +185,7 @@ public class JobExecutorTest {
                                 eq(1));
         assertThat(Pointer.wrap(Byte.class,
                                 bufferArgumentCaptor.getValue())
-                          .dref()).isEqualTo((byte) 1);
+                          .get()).isEqualTo((byte) 1);
         verify(job).run();
     }
 
@@ -211,7 +211,7 @@ public class JobExecutorTest {
                      //new job
                      Pointer.wrap(Byte.class,
                                   buffer)
-                            .write((byte) 1);
+                            .set((byte) 1);
 
                      return null;
                  }
@@ -241,7 +241,7 @@ public class JobExecutorTest {
                                eq(1));
         assertThat(Pointer.wrap(Byte.class,
                                 bufferArgumentCaptor.getValue())
-                          .dref()).isEqualTo((byte) 1);
+                          .get()).isEqualTo((byte) 1);
         verify(job,
                times(2)).run();
     }
@@ -267,7 +267,7 @@ public class JobExecutorTest {
                          //new job
                          Pointer.wrap(Byte.class,
                                       buffer)
-                                .write((byte) 1);
+                                .set((byte) 1);
                          return null;
                      }
                     ).when(this.libc)
@@ -289,7 +289,7 @@ public class JobExecutorTest {
                          //event finished
                          Pointer.wrap(Byte.class,
                                       buffer)
-                                .write((byte) 0);
+                                .set((byte) 0);
                          return null;
                      }
                     ).when(this.libc)
@@ -315,16 +315,16 @@ public class JobExecutorTest {
         assertThat(Pointer.wrap(Byte.class,
                                 bufferArgumentCaptor.getAllValues()
                                                     .get(0))
-                          .dref()).isEqualTo((byte) 1);
+                          .get()).isEqualTo((byte) 1);
         assertThat(Pointer.wrap(Byte.class,
                                 bufferArgumentCaptor.getAllValues()
                                                     .get(1))
-                          .dref())
+                          .get())
                 .isEqualTo((byte) 0);
         assertThat(Pointer.wrap(Byte.class,
                                 bufferArgumentCaptor.getAllValues()
                                                     .get(2))
-                          .dref())
+                          .get())
                 .isEqualTo((byte) 1);
 
         verify(job).run();

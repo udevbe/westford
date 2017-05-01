@@ -54,8 +54,8 @@ import javax.inject.Singleton
                                    0)
         libc.pipe(pipeFds.address)
 
-        val readFd = pipeFds.dref(0)
-        val writeFd = pipeFds.dref(1)
+        val readFd = pipeFds[0]
+        val writeFd = pipeFds[1]
 
         val readFlags = libc.fcntl(readFd,
                                    Libc.F_GETFD,

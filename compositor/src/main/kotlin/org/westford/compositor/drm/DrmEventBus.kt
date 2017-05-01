@@ -44,7 +44,7 @@ import org.westford.nativ.libdrm.Libdrm
                         @Ptr user_data: Long) {
         val drmPageFlipCallbackPointer = Pointer.wrap<Any>(Any::class.java,
                                                            user_data)
-        val drmPageFlipCallback = drmPageFlipCallbackPointer.dref() as DrmPageFlipCallback
+        val drmPageFlipCallback = drmPageFlipCallbackPointer.get() as DrmPageFlipCallback
         drmPageFlipCallback.onPageFlip(sequence,
                                        tv_sec,
                                        tv_usec)
@@ -58,7 +58,7 @@ import org.westford.nativ.libdrm.Libdrm
                       @Ptr user_data: Long) {
         val drmPageFlipCallbackPointer = Pointer.wrap<Any>(Any::class.java,
                                                            user_data)
-        val drmPageFlipCallback = drmPageFlipCallbackPointer.dref() as DrmPageFlipCallback
+        val drmPageFlipCallback = drmPageFlipCallbackPointer.get() as DrmPageFlipCallback
         drmPageFlipCallback.onVBlank(sequence,
                                      tv_sec,
                                      tv_usec)

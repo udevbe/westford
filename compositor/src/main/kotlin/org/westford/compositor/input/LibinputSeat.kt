@@ -148,7 +148,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_UP
 
         val devicePointer = wrap<LibinputDevice>(LibinputDevice::class.java,
                                                  deviceData)
-        val libinputDevice = devicePointer.dref()
+        val libinputDevice = devicePointer.get()
         this.libinputDevices.remove(libinputDevice)
         devicePointer.close()
         this.libinput.libinput_device_unref(device)
@@ -165,7 +165,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_UP
             return
         }
         val libinputDevice = wrap<Any>(Any::class.java,
-                                       deviceData).dref() as LibinputDevice
+                                       deviceData).get() as LibinputDevice
 
         when (eventType) {
             LIBINPUT_EVENT_KEYBOARD_KEY            -> libinputDevice.handleKeyboardKey(this.libinput.libinput_event_get_keyboard_event(event))

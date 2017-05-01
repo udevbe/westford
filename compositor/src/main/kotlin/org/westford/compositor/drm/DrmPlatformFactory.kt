@@ -107,7 +107,7 @@ class DrmPlatformFactory @Inject internal constructor(private val libudev: Libud
             }
             else {
                 deviceSeat = wrap<String>(String::class.java,
-                                          seatId).dref()
+                                          seatId).get()
             }
             if (deviceSeat != seat) {
                 //device has a seat, but not the one we want, process next entry
@@ -123,7 +123,7 @@ class DrmPlatformFactory @Inject internal constructor(private val libudev: Libud
                 val id = this.libudev.udev_device_get_sysattr_value(pci,
                                                                     nref("boot_vga").address)
                 if (id != 0L && wrap<String>(String::class.java,
-                                             id).dref() == "1") {
+                                             id).get() == "1") {
                     if (drmDevice != 0L) {
                         this.libudev.udev_device_unref(drmDevice)
                     }
@@ -150,7 +150,7 @@ class DrmPlatformFactory @Inject internal constructor(private val libudev: Libud
         val drmId: Int
         if (sysnum != 0L) {
             drmId = Integer.parseInt(wrap<String>(String::class.java,
-                                                  sysnum).dref())
+                                                  sysnum).get())
         }
         else {
             drmId = 0
@@ -176,7 +176,7 @@ class DrmPlatformFactory @Inject internal constructor(private val libudev: Libud
         }
 
         val drmModeRes = wrap<DrmModeRes>(DrmModeRes::class.java,
-                                          resources).dref()
+                                          resources).get()
 
         val countConnectors = drmModeRes.count_connectors()
         val drmOutputs = ArrayList<DrmOutput>(countConnectors)
@@ -184,13 +184,13 @@ class DrmPlatformFactory @Inject internal constructor(private val libudev: Libud
 
         for (i in 0..countConnectors - 1) {
             val connector = this.libdrm.drmModeGetConnector(drmFd,
-                                                            drmModeRes.connectors().dref(i))
+                                                            drmModeRes.connectors().get(i))
             if (connector == 0L) {
                 continue
             }
 
             val drmModeConnector = wrap<DrmModeConnector>(DrmModeConnector::class.java,
-                                                          connector).dref()
+                                                          connector).get()
 
             if (drmModeConnector.connection() == DRM_MODE_CONNECTED) {
                 findCrtcIdForConnector(drmFd,
@@ -214,19 +214,19 @@ class DrmPlatformFactory @Inject internal constructor(private val libudev: Libud
 
         for (j in 0..drmModeConnector.count_encoders() - 1) {
             val encoder = this.libdrm.drmModeGetEncoder(drmFd,
-                                                        drmModeConnector.encoders().dref(j))
+                                                        drmModeConnector.encoders().get(j))
             if (encoder == 0L) {
                 return Optional.empty<Int>()
             }
 
             //bitwise flag of available crtcs, each bit represents the index of crtcs in drmModeRes
             val possibleCrtcs = wrap<DrmModeEncoder>(DrmModeEncoder::class.java,
-                                                     encoder).dref().possible_crtcs()
+                                                     encoder).get().possible_crtcs()
             this.libdrm.drmModeFreeEncoder(encoder)
 
             for (i in 0..drmModeRes.count_crtcs() - 1) {
-                if (possibleCrtcs and (1 shl i) != 0 && crtcAllocations.add(drmModeRes.crtcs().dref(i))) {
-                    return Optional.of(drmModeRes.crtcs().dref(i))
+                if (possibleCrtcs and (1 shl i) != 0 && crtcAllocations.add(drmModeRes.crtcs().get(i))) {
+                    return Optional.of(drmModeRes.crtcs().get(i))
                 }
             }
         }
@@ -241,7 +241,7 @@ class DrmPlatformFactory @Inject internal constructor(private val libudev: Libud
         var area = 0
         var mode: DrmModeModeInfo? = null
         for (i in 0..drmModeConnector.count_modes() - 1) {
-            val currentMode = drmModeConnector.modes().dref(i)
+            val currentMode = drmModeConnector.modes().get(i)
             val current_area = currentMode.hdisplay() * currentMode.vdisplay()
             if (current_area > area) {
                 mode = currentMode

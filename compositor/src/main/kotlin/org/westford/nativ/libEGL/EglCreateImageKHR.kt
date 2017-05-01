@@ -20,9 +20,9 @@ package org.westford.nativ.libEGL
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@Functor @FunctionalInterface interface EglCreateImageKHR {
+@Functor  interface EglCreateImageKHR {
 
-    @Ptr fun `$`(@Ptr dpy: Long,
+    @Ptr operator fun invoke(@Ptr dpy: Long,
                  @Ptr ctx: Long,
                  target: Int,
                  @Ptr buffer: Long,

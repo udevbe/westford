@@ -132,7 +132,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
         }
 
         val deviceOutputName = Pointer.wrap<String>(String::class.java,
-                                                    outputNamePointer).dref()
+                                                    outputNamePointer).get()
         //        for (final WlOutput wlOutput : this.renderPlatform.getWlOutput()) {
         //FIXME give outputs a name, iterate them and match
         //            if (deviceOutputName.equals(renderPlatform.getOutput()

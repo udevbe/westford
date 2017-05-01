@@ -66,7 +66,7 @@ public class Gles2RendererTest {
             final long     status    = (Long) arguments[2];
             Pointer.wrap(Integer.class,
                          status)
-                   .write(1);
+                   .set(1);
             return null;
         }).when(this.libGLESv2)
           .glGetProgramiv(anyInt(),
@@ -77,7 +77,7 @@ public class Gles2RendererTest {
             final long     status    = (Long) arguments[2];
             Pointer.wrap(Integer.class,
                          status)
-                   .write(1);
+                   .set(1);
             return null;
         }).when(this.libGLESv2)
           .glGetShaderiv(anyInt(),

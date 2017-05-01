@@ -25,5 +25,5 @@ interface EglOutput : RenderOutput {
 
     val eglDisplay: Long
 
-    val state: EglOutputState?
+    var state: EglOutputState?
 }

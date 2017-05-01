@@ -40,10 +40,10 @@ import java.util.*
         val pixman_box32_array = Pointer.wrap<pixman_box32>(pixman_box32::class.java,
                                                             this.libpixman1.pixman_region32_rectangles(this.pixmanRegion32.address,
                                                                                                        n_rects.address))
-        val size = n_rects.dref()
+        val size = n_rects.get()
         val boxes = ArrayList<Rectangle>(size)
         for (i in 0..size - 1) {
-            val pixman_box32 = pixman_box32_array.dref(i)
+            val pixman_box32 = pixman_box32_array.get(i)
             val x = pixman_box32.x1()
             val y = pixman_box32.y1()
 

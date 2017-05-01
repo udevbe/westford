@@ -25,6 +25,7 @@ import org.westford.compositor.core.OutputMode
 import org.westford.compositor.drm.DrmOutput
 import org.westford.compositor.drm.DrmPlatform
 import org.westford.compositor.protocol.WlOutput
+import org.westford.compositor.protocol.WlOutputFactory
 import org.westford.launch.LifeCycleSignals
 import org.westford.launch.Privileges
 import org.westford.nativ.libEGL.EglCreatePlatformWindowSurfaceEXT
@@ -67,16 +68,16 @@ class DrmEglPlatformFactory @Inject internal constructor(private val wlOutputFac
 
         val eglExtensions = Pointer.wrap<String>(String::class.java,
                                                  this.libEGL.eglQueryString(eglDisplay,
-                                                                            EGL_EXTENSIONS)).dref()
+                                                                            EGL_EXTENSIONS)).get()
         val eglClientApis = Pointer.wrap<String>(String::class.java,
                                                  this.libEGL.eglQueryString(eglDisplay,
-                                                                            EGL_CLIENT_APIS)).dref()
+                                                                            EGL_CLIENT_APIS)).get()
         val eglVendor = Pointer.wrap<String>(String::class.java,
                                              this.libEGL.eglQueryString(eglDisplay,
-                                                                        EGL_VENDOR)).dref()
+                                                                        EGL_VENDOR)).get()
         val eglVersion = Pointer.wrap<String>(String::class.java,
                                               this.libEGL.eglQueryString(eglDisplay,
-                                                                         EGL_VERSION)).dref()
+                                                                         EGL_VERSION)).get()
 
         LOGGER.info(format("Creating DRM EGL output:\n" + "\tEGL client apis: %s\n" + "\tEGL vendor: %s\n" + "\tEGL version: %s\n" + "\tEGL extensions: %s",
                            eglClientApis,
@@ -167,7 +168,7 @@ class DrmEglPlatformFactory @Inject internal constructor(private val wlOutputFac
         if (noDisplayExtensions.address == 0L) {
             throw RuntimeException("Could not query egl extensions.")
         }
-        val extensions = noDisplayExtensions.dref()
+        val extensions = noDisplayExtensions.get()
 
         if (!extensions.contains("EGL_MESA_platform_gbm")) {
             throw RuntimeException("Required extension EGL_MESA_platform_gbm not available.")
@@ -176,9 +177,9 @@ class DrmEglPlatformFactory @Inject internal constructor(private val wlOutputFac
         val eglGetPlatformDisplayEXT = Pointer.wrap<EglGetPlatformDisplayEXT>(EglGetPlatformDisplayEXT::class.java,
                                                                               this.libEGL.eglGetProcAddress(Pointer.nref("eglGetPlatformDisplayEXT").address))
 
-        val eglDisplay = eglGetPlatformDisplayEXT.dref().`$`(EGL_PLATFORM_GBM_KHR,
-                                                             gbmDevice,
-                                                             0L)
+        val eglDisplay = eglGetPlatformDisplayEXT.get()(EGL_PLATFORM_GBM_KHR,
+                                                        gbmDevice,
+                                                        0L)
         if (eglDisplay == 0L) {
             throw RuntimeException("eglGetDisplay() failed")
         }
@@ -266,10 +267,10 @@ class DrmEglPlatformFactory @Inject internal constructor(private val wlOutputFac
 
         val eglGetPlatformDisplayEXT = Pointer.wrap<EglCreatePlatformWindowSurfaceEXT>(EglCreatePlatformWindowSurfaceEXT::class.java,
                                                                                        this.libEGL.eglGetProcAddress(Pointer.nref("eglCreatePlatformWindowSurfaceEXT").address))
-        val eglSurface = eglGetPlatformDisplayEXT.dref().`$`(eglDisplay,
-                                                             config,
-                                                             gbmSurface,
-                                                             eglSurfaceAttribs.address)
+        val eglSurface = eglGetPlatformDisplayEXT.get()(eglDisplay,
+                                                        config,
+                                                        gbmSurface,
+                                                        eglSurfaceAttribs.address)
         if (eglSurface == 0L) {
             throw RuntimeException("eglCreateWindowSurface() failed")
         }

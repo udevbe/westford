@@ -56,13 +56,13 @@ class Libc {
 
     val strError: String
         get() = Pointer.wrap<String>(String::class.java,
-                                     strerror(errno)).dref()
+                                     strerror(errno)).get()
 
     @Ptr(String::class) external fun strerror(errnum: Int): Long
 
     var errno: Int
-        get() = this.errno_p.dref()
-        set(value) = this.errno_p.write(value)
+        get() = this.errno_p.get()
+        set(value) = this.errno_p.set(value)
 
     external fun write(fd: Int,
                        @Ptr buffer: Long,

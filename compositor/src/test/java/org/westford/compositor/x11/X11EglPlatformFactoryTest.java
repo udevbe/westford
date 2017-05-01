@@ -40,7 +40,6 @@ import org.westford.nativ.libxcb.Libxcb;
 import org.westford.nativ.libxcb.xcb_generic_event_t;
 import org.westford.nativ.libxcb.xcb_screen_t;
 
-import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -127,7 +126,7 @@ public class X11EglPlatformFactoryTest {
             final long func_name = (Long) invocation.getArguments()[0];
             final String funcName = Pointer.wrap(String.class,
                                                  func_name)
-                                           .dref();
+                                           .get();
             if (funcName.equals("eglGetPlatformDisplayEXT")) {
                 return PointerEglGetPlatformDisplayEXT.nref((platform, native_display, attrib_list) -> 0).address;
             }
@@ -160,7 +159,7 @@ public class X11EglPlatformFactoryTest {
             final long func_name = (Long) invocation.getArguments()[0];
             final String funcName = Pointer.wrap(String.class,
                                                  func_name)
-                                           .dref();
+                                           .get();
             if (funcName.equals("eglGetPlatformDisplayEXT")) {
                 return PointerEglGetPlatformDisplayEXT.nref((platform, native_display, attrib_list) -> eglDisplay).address;
             }
@@ -203,7 +202,7 @@ public class X11EglPlatformFactoryTest {
             final long func_name = (Long) invocation.getArguments()[0];
             final String funcName = Pointer.wrap(String.class,
                                                  func_name)
-                                           .dref();
+                                           .get();
             if (funcName.equals("eglGetPlatformDisplayEXT")) {
                 return PointerEglGetPlatformDisplayEXT.nref((platform, native_display, attrib_list) -> eglDisplay).address;
             }
@@ -226,12 +225,12 @@ public class X11EglPlatformFactoryTest {
             final long configs = (Long) invocation.getArguments()[2];
             Pointer.wrap(Pointer.class,
                          configs)
-                   .write(Pointer.wrap(config));
+                   .set(Pointer.wrap(config));
 
             final long num_configs = (Long) invocation.getArguments()[4];
             Pointer.wrap(Integer.class,
                          num_configs)
-                   .write(1);
+                   .set(1);
             return 1;
         });
         when(this.libEGL.eglCreateContext(eq(eglDisplay),
@@ -286,7 +285,7 @@ public class X11EglPlatformFactoryTest {
             final long func_name = (Long) invocation.getArguments()[0];
             final String funcName = Pointer.wrap(String.class,
                                                  func_name)
-                                           .dref();
+                                           .get();
             if (funcName.equals("eglGetPlatformDisplayEXT")) {
                 return PointerEglGetPlatformDisplayEXT.nref((platform, native_display, attrib_list) -> eglDisplay).address;
             }
@@ -364,7 +363,7 @@ public class X11EglPlatformFactoryTest {
             final long func_name = (Long) invocation.getArguments()[0];
             final String funcName = Pointer.wrap(String.class,
                                                  func_name)
-                                           .dref();
+                                           .get();
             if (funcName.equals("eglGetPlatformDisplayEXT")) {
                 return PointerEglGetPlatformDisplayEXT.nref((platform, native_display, attrib_list) -> eglDisplay).address;
             }
@@ -395,12 +394,12 @@ public class X11EglPlatformFactoryTest {
             final long configs = (Long) invocation.getArguments()[2];
             Pointer.wrap(Pointer.class,
                          configs)
-                   .write(Pointer.wrap(config));
+                   .set(Pointer.wrap(config));
 
             final long num_configs = (Long) invocation.getArguments()[4];
             Pointer.wrap(Integer.class,
                          num_configs)
-                   .write(1);
+                   .set(1);
             return 1;
         });
         when(this.libEGL.eglCreateContext(eq(eglDisplay),

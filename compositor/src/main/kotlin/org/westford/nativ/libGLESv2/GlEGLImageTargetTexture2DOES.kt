@@ -21,7 +21,7 @@ import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 import org.freedesktop.jaccall.Unsigned
 
-@FunctionalInterface @Functor interface GlEGLImageTargetTexture2DOES {
-    fun `$`(@Unsigned target: Int,
+ @Functor interface GlEGLImageTargetTexture2DOES {
+    operator fun invoke(@Unsigned target: Int,
             @Ptr(Void::class) image: Long)
 }

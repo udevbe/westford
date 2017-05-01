@@ -38,7 +38,7 @@ import org.westford.nativ.libxkbcommon.Libxkbcommon.Companion.XKB_KEYMAP_FORMAT_
                 if (it.address == 0L) {
                     throw RuntimeException("Got an error while trying to get keymap as string.\nUnfortunately the docs of the xkb library do not specify how we to get more information about the error, so you'll have to do it with this lousy exception.")
                 }
-                return it.dref()
+                return it.get()
             }
         }
 

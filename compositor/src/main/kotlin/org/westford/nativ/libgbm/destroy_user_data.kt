@@ -20,7 +20,7 @@ package org.westford.nativ.libgbm
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@Functor @FunctionalInterface interface destroy_user_data {
-    fun `$`(@Ptr bo: Long,
+@Functor  interface destroy_user_data {
+    operator fun invoke(@Ptr bo: Long,
             @Ptr data: Long)
 }

@@ -20,8 +20,8 @@ package org.westford.nativ.libEGL
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@FunctionalInterface @Functor interface EglQueryWaylandBufferWL {
-    fun `$`(@Ptr dpy: Long,
+ @Functor interface EglQueryWaylandBufferWL {
+    operator fun invoke(@Ptr dpy: Long,
             @Ptr buffer: Long,
             attribute: Int,
             @Ptr value: Long): Int

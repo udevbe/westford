@@ -28,22 +28,16 @@ import org.westford.compositor.x11.X11Output
 
 @AutoFactory(allowSubclasses = true,
              className = "X11EglOutputFactory") class X11EglOutput(@param:Provided private val display: Display,
-                                                                   @Provided gles2PainterFactory: org.westford.compositor.gles2.Gles2PainterFactory,
+                                                                   private @Provided val gles2PainterFactory: org.westford.compositor.gles2.Gles2PainterFactory,
                                                                    @param:Provided private val scene: Scene,
                                                                    val x11Output: X11Output,
                                                                    override val eglSurface: Long,
                                                                    override val eglContext: Long,
                                                                    override val eglDisplay: Long) : EglOutput {
 
-    private val gles2PainterFactory: Gles2PainterFactory
-
     private var renderScheduled = false
 
     override var state: EglOutputState? = null
-
-    init {
-        this.gles2PainterFactory = gles2PainterFactory
-    }
 
     override fun render(wlOutput: WlOutput) {
         //TODO unit test 2 cases here: schedule idle, no-op when already scheduled

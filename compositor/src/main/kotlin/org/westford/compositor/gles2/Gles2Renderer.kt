@@ -99,7 +99,7 @@ import javax.inject.Singleton
     private var init = false
 
     private var eglOutputState: EglOutputState? = null
-    private var newEglOutputState: EglOutputState.Builder? = null
+    private var newEglOutputState: EglOutputState.Builder = EglOutputState.builder()
 
     override fun onDestroy(wlSurfaceResource: WlSurfaceResource) {
 
@@ -126,8 +126,10 @@ import javax.inject.Singleton
         }
 
         for (eglImage in eglSurfaceState.eglImages) {
-            this.eglDestroyImageKHR?.`$`(this.eglDisplay,
-                                         eglImage)
+            this.eglDestroyImageKHR?.let {
+                it(this.eglDisplay,
+                   eglImage)
+            }
         }
 
     }
@@ -156,25 +158,31 @@ import javax.inject.Singleton
             val textureFormatP = Pointer.nref(0)
             val bufferPointer = wlBufferResource.pointer
 
-            queryWlEglBuffer?.`$`(this.eglDisplay,
-                                  bufferPointer!!,
-                                  EGL_TEXTURE_FORMAT,
-                                  textureFormatP.address)
-            val textureFormat = textureFormatP.dref()
+            if (queryWlEglBuffer != null) {
+                queryWlEglBuffer(this.eglDisplay,
+                                 bufferPointer!!,
+                                 EGL_TEXTURE_FORMAT,
+                                 textureFormatP.address)
+            }
+            val textureFormat = textureFormatP.get()
 
             if (textureFormat != 0) {
                 val widthP = Pointer.nref(0)
                 val heightP = Pointer.nref(0)
-                queryWlEglBuffer?.`$`(this.eglDisplay,
-                                      bufferPointer,
-                                      EGL_WIDTH,
-                                      widthP.address)
-                queryWlEglBuffer?.`$`(this.eglDisplay,
-                                      bufferPointer,
-                                      EGL_HEIGHT,
-                                      heightP.address)
-                val width = widthP.dref()
-                val height = heightP.dref()
+                if (queryWlEglBuffer != null) {
+                    queryWlEglBuffer(this.eglDisplay,
+                                     bufferPointer,
+                                     EGL_WIDTH,
+                                     widthP.address)
+                }
+                if (queryWlEglBuffer != null) {
+                    queryWlEglBuffer(this.eglDisplay,
+                                     bufferPointer,
+                                     EGL_HEIGHT,
+                                     heightP.address)
+                }
+                val width = widthP.get()
+                val height = heightP.get()
 
                 buffer = EglBuffer.create(width,
                                           height,
@@ -224,7 +232,7 @@ import javax.inject.Singleton
                                         num_configs.address) == 0) {
             throw RuntimeException("eglChooseConfig() failed")
         }
-        if (num_configs.dref() == 0) {
+        if (num_configs.get() == 0) {
             throw RuntimeException("failed to find suitable EGLConfig")
         }
 
@@ -232,7 +240,7 @@ import javax.inject.Singleton
                          eglExtensions)
         this.eglDisplay = eglDisplay
 
-        return configs.dref().address
+        return configs.get().address
 
     }
 
@@ -242,17 +250,17 @@ import javax.inject.Singleton
         if (bindDisplay(eglDisplay,
                         eglExtensions)) {
             this.eglQueryWaylandBufferWL = wrap(EglQueryWaylandBufferWL::class.java,
-                                                this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address)).dref()
+                                                this.libEGL.eglGetProcAddress(Pointer.nref("eglQueryWaylandBufferWL").address)).get()
 
             //FIXME we need to check this gl extension before we can be 100% sure we support wayland egl.
             this.glEGLImageTargetTexture2DOES = wrap(GlEGLImageTargetTexture2DOES::class.java,
-                                                     this.libEGL.eglGetProcAddress(Pointer.nref("glEGLImageTargetTexture2DOES").address)).dref()
+                                                     this.libEGL.eglGetProcAddress(Pointer.nref("glEGLImageTargetTexture2DOES").address)).get()
 
             if (eglExtensions.contains("EGL_KHR_image_base")) {
                 this.eglCreateImageKHR = wrap(EglCreateImageKHR::class.java,
-                                              this.libEGL.eglGetProcAddress(Pointer.nref("eglCreateImageKHR").address)).dref()
+                                              this.libEGL.eglGetProcAddress(Pointer.nref("eglCreateImageKHR").address)).get()
                 this.eglDestroyImageKHR = wrap(EglDestroyImageKHR::class.java,
-                                               this.libEGL.eglGetProcAddress(Pointer.nref("eglDestroyImageKHR").address)).dref()
+                                               this.libEGL.eglGetProcAddress(Pointer.nref("eglDestroyImageKHR").address)).get()
                 this.hasWlEglDisplay = true
             }
             else {
@@ -268,8 +276,8 @@ import javax.inject.Singleton
         if (extensions.contains("EGL_WL_bind_wayland_display")) {
             val eglBindWaylandDisplayWL = Pointer.wrap<EglBindWaylandDisplayWL>(EglBindWaylandDisplayWL::class.java,
                                                                                 this.libEGL.eglGetProcAddress(Pointer.nref("eglBindWaylandDisplayWL").address))
-            return eglBindWaylandDisplayWL.dref().`$`(eglDisplay,
-                                                      this.display.pointer) != 0
+            return eglBindWaylandDisplayWL.get()(eglDisplay,
+                                                 this.display.pointer) != 0
         }
         else {
             LOGGER.warning("Extension EGL_WL_bind_wayland_display not available. Required for client side egl support.")
@@ -326,7 +334,7 @@ import javax.inject.Singleton
     private fun initRenderer() {
         //check for required texture glExtensions
         val glExtensions = wrap<String>(String::class.java,
-                                        this.libGLESv2.glGetString(LibGLESv2.GL_EXTENSIONS)).dref()
+                                        this.libGLESv2.glGetString(LibGLESv2.GL_EXTENSIONS)).get()
 
         //init shm shaders
         LOGGER.info("GLESv2 glExtensions: " + glExtensions)
@@ -381,7 +389,7 @@ import javax.inject.Singleton
     }
 
     private fun flushRenderState(eglOutput: EglOutput) {
-        eglOutput.updateState(this.newEglOutputState!!.build())
+        eglOutput.state = this.newEglOutputState.build()
         this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    eglOutput.eglSurface)
     }
@@ -409,12 +417,12 @@ import javax.inject.Singleton
         this.libGLESv2.glGetProgramiv(shaderProgram,
                                       LibGLESv2.GL_LINK_STATUS,
                                       linked.address)
-        if (linked.dref() == 0) {
+        if (linked.get() == 0) {
             val infoLen = Pointer.nref(0)
             this.libGLESv2.glGetProgramiv(shaderProgram,
                                           LibGLESv2.GL_INFO_LOG_LENGTH,
                                           infoLen.address)
-            var logSize = infoLen.dref()
+            var logSize = infoLen.get()
             if (logSize <= 0) {
                 //some drivers report incorrect log size
                 logSize = 1024
@@ -425,7 +433,7 @@ import javax.inject.Singleton
                                                0L,
                                                log.address)
             this.libGLESv2.glDeleteProgram(shaderProgram)
-            System.err.println("Error compiling the vertex shader: " + log.dref())
+            System.err.println("Error compiling the vertex shader: " + log.get())
             System.exit(1)
         }
 
@@ -455,7 +463,7 @@ import javax.inject.Singleton
                         output)
 
         val eglOutputState = builder.build()
-        eglOutput.updateState(eglOutputState)
+        eglOutput.state = eglOutputState
 
         //listen for external updates
         output.transformSignal.connect {
@@ -510,7 +518,7 @@ import javax.inject.Singleton
             val stateBuilder = it.toBuilder()
             updateTransform(stateBuilder,
                             wlOutput.output)
-            eglOutput.updateState(stateBuilder.build())
+            eglOutput.state = stateBuilder.build()
             //schedule new render
             eglOutput.render(wlOutput)
         }
@@ -521,7 +529,7 @@ import javax.inject.Singleton
         this.libGLESv2.glGetShaderiv(shader,
                                      LibGLESv2.GL_COMPILE_STATUS,
                                      vstatus.address)
-        if (vstatus.dref() == 0) {
+        if (vstatus.get() == 0) {
             //failure!
             //get log length
             val logLength = Pointer.nref(0)
@@ -529,7 +537,7 @@ import javax.inject.Singleton
                                          LibGLESv2.GL_INFO_LOG_LENGTH,
                                          logLength.address)
             //get log
-            var logSize = logLength.dref()
+            var logSize = logLength.get()
             if (logSize == 0) {
                 //some drivers report incorrect log size
                 logSize = 1024
@@ -539,7 +547,7 @@ import javax.inject.Singleton
                                               logSize,
                                               0L,
                                               log.address)
-            System.err.println("Error compiling the vertex shader: " + log.dref())
+            System.err.println("Error compiling the vertex shader: " + log.get())
             System.exit(1)
         }
     }
@@ -817,7 +825,7 @@ import javax.inject.Singleton
         //surface egl render states:
         val pitch = eglBuffer.width
         val height = eglBuffer.height
-        val yInverted: Boolean
+        var yInverted: Boolean = false
         val shaderProgram: Int
         val target: Int
         val textures: IntArray
@@ -830,10 +838,12 @@ import javax.inject.Singleton
 
         val yInvertedP = Pointer.nref(0)
 
-        yInverted = queryWaylandBuffer?.`$`(this.eglDisplay,
-                                            buffer,
-                                            EGL_WAYLAND_Y_INVERTED_WL,
-                                            yInvertedP.address) == 0 || yInvertedP.dref() != 0
+        if (queryWaylandBuffer != null) {
+            yInverted = queryWaylandBuffer(this.eglDisplay,
+                                           buffer,
+                                           EGL_WAYLAND_Y_INVERTED_WL,
+                                           yInvertedP.address) == 0 || yInvertedP.get() != 0
+        }
 
         when (eglBuffer.textureFormat) {
             EGL_TEXTURE_RGB, EGL_TEXTURE_RGBA -> {
@@ -874,8 +884,10 @@ import javax.inject.Singleton
         //delete old egl images
         oldRenderState?.let {
             for (oldEglImage in it.eglImages) {
-                this.eglDestroyImageKHR?.`$`(this.eglDisplay,
-                                             oldEglImage)
+                this.eglDestroyImageKHR?.let {
+                    it(eglDisplay,
+                       oldEglImage)
+                }
             }
         }
 
@@ -887,11 +899,13 @@ import javax.inject.Singleton
             attribs[1] = i
             attribs[2] = EGL_NONE
 
-            val eglImage = this.eglCreateImageKHR?.`$`(this.eglDisplay,
-                                                       EGL_NO_CONTEXT,
-                                                       EGL_WAYLAND_BUFFER_WL,
-                                                       buffer,
-                                                       Pointer.nref(*attribs).address) ?: 0L
+            val eglImage = this.eglCreateImageKHR?.let {
+                it(this.eglDisplay,
+                   EGL_NO_CONTEXT,
+                   EGL_WAYLAND_BUFFER_WL,
+                   buffer,
+                   Pointer.nref(*attribs).address)
+            } ?: 0L
             if (eglImage == EGL_NO_IMAGE_KHR) {
                 return null
             }
@@ -931,8 +945,10 @@ import javax.inject.Singleton
             this.libGLESv2.glActiveTexture(LibGLESv2.GL_TEXTURE0 + i)
             this.libGLESv2.glBindTexture(target,
                                          textures[i])
-            this.glEGLImageTargetTexture2DOES?.`$`(target,
-                                                   eglImage)
+            this.glEGLImageTargetTexture2DOES?.let {
+                it(target,
+                   eglImage)
+            }
         }
 
         return EglSurfaceState.create(pitch,
@@ -1023,7 +1039,7 @@ import javax.inject.Singleton
         val texture = Pointer.nref(0)
         this.libGLESv2.glGenTextures(1,
                                      texture.address)
-        val textureId = texture.dref()
+        val textureId = texture.get()
         this.libGLESv2.glBindTexture(target,
                                      textureId)
         this.libGLESv2.glTexParameteri(target,
@@ -1083,7 +1099,7 @@ import javax.inject.Singleton
                                              LibGLESv2.GL_FLOAT,
                                              0,
                                              4 * java.lang.Float.BYTES,
-                                             vertexData.offset(2).address)
+                                             (vertexData + 2).address)
 
     }
 

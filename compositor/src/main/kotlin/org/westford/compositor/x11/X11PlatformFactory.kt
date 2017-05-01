@@ -149,7 +149,7 @@ class X11PlatformFactory @Inject internal constructor(private val display: Displ
                                                                                     cookies[i],
                                                                                     0L)).use { reply ->
                 x11Atoms.put(atomNames[i],
-                             reply.dref().atom())
+                             reply.get().atom())
             }
         }
         return x11Atoms
@@ -174,7 +174,7 @@ class X11PlatformFactory @Inject internal constructor(private val display: Displ
         var screen: xcb_screen_t
         Pointer.wrap<xcb_screen_iterator_t>(xcb_screen_iterator_t::class.java,
                                             this.libxcb.xcb_setup_roots_iterator(setup)).use { xcb_screen_iterator ->
-            screen = xcb_screen_iterator.dref().data().dref()
+            screen = xcb_screen_iterator.get().data().get()
         }
 
         val window = this.libxcb.xcb_generate_id(xcbConnection)

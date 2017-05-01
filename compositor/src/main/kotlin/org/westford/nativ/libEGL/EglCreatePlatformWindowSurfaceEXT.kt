@@ -20,9 +20,9 @@ package org.westford.nativ.libEGL
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@FunctionalInterface @Functor interface EglCreatePlatformWindowSurfaceEXT {
-    @Ptr fun `$`(@Ptr dpy: Long,
-                 @Ptr config: Long,
-                 @Ptr native_window: Long,
-                 @Ptr attrib_list: Long): Long
+ @Functor interface EglCreatePlatformWindowSurfaceEXT {
+    @Ptr operator fun invoke(@Ptr dpy: Long,
+                             @Ptr config: Long,
+                             @Ptr native_window: Long,
+                             @Ptr attrib_list: Long): Long
 }

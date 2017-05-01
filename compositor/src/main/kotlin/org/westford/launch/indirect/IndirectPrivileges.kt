@@ -34,9 +34,9 @@ import org.westford.nativ.linux.Socket
                                                      messageSize))
             }
 
-            it.dref().opcode(NativeConstants.OPCODE_WESTMALLE_LAUNCHER_OPEN)
-            it.dref().flags(flags)
-            this.libc.strcpy(it.dref().path().address,
+            it.get().opcode(NativeConstants.OPCODE_WESTMALLE_LAUNCHER_OPEN)
+            it.get().flags(flags)
+            this.libc.strcpy(it.get().path().address,
                              path)
 
             var len: Long
@@ -63,14 +63,14 @@ import org.westford.nativ.linux.Socket
                     val control = Pointer.calloc(1,
                                                  controlSize)
 
-                    iov.dref().iov_base(it)
+                    iov.get().iov_base(it)
                     val retSize = sizeof(null as Int?)
-                    iov.dref().iov_len(CLong(retSize.toLong()))
+                    iov.get().iov_len(CLong(retSize.toLong()))
 
-                    msg.dref().msg_iov(iov)
-                    msg.dref().msg_iovlen(CLong(1))
-                    msg.dref().msg_control(control)
-                    msg.dref().msg_controllen(CLong(controlSize.toLong()))
+                    msg.get().msg_iov(iov)
+                    msg.get().msg_iovlen(CLong(1))
+                    msg.get().msg_control(control)
+                    msg.get().msg_controllen(CLong(controlSize.toLong()))
 
                     var len: Long
                     do {
@@ -80,16 +80,16 @@ import org.westford.nativ.linux.Socket
                     }
                     while (len < 0 && this.libc.errno == Libc.EINTR)
 
-                    if (len != retSize.toLong() || it.castp(Int::class.java).dref() < 0) {
+                    if (len != retSize.toLong() || it.castp(Int::class.java).get() < 0) {
                         throw RuntimeException("Receive an illegal open reply.")
                     }
 
-                    val cmsg = this.libc.CMSG_FIRSTHDR(msg.dref())
-                    if (cmsg.address == 0L || cmsg.dref().cmsg_level() !== Socket.SOL_SOCKET || cmsg.dref().cmsg_type() !== Socket.SCM_RIGHTS) {
+                    val cmsg = this.libc.CMSG_FIRSTHDR(msg.get())
+                    if (cmsg.address == 0L || cmsg.get().cmsg_level() !== Socket.SOL_SOCKET || cmsg.get().cmsg_type() !== Socket.SCM_RIGHTS) {
                         throw RuntimeException("invalid control message")
                     }
 
-                    return this.libc.CMSG_DATA(cmsg).castp<Int>(Int::class.java).dref()
+                    return this.libc.CMSG_DATA(cmsg).castp<Int>(Int::class.java).get()
                 }
             }
         }

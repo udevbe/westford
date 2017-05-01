@@ -21,8 +21,8 @@ import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 import org.freedesktop.jaccall.Unsigned
 
-@Functor @FunctionalInterface interface vblank_handler {
-    fun `$`(fd: Int,
+@Functor  interface vblank_handler {
+    operator fun invoke(fd: Int,
             @Unsigned sequence: Int,
             @Unsigned tv_sec: Int,
             @Unsigned tv_usec: Int,

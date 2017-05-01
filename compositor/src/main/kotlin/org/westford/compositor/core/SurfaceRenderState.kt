@@ -17,6 +17,6 @@
  */
 package org.westford.compositor.core
 
-@FunctionalInterface interface SurfaceRenderState {
+interface SurfaceRenderState {
     fun accept(surfaceRenderStateVisitor: SurfaceRenderStateVisitor): SurfaceRenderState?
 }

@@ -21,8 +21,8 @@ import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 import org.freedesktop.jaccall.Unsigned
 
-@Functor @FunctionalInterface interface page_flip_handler {
-    fun `$`(fd: Int,
+@Functor  interface page_flip_handler {
+    operator fun invoke(fd: Int,
             @Unsigned sequence: Int,
             @Unsigned tv_sec: Int,
             @Unsigned tv_usec: Int,

@@ -28,7 +28,7 @@ import org.westford.compositor.protocol.WlSurface
                                                                                            private var currentSurfaceState: SurfaceState,
                                                                                            private var cachedSurfaceState: SurfaceState) : Role {
 
-    val effectiveSyncSignal = Signal<Boolean, Slot<Boolean>>()
+    val effectiveSyncSignal = Signal<Boolean>()
     var isEffectiveSync = true
         private set
 
