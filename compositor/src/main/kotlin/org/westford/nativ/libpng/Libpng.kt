@@ -44,7 +44,7 @@ import org.freedesktop.jaccall.Unsigned
 
     external fun png_set_rows(@Ptr png_ptr: Long,
                               @Ptr info_ptr: Long,
-                              @Ptr(Pointer<*>::class) /*byte*/ row_pointers: Long)
+                              @Ptr(Pointer::class) /*byte*/ row_pointers: Long)
 
     external fun png_set_write_fn(@Ptr png_ptr: Long,
                                   @Ptr(Void::class) io_ptr: Long,

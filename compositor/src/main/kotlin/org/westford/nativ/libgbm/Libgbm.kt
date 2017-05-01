@@ -94,7 +94,7 @@ import org.freedesktop.jaccall.Unsigned
      */
     external fun gbm_bo_set_user_data(@Ptr bo: Long,
                                       @Ptr data: Long,
-                                      @Ptr(destroy_user_data::class) destroy_user_data: Long)
+                                      @Ptr destroy_user_data: Long)
 
     /**
      * Get the gbm device used to create the buffer object

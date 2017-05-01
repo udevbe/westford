@@ -295,7 +295,6 @@ import javax.inject.Singleton
         val EGL_SIGNALED = 0x30F2
         val EGL_UNSIGNALED = 0x30F3
         val EGL_SYNC_FLUSH_COMMANDS_BIT = 0x0001
-        val EGL_FOREVER = 0xFFFFFFFFFFFFFFFFL
         val EGL_TIMEOUT_EXPIRED = 0x30F5
         val EGL_CONDITION_SATISFIED = 0x30F6
         val EGL_NO_SYNC = 0L

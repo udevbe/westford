@@ -17,7 +17,14 @@
  */
 package org.westford.nativ.glibc
 
-import org.freedesktop.jaccall.*
+import org.freedesktop.jaccall.CLong
+import org.freedesktop.jaccall.Lib
+import org.freedesktop.jaccall.Lng
+import org.freedesktop.jaccall.Pointer
+import org.freedesktop.jaccall.Ptr
+import org.freedesktop.jaccall.Size
+import org.freedesktop.jaccall.Symbol
+import org.freedesktop.jaccall.Unsigned
 import org.westford.nativ.linux.Kdev_t
 import org.westford.nativ.linux.Stat
 import org.westford.nativ.linux.stat
@@ -199,7 +206,7 @@ class Libc {
         val SIGUSR1 = 10
         val SIGUSR2 = 12
 
-        val NCCS = 32
+        const val NCCS = 32
 
         val POLLIN = 0x0001
         val POLLPRI = 0x0002

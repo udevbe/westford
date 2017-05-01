@@ -20,7 +20,7 @@ package org.westford.nativ.libgbm
 import org.freedesktop.jaccall.Functor
 import org.freedesktop.jaccall.Ptr
 
-@Functor  interface destroy_user_data {
+@Functor interface destroy_user_data {
     operator fun invoke(@Ptr bo: Long,
-            @Ptr data: Long)
+                        @Ptr data: Long)
 }

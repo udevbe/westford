@@ -11,7 +11,6 @@
 
     <artifactId>compositor</artifactId>
     <name>Westford Compositor Library</name>
-    <packaging>bundle</packaging>
 
     <properties>
         <wayland-java-bindings.version>1.5.1</wayland-java-bindings.version>
