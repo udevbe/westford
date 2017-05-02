@@ -60,11 +60,14 @@
         <!-- build properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.1.2-2</kotlin.version>
+        <kotlin.compiler.incremental>false</kotlin.compiler.incremental>
     </properties>
 
     <modules>
         <module>compositor</module>
-        <module>launch</module>
+        <module>launch.drm.direct</module>
+        <module>launch.drm.indirect</module>
+        <module>launch.x11</module>
     </modules>
 
     <dependencies>
@@ -160,6 +163,7 @@
                             <goal>kapt</goal>
                         </goals>
                         <configuration>
+                            <correctErrorTypes>true</correctErrorTypes>
                             <sourceDirs>
                                 <sourceDir>src/main/kotlin</sourceDir>
                                 <sourceDir>src/main/java</sourceDir>
@@ -225,6 +229,7 @@
                             <goal>test-compile</goal>
                         </goals>
                         <configuration>
+                            <myIncremental>false</myIncremental>
                             <sourceDirs>
                                 <sourceDir>src/test/kotlin</sourceDir>
                                 <sourceDir>src/test/java</sourceDir>
