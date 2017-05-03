@@ -34,27 +34,31 @@ class SubsurfaceFactory @Inject internal constructor(private val privateSubsurfa
                                                               Sibling.create(wlSurfaceResource),
                                                               surfaceState,
                                                               surfaceState)
-        surface.applySurfaceStateSignal.connect(Slot<SurfaceState> { subsurface.apply(it) })
+        surface.applySurfaceStateSignal.connect {
+            subsurface.apply(it)
+        }
 
         val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
         val parentSurface = parentWlSurface.surface
 
-        parentSurface.applySurfaceStateSignal.connect({ parentSurfaceState -> subsurface.onParentApply() })
-
-        parentSurface.role.ifPresent { role ->
-            role.accept(object : RoleVisitor {
-                override fun visit(parentSubsurface: Subsurface) {
-                    parentSubsurface.effectiveSyncSignal.connect(Slot<Boolean> { subsurface.updateEffectiveSync(it) })
-                }
-            })
+        parentSurface.applySurfaceStateSignal.connect {
+            subsurface.onParentApply()
         }
+
+        parentSurface.role?.accept(object : RoleVisitor {
+            override fun visit(subsurface: Subsurface) {
+                subsurface.effectiveSyncSignal.connect {
+                    subsurface.updateEffectiveSync(it)
+                }
+            }
+        })
 
         parentSurface.addSubsurface(subsurface)
 
         /*
          * Docs says a subsurface with a destroyed parent must become inert.
          */
-        parentWlSurfaceResource.register(DestroyListener { subsurface.setInert() })
+        parentWlSurfaceResource.register { subsurface.setInert() }
 
         parentSurface.pendingSubsurfaces.add(subsurface)
 

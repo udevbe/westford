@@ -58,7 +58,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
         }
 
         val wlKeyboard = this.wlSeat.wlKeyboard
-        wlKeyboard.keyboardDevice.key(wlKeyboard.getResources(),
+        wlKeyboard.keyboardDevice.key(wlKeyboard.resources,
                                       time,
                                       key,
                                       wlKeyboardKeyState(keyState))
@@ -85,11 +85,11 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
         val pointerDevice = wlPointer.pointerDevice
         val pointerDevicePosition = pointerDevice.position
 
-        pointerDevice.motion(wlPointer.getResources(),
+        pointerDevice.motion(wlPointer.resources,
                              time,
                              pointerDevicePosition.x + dx.toInt(),
                              pointerDevicePosition.y + dy.toInt())
-        pointerDevice.frame(wlPointer.getResources())
+        pointerDevice.frame(wlPointer.resources)
     }
 
     fun handlePointerMotionAbsolute(pointerEvent: Long) {
@@ -109,11 +109,11 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
             val wlPointer = this.wlSeat.wlPointer
             val pointerDevice = wlPointer.pointerDevice
 
-            pointerDevice.motion(wlPointer.getResources(),
+            pointerDevice.motion(wlPointer.resources,
                                  time,
                                  x.toInt(),
                                  y.toInt())
-            pointerDevice.frame(wlPointer.getResources())
+            pointerDevice.frame(wlPointer.resources)
         }
     }
 
@@ -159,11 +159,11 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
         val wlPointer = this.wlSeat.wlPointer
         val pointerDevice = wlPointer.pointerDevice
 
-        pointerDevice.button(wlPointer.getResources(),
+        pointerDevice.button(wlPointer.resources,
                              time,
                              button,
                              wlPointerButtonState(buttonState))
-        pointerDevice.frame(wlPointer.getResources())
+        pointerDevice.frame(wlPointer.resources)
     }
 
     private fun wlPointerButtonState(buttonState: Int): WlPointerButtonState {
@@ -200,7 +200,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
         val wlPointer = this.wlSeat.wlPointer
         val pointerDevice = wlPointer.pointerDevice
 
-        pointerDevice.axisSource(wlPointer.getResources(),
+        pointerDevice.axisSource(wlPointer.resources,
                                  wlPointerAxisSource)
 
         if (hasVertical != 0) {
@@ -212,13 +212,13 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
             val time = this.libinput.libinput_event_pointer_get_time(pointerEvent)
 
             if (vertDiscrete == 0) {
-                pointerDevice.axisContinuous(wlPointer.getResources(),
+                pointerDevice.axisContinuous(wlPointer.resources,
                                              time,
                                              WlPointerAxis.VERTICAL_SCROLL,
                                              vert.toFloat())
             }
             else {
-                pointerDevice.axisDiscrete(wlPointer.getResources(),
+                pointerDevice.axisDiscrete(wlPointer.resources,
                                            WlPointerAxis.VERTICAL_SCROLL,
                                            time,
                                            vertDiscrete,
@@ -235,13 +235,13 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
             val time = this.libinput.libinput_event_pointer_get_time(pointerEvent)
 
             if (horizDiscrete == 0) {
-                pointerDevice.axisContinuous(wlPointer.getResources(),
+                pointerDevice.axisContinuous(wlPointer.resources,
                                              time,
                                              WlPointerAxis.HORIZONTAL_SCROLL,
                                              horiz.toFloat())
             }
             else {
-                pointerDevice.axisDiscrete(wlPointer.getResources(),
+                pointerDevice.axisDiscrete(wlPointer.resources,
                                            WlPointerAxis.HORIZONTAL_SCROLL,
                                            time,
                                            horizDiscrete,
@@ -249,7 +249,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
             }
         }
 
-        pointerDevice.frame(wlPointer.getResources())
+        pointerDevice.frame(wlPointer.resources)
     }
 
     private fun getAxisDiscrete(pointerEvent: Long,
@@ -300,7 +300,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
                                                                          physicalHeight).toInt()
 
             val wlTouch = this.wlSeat.wlTouch
-            wlTouch.touchDevice.down(wlTouch.getResources(),
+            wlTouch.touchDevice.down(wlTouch.resources,
                                      slot,
                                      time,
                                      x,
@@ -324,7 +324,7 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
                                                                          physicalHeight).toInt()
 
             val wlTouch = this.wlSeat.wlTouch
-            wlTouch.touchDevice.motion(wlTouch.getResources(),
+            wlTouch.touchDevice.motion(wlTouch.resources,
                                        slot,
                                        time,
                                        x,
@@ -337,13 +337,13 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_POINTER_AXIS_SOUR
         val slot = this.libinput.libinput_event_touch_get_seat_slot(touchEvent)
 
         val wlTouch = this.wlSeat.wlTouch
-        wlTouch.touchDevice.up(wlTouch.getResources(),
+        wlTouch.touchDevice.up(wlTouch.resources,
                                slot,
                                time)
     }
 
     fun handleTouchFrame(touchEvent: Long) {
         val wlTouch = this.wlSeat.wlTouch
-        wlTouch.touchDevice.frame(wlTouch.getResources())
+        wlTouch.touchDevice.frame(wlTouch.resources)
     }
 }

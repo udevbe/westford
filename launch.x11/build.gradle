@@ -3,24 +3,18 @@ plugins {
     id "org.jetbrains.kotlin.kapt" version "1.1.2-2"
 }
 
-apply plugin: 'kotlin-kapt'
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 dependencies {
     ext.kotlin_version = '1.1.2-2'
     ext.dagger_version = '2.2'
-    ext.wayland_java_bindings_version = '1.5.1'
 
-    compile "org.freedesktop:wayland-server:$wayland_java_bindings_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "com.google.dagger:dagger:$dagger_version"
 
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
-    kapt "org.freedesktop:jaccall.generator:2.0.0-SNAPSHOT"
 
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+}
+
+kapt {
+    correctErrorTypes = true
 }

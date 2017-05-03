@@ -498,7 +498,7 @@ import javax.annotation.Nonnegative
             cursor.hotspot = hotspot
         }
 
-        cursor.show()
+        cursor?.show()
         updateActiveCursor(wlPointerResource)
 
         val wlSurface = wlSurfaceResource.implementation as WlSurface

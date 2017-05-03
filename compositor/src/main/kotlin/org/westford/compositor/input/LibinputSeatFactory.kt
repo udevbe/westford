@@ -19,7 +19,6 @@ package org.westford.compositor.input
 
 import org.freedesktop.jaccall.Pointer
 import org.freedesktop.jaccall.Pointer.malloc
-import org.freedesktop.jaccall.Pointer.nref
 import org.freedesktop.jaccall.Ptr
 import org.westford.compositor.core.KeyboardDeviceFactory
 import org.westford.compositor.protocol.WlKeyboardFactory
@@ -28,8 +27,7 @@ import org.westford.compositor.protocol.WlSeat
 import org.westford.compositor.protocol.WlSeatFactory
 import org.westford.launch.LifeCycleSignals
 import org.westford.nativ.glibc.Libc
-import org.westford.nativ.libinput.Libinput
-import org.westford.nativ.libinput.libinput_interface
+import org.westford.nativ.libinput.*
 import org.westford.nativ.libudev.Libudev
 import javax.inject.Inject
 
@@ -80,25 +78,17 @@ class LibinputSeatFactory @Inject internal constructor(private val wlSeatFactory
             throw RuntimeException("Failed to initialize udev")
         }
 
-        val interface_ = malloc<libinput_interface>(libinput_interface.SIZE,
+        val interface_ = malloc<libinput_interface>(libinput_interface_Jaccall_StructType.SIZE,
                                                     libinput_interface::class.java)
-        interface_.get().open_restricted(nref { path, flags, user_data ->
-            this.openRestricted(path,
-                                flags,
-                                user_data)
-        })
-        interface_.get().close_restricted(Pointerclose_restricted.nref { fd, user_data ->
-            this.closeRestricted(fd,
-                                 user_data)
-        })
+        interface_.get().open_restricted = Pointeropen_restricted.nref(this::openRestricted as open_restricted)
+        interface_.get().close_restricted = Pointerclose_restricted.nref(this::closeRestricted as close_restricted)
 
         val libinput = this.libinput.libinput_udev_create_context(interface_.address,
                                                                   0,
                                                                   udev)
 
         if (this.libinput.libinput_udev_assign_seat(libinput,
-                                                    Pointer
-                                               .nref(seatId).address) != 0) {
+                                                    Pointer.nref(seatId).address) != 0) {
             this.libinput.libinput_unref(libinput)
             this.libudev.udev_unref(udev)
 

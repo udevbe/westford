@@ -90,9 +90,9 @@ import java.util.logging.Logger
         //restore tty
         if (this.libc.ioctl(this.ttyFd,
                             KDSKBMUTE.toLong(),
-                            0) != 0 && this.libc.ioctl(this.ttyFd,
-                                                       KDSKBMODE.toLong(),
-                                                       this.oldKbMode.toLong()) != 0) {
+                            0L) != 0 && this.libc.ioctl(this.ttyFd,
+                                                        KDSKBMODE.toLong(),
+                                                        this.oldKbMode.toLong()) != 0) {
             LOGGER.warning("failed to restore kb mode")
         }
 
@@ -107,11 +107,11 @@ import java.util.logging.Logger
         }
 
         val mode = vt_mode()
-        mode.frsig(0.toByte())
-        mode.waitv(0.toByte())
-        mode.acqsig(0.toByte())
-        mode.relsig(0.toByte())
-        mode.mode(VT_AUTO)
+        mode.frsig = 0
+        mode.waitv = 0
+        mode.acqsig = 0
+        mode.relsig = 0
+        mode.mode = VT_AUTO
         if (this.libc.ioctl(this.ttyFd,
                             VT_SETMODE.toLong(),
                             Pointer.ref(mode).address) < 0) {

@@ -40,11 +40,11 @@ class LibinputXkbFactory @Inject internal constructor(private val libxkbcommon: 
         }
 
         val names = xkb_rule_names()
-        names.rules(Pointer.nref(rule))
-        names.model(Pointer.nref(model))
-        names.layout(Pointer.nref(layout))
-        names.variant(Pointer.nref(variant))
-        names.options(Pointer.nref(options))
+        names.rules = Pointer.nref(rule)
+        names.model = Pointer.nref(model)
+        names.layout = Pointer.nref(layout)
+        names.variant = Pointer.nref(variant)
+        names.options = Pointer.nref(options)
 
         val keymap = this.libxkbcommon.xkb_keymap_new_from_names(xkbContext,
                                                                  Pointer.ref(names).address,

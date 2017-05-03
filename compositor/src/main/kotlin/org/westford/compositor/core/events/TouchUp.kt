@@ -20,7 +20,7 @@ package org.westford.compositor.core.events
 import com.google.auto.value.AutoValue
 
 @AutoValue abstract class TouchUp {
-    fun create(): TouchUp {
-        return AutoValue_TouchUp()
+    companion object {
+        fun create(): TouchUp = AutoValue_TouchUp()
     }
 }

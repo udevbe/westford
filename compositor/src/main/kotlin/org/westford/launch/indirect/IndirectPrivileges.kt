@@ -7,9 +7,7 @@ import org.freedesktop.jaccall.Pointer
 import org.freedesktop.jaccall.Ptr
 import org.freedesktop.jaccall.Size.sizeof
 import org.westford.launch.Privileges
-import org.westford.nativ.glibc.Libc
-import org.westford.nativ.glibc.iovec
-import org.westford.nativ.glibc.msghdr
+import org.westford.nativ.glibc.*
 import org.westford.nativ.linux.Socket
 
 @AutoFactory(allowSubclasses = true,
@@ -25,18 +23,18 @@ import org.westford.nativ.linux.Socket
 
     private fun sendOpenRequest(@Ptr(String::class) path: Long,
                                 flags: Int) {
-        val payloadSize = launcher_open.SIZE + this.libc.strlen(path) + 1
-        val messageSize = launcher_open.SIZE + payloadSize
+        val payloadSize = launcher_open_Jaccall_StructType.SIZE + this.libc.strlen(path) + 1
+        val messageSize = launcher_open_Jaccall_StructType.SIZE + payloadSize
         Pointer.calloc(1,
-                       messageSize).castp<launcher_open>(launcher_open::class.java).use {
+                       messageSize.toInt()).castp<launcher_open>(launcher_open::class.java).use {
             if (it.address == 0L) {
                 throw RuntimeException(String.format("Unable to allocate %d bytes. Memory full?",
                                                      messageSize))
             }
 
-            it.get().opcode(NativeConstants.OPCODE_WESTMALLE_LAUNCHER_OPEN)
-            it.get().flags(flags)
-            this.libc.strcpy(it.get().path().address,
+            it.get().opcode = NativeConstants.OPCODE_WESTMALLE_LAUNCHER_OPEN
+            it.get().flags = flags
+            this.libc.strcpy(it.get().path.address,
                              path)
 
             var len: Long
@@ -54,28 +52,28 @@ import org.westford.nativ.linux.Socket
         Pointer.calloc(1,
                        sizeof(null as Int?)).use {
             Pointer.calloc<msghdr>(1,
-                                   msghdr.SIZE,
-                                   msghdr::class.java).use { msg ->
+                                   msghdr_Jaccall_StructType.SIZE,
+                                   msghdr::class.java).use {
                 Pointer.calloc<iovec>(1,
-                                      iovec.SIZE,
+                                      iovec_Jaccall_StructType.SIZE,
                                       iovec::class.java).use { iov ->
                     val controlSize = this.libc.CMSG_SPACE(sizeof(null as Int?).toLong()).toInt()
                     val control = Pointer.calloc(1,
                                                  controlSize)
 
-                    iov.get().iov_base(it)
+                    iov.get().iov_base = it.castp(Void.TYPE)
                     val retSize = sizeof(null as Int?)
-                    iov.get().iov_len(CLong(retSize.toLong()))
+                    iov.get().iov_len = CLong(retSize.toLong())
 
-                    msg.get().msg_iov(iov)
-                    msg.get().msg_iovlen(CLong(1))
-                    msg.get().msg_control(control)
-                    msg.get().msg_controllen(CLong(controlSize.toLong()))
+                    it.get().msg_iov = iov
+                    it.get().msg_iovlen = CLong(1)
+                    it.get().msg_control = control
+                    it.get().msg_controllen = CLong(controlSize.toLong())
 
                     var len: Long
                     do {
                         len = this.libc.recvmsg(this.launcherFd,
-                                                msg.address,
+                                                it.address,
                                                 Socket.MSG_CMSG_CLOEXEC)
                     }
                     while (len < 0 && this.libc.errno == Libc.EINTR)
@@ -84,8 +82,8 @@ import org.westford.nativ.linux.Socket
                         throw RuntimeException("Receive an illegal open reply.")
                     }
 
-                    val cmsg = this.libc.CMSG_FIRSTHDR(msg.get())
-                    if (cmsg.address == 0L || cmsg.get().cmsg_level() !== Socket.SOL_SOCKET || cmsg.get().cmsg_type() !== Socket.SCM_RIGHTS) {
+                    val cmsg = this.libc.CMSG_FIRSTHDR(it.get())
+                    if (cmsg.address == 0L || cmsg.get().cmsg_level != Socket.SOL_SOCKET || cmsg.get().cmsg_type != Socket.SCM_RIGHTS) {
                         throw RuntimeException("invalid control message")
                     }
 

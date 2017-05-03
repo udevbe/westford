@@ -13,8 +13,7 @@
     <name>Westford Compositor Library</name>
 
     <properties>
-        <wayland-java-bindings.version>1.5.1</wayland-java-bindings.version>
-        <jetty.version>9.3.7.v20160115</jetty.version>
+        <wayland-java-bindings.version>1.5.2-SNAPSHOT</wayland-java-bindings.version>
     </properties>
 
     <dependencies>

@@ -31,8 +31,10 @@ import org.westford.nativ.libxcb.Libxcb.Companion.XCB_KEYMAP_NOTIFY
 import org.westford.nativ.libxcb.Libxcb.Companion.XCB_KEY_PRESS
 import org.westford.nativ.libxcb.Libxcb.Companion.XCB_KEY_RELEASE
 import org.westford.nativ.libxcb.Libxcb.Companion.XCB_LEAVE_NOTIFY
+import org.westford.nativ.libxcb.Libxcb.Companion.XCB_MAPPING_KEYBOARD
 import org.westford.nativ.libxcb.Libxcb.Companion.XCB_MAPPING_NOTIFY
 import org.westford.nativ.libxcb.Libxcb.Companion.XCB_MOTION_NOTIFY
+import kotlin.experimental.and
 
 @AutoFactory(className = "X11InputEventListenerFactory",
              allowSubclasses = true) class X11InputEventListener(@param:Provided private val x11XkbFactory: X11XkbFactory,
@@ -40,7 +42,7 @@ import org.westford.nativ.libxcb.Libxcb.Companion.XCB_MOTION_NOTIFY
                                                                  private val x11Seat: X11Seat) : (Pointer<xcb_generic_event_t>) -> Unit {
 
     override fun invoke(event: Pointer<xcb_generic_event_t>) {
-        val responseType = event.get().response_type() and 0x7f
+        val responseType = (event.get().response_type and 0x7f).toInt()
         when (responseType) {
             XCB_MOTION_NOTIFY  -> {
                 val motion_notify_event = event.castp<xcb_motion_notify_event_t>(xcb_motion_notify_event_t::class.java)
@@ -88,40 +90,40 @@ import org.westford.nativ.libxcb.Libxcb.Companion.XCB_MOTION_NOTIFY
     }
 
     private fun handle(event: xcb_motion_notify_event_t) {
-        this.x11Seat.deliverMotion(event.event(),
-                                   event.time(),
-                                   event.event_x(),
-                                   event.event_y())
+        this.x11Seat.deliverMotion(event.event,
+                                   event.time,
+                                   event.event_x.toInt(),
+                                   event.event_y.toInt())
     }
 
     private fun handle(event: xcb_button_press_event_t) {
-        this.x11Seat.deliverButton(event.event(),
-                                   event.time(),
-                                   event.detail(),
+        this.x11Seat.deliverButton(event.event,
+                                   event.time,
+                                   event.detail.toShort(),
                                    true)
     }
 
     private fun handle(event: xcb_button_release_event_t) {
-        this.x11Seat.deliverButton(event.event(),
-                                   event.time(),
-                                   event.detail(),
+        this.x11Seat.deliverButton(event.event,
+                                   event.time,
+                                   event.detail.toShort(),
                                    false)
     }
 
     private fun handle(event: xcb_key_press_event_t) {
-        this.x11Seat.deliverKey(event.time(),
-                                event.detail(),
+        this.x11Seat.deliverKey(event.time,
+                                event.detail.toShort(),
                                 true)
     }
 
     private fun handle(event: xcb_key_release_event_t) {
-        this.x11Seat.deliverKey(event.time(),
-                                event.detail(),
+        this.x11Seat.deliverKey(event.time,
+                                event.detail.toShort(),
                                 false)
     }
 
     private fun handle(event: xcb_mapping_notify_event_t) {
-        if (event.request() === XCB_MAPPING_KEYBOARD) {
+        if (event.request.toInt() == XCB_MAPPING_KEYBOARD) {
             val wlKeyboard = this.x11Seat.wlSeat.wlKeyboard
             val keyboardDevice = wlKeyboard.keyboardDevice
             val xkb = this.x11XkbFactory.create(this.x11Platform.xcbConnection)

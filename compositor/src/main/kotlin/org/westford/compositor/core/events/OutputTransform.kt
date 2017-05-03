@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue
 
 @AutoValue abstract class OutputTransform {
 
-    fun create(): OutputTransform {
-        return AutoValue_OutputTransform()
+    companion object {
+        fun create(): OutputTransform = AutoValue_OutputTransform()
     }
 }

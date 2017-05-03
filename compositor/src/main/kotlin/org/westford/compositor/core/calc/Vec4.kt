@@ -26,12 +26,10 @@ import javax.annotation.Nonnegative
 
     abstract fun toBuilder(): Builder
 
-    fun add(right: Vec4): Vec4 {
-        return Vec4.create(x + right.x,
-                           y + right.y,
-                           z + right.z,
-                           w + right.w)
-    }
+    fun add(right: Vec4): Vec4 = Vec4.create(x + right.x,
+                                             y + right.y,
+                                             z + right.z,
+                                             w + right.w)
 
     abstract val x: Float
 
@@ -41,17 +39,13 @@ import javax.annotation.Nonnegative
 
     abstract val w: Float
 
-    fun subtract(right: Vec4): Vec4 {
-        return Vec4.create(x - right.x,
-                           y - right.y,
-                           z - right.z,
-                           w - right.w)
-    }
+    fun subtract(right: Vec4): Vec4 = Vec4.create(x - right.x,
+                                                  y - right.y,
+                                                  z - right.z,
+                                                  w - right.w)
 
-    fun toPoint(): Point {
-        return Point.create(x.toInt(),
-                            y.toInt())
-    }
+    fun toPoint(): Point = Point.create(x.toInt(),
+                                        y.toInt())
 
     @AutoValue.Builder interface Builder {
 
@@ -68,10 +62,8 @@ import javax.annotation.Nonnegative
 
     companion object {
 
-        fun create(array: FloatArray): Vec4 {
-            return Vec4.create(array,
-                               0)
-        }
+        fun create(array: FloatArray): Vec4 = Vec4.create(array,
+                                                          0)
 
         fun create(array: FloatArray,
                    @Nonnegative offset: Int): Vec4 {
@@ -81,15 +73,11 @@ import javax.annotation.Nonnegative
             return Vec4.builder().x(array[offset]).y(array[1 + offset]).z(array[2 + offset]).w(array[3 + offset]).build()
         }
 
-        fun builder(): Builder {
-            return AutoValue_Vec4.Builder().x(0).y(0).z(0).w(0)
-        }
+        fun builder(): Builder = AutoValue_Vec4.Builder().x(0f).y(0f).z(0f).w(0f)
 
         fun create(x: Float,
                    y: Float,
                    z: Float,
-                   w: Float): Vec4 {
-            return Vec4.builder().x(x).y(y).z(z).w(w).build()
-        }
+                   w: Float): Vec4 = Vec4.builder().x(x).y(y).z(z).w(w).build()
     }
 }

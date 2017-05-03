@@ -149,7 +149,7 @@ class X11PlatformFactory @Inject internal constructor(private val display: Displ
                                                                                     cookies[i],
                                                                                     0L)).use { reply ->
                 x11Atoms.put(atomNames[i],
-                             reply.get().atom())
+                             reply.get().atom)
             }
         }
         return x11Atoms
@@ -171,11 +171,10 @@ class X11PlatformFactory @Inject internal constructor(private val display: Displ
         }
 
         val setup = this.libxcb.xcb_get_setup(xcbConnection)
-        var screen: xcb_screen_t
-        Pointer.wrap<xcb_screen_iterator_t>(xcb_screen_iterator_t::class.java,
-                                            this.libxcb.xcb_setup_roots_iterator(setup)).use { xcb_screen_iterator ->
-            screen = xcb_screen_iterator.get().data().get()
-        }
+        val screent_iter = Pointer.wrap<xcb_screen_iterator_t>(xcb_screen_iterator_t::class.java,
+                                                               this.libxcb.xcb_setup_roots_iterator(setup))
+        val screen: xcb_screen_t = screent_iter.get().data.get()
+        screent_iter.close()
 
         val window = this.libxcb.xcb_generate_id(xcbConnection)
         if (window <= 0) {
@@ -186,21 +185,21 @@ class X11PlatformFactory @Inject internal constructor(private val display: Displ
         this.libxcb.xcb_create_window(xcbConnection,
                                       XCB_COPY_FROM_PARENT.toByte(),
                                       window,
-                                      screen.root(),
+                                      screen.root,
                                       x.toShort(),
                                       y.toShort(),
                                       width.toShort(),
                                       height.toShort(),
                                       0.toShort(),
                                       XCB_WINDOW_CLASS_INPUT_OUTPUT.toShort(),
-                                      screen.root_visual(),
+                                      screen.root_visual,
                                       XCB_CW_EVENT_MASK,
                                       values.address)
 
         setWmProtocol(xcbConnection,
                       window,
-                      x11Atoms["WM_PROTOCOLS"],
-                      x11Atoms["WM_DELETE_WINDOW"])
+                      x11Atoms["WM_PROTOCOLS"]!!,
+                      x11Atoms["WM_DELETE_WINDOW"]!!)
         setName(x11OutputConfig,
                 xcbConnection,
                 window,
@@ -245,16 +244,16 @@ class X11PlatformFactory @Inject internal constructor(private val display: Displ
         this.libxcb.xcb_change_property(connection,
                                         XCB_PROP_MODE_REPLACE.toByte(),
                                         window,
-                                        x11Atoms["_NET_WM_NAME"],
-                                        x11Atoms["UTF8_STRING"],
+                                        x11Atoms["_NET_WM_NAME"]!!,
+                                        x11Atoms["UTF8_STRING"]!!,
                                         8.toByte(),
                                         nameLength,
                                         nameNative)
         this.libxcb.xcb_change_property(connection,
                                         XCB_PROP_MODE_REPLACE.toByte(),
                                         window,
-                                        x11Atoms["WM_CLASS"],
-                                        x11Atoms["STRING"],
+                                        x11Atoms["WM_CLASS"]!!,
+                                        x11Atoms["STRING"]!!,
                                         8.toByte(),
                                         nameLength,
                                         nameNative)

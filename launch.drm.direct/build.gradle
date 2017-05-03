@@ -16,12 +16,10 @@ dependencies {
 }
 
 kapt {
-    generateStubs = true
     correctErrorTypes = true
 }
 
-task buildNative(type: Exec, dependsOn: ':projectB:taskY') {
-    workingDir '.'
-
-    commandLine './build.sh'
+task buildNative(type: Exec, dependsOn: ':KotlinCompile') {
+    workingDir "$projectDir"
+    commandLine 'bash', './build.sh'
 }

@@ -1,4 +1,4 @@
-include: 'compositor'
-include: 'launch.drm.direct'
-include: 'launch.drm.indirect'
-include: 'launch.x11'
+include 'compositor'
+include 'launch.drm.direct'
+include 'launch.drm.indirect'
+include 'launch.x11'

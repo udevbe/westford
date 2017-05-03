@@ -20,7 +20,7 @@ package org.westford.compositor.core.events
 import com.google.auto.value.AutoValue
 
 @AutoValue abstract class PointerFocus {
-    fun create(): PointerFocus {
-        return AutoValue_PointerFocus()
+    companion object {
+        fun create(): PointerFocus = AutoValue_PointerFocus()
     }
 }

@@ -22,16 +22,15 @@ import org.westford.compositor.protocol.WlSurface
         val wlSurface = wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        surface.views.forEach { surfaceView ->
-            surfaceView.parent.ifPresent { parentSurfaceView -> surfaceView.setPosition(parentSurfaceView.global(this.position)) }
+        surface.views.forEach {
+            it.parent?.let { parentSurfaceView ->
+                it.setPosition(parentSurfaceView.global(this.position))
+            }
         }
     }
 
     override fun toString(): String {
-        return "Sibling{"
-        +"wlSurfaceResource=" + wlSurfaceResource + ","
-        +"position=" + position
-        +"}"
+        return "Sibling{wlSurfaceResource=$wlSurfaceResource,position=$position}"
     }
 
     companion object {

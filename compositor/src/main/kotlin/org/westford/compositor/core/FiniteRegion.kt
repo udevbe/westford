@@ -44,11 +44,11 @@ import java.util.*
         val boxes = ArrayList<Rectangle>(size)
         for (i in 0..size - 1) {
             val pixman_box32 = pixman_box32_array.get(i)
-            val x = pixman_box32.x1()
-            val y = pixman_box32.y1()
+            val x = pixman_box32.x1
+            val y = pixman_box32.y1
 
-            val width = pixman_box32.x2() - x
-            val height = pixman_box32.y2() - y
+            val width = pixman_box32.x2 - x
+            val height = pixman_box32.y2 - y
             boxes.add(Rectangle.create(x,
                                        y,
                                        width,
@@ -126,10 +126,10 @@ import java.util.*
 
     override fun contains(rectangle: Rectangle): Boolean {
         val pixman_box32 = pixman_box32()
-        pixman_box32.x1(rectangle.x)
-        pixman_box32.y1(rectangle.y)
-        pixman_box32.x2(rectangle.x + rectangle.width)
-        pixman_box32.y2(rectangle.y + rectangle.height)
+        pixman_box32.x1 = rectangle.x
+        pixman_box32.y1 = rectangle.y
+        pixman_box32.x2 = rectangle.x + rectangle.width
+        pixman_box32.y2 = rectangle.y + rectangle.height
         return Libpixman1.PIXMAN_REGION_OUT != this.libpixman1.pixman_region32_contains_rectangle(this.pixmanRegion32.address,
                                                                                                   Pointer.ref(pixman_box32).address)
     }

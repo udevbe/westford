@@ -108,18 +108,16 @@ import org.westford.compositor.protocol.WlSurface
         this.sync = sync
 
         val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
-        parentWlSurface.surface.role.ifPresent { role ->
-            role.accept(object : RoleVisitor {
-                override fun visit(parentSubsurface: Subsurface) {
-                    //TODO unit test this
-                    updateEffectiveSync(parentSubsurface.isEffectiveSync)
-                }
+        parentWlSurface.surface.role?.accept(object : RoleVisitor {
+            override fun visit(subsurface: Subsurface) {
+                //TODO unit test this
+                updateEffectiveSync(subsurface.isEffectiveSync)
+            }
 
-                override fun defaultAction(role: Role) {
-                    updateEffectiveSync(false)
-                }
-            })
-        }
+            override fun defaultAction(role: Role) {
+                updateEffectiveSync(false)
+            }
+        })
     }
 
     fun updateEffectiveSync(parentEffectiveSync: Boolean) {

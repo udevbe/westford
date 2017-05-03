@@ -18,23 +18,22 @@
 package org.westford.compositor.drm
 
 import org.freedesktop.jaccall.Pointer
-import org.westford.nativ.libdrm.DrmEventContext
-import org.westford.nativ.libdrm.Libdrm
+import org.westford.nativ.libdrm.*
 import javax.inject.Inject
 
 class DrmEventBusFactory @Inject internal constructor(private val privateDrmEventBusFactory: PrivateDrmEventBusFactory) {
 
     fun create(drmFd: Int): DrmEventBus {
-        val drmEventContextP = Pointer.malloc<DrmEventContext>(DrmEventContext.SIZE,
+        val drmEventContextP = Pointer.malloc<DrmEventContext>(DrmEventContext_Jaccall_StructType.SIZE,
                                                                DrmEventContext::class.java)
 
         val drmEventBus = this.privateDrmEventBusFactory.create(drmFd,
                                                                 drmEventContextP.address)
 
         val drmEventContext = drmEventContextP.get()
-        drmEventContext.version(Libdrm.DRM_EVENT_CONTEXT_VERSION)
-        drmEventContext.page_flip_handler(Pointerpage_flip_handler.nref(drmEventBus::pageFlipHandler))
-        drmEventContext.vblank_handler(Pointervblank_handler.nref(drmEventBus::vblankHandler))
+        drmEventContext.version = Libdrm.DRM_EVENT_CONTEXT_VERSION
+        drmEventContext.page_flip_handler = Pointerpage_flip_handler.nref(drmEventBus::pageFlipHandler as page_flip_handler)
+        drmEventContext.vblank_handler = Pointervblank_handler.nref(drmEventBus::vblankHandler as vblank_handler)
 
         return drmEventBus
     }

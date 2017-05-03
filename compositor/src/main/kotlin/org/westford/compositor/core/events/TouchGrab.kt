@@ -19,8 +19,8 @@ package org.westford.compositor.core.events
 
 import com.google.auto.value.AutoValue
 
-@AutoValue  abstract class TouchGrab {
-    fun create(): TouchGrab {
-        return AutoValue_TouchGrab()
+@AutoValue abstract class TouchGrab {
+    companion object {
+        fun create(): TouchGrab = AutoValue_TouchGrab()
     }
 }

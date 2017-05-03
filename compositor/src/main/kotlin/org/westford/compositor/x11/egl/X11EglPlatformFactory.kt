@@ -44,6 +44,7 @@ import org.westford.nativ.libxcb.xcb_client_message_event_t
 import java.lang.String.format
 import java.util.logging.Logger
 import javax.inject.Inject
+import kotlin.experimental.and
 
 class X11EglPlatformFactory @Inject internal constructor(private val libxcb: Libxcb,
                                                          private val libEGL: LibEGL,
@@ -104,7 +105,7 @@ class X11EglPlatformFactory @Inject internal constructor(private val libxcb: Lib
                                                                       eglExtensions)
 
         this.x11Platform.x11EventBus.xEventSignal.connect {
-            val responseType = it.get().response_type() and 0x7f
+            val responseType = (it.get().response_type and 0x7f).toInt()
             when (responseType) {
                 XCB_CLIENT_MESSAGE -> {
                     handle(it.castp(xcb_client_message_event_t::class.java),
@@ -192,7 +193,7 @@ EGL_NONE
         val width = x11Output.width
         val height = x11Output.height
 
-        val outputGeometry = OutputGeometry.builder().x(x11Output.x).y(x11Output.y).subpixel(0).make("Westford xcb").model("X11").physicalWidth(width / screen.width_in_pixels() * screen.width_in_millimeters()).physicalHeight(height / screen.height_in_pixels() * screen.height_in_millimeters()).transform(WlOutputTransform.NORMAL.value).build()
+        val outputGeometry = OutputGeometry.builder().x(x11Output.x).y(x11Output.y).subpixel(0).make("Westford xcb").model("X11").physicalWidth(width / screen.width_in_pixels * screen.width_in_millimeters).physicalHeight(height / screen.height_in_pixels * screen.height_in_millimeters).transform(WlOutputTransform.NORMAL.value).build()
         val outputMode = OutputMode.builder().flags(0).width(width).height(height).refresh(60).build()
         return this.outputFactory.create(x11EglOutput,
                                          x11Output.name,
@@ -202,8 +203,8 @@ EGL_NONE
 
     private fun handle(event: Pointer<xcb_client_message_event_t>,
                        x11EglPlatform: X11EglPlatform) {
-        val atom = event.get().data().data32().get()
-        val sourceWindow = event.get().window()
+        val atom = event.get().data().data32.get()
+        val sourceWindow = event.get().window
 
         if (atom == this.x11Platform.x11Atoms["WM_DELETE_WINDOW"]) {
 

@@ -26,15 +26,9 @@ import javax.inject.Singleton
 
 @Module class X11PlatformModule(private val x11PlatformConfig: X11PlatformConfig) {
 
-    @Provides @Singleton internal fun createX11Platform(x11PlatformFactory: X11PlatformFactory): X11Platform {
-        return x11PlatformFactory.create()
-    }
+    @Provides @Singleton internal fun createX11Platform(x11PlatformFactory: X11PlatformFactory): X11Platform = x11PlatformFactory.create()
 
-    @Provides @Singleton internal fun createWlSeat(x11SeatFactory: X11SeatFactory): WlSeat {
-        return x11SeatFactory.create()
-    }
+    @Provides @Singleton internal fun createWlSeat(x11SeatFactory: X11SeatFactory): WlSeat = x11SeatFactory.create()
 
-    @Provides @Singleton internal fun provideX11PlatformConfig(): X11PlatformConfig {
-        return this.x11PlatformConfig
-    }
+    @Provides @Singleton internal fun provideX11PlatformConfig(): X11PlatformConfig = this.x11PlatformConfig
 }

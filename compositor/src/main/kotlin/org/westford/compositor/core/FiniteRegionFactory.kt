@@ -4,13 +4,14 @@ import org.freedesktop.jaccall.Pointer
 import org.freedesktop.jaccall.Pointer.malloc
 import org.westford.nativ.libpixman1.Libpixman1
 import org.westford.nativ.libpixman1.pixman_region32
+import org.westford.nativ.libpixman1.pixman_region32_Jaccall_StructType
 import javax.inject.Inject
 
 class FiniteRegionFactory @Inject internal constructor(private val privateFiniteRegionFactory: PrivateFiniteRegionFactory,
                                                        private val libpixman1: Libpixman1) {
 
     fun create(): FiniteRegion {
-        val pixman_region32Pointer = malloc<pixman_region32>(pixman_region32.SIZE,
+        val pixman_region32Pointer = malloc<pixman_region32>(pixman_region32_Jaccall_StructType.SIZE,
                                                              pixman_region32::class.java)
         this.libpixman1.pixman_region32_init(pixman_region32Pointer.address)
 

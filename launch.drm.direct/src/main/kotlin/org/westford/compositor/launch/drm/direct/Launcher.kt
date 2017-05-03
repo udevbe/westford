@@ -95,11 +95,11 @@ class Launcher {
         }
 
         val mode = vt_mode()
-        mode.mode(VT_PROCESS)
-        mode.relsig(libc.SIGRTMIN().toShort())
-        mode.acqsig(libc.SIGRTMIN().toShort())
-        mode.waitv(0.toByte())
-        mode.frsig(0.toShort())
+        mode.mode = VT_PROCESS
+        mode.relsig = libc.SIGRTMIN().toShort()
+        mode.acqsig = libc.SIGRTMIN().toShort()
+        mode.waitv = 0
+        mode.frsig = 0
         if (-1 == libc.ioctl(tty.ttyFd,
                              VT_SETMODE.toLong(),
                              Pointer.ref(mode).address)) {

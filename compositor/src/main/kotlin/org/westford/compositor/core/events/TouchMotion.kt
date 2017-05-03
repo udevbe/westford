@@ -20,7 +20,7 @@ package org.westford.compositor.core.events
 import com.google.auto.value.AutoValue
 
 @AutoValue abstract class TouchMotion {
-    fun create(): TouchMotion {
-        return AutoValue_TouchMotion()
+    companion object {
+        fun create(): TouchMotion = AutoValue_TouchMotion()
     }
 }

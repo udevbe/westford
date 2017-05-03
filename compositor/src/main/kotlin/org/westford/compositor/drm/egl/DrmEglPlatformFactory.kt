@@ -137,21 +137,21 @@ class DrmEglPlatformFactory @Inject internal constructor(private val wlOutputFac
 
         val fallBackDpi = 96
 
-        var mmWidth = drmModeConnector.mmWidth()
-        val hdisplay = drmOutput.mode.hdisplay()
+        var mmWidth = drmModeConnector.mmWidth
+        val hdisplay = drmOutput.mode.hdisplay
         if (mmWidth == 0) {
             mmWidth = (hdisplay * 25.4 / fallBackDpi).toInt()
         }
 
-        var mmHeight = drmModeConnector.mmHeight()
-        val vdisplay = drmOutput.mode.vdisplay()
+        var mmHeight = drmModeConnector.mmHeight
+        val vdisplay = drmOutput.mode.vdisplay
         if (mmHeight == 0) {
             mmHeight = (vdisplay * 25.4 / fallBackDpi).toInt()
         }
 
         //TODO gather more geo & drmModeModeInfo info
-        val outputGeometry = OutputGeometry.builder().physicalWidth(mmWidth).physicalHeight(mmHeight).make("unknown").model("unknown").x(0).y(0).subpixel(drmModeConnector.drmModeSubPixel()).transform(0).build()
-        val outputMode = OutputMode.builder().width(hdisplay.toInt()).height(vdisplay.toInt()).refresh(drmOutput.mode.vrefresh()).flags(drmModeModeInfo.flags()).build()
+        val outputGeometry = OutputGeometry.builder().physicalWidth(mmWidth).physicalHeight(mmHeight).make("unknown").model("unknown").x(0).y(0).subpixel(drmModeConnector.drmModeSubPixel).transform(0).build()
+        val outputMode = OutputMode.builder().width(hdisplay.toInt()).height(vdisplay.toInt()).refresh(drmOutput.mode.vrefresh).flags(drmModeModeInfo.flags).build()
 
         //FIXME deduce an output name from the drm connector
         return this.wlOutputFactory.create(this.outputFactory.create(drmEglOutput,
@@ -219,8 +219,8 @@ class DrmEglPlatformFactory @Inject internal constructor(private val wlOutputFac
 
         //TODO test if format is supported (gbm_device_is_format_supported)?
         val gbmSurface = this.libgbm.gbm_surface_create(gbmDevice,
-                                                        drmModeModeInfo.hdisplay(),
-                                                        drmModeModeInfo.vdisplay(),
+                                                        drmModeModeInfo.hdisplay.toInt(),
+                                                        drmModeModeInfo.vdisplay.toInt(),
                                                         Libgbm.GBM_FORMAT_XRGB8888,
                                                         Libgbm.GBM_BO_USE_SCANOUT or Libgbm.GBM_BO_USE_RENDERING)
 

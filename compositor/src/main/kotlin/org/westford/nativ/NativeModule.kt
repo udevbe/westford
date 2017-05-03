@@ -20,21 +20,37 @@ package org.westford.nativ
 import dagger.Module
 import dagger.Provides
 import org.westford.nativ.glibc.Libc
+import org.westford.nativ.glibc.Libc_Symbols
 import org.westford.nativ.glibc.Libpthread
+import org.westford.nativ.glibc.Libpthread_Symbols
 import org.westford.nativ.libEGL.LibEGL
+import org.westford.nativ.libEGL.LibEGL_Symbols
 import org.westford.nativ.libGLESv2.LibGLESv2
+import org.westford.nativ.libGLESv2.LibGLESv2_Symbols
 import org.westford.nativ.libX11.LibX11
+import org.westford.nativ.libX11.LibX11_Symbols
 import org.westford.nativ.libX11xcb.LibX11xcb
+import org.westford.nativ.libX11xcb.LibX11xcb_Symbols
 import org.westford.nativ.libbcm_host.Libbcm_host
+import org.westford.nativ.libbcm_host.Libbcm_host_Symbols
 import org.westford.nativ.libdrm.Libdrm
+import org.westford.nativ.libdrm.Libdrm_Symbols
 import org.westford.nativ.libgbm.Libgbm
+import org.westford.nativ.libgbm.Libgbm_Symbols
 import org.westford.nativ.libinput.Libinput
+import org.westford.nativ.libinput.Libinput_Symbols
 import org.westford.nativ.libpixman1.Libpixman1
+import org.westford.nativ.libpixman1.Libpixman1_Symbols
 import org.westford.nativ.libpng.Libpng
+import org.westford.nativ.libpng.Libpng_Symbols
 import org.westford.nativ.libudev.Libudev
+import org.westford.nativ.libudev.Libudev_Symbols
 import org.westford.nativ.libxcb.Libxcb
+import org.westford.nativ.libxcb.Libxcb_Symbols
 import org.westford.nativ.libxkbcommon.Libxkbcommon
+import org.westford.nativ.libxkbcommon.Libxkbcommon_Symbols
 import org.westford.nativ.libxkbcommonx11.Libxkbcommonx11
+import org.westford.nativ.libxkbcommonx11.Libxkbcommonx11_Symbols
 import javax.inject.Singleton
 
 @Module class NativeModule {

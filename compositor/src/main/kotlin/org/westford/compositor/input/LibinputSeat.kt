@@ -192,6 +192,6 @@ import org.westford.nativ.libinput.Libinput.Companion.LIBINPUT_EVENT_TOUCH_UP
 
         val seat = this.wlSeat.seat
         seat.capabilities = seatCapabilities
-        seat.emitCapabilities(this.wlSeat.getResources())
+        seat.emitCapabilities(this.wlSeat.resources)
     }
 }

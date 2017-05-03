@@ -18,7 +18,7 @@ class WlPointerFactory @Inject internal constructor(private val renderPlatform: 
         //TODO unit test
         this.renderPlatform.renderOutputDestroyedSignal.connect {
             pointerDevice.clampRegion.remove(it.wlOutput.output.region)
-            pointerDevice.clamp(wlPointer.getResources(),
+            pointerDevice.clamp(wlPointer.resources,
                                 pointerDevice.position)
         }
 

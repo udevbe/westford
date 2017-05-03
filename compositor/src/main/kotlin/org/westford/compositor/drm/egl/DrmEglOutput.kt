@@ -38,6 +38,8 @@ import org.westford.nativ.libdrm.Libdrm.Companion.DRM_MODE_PAGE_FLIP_EVENT
 import org.westford.nativ.libgbm.Libgbm
 import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_ARGB8888
 import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
+import org.westford.nativ.libgbm.Pointerdestroy_user_data
+import org.westford.nativ.libgbm.destroy_user_data
 
 @AutoFactory(allowSubclasses = true,
              className = "DrmEglOutputFactory") class DrmEglOutput(@param:Provided private val libc: Libc,
@@ -56,7 +58,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
                                                                    override val eglSurface: Long,
                                                                    override val eglContext: Long,
                                                                    override val eglDisplay: Long) : EglOutput, DrmPageFlipCallback {
-    override val state: EglOutputState? = null
+    override var state: EglOutputState? = null
 
     private var nextGbmBo: GbmBo
     private var renderPending = false
@@ -120,7 +122,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
 
         this.libgbm.gbm_bo_set_user_data(gbmBoPtr,
                                          fb.address,
-                                         Pointerdestroy_user_data.nref(this::destroyUserData).address)
+                                         Pointerdestroy_user_data.nref(this::destroyUserData as destroy_user_data).address)
 
         return fb.get()
     }
@@ -320,7 +322,7 @@ import org.westford.nativ.libgbm.Libgbm.Companion.GBM_FORMAT_XRGB8888
                                                fbId,
                                                0,
                                                0,
-                                               Pointer.nref(this.drmOutput.drmModeConnector.connector_id()).address,
+                                               Pointer.nref(this.drmOutput.drmModeConnector.connector_id).address,
                                                1,
                                                Pointer.ref(this.drmOutput.mode).address)
         if (error != 0) {

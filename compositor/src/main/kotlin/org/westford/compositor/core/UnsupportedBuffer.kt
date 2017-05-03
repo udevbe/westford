@@ -32,14 +32,9 @@ import javax.annotation.Nonnegative
 
     abstract override val wlBufferResource: WlBufferResource
 
-    override fun accept(bufferVisitor: BufferVisitor) {
-        bufferVisitor.visit(this)
-    }
+    override fun accept(bufferVisitor: BufferVisitor) = bufferVisitor.visit(this)
 
     companion object {
-
-        fun create(wlBufferResource: WlBufferResource): UnsupportedBuffer {
-            return AutoValue_UnsupportedBuffer(wlBufferResource)
-        }
+        fun create(wlBufferResource: WlBufferResource): UnsupportedBuffer = AutoValue_UnsupportedBuffer(wlBufferResource)
     }
 }
