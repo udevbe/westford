@@ -157,41 +157,41 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <version>${kotlin.version}</version>
                 <executions>
-                    <!--<execution>-->
-                        <!--<id>kapt</id>-->
-                        <!--<goals>-->
-                            <!--<goal>kapt</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<correctErrorTypes>true</correctErrorTypes>-->
-                            <!--<sourceDirs>-->
-                                <!--<sourceDir>src/main/kotlin</sourceDir>-->
-                                <!--<sourceDir>src/main/java</sourceDir>-->
-                            <!--</sourceDirs>-->
-                            <!--<annotationProcessorPaths>-->
-                                <!--<path>-->
-                                    <!--<groupId>org.freedesktop</groupId>-->
-                                    <!--<artifactId>jaccall.generator</artifactId>-->
-                                    <!--<version>${jaccall.version}</version>-->
-                                <!--</path>-->
-                                <!--<path>-->
-                                    <!--<groupId>com.google.auto.factory</groupId>-->
-                                    <!--<artifactId>auto-factory</artifactId>-->
-                                    <!--<version>${auto.factory.version}</version>-->
-                                <!--</path>-->
-                                <!--<path>-->
-                                    <!--<groupId>com.google.auto.value</groupId>-->
-                                    <!--<artifactId>auto-value</artifactId>-->
-                                    <!--<version>${auto.value.version}</version>-->
-                                <!--</path>-->
-                                <!--<path>-->
-                                    <!--<groupId>com.google.dagger</groupId>-->
-                                    <!--<artifactId>dagger-compiler</artifactId>-->
-                                    <!--<version>${dagger.version}</version>-->
-                                <!--</path>-->
-                            <!--</annotationProcessorPaths>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+                    <execution>
+                        <id>kapt</id>
+                        <goals>
+                            <goal>kapt</goal>
+                        </goals>
+                        <configuration>
+                            <correctErrorTypes>true</correctErrorTypes>
+                            <sourceDirs>
+                                <sourceDir>src/main/kotlin</sourceDir>
+                                <sourceDir>src/main/java</sourceDir>
+                            </sourceDirs>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.freedesktop</groupId>
+                                    <artifactId>jaccall.generator</artifactId>
+                                    <version>${jaccall.version}</version>
+                                </path>
+                                <path>
+                                    <groupId>com.google.auto.factory</groupId>
+                                    <artifactId>auto-factory</artifactId>
+                                    <version>${auto.factory.version}</version>
+                                </path>
+                                <path>
+                                    <groupId>com.google.auto.value</groupId>
+                                    <artifactId>auto-value</artifactId>
+                                    <version>${auto.value.version}</version>
+                                </path>
+                                <path>
+                                    <groupId>com.google.dagger</groupId>
+                                    <artifactId>dagger-compiler</artifactId>
+                                    <version>${dagger.version}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>compile</id>
                         <goals>
