@@ -209,7 +209,7 @@ class Launcher {
             fileHandler.formatter = SimpleFormatter()
             LOGGER.addHandler(fileHandler)
 
-            Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
                 LOGGER.severe("Got uncaught exception " + throwable.message)
                 throwable.printStackTrace()
             }

@@ -49,7 +49,7 @@ class Launcher {
         val pointerDevice = wlSeat.wlPointer.pointerDevice
         pointerDevice.pointerFocusSignal.connect {
             wlKeyboard.keyboardDevice.setFocus(wlKeyboard.resources,
-                                               pointerDevice.focus.wlSurfaceResource)
+                                               pointerDevice.focus?.wlSurfaceResource)
         }
         /*
          * Start the compositor.
@@ -73,7 +73,7 @@ class Launcher {
             fileHandler.formatter = SimpleFormatter()
             LOGGER.addHandler(fileHandler)
 
-            Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
                 LOGGER.severe("Got uncaught exception " + throwable.message)
                 throwable.printStackTrace()
             }
