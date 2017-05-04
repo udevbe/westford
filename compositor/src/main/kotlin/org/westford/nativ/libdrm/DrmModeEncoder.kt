@@ -30,4 +30,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "possible_crtcs",
               type = CType.UNSIGNED_INT),
         Field(name = "possible_clones",
-              type = CType.UNSIGNED_INT)) class DrmModeEncoder : DrmModeEncoder_Jaccall_StructType()
+              type = CType.UNSIGNED_INT)) class DrmModeEncoder : Struct_DrmModeEncoder()

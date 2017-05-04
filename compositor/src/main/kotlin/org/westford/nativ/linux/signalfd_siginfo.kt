@@ -40,4 +40,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.UNSIGNED_SHORT),
         Field(name = "__pad",
               cardinality = 46,
-              type = CType.UNSIGNED_CHAR)) class signalfd_siginfo : signalfd_siginfo_Jaccall_StructType()
+              type = CType.UNSIGNED_CHAR)) class signalfd_siginfo : Struct_signalfd_siginfo()

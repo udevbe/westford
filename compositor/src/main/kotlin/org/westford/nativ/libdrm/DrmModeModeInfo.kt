@@ -53,4 +53,4 @@ import org.westford.nativ.libdrm.Libdrm.Companion.DRM_DISPLAY_MODE_LEN
         Field(name = "name",
               type = CType.CHAR,
               dataType = String::class,
-              cardinality = DRM_DISPLAY_MODE_LEN)) class DrmModeModeInfo : DrmModeModeInfo_Jaccall_StructType()
+              cardinality = DRM_DISPLAY_MODE_LEN)) class DrmModeModeInfo : Struct_DrmModeModeInfo()

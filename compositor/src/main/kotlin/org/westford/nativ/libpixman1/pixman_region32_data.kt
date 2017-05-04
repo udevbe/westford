@@ -24,4 +24,4 @@ import org.freedesktop.jaccall.Struct
 @Struct(Field(name = "size",
               type = CType.LONG),
         Field(name = "numRects",
-              type = CType.LONG)) class pixman_region32_data : pixman_region32_data_Jaccall_StructType()
+              type = CType.LONG)) class pixman_region32_data : Struct_pixman_region32_data()

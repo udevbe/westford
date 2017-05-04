@@ -4,7 +4,7 @@ object depversion {
     val jaccall = "2.0.0-SNAPSHOT"
     val auto_factory = "1.0-beta5"
     val auto_value = "1.4.1"
-    val dagger = "2.11-rc1"
+    val dagger = "2.2"
 }
 
 plugins {
@@ -14,11 +14,6 @@ plugins {
 
 kapt {
     correctErrorTypes = true
-}
-
-apply {
-    plugin("kotlin")
-    plugin("kotlin-kapt")
 }
 
 buildscript {

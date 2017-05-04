@@ -31,4 +31,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.INT,
               cardinality = 7),
         Field(name = "full_sequence",
-              type = CType.INT)) class xcb_generic_event_t : xcb_generic_event_t_Jaccall_StructType()
+              type = CType.INT)) class xcb_generic_event_t : Struct_xcb_generic_event_t()

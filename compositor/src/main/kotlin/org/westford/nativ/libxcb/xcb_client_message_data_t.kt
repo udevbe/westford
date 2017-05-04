@@ -30,4 +30,4 @@ import org.freedesktop.jaccall.Struct
                                cardinality = 10),
                          Field(name = "data32",
                                type = CType.INT,
-                               cardinality = 5))) class xcb_client_message_data_t : xcb_client_message_data_t_Jaccall_StructType()
+                               cardinality = 5))) class xcb_client_message_data_t : Struct_xcb_client_message_data_t()

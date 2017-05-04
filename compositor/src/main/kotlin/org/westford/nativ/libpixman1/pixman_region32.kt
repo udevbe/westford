@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct
               dataType = pixman_box32::class),
         Field(name = "data",
               type = CType.POINTER,
-              dataType = pixman_region32_data::class)) class pixman_region32 : pixman_region32_Jaccall_StructType()
+              dataType = pixman_region32_data::class)) class pixman_region32 : Struct_pixman_region32()

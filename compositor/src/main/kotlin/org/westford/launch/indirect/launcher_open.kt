@@ -10,4 +10,4 @@ import org.freedesktop.jaccall.Struct
                                type = CType.INT),
                          Field(name = "path",
                                cardinality = 0,
-                               type = CType.CHAR))) internal class launcher_open : launcher_open_Jaccall_StructType()
+                               type = CType.CHAR))) internal class launcher_open : Struct_launcher_open()

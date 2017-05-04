@@ -46,4 +46,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "st_mtime",
               type = CType.LONG),
         Field(name = "st_ctime",
-              type = CType.LONG)) class stat : stat_Jaccall_StructType()
+              type = CType.LONG)) class stat : Struct_stat()

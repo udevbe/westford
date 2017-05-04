@@ -39,4 +39,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.INT,
               cardinality = 5),
         Field(name = "full_sequence",
-              type = CType.INT)) class xcb_generic_error_t : xcb_generic_error_t_Jaccall_StructType()
+              type = CType.INT)) class xcb_generic_error_t : Struct_xcb_generic_error_t()

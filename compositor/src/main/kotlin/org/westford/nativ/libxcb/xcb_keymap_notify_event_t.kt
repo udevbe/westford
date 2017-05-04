@@ -25,4 +25,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.CHAR),
         Field(name = "keys",
               type = CType.CHAR,
-              cardinality = 31)) class xcb_keymap_notify_event_t : xcb_keymap_notify_event_t_Jaccall_StructType()
+              cardinality = 31)) class xcb_keymap_notify_event_t : Struct_xcb_keymap_notify_event_t()

@@ -30,4 +30,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "length",
               type = CType.INT),
         Field(name = "atom",
-              type = CType.INT)) class xcb_intern_atom_reply_t : xcb_intern_atom_reply_t_Jaccall_StructType()
+              type = CType.INT)) class xcb_intern_atom_reply_t : Struct_xcb_intern_atom_reply_t()

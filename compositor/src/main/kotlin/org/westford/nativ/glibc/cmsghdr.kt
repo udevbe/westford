@@ -12,4 +12,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.INT),
         Field(name = "__cmsg_data",
               cardinality = 0,
-              type = CType.UNSIGNED_CHAR)) class cmsghdr : cmsghdr_Jaccall_StructType()
+              type = CType.UNSIGNED_CHAR)) class cmsghdr : Struct_cmsghdr()

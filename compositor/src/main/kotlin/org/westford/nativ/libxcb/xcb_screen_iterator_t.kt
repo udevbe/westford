@@ -27,4 +27,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "rem",
               type = CType.INT),
         Field(name = "index",
-              type = CType.INT)) class xcb_screen_iterator_t : xcb_screen_iterator_t_Jaccall_StructType()
+              type = CType.INT)) class xcb_screen_iterator_t : Struct_xcb_screen_iterator_t()

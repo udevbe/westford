@@ -22,4 +22,4 @@ import org.freedesktop.jaccall.Field
 import org.freedesktop.jaccall.Struct
 
 @Struct(Field(name = "dummy",
-              type = CType.INT)) class DISPMANX_CLAMP_T : DISPMANX_CLAMP_T_Jaccall_StructType()
+              type = CType.INT)) class DISPMANX_CLAMP_T : Struct_DISPMANX_CLAMP_T()

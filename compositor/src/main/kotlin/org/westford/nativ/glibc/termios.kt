@@ -37,4 +37,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "c_ispeed",
               type = CType.UNSIGNED_INT),
         Field(name = "c_ospeed",
-              type = CType.UNSIGNED_INT)) class termios : termios_Jaccall_StructType()
+              type = CType.UNSIGNED_INT)) class termios : Struct_termios()

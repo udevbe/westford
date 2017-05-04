@@ -8,4 +8,4 @@ import org.freedesktop.jaccall.Struct
                                type = CType.POINTER,
                                dataType = Void::class),
                          Field(name = "iov_len",
-                               type = CType.UNSIGNED_LONG))) class iovec : iovec_Jaccall_StructType()
+                               type = CType.UNSIGNED_LONG))) class iovec : Struct_iovec()

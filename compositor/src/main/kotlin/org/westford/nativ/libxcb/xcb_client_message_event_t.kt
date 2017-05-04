@@ -33,4 +33,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.INT),
         Field(name = "data",
               type = CType.STRUCT,
-              dataType = xcb_client_message_data_t::class)) class xcb_client_message_event_t : xcb_client_message_event_t_Jaccall_StructType()
+              dataType = xcb_client_message_data_t::class)) class xcb_client_message_event_t : Struct_xcb_client_message_event_t()

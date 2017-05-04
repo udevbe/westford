@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "opacity",
               type = CType.INT),
         Field(name = "mask",
-              type = CType.INT)) class VC_DISPMANX_ALPHA_T : VC_DISPMANX_ALPHA_T_Jaccall_StructType()
+              type = CType.INT)) class VC_DISPMANX_ALPHA_T : Struct_VC_DISPMANX_ALPHA_T()

@@ -35,7 +35,7 @@ import org.freedesktop.jaccall.Struct
               dataType = String::class),
         Field(name = "options",
               type = CType.POINTER,
-              dataType = String::class)) class xkb_rule_names : xkb_rule_names_Jaccall_StructType()
+              dataType = String::class)) class xkb_rule_names : Struct_xkb_rule_names()
 /**
  * The rules file to use. The rules file describes how to interpret
  * the values of the model, layout, variant and options fields.

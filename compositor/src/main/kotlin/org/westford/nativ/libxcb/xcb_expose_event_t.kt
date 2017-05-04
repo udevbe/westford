@@ -38,4 +38,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "height",
               type = CType.SHORT),
         Field(name = "count",
-              type = CType.SHORT)) class xcb_expose_event_t : xcb_expose_event_t_Jaccall_StructType()
+              type = CType.SHORT)) class xcb_expose_event_t : Struct_xcb_expose_event_t()

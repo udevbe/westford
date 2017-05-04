@@ -52,5 +52,5 @@ import org.freedesktop.jaccall.Struct
         Field(name = "root_depth",
               type = CType.CHAR),
         Field(name = "allowed_depths_len",
-              type = CType.CHAR)) class xcb_screen_t : xcb_screen_t_Jaccall_StructType()
+              type = CType.CHAR)) class xcb_screen_t : Struct_xcb_screen_t()
 

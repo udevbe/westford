@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct
               dataType = open_restricted::class),
         Field(name = "close_restricted",
               type = CType.POINTER,
-              dataType = close_restricted::class)) class libinput_interface : libinput_interface_Jaccall_StructType()
+              dataType = close_restricted::class)) class libinput_interface : Struct_libinput_interface()

@@ -28,4 +28,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "width",
               type = CType.INT),
         Field(name = "height",
-              type = CType.INT)) class VC_RECT_T : VC_RECT_T_Jaccall_StructType()
+              type = CType.INT)) class VC_RECT_T : Struct_VC_RECT_T()

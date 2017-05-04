@@ -30,4 +30,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "acqsig",
               type = CType.SHORT),
         Field(name = "frsig",
-              type = CType.SHORT)) class vt_mode : vt_mode_Jaccall_StructType()
+              type = CType.SHORT)) class vt_mode : Struct_vt_mode()

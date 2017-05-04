@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "v_signal",
               type = CType.UNSIGNED_SHORT),
         Field(name = "v_state",
-              type = CType.UNSIGNED_SHORT)) class vt_stat : vt_stat_Jaccall_StructType()
+              type = CType.UNSIGNED_SHORT)) class vt_stat : Struct_vt_stat()

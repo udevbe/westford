@@ -78,7 +78,7 @@ class LibinputSeatFactory @Inject internal constructor(private val wlSeatFactory
             throw RuntimeException("Failed to initialize udev")
         }
 
-        val interface_ = malloc<libinput_interface>(libinput_interface_Jaccall_StructType.SIZE,
+        val interface_ = malloc<libinput_interface>(Struct_libinput_interface.SIZE,
                                                     libinput_interface::class.java)
         interface_.get().open_restricted = Pointeropen_restricted.nref(this::openRestricted as open_restricted)
         interface_.get().close_restricted = Pointerclose_restricted.nref(this::closeRestricted as close_restricted)

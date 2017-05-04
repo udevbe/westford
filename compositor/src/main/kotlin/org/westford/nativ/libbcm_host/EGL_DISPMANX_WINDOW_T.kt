@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "width",
               type = CType.INT),
         Field(name = "height",
-              type = CType.INT)) class EGL_DISPMANX_WINDOW_T : EGL_DISPMANX_WINDOW_T_Jaccall_StructType()
+              type = CType.INT)) class EGL_DISPMANX_WINDOW_T : Struct_EGL_DISPMANX_WINDOW_T()

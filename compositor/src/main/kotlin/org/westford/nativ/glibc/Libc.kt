@@ -38,16 +38,16 @@ class Libc {
 
     external fun __libc_current_sigrtmax(): Int
 
-    fun CMSG_SPACE(len: Long): Long = CMSG_ALIGN(len) + CMSG_ALIGN(cmsghdr_Jaccall_StructType.SIZE.toLong())
+    fun CMSG_SPACE(len: Long): Long = CMSG_ALIGN(len) + CMSG_ALIGN(Struct_cmsghdr.SIZE.toLong())
 
     fun CMSG_ALIGN(len: Long): Long = len + Size.sizeof(null as CLong?) - 1 and (Size.sizeof(null as CLong?) - 1).inv().toLong()
 
-    fun CMSG_LEN(len: Long): Long = CMSG_ALIGN(cmsghdr_Jaccall_StructType.SIZE + len)
+    fun CMSG_LEN(len: Long): Long = CMSG_ALIGN(Struct_cmsghdr.SIZE + len)
 
     fun CMSG_DATA(cmsg: Pointer<cmsghdr>): Pointer<Byte> = (cmsg + 1).castp(Byte::class.java)
 
     fun CMSG_FIRSTHDR(mhdr: msghdr): Pointer<cmsghdr> {
-        return if (mhdr.msg_controllen.toLong() >= cmsghdr_Jaccall_StructType.SIZE) mhdr.msg_control.castp(cmsghdr::class.java)
+        return if (mhdr.msg_controllen.toLong() >= Struct_cmsghdr.SIZE) mhdr.msg_control.castp(cmsghdr::class.java)
         else Pointer.wrap<cmsghdr>(cmsghdr::class.java,
                                    0L)
     }

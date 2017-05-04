@@ -8,4 +8,4 @@ import org.freedesktop.jaccall.Struct
                                type = CType.UNSIGNED_INT),
                          Field(name = "planes",
                                type = CType.POINTER,
-                               dataType = Int::class))) class drmModePlaneRes : drmModePlaneRes_Jaccall_StructType()
+                               dataType = Int::class))) class drmModePlaneRes : Struct_drmModePlaneRes()

@@ -23,4 +23,4 @@ import org.freedesktop.jaccall.Struct
 
 @Struct(Field(name = "filler",
               cardinality = 128,
-              type = CType.CHAR)) class sigset_t : sigset_t_Jaccall_StructType()
+              type = CType.CHAR)) class sigset_t : Struct_sigset_t()

@@ -48,4 +48,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "same_screen",
               type = CType.CHAR),
         Field(name = "pad0",
-              type = CType.CHAR)) class xcb_key_release_event_t : xcb_key_release_event_t_Jaccall_StructType()
+              type = CType.CHAR)) class xcb_key_release_event_t : Struct_xcb_key_release_event_t()

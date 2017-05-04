@@ -28,4 +28,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "x2",
               type = CType.INT),
         Field(name = "y2",
-              type = CType.INT)) class pixman_box32 : pixman_box32_Jaccall_StructType()
+              type = CType.INT)) class pixman_box32 : Struct_pixman_box32()

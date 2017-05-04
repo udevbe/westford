@@ -34,4 +34,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "count",
               type = CType.UNSIGNED_CHAR),
         Field(name = "pad1",
-              type = CType.UNSIGNED_CHAR)) class xcb_mapping_notify_event_t : xcb_mapping_notify_event_t_Jaccall_StructType()
+              type = CType.UNSIGNED_CHAR)) class xcb_mapping_notify_event_t : Struct_xcb_mapping_notify_event_t()

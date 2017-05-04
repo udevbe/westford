@@ -33,4 +33,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.CHAR),
         Field(name = "pad0",
               type = CType.CHAR,
-              cardinality = 3)) class xcb_focus_in_event_t : xcb_focus_in_event_t_Jaccall_StructType()
+              cardinality = 3)) class xcb_focus_in_event_t : Struct_xcb_focus_in_event_t()

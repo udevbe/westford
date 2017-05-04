@@ -20,4 +20,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "msg_controllen",
               type = CType.UNSIGNED_LONG),
         Field(name = "msg_flags",
-              type = CType.INT)) class msghdr : msghdr_Jaccall_StructType()
+              type = CType.INT)) class msghdr : Struct_msghdr()

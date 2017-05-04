@@ -28,4 +28,4 @@ import org.freedesktop.jaccall.Struct
               dataType = vblank_handler::class),
         Field(name = "page_flip_handler",
               type = CType.POINTER,
-              dataType = page_flip_handler::class)) class DrmEventContext : DrmEventContext_Jaccall_StructType()
+              dataType = page_flip_handler::class)) class DrmEventContext : Struct_DrmEventContext()

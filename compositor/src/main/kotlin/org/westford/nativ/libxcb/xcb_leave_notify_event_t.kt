@@ -48,4 +48,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "mode",
               type = CType.CHAR),
         Field(name = "same_screen_focus",
-              type = CType.CHAR)) class xcb_leave_notify_event_t : xcb_leave_notify_event_t_Jaccall_StructType()
+              type = CType.CHAR)) class xcb_leave_notify_event_t : Struct_xcb_leave_notify_event_t()

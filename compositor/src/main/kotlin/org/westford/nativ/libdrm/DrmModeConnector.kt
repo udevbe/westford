@@ -54,4 +54,4 @@ import org.freedesktop.jaccall.Struct
               type = CType.INT),
         Field(name = "encoders",
               type = CType.POINTER,
-              dataType = Int::class)) class DrmModeConnector : DrmModeConnector_Jaccall_StructType()
+              dataType = Int::class)) class DrmModeConnector : Struct_DrmModeConnector()

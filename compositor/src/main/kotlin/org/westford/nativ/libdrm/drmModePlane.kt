@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "x",
               type = CType.UNSIGNED_INT),
         Field(name = "y",
-              type = CType.UNSIGNED_INT)) class drmModePlane : drmModePlane_Jaccall_StructType()
+              type = CType.UNSIGNED_INT)) class drmModePlane : Struct_drmModePlane()

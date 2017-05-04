@@ -24,7 +24,7 @@ import javax.inject.Inject
 class DrmEventBusFactory @Inject internal constructor(private val privateDrmEventBusFactory: PrivateDrmEventBusFactory) {
 
     fun create(drmFd: Int): DrmEventBus {
-        val drmEventContextP = Pointer.malloc<DrmEventContext>(DrmEventContext_Jaccall_StructType.SIZE,
+        val drmEventContextP = Pointer.malloc<DrmEventContext>(Struct_DrmEventContext.SIZE,
                                                                DrmEventContext::class.java)
 
         val drmEventBus = this.privateDrmEventBusFactory.create(drmFd,

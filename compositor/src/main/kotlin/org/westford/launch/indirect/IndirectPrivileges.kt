@@ -23,8 +23,8 @@ import org.westford.nativ.linux.Socket
 
     private fun sendOpenRequest(@Ptr(String::class) path: Long,
                                 flags: Int) {
-        val payloadSize = launcher_open_Jaccall_StructType.SIZE + this.libc.strlen(path) + 1
-        val messageSize = launcher_open_Jaccall_StructType.SIZE + payloadSize
+        val payloadSize = Struct_launcher_open.SIZE + this.libc.strlen(path) + 1
+        val messageSize = Struct_launcher_open.SIZE + payloadSize
         Pointer.calloc(1,
                        messageSize.toInt()).castp<launcher_open>(launcher_open::class.java).use {
             if (it.address == 0L) {
@@ -52,10 +52,10 @@ import org.westford.nativ.linux.Socket
         Pointer.calloc(1,
                        sizeof(null as Int?)).use {
             Pointer.calloc<msghdr>(1,
-                                   msghdr_Jaccall_StructType.SIZE,
+                                   Struct_msghdr.SIZE,
                                    msghdr::class.java).use {
                 Pointer.calloc<iovec>(1,
-                                      iovec_Jaccall_StructType.SIZE,
+                                      Struct_iovec.SIZE,
                                       iovec::class.java).use { iov ->
                     val controlSize = this.libc.CMSG_SPACE(sizeof(null as Int?).toLong()).toInt()
                     val control = Pointer.calloc(1,

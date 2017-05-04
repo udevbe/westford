@@ -48,4 +48,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "min_height",
               type = CType.UNSIGNED_INT),
         Field(name = "max_height",
-              type = CType.UNSIGNED_INT)) class DrmModeRes : DrmModeRes_Jaccall_StructType()
+              type = CType.UNSIGNED_INT)) class DrmModeRes : Struct_DrmModeRes()

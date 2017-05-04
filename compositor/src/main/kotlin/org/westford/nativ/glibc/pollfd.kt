@@ -26,4 +26,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "events",
               type = CType.SHORT),
         Field(name = "revents",
-              type = CType.SHORT)) class pollfd : pollfd_Jaccall_StructType()
+              type = CType.SHORT)) class pollfd : Struct_pollfd()

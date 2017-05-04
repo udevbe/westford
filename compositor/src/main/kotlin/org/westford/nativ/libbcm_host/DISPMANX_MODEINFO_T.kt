@@ -30,4 +30,4 @@ import org.freedesktop.jaccall.Struct
         Field(name = "input_format",
               type = CType.INT),
         Field(name = "display_num",
-              type = CType.INT)) class DISPMANX_MODEINFO_T : DISPMANX_MODEINFO_T_Jaccall_StructType()
+              type = CType.INT)) class DISPMANX_MODEINFO_T : Struct_DISPMANX_MODEINFO_T()
