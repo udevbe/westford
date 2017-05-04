@@ -1,4 +1,8 @@
-include 'compositor'
-include 'launch.drm.direct'
-include 'launch.drm.indirect'
-include 'launch.x11'
+def configureGradleScriptKotlinOn(ProjectDescriptor project) {
+    project.buildFileName = 'build.gradle.kts'
+    project.children.each { configureGradleScriptKotlinOn(it) }
+}
+
+include 'compositor', 'launch.drm.direct', 'launch.drm.indirect', 'launch.x11'
+
+configureGradleScriptKotlinOn rootProject
