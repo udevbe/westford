@@ -75,22 +75,23 @@ import org.westford.compositor.x11.X11Output
             }
         }
         else {
-            fullscreenView?.let { fullscreenSurfaceView ->
-                //try painting fullscreen view
-                if (!gles2Painter.paint(fullscreenSurfaceView)) {
-                    //fullscreen view not visible, paint the rest of the subscene.
-                    subscene.backgroundView?.let {
-                        gles2Painter.paint(it)
-                    }
-                    subscene.underViews.forEach {
-                        gles2Painter.paint(it)
-                    }
-                    subscene.applicationViews.forEach {
-                        gles2Painter.paint(it)
-                    }
-                    subscene.overViews.forEach {
-                        gles2Painter.paint(it)
-                    }
+            val fullscreenPainted = fullscreenView?.let {
+                gles2Painter.paint(it)
+            } ?: false
+
+            if (!fullscreenPainted) {
+                //fullscreen view not visible, paint the rest of the subscene.
+                subscene.backgroundView?.let {
+                    gles2Painter.paint(it)
+                }
+                subscene.underViews.forEach {
+                    gles2Painter.paint(it)
+                }
+                subscene.applicationViews.forEach {
+                    gles2Painter.paint(it)
+                }
+                subscene.overViews.forEach {
+                    gles2Painter.paint(it)
                 }
             }
         }
