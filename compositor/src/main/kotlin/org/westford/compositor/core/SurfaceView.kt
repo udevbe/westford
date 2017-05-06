@@ -18,9 +18,11 @@ import org.westford.compositor.protocol.WlSurface
 
     var parent: SurfaceView? = null
         set(value) {
-            removeParent()
+            field?.let {
+                removeParent()
+            }
             value?.destroyedSignal?.connect(this::destroyOnParent)
-            this.parent = parent
+            field = value
         }
 
     var positionTransform: Mat4
@@ -108,8 +110,10 @@ import org.westford.compositor.protocol.WlSurface
     }
 
     fun removeParent() {
-        this.parent?.destroyedSignal?.disconnect(this::destroyOnParent)
-        this.parent = null
+        this.parent?.let {
+            it.destroyedSignal.disconnect(this::destroyOnParent)
+            this.parent = null
+        }
     }
 
     /**

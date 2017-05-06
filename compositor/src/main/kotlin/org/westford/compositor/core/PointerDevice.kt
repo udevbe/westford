@@ -575,7 +575,7 @@ import javax.annotation.Nonnegative
     fun warp(wlPointerResources: Set<WlPointerResource>,
              position: Point) {
         this.position = position
-        if (grab != null) {
+        if (grab == null) {
             calculateFocus(wlPointerResources)
         }
     }
