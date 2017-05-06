@@ -427,7 +427,7 @@ import javax.annotation.Nonnegative
         val surface = wlSurface.surface
         val surfaceViews = surface.views
 
-        if (grab != null || !surfaceViews.contains(grab) || buttonPressSerial != this.buttonPressSerial) {
+        if (!surfaceViews.contains(grab) || buttonPressSerial != this.buttonPressSerial) {
             //preconditions not met
             return false
         }
