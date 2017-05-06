@@ -17,16 +17,6 @@
  */
 package org.westford.compositor.core.events
 
-import com.google.auto.value.AutoValue
 import org.westford.compositor.core.SurfaceView
 
-@AutoValue abstract class PointerGrab {
-
-    abstract val wlSurfaceResource: SurfaceView?
-
-    companion object {
-        fun create(surfaceView: SurfaceView?): PointerGrab {
-            return AutoValue_PointerGrab(surfaceView)
-        }
-    }
-}
+data class PointerGrab(val wlSurfaceResource: SurfaceView?)

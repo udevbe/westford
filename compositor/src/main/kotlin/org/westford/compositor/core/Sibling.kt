@@ -1,18 +1,19 @@
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.compositor.protocol.WlSurface
 
-@AutoValue abstract class Sibling {
+data class Sibling(private val _position: Point,
+                   val wlSurfaceResource: WlSurfaceResource) {
 
-    var position = Point.ZERO
-        set(position) {
-            field = position
+    constructor(wlSurfaceResource: WlSurfaceResource) : this(Point.ZERO,
+                                                             wlSurfaceResource)
+
+    var position = _position
+        set(value) {
+            field = value
             updateSurfaceViewsPosition()
         }
-
-    abstract val wlSurfaceResource: WlSurfaceResource
 
     /**
      * Update all views' position of this sibling surface, with respect to their parent view. This method should be
@@ -26,24 +27,6 @@ import org.westford.compositor.protocol.WlSurface
             it.parent?.let { parentSurfaceView ->
                 it.setPosition(parentSurfaceView.global(this.position))
             }
-        }
-    }
-
-    override fun toString(): String {
-        return "Sibling{wlSurfaceResource=$wlSurfaceResource,position=$position}"
-    }
-
-    companion object {
-
-        fun create(wlSurfaceResource: WlSurfaceResource,
-                   position: Point): Sibling {
-            val sibling = AutoValue_Sibling(wlSurfaceResource)
-            sibling.position = position
-            return sibling
-        }
-
-        fun create(wlSurfaceResource: WlSurfaceResource): Sibling {
-            return AutoValue_Sibling(wlSurfaceResource)
         }
     }
 }

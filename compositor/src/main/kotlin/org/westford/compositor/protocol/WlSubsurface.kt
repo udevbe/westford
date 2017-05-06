@@ -47,8 +47,8 @@ import javax.annotation.Nonnegative
 
     override fun setPosition(wlSubsurfaceResource: WlSubsurfaceResource,
                              x: Int,
-                             y: Int) = subsurface.setPosition(Point.create(x,
-                                                                           y))
+                             y: Int) = subsurface.setPosition(Point(x,
+                                                                    y))
 
     override fun placeAbove(requester: WlSubsurfaceResource,
                             sibling: WlSurfaceResource) {
@@ -76,7 +76,7 @@ import javax.annotation.Nonnegative
 
         val wlSubsurface = requester.implementation as WlSubsurface
         val parentWlSurface = wlSubsurface.subsurface.parentWlSurfaceResource.implementation as WlSurface
-        return parentWlSurface.surface.siblings.contains(Sibling.create(siblingWlSurfaceResource))
+        return parentWlSurface.surface.siblings.contains(Sibling(siblingWlSurfaceResource))
     }
 
     override fun placeBelow(requester: WlSubsurfaceResource,

@@ -17,12 +17,4 @@
  */
 package org.westford.tty
 
-import com.google.auto.value.AutoValue
-
-@AutoValue open class VtLeave {
-    companion object {
-        fun create(): VtLeave {
-            return AutoValue_VtLeave()
-        }
-    }
-}
+class VtLeave

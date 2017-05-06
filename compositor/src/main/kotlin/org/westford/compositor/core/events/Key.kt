@@ -17,26 +17,8 @@
  */
 package org.westford.compositor.core.events
 
-import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.shared.WlKeyboardKeyState
 
-import javax.annotation.Nonnegative
-
-@AutoValue abstract class Key {
-
-    abstract val time: Int
-
-    abstract val key: Int
-
-    abstract val keyState: WlKeyboardKeyState
-
-    companion object {
-        fun create(time: Int,
-                   @Nonnegative key: Int,
-                   wlKeyboardKeyState: WlKeyboardKeyState): Key {
-            return AutoValue_Key(time,
-                                 key,
-                                 wlKeyboardKeyState)
-        }
-    }
-}
+data class Key(val time: Int,
+               val key: Int,
+               val keyState: WlKeyboardKeyState)

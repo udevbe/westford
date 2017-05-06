@@ -17,78 +17,23 @@
  */
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
-
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class OutputGeometry {
-
-    /**
-     * @return x position within the global compositor space
-     */
-    abstract val x: Int
-
-    /**
-     * @return y position within the global compositor space
-     */
-    abstract val y: Int
-
-    /**
-     * @return width in millimeters of the output
-     */
-    @get:Nonnegative abstract val physicalWidth: Int
-
-    /**
-     * @return height in millimeters of the output
-     */
-    @get:Nonnegative abstract val physicalHeight: Int
-
-    /**
-     * @return subpixel orientation of the output
-     */
-    abstract val subpixel: Int
-
-    /**
-     * @return textual description of the manufacturer
-     */
-    abstract val make: String
-
-    /**
-     * @return textual description of the model
-     */
-    abstract val model: String
-
-    /**
-     * @return transform that maps framebuffer to output
-     */
-    abstract val transform: Int
-
-    abstract fun toBuilder(): Builder
-
-    @AutoValue.Builder interface Builder {
-        fun x(x: Int): Builder
-
-        fun y(y: Int): Builder
-
-        fun physicalWidth(@Nonnegative width: Int): Builder
-
-        fun physicalHeight(@Nonnegative height: Int): Builder
-
-        fun subpixel(subpixel: Int): Builder
-
-        fun make(make: String): Builder
-
-        fun model(model: String): Builder
-
-        fun transform(transform: Int): Builder
-
-        fun build(): OutputGeometry
-    }
-
-    companion object {
-
-        fun builder(): Builder {
-            return AutoValue_OutputGeometry.Builder()
-        }
-    }
-}
+/**
+ * @param x x position within the global compositor space, starting from top left.
+ * @param y y position within the global compositor space, starting from top left.
+ * @param physicalWidth width in millimeters of the output
+ * @param physicalHeight height in millimeters of the output
+ * @param subpixel subpixel orientation of the output
+ * @param make textual description of the manufacturer
+ * @param model textual description of the model
+ * @param transform transform that maps framebuffer to output
+ */
+data class OutputGeometry(val x: Int,
+                          val y: Int,
+                          @param:Nonnegative val physicalWidth: Int,
+                          @param: Nonnegative val physicalHeight: Int,
+                          val subpixel: Int,
+                          val make: String,
+                          val model: String,
+                          val transform: Int)

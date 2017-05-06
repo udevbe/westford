@@ -17,35 +17,15 @@
  */
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.WlBufferResource
 
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class EglBuffer : Buffer {
-
+data class EglBuffer(@param:Nonnegative override val width: Int,
+                     @param:Nonnegative override val height: Int,
+                     override val wlBufferResource: WlBufferResource,
+                     val textureFormat: Int) : Buffer {
     override fun accept(bufferVisitor: BufferVisitor) {
         bufferVisitor.visit(this)
-    }
-
-    @get:Nonnegative abstract override val width: Int
-
-    @get:Nonnegative abstract override val height: Int
-
-    abstract override val wlBufferResource: WlBufferResource
-
-    abstract val textureFormat: Int
-
-    companion object {
-
-        fun create(@Nonnegative width: Int,
-                   @Nonnegative height: Int,
-                   @Nonnegative wlBufferResource: WlBufferResource,
-                   textureFormat: Int): EglBuffer {
-            return AutoValue_EglBuffer(width,
-                                       height,
-                                       wlBufferResource,
-                                       textureFormat)
-        }
     }
 }

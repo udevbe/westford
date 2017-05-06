@@ -17,51 +17,15 @@
  */
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
-
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class OutputMode {
-
-    /**
-     * @return bitfield of mode flags
-     */
-    abstract val flags: Int
-
-    /**
-     * @return width of the mode in hardware units
-     */
-    @get:Nonnegative abstract val width: Int
-
-    /**
-     * @return height of the mode in hardware units
-     */
-    @get:Nonnegative abstract val height: Int
-
-    /**
-     * @return vertical refresh rate in mHz
-     */
-    @get:Nonnegative abstract val refresh: Int
-
-    abstract fun toBuilder(): Builder
-
-    @AutoValue.Builder interface Builder {
-
-        fun flags(flags: Int): Builder
-
-        fun width(@Nonnegative width: Int): Builder
-
-        fun height(@Nonnegative height: Int): Builder
-
-        fun refresh(@Nonnegative refresh: Int): Builder
-
-        fun build(): OutputMode
-    }
-
-    companion object {
-
-        fun builder(): Builder {
-            return AutoValue_OutputMode.Builder()
-        }
-    }
-}
+/**
+ * @param flags bitfield of mode flags
+ * @param width width of the mode in hardware units
+ * @param height height of the mode in hardware units
+ * @param refresh vertical refresh rate in mHz
+ */
+data class OutputMode(val flags: Int,
+                      @param:Nonnegative val width: Int,
+                      @param:Nonnegative val height: Int,
+                      @param:Nonnegative val refresh: Int)

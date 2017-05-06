@@ -17,27 +17,10 @@
  */
 package org.westford.compositor.core.events
 
-import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.shared.WlPointerButtonState
 
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class Button {
-
-    abstract val time: Int
-
-    @get:Nonnegative abstract val button: Int
-
-    abstract val buttonState: WlPointerButtonState
-
-    companion object {
-
-        fun create(time: Int,
-                   @Nonnegative button: Int,
-                   buttonState: WlPointerButtonState): Button {
-            return AutoValue_Button(time,
-                                    button,
-                                    buttonState)
-        }
-    }
-}
+data class Button(val time: Int,
+                  @param:Nonnegative val button: Int,
+                  val buttonState: WlPointerButtonState)

@@ -17,27 +17,6 @@
  */
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
 import org.westford.compositor.core.calc.Mat4
 
-@AutoValue abstract class EglOutputState {
-    //TODO damage
-
-    abstract val glTransform: Mat4
-
-    abstract fun toBuilder(): Builder
-
-    @AutoValue.Builder interface Builder {
-
-        fun glTransform(glTransform: Mat4): Builder
-
-        fun build(): EglOutputState
-    }
-
-    companion object {
-
-        fun builder(): Builder {
-            return AutoValue_EglOutputState.Builder()
-        }
-    }
-}
+data class EglOutputState(val glTransform: Mat4)

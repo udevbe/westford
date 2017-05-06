@@ -17,16 +17,6 @@
  */
 package org.westford.compositor.core.events
 
-import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.WlKeyboardResource
 
-@AutoValue abstract class KeyboardFocusGained {
-
-    abstract val wlKeyboardResources: Set<WlKeyboardResource>
-
-    companion object {
-        fun create(wlKeyboardResources: Set<WlKeyboardResource>): KeyboardFocusGained {
-            return AutoValue_KeyboardFocusGained(wlKeyboardResources)
-        }
-    }
-}
+data class KeyboardFocusGained(val wlKeyboardResources: Set<WlKeyboardResource>)

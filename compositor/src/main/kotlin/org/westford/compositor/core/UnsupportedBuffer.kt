@@ -17,24 +17,13 @@
  */
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.WlBufferResource
 
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class UnsupportedBuffer : Buffer {
-
-    override val width: Int
-        @Nonnegative get() = 0
-
-    override val height: Int
-        @Nonnegative get() = 0
-
-    abstract override val wlBufferResource: WlBufferResource
+data class UnsupportedBuffer(@param:Nonnegative override val width: Int,
+                             @param:Nonnegative override val height: Int,
+                             override val wlBufferResource: WlBufferResource) : Buffer {
 
     override fun accept(bufferVisitor: BufferVisitor) = bufferVisitor.visit(this)
-
-    companion object {
-        fun create(wlBufferResource: WlBufferResource): UnsupportedBuffer = AutoValue_UnsupportedBuffer(wlBufferResource)
-    }
 }

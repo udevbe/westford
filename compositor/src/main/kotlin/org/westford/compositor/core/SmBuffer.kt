@@ -17,36 +17,17 @@
  */
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
 import org.freedesktop.wayland.server.ShmBuffer
 import org.freedesktop.wayland.server.WlBufferResource
 
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class SmBuffer : Buffer {
+data class SmBuffer(@param:Nonnegative override val width: Int,
+                    @param:Nonnegative override val height: Int,
+                    override val wlBufferResource: WlBufferResource,
+                    val shmBuffer: ShmBuffer) : Buffer {
 
     override fun accept(bufferVisitor: BufferVisitor) {
         bufferVisitor.visit(this)
-    }
-
-    @get:Nonnegative abstract override val width: Int
-
-    @get:Nonnegative abstract override val height: Int
-
-    abstract override val wlBufferResource: WlBufferResource
-
-    abstract val shmBuffer: ShmBuffer
-
-    companion object {
-
-        fun create(@Nonnegative width: Int,
-                   @Nonnegative height: Int,
-                   wlBufferResource: WlBufferResource,
-                   shmBuffer: ShmBuffer): SmBuffer {
-            return AutoValue_SmBuffer(width,
-                                      height,
-                                      wlBufferResource,
-                                      shmBuffer)
-        }
     }
 }

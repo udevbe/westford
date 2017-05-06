@@ -17,61 +17,30 @@
  */
 package org.westford.compositor.core
 
-import com.google.auto.value.AutoValue
-
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class Rectangle {
+data class Rectangle(val x: Int,
+                     val y: Int,
+                     @param:Nonnegative val width: Int,
+                     @param:Nonnegative val height: Int) {
 
-    @get:Nonnegative abstract val width: Int
-
-    @get:Nonnegative abstract val height: Int
+    constructor(position: Point,
+                width: Int,
+                height: Int) : this(position.x,
+                                    position.y,
+                                    width,
+                                    height)
 
     val position: Point
         get() = Point.create(x,
                              y)
 
-    abstract val x: Int
-
-    abstract val y: Int
-
-    abstract fun toBuilder(): Builder
-
-    @AutoValue.Builder interface Builder {
-        fun x(x: Int): Builder
-
-        fun y(y: Int): Builder
-
-        fun width(@Nonnegative width: Int): Builder
-
-        fun height(@Nonnegative height: Int): Builder
-
-        fun build(): Rectangle
-    }
-
     companion object {
 
-        val ZERO = builder().build()
-
-        fun create(position: Point,
-                   @Nonnegative width: Int,
-                   @Nonnegative height: Int): Rectangle {
-            return create(position.x,
-                          position.y,
-                          width,
-                          height)
-        }
-
-        fun create(x: Int,
-                   y: Int,
-                   @Nonnegative width: Int,
-                   @Nonnegative height: Int): Rectangle {
-            return builder().x(x).y(y).width(width).height(height).build()
-        }
-
-        fun builder(): Builder {
-            return AutoValue_Rectangle.Builder().x(0).y(0).width(0).height(0)
-        }
+        val ZERO = Rectangle(0,
+                             0,
+                             0,
+                             0)
 
         fun create(a: Point,
                    b: Point): Rectangle {
@@ -98,10 +67,10 @@ import javax.annotation.Nonnegative
                 y = a.y
             }
 
-            return create(x,
-                          y,
-                          width,
-                          height)
+            return Rectangle(x,
+                             y,
+                             width,
+                             height)
         }
     }
 }

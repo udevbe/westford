@@ -17,19 +17,6 @@
  */
 package org.westford.compositor.core.events
 
-import com.google.auto.value.AutoValue
 import org.westford.compositor.core.Point
 
-@AutoValue abstract class PointerMotion {
-
-    abstract val time: Int
-
-    abstract val point: Point
-
-    companion object {
-
-        fun create(time: Int,
-                   point: Point): PointerMotion = AutoValue_PointerMotion(time,
-                                                                          point)
-    }
-}
+class PointerMotion(val time: Int, val point: Point)

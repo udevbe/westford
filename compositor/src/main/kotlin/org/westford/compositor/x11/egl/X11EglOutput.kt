@@ -81,6 +81,8 @@ import org.westford.compositor.x11.X11Output
 
             if (!fullscreenPainted) {
                 //fullscreen view not visible, paint the rest of the subscene.
+
+                //TODO for now we use a simple back to front overdraw painting
                 subscene.backgroundView?.let {
                     gles2Painter.paint(it)
                 }

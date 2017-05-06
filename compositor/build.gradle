@@ -52,8 +52,6 @@ dependencies {
     //auto
     compile("com.google.auto.factory:auto-factory:${ext.auto_factory}")
     kapt("com.google.auto.factory:auto-factory:${ext.auto_factory}")
-    compile("com.google.auto.value:auto-value:${ext.auto_value}")
-    kapt("com.google.auto.value:auto-value:${ext.auto_value}")
 
     //dagger
     compile("com.google.dagger:dagger:${ext.dagger}")

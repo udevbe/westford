@@ -17,67 +17,36 @@
  */
 package org.westford.compositor.core.calc
 
-import com.google.auto.value.AutoValue
 import org.westford.compositor.core.Point
 
 import javax.annotation.Nonnegative
 
-@AutoValue abstract class Vec4 {
+data class Vec4(val x: Float,
+                val y: Float,
+                val z: Float,
+                val w: Float) {
 
-    abstract fun toBuilder(): Builder
+    constructor(array: FloatArray) : this(array[0],
+                                          array[1],
+                                          array[2],
+                                          array[3])
 
-    fun add(right: Vec4): Vec4 = Vec4.create(x + right.x,
-                                             y + right.y,
-                                             z + right.z,
-                                             w + right.w)
+    constructor(array: FloatArray,
+                @Nonnegative offset: Int) : this(array[offset],
+                                                 array[1 + offset],
+                                                 array[2 + offset],
+                                                 array[3 + offset])
 
-    abstract val x: Float
+    operator fun plus(right: Vec4): Vec4 = Vec4(x + right.x,
+                                                y + right.y,
+                                                z + right.z,
+                                                w + right.w)
 
-    abstract val y: Float
+    operator fun minus(right: Vec4): Vec4 = Vec4(x - right.x,
+                                                 y - right.y,
+                                                 z - right.z,
+                                                 w - right.w)
 
-    abstract val z: Float
-
-    abstract val w: Float
-
-    fun subtract(right: Vec4): Vec4 = Vec4.create(x - right.x,
-                                                  y - right.y,
-                                                  z - right.z,
-                                                  w - right.w)
-
-    fun toPoint(): Point = Point.create(x.toInt(),
-                                        y.toInt())
-
-    @AutoValue.Builder interface Builder {
-
-        fun x(x: Float): Builder
-
-        fun y(y: Float): Builder
-
-        fun z(z: Float): Builder
-
-        fun w(z: Float): Builder
-
-        fun build(): Vec4
-    }
-
-    companion object {
-
-        fun create(array: FloatArray): Vec4 = Vec4.create(array,
-                                                          0)
-
-        fun create(array: FloatArray,
-                   @Nonnegative offset: Int): Vec4 {
-            if (array.size < 4) {
-                throw IllegalArgumentException("Array length must be >= 4")
-            }
-            return Vec4.builder().x(array[offset]).y(array[1 + offset]).z(array[2 + offset]).w(array[3 + offset]).build()
-        }
-
-        fun builder(): Builder = AutoValue_Vec4.Builder().x(0f).y(0f).z(0f).w(0f)
-
-        fun create(x: Float,
-                   y: Float,
-                   z: Float,
-                   w: Float): Vec4 = Vec4.builder().x(x).y(y).z(z).w(w).build()
-    }
+    fun toPoint(): Point = Point(x.toInt(),
+                                 y.toInt())
 }

@@ -19,7 +19,11 @@ package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import org.freedesktop.wayland.server.*
+import org.freedesktop.wayland.server.WlBufferResource
+import org.freedesktop.wayland.server.WlCallbackResource
+import org.freedesktop.wayland.server.WlKeyboardResource
+import org.freedesktop.wayland.server.WlRegionResource
+import org.freedesktop.wayland.server.WlSurfaceResource
 import org.westford.Signal
 import org.westford.compositor.core.calc.Mat4
 import org.westford.compositor.core.events.KeyboardFocusGained
@@ -249,11 +253,12 @@ import javax.annotation.Nonnegative
 
     fun removeSibling(sibling: Sibling) {
         if (this.siblings.remove(sibling)) {
-
             val siblingWlSurfaceResource = sibling.wlSurfaceResource
             val siblingWlSurface = siblingWlSurfaceResource.implementation as WlSurface
 
-            siblingWlSurface.surface.views.forEach { it.removeParent() }
+            siblingWlSurface.surface.views.forEach {
+                it.parent = null
+            }
         }
     }
 
