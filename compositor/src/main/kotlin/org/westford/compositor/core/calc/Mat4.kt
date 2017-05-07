@@ -17,6 +17,8 @@
  */
 package org.westford.compositor.core.calc
 
+import org.westford.compositor.core.Point
+
 /**
  * @param m00 Column 0, Row 0
  * @param m10 Column 1, Row 0
@@ -61,16 +63,18 @@ data class Mat4(val m00: Float,
         //@formatter:on
     }
 
+    operator fun times(right: Point): Point = times(right.toVec4()).toPoint()
+
     operator fun times(right: Vec4): Vec4 {
         val rightX = right.x
         val rightY = right.y
         val rightZ = right.z
         val rightW = right.w
 
-        return Vec4.create(m00 * rightX + m10 * rightY + m20 * rightZ + m30 * rightW,
-                           m01 * rightX + m11 * rightY + m21 * rightZ + m31 * rightW,
-                           m02 * rightX + m12 * rightY + m22 * rightZ + m32 * rightW,
-                           m03 * rightX + m13 * rightY + m23 * rightZ + m33 * rightW)
+        return Vec4(m00 * rightX + m10 * rightY + m20 * rightZ + m30 * rightW,
+                    m01 * rightX + m11 * rightY + m21 * rightZ + m31 * rightW,
+                    m02 * rightX + m12 * rightY + m22 * rightZ + m32 * rightW,
+                    m03 * rightX + m13 * rightY + m23 * rightZ + m33 * rightW)
     }
 
     operator fun times(right: Mat4): Mat4 {

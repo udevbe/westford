@@ -46,8 +46,8 @@ import org.westford.nativ.glibc.Libc
         while (len < 0 && this.libc.errno == Libc.EINTR)
 
         when (ret.get()) {
-            NativeConstants.EVENT_WESTMALLE_LAUNCHER_ACTIVATE   -> activateSignal.emit(Activate.create())
-            NativeConstants.EVENT_WESTMALLE_LAUNCHER_DEACTIVATE -> deactivateSignal.emit(Deactivate.create())
+            NativeConstants.EVENT_WESTMALLE_LAUNCHER_ACTIVATE   -> activateSignal.emit(Activate())
+            NativeConstants.EVENT_WESTMALLE_LAUNCHER_DEACTIVATE -> deactivateSignal.emit(Deactivate())
             else                                                -> {/*unsupported event*/
             }
         }

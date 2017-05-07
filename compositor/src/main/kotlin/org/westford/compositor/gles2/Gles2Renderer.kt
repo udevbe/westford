@@ -99,7 +99,7 @@ import javax.inject.Singleton
     private var init = false
 
     private var eglOutputState: EglOutputState? = null
-    private var newEglOutputState: EglOutputState.Builder = EglOutputState.builder()
+    private var newEglOutputState: EglOutputState = EglOutputState(Mat4.IDENTITY)
 
     override fun onDestroy(wlSurfaceResource: WlSurfaceResource) {
 
@@ -148,10 +148,10 @@ import javax.inject.Singleton
 
         val shmBuffer = ShmBuffer.get(wlBufferResource)
         if (shmBuffer != null) {
-            buffer = SmBuffer.create(shmBuffer.width,
-                                     shmBuffer.height,
-                                     wlBufferResource,
-                                     shmBuffer)
+            buffer = SmBuffer(shmBuffer.width,
+                              shmBuffer.height,
+                              wlBufferResource,
+                              shmBuffer)
         }
         else if (this.eglQueryWaylandBufferWL != null) {
             val queryWlEglBuffer = this.eglQueryWaylandBufferWL
@@ -184,18 +184,18 @@ import javax.inject.Singleton
                 val width = widthP.get()
                 val height = heightP.get()
 
-                buffer = EglBuffer.create(width,
-                                          height,
-                                          wlBufferResource,
-                                          textureFormat)
+                buffer = EglBuffer(width,
+                                   height,
+                                   wlBufferResource,
+                                   textureFormat)
             }
             else {
-                buffer = UnsupportedBuffer.create(wlBufferResource)
+                buffer = UnsupportedBuffer(wlBufferResource)
             }
         }
         else {
             //TODO dma buffer.
-            buffer = UnsupportedBuffer.create(wlBufferResource)
+            buffer = UnsupportedBuffer(wlBufferResource)
         }
 
         return buffer
@@ -384,12 +384,12 @@ import javax.inject.Singleton
         val eglOutputState = eglOutput.state ?: initOutputRenderState(eglOutput,
                                                                       wlOutput)
         //updates to state are registered with the builder
-        this.newEglOutputState = eglOutputState.toBuilder()
+        this.newEglOutputState = eglOutputState
         this.eglOutputState = eglOutputState
     }
 
     private fun flushRenderState(eglOutput: EglOutput) {
-        eglOutput.state = this.newEglOutputState.build()
+        eglOutput.state = this.newEglOutputState
         this.libEGL.eglSwapBuffers(this.eglDisplay,
                                    eglOutput.eglSurface)
     }
@@ -457,12 +457,10 @@ import javax.inject.Singleton
 
     private fun initOutputRenderState(eglOutput: EglOutput,
                                       wlOutput: WlOutput): EglOutputState {
-        val builder = EglOutputState.builder()
+        val eglOutputState = EglOutputState(Mat4.IDENTITY)
         val output = wlOutput.output
-        updateTransform(builder,
+        updateTransform(eglOutputState,
                         output)
-
-        val eglOutputState = builder.build()
         eglOutput.state = eglOutputState
 
         //listen for external updates
@@ -492,7 +490,7 @@ import javax.inject.Singleton
         return shader
     }
 
-    private fun updateTransform(eglOutputStateBuilder: EglOutputState.Builder,
+    private fun updateTransform(eglOutputState: EglOutputState,
                                 output: Output) {
         val mode = output.mode
         val width = mode.width
@@ -509,16 +507,15 @@ import javax.inject.Singleton
                                     1.0f)
         this.libGLESv2.glClear(LibGLESv2.GL_COLOR_BUFFER_BIT)
 
-        eglOutputStateBuilder.glTransform(createGlTransform(output))
+        eglOutputState.glTransform = createGlTransform(output)
     }
 
     private fun handleOutputUpdate(eglOutput: EglOutput,
                                    wlOutput: WlOutput) {
         eglOutput.state?.let {
-            val stateBuilder = it.toBuilder()
-            updateTransform(stateBuilder,
+            updateTransform(it,
                             wlOutput.output)
-            eglOutput.state = stateBuilder.build()
+            eglOutput.state = it
             //schedule new render
             eglOutput.render(wlOutput)
         }
@@ -559,10 +556,10 @@ import javax.inject.Singleton
         val height = mode.height
 
         //@formatter:off
-        return Mat4.create(2.0f / width, 0f,             0f, -1f,
-                           0f,           2.0f / -height, 0f, 1f,
-                           0f,           0f,             1f, 0f,
-                           0f,           0f,             0f, 1f).multiply(output.inverseTransform)
+        return Mat4(2.0f / width, 0f,             0f, -1f,
+                   0f,            2.0f / -height, 0f, 1f,
+                   0f,            0f,             1f, 0f,
+                   0f,            0f,             0f, 1f) * output.inverseTransform
         //@formatter:on
     }
 
@@ -680,13 +677,13 @@ import javax.inject.Singleton
             val oldShmSurfaceState = oldRenderState
             texture = oldShmSurfaceState.texture
 
-            newShmSurfaceState = ShmSurfaceState.create(pitch,
-                                                        height,
-                                                        target,
-                                                        shaderProgram,
-                                                        glFormat,
-                                                        glPixelType,
-                                                        texture)
+            newShmSurfaceState = ShmSurfaceState(pitch,
+                                                 height,
+                                                 target,
+                                                 shaderProgram,
+                                                 glFormat,
+                                                 glPixelType,
+                                                 texture)
 
             if (pitch != oldShmSurfaceState.pitch || height != oldShmSurfaceState.height || glFormat != oldShmSurfaceState.glFormat || glPixelType != oldShmSurfaceState.glPixelType) {
                 //state needs full texture updating
@@ -704,13 +701,13 @@ import javax.inject.Singleton
         else {
             //allocate new texture id & upload full texture
             texture = genTexture(target)
-            newShmSurfaceState = ShmSurfaceState.create(pitch,
-                                                        height,
-                                                        target,
-                                                        shaderProgram,
-                                                        glFormat,
-                                                        glPixelType,
-                                                        texture)
+            newShmSurfaceState = ShmSurfaceState(pitch,
+                                                 height,
+                                                 target,
+                                                 shaderProgram,
+                                                 glFormat,
+                                                 glPixelType,
+                                                 texture)
             shmUpdateAll(surfaceView,
                          shmBuffer,
                          newShmSurfaceState)
@@ -951,13 +948,13 @@ import javax.inject.Singleton
             }
         }
 
-        return EglSurfaceState.create(pitch,
-                                      height,
-                                      target,
-                                      shaderProgram,
-                                      yInverted,
-                                      textures,
-                                      eglImages)
+        return EglSurfaceState(pitch,
+                               height,
+                               target,
+                               shaderProgram,
+                               yInverted,
+                               textures,
+                               eglImages)
 
     }
 
@@ -1066,7 +1063,7 @@ import javax.inject.Singleton
 
         val wlSurface = surfaceView.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
-        val transform = surfaceView.positionTransform.multiply(surface.transform).toArray()
+        val transform = (surfaceView.positionTransform * surface.transform).toArray()
 
         //define vertex data
         val vertexData = vertexData(bufferWidth,

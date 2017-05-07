@@ -162,7 +162,7 @@ import org.westford.compositor.protocol.WlSurface
         for (i in siblings.indices) {
             val sibling = siblings[i]
 
-            if (sibling == Sibling.create(siblingWlSurfaceResource)) {
+            if (sibling == Sibling(siblingWlSurfaceResource)) {
                 siblingIndex = i
             }
             else if (sibling == sibling) {

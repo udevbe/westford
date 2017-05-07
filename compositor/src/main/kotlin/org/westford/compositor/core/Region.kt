@@ -21,9 +21,9 @@ interface Region {
 
     fun asList(): List<Rectangle>
 
-    fun add(rectangle: Rectangle)
+    operator fun plus(rectangle: Rectangle): Region
 
-    fun subtract(rectangle: Rectangle)
+    operator fun minus(rectangle: Rectangle): Region
 
     operator fun contains(point: Point): Boolean
 

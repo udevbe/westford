@@ -19,11 +19,7 @@ package org.westford.compositor.core
 
 import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
-import org.freedesktop.wayland.server.WlBufferResource
-import org.freedesktop.wayland.server.WlCallbackResource
-import org.freedesktop.wayland.server.WlKeyboardResource
-import org.freedesktop.wayland.server.WlRegionResource
-import org.freedesktop.wayland.server.WlSurfaceResource
+import org.freedesktop.wayland.server.*
 import org.westford.Signal
 import org.westford.compositor.core.calc.Mat4
 import org.westford.compositor.core.events.KeyboardFocusGained
@@ -52,7 +48,13 @@ import javax.annotation.Nonnegative
      * @return a set of keyboard resources.
      */
     val keyboardFocuses = mutableSetOf<WlKeyboardResource>()
-    val pendingState: SurfaceState.Builder = SurfaceState.builder()
+    val pendingState: SurfaceState = SurfaceState(opaqueRegion = null,
+                                                  inputRegion = null,
+                                                  damage = null,
+                                                  buffer = null,
+                                                  bufferTransform = Mat4.IDENTITY,
+                                                  deltaPosition = Point.ZERO,
+                                                  scale = 1)
     val pendingSubsurfaces = mutableListOf<Subsurface>()
     /**
      * Return all sibling surfaces, including this surface.
@@ -62,7 +64,7 @@ import javax.annotation.Nonnegative
     val views: MutableSet<SurfaceView>
         get() = this.surfaceViews
 
-    var state = SurfaceState.builder().build()
+    var state = this.pendingState.copy()
     var role: Role? = null
     var renderState: SurfaceRenderState? = null
 
@@ -82,53 +84,48 @@ import javax.annotation.Nonnegative
 
     private val surfaceViews = mutableSetOf<SurfaceView>()
 
-    private var pendingBufferDestroyListener: (() -> Unit)? = null
-
     fun markDestroyed() {
         this.isDestroyed = true
     }
 
     fun markDamaged(damage: Rectangle) {
-        val damageRegion = this.pendingState.build().damage ?: this.finiteRegionFactory.create()
-        damageRegion.add(damage)
-        this.pendingState.damage(damageRegion)
+        val pendingDamage = this.pendingState.damage ?: this.finiteRegionFactory.create()
+        this.pendingState.damage = (pendingDamage + damage)
     }
 
     fun attachBuffer(wlBufferResource: WlBufferResource,
                      dx: Int,
                      dy: Int) {
-        pendingState.build().buffer?.unregister(this.pendingBufferDestroyListener)
-        val detachBuffer = { this.detachBuffer() }
-        wlBufferResource.register(detachBuffer)
-        this.pendingBufferDestroyListener = detachBuffer
-        pendingState.buffer(wlBufferResource).deltaPosition(Point.create(dx,
-                                                                         dy))
+        pendingState.buffer?.unregister(this::detachBuffer)
+        wlBufferResource.register(this::detachBuffer)
+        pendingState.buffer = wlBufferResource
+        this.pendingState.deltaPosition = Point(dx,
+                                                dy)
     }
 
     fun commit() {
-        val buffer = state.buffer
         //signal client that the previous buffer can be reused as we will now use the
         //newly attached buffer.
-        buffer?.release()
+        state.buffer?.release()
 
         //flush states
-        apply(this.pendingState.build())
+        apply(this.pendingState)
 
         //reset pending buffer state
         detachBuffer()
     }
 
     fun apply(surfaceState: SurfaceState) {
-        state = surfaceState
+        state = surfaceState.copy()
         updateTransform()
         updateSize()
 
         //copy subsurface stack to siblings list. subsurfaces always go first in the sibling list.
         this.pendingSubsurfaces.forEach {
-            this.siblings -= (it.sibling)
+            this.siblings -= it.sibling
         }
         this.pendingSubsurfaces.asReversed().forEach {
-            this.siblings += (it.sibling)
+            this.siblings += it.sibling
         }
 
         this.compositor.requestRender()
@@ -137,49 +134,48 @@ import javax.annotation.Nonnegative
     }
 
     fun detachBuffer() {
-        pendingState.build().buffer?.unregister(this.pendingBufferDestroyListener)
-        this.pendingBufferDestroyListener = null
-        pendingState.buffer(null).damage(null)
+        pendingState.buffer?.unregister(this::detachBuffer)
+        pendingState.buffer = null
+        pendingState.damage = null
     }
 
     fun updateTransform() {
-        val state = state
-        this.transform = Transforms.SCALE(state.scale.toFloat()).multiply(state.bufferTransform)
+        this.transform = Transforms.SCALE(state.scale.toFloat()) * state.bufferTransform
         this.inverseTransform = transform.invert()
     }
 
     fun updateSize() {
-        val state = state
-        val wlBufferResourceOptional = state.buffer
-        val scale = state.scale
-
         this.size = Rectangle.ZERO
 
-        wlBufferResourceOptional?.let {
+        state.buffer?.let {
             val buffer = this.renderer.queryBuffer(it)
-            val width = buffer.width / scale
-            val height = buffer.height / scale
+            val width = buffer.width / state.scale
+            val height = buffer.height / state.scale
 
-            this.size = Rectangle.builder().width(width).height(height).build()
+            this.size = Rectangle(Point.ZERO,
+                                  width,
+                                  height)
         }
     }
 
     fun addCallback(callback: WlCallbackResource) = this.frameCallbacks.add(callback)
 
-    fun removeOpaqueRegion() = this.pendingState.opaqueRegion(null)
+    fun removeOpaqueRegion() {
+        this.pendingState.opaqueRegion = null
+    }
 
     fun setOpaqueRegion(wlRegionResource: WlRegionResource) {
         val wlRegion = wlRegionResource.implementation as WlRegion
-        val region = wlRegion.region
-        this.pendingState.opaqueRegion(region)
+        this.pendingState.opaqueRegion = wlRegion.region
     }
 
-    fun removeInputRegion() = this.pendingState.inputRegion(null)
+    fun removeInputRegion() {
+        this.pendingState.inputRegion = null
+    }
 
     fun setInputRegion(wlRegionResource: WlRegionResource) {
         val wlRegion = wlRegionResource.implementation as WlRegion
-        val region = wlRegion.region
-        pendingState.inputRegion(region)
+        this.pendingState.inputRegion = wlRegion.region
     }
 
     fun firePaintCallbacks(serial: Int) {
@@ -191,9 +187,13 @@ import javax.annotation.Nonnegative
         }
     }
 
-    fun setScale(@Nonnegative scale: Int) = pendingState.scale(scale)
+    fun setScale(@Nonnegative scale: Int) {
+        pendingState.scale = scale
+    }
 
-    fun setBufferTransform(bufferTransform: Mat4) = pendingState.bufferTransform(bufferTransform)
+    fun setBufferTransform(bufferTransform: Mat4) {
+        pendingState.bufferTransform = bufferTransform
+    }
 
     fun createView(wlSurfaceResource: WlSurfaceResource,
                    position: Point): SurfaceView {
@@ -236,7 +236,7 @@ import javax.annotation.Nonnegative
                                                            surfaceView.global(siblingPosition))
         siblingSurfaceView.parent = surfaceView
         surfaceView.positionSignal.connect {
-            siblingSurfaceView.setPosition(surfaceView.global(sibling.position))
+            siblingSurfaceView.updatePosition(surfaceView.global(sibling.position))
         }
     }
 

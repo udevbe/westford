@@ -27,7 +27,7 @@ import java.util.*
 import javax.annotation.Nonnegative
 
 @AutoFactory(className = "WlRegionFactory",
-             allowSubclasses = true) class WlRegion(val region: Region) : WlRegionRequests, ProtocolObject<WlRegionResource> {
+             allowSubclasses = true) class WlRegion(var region: Region) : WlRegionRequests, ProtocolObject<WlRegionResource> {
 
     override val resources: MutableSet<WlRegionResource> = Collections.newSetFromMap(WeakHashMap<WlRegionResource, Boolean>())
 
@@ -46,13 +46,14 @@ import javax.annotation.Nonnegative
                      @Nonnegative width: Int,
                      @Nonnegative height: Int) {
         if (width < 0 || height < 0) {
+            //TODO protocol error
             throw IllegalArgumentException("Got negative width or height")
         }
 
-        this.region.add(Rectangle.create(x,
-                                         y,
-                                         width,
-                                         height))
+        this.region += Rectangle(x,
+                                 y,
+                                 width,
+                                 height)
     }
 
     override fun subtract(resource: WlRegionResource,
@@ -61,12 +62,13 @@ import javax.annotation.Nonnegative
                           @Nonnegative width: Int,
                           @Nonnegative height: Int) {
         if (width < 0 || height < 0) {
+            //TODO protocol error
             throw IllegalArgumentException("Got negative width or height")
         }
 
-        this.region.subtract(Rectangle.create(x,
-                                              y,
-                                              width,
-                                              height))
+        this.region -= Rectangle(x,
+                                 y,
+                                 width,
+                                 height)
     }
 }

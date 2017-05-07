@@ -87,14 +87,14 @@ import org.westford.compositor.protocol.WlSurface
         pointerDevice.grab?.takeIf {
             surface.views.contains(it)
         }?.let {
-            val surfacePosition = it.global(Point.create(0,
-                                                         0))
-            val pointerOffset = pointerPosition.subtract(surfacePosition)
+            val surfacePosition = it.global(Point(0,
+                                                  0))
+            val pointerOffset = pointerPosition - surfacePosition
 
             //FIXME pick a surface view based on the pointer position
             pointerDevice.grabMotion(wlSurfaceResource,
                                      grabSerial) { motion ->
-                it.setPosition(motion.point.subtract(pointerOffset))
+                it.updatePosition(motion.point - pointerOffset)
             }
         }
     }
@@ -127,8 +127,8 @@ import org.westford.compositor.protocol.WlSurface
 
             val grabMotionSuccess = pointerDevice.grabMotion(wlSurfaceResource,
                                                              buttonPressSerial) {
-                val motionLocal = inverseTransform.multiply(it.point.toVec4())
-                val resize = transform.multiply(motionLocal)
+                val motionLocal = inverseTransform * it.point.toVec4()
+                val resize = transform * motionLocal
                 val width = resize.x.toInt()
                 val height = resize.y.toInt()
                 wlShellSurfaceResource.configure(quadrant.value,
@@ -175,76 +175,72 @@ import org.westford.compositor.protocol.WlSurface
         val width = size.width
         val height = size.height
 
-        val transformationBuilder: Mat4.Builder
         val transformation: Mat4
         val pointerdx: Float
         val pointerdy: Float
         when (quadrant) {
             WlShellSurfaceResize.TOP          -> {
-                transformationBuilder = Transforms._180.toBuilder().m00(0f).m30(width.toFloat())
-                transformation = transformationBuilder.build()
-                val pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4())
+                transformation = Transforms._180.copy(m00 = 0f,
+                                                      m30 = width.toFloat())
+                val pointerLocalTransformed = transformation * pointerLocal.toVec4()
                 pointerdx = 0f
                 pointerdy = height - pointerLocalTransformed.y
             }
             WlShellSurfaceResize.TOP_LEFT     -> {
-                transformationBuilder = Transforms._180.toBuilder().m30(width.toFloat()).m31(height.toFloat())
-                transformation = transformationBuilder.build()
-                val localTransformed = transformation.multiply(pointerLocal.toVec4())
+                transformation = Transforms._180.copy(m30 = width.toFloat(),
+                                                      m31 = height.toFloat())
+                val localTransformed = transformation * pointerLocal.toVec4()
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
             WlShellSurfaceResize.LEFT         -> {
-                transformationBuilder = Transforms.FLIPPED.toBuilder().m11(0f).m31(height.toFloat())
-                transformation = transformationBuilder.build()
-                val localTransformed = transformation.multiply(pointerLocal.toVec4())
+                transformation = Transforms.FLIPPED.copy(m11 = 0f,
+                                                         m31 = height.toFloat())
+                val localTransformed = transformation * pointerLocal.toVec4()
                 pointerdx = width - localTransformed.x
                 pointerdy = 0f
             }
             WlShellSurfaceResize.BOTTOM_LEFT  -> {
-                transformationBuilder = Transforms.FLIPPED.toBuilder().m30(width.toFloat())
-                transformation = transformationBuilder.build()
-                val localTransformed = transformation.multiply(pointerLocal.toVec4())
+                transformation = Transforms.FLIPPED.copy(m30 = width.toFloat())
+                val localTransformed = transformation * pointerLocal.toVec4()
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
             WlShellSurfaceResize.RIGHT        -> {
-                transformationBuilder = Transforms.NORMAL.toBuilder().m11(0f).m31(height.toFloat())
-                transformation = transformationBuilder.build()
-                val localTransformed = transformation.multiply(pointerLocal.toVec4())
+                transformation = Transforms.NORMAL.copy(m11 = 0f,
+                                                        m31 = height.toFloat())
+                val localTransformed = transformation * pointerLocal.toVec4()
                 pointerdx = width - localTransformed.x
                 pointerdy = 0f
             }
             WlShellSurfaceResize.TOP_RIGHT    -> {
-                transformationBuilder = Transforms.FLIPPED_180.toBuilder().m31(height.toFloat())
-                transformation = transformationBuilder.build()
-                val localTransformed = transformation.multiply(pointerLocal.toVec4())
+                transformation = Transforms.FLIPPED_180.copy(m31 = height.toFloat())
+                val localTransformed = transformation * pointerLocal.toVec4()
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
             WlShellSurfaceResize.BOTTOM       -> {
-                transformationBuilder = Transforms.NORMAL.toBuilder().m00(0f).m30(width.toFloat())
-                transformation = transformationBuilder.build()
-                val pointerLocalTransformed = transformation.multiply(pointerLocal.toVec4())
+                transformation = Transforms.NORMAL.copy(m00 = 0f,
+                                                        m30 = width.toFloat())
+                val pointerLocalTransformed = transformation * pointerLocal.toVec4()
                 pointerdx = 0f
                 pointerdy = height - pointerLocalTransformed.y
             }
             WlShellSurfaceResize.BOTTOM_RIGHT -> {
-                transformationBuilder = Transforms.NORMAL.toBuilder()
-                transformation = transformationBuilder.build()
+                transformation = Transforms.NORMAL
                 val localTransformed = pointerLocal.toVec4()
                 pointerdx = width - localTransformed.x
                 pointerdy = height - localTransformed.y
             }
             else                              -> {
-                transformationBuilder = Transforms.NORMAL.toBuilder()
-                transformation = transformationBuilder.build()
+                transformation = Transforms.NORMAL
                 pointerdx = 0f
                 pointerdy = 0f
             }
         }
 
-        return transformationBuilder.m30(transformation.m30 + pointerdx).m31(transformation.m31 + pointerdy).build()
+        return transformation.copy(m30 = (transformation.m30 + pointerdx),
+                                   m31 = (transformation.m31 + pointerdy))
     }
 
     fun setTransient(wlSurfaceResource: WlSurfaceResource,
@@ -287,9 +283,9 @@ import org.westford.compositor.protocol.WlSurface
             this.surfaceView.parent = it
         }
 
-        parentSurface.addSibling(Sibling.create(wlSurfaceResource,
-                                                Point.create(x,
-                                                             y)))
+        parentSurface.addSibling(Sibling(Point(x,
+                                               y),
+                                         wlSurfaceResource))
     }
 
     override fun accept(roleVisitor: RoleVisitor) = roleVisitor.visit(this)
@@ -303,7 +299,7 @@ import org.westford.compositor.protocol.WlSurface
                 val parentWlSurfaceResource = it.wlSurfaceResource
                 val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
                 val parentSurface = parentWlSurface.surface
-                parentSurface.removeSibling(Sibling.create(wlSurfaceResource))
+                parentSurface.removeSibling(Sibling(wlSurfaceResource))
             }
         }
 

@@ -78,10 +78,10 @@ class Geo @Inject internal constructor() {
         val rectX = if (targetX > sourceX) sourceX else targetX
         val rectY = if (targetY > sourceY) sourceY else targetY
 
-        val intersect = region.intersect(Rectangle.create(rectX,
-                                                          rectY,
-                                                          rectWidth,
-                                                          rectHeight))
+        val intersect = region.intersect(Rectangle(rectX,
+                                                   rectY,
+                                                   rectWidth,
+                                                   rectHeight))
         var intersectionRects = intersect.asList()
         if (intersectionRects.isEmpty()) {
             //Both points fall completely outside the region. make the entire clamp region the intersection.
@@ -90,15 +90,15 @@ class Geo @Inject internal constructor() {
         }
 
         val points = mutableSetOf<Point>()
-        for (intersectRect in intersectionRects) {
-            points.add(Point.create(intersectRect.x,
-                                    intersectRect.y))
-            points.add(Point.create(intersectRect.x + intersectRect.width,
-                                    intersectRect.y))
-            points.add(Point.create(intersectRect.x + intersectRect.width,
-                                    intersectRect.y + intersectRect.height))
-            points.add(Point.create(intersectRect.x,
-                                    intersectRect.y + intersectRect.height))
+        for ((x, y, width, height) in intersectionRects) {
+            points += Point(x,
+                            y)
+            points += Point(x + width,
+                            y)
+            points += Point(x + width,
+                            y + height)
+            points += Point(x,
+                            y + height)
         }
 
         var clampPoint = source
@@ -133,8 +133,7 @@ class Geo @Inject internal constructor() {
                                sourceY: Int,
                                targetX: Int,
                                targetY: Int): Point {
-        val builder = clampPoint.toBuilder()
-
+        var (x, y) = clampPoint
         //direction of the vector
         val right = targetX > sourceX
         val bottom = targetY > sourceY
@@ -144,7 +143,7 @@ class Geo @Inject internal constructor() {
 
             if (right) {
                 //right edge
-                builder.x(clampPoint.x - 1)
+                x = clampPoint.x - 1
             }
         }
         else if (clampPoint.x == targetX) {
@@ -152,7 +151,7 @@ class Geo @Inject internal constructor() {
 
             if (bottom) {
                 //bottom edge
-                builder.y(clampPoint.y - 1)
+                y = (clampPoint.y - 1)
             }
         }
         else if (clampPoint.x != targetX && clampPoint.y != targetY) {
@@ -160,19 +159,20 @@ class Geo @Inject internal constructor() {
 
             if (right && bottom) {
                 //bottom-right corner
-                builder.x(clampPoint.x - 1)
-                builder.y(clampPoint.y - 1)
+                x = (clampPoint.x - 1)
+                y = (clampPoint.y - 1)
             }
             else if (right) {
                 //top-right corner
-                builder.x(clampPoint.x - 1)
+                x = (clampPoint.x - 1)
             }
             else if (bottom) {
                 //bottom-left corner
-                builder.y(clampPoint.y - 1)
+                y = (clampPoint.y - 1)
             }
         }
 
-        return builder.build()
+        return Point(x,
+                     y)
     }
 }

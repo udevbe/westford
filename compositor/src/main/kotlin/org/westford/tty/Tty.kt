@@ -60,7 +60,7 @@ import java.util.logging.Logger
             LOGGER.info("Leaving our vt.")
 
             this.vtActive = false
-            this.vtLeaveSignal.emit(VtLeave.create())
+            this.vtLeaveSignal.emit(VtLeave())
 
             if (-1 == this.libc.ioctl(this.ttyFd,
                                       VT_RELDISP.toLong(),
@@ -80,7 +80,7 @@ import java.util.logging.Logger
             }
 
             this.vtActive = true
-            this.vtEnterSignal.emit(VtEnter.create())
+            this.vtEnterSignal.emit(VtEnter())
         }
 
         return 1
@@ -103,7 +103,7 @@ import java.util.logging.Logger
         }
 
         if (this.vtActive) {
-            this.vtLeaveSignal.emit(VtLeave.create())
+            this.vtLeaveSignal.emit(VtLeave())
         }
 
         val mode = vt_mode()

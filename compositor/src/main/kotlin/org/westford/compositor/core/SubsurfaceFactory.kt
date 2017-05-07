@@ -31,7 +31,7 @@ class SubsurfaceFactory @Inject internal constructor(private val privateSubsurfa
 
         val surfaceState = surface.state
         val subsurface = this.privateSubsurfaceFactory.create(parentWlSurfaceResource,
-                                                              Sibling.create(wlSurfaceResource),
+                                                              Sibling(wlSurfaceResource),
                                                               surfaceState,
                                                               surfaceState)
         surface.applySurfaceStateSignal.connect {

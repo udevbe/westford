@@ -73,13 +73,14 @@ import javax.annotation.Nonnegative
                         @Nonnegative width: Int,
                         @Nonnegative height: Int) {
         if (width < 0 || height < 0) {
+            //TODO protocol error
             throw IllegalArgumentException("Got negative width or height")
         }
 
-        surface.markDamaged(Rectangle.create(x,
-                                             y,
-                                             width,
-                                             height))
+        surface.markDamaged(Rectangle(x,
+                                      y,
+                                      width,
+                                      height))
     }
 
     override fun frame(resource: WlSurfaceResource,

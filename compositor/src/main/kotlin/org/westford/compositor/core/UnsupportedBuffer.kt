@@ -19,11 +19,11 @@ package org.westford.compositor.core
 
 import org.freedesktop.wayland.server.WlBufferResource
 
-import javax.annotation.Nonnegative
-
-data class UnsupportedBuffer(@param:Nonnegative override val width: Int,
-                             @param:Nonnegative override val height: Int,
-                             override val wlBufferResource: WlBufferResource) : Buffer {
+data class UnsupportedBuffer(override val wlBufferResource: WlBufferResource) : Buffer {
+    override val width: Int
+        get() = 0
+    override val height: Int
+        get() = 0
 
     override fun accept(bufferVisitor: BufferVisitor) = bufferVisitor.visit(this)
 }

@@ -24,8 +24,8 @@ class LifeCycle @Inject internal constructor(private val lifeCycleSignals: LifeC
         this.jobExecutor.start()
         this.display.initShm()
         this.display.addSocket("wayland-0")
-        this.lifeCycleSignals.startSignal.emit(Start.create())
-        this.lifeCycleSignals.activateSignal.emit(Activate.create())
+        this.lifeCycleSignals.startSignal.emit(Start())
+        this.lifeCycleSignals.activateSignal.emit(Activate())
         this.display.run()
     }
 
@@ -37,8 +37,8 @@ class LifeCycle @Inject internal constructor(private val lifeCycleSignals: LifeC
         this.wlShell.destroy()
         this.wlSubcompositor.destroy()
 
-        this.lifeCycleSignals.deactivateSignal.emit(Deactivate.create())
-        this.lifeCycleSignals.stopSignal.emit(Stop.create())
+        this.lifeCycleSignals.deactivateSignal.emit(Deactivate())
+        this.lifeCycleSignals.stopSignal.emit(Stop())
         this.jobExecutor.fireFinishedEvent()
 
         this.display.terminate()

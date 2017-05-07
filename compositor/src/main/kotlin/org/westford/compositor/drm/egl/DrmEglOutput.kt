@@ -156,7 +156,7 @@ import org.westford.nativ.libgbm.destroy_user_data
         val subscene = this.scene.subsection(wlOutput.output.region)
 
         val cursorPlane = toCursorPlane(wlOutput,
-                                        subscene.geCursorViews())
+                                        subscene.cursorViews)
         //If we can't offload to some kind of cursor plane then we are forced to put it on the primary plane.
         //This means we can't really offload anything to other planes as hey would be shown on top of the cursor
         //primary plane
@@ -216,7 +216,7 @@ import org.westford.nativ.libgbm.destroy_user_data
               subscene)
 
         //TODO paint cursors on separate overlay
-        subscene.geCursorViews().forEach { painter.paint(it) }
+        subscene.cursorViews.forEach { painter.paint(it) }
 
         //FIXME how to compose different gbm_bos?
         if (painter.commit()) {
@@ -387,12 +387,10 @@ import org.westford.nativ.libgbm.destroy_user_data
 
         if (clientFormat == GBM_FORMAT_ARGB8888) {
             surface.state.opaqueRegion?.let {
-                val opaqueCopy = it.copy()
-                opaqueCopy.subtract(Rectangle.create(0,
-                                                     0,
-                                                     mode.width,
-                                                     mode.height))
-                if (opaqueCopy.isEmpty()) {
+                if ((it - Rectangle(x = 0,
+                                    y = 0,
+                                    width = mode.width,
+                                    height = mode.height)).isEmpty()) {
                     clientFormat = GBM_FORMAT_XRGB8888
                 }
             }

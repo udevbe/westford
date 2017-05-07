@@ -77,7 +77,7 @@ class TouchDevice @Inject internal constructor(private val display: Display,
                    it.wlSurfaceResource.client).forEach {
                 if (this.touchCount == 0) {
                     this.grab = null
-                    this.touchGrabSignal.emit(TouchGrab.create())
+                    this.touchGrabSignal.emit(TouchGrab())
                 }
                 it.frame()
             }
@@ -95,17 +95,17 @@ class TouchDevice @Inject internal constructor(private val display: Display,
 
         //get a grabbed surface or try to establish new grab
         if (grab == null) {
-            this.grab = this.scene.pickSurfaceView(Point.create(x,
-                                                                y))
-            this.touchGrabSignal.emit(TouchGrab.create())
+            this.grab = this.scene.pickSurfaceView(Point(x,
+                                                         y))
+            this.touchGrabSignal.emit(TouchGrab())
         }
 
         //report 'down' to grab (if any)
         grab?.let {
             this.touchCount++
 
-            val local = it.local(Point.create(x,
-                                              y))
+            val local = it.local(Point(x,
+                                       y))
             filter(wlTouchResources,
                    it.wlSurfaceResource.client).forEach { wlTouchResource ->
                 wlTouchResource.down(nextDownSerial(),
@@ -117,7 +117,7 @@ class TouchDevice @Inject internal constructor(private val display: Display,
             }
         }
 
-        this.touchDownSignal.emit(TouchDown.create())
+        this.touchDownSignal.emit(TouchDown())
     }
 
     private fun nextDownSerial(): Int {
@@ -142,7 +142,7 @@ class TouchDevice @Inject internal constructor(private val display: Display,
             }
         }
 
-        this.touchUpSignal.emit(TouchUp.create())
+        this.touchUpSignal.emit(TouchUp())
     }
 
     private fun nextUpSerial(): Int {
@@ -157,8 +157,8 @@ class TouchDevice @Inject internal constructor(private val display: Display,
                x: Int,
                y: Int) {
         grab?.let {
-            val local = it.local(Point.create(x,
-                                              y))
+            val local = it.local(Point(x,
+                                       y))
             filter(wlTouchResources,
                    it.wlSurfaceResource.client).forEach {
                 it.motion(time,
@@ -168,6 +168,6 @@ class TouchDevice @Inject internal constructor(private val display: Display,
             }
         }
 
-        this.touchMotionSignal.emit(TouchMotion.create())
+        this.touchMotionSignal.emit(TouchMotion())
     }
 }

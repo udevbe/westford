@@ -21,18 +21,15 @@ import com.google.auto.factory.AutoFactory
 import com.google.auto.factory.Provided
 import org.freedesktop.jaccall.Pointer
 import org.westford.nativ.libpixman1.Libpixman1
+import org.westford.nativ.libpixman1.Struct_pixman_region32
 import org.westford.nativ.libpixman1.pixman_box32
 import org.westford.nativ.libpixman1.pixman_region32
 import java.util.*
 
 @AutoFactory(className = "PrivateFiniteRegionFactory",
-             allowSubclasses = true) class FiniteRegion(@param:Provided private val libpixman1: Libpixman1,
-                                                        @param:Provided private val finiteRegionFactory: FiniteRegionFactory,
-                                                        val pixmanRegion32: Pointer<pixman_region32>) : Region {
-
-    override fun hashCode(): Int {
-        return Objects.hashCode(asList())
-    }
+             allowSubclasses = true) data class FiniteRegion(@param:Provided private val libpixman1: Libpixman1,
+                                                             @param:Provided private val finiteRegionFactory: FiniteRegionFactory,
+                                                             val pixmanRegion32: Pointer<pixman_region32>) : Region {
 
     override fun asList(): List<Rectangle> {
         //int pointer
@@ -49,57 +46,59 @@ import java.util.*
 
             val width = pixman_box32.x2 - x
             val height = pixman_box32.y2 - y
-            boxes.add(Rectangle.create(x,
-                                       y,
-                                       width,
-                                       height))
+            boxes.add(Rectangle(x,
+                                y,
+                                width,
+                                height))
         }
         return boxes
     }
 
-    //TODO unit test equals
-    override fun equals(o: Any?): Boolean {
-        if (this === o) {
-            return true
-        }
-        if (o !is Region) {
-            return false
-        }
+    operator fun plus(otherRegion: FiniteRegion): FiniteRegion {
+        val result = Pointer.malloc(Struct_pixman_region32.SIZE,
+                                    pixman_region32::class.java)
+        this.libpixman1.pixman_region32_init(result.address)
 
-        val region = o
-
-        return region.asList().containsAll(asList()) && asList().containsAll(region.asList())
+        this.libpixman1.pixman_region32_union(new_reg = result.address,
+                                              reg1 = this.pixmanRegion32.address,
+                                              reg2 = otherRegion.pixmanRegion32.address)
+        return this.finiteRegionFactory.create(result)
     }
 
-    fun add(region: FiniteRegion) {
-        this.libpixman1.pixman_region32_union(this.pixmanRegion32.address,
-                                              this.pixmanRegion32.address,
-                                              region.pixmanRegion32.address)
+    override operator fun plus(rectangle: Rectangle): FiniteRegion {
+        val result = Pointer.malloc(Struct_pixman_region32.SIZE,
+                                    pixman_region32::class.java)
+        this.libpixman1.pixman_region32_init(result.address)
+
+        this.libpixman1.pixman_region32_union_rect(dest = result.address,
+                                                   source = this.pixmanRegion32.address,
+                                                   x = rectangle.x,
+                                                   y = rectangle.y,
+                                                   width = rectangle.width,
+                                                   height = rectangle.height)
+        return this.finiteRegionFactory.create(result)
     }
 
-    override fun add(rectangle: Rectangle) {
-        this.libpixman1.pixman_region32_union_rect(this.pixmanRegion32.address,
-                                                   this.pixmanRegion32.address,
-                                                   rectangle.x,
-                                                   rectangle.y,
-                                                   rectangle.width,
-                                                   rectangle.height)
-    }
+    override operator fun minus(rectangle: Rectangle): FiniteRegion {
+        val result = Pointer.malloc(Struct_pixman_region32.SIZE,
+                                    pixman_region32::class.java)
+        this.libpixman1.pixman_region32_init(result.address)
 
-    override fun subtract(rectangle: Rectangle) {
         val delta_pixman_region32 = Pointer.ref(pixman_region32())
         this.libpixman1.pixman_region32_init_rect(delta_pixman_region32.address,
                                                   rectangle.x,
                                                   rectangle.y,
                                                   rectangle.width,
                                                   rectangle.height)
-        this.libpixman1.pixman_region32_subtract(this.pixmanRegion32.address,
-                                                 this.pixmanRegion32.address,
-                                                 delta_pixman_region32.address)
+        this.libpixman1.pixman_region32_subtract(reg_d = result.address,
+                                                 reg_m = this.pixmanRegion32.address,
+                                                 reg_s = delta_pixman_region32.address)
         this.libpixman1.pixman_region32_fini(delta_pixman_region32.address)
+
+        return this.finiteRegionFactory.create(result)
     }
 
-    override fun contains(point: Point): Boolean {
+    override operator fun contains(point: Point): Boolean {
         return this.libpixman1.pixman_region32_contains_point(this.pixmanRegion32.address,
                                                               point.x,
                                                               point.y,
@@ -134,9 +133,8 @@ import java.util.*
                                                                                                   Pointer.ref(pixman_box32).address)
     }
 
-    override fun intersect(rectangle: Rectangle): Region {
+    override fun intersect(rectangle: Rectangle): FiniteRegion {
         val region = this.finiteRegionFactory.create()
-
         this.libpixman1.pixman_region32_intersect_rect(region.pixmanRegion32.address,
                                                        this.pixmanRegion32.address,
                                                        rectangle.x,
@@ -147,11 +145,13 @@ import java.util.*
         return region
     }
 
-    override fun copy(): Region {
-        val copyRegion = Pointer.ref(pixman_region32())
-        this.libpixman1.pixman_region32_copy(copyRegion.address,
+    override fun copy(): FiniteRegion {
+        val result = Pointer.malloc(Struct_pixman_region32.SIZE,
+                                    pixman_region32::class.java)
+        this.libpixman1.pixman_region32_init(result.address)
+        this.libpixman1.pixman_region32_copy(result.address,
                                              this.pixmanRegion32.address)
-        return this.finiteRegionFactory.create(copyRegion)
+        return this.finiteRegionFactory.create(result)
     }
 
     override fun isEmpty(): Boolean {
@@ -162,13 +162,13 @@ import java.util.*
         this.libpixman1.pixman_region32_fini(this.pixmanRegion32.address)
     }
 
-    fun remove(region: FiniteRegion) {
-        this.libpixman1.pixman_region32_subtract(this.pixmanRegion32.address,
-                                                 this.pixmanRegion32.address,
-                                                 region.pixmanRegion32.address)
-    }
-
-    fun clear() {
-        this.libpixman1.pixman_region32_clear(this.pixmanRegion32.address)
+    operator fun minus(region: FiniteRegion): FiniteRegion {
+        val result = Pointer.malloc(Struct_pixman_region32.SIZE,
+                                    pixman_region32::class.java)
+        this.libpixman1.pixman_region32_init(result.address)
+        this.libpixman1.pixman_region32_subtract(reg_d = result.address,
+                                                 reg_m = this.pixmanRegion32.address,
+                                                 reg_s = region.pixmanRegion32.address)
+        return this.finiteRegionFactory.create(result)
     }
 }

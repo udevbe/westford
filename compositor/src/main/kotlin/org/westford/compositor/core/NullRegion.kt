@@ -20,9 +20,13 @@ import javax.inject.Singleton
 
     override fun asList(): List<Rectangle> = emptyList()
 
-    override fun add(rectangle: Rectangle) {}
+    override fun plus(rectangle: Rectangle): Region {
+        return this
+    }
 
-    override fun subtract(rectangle: Rectangle) {}
+    override fun minus(rectangle: Rectangle): Region {
+        return this
+    }
 
     override fun contains(point: Point): Boolean = false
 

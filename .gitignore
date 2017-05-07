@@ -230,3 +230,4 @@ bootstrap/dependency-reduced-pom.xml
 !/compositor/src/main/kotlin/org/westford/compositor/core/events/TouchUp.kt
 !/compositor/src/main/kotlin/org/westford/compositor/core/Subsurface.kt
 !/compositor/src/main/kotlin/org/westford/nativ/glibc/iovec.kt
+!/compositor/src/main/kotlin/org/westford/compositor/drm/egl/DrmEglPlatformFactory.kt

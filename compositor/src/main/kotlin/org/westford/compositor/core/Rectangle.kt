@@ -32,8 +32,8 @@ data class Rectangle(val x: Int,
                                     height)
 
     val position: Point
-        get() = Point.create(x,
-                             y)
+        get() = Point(x,
+                      y)
 
     companion object {
 

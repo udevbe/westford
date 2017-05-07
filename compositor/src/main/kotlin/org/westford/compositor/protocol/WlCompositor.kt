@@ -54,7 +54,7 @@ import javax.inject.Singleton
         //TODO we might want to move view creation to role object
         surface.createView(wlSurfaceResource,
                            Point.ZERO)
-        surface.siblings.add(Sibling.create(wlSurfaceResource))
+        surface.siblings.add(Sibling(wlSurfaceResource))
 
         //TODO unit test destroy handler
         wlSurfaceResource.register {

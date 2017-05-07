@@ -16,15 +16,16 @@ class SurfaceViewFactory @Inject internal constructor(private val privateSurface
         val positionTransform = Transforms.TRANSLATE(globalPosition.x,
                                                      globalPosition.y)
 
-        val transform = positionTransform.multiply(surfaceTransform)
+        val transform = positionTransform * surfaceTransform
         val inverseTransform = transform.invert()
 
         val surfaceView = this.privateSurfaceViewFactory.create(wlSurfaceResource,
                                                                 positionTransform,
                                                                 transform,
                                                                 inverseTransform)
-
-        surface.applySurfaceStateSignal.connect { surfaceView.onApply(it) }
+        surface.applySurfaceStateSignal.connect {
+            surfaceView.onApply(it)
+        }
 
         return surfaceView
     }

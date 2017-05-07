@@ -150,8 +150,18 @@ class DrmEglPlatformFactory @Inject internal constructor(private val wlOutputFac
         }
 
         //TODO gather more geo & drmModeModeInfo info
-        val outputGeometry = OutputGeometry.builder().physicalWidth(mmWidth).physicalHeight(mmHeight).make("unknown").model("unknown").x(0).y(0).subpixel(drmModeConnector.drmModeSubPixel).transform(0).build()
-        val outputMode = OutputMode.builder().width(hdisplay.toInt()).height(vdisplay.toInt()).refresh(drmOutput.mode.vrefresh).flags(drmModeModeInfo.flags).build()
+        val outputGeometry = OutputGeometry(physicalWidth = mmWidth,
+                                            physicalHeight = mmHeight,
+                                            make = "unknown",
+                                            model = "unknown",
+                                            x = 0,
+                                            y = 0,
+                                            subpixel = drmModeConnector.drmModeSubPixel,
+                                            transform = 0)
+        val outputMode = OutputMode(width = hdisplay.toInt(),
+                                    height = vdisplay.toInt(),
+                                    refresh = drmOutput.mode.vrefresh,
+                                    flags = drmModeModeInfo.flags)
 
         //FIXME deduce an output name from the drm connector
         return this.wlOutputFactory.create(this.outputFactory.create(drmEglOutput,

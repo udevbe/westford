@@ -109,10 +109,10 @@ class Launcher {
         val display = drmEglCompositor.display()
         val lifeCycleSignals = drmEglCompositor.lifeCycleSignals()
         tty.vtEnterSignal.connect {
-            lifeCycleSignals.activateSignal.emit(Activate.create())
+            lifeCycleSignals.activateSignal.emit(Activate())
         }
         tty.vtLeaveSignal.connect {
-            lifeCycleSignals.deactivateSignal.emit(Deactivate.create())
+            lifeCycleSignals.deactivateSignal.emit(Deactivate())
         }
 
         val vtSource = display.eventLoop.addSignal(libc.SIGRTMIN(),

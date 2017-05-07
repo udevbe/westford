@@ -152,9 +152,9 @@ class X11EglPlatformFactory @Inject internal constructor(private val libxcb: Lib
     private fun createEglContext(eglDisplay: Long,
                                  config: Long): Long {
         val eglContextAttribs = Pointer.nref(//@formatter:off
-                EGL_CONTEXT_CLIENT_VERSION, 2,
-EGL_NONE
- //@formatter:on
+                                             EGL_CONTEXT_CLIENT_VERSION, 2,
+                                             EGL_NONE
+                                             //@formatter:on
                                             )
         val context = this.libEGL.eglCreateContext(eglDisplay,
                                                    config,
@@ -193,8 +193,18 @@ EGL_NONE
         val width = x11Output.width
         val height = x11Output.height
 
-        val outputGeometry = OutputGeometry.builder().x(x11Output.x).y(x11Output.y).subpixel(0).make("Westford xcb").model("X11").physicalWidth(width / screen.width_in_pixels * screen.width_in_millimeters).physicalHeight(height / screen.height_in_pixels * screen.height_in_millimeters).transform(WlOutputTransform.NORMAL.value).build()
-        val outputMode = OutputMode.builder().flags(0).width(width).height(height).refresh(60).build()
+        val outputGeometry = OutputGeometry(x = x11Output.x,
+                                            y = x11Output.y,
+                                            subpixel = 0,
+                                            make = "Westford xcb",
+                                            model = "X11",
+                                            physicalWidth = (width / screen.width_in_pixels * screen.width_in_millimeters),
+                                            physicalHeight = (height / screen.height_in_pixels * screen.height_in_millimeters),
+                                            transform = WlOutputTransform.NORMAL.value)
+        val outputMode = OutputMode(flags = 0,
+                                    width = width,
+                                    height = height,
+                                    refresh = 60)
         return this.outputFactory.create(x11EglOutput,
                                          x11Output.name,
                                          outputGeometry,
@@ -218,7 +228,7 @@ EGL_NONE
                     this.libxcb.xcb_destroy_window(this.x11Platform.xcbConnection,
                                                    sourceWindow)
                     wlOutputIterator.remove()
-                    x11EglPlatform.renderOutputDestroyedSignal.emit(RenderOutputDestroyed.create(wlOutput))
+                    x11EglPlatform.renderOutputDestroyedSignal.emit(RenderOutputDestroyed(wlOutput))
                     return
                 }
             }

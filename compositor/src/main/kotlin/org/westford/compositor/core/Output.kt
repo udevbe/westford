@@ -28,7 +28,8 @@ import org.westford.compositor.core.events.OutputTransform
 import javax.annotation.Nonnegative
 
 @AutoFactory(className = "PrivateOutputFactory",
-             allowSubclasses = true) class Output(@param:Provided val region: FiniteRegion,
+             allowSubclasses = true) class Output(@param:Provided val regionFactory: FiniteRegionFactory,
+                                                  @param:Provided var region: FiniteRegion,
                                                   val renderOutput: RenderOutput,
                                                   val name: String) {
 
@@ -54,9 +55,19 @@ import javax.annotation.Nonnegative
      */
     var inverseTransform = Mat4.IDENTITY
         private set
-    var geometry = OutputGeometry.builder().physicalWidth(0).physicalHeight(0).make("").model("").x(0).y(0).subpixel(0).transform(0).build()
+    var geometry = OutputGeometry(physicalWidth = 0,
+                                  physicalHeight = 0,
+                                  make = "",
+                                  model = "",
+                                  x = 0,
+                                  y = 0,
+                                  subpixel = 0,
+                                  transform = 0)
         private set
-    var mode = OutputMode.builder().width(0).height(0).refresh(0).flags(0).build()
+    var mode = OutputMode(width = 0,
+                          height = 0,
+                          refresh = 0,
+                          flags = 0)
         private set
 
     fun update(resources: Set<WlOutputResource>,
@@ -106,25 +117,23 @@ import javax.annotation.Nonnegative
             transformMat = Mat4.IDENTITY
         }
 
-        val newTransform = transformMat.multiply(scaleMat).multiply(moveMat)
+        val newTransform = transformMat * scaleMat * moveMat
         if (this.transform != newTransform) {
             this.transform = newTransform
             this.inverseTransform = this.transform.invert()
             updateRegion()
-            this.transformSignal.emit(OutputTransform.create())
+            this.transformSignal.emit(OutputTransform())
         }
     }
 
     private fun updateRegion() {
-        val regionTopLeft = this.transform.multiply(Point.ZERO.toVec4()).toPoint()
-        val regionBottomRight = this.transform.multiply(Point.create(this.mode.width,
-                                                                     this.mode.height).toVec4()).toPoint()
+        val regionTopLeft = this.transform * Point.ZERO
+        val regionBottomRight = this.transform * Point(this.mode.width,
+                                                       this.mode.height)
         //TODO fire region event?
-        this.region.clear()
         //TODO check if the region is properly updated in the unit tests
-        this.region.add(Rectangle.create(regionTopLeft,
-                                         regionBottomRight.x - regionTopLeft.x,
-                                         regionBottomRight.y - regionTopLeft.y))
+        this.region = this.regionFactory.create() + Rectangle.create(regionTopLeft,
+                                                                     regionBottomRight)
     }
 
     fun update(resources: Set<WlOutputResource>,
@@ -156,15 +165,7 @@ import javax.annotation.Nonnegative
                                   this.geometry.transform)
     }
 
-    fun local(global: Point): Point {
-        val localPoint = this.inverseTransform.multiply(global.toVec4())
-        return Point.create(localPoint.x.toInt(),
-                            localPoint.y.toInt())
-    }
+    fun local(global: Point): Point = this.inverseTransform * global
 
-    fun global(outputLocal: Point): Point {
-        val globalPoint = this.transform.multiply(outputLocal.toVec4())
-        return Point.create(globalPoint.x.toInt(),
-                            globalPoint.y.toInt())
-    }
+    fun global(outputLocal: Point): Point = this.transform * outputLocal
 }

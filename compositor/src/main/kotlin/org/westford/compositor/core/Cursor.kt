@@ -31,14 +31,16 @@ import org.westford.compositor.protocol.WlSurface
     fun updatePosition(pointerPosition: Point) {
         val wlSurface = this.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
-        surface.views.forEach { it.setPosition(pointerPosition.subtract(hotspot)) }
+        surface.views.forEach {
+            it.updatePosition(pointerPosition - hotspot)
+        }
     }
 
     fun hide() {
         val wlSurface = this.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        surface.state = surface.state.toBuilder().buffer(null).build()
+        surface.state.buffer = null
 
         this.isHidden = true
     }

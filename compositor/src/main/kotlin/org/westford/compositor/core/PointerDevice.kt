@@ -43,7 +43,7 @@ import javax.annotation.Nonnegative
                                                                             @param:Provided private val cursorFactory: CursorFactory,
                                                                             @param:Provided private val jobExecutor: JobExecutor,
                                                                             @param:Provided private val scene: Scene,
-                                                                            val clampRegion: FiniteRegion) : Role {
+                                                                            var clampRegion: FiniteRegion) : Role {
 
     val motionSignal = Signal<PointerMotion>()
     val buttonSignal = Signal<Button>()
@@ -194,8 +194,8 @@ import javax.annotation.Nonnegative
                y: Int) {
 
         clamp(wlPointerResources,
-              Point.create(x,
-                           y))
+              Point(x,
+                    y))
 
         focus?.let {
             reportMotion(wlPointerResources,
@@ -203,8 +203,8 @@ import javax.annotation.Nonnegative
                          it)
         }
 
-        this.motionSignal.emit(PointerMotion.create(time,
-                                                    position))
+        this.motionSignal.emit(PointerMotion(time,
+                                             position))
     }
 
     fun calculateFocus(wlPointerResources: Set<WlPointerResource>) {
@@ -278,9 +278,9 @@ import javax.annotation.Nonnegative
                  time,
                  button,
                  wlPointerButtonState)
-        this.buttonSignal.emit(Button.create(time,
-                                             button,
-                                             wlPointerButtonState))
+        this.buttonSignal.emit(Button(time,
+                                      button,
+                                      wlPointerButtonState))
     }
 
     private fun doButton(wlPointerResources: Set<WlPointerResource>,
@@ -327,7 +327,7 @@ import javax.annotation.Nonnegative
         //if the surface having the grab is destroyed, we clear the grab
         surfaceView?.wlSurfaceResource?.register(this.grabDestroyListener)
 
-        this.pointerGrabSignal.emit(PointerGrab.create(grab))
+        this.pointerGrabSignal.emit(PointerGrab(grab))
     }
 
     private fun reportButton(wlPointerResources: Set<WlPointerResource>,
@@ -349,7 +349,7 @@ import javax.annotation.Nonnegative
         grab?.wlSurfaceResource?.unregister(this.grabDestroyListener)
         this.grabDestroyListener = null
         this.grab = null
-        this.pointerGrabSignal.emit(PointerGrab.create(grab))
+        this.pointerGrabSignal.emit(PointerGrab(grab))
     }
 
     fun nextButtonPressSerial(): Int {
@@ -397,7 +397,7 @@ import javax.annotation.Nonnegative
         //update focus to new focus
         this.focus = newFocus
         //notify listeners focus has changed
-        this.pointerFocusSignal.emit(PointerFocus.create())
+        this.pointerFocusSignal.emit(PointerFocus())
     }
 
     fun isButtonPressed(@Nonnegative button: Int): Boolean {
@@ -474,8 +474,8 @@ import javax.annotation.Nonnegative
         }
 
         var cursor: Cursor? = this.cursors[wlPointerResource]
-        val hotspot = Point.create(hotspotX,
-                                   hotspotY)
+        val hotspot = Point(hotspotX,
+                            hotspotY)
 
         if (cursor == null) {
             cursor = this.cursorFactory.create(wlSurfaceResource,
@@ -504,10 +504,8 @@ import javax.annotation.Nonnegative
         val wlSurface = wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        val stateBuilder = surface.state.toBuilder()
         updateCursorSurfaceState(wlSurfaceResource,
-                                 stateBuilder)
-        surface.state = stateBuilder.build()
+                                 surface.state)
     }
 
     private fun updateActiveCursor(wlPointerResource: WlPointerResource) {
@@ -524,12 +522,10 @@ import javax.annotation.Nonnegative
     }
 
     private fun updateCursorSurfaceState(wlSurfaceResource: WlSurfaceResource,
-                                         surfaceStateBuilder: SurfaceState.Builder) {
-        surfaceStateBuilder.inputRegion(this.nullRegion)
-        if (this.activeCursor?.wlSurfaceResource == wlSurfaceResource && !(this.activeCursor?.isHidden ?: false)) {
-        }
-        else {
-            surfaceStateBuilder.buffer(null)
+                                         surfaceState: SurfaceState) {
+        surfaceState.inputRegion = this.nullRegion
+        if (this.activeCursor?.wlSurfaceResource != wlSurfaceResource || this.activeCursor?.isHidden ?: false) {
+            surfaceState.buffer = null
         }
     }
 

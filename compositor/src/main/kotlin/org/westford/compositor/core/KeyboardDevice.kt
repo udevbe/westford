@@ -96,9 +96,9 @@ import javax.annotation.Nonnegative
             }
         }
 
-        this.keySignal.emit(Key.create(time,
-                                       key,
-                                       wlKeyboardKeyState))
+        this.keySignal.emit(Key(time,
+                                key,
+                                wlKeyboardKeyState))
 
         if (this.consumeNextKeyEvent) {
             this.consumeNextKeyEvent = false
@@ -193,7 +193,7 @@ import javax.annotation.Nonnegative
                             oldFocus: WlSurfaceResource?,
                             newFocus: WlSurfaceResource?) {
         this.focus = newFocus
-        keyboardFocusSignal.emit(KeyboardFocus.create(newFocus))
+        keyboardFocusSignal.emit(KeyboardFocus(newFocus))
 
         oldFocus?.let {
             it.unregister(this.focusDestroyListener)
@@ -205,7 +205,7 @@ import javax.annotation.Nonnegative
             val clientKeyboardResources = filter(wlKeyboardResources,
                                                  it.client)
             surface.keyboardFocuses.minus(clientKeyboardResources)
-            surface.keyboardFocusLostSignal.emit(KeyboardFocusLost.create(clientKeyboardResources))
+            surface.keyboardFocusLostSignal.emit(KeyboardFocusLost(clientKeyboardResources))
 
             clientKeyboardResources.forEach { oldFocusKeyboardResource ->
                 oldFocusKeyboardResource.leave(nextKeyboardSerial(),
@@ -227,7 +227,7 @@ import javax.annotation.Nonnegative
             val clientKeyboardResources = filter(wlKeyboardResources,
                                                  it.client)
             surface.keyboardFocuses += clientKeyboardResources
-            surface.keyboardFocusGainedSignal.emit(KeyboardFocusGained.create(clientKeyboardResources))
+            surface.keyboardFocusGainedSignal.emit(KeyboardFocusGained(clientKeyboardResources))
 
             match(wlKeyboardResources,
                   it).forEach { newFocusKeyboardResource ->

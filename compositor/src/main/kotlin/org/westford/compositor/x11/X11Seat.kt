@@ -192,8 +192,8 @@ import org.westford.nativ.linux.InputEventCodes.BTN_SIDE
         val globalX = x11Output.x + x11WindowX
         val globalY = x11Output.y + x11WindowY
 
-        return Point.create(globalX,
-                            globalY)
+        return Point(globalX,
+                     globalY)
     }
 
     companion object {

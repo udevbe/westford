@@ -98,7 +98,7 @@ import org.westford.compositor.x11.X11Output
             }
         }
 
-        subscene.geCursorViews().forEach {
+        subscene.cursorViews.forEach {
             gles2Painter.paint(it)
         }
         gles2Painter.commit()

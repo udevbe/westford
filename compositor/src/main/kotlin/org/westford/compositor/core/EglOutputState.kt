@@ -19,4 +19,4 @@ package org.westford.compositor.core
 
 import org.westford.compositor.core.calc.Mat4
 
-data class EglOutputState(val glTransform: Mat4)
+data class EglOutputState(var glTransform: Mat4)

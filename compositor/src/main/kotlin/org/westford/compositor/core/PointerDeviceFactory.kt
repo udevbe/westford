@@ -7,12 +7,12 @@ class PointerDeviceFactory @Inject internal constructor(private val privatePoint
                                                         private val finiteRegionFactory: FiniteRegionFactory) {
 
     fun create(): PointerDevice {
-        val outputsRegion = this.finiteRegionFactory.create()
-        val pointerDevice = this.privatePointerDeviceFactory.create(outputsRegion)
+        var outputsRegion = this.finiteRegionFactory.create()
 
         this.renderPlatform.wlOutputs.forEach {
-            outputsRegion.add(it.output.region)
+            outputsRegion += it.output.region
         }
-        return pointerDevice
+
+        return this.privatePointerDeviceFactory.create(outputsRegion)
     }
 }

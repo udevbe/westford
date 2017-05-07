@@ -105,9 +105,9 @@ import javax.inject.Singleton
             val surface = wlSurface.surface
             val size = surface.size
 
-            val viewBox = Rectangle.create(it.global(Point.ZERO),
-                                           size.width,
-                                           size.height)
+            val viewBox = Rectangle(it.global(Point.ZERO),
+                                    size.width,
+                                    size.height)
 
             if (region.contains(viewBox)) {
                 intersectingViews.add(it)
@@ -157,13 +157,13 @@ import javax.inject.Singleton
                                              region)
             val cursorViews = subsection(this.cursorLayer,
                                          region)
-            outputScene = Subscene.create(null,
-                                          emptyList<SurfaceView>(),
-                                          emptyList<SurfaceView>(),
-                                          emptyList<SurfaceView>(),
-                                          null,
-                                          outputLockViews,
-                                          cursorViews)
+            outputScene = Subscene(null,
+                                   emptyList<SurfaceView>(),
+                                   emptyList<SurfaceView>(),
+                                   emptyList<SurfaceView>(),
+                                   null,
+                                   outputLockViews,
+                                   cursorViews)
         }
         else {
 
@@ -202,13 +202,13 @@ import javax.inject.Singleton
                 fullscreenView = outputFullscreenViews.first()
             }
 
-            outputScene = Subscene.create(backgroundView,
-                                          underViews,
-                                          applicationViews,
-                                          overViews,
-                                          fullscreenView,
-                                          emptyList<SurfaceView>(),
-                                          cursorViews)
+            outputScene = Subscene(backgroundView,
+                                   underViews,
+                                   applicationViews,
+                                   overViews,
+                                   fullscreenView,
+                                   emptyList<SurfaceView>(),
+                                   cursorViews)
         }
 
         return outputScene

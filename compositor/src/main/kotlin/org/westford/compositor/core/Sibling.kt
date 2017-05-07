@@ -25,7 +25,7 @@ data class Sibling(private val _position: Point,
 
         surface.views.forEach {
             it.parent?.let { parentSurfaceView ->
-                it.setPosition(parentSurfaceView.global(this.position))
+                it.updatePosition(parentSurfaceView.global(this.position))
             }
         }
     }

@@ -70,11 +70,11 @@ import org.westford.compositor.protocol.WlSurface
         val surface = wlSurface.surface
         val surfaceTransform = surface.transform
 
-        this.transform = this.positionTransform.multiply(surfaceTransform)
+        this.transform = this.positionTransform * surfaceTransform
         this.inverseTransform = this.transform.invert()
     }
 
-    fun setPosition(global: Point) {
+    fun updatePosition(global: Point) {
         setPosition(Transforms.TRANSLATE(global.x,
                                          global.y))
         positionSignal.emit(global)
@@ -90,8 +90,8 @@ import org.westford.compositor.protocol.WlSurface
         val dx = deltaPosition.x
         val dy = deltaPosition.y
 
-        setPosition(this.positionTransform.multiply(Transforms.TRANSLATE(dx,
-                                                                         dy)))
+        setPosition(this.positionTransform * Transforms.TRANSLATE(dx,
+                                                                  dy))
     }
 
     private fun destroyOnParent(parent: SurfaceView) {
@@ -116,9 +116,9 @@ import org.westford.compositor.protocol.WlSurface
      * @return A point in view local plane.
      */
     fun local(global: Point): Point {
-        val localPoint = this.inverseTransform.multiply(global.toVec4())
-        return Point.create(localPoint.x.toInt(),
-                            localPoint.y.toInt())
+        val localPoint = this.inverseTransform * global.toVec4()
+        return Point(localPoint.x.toInt(),
+                     localPoint.y.toInt())
     }
 
     /**
@@ -130,8 +130,8 @@ import org.westford.compositor.protocol.WlSurface
      * @return A point in the compositor global plane.
      */
     fun global(surfaceLocal: Point): Point {
-        val globalPoint = this.transform.multiply(surfaceLocal.toVec4())
-        return Point.create(globalPoint.x.toInt(),
-                            globalPoint.y.toInt())
+        val globalPoint = this.transform * surfaceLocal.toVec4()
+        return Point(globalPoint.x.toInt(),
+                     globalPoint.y.toInt())
     }
 }

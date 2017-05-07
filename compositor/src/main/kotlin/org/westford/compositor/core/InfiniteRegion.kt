@@ -32,17 +32,20 @@ import javax.inject.Singleton
         return INFINITE_RECT
     }
 
-    override fun add(rectangle: Rectangle) {}
+    override fun plus(rectangle: Rectangle): Region {
+        return this
+    }
 
-    override fun subtract(rectangle: Rectangle) {}
+    override fun minus(rectangle: Rectangle): Region {
+        return this
+    }
 
     override fun contains(point: Point) = true
 
     override fun contains(clipping: Rectangle,
                           point: Point): Boolean {
-        val finiteRegion = this.finiteRegionFactory.create()
-        finiteRegion.add(clipping)
-        return finiteRegion.contains(point)
+        val clippedRegion = this.finiteRegionFactory.create() + clipping
+        return point in clippedRegion
     }
 
     override fun contains(rectangle: Rectangle) = true
@@ -54,10 +57,10 @@ import javax.inject.Singleton
     override fun isEmpty() = false
 
     companion object {
-        private val INFINITE_RECT = listOf<Rectangle>(Rectangle.create(java.lang.Short.MIN_VALUE.toInt(),
-                                                                       java.lang.Short.MIN_VALUE.toInt(),
-                                                                       Integer.MAX_VALUE,
-                                                                       Integer.MAX_VALUE))
+        private val INFINITE_RECT = listOf(Rectangle(java.lang.Short.MIN_VALUE.toInt(),
+                                                     java.lang.Short.MIN_VALUE.toInt(),
+                                                     Integer.MAX_VALUE,
+                                                     Integer.MAX_VALUE))
     }
 
     //TODO equals & hash?
