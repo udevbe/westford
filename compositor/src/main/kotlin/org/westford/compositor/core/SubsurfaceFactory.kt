@@ -58,7 +58,9 @@ class SubsurfaceFactory @Inject internal constructor(private val privateSubsurfa
         /*
          * Docs says a subsurface with a destroyed parent must become inert.
          */
-        parentWlSurfaceResource.register { subsurface.setInert() }
+        parentWlSurfaceResource.register {
+            subsurface.inert = true
+        }
 
         parentSurface.pendingSubsurfaces.add(subsurface)
 

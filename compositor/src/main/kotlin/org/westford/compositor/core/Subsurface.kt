@@ -29,20 +29,47 @@ import org.westford.compositor.protocol.WlSurface
                                                                                            private var cachedSurfaceState: SurfaceState) : Role {
 
     val effectiveSyncSignal = Signal<Boolean>()
-    var isEffectiveSync = true
-        private set
-    var isInert = false
+    var inert = false
+
+    var effectiveSync = true
         private set
 
-    private var sync = true
-    private var position = Point.ZERO
+    var sync = true
+        set(value) {
+            if (inert) {
+                return
+            }
+
+            field = value
+
+            val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
+            parentWlSurface.surface.role?.accept(object : RoleVisitor {
+                override fun visit(subsurface: Subsurface) {
+                    //TODO unit test this
+                    updateEffectiveSync(subsurface.effectiveSync)
+                }
+
+                override fun defaultAction(role: Role) {
+                    updateEffectiveSync(false)
+                }
+            })
+        }
+
+    var position = Point.ZERO
+        set(value) {
+            if (inert) {
+                return
+            }
+
+            field = value
+        }
 
     override fun beforeCommit(wlSurfaceResource: WlSurfaceResource) {
-        if (isInert) {
+        if (inert) {
             return
         }
 
-        if (isEffectiveSync) {
+        if (effectiveSync) {
             val wlSurface = wlSurfaceResource.implementation as WlSurface
             val surface = wlSurface.surface
 
@@ -55,16 +82,12 @@ import org.westford.compositor.protocol.WlSurface
         roleVisitor.visit(this)
     }
 
-    fun setInert() {
-        this.isInert = true
-    }
-
     fun onParentApply() {
-        if (isInert) {
+        if (inert) {
             return
         }
 
-        if (isEffectiveSync && this.currentSurfaceState != this.cachedSurfaceState) {
+        if (effectiveSync && this.currentSurfaceState != this.cachedSurfaceState) {
             //sync mode. update current state with cached state
             this.currentSurfaceState = this.cachedSurfaceState
             apply(this.cachedSurfaceState)
@@ -75,14 +98,14 @@ import org.westford.compositor.protocol.WlSurface
     }
 
     fun apply(surfaceState: SurfaceState) {
-        if (isInert) {
+        if (inert) {
             return
         }
 
         val wlSurface = sibling.wlSurfaceResource.implementation as WlSurface
         val surface = wlSurface.surface
 
-        if (isEffectiveSync) {
+        if (effectiveSync) {
 
             if (surface.state != this.currentSurfaceState) {
                 //roll back 'to-be' state to current active state in case of non-parent commit.
@@ -99,47 +122,27 @@ import org.westford.compositor.protocol.WlSurface
         }
     }
 
-    fun setSync(sync: Boolean) {
-        if (isInert) {
-            return
-        }
-
-        this.sync = sync
-
-        val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
-        parentWlSurface.surface.role?.accept(object : RoleVisitor {
-            override fun visit(subsurface: Subsurface) {
-                //TODO unit test this
-                updateEffectiveSync(subsurface.isEffectiveSync)
-            }
-
-            override fun defaultAction(role: Role) {
-                updateEffectiveSync(false)
-            }
-        })
-    }
-
     fun updateEffectiveSync(parentEffectiveSync: Boolean) {
-        val oldEffectiveSync = this.isEffectiveSync
-        this.isEffectiveSync = this.sync || parentEffectiveSync
+        val oldEffectiveSync = this.effectiveSync
+        this.effectiveSync = this.sync || parentEffectiveSync
 
-        if (oldEffectiveSync != isEffectiveSync) {
+        if (oldEffectiveSync != effectiveSync) {
             /*
              * If we were in sync mode and now our effective mode is desync, we have to apply our cached state
              * immediately
              */
             //TODO unit test this
-            if (!isEffectiveSync) {
+            if (!effectiveSync) {
                 val wlSurface = sibling.wlSurfaceResource.implementation as WlSurface
                 wlSurface.surface.apply(this.cachedSurfaceState)
             }
 
-            effectiveSyncSignal.emit(isEffectiveSync)
+            effectiveSyncSignal.emit(effectiveSync)
         }
     }
 
     fun above(sibling: WlSurfaceResource) {
-        if (isInert) {
+        if (inert) {
             return
         }
 
@@ -178,19 +181,11 @@ import org.westford.compositor.protocol.WlSurface
     }
 
     fun below(sibling: WlSurfaceResource) {
-        if (isInert) {
+        if (inert) {
             return
         }
 
         placement(true,
                   sibling)
-    }
-
-    fun setPosition(position: Point) {
-        if (isInert) {
-            return
-        }
-
-        this.position = position
     }
 }
