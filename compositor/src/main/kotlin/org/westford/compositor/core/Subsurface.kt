@@ -31,11 +31,10 @@ import org.westford.compositor.protocol.WlSurface
     val effectiveSyncSignal = Signal<Boolean>()
     var isEffectiveSync = true
         private set
-
     var isInert = false
         private set
-    private var sync = true
 
+    private var sync = true
     private var position = Point.ZERO
 
     override fun beforeCommit(wlSurfaceResource: WlSurfaceResource) {
@@ -150,11 +149,8 @@ import org.westford.compositor.protocol.WlSurface
 
     private fun placement(below: Boolean,
                           siblingWlSurfaceResource: WlSurfaceResource) {
-
-        val parentWlSurfaceResource = parentWlSurfaceResource
         val parentWlSurface = parentWlSurfaceResource.implementation as WlSurface
-        val parentSurface = parentWlSurface.surface
-        val siblings = parentSurface.siblings
+        val siblings = parentWlSurface.surface.siblings
 
         var siblingIndex = -1
         var thisIndex = -1
@@ -175,7 +171,6 @@ import org.westford.compositor.protocol.WlSurface
         }
 
         //FIXME if siblingIndex == -1 then we have a (client) protocol error, else we have a bug.
-
         siblings.add(if (below) siblingIndex else siblingIndex + 1,
                      siblings.removeAt(thisIndex))
 
