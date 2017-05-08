@@ -36,6 +36,8 @@ internal constructor(private val keyboardDevice: KeyboardDevice,
     fun disable() = this.keyboardDevice.keySignal.disconnect(this::handleKey)
 
     private fun handleKey(event: Key) {
+        //FIXME instead of hiding the key(s) from the client, we need to temporarily remove the keyboard focus, else
+        // the client keymap state will get confused
         val keyState = event.keyState
         if (keyState == WlKeyboardKeyState.RELEASED) {
             //the trigger key is released, the hide it from the client.
