@@ -49,3 +49,12 @@ dependencies {
     //test
     testCompile("org.jetbrains.kotlin:kotlin-test-junit:${ext.kotlin}")
 }
+
+task compileNative(type: Exec) {
+    String arch = ""
+    if (project.hasProperty('arch')) {
+        arch = project.getProperty('arch')
+    }
+    commandLine "sh", "build.sh", arch
+}
+compileKotlin.dependsOn compileNative
