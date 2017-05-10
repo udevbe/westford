@@ -1,22 +1,23 @@
 Westford
 =====================
 
-A Wayland OpenGL compositor written in Java.
+A Wayland compositor written in Kotlin.
+
 This is a work in progress and not ready for day to day use, however
 certain features like client movement and render output on X are considered ready.
 
-Javadoc
+KDoc
 =======
 Not available yet.
 
 Building
 ========
 Prerequisites: 
-- maven
+- gradle
 - cmake 
 - docker (optional, needed for build-in cross compilation) 
 
-Run `mvn package` in the root of the project. Westford is still under heavy 
+Run `gradle build` in the root of the project. Westford is still under heavy 
 development, so occasionally tests might fail. If this is the case you can run the build
 with `gradle build -x test`.
 
@@ -36,7 +37,7 @@ Available profiles are:
 So if we were to build for `armv7hf`, our build command would becomes `gradle build -x test -Parch=linux-armv7hf`.
 This will trigger a cross compilation inside a cleanly isolated docker container.
 
-If no profile is selected, the maven build will default to the `native` profile, which corresponds to
+If no profile is selected, the gradle build will default to the `native` profile, which corresponds to
 the architecture that you're currently building on, without the use of docker.
 
 Running
