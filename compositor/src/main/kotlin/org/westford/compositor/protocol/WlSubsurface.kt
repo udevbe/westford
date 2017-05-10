@@ -47,8 +47,10 @@ import javax.annotation.Nonnegative
 
     override fun setPosition(wlSubsurfaceResource: WlSubsurfaceResource,
                              x: Int,
-                             y: Int) = subsurface.setPosition(Point(x,
-                                                                    y))
+                             y: Int) {
+        subsurface.position = Point(x,
+                                    y)
+    }
 
     override fun placeAbove(requester: WlSubsurfaceResource,
                             sibling: WlSurfaceResource) {
@@ -66,7 +68,7 @@ import javax.annotation.Nonnegative
     private fun isValid(requester: WlSubsurfaceResource,
                         siblingWlSurfaceResource: WlSurfaceResource): Boolean {
         val subsurface = subsurface
-        if (subsurface.isInert) {
+        if (subsurface.inert) {
             /*
              * we return true here as a the docs say that a subsurface with a destroyed parent should become inert
              * ie we don't care what the sibling argument is, as the request will be ignored anyway.
@@ -92,7 +94,11 @@ import javax.annotation.Nonnegative
         }
     }
 
-    override fun setSync(requester: WlSubsurfaceResource) = subsurface.setSync(true)
+    override fun setSync(requester: WlSubsurfaceResource) {
+        subsurface.sync = true
+    }
 
-    override fun setDesync(requester: WlSubsurfaceResource) = subsurface.setSync(false)
+    override fun setDesync(requester: WlSubsurfaceResource) {
+        subsurface.sync = false
+    }
 }

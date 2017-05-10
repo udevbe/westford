@@ -51,7 +51,7 @@ import javax.inject.Singleton
          * Check if the surface does not have a role or has an inactive subsurface role, both are ok. Otherwise we raise
          * a protocol error.
          */
-        if (!hasRole || role is Subsurface && role.isInert) {
+        if (!hasRole || role is Subsurface && role.inert) {
 
             val subsurface = this.subsurfaceFactory.create(parentWlSurfaceResource,
                                                            wlSurfaceResource)
