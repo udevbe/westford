@@ -20,5 +20,5 @@ package org.westford.compositor.x11.config
 interface X11PlatformConfig {
     val display: String
 
-    val x11RenderOutputConfigs: Iterable<X11OutputConfig>
+    val x11RenderOutputConfigs: List<X11OutputConfig>
 }

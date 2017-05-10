@@ -19,11 +19,6 @@ package org.westford.compositor.x11.config
 
 import javax.annotation.Nonnegative
 
-interface X11OutputConfig {
-
-    val name: String
-
-    @get:Nonnegative val width: Int
-
-    @get:Nonnegative val height: Int
-}
+data class X11OutputConfig(val name: String,
+                           @get:Nonnegative val width: Int,
+                           @get:Nonnegative val height: Int)

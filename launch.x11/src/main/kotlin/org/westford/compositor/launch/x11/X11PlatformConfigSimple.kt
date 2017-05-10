@@ -22,18 +22,15 @@ import org.westford.compositor.x11.config.X11PlatformConfig
 
 class X11PlatformConfigSimple : X11PlatformConfig {
 
-    override val display: String
-        get() = System.getenv("DISPLAY")
+    override val display: String = System.getenv("DISPLAY")
 
-    override val x11RenderOutputConfigs: Iterable<X11OutputConfig>
-        get() = listOf<X11OutputConfig>(object : X11OutputConfig {
-            override val name: String
-                get() = "window0"
-
-            override val width: Int
-                get() = 1024
-
-            override val height: Int
-                get() = 768
-        })
+    override val x11RenderOutputConfigs: List<X11OutputConfig> = listOf(X11OutputConfig(name = "window0",
+                                                                                        width = 1024,
+                                                                                        height = 768)
+            //uncomment to enable a second output
+            //                                                                        ,
+            //                                                                        X11OutputConfig(name = "window1",
+            //                                                                                        width = 1024,
+            //                                                                                        height = 768)
+                                                                       )
 }
