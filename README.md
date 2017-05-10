@@ -23,7 +23,7 @@ with `gradle build -x test`.
 To cross compile for a specific architecture, set the corresponding arch variable in the gradle build command.
 Available profiles are:
 
-| Architecture | -Parch=     |
+| Architecture | arch        |
 |:------------:|:-----------:|
 | aarch64      |linux-aarch64|
 | armv7hf      |linux-armv7hf| 
@@ -52,13 +52,14 @@ Currently the following back-ends exist:
 
 Running under X11
 =================
-Go into the `launch.x11/target` folder. Type `java -jar x11-1.0.0-SNAPSHOT.jar`.
+To create an runnable distribution, go into the `launch.x11` folder. Type `gradle installDist`.
+This will create an executable `launch.x11` in `build/install/launch.x11/bin`
 Next fire up some test clients from the Weston compositor (eg `weston-terminal`). 
 Make sure you use Weston 1.4 as more recent versions depend on xdg-shell which is not 
 yet implemented by Westford.
 
-To configure the X11 back-end, open up `org.westford.compositor.launch.x11.X11PlatformConfigSimple` 
-found in `X11PlatformConfigSimple.java` and adjust as required.
+To configure the X11 back-end, open up `X11PlatformConfigSimple.kt` 
+found in `westford/launch.x11/src/main/kotlin/org/westford/compositor/launch/x11` and adjust as required.
 
 Running with drm/kms
 ====================
