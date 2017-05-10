@@ -50,7 +50,7 @@ dependencies {
     kapt("org.freedesktop:jaccall.generator:${ext.jaccall}")
 
     //auto
-    compile("com.google.auto.factory:auto-factory:${ext.auto_factory}")
+    compileOnly("com.google.auto.factory:auto-factory:${ext.auto_factory}")
     kapt("com.google.auto.factory:auto-factory:${ext.auto_factory}")
 
     //dagger
