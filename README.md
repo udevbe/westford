@@ -18,12 +18,12 @@ Prerequisites:
 
 Run `mvn package` in the root of the project. Westford is still under heavy 
 development, so occasionally tests might fail. If this is the case you can run the build
-with `mvn package -DskipTests`.
+with `gradle build -x test`.
 
-To cross compile for a specific architecture, set the corresponding profile in the maven build command.
+To cross compile for a specific architecture, set the corresponding arch variable in the gradle build command.
 Available profiles are:
 
-| Architecture | Profile     |
+| Architecture | -Parch=     |
 |:------------:|:-----------:|
 | aarch64      |linux-aarch64|
 | armv7hf      |linux-armv7hf| 
@@ -33,11 +33,11 @@ Available profiles are:
 | i686         |linux-i686   |
 | all of above |all          |
 
-So if we were to build for `armv7hf`, our build command would becomes `mvn package -DskipTests -Plinux-armv7hf`.
+So if we were to build for `armv7hf`, our build command would becomes `gradle build -x test -Parch=linux-armv7hf`.
 This will trigger a cross compilation inside a cleanly isolated docker container.
 
 If no profile is selected, the maven build will default to the `native` profile, which corresponds to
-the architecture that you're currently building on without the use of docker.
+the architecture that you're currently building on, without the use of docker.
 
 Running
 =======
@@ -45,14 +45,14 @@ Westford can be launched using different back-ends and configurations. These liv
 under `launch`
 
 Currently the following back-ends exist:
-- `launch/x11`A back-end that outputs to a regular X11 window, one window per (virtual) screen. Ideal for quick testing.
-- `launch/drm.direct` Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. Root user only. 
-- `launch/drm.indirect`Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. All users. Uses setuid.
+- `launch.x11`A back-end that outputs to a regular X11 window, one window per (virtual) screen. Ideal for quick testing.
+- `launch.drm.direct` Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. Root user only.
+- `launch.drm.indirect`Uses the kernel's drm/kms system to directly output to the screen, without the use of X11. All users. Uses setuid.
 
 
 Running under X11
 =================
-Go into the `launch/x11/target` folder. Type `java -jar x11-1.0.0-SNAPSHOT.jar`.
+Go into the `launch.x11/target` folder. Type `java -jar x11-1.0.0-SNAPSHOT.jar`.
 Next fire up some test clients from the Weston compositor (eg `weston-terminal`). 
 Make sure you use Weston 1.4 as more recent versions depend on xdg-shell which is not 
 yet implemented by Westford.
@@ -113,7 +113,7 @@ Roadmap
 | sw rendering  | 0%        |
 | xdg_shell     | 0%        |
 | xwayland      | 0%        |
-| DRM/KMS       | 90%        |
+| DRM/KMS       | 90%       |
 | multi seat    | 100%      |
 
 License
