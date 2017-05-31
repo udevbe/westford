@@ -6,6 +6,8 @@ A Wayland compositor written in Kotlin.
 This is a work in progress and not ready for day to day use, however
 certain features like client movement and render output on X are considered ready.
 
+This compositor was originally written in Java. The latest Java commit can still be found [here](https://github.com/udevbe/westford/tree/8510ee7b3387a8693a2fa364a590e6b7caf0784a)
+
 KDoc
 =======
 Not available yet.
